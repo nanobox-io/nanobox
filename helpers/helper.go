@@ -75,7 +75,7 @@ func FindPagodaApp() string {
 	// here, only interested in the file
 	gitConfigFile, _, _ := FindGitConfigFile()
 
-	// count how many Pagoda Box remotes there are (if any)
+	// count how many Nanobox remotes there are (if any)
 	for name, _ := range gitConfigFile {
 
 		section, ok := gitConfigFile.Get(name, "url")
@@ -95,19 +95,19 @@ func FindPagodaApp() string {
 
 	switch {
 
-	// no Pagoda Box remotes found, prompt for an app to use
+	// no Nanobox remotes found, prompt for an app to use
 	case remotes <= 0:
-		fmt.Println("We were unable to find a Pagoda Box app tied to this project.\n")
+		fmt.Println("We were unable to find a Nanobox app tied to this project.\n")
 		return ui.Prompt("Which app are you trying to use: ")
 
-	// one Pagoda Box remote found, return the app-name
+	// one Nanobox remote found, return the app-name
 	case remotes == 1:
 		return apps[0]
 
-	// multiple Pagoda Box remotes found, display apps found and prompt for an app
+	// multiple Nanobox remotes found, display apps found and prompt for an app
 	// to use
 	case remotes > 1:
-		fmt.Println("We found the following Pagoda Box apps tied to this project.\n")
+		fmt.Println("We found the following Nanobox apps tied to this project.\n")
 		for _, app := range apps {
 			fmt.Println("- " + app)
 		}

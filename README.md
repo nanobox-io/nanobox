@@ -39,7 +39,7 @@ It is _**highly recommended**_ that you use [git bash](http://git-scm.com/downlo
 2. `git clone git@github.com:nanobox-core/pagoda.git`.
 3. install [gom](https://github.com/mattn/gom). This is how the CLI manages dependancies. Skipping this step requires that you `go get` **each** dependancy in order to use the CLI.
 3. `cd` into the new directory and run `gom install` or `gom build`.
-4. Type `pagoda` and follow the instructions to authenticate the CLI with Pagoda Box.
+4. Type `pagoda` and follow the instructions to authenticate the CLI with Nanobox.
 
 
 ### Usage

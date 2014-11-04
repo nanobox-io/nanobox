@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"strings"
 
-	pagodaAPI "github.com/nanobox-core/api-client-go"
+	nanoAPI "github.com/nanobox-core/api-client-go"
 	"github.com/nanobox-core/cli/helpers"
 	"github.com/nanobox-core/cli/ui"
 )
@@ -55,7 +55,7 @@ Options:
 // the first 'codeable' service it finds and run the command there. Also takes an
 // identity file flag to all a user to specify the location of their public SSH
 // key if necessary
-func (c *ServiceRunCommand) Run(fApp string, opts []string, api *pagodaAPI.Client) {
+func (c *ServiceRunCommand) Run(fApp string, opts []string, api *nanoAPI.Client) {
 
 	// if no app flag was passed, attempt to find one
 	if fApp == "" {

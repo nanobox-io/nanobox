@@ -6,7 +6,7 @@ import (
 	"os"
 	"os/exec"
 
-	pagodaAPI "github.com/nanobox-core/api-client-go"
+	nanoAPI "github.com/nanobox-core/api-client-go"
 	"github.com/nanobox-core/cli/helpers"
 	"github.com/nanobox-core/cli/ui"
 )
@@ -18,7 +18,7 @@ type AppCreateCommand struct{}
 func (c *AppCreateCommand) Help() {
 	ui.CPrintln(`
 Description:
-  Creates a new application on Pagoda Box.
+  Creates a new application on Nanobox.
 
   If [app-name] is not specified, a name will be generated for you.
 
@@ -43,11 +43,11 @@ Options:
   `)
 }
 
-// Run attempts to create a new app on Pagoda Box. It can take an app-name flag
+// Run attempts to create a new app on Nanobox. It can take an app-name flag
 // for naming the app, and a tinker flag for designating the type of app to create.
 // If successful, it attempts to add a new remote, then prints instructions on
 // pushing code to pagodabox
-func (c *AppCreateCommand) Run(fApp string, opts []string, api *pagodaAPI.Client) {
+func (c *AppCreateCommand) Run(fApp string, opts []string, api *nanoAPI.Client) {
 
 	// flags
 	flags := flag.NewFlagSet("flags", flag.ContinueOnError)
@@ -63,7 +63,7 @@ func (c *AppCreateCommand) Run(fApp string, opts []string, api *pagodaAPI.Client
 	}
 
 	//
-	appCreateOptions := &pagodaAPI.AppCreateOptions{Name: fApp, Free: fTinker}
+	appCreateOptions := &nanoAPI.AppCreateOptions{Name: fApp, Free: fTinker}
 
 	// create app
 	app, err := api.CreateApp(appCreateOptions)
@@ -114,7 +114,7 @@ New remote added:
 
 To push code to your new app run:
   git add .
-  git commit -am "Pushing to Pagoda Box\!"
+  git commit -am "Pushing to Nanobox\!"
   git push ` + remote + ` master
   `)
 }

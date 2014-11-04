@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	pagodaAPI "github.com/nanobox-core/api-client-go"
+	nanoAPI "github.com/nanobox-core/api-client-go"
 	"github.com/nanobox-core/cli/helpers"
 	"github.com/nanobox-core/cli/ui"
 )
@@ -14,11 +14,11 @@ const Version = "0.0.1"
 
 type (
 
-	// CLU represents the Pagoda Box CLI. It has a version, a Pagoda Box API client
+	// CLI represents the Nanobox CLI. It has a version, a Nanobox API client
 	// and a map of all the commands it responds to
 	CLI struct {
 		version   string
-		apiClient *pagodaAPI.Client
+		apiClient *nanoAPI.Client
 		commands  map[string]Command
 	}
 )
@@ -30,36 +30,16 @@ func main() {
 	//
 	cli := &CLI{
 		version:   Version,
-		apiClient: pagodaAPI.NewClient(),
+		apiClient: nanoAPI.NewClient(),
 		commands:  Commands,
 	}
 
-	// see if there is a .pagodabox/token file. We wont handle an error here because
-	// on a first time install we wouldn't expect to find one. Instead we'll handle
-	// the file
-	if helpers.NeedsAuth() {
+	// cli.apiClient.APIURL     = "https://dashboard.pagodabox.io"
+	// cli.apiClient.APIVersion = "api"
+	cli.apiClient.AuthToken = helpers.GetAuthToken()
 
-		fmt.Println(`
-Before you'll be able to use the Pagoda Box CLI on this machine. To continue,
-please login to verify your account:
-    `)
-
-		// authenticate w/o username or password
-		helpers.Authenticate("", "", cli.apiClient)
-
-		fmt.Println("To begin using the Pagoda Box CLI type 'pagoda' to see a list of commands.")
-		os.Exit(0)
-
-		// we've already 'installed' the CLI so we can just create our client
-	} else {
-
-		// cli.apiClient.APIURL     = "https://dashboard.pagodabox.io"
-		// cli.apiClient.APIVersion = "api"
-		cli.apiClient.AuthToken = helpers.GetAuthToken()
-
-		// run the CLI
-		cli.run()
-	}
+	// run the CLI
+	cli.run()
 
 }
 
@@ -133,20 +113,6 @@ func (cli *CLI) run() {
 					cli.apiClient.Debug = true
 
 					opts = opts[:len(opts)-1]
-				}
-
-				// do a quick ping to make sure we can communicate properly with the API
-				_, err := cli.apiClient.GetUser("me")
-				if err != nil {
-
-					//
-					if strings.Contains(err.Error(), "Invalid authentication token") {
-						helpers.ReAuthenticate(cli.apiClient)
-
-						//
-					} else {
-						fmt.Printf("The CLI was unable to communicate with the API: %s", err)
-					}
 				}
 
 				// run the command

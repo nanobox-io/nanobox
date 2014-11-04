@@ -9,7 +9,7 @@ import (
   "os"
   "strconv"
 
-  pagodaAPI "github.com/nanobox-core/api-client-go"
+  nanoAPI "github.com/nanobox-core/api-client-go"
   "github.com/nanobox-core/cli/helpers"
   "github.com/nanobox-core/cli/ui"
 )
@@ -60,7 +60,7 @@ Options:
 // port. Also takes an identity file flag allowing a user to specify the location
 // of their public SSH key if necessary. If the tunnel is able to establish correctly
 // it will stay open until closed (ctrl + c)
-func (c *ServiceTunnelCommand) Run(fApp string, opts []string, api *pagodaAPI.Client) {
+func (c *ServiceTunnelCommand) Run(fApp string, opts []string, api *nanoAPI.Client) {
 
   // if no app flag was passed, attempt to find one
   if fApp == "" {

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	pagodaAPI "github.com/nanobox-core/api-client-go"
+	nanoAPI "github.com/nanobox-core/api-client-go"
 	"github.com/nanobox-core/cli/helpers"
 	"github.com/nanobox-core/cli/ui"
 )
@@ -37,7 +37,7 @@ Options:
 }
 
 // Run disaplys select information about all of an app's environment variables
-func (c *EVarListCommand) Run(fApp string, opts []string, api *pagodaAPI.Client) {
+func (c *EVarListCommand) Run(fApp string, opts []string, api *nanoAPI.Client) {
 
 	// if no app flag was passed, attempt to find one
 	if fApp == "" {
@@ -51,7 +51,7 @@ func (c *EVarListCommand) Run(fApp string, opts []string, api *pagodaAPI.Client)
 		ui.Error("pagoda evar:list", err)
 	}
 
-	var internal, custom []pagodaAPI.AppEVar
+	var internal, custom []nanoAPI.AppEVar
 
 	for _, eVar := range eVars {
 

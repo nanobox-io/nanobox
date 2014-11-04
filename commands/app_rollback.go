@@ -3,7 +3,7 @@ package commands
 import (
 	"fmt"
 
-	pagodaAPI "github.com/nanobox-core/api-client-go"
+	nanoAPI "github.com/nanobox-core/api-client-go"
 	"github.com/nanobox-core/cli/helpers"
 	"github.com/nanobox-core/cli/ui"
 )
@@ -33,7 +33,7 @@ Options:
 }
 
 // Run attempts to roll an app back one (1) deploy
-func (c *AppRollbackCommand) Run(fApp string, opts []string, api *pagodaAPI.Client) {
+func (c *AppRollbackCommand) Run(fApp string, opts []string, api *nanoAPI.Client) {
 
 	// if no app flag was passed, attempt to find one
 	if fApp == "" {

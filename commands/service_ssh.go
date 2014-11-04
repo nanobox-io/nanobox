@@ -8,7 +8,7 @@ import (
 	"os"
 	"strconv"
 
-	pagodaAPI "github.com/nanobox-core/api-client-go"
+	nanoAPI "github.com/nanobox-core/api-client-go"
 	"github.com/nanobox-core/cli/helpers"
 	"github.com/nanobox-core/cli/ui"
 )
@@ -46,7 +46,7 @@ Options:
 // Run attempts to SSH into an app service and provide a pseudo terminal to use
 // on the server. Also takes an identity file flag allowing a user to specify the location
 // of their public SSH key if necessary
-func (c *ServiceSSHCommand) Run(fApp string, opts []string, api *pagodaAPI.Client) {
+func (c *ServiceSSHCommand) Run(fApp string, opts []string, api *nanoAPI.Client) {
 
 	// if no app flag was passed, attempt to find one
 	if fApp == "" {

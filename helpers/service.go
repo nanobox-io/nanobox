@@ -6,14 +6,14 @@ import (
 	"os"
 	"time"
 
-	pagodaAPI "github.com/nanobox-core/api-client-go"
+	nanoAPI "github.com/nanobox-core/api-client-go"
 	"github.com/nanobox-core/cli/ui"
 )
 
 // GetServiceBySlug attemtps to find an app service by name or UID. It takes an
 // app name, fetches all its services, then iterates over the services to see if
 // there is a name or UID that matches the provided slug.
-func GetServiceBySlug(appName, serviceSlug string, api *pagodaAPI.Client) (*pagodaAPI.AppService, error) {
+func GetServiceBySlug(appName, serviceSlug string, api *nanoAPI.Client) (*nanoAPI.AppService, error) {
 
 	services, err := api.GetAppServices(appName)
 	if err != nil {
@@ -37,9 +37,9 @@ func GetServiceBySlug(appName, serviceSlug string, api *pagodaAPI.Client) (*pago
 
 // EnablePublicTunnel enables a service's public tunnel if an SSH command is run
 // and the public tunnel for that service has not yet been enabled
-func EnablePublicTunnel(service *pagodaAPI.AppService, api *pagodaAPI.Client, opts *SSHOptions) {
+func EnablePublicTunnel(service *nanoAPI.AppService, api *nanoAPI.Client, opts *SSHOptions) {
 
-	appServiceUpdateOptions := &pagodaAPI.AppServiceUpdateOptions{PublicTunnel: true}
+	appServiceUpdateOptions := &nanoAPI.AppServiceUpdateOptions{PublicTunnel: true}
 
 	service, err := api.UpdateAppService(service.AppID, service.ID, appServiceUpdateOptions)
 	if err != nil {

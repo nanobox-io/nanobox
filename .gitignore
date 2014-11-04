@@ -22,3 +22,9 @@ _testmain.go
 *.exe
 *.test
 *.prof
+
+
+.DS_Store
+
+# incase the build fails and leaves some left overs
+/cli

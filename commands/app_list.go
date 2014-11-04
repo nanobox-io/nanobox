@@ -3,7 +3,7 @@ package commands
 import (
 	"fmt"
 
-	pagodaAPI "github.com/nanobox-core/api-client-go"
+	nanoAPI "github.com/nanobox-core/api-client-go"
 	"github.com/nanobox-core/cli/helpers"
 	"github.com/nanobox-core/cli/ui"
 )
@@ -46,7 +46,7 @@ Usage:
 }
 
 // Run displays select information about all of a user's apps
-func (c *AppListCommand) Run(fApp string, opts []string, api *pagodaAPI.Client) {
+func (c *AppListCommand) Run(fApp string, opts []string, api *nanoAPI.Client) {
 
 	// get apps
 	apps, err := api.GetApps()

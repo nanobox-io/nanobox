@@ -11,7 +11,7 @@ import (
 	"strconv"
 	"time"
 
-	pagodaAPI "github.com/nanobox-core/api-client-go"
+	nanoAPI "github.com/nanobox-core/api-client-go"
 	"github.com/nanobox-core/cli/helpers"
 	"github.com/nanobox-core/cli/ui"
 )
@@ -117,7 +117,7 @@ Options:
 // Run attempts to display an app's logs. It takes count flag to designate how
 // many logs to print, and a stream flag to indicate the live stream rather than
 // historical. Logs are prased, colorized and printed to the terminal
-func (c *AppLogCommand) Run(fApp string, opts []string, api *pagodaAPI.Client) {
+func (c *AppLogCommand) Run(fApp string, opts []string, api *nanoAPI.Client) {
 
 	// flags
 	flags := flag.NewFlagSet("flags", flag.ContinueOnError)

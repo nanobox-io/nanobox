@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	pagodaAPI "github.com/nanobox-core/api-client-go"
+	nanoAPI "github.com/nanobox-core/api-client-go"
 	"github.com/nanobox-core/cli/helpers"
 	"github.com/nanobox-core/cli/ui"
 )
@@ -33,10 +33,10 @@ Options:
   `)
 }
 
-// Run attempts to destroy an app on Pagoda Box. It can take a force flag that will
+// Run attempts to destroy an app on Nanobox. It can take a force flag that will
 // skip the confirmation process, other wise will ask for confirmation by retyping
 // the name of the app to be destroyed
-func (c *EVarDestroyCommand) Run(fApp string, opts []string, api *pagodaAPI.Client) {
+func (c *EVarDestroyCommand) Run(fApp string, opts []string, api *nanoAPI.Client) {
 
 	// if no app flag was passed, attempt to find one
 	if fApp == "" {

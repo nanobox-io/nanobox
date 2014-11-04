@@ -5,7 +5,7 @@ import (
 	"os"
 	"regexp"
 
-	pagodaAPI "github.com/nanobox-core/api-client-go"
+	nanoAPI "github.com/nanobox-core/api-client-go"
 	"github.com/nanobox-core/cli/helpers"
 	"github.com/nanobox-core/cli/ui"
 )
@@ -33,11 +33,11 @@ Options:
   `)
 }
 
-// Run attempts to create a new app on Pagoda Box. It can take an app-name flag
+// Run attempts to create a new app on Nanobox. It can take an app-name flag
 // for naming the app, and a tinker flag for designating the type of app to create.
 // If successful, it attempts to add a new remote, then prints instructions on
 // pushing code to pagodabox
-func (c *EVarCreateCommand) Run(fApp string, opts []string, api *pagodaAPI.Client) {
+func (c *EVarCreateCommand) Run(fApp string, opts []string, api *nanoAPI.Client) {
 
 	// if no app flag was passed, attempt to find one
 	if fApp == "" {
@@ -66,7 +66,7 @@ Oops! You forgot include an environment variable:
 	}
 
 	//
-	appEVarCreateOptions := &pagodaAPI.AppEVarCreateOptions{Title: subMatch[1], Value: subMatch[2]}
+	appEVarCreateOptions := &nanoAPI.AppEVarCreateOptions{Title: subMatch[1], Value: subMatch[2]}
 
 	// create evar
 	eVar, err := api.CreateAppEVar(fApp, appEVarCreateOptions)

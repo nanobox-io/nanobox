@@ -82,9 +82,9 @@ func Error(cmd string, msg error) {
 		}
 
 		if _, err := l.WriteString("" +
-			"Pagoda Box log.txt file - logging since " + time.Now().Format(time.RFC822) +
+			"Nanobox log.txt file - logging since " + time.Now().Format(time.RFC822) +
 			"\r\n" +
-			"\r\nAnytime the Pagoda Box CLI encounters an error it will dump the output here. If" +
+			"\r\nAnytime the Nanobox CLI encounters an error it will dump the output here. If" +
 			"\r\nyou are encountering an error with a command and you believe the error to be the" +
 			"\r\nCLI's fault, you can find that error here and send it to us to take a look at." +
 			"\r\n"); err != nil {

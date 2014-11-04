@@ -25,8 +25,8 @@ func (cli *CLI) Help() {
 
 
 Description:
-  Welcome to the Pagoda Box CLI! We hope this tool will help your workflow when
-  using Pagoda Box from the command line. If you encounter any issues or have
+  Welcome to the Nanobox CLI! We hope this tool will help your workflow when
+  using Nanobox from the command line. If you encounter any issues or have
   any suggestions, [green]find us on IRC (freenode) at #pagodabox[reset]. Our
   engineers are available between 8 - 5pm MST.
 

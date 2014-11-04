@@ -1,25 +1,25 @@
 package main
 
 import (
-	pagodaAPI "github.com/nanobox-core/api-client-go"
+	nanoAPI "github.com/nanobox-core/api-client-go"
 	"github.com/nanobox-core/cli/commands"
 )
 
-// Commands represents a map of all the available commands that the Pagoda Box
+// Commands represents a map of all the available commands that the Nanobox
 // CLI can run
 var Commands map[string]Command
 
-// Command represents a Pagoda Box CLI command. Every command must have a Help()
+// Command represents a Nanobox CLI command. Every command must have a Help()
 // and Run() function
 type Command interface {
 	Help()                                                 // Prints the help text associated with this command
-	Run(fApp string, opts []string, api *pagodaAPI.Client) // Houses the logic that will be run upon calling this command
+	Run(fApp string, opts []string, api *nanoAPI.Client) // Houses the logic that will be run upon calling this command
 }
 
-// init builds the list of available Pagoda Box CLI commands
+// init builds the list of available Nanobox CLI commands
 func init() {
 
-	// the map of all available commands the Pagoda Box CLI can run
+	// the map of all available commands the Nanobox CLI can run
 	Commands = map[string]Command{
 		"create":          &commands.AppCreateCommand{},
 		"destroy":         &commands.AppDestroyCommand{},

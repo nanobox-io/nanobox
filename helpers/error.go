@@ -6,17 +6,17 @@ import (
 	"os"
 	"regexp"
 
-	pagodaAPI "github.com/nanobox-core/api-client-go"
+	nanoAPI "github.com/nanobox-core/api-client-go"
 	"github.com/nanobox-core/cli/ui"
 )
 
 // HandleAPIError takes an error returned from an API call, break it down and
-// return important information regarding the error. The Pagoda Box API returns
+// return important information regarding the error. The Nanobox API returns
 // custom errors in some instances that need to have very specific handlers.
 func HandleAPIError(err error) (int, string, string) {
 
 	// if its a pagodabox.Error we have special things we want to do...
-	if apiError, ok := err.(pagodaAPI.Error); ok {
+	if apiError, ok := err.(nanoAPI.Error); ok {
 
 		switch apiError.Code {
 

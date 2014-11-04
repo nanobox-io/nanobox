@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	pagodaAPI "github.com/nanobox-core/api-client-go"
+	nanoAPI "github.com/nanobox-core/api-client-go"
 	"github.com/nanobox-core/cli/helpers"
 	"github.com/nanobox-core/cli/ui"
 )
@@ -17,7 +17,7 @@ type AppDestroyCommand struct{}
 func (c *AppDestroyCommand) Help() {
 	ui.CPrintln(`
 Description:
-  Destroys an application on Pagoda Box. [red]THIS ACTION CANNOT BE UNDONE![reset]
+  Destroys an application on Nanobox. [red]THIS ACTION CANNOT BE UNDONE![reset]
 
   If [app-name] is not specified, will prompt for one. Also, before an app is
   destroyed, will prompt for [app-name] to confirm action.
@@ -37,10 +37,10 @@ Options:
   `)
 }
 
-// Run attempts to destroy an app on Pagoda Box. It can take a force flag that will
+// Run attempts to destroy an app on Nanobox. It can take a force flag that will
 // skip the confirmation process, other wise will ask for confirmation by retyping
 // the name of the app to be destroyed
-func (c *AppDestroyCommand) Run(fApp string, opts []string, api *pagodaAPI.Client) {
+func (c *AppDestroyCommand) Run(fApp string, opts []string, api *nanoAPI.Client) {
 
 	// flags
 	flags := flag.NewFlagSet("flags", flag.ContinueOnError)
@@ -72,12 +72,12 @@ func (c *AppDestroyCommand) Run(fApp string, opts []string, api *pagodaAPI.Clien
 }
 
 // forceDeleteApp skips the confirmation process and deletes the app
-func (c *AppDestroyCommand) forceDeleteApp(api *pagodaAPI.Client, app string) {
+func (c *AppDestroyCommand) forceDeleteApp(api *nanoAPI.Client, app string) {
 	c.deleteApp(api, app)
 }
 
 // safeDeleteapp asks the user to confirm the name of the app before deletion
-func (c *AppDestroyCommand) safeDeleteApp(api *pagodaAPI.Client, app string) {
+func (c *AppDestroyCommand) safeDeleteApp(api *nanoAPI.Client, app string) {
 
 	ui.CPrintln(`
 All code, data, network storage, ect. will be deleted forever.
@@ -97,7 +97,7 @@ Are you sure you want to destroy [red]` + app + `[reset]?
 }
 
 // deleteApp deletes the specified app
-func (c *AppDestroyCommand) deleteApp(api *pagodaAPI.Client, app string) {
+func (c *AppDestroyCommand) deleteApp(api *nanoAPI.Client, app string) {
 
 	err := api.DeleteApp(app)
 	if err != nil {

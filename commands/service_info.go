@@ -5,7 +5,7 @@ import (
 	"os"
 	"strconv"
 
-	pagodaAPI "github.com/nanobox-core/api-client-go"
+	nanoAPI "github.com/nanobox-core/api-client-go"
 	"github.com/nanobox-core/cli/helpers"
 	"github.com/nanobox-core/cli/ui"
 )
@@ -37,7 +37,7 @@ Options:
 
 // Run attempts to print select information about an app's service. If no service
 // is provided the command will prompt for one
-func (c *ServiceInfoCommand) Run(fApp string, opts []string, api *pagodaAPI.Client) {
+func (c *ServiceInfoCommand) Run(fApp string, opts []string, api *nanoAPI.Client) {
 
 	// if no app flag was passed, attempt to find one
 	if fApp == "" {
