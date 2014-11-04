@@ -1,0 +1,5 @@
+- list available services on service destroy
+- do another pass at output:
+  - check for correct new lines
+  - check for spelling
+  - check for color
