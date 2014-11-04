@@ -25,6 +25,7 @@ _testmain.go
 
 
 .DS_Store
+TODO
 
 # incase the build fails and leaves some left overs
 /cli
