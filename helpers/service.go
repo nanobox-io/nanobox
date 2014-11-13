@@ -43,7 +43,7 @@ func EnablePublicTunnel(service *nanoAPI.AppService, api *nanoAPI.Client, opts *
 
 	service, err := api.UpdateAppService(service.AppID, service.ID, appServiceUpdateOptions)
 	if err != nil {
-		fmt.Println("There was a problem enabling '%s' SSH. See ~/.pagodabox/log.txt for details", service.UID)
+		fmt.Println("There was a problem enabling '%v' SSH. See ~/.pagodabox/log.txt for details", service.UID)
 		ui.Error("pagoda helpers.EnablePublicTunnel", err)
 	}
 
@@ -54,7 +54,7 @@ func EnablePublicTunnel(service *nanoAPI.AppService, api *nanoAPI.Client, opts *
 
 		service, err := api.GetAppService(service.AppID, service.ID)
 		if err != nil {
-			fmt.Printf("Oops! We could not find a '%s'.\n", service.UID)
+			fmt.Printf("Oops! We could not find a '%v'.\n", service.UID)
 			os.Exit(1)
 		}
 

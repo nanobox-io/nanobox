@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	nanoAPI "github.com/nanobox-core/api-client-go"
-	"github.com/nanobox-core/cli/helpers"
+	// "github.com/nanobox-core/cli/helpers"
 	"github.com/nanobox-core/cli/ui"
 )
 
@@ -40,18 +40,20 @@ Options:
 func (c *EVarListCommand) Run(fApp string, opts []string, api *nanoAPI.Client) {
 
 	// if no app flag was passed, attempt to find one
-	if fApp == "" {
-		fApp = helpers.FindPagodaApp()
-	}
+	// if fApp == "" {
+	// 	fApp = helpers.FindPagodaApp()
+	// }
+
+	fApp = "TESTING"
 
 	// get environment variables
-	eVars, err := api.GetAppEVars(fApp)
+	eVars, err := api.GetEVars()
 	if err != nil {
-		fmt.Printf("There was a problem getting '%s's' environment variables. See ~/.pagodabox/log.txt for details", fApp)
+		fmt.Printf("There was a problem getting '%v's' environment variables. See ~/.pagodabox/log.txt for details", fApp)
 		ui.Error("pagoda evar:list", err)
 	}
 
-	var internal, custom []nanoAPI.AppEVar
+	var internal, custom []nanoAPI.EVar
 
 	for _, eVar := range eVars {
 
@@ -72,7 +74,7 @@ Custom (`+strconv.Itoa(len(custom))+`):
 	// list custom environment variables
 	if len(custom) > 0 {
 		for _, eVar := range custom {
-			fmt.Printf("%s = %s", eVar.Title, eVar.Value)
+			fmt.Printf("%v = %v", eVar.Title, eVar.Value)
 			fmt.Println("")
 		}
 	} else {
@@ -86,7 +88,7 @@ Custom (`+strconv.Itoa(len(custom))+`):
 Generated (`+strconv.Itoa(len(internal))+`):
 --------------------------------------------------`)
 	for _, eVar := range internal {
-		fmt.Printf("%s = %s", eVar.Title, eVar.Value)
+		fmt.Printf("%v = %v", eVar.Title, eVar.Value)
 		fmt.Println("")
 	}
 

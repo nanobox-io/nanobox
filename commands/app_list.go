@@ -55,18 +55,6 @@ func (c *AppListCommand) Run(fApp string, opts []string, api *nanoAPI.Client) {
 		ui.Error("pagoda app:list", err)
 	}
 
-	// get roles
-	roles, err := api.GetUserRoles()
-	if err != nil {
-		fmt.Println("There was a problem getting your apps role's. See ~/.pagodabox/log.txt for details\n")
-		ui.Error("pagoda app:list", err)
-	}
-
-	rolesMap := make(map[string]string)
-	for _, role := range roles {
-		rolesMap[role.AppID] = role.Permission
-	}
-
 	//
 	fmt.Println(`
 state name (permission)
@@ -92,10 +80,6 @@ state name (permission)
 		//
 		case "hybernated":
 			ui.CPrint(appColor + "![reset] " + appType + app.Name)
-		}
-
-		if val, ok := rolesMap[app.ID]; ok {
-			fmt.Print(" (" + val + ")")
 		}
 
 		fmt.Println("")

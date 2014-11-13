@@ -46,9 +46,9 @@ func (c *EVarDestroyCommand) Run(fApp string, opts []string, api *nanoAPI.Client
 	var fEVar string
 
 	// get environment variables
-	eVars, err := api.GetAppEVars(fApp)
+	eVars, err := api.GetEVars()
 	if err != nil {
-		fmt.Printf("There was a problem getting '%s's' environment variables. See ~/.pagodabox/log.txt for details", fApp)
+		fmt.Printf("There was a problem getting '%v's' environment variables. See ~/.pagodabox/log.txt for details", fApp)
 		ui.Error("pagoda evar:destroy", err)
 	}
 
@@ -61,7 +61,7 @@ KEY = VALUE
 --------------------------------------------------`)
 		for _, eVar := range eVars {
 			if !eVar.Internal {
-				fmt.Printf("- %s = %s", eVar.Title, eVar.Value)
+				fmt.Printf("- %v = %v", eVar.Title, eVar.Value)
 				fmt.Println("")
 			}
 		}
@@ -83,12 +83,12 @@ KEY = VALUE
 	}
 
 	// destroy evar
-	if err := api.DeleteAppEVar(fApp, eVarID); err != nil {
+	if err := api.DeleteEVar(eVarID); err != nil {
 		_, err, msg := helpers.HandleAPIError(err)
-		fmt.Printf("Oops! We could not destroy your environment variable: %s - %s", err, msg)
+		fmt.Printf("Oops! We could not destroy your environment variable: %v - %v", err, msg)
 		os.Exit(1)
 	}
 
-	fmt.Printf("Environment variable '%s' destroyed for '%s'", fEVar, fApp)
+	fmt.Printf("Environment variable '%v' destroyed for '%v'", fEVar, fApp)
 
 }

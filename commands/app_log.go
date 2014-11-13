@@ -144,7 +144,7 @@ func (c *AppLogCommand) Run(fApp string, opts []string, api *nanoAPI.Client) {
 	//
 	app, err := api.GetApp(fApp)
 	if err != nil {
-		fmt.Printf("Oops! We could not find '%s'", fApp)
+		fmt.Printf("Oops! We could not find '%v'", fApp)
 		os.Exit(1)
 	}
 
@@ -154,7 +154,7 @@ func (c *AppLogCommand) Run(fApp string, opts []string, api *nanoAPI.Client) {
 
 		// authenticate stormpack
 		fmt.Println("Authenticating... ")
-		if err := api.DoRawRequest(&stormpack, "POST", "https://api.pagodabox.io/v1/auth/stormpack?auth_token="+api.AuthToken, nil, nil); err != nil {
+		if err := api.DoRawRequest(&stormpack, "POST", "https://api.pagodabox.io/v1/auth/stormpack", nil, nil); err != nil {
 			fmt.Println("Unable to complete API request. See ~/.pagodabox/log.txt for details")
 			ui.Error("pagoda app:log", err)
 		}
@@ -197,7 +197,7 @@ func (c *AppLogCommand) Run(fApp string, opts []string, api *nanoAPI.Client) {
 		var logvac Logvac
 
 		// authenticate logvac
-		if err := api.DoRawRequest(&logvac, "POST", "https://api.pagodabox.io/v1/auth/logvac?auth_token="+api.AuthToken, nil, nil); err != nil {
+		if err := api.DoRawRequest(&logvac, "POST", "https://api.pagodabox.io/v1/auth/logvac", nil, nil); err != nil {
 			fmt.Println("Unable to complete API request. See ~/.pagodabox/log.txt for details")
 			ui.Error("pagoda app:log", err)
 		}

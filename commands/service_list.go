@@ -42,20 +42,8 @@ func (c *ServiceListCommand) Run(fApp string, opts []string, api *nanoAPI.Client
 	// get services
 	services, err := api.GetAppServices(fApp)
 	if err != nil {
-		fmt.Println("There was a problem getting '%s's' services. See ~/.pagodabox/log.txt for details", fApp)
+		fmt.Println("There was a problem getting '%v's' services. See ~/.pagodabox/log.txt for details", fApp)
 		ui.Error("pagoda service:list", err)
-	}
-
-	// get scaffolds
-	scaffolds, err := api.GetScaffolds()
-	if err != nil {
-		fmt.Println("There was a problem getting scaffolds. See ~/.pagodabox/log.txt for details")
-		ui.Error("pagoda service:list", err)
-	}
-
-	scaffoldsMap := make(map[string]string)
-	for _, scaffold := range scaffolds {
-		scaffoldsMap[scaffold.ID] = scaffold.Name
 	}
 
 	//
@@ -64,30 +52,25 @@ state name - type (uid)
 -------------------------
   `)
 
-	var serviceColor, serviceScaffold string
+	var serviceColor string
 
 	for _, service := range services {
 
 		serviceColor = helpers.DetermineServiceStatus(service.State)
 
-		//
-		if val, ok := scaffoldsMap[service.ScaffoldID]; ok {
-			serviceScaffold = val
-		}
-
 		switch service.State {
 
 		//
 		case "initialized", "active":
-			ui.CPrint(serviceColor + "\u2022[reset] " + service.Name + " - " + serviceScaffold + " (" + service.UID + ")")
+			ui.CPrint(serviceColor + "\u2022[reset] " + service.Name + " - (" + service.UID + ")")
 
 		//
 		case "inactive":
-			ui.CPrint(serviceColor + "x[reset] " + service.Name + " - " + serviceScaffold + " (" + service.UID + ")")
+			ui.CPrint(serviceColor + "x[reset] " + service.Name + " - (" + service.UID + ")")
 
 		//
 		case "defunct":
-			ui.CPrint(serviceColor + "![reset] " + service.Name + " - " + serviceScaffold + " (" + service.UID + ")")
+			ui.CPrint(serviceColor + "![reset] " + service.Name + " - (" + service.UID + ")")
 		}
 
 		fmt.Println("")

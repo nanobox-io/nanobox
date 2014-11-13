@@ -40,9 +40,10 @@ Options:
 func (c *EVarCreateCommand) Run(fApp string, opts []string, api *nanoAPI.Client) {
 
 	// if no app flag was passed, attempt to find one
-	if fApp == "" {
-		fApp = helpers.FindPagodaApp()
-	}
+	// if fApp == "" {
+	// 	fApp = helpers.FindPagodaApp()
+	// }
+  fApp = "TESTING"
 
 	var fEVar string
 
@@ -61,18 +62,18 @@ Oops! You forgot include an environment variable:
 
 	subMatch := reFindEVar.FindStringSubmatch(fEVar)
 	if subMatch == nil {
-		fmt.Printf("Your environment variable '%s' does not match the required format 'KEY=VALUE'", fEVar)
+		fmt.Printf("Your environment variable '%v' does not match the required format 'KEY=VALUE'", fEVar)
 		os.Exit(1)
 	}
 
 	//
-	appEVarCreateOptions := &nanoAPI.AppEVarCreateOptions{Title: subMatch[1], Value: subMatch[2]}
+	eVarCreateOptions := &nanoAPI.EVarCreateOptions{Title: subMatch[1], Value: subMatch[2]}
 
 	// create evar
-	eVar, err := api.CreateAppEVar(fApp, appEVarCreateOptions)
+	eVar, err := api.CreateEVar(eVarCreateOptions)
 	if err != nil {
 		_, err, msg := helpers.HandleAPIError(err)
-		fmt.Printf("Oops! We could not create your evar: %s - %s", err, msg)
+		fmt.Printf("Oops! We could not create your evar: %v - %v", err, msg)
 		os.Exit(1)
 	}
 

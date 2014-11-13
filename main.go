@@ -3,10 +3,9 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
 
 	nanoAPI "github.com/nanobox-core/api-client-go"
-	"github.com/nanobox-core/cli/helpers"
+	// "github.com/nanobox-core/cli/helpers"
 	"github.com/nanobox-core/cli/ui"
 )
 
@@ -34,9 +33,9 @@ func main() {
 		commands:  Commands,
 	}
 
-	// cli.apiClient.APIURL     = "https://dashboard.pagodabox.io"
+	// cli.apiClient.APIURL     = "localhost:8080"
 	// cli.apiClient.APIVersion = "api"
-	cli.apiClient.AuthToken = helpers.GetAuthToken()
+	// cli.apiClient.AuthToken = ""
 
 	// run the CLI
 	cli.run()
@@ -120,7 +119,7 @@ func (cli *CLI) run() {
 
 				// no valid command found
 			} else {
-				fmt.Printf("'%s' is not a valid command. Type 'pagoda' for available commands\n and usage.", command)
+				fmt.Printf("'%v' is not a valid command. Type 'pagoda' for available commands\n and usage.", command)
 				os.Exit(1)
 			}
 		}

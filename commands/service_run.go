@@ -96,7 +96,7 @@ func (c *ServiceRunCommand) Run(fApp string, opts []string, api *nanoAPI.Client)
 	if fService == "" {
 		services, err := api.GetAppServices(fApp)
 		if err != nil {
-			fmt.Println("There was a problem getting '%s's' services. See ~/.pagodabox/log.txt for details", fApp)
+			fmt.Println("There was a problem getting '%v's' services. See ~/.pagodabox/log.txt for details", fApp)
 			ui.Error("pagoda service:run", err)
 		}
 
@@ -110,7 +110,7 @@ func (c *ServiceRunCommand) Run(fApp string, opts []string, api *nanoAPI.Client)
 	// the service to run the command on
 	service, err := helpers.GetServiceBySlug(fApp, fService, api)
 	if err != nil {
-		fmt.Printf("Oops! We could not find a '%s' on '%s'.\n", fService, fApp)
+		fmt.Printf("Oops! We could not find a '%v' on '%v'.\n", fService, fApp)
 		os.Exit(1)
 	}
 
@@ -184,7 +184,7 @@ Running '` + runOptions.Command + `' on ` + service.UID + ` :
   `)
 
 	if err := session.Run("source /home/gopagoda/.bashrc && cd ./data && " + runOptions.Command); err != nil {
-		fmt.Printf("Unable to run command: %s \n", err)
+		fmt.Printf("Unable to run command: %v \n", err)
 		os.Exit(1)
 	}
 }

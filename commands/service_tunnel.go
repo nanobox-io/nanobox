@@ -99,20 +99,13 @@ func (c *ServiceTunnelCommand) Run(fApp string, opts []string, api *nanoAPI.Clie
   // the service to open the port forward 'tunnel' to
   service, err := helpers.GetServiceBySlug(fApp, fService, api)
   if err != nil {
-    fmt.Printf("Oops! We could not find a '%s' on '%s'.\n", fService, fApp)
+    fmt.Printf("Oops! We could not find a '%v' on '%v'.\n", fService, fApp)
     os.Exit(1)
-  }
-
-  // used to get the default port for connecting to the service
-  scaffold, err := api.GetScaffold(service.ScaffoldID)
-  if err != nil {
-    fmt.Println("There was a problem getting '%s's' scaffold. See ~/.pagodabox/log.txt for details", service.UID)
-    ui.Error("pagoda service:tunnel", err)
   }
 
   //
   if fPort == 0 {
-    fPort = scaffold.DefaultPort
+    fPort = 0
   }
 
   // the public SSH key to use when SSHing into the server
@@ -142,7 +135,7 @@ func (c *ServiceTunnelCommand) Run(fApp string, opts []string, api *nanoAPI.Clie
     RemoteUser: service.TunnelUser,
 
     ServerIP:   service.IPs["default"],
-    ServerPort: scaffold.DefaultPort,
+    ServerPort: 0,
 
     ServiceApp:  fApp,
     ServiceUser: service.Usernames["default"],
@@ -158,7 +151,7 @@ func (c *ServiceTunnelCommand) Run(fApp string, opts []string, api *nanoAPI.Clie
   // remote server
   listener, err := net.Listen("tcp", tunnelOptions.LocalIP+":"+strconv.Itoa(tunnelOptions.LocalPort))
   if err != nil {
-    fmt.Printf("Unable to tunnel into this type of service: %s \n", err)
+    fmt.Printf("Unable to tunnel into this type of service: %v \n", err)
     os.Exit(1)
   }
 

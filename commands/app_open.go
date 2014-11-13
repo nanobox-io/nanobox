@@ -58,22 +58,15 @@ func (c *AppOpenCommand) Run(fApp string, opts []string, api *nanoAPI.Client) {
 	}
 
 	//
-	user, err := api.GetUser("me")
-	if err != nil {
-		fmt.Println("There was a problem getting your user. See ~/.pagodabox/log.txt for details")
-		ui.Error("pagoda app:open", err)
-	}
-
-	//
 	app, err := api.GetApp(fApp)
 	if err != nil {
-		fmt.Printf("Unable to find an app with the name '%s' \n", fApp)
+		fmt.Printf("Unable to find an app with the name '%v' \n", fApp)
 		os.Exit(1)
 	}
 
-	fmt.Printf("Opening %s to %s", fApp, fPath)
+	fmt.Printf("Opening %v to %v", fApp, fPath)
 
-	path := `https://dashboard.pagodabox.io/apps/` + app.ID + fPath + `?auth_token=` + user.AuthenticationToken
+	path := `https://dashboard.pagodabox.io/apps/` + app.ID + fPath
 
 	// detect current operating system to determine which version of 'open' we can
 	// call

@@ -42,9 +42,9 @@ func (c *AppRollbackCommand) Run(fApp string, opts []string, api *nanoAPI.Client
 
 	//
 	if _, err := api.RollbackAppDeploy(fApp); err != nil {
-		fmt.Println("There was a problem rolling back %s. See ~/.pagodabox/log.txt for details", fApp)
+		fmt.Println("There was a problem rolling back %v. See ~/.pagodabox/log.txt for details", fApp)
 		ui.Error("pagoda app:rollback", err)
 	}
 
-	fmt.Printf("Rolling %s back to previous deploy... Check your dashboard for transaction details and logs\n", fApp)
+	fmt.Printf("Rolling %v back to previous deploy... Check your dashboard for transaction details and logs\n", fApp)
 }

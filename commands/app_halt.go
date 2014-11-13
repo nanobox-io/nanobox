@@ -10,11 +10,11 @@ import (
   "github.com/nanobox-core/cli/ui"
 )
 
-// AppDestroyCommand satisfies the Command interface for destroying an app
-type AppDestroyCommand struct{}
+// AppHaltCommand satisfies the Command interface for destroying an app
+type AppHaltCommand struct{}
 
 // Help prints detailed help text for the app destroy command
-func (c *AppDestroyCommand) Help() {
+func (c *AppHaltCommand) Help() {
   ui.CPrintln(`
 Description:
   Destroys an application on Nanobox. [red]THIS ACTION CANNOT BE UNDONE![reset]
@@ -40,7 +40,7 @@ Options:
 // Run attempts to destroy an app on Nanobox. It can take a force flag that will
 // skip the confirmation process, other wise will ask for confirmation by retyping
 // the name of the app to be destroyed
-func (c *AppDestroyCommand) Run(fApp string, opts []string, api *nanoAPI.Client) {
+func (c *AppHaltCommand) Run(fApp string, opts []string, api *nanoAPI.Client) {
 
   // flags
   flags := flag.NewFlagSet("flags", flag.ContinueOnError)
@@ -72,12 +72,12 @@ func (c *AppDestroyCommand) Run(fApp string, opts []string, api *nanoAPI.Client)
 }
 
 // forceDeleteApp skips the confirmation process and deletes the app
-func (c *AppDestroyCommand) forceDeleteApp(api *nanoAPI.Client, app string) {
+func (c *AppHaltCommand) forceDeleteApp(api *nanoAPI.Client, app string) {
   c.deleteApp(api, app)
 }
 
 // safeDeleteapp asks the user to confirm the name of the app before deletion
-func (c *AppDestroyCommand) safeDeleteApp(api *nanoAPI.Client, app string) {
+func (c *AppHaltCommand) safeDeleteApp(api *nanoAPI.Client, app string) {
 
   ui.CPrintln(`
 All code, data, network storage, ect. will be deleted forever.
@@ -97,12 +97,12 @@ Are you sure you want to destroy [red]` + app + `[reset]?
 }
 
 // deleteApp deletes the specified app
-func (c *AppDestroyCommand) deleteApp(api *nanoAPI.Client, app string) {
+func (c *AppHaltCommand) deleteApp(api *nanoAPI.Client, app string) {
 
   err := api.DeleteApp(app)
   if err != nil {
     _, err, msg := helpers.HandleAPIError(err)
-    fmt.Printf("Oops! We could not delete '%s': %s - %s", app, err, msg)
+    fmt.Printf("Oops! We could not delete '%v': %v - %v", app, err, msg)
     os.Exit(1)
   }
 

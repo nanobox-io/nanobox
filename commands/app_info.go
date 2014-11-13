@@ -44,7 +44,7 @@ func (c *AppInfoCommand) Run(fApp string, opts []string, api *nanoAPI.Client) {
 	//
 	app, err := api.GetApp(fApp)
 	if err != nil {
-		fmt.Printf("Unable to find an app with the name '%s' \n", fApp)
+		fmt.Printf("Unable to find an app with the name '%v' \n", fApp)
 		os.Exit(1)
 	}
 
@@ -82,7 +82,7 @@ Currently Deployed:
 	if app.ActiveDeployID != "" {
 		deploy, err := api.GetAppDeploy(app.ID, app.ActiveDeployID)
 		if err != nil {
-			fmt.Printf("Oops! We could not find any deploys for '%s'.\n", app.Name)
+			fmt.Printf("Oops! We could not find any deploys for '%v'.\n", app.Name)
 			os.Exit(1)
 		}
 
@@ -94,22 +94,4 @@ Currently Deployed:
 
 	fmt.Println("")
 
-	// team info
-	roles, err := api.GetAppRoles(app.ID)
-	if err != nil {
-		fmt.Printf("Oops! We could not find any roles for '%s'.\n", app.Name)
-		os.Exit(1)
-	}
-
-	fmt.Println(`
-Team Members:
--------------------------`)
-
-	for _, role := range roles {
-		fmt.Println("Username  : " + role.Username)
-		fmt.Println("Email     : " + role.Email)
-		fmt.Println("Role      : " + role.Permission)
-
-		fmt.Println("")
-	}
 }

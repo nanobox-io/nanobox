@@ -81,7 +81,7 @@ func (c *ServiceSSHCommand) Run(fApp string, opts []string, api *nanoAPI.Client)
 	// the service to SSH into
 	service, err := helpers.GetServiceBySlug(fApp, fService, api)
 	if err != nil {
-		fmt.Printf("Oops! We could not find a '%s' on '%s'.\n", fService, fApp)
+		fmt.Printf("Oops! We could not find a '%v' on '%v'.\n", fService, fApp)
 		os.Exit(1)
 	}
 
@@ -150,13 +150,13 @@ func (c *ServiceSSHCommand) Run(fApp string, opts []string, api *nanoAPI.Client)
 
 	// Request pseudo terminal
 	if err := session.RequestPty("xterm", 24, 80, modes); err != nil {
-		fmt.Printf("Request for PTY failed: %s \n", err)
+		fmt.Printf("Request for PTY failed: %v \n", err)
 		os.Exit(1)
 	}
 
 	// Start remote shell
 	if err := session.Shell(); err != nil {
-		fmt.Printf("Failed to start shell: %s", err)
+		fmt.Printf("Failed to start shell: %v", err)
 		os.Exit(1)
 	}
 

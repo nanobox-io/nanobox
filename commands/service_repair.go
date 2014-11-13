@@ -56,14 +56,14 @@ func (c *ServiceRepairCommand) Run(fApp string, opts []string, api *nanoAPI.Clie
 
 	service, err := helpers.GetServiceBySlug(fApp, fService, api)
 	if err != nil {
-		fmt.Printf("Oops! We could not find a '%s' on '%s'.\n", fService, fApp)
+		fmt.Printf("Oops! We could not find a '%v' on '%v'.\n", fService, fApp)
 		os.Exit(1)
 	}
 
 	if _, err := api.RepairAppService(fApp, service.ID); err != nil {
-		fmt.Println("There was a problem repairing %s. See ~/.pagodabox/log.txt for details", fService)
+		fmt.Println("There was a problem repairing %v. See ~/.pagodabox/log.txt for details", fService)
 		ui.Error("pagoda service:repair", err)
 	}
 
-	fmt.Printf("Repairing %s's %s (%s)... Check your dashboard for transaction details and logs.\n", fApp, service.UID, service.Name)
+	fmt.Printf("Repairing %v's %v (%v)... Check your dashboard for transaction details and logs.\n", fApp, service.UID, service.Name)
 }

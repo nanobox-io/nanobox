@@ -56,14 +56,14 @@ func (c *ServiceRebootCommand) Run(fApp string, opts []string, api *nanoAPI.Clie
 
 	service, err := helpers.GetServiceBySlug(fApp, fService, api)
 	if err != nil {
-		fmt.Printf("Oops! We could not find a '%s' on '%s'.\n", fService, fApp)
+		fmt.Printf("Oops! We could not find a '%v' on '%v'.\n", fService, fApp)
 		os.Exit(1)
 	}
 
 	if _, err := api.RebootAppService(fApp, service.ID); err != nil {
-		fmt.Println("There was a problem reboot %s. See ~/.pagodabox/log.txt for details", fService)
+		fmt.Println("There was a problem reboot %v. See ~/.pagodabox/log.txt for details", fService)
 		ui.Error("pagoda service:reboot", err)
 	}
 
-	fmt.Printf("Rebooting %s's %s (%s)... Check your dashboard for transaction details and logs.\n", fApp, service.UID, service.Name)
+	fmt.Printf("Rebooting %v's %v (%v)... Check your dashboard for transaction details and logs.\n", fApp, service.UID, service.Name)
 }

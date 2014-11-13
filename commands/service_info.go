@@ -58,22 +58,8 @@ func (c *ServiceInfoCommand) Run(fApp string, opts []string, api *nanoAPI.Client
 	//
 	service, err := helpers.GetServiceBySlug(fApp, fService, api)
 	if err != nil {
-		fmt.Printf("Oops! We could not find a '%s' on '%s'.\n", fService, fApp)
+		fmt.Printf("Oops! We could not find a '%v' on '%v'.\n", fService, fApp)
 		os.Exit(1)
-	}
-
-	//
-	scaffold, err := api.GetScaffold(service.ScaffoldID)
-	if err != nil {
-		fmt.Println("There was a problem getting '%s's' scaffold. See ~/.pagodabox/log.txt for details", service.UID)
-		ui.Error("pagoda service:info", err)
-	}
-
-	//
-	plan, err := api.GetAppServicePlan(fApp, service.ID, service.ActivePlanID)
-	if err != nil {
-		fmt.Println("There was a problem getting '%s's' active plan. See ~/.pagodabox/log.txt for details", service.UID)
-		ui.Error("pagoda service:info", err)
 	}
 
 	//
@@ -82,15 +68,8 @@ General Information:
 ------------------------------
 Name      : ` + service.Name + `
 UID       : ` + service.UID + `
-Type      : ` + scaffold.Name + `
 State     : ` + service.State + `
-Topology  : ` + service.Topology + `
-
-
-Current Scale:
-------------------------------
-Instances : ` + strconv.Itoa(plan.Quantity) + `
-Tier      : ` + plan.Tier)
+Topology  : ` + service.Topology )
 
 	// only show connection details for 'authable' services
 	if service.Authable {
@@ -99,7 +78,6 @@ Tier      : ` + plan.Tier)
 Connection:
 ------------------------------
 Host      : ` + service.TunnelIP + `
-Port      : ` + strconv.Itoa(scaffold.DefaultPort) + `
 Username  : ` + service.Usernames["default"] + `
 Password  : ` + service.Passwords["default"] + `
 Database  : ` + service.TunnelUser)

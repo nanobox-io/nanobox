@@ -69,7 +69,7 @@ func (c *AppCreateCommand) Run(fApp string, opts []string, api *nanoAPI.Client) 
 	app, err := api.CreateApp(appCreateOptions)
 	if err != nil {
 		_, err, msg := helpers.HandleAPIError(err)
-		fmt.Printf("Oops! We could not create your app: %s - %s", err, msg)
+		fmt.Printf("Oops! We could not create your app: %v - %v", err, msg)
 		os.Exit(1)
 	}
 
@@ -104,7 +104,7 @@ current working directory as a git repo and add a pagoda remote, run:
 	cmd := exec.Command("git", "remote", "add", remote, remotePath)
 	cmd.Dir = path
 	if err := cmd.Run(); err != nil {
-		fmt.Printf("Unable to add remote at this time: %s \n", err)
+		fmt.Printf("Unable to add remote at this time: %v \n", err)
 		os.Exit(1)
 	}
 

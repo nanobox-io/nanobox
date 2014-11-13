@@ -102,7 +102,7 @@ func (c *AppDestroyCommand) deleteApp(api *nanoAPI.Client, app string) {
 	err := api.DeleteApp(app)
 	if err != nil {
 		_, err, msg := helpers.HandleAPIError(err)
-		fmt.Printf("Oops! We could not delete '%s': %s - %s", app, err, msg)
+		fmt.Printf("Oops! We could not delete '%v': %v - %v", app, err, msg)
 		os.Exit(1)
 	}
 

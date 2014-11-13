@@ -42,9 +42,9 @@ func (c *AppRebuildCommand) Run(fApp string, opts []string, api *nanoAPI.Client)
 
 	//
 	if _, err := api.RebuildAppLibs(fApp); err != nil {
-		fmt.Println("There was a problem rebuilding %s. See ~/.pagodabox/log.txt for details", fApp)
+		fmt.Println("There was a problem rebuilding %v. See ~/.pagodabox/log.txt for details", fApp)
 		ui.Error("pagoda app:rebuild", err)
 	}
 
-	fmt.Printf("Rebuilding %s... Check your dashboard for transaction details and logs\n", fApp)
+	fmt.Printf("Rebuilding %v... Check your dashboard for transaction details and logs\n", fApp)
 }
