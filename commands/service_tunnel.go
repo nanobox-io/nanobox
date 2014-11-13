@@ -1,17 +1,17 @@
 package commands
 
 import (
-  "code.google.com/p/go.crypto/ssh"
-  "flag"
-  "fmt"
-  "io"
-  "net"
-  "os"
-  "strconv"
+	"code.google.com/p/go.crypto/ssh"
+	"flag"
+	"fmt"
+	"io"
+	"net"
+	"os"
+	"strconv"
 
-  nanoAPI "github.com/nanobox-core/api-client-go"
-  "github.com/nanobox-core/cli/helpers"
-  "github.com/nanobox-core/cli/ui"
+	nanoAPI "github.com/nanobox-core/api-client-go"
+	"github.com/nanobox-core/cli/helpers"
+	"github.com/nanobox-core/cli/ui"
 )
 
 // ServiceTunnelCommand satisfies the Command interface for opening a port forward
@@ -20,7 +20,7 @@ type ServiceTunnelCommand struct{}
 
 // Help prints detailed help text for the service tunnel command
 func (c *ServiceTunnelCommand) Help() {
-  ui.CPrintln(`
+	ui.CPrintln(`
 Description:
   Create an SSH port forward to the specified service
 
@@ -62,100 +62,100 @@ Options:
 // it will stay open until closed (ctrl + c)
 func (c *ServiceTunnelCommand) Run(fApp string, opts []string, api *nanoAPI.Client) {
 
-  // if no app flag was passed, attempt to find one
-  if fApp == "" {
-    fApp = helpers.FindPagodaApp()
-  }
+	// if no app flag was passed, attempt to find one
+	if fApp == "" {
+		fApp = helpers.FindPagodaApp()
+	}
 
-  var fService string
+	var fService string
 
-  // If there's no service, prompt for one
-  if len(opts) <= 0 {
-    fService = ui.Prompt("To which service would you like to open a tunnel: ")
+	// If there's no service, prompt for one
+	if len(opts) <= 0 {
+		fService = ui.Prompt("To which service would you like to open a tunnel: ")
 
-    // We should expect opts[0] to be the service.
-  } else {
-    fService = opts[0]
-    opts = opts[1:]
-  }
+		// We should expect opts[0] to be the service.
+	} else {
+		fService = opts[0]
+		opts = opts[1:]
+	}
 
-  // parse remaining flags
-  flags := flag.NewFlagSet("flags", flag.ContinueOnError)
-  flags.Usage = func() { c.Help() }
+	// parse remaining flags
+	flags := flag.NewFlagSet("flags", flag.ContinueOnError)
+	flags.Usage = func() { c.Help() }
 
-  var fPort int
-  flags.IntVar(&fPort, "p", 0, "")
-  flags.IntVar(&fPort, "port", 0, "")
+	var fPort int
+	flags.IntVar(&fPort, "p", 0, "")
+	flags.IntVar(&fPort, "port", 0, "")
 
-  var fIdentity string
-  flags.StringVar(&fIdentity, "i", "", "")
-  flags.StringVar(&fIdentity, "identity-file", "", "")
+	var fIdentity string
+	flags.StringVar(&fIdentity, "i", "", "")
+	flags.StringVar(&fIdentity, "identity-file", "", "")
 
-  if err := flags.Parse(opts); err != nil {
-    fmt.Println("Unable to parse flags. See ~/.pagodabox/log.txt for details")
-    ui.Error("pagoda service:tunnel", err)
-  }
+	if err := flags.Parse(opts); err != nil {
+		fmt.Println("Unable to parse flags. See ~/.pagodabox/log.txt for details")
+		ui.Error("pagoda service:tunnel", err)
+	}
 
-  // the service to open the port forward 'tunnel' to
-  service, err := helpers.GetServiceBySlug(fApp, fService, api)
-  if err != nil {
-    fmt.Printf("Oops! We could not find a '%v' on '%v'.\n", fService, fApp)
-    os.Exit(1)
-  }
+	// the service to open the port forward 'tunnel' to
+	service, err := helpers.GetServiceBySlug(fApp, fService, api)
+	if err != nil {
+		fmt.Printf("Oops! We could not find a '%v' on '%v'.\n", fService, fApp)
+		os.Exit(1)
+	}
 
-  //
-  if fPort == 0 {
-    fPort = 0
-  }
+	//
+	if fPort == 0 {
+		fPort = 0
+	}
 
-  // the public SSH key to use when SSHing into the server
-  key, err := helpers.GetKeyFile(fIdentity)
-  if err != nil {
-    fmt.Println("Unable to use SSH key. See ~/.pagodabox/log.txt for details")
-    ui.Error("pagoda service:tunnel", err)
-  }
+	// the public SSH key to use when SSHing into the server
+	key, err := helpers.GetKeyFile(fIdentity)
+	if err != nil {
+		fmt.Println("Unable to use SSH key. See ~/.pagodabox/log.txt for details")
+		ui.Error("pagoda service:tunnel", err)
+	}
 
-  // the config credentials for connecting to the remote server
-  config := &ssh.ClientConfig{
-    User: service.TunnelUser,
-    Auth: []ssh.AuthMethod{
-      ssh.PublicKeys(key),
-    },
-  }
+	// the config credentials for connecting to the remote server
+	config := &ssh.ClientConfig{
+		User: service.TunnelUser,
+		Auth: []ssh.AuthMethod{
+			ssh.PublicKeys(key),
+		},
+	}
 
-  // all the necessary options for connecting to the remote server
-  tunnelOptions := &helpers.SSHOptions{
-    Config: config,
+	// all the necessary options for connecting to the remote server
+	tunnelOptions := &helpers.SSHOptions{
+		Config: config,
 
-    LocalIP:   "localhost",
-    LocalPort: fPort,
+		LocalIP:   "localhost",
+		LocalPort: fPort,
 
-    RemoteIP:   service.TunnelIP,
-    RemotePort: service.TunnelPort,
-    RemoteUser: service.TunnelUser,
+		RemoteIP:   service.TunnelIP,
+		RemotePort: service.TunnelPort,
+		RemoteUser: service.TunnelUser,
 
-    ServerIP:   service.IPs["default"],
-    ServerPort: 0,
+		ServerIP:   service.IPs["default"],
+		ServerPort: 0,
 
-    ServiceApp:  fApp,
-    ServiceUser: service.Usernames["default"],
-    ServicePass: service.Passwords["default"],
-  }
+		ServiceApp:  fApp,
+		ServiceUser: service.Usernames["default"],
+		ServicePass: service.Passwords["default"],
+	}
 
-  // if the service SSH tunnel isn't enabled, enable it
-  if !service.PublicTunnel {
-    helpers.EnablePublicTunnel(service, api, tunnelOptions)
-  }
+	// if the service SSH tunnel isn't enabled, enable it
+	if !service.PublicTunnel {
+		helpers.EnablePublicTunnel(service, api, tunnelOptions)
+	}
 
-  // create a local listener that listens for traffic on the tunnel from the
-  // remote server
-  listener, err := net.Listen("tcp", tunnelOptions.LocalIP+":"+strconv.Itoa(tunnelOptions.LocalPort))
-  if err != nil {
-    fmt.Printf("Unable to tunnel into this type of service: %v \n", err)
-    os.Exit(1)
-  }
+	// create a local listener that listens for traffic on the tunnel from the
+	// remote server
+	listener, err := net.Listen("tcp", tunnelOptions.LocalIP+":"+strconv.Itoa(tunnelOptions.LocalPort))
+	if err != nil {
+		fmt.Printf("Unable to tunnel into this type of service: %v \n", err)
+		os.Exit(1)
+	}
 
-  fmt.Println(`
+	fmt.Println(`
 Tunnel established, use the following credentials to connect:
 -------------------------------------------------------------
 
@@ -169,52 +169,52 @@ Database  : ` + tunnelOptions.RemoteUser + `
 (note : ctrl-c To close this tunnel)
   `)
 
-  // attempt to open a tunnel
-  for {
-    localConnection, err := listener.Accept()
+	// attempt to open a tunnel
+	for {
+		localConnection, err := listener.Accept()
 
-    if err != nil {
-      fmt.Println("Unable to maintain tunnel. See ~/.pagodabox/log.txt for details")
-      ui.Error("pagoda service:tunnel", err)
-    }
+		if err != nil {
+			fmt.Println("Unable to maintain tunnel. See ~/.pagodabox/log.txt for details")
+			ui.Error("pagoda service:tunnel", err)
+		}
 
-    // establish the tunnel
-    go forward(localConnection, tunnelOptions)
-  }
+		// establish the tunnel
+		go forward(localConnection, tunnelOptions)
+	}
 }
 
 // forward attempts to keep open a port forward 'tunnel' to an app service
 func forward(localConnection net.Conn, tunnelOptions *helpers.SSHOptions) {
 
-  // Start a client connection to the SSH server
-  sshClient, err := ssh.Dial("tcp", tunnelOptions.RemoteIP+":"+strconv.Itoa(tunnelOptions.RemotePort), tunnelOptions.Config)
-  if err != nil {
-    fmt.Println("Unable to connect SSH client. See ~/.pagodabox/log.txt for details")
-    ui.Error("pagoda service:tunnel", err)
-  }
+	// Start a client connection to the SSH server
+	sshClient, err := ssh.Dial("tcp", tunnelOptions.RemoteIP+":"+strconv.Itoa(tunnelOptions.RemotePort), tunnelOptions.Config)
+	if err != nil {
+		fmt.Println("Unable to connect SSH client. See ~/.pagodabox/log.txt for details")
+		ui.Error("pagoda service:tunnel", err)
+	}
 
-  // Initiate a connection to the addr from the remote host
-  sshConnection, err := sshClient.Dial("tcp", tunnelOptions.ServerIP+":"+strconv.Itoa(tunnelOptions.ServerPort))
+	// Initiate a connection to the addr from the remote host
+	sshConnection, err := sshClient.Dial("tcp", tunnelOptions.ServerIP+":"+strconv.Itoa(tunnelOptions.ServerPort))
 
-  // Copy localConnection.Reader to sshConnection.Writer
-  go func() {
-    defer localConnection.Close()
+	// Copy localConnection.Reader to sshConnection.Writer
+	go func() {
+		defer localConnection.Close()
 
-    _, err = io.Copy(localConnection, sshConnection)
-    if err != nil {
-      fmt.Println("Unable to copy data. See ~/.pagodabox/log.txt for details")
-      ui.Error("pagoda service:tunnel", err)
-    }
-  }()
+		_, err = io.Copy(localConnection, sshConnection)
+		if err != nil {
+			fmt.Println("Unable to copy data. See ~/.pagodabox/log.txt for details")
+			ui.Error("pagoda service:tunnel", err)
+		}
+	}()
 
-  // Copy sshConnection.Reader to localConnection.Writer
-  go func() {
-    defer sshConnection.Close()
+	// Copy sshConnection.Reader to localConnection.Writer
+	go func() {
+		defer sshConnection.Close()
 
-    _, err = io.Copy(sshConnection, localConnection)
-    if err != nil {
-      fmt.Println("Unable to copy data. See ~/.pagodabox/log.txt for details")
-      ui.Error("pagoda service:tunnel", err)
-    }
-  }()
+		_, err = io.Copy(sshConnection, localConnection)
+		if err != nil {
+			fmt.Println("Unable to copy data. See ~/.pagodabox/log.txt for details")
+			ui.Error("pagoda service:tunnel", err)
+		}
+	}()
 }

@@ -68,7 +68,7 @@ func (c *EVarListCommand) Run(fApp string, opts []string, api *nanoAPI.Client) {
 	}
 
 	fmt.Println(`
-Custom (`+strconv.Itoa(len(custom))+`):
+Custom (` + strconv.Itoa(len(custom)) + `):
 --------------------------------------------------`)
 
 	// list custom environment variables
@@ -85,7 +85,7 @@ Custom (`+strconv.Itoa(len(custom))+`):
 
 	// list generated environment variables
 	fmt.Println(`
-Generated (`+strconv.Itoa(len(internal))+`):
+Generated (` + strconv.Itoa(len(internal)) + `):
 --------------------------------------------------`)
 	for _, eVar := range internal {
 		fmt.Printf("%v = %v", eVar.Title, eVar.Value)

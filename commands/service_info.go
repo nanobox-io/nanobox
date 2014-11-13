@@ -69,7 +69,7 @@ General Information:
 Name      : ` + service.Name + `
 UID       : ` + service.UID + `
 State     : ` + service.State + `
-Topology  : ` + service.Topology )
+Topology  : ` + service.Topology)
 
 	// only show connection details for 'authable' services
 	if service.Authable {

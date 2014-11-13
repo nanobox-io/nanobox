@@ -43,7 +43,7 @@ func (c *EVarCreateCommand) Run(fApp string, opts []string, api *nanoAPI.Client)
 	// if fApp == "" {
 	// 	fApp = helpers.FindPagodaApp()
 	// }
-  fApp = "TESTING"
+	fApp = "TESTING"
 
 	var fEVar string
 

@@ -12,7 +12,7 @@ var Commands map[string]Command
 // Command represents a Nanobox CLI command. Every command must have a Help()
 // and Run() function
 type Command interface {
-	Help()                                                 // Prints the help text associated with this command
+	Help()                                               // Prints the help text associated with this command
 	Run(fApp string, opts []string, api *nanoAPI.Client) // Houses the logic that will be run upon calling this command
 }
 
