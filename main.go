@@ -33,10 +33,6 @@ func main() {
 		commands:  Commands,
 	}
 
-	// cli.apiClient.APIURL     = "localhost:8080"
-	// cli.apiClient.APIVersion = "api"
-	// cli.apiClient.AuthToken = ""
-
 	// run the CLI
 	cli.run()
 
@@ -119,7 +115,7 @@ func (cli *CLI) run() {
 
 				// no valid command found
 			} else {
-				fmt.Printf("'%v' is not a valid command. Type 'pagoda' for available commands\n and usage.", command)
+				fmt.Printf("'%v' is not a valid command. Type 'nanobox' for available commands\n and usage.", command)
 				os.Exit(1)
 			}
 		}
