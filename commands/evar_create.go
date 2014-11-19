@@ -79,6 +79,5 @@ Oops! You forgot include an environment variable:
 
 	ui.CPrintln(`
 New environment variable added to [green]` + fApp + `[reset]:
-  ` + eVar.Title + ` = ` + eVar.Value + `
-`)
+  ` + eVar.Title + ` = ` + eVar.Value)
 }
