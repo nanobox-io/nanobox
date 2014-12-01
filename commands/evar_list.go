@@ -2,7 +2,7 @@ package commands
 
 import (
 	"fmt"
-	// "strconv"
+	"strconv"
 
 	nanoAPI "github.com/nanobox-core/api-client-go"
 	// "github.com/nanobox-core/cli/helpers"
@@ -36,74 +36,57 @@ Options:
   `)
 }
 
-type Test struct{}
-
 // Run disaplys select information about all of an app's environment variables
 func (c *EVarListCommand) Run(fApp string, opts []string, api *nanoAPI.Client) {
-
-	// if no app flag was passed, attempt to find one
-	// if fApp == "" {
-	// 	fApp = helpers.FindPagodaApp()
-	// }
-
-	fApp = "TESTING"
 
 	// get environment variables
 	eVars, err := api.GetEVars()
 	if err != nil {
-		fmt.Printf("There was a problem getting '%v's' environment variables. See ~/.pagodabox/log.txt for details", fApp)
+		fmt.Printf("There was a problem getting environment variables. See ~/.pagodabox/log.txt for details")
 		ui.Error("pagoda evar:list", err)
 	}
 
-	fmt.Println("INITIAL DONE!!!", eVars)
-
-	thing := Test{}
-
-	fmt.Println("DO MIST!!!")
-
 	//
-	api.DoRawRequest(&thing, "GET", "http://127.0.0.1:1445/mist?subscribe=a,b", nil, nil)
+	api.DoRawRequest(nil, "GET", "http://127.0.0.1:1445/mist?subscribe=evars", nil, nil)
 
-	fmt.Println("MIST DONE!!!")
+	var internal, custom []nanoAPI.EVar
 
-	// 	var internal, custom []nanoAPI.EVar
+	for _, eVar := range eVars {
 
-	// 	for _, eVar := range eVars {
+		// load custom environment variables
+		if !eVar.Internal {
+			custom = append(custom, eVar)
 
-	// 		// load custom environment variables
-	// 		if !eVar.Internal {
-	// 			custom = append(custom, eVar)
+			// load generated environment variables
+		} else {
+			internal = append(internal, eVar)
+		}
+	}
 
-	// 			// load generated environment variables
-	// 		} else {
-	// 			internal = append(internal, eVar)
-	// 		}
-	// 	}
+	fmt.Println(`
+Custom (` + strconv.Itoa(len(custom)) + `):
+--------------------------------------------------`)
 
-	// 	fmt.Println(`
-	// Custom (` + strconv.Itoa(len(custom)) + `):
-	// --------------------------------------------------`)
+	// list custom environment variables
+	if len(custom) > 0 {
+		for _, eVar := range custom {
+			fmt.Printf("%v = %v", eVar.Title, eVar.Value)
+			fmt.Println("")
+		}
+	} else {
+		fmt.Println("** NONE CREATED **")
+	}
 
-	// 	// list custom environment variables
-	// 	if len(custom) > 0 {
-	// 		for _, eVar := range custom {
-	// 			fmt.Printf("%v = %v", eVar.Title, eVar.Value)
-	// 			fmt.Println("")
-	// 		}
-	// 	} else {
-	// 		fmt.Println("** NONE CREATED **")
-	// 	}
+	fmt.Println("")
 
-	// 	fmt.Println("")
+	// list generated environment variables
+	fmt.Println(`
+Generated (` + strconv.Itoa(len(internal)) + `):
+--------------------------------------------------`)
+	for _, eVar := range internal {
+		fmt.Printf("%v = %v", eVar.Title, eVar.Value)
+		fmt.Println("")
+	}
 
-	// 	// list generated environment variables
-	// 	fmt.Println(`
-	// Generated (` + strconv.Itoa(len(internal)) + `):
-	// --------------------------------------------------`)
-	// 	for _, eVar := range internal {
-	// 		fmt.Printf("%v = %v", eVar.Title, eVar.Value)
-	// 		fmt.Println("")
-	// 	}
-
-	// 	fmt.Println("")
+	fmt.Println("")
 }
