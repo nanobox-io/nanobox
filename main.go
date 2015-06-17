@@ -1,41 +1,65 @@
+// Copyright (c) 2015 Pagoda Box Inc
+//
+// This Source Code Form is subject to the terms of the Mozilla Public License, v.
+// 2.0. If a copy of the MPL was not distributed with this file, You can obtain one
+// at http://mozilla.org/MPL/2.0/.
+//
+
 package main
 
 import (
 	"fmt"
 	"os"
 
-	nanoAPI "github.com/nanobox-core/api-client-go"
-	// "github.com/nanobox-core/cli/helpers"
-	"github.com/nanobox-core/cli/ui"
+	"github.com/jcelliott/lumber"
+
+	api "github.com/pagodabox/nanobox-api-client"
+	"github.com/pagodabox/nanobox-cli/commands"
+	"github.com/pagodabox/nanobox-cli/config"
+	"github.com/pagodabox/nanobox-cli/ui"
 )
 
-const Version = "0.0.1"
+// init
+func init() {
 
-type (
-
-	// CLI represents the Nanobox CLI. It has a version, a Nanobox API client
-	// and a map of all the commands it responds to
-	CLI struct {
-		version   string
-		apiClient *nanoAPI.Client
-		commands  map[string]Command
+	// idempotent install
+	if err := install(); err != nil {
+		config.Console.Fatal("Failed to install! Exiting... %v", err)
+		os.Exit(1)
 	}
-)
 
-// main creates a new CLI and then checks to see if authentication is needed. If
-// no authentication is required it will attempt to run the provided command
-func main() {
+	// create a logger
+	logger, err := lumber.NewFileLogger(config.LogFile, config.LogLevel, lumber.ROTATE, 100, 1, 100)
+	if err != nil {
+		config.Console.Fatal("Failed to create logger! Exiting... %v", err)
+		os.Exit(1)
+	}
+
+	// set the logger
+	config.Log = logger
+
+	// set the api to debug mode
+	if config.LogLevel == lumber.DEBUG {
+		api.Debug = true
+	}
+
+	api.APIURL = "http://api.lvh.me:3000"
 
 	//
-	cli := &CLI{
-		version:   Version,
-		apiClient: nanoAPI.NewClient(),
-		commands:  Commands,
-	}
+	config.Boxfile = config.ParseBoxfile()
+}
+
+// main
+func main() {
+
+	// check for updates
+	// checkUpdate()
+
+	// verify that all dependancies exist before attempting to do anything
+	// verifyDependancies()
 
 	// run the CLI
-	cli.run()
-
+	run()
 }
 
 // run attempts to run a CLI command. If no flags are passed (only the program
@@ -45,79 +69,106 @@ func main() {
 // on (otherwise it wll attempt to find an app associated with the current directory).
 // It also takes a debug flag (which must be passed last), that will display all
 // request/response output for any API call the CLI makes.
-func (cli *CLI) run() {
+func run() {
 
 	// command line args w/o program
 	args := os.Args[1:]
 
 	// if only program is run, print help by default
 	if len(args) <= 0 {
-		cli.Help()
+		help()
+	}
 
-		// parse command line args
-	} else {
+	// parse command line args; it's safe to assume that args[0] is the command we
+	// want to run, or one of our 'shortcut' flags that we'll catch before trying
+	// to run the command.
+	command := args[0]
 
-		// it's safe to assume that args[0] is the command we want to run, or one of
-		// our 'shortcut' flags that we'll catch before trying to run the command.
-		command := args[0]
+	// check for 'global' commands
+	switch command {
 
-		// check for 'global' commands
-		switch command {
+	// check for help shortcuts
+	case "-h", "--help", "help":
+		help()
 
-		// Check for help shortcuts
-		case "-h", "--help", "help":
-			cli.Help()
+	// check for version shortcuts
+	case "-v", "--version", "version":
+		fmt.Printf("Version: %v\n", config.Version.String())
 
-		// Check for version shortcuts
-		case "-v", "--version", "version":
-			ui.CPrintln("[yellow]Version " + cli.Version() + "[reset]")
+	// check for the update command and update
+	case "-u", "--update", "update":
+		update()
 
-		// we didn't find a 'shortcut' flag, so we'll continue parsing the remaining
-		// args looking for a command to run.
-		default:
+	// we didn't find a 'shortcut' flag, so we'll continue parsing the remaining
+	// args looking for a command to run.
+	default:
 
-			// if we find a valid command we run it
-			if val, ok := cli.commands[command]; ok {
+		// if we find a valid command we run it
+		if val, ok := commands.Commands[command]; ok {
 
-				// args[1:] will be our remaining subcommand or flags after the intial command.
-				// This value could also be 0 if running an alias command.
-				opts := args[1:]
+			// args[1:] will be our remaining subcommand or flags after the intial command.
+			// This value could also be 0 if running an alias command.
+			opts := args[1:]
 
-				// assume they wont be passing an app
-				fApp := ""
+			//
+			if len(opts) >= 1 {
+				switch opts[0] {
 
-				//
-				if len(opts) >= 1 {
-					switch opts[0] {
-
-					// Check for help shortcuts
-					case "-h", "--help", "help":
-						cli.commands[command].Help()
-						os.Exit(0)
-
-					// Check for app flag, set fApp and strip out the flag and app
-					case "-a", "--app":
-						fApp = opts[1]
-						opts = opts[2:]
-					}
+				// Check for help shortcuts on commands
+				case "-h", "--help", "help":
+					commands.Commands[command].Help()
+					os.Exit(0)
 				}
-
-				// before we run the command we'll check to see if debug mode needs to
-				// be enabled. If so, enable it and strip off the flag.
-				if args[len(args)-1] == "--debug" {
-					cli.apiClient.Debug = true
-
-					opts = opts[:len(opts)-1]
-				}
-
-				// run the command
-				val.Run(fApp, opts, cli.apiClient)
-
-				// no valid command found
-			} else {
-				fmt.Printf("'%v' is not a valid command. Type 'nanobox' for available commands\n and usage.", command)
-				os.Exit(1)
 			}
+
+			// if debug was passed we remove it from the list of options that get sent
+			// to commands
+			if args[len(args)-1] == "--debug" {
+				opts = opts[:len(opts)-1]
+			}
+
+			// do a quick ping to make sure we can communicate properly with the API
+			// if err := api.DoRawRequest(nil, "GET", "https://api.pagodabox.io/v1/ping", nil, nil); err != nil {
+			// 	ui.LogFatal("[main] The CLI was unable to communicate with the API", err)
+			// }
+
+			// run the command
+			val.Run(opts)
+
+			// no valid command found
+		} else {
+			fmt.Printf("'%v' is not a valid command. Type 'nanobox' for available commands and usage.\n", command)
+			os.Exit(1)
 		}
 	}
+}
+
+// help
+func help() {
+	cmd := commands.Commands["help"]
+	cmd.Run(nil)
+	os.Exit(0)
+}
+
+// update
+func update() {
+
+	//
+	fmt.Println("Checking for updates...")
+
+	//
+	release, err := getRelease()
+	if err != nil {
+		ui.LogFatal("[version] getRelease() failed", err)
+	}
+
+	if less := config.Version.Less(release); !less {
+		fmt.Println("No updates available at this time.")
+		touchUpdate()
+		return
+	}
+
+	cmd := commands.Commands["update"]
+	cmd.Run(nil)
+	os.Exit(0)
 }

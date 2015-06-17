@@ -1,33 +1,35 @@
+// Copyright (c) 2015 Pagoda Box Inc
+//
+// This Source Code Form is subject to the terms of the Mozilla Public License, v.
+// 2.0. If a copy of the MPL was not distributed with this file, You can obtain one
+// at http://mozilla.org/MPL/2.0/.
+//
+
 package helpers
 
 import (
 	"errors"
 	"fmt"
-	"os"
 	"regexp"
 
-	nanoAPI "github.com/nanobox-core/api-client-go"
-	"github.com/nanobox-core/cli/ui"
+	api "github.com/pagodabox/nanobox-api-client"
+	"github.com/pagodabox/nanobox-cli/ui"
 )
 
 // HandleAPIError takes an error returned from an API call, break it down and
-// return important information regarding the error. The Nanobox API returns
+// return important information regarding the error. The Pagoda Box API returns
 // custom errors in some instances that need to have very specific handlers.
-func HandleAPIError(err error) (int, string, string) {
+func HandleAPIError(err error) error {
 
 	// if its a pagodabox.Error we have special things we want to do...
-	if apiError, ok := err.(nanoAPI.Error); ok {
+	if apiError, ok := err.(api.APIError); ok {
 
+		//
 		switch apiError.Code {
 
-		// These should be rare. so we'll just print the error and exit
-		case 401, 403, 500, 502:
-			fmt.Printf(apiError.Status)
-			os.Exit(1)
-
-		// Not Found - Resouce does not exist
-		case 404:
-			return 404, apiError.StatusText, "Reason: does not exist"
+		// Unauthorized, Forbidden, Not Found, Internal Server Error, Bad Gateway
+		case 401, 403, 404, 500, 502:
+			return errors.New(apiError.Body)
 
 		// Unprocessable Entity -
 		case 422:
@@ -37,23 +39,20 @@ func HandleAPIError(err error) (int, string, string) {
 
 			subMatch := reFindError.FindStringSubmatch(apiError.Body)
 			if subMatch == nil {
-				fmt.Println("Unable to parse api error. See ~/.pagodabox/log.txt for details")
-				ui.Error("error:HandleAPIError", errors.New("No matches found for api error: "+apiError.Body))
+				ui.LogFatal("[helpers.error] reFindError.FindStringSubmatch() failed", errors.New(fmt.Sprintf("No matches found for api error: %v", apiError.Body)))
 			}
 
-			return 422, subMatch[1], subMatch[2]
+			return errors.New(fmt.Sprintf("[helpers.error] %d %v - %v", 422, subMatch[1], subMatch[2]))
 
 		// some error we're not aware of
 		default:
-			fmt.Println("Unhandled API error. See ~/.pagodabox/log.txt for details")
-			ui.Error("helpers.HandleAPIError", err)
+			return errors.New(fmt.Sprintf("[helpers.error] Unhandled API error - %v", err))
 		}
 
-		// ...if not, just panic
+		// ...if not, just write to the log
 	} else {
-		fmt.Println("Unhandled error. See ~/.pagodabox/log.txt for details")
-		ui.Error("helpers.HandleAPIError", err)
+		return errors.New(fmt.Sprintf("[helpers.error] Unhandled error - %v", err))
 	}
 
-	return 1, "", ""
+	return nil
 }
