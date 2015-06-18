@@ -110,7 +110,7 @@ func (c *PublishCommand) Run(opts []string) {
 
 	// set up the output file
 
-	archive := "release.tar.gz"
+	archive := "release.tgz"
 
 	a, err := os.Create(archive)
 	if err != nil {

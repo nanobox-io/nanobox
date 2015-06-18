@@ -51,7 +51,7 @@ func (c *InitCommand) Run(opts []string) {
 	// create synced folders
 
 	//
-	synced_folders := fmt.Sprintf("config.vm.synced_folder \"%v\", \"/vagrant/code/%v\"", config.CWDir, config.App)
+	synced_folders := fmt.Sprintf("nanobox.vm.synced_folder \"%v\", \"/vagrant/code/%v\"", config.CWDir, config.App)
 
 	// if an engine path is provided, add it to the synced_folders
 	if engine := config.Boxfile.Engine; engine != "" {
@@ -60,7 +60,7 @@ func (c *InitCommand) Run(opts []string) {
 			if err != nil {
 				ui.LogFatal("[commands.init] filepath.Abs() failed", err)
 			}
-			synced_folders += fmt.Sprintf("\n  config.vm.synced_folder \"%v\", \"/vagrant/engines/%v\"", fp, engine)
+			synced_folders += fmt.Sprintf("\n  nanobox.vm.synced_folder \"%v\", \"/vagrant/engines/%v\"", fp, engine)
 		} else {
 			config.Console.Warn("Unable to mount '%v' (not a valid directory). Configuring as engine...", engine)
 		}
@@ -73,7 +73,7 @@ func (c *InitCommand) Run(opts []string) {
 			if err != nil {
 				ui.LogFatal("[commands.init] filepath.Abs() failed", err)
 			}
-			synced_folders += fmt.Sprintf("\n  config.vm.synced_folder \"%v\", \"/vagrant/plugins/%v\"", fp, plugin)
+			synced_folders += fmt.Sprintf("\n  nanobox.vm.synced_folder \"%v\", \"/vagrant/plugins/%v\"", fp, plugin)
 		} else {
 			config.Console.Warn("Unable to mount '%v' (not a valid directory). Configuring as plugin...", plugin)
 		}
@@ -82,7 +82,7 @@ func (c *InitCommand) Run(opts []string) {
 	//
 	// create nanobox private network
 	config.Console.Info("Private network created ('%v')...", config.Boxfile.IP)
-	network := fmt.Sprintf("config.vm.network \"private_network\", ip: \"%v\"", config.Boxfile.IP)
+	network := fmt.Sprintf("nanobox.vm.network \"private_network\", ip: \"%v\"", config.Boxfile.IP)
 
 	//
 	// configure provider
@@ -97,21 +97,23 @@ func (c *InitCommand) Run(opts []string) {
 	//
 	case "virtualbox":
 		provider = fmt.Sprintf(`
-	# VirtualBox
-	config.vm.provider "virtualbox" do |p|
-		p.customize ["modifyvm", :id, "--cpuexecutioncap", "%v"]
-		p.cpus = %v
-		p.memory = %v
-	end`, config.Boxfile.CPUCap, config.Boxfile.CPUs, config.Boxfile.RAM)
+		# VirtualBox
+		nanobox.vm.provider "virtualbox" do |p|
+			p.name = "%v"
+
+			p.customize ["modifyvm", :id, "--cpuexecutioncap", "%v"]
+			p.cpus = %v
+			p.memory = %v
+		end`, config.App, config.Boxfile.CPUCap, config.Boxfile.CPUs, config.Boxfile.RAM)
 
 	//
 	case "vmware":
 		provider = fmt.Sprintf(`
-  # VMWare
-  config.vm.provider "vmware" do |p|
-	  v.vmx["numvcpus"] = "%v"
-	  v.vmx["memsize"] = "%v"
-  end`, config.Boxfile.CPUCap, config.Boxfile.CPUs, config.Boxfile.RAM)
+	  # VMWare
+	  nanobox.vm.provider "vmware" do |p|
+		  v.vmx["numvcpus"] = "%v"
+		  v.vmx["memsize"] = "%v"
+	  end`, config.Boxfile.CPUCap, config.Boxfile.CPUs, config.Boxfile.RAM)
 	}
 
 	//
@@ -128,30 +130,34 @@ func (c *InitCommand) Run(opts []string) {
 
 Vagrant.configure(2) do |config|
 
-  ## box
-  config.vm.box_url = "https://github.com/pagodabox/nanobox-boot2docker/releases/download/v0.0.1/nanobox-boot2docker.box"
-  config.vm.box     = "nanobox/boot2docker"
+  config.vm.define :nanobox_boot2docker do |nanobox|
+
+	  ## box
+	  nanobox.vm.box_url = "https://github.com/pagodabox/nanobox-boot2docker/releases/download/v0.0.1/nanobox-boot2docker.box"
+	  nanobox.vm.box     = "nanobox/boot2docker"
 
 
-  ## network
-  %s
+	  ## network
+	  %s
 
 
-  ## shared folders
+	  ## shared folders
 
-  # disable default /vagrant share to override...
-  config.vm.synced_folder ".", "/vagrant", disabled: true
+	  # disable default /vagrant share to override...
+	  nanobox.vm.synced_folder ".", "/vagrant", disabled: true
 
-  # ...add nanobox shared folders
-  %s
-
-
-  ## provider configs
-  %s
+	  # ...add nanobox shared folders
+	  %s
 
 
-  ##
-  config.vm.post_up_message = "Nanobox is up and running!"
+	  ## provider configs
+	  %s
+
+
+	  ##
+	  nanobox.vm.post_up_message = "Nanobox is up and running!"
+
+  end
 
 end
 `, network, synced_folders, provider)

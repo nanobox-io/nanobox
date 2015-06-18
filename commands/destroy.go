@@ -11,7 +11,6 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
@@ -79,41 +78,34 @@ func (c *DestroyCommand) Run(opts []string) {
 
 		// attempt to open /etc/hosts file...
 		f, err := os.OpenFile("/etc/hosts", os.O_RDWR, 0644)
+		defer f.Close()
 
 		// ...if we're unable to open, we'll assume it's because we don't have permission
 		if err != nil {
 
-			fmt.Printf("Nanobox needs your permission to remove the '%v' network from your /etc/hosts file\n", config.App)
+			//
+	    if perm := os.IsPermission(err); perm == true {
 
-			// re-run the command as sudo so we can write to /etc/hosts
-			if err := sudo(); err != nil {
-				ui.LogFatal("[commands.destroy] sudo() failed", err)
-			}
+	      //
+			  cmd := exec.Command("/bin/sh", "-c", "sudo " + os.Args[0] + " domain -x")
 
-			os.Exit(0)
-		}
+			  // connect standard in/outputs
+			  cmd.Stdin = os.Stdin
+			  cmd.Stdout = os.Stdout
+			  cmd.Stderr = os.Stderr
 
-		defer f.Close()
+			  //
+				fmt.Printf("\nNanobox needs your permission to remove the '%v' network from your /etc/hosts file\n", config.App)
 
-		config.Console.Info("Removing '%v' private network to hosts file...", config.App)
+			  // run command
+			  if err := cmd.Run(); err != nil {
+			    ui.LogFatal("[commands.create] cmd.Run() failed", err)
+			  }
 
-		scanner := bufio.NewScanner(f)
-		contents := ""
-
-		// remove entry from /etc/hosts
-		for scanner.Scan() {
-
-			// if the line doesn't contain the entry add it back to what is going to be
-			// re-written to the file
-			if !strings.HasPrefix(scanner.Text(), config.Boxfile.IP) {
-				contents += fmt.Sprintf("%s\n", scanner.Text())
-			}
-		}
-
-		// write back the entirety of the hosts file minus the removed entry
-		err = ioutil.WriteFile("/etc/hosts", []byte(contents), 0644)
-		if err != nil {
-			ui.LogFatal("[commands.destroy] ioutil.WriteFile failed", err)
+	    //
+	    } else {
+	      ui.LogFatal("[commands.domain] os.OpenFile() failed", err)
+	    }
 		}
 	}
 

@@ -31,6 +31,7 @@ func init() {
 	// the map of all available commands the Pagoda Box CLI can run
 	Commands = map[string]Command{
 		"create":  &CreateCommand{},
+		"domain":  &DomainCommand{},
 		"deploy":  &DeployCommand{},
 		"destroy": &DestroyCommand{},
 		"halt":    &HaltCommand{},
@@ -71,25 +72,6 @@ func runVagrantCommand(cmd *exec.Cmd) error {
 
 	// switch back to project dir
 	if err := os.Chdir(config.CWDir); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// sudo
-func sudo() error {
-
-	//
-	cmd := exec.Command("sudo", os.Args...)
-
-	// connect standard in/outputs
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	// run command
-	if err := cmd.Run(); err != nil {
 		return err
 	}
 

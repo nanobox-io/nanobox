@@ -39,16 +39,6 @@ func (c *CreateCommand) Run(opts []string) {
 	init := InitCommand{}
 	init.Run(opts)
 
-	// boot the machine
-	// NOTE: I want more time to think about the order of things here. Ideally I
-	// want to break the writing portion of this out into it's own thing, but I
-	// haven't quite come up with the best solution (that I like)
-	cmd := exec.Command("vagrant", "up")
-
-	if err := runVagrantCommand(cmd); err != nil {
-		ui.LogFatal("[commands.create] runVagrantCommand() failed", err)
-	}
-
 	// assume we'll need to add an entry...
 	addEntry := true
 
@@ -73,37 +63,48 @@ func (c *CreateCommand) Run(opts []string) {
 	// entry needed...
 	if addEntry {
 
-		//
-		entry := fmt.Sprintf("\n%v %v # '%v' private network (added by nanobox)", config.Boxfile.IP, config.Boxfile.Domain, config.App)
-
 		// attempt to open /etc/hosts file...
 		f, err := os.OpenFile("/etc/hosts", os.O_RDWR|os.O_APPEND, 0644)
+		defer f.Close()
 
 		// ...if we're unable to open, we'll assume it's because we don't have permission
 		if err != nil {
 
-			fmt.Printf(`
+			//
+	    if perm := os.IsPermission(err); perm == true {
+
+	      //
+			  cmd := exec.Command("/bin/sh", "-c", "sudo " + os.Args[0] + " domain -w")
+
+			  // connect standard in/outputs
+			  cmd.Stdin = os.Stdin
+			  cmd.Stdout = os.Stdout
+			  cmd.Stderr = os.Stderr
+
+			  //
+				fmt.Printf(`
 Nanobox needs your permission to write the following entry into your /etc/hosts file:
 	%v
 
-	`, entry)
+	`, fmt.Sprintf("%-15v   %s # '%v' private network (added by nanobox)", config.Boxfile.IP, config.Boxfile.Domain, config.App))
 
-			// re-run the command as sudo so we can write to /etc/hosts
-			if err := sudo(); err != nil {
-				ui.LogFatal("[commands.create] sudo() failed", err)
-			}
+			  // run command
+			  if err := cmd.Run(); err != nil {
+			    ui.LogFatal("[commands.create] cmd.Run() failed", err)
+			  }
 
-			os.Exit(0)
+	    //
+	    } else {
+	      ui.LogFatal("[commands.domain] os.OpenFile() failed", err)
+	    }
 		}
+	}
 
-		defer f.Close()
+	// boot the machine
+	cmd := exec.Command("vagrant", "up")
 
-		config.Console.Info("Adding '%v' private network to hosts file...", config.App)
-
-		// write the entry to the hosts file
-		if _, err := f.WriteString(entry); err != nil {
-			ui.LogFatal("[commands.create] WriteString() failed", err)
-		}
+	if err := runVagrantCommand(cmd); err != nil {
+		ui.LogFatal("[commands.create] runVagrantCommand() failed", err)
 	}
 
 }

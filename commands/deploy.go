@@ -52,6 +52,8 @@ func (c *DeployCommand) Run(opts []string) {
 	client := mist.Client{}
 	client.Connect(config.Boxfile.IP, "1445")
 
+	defer client.Close()
+
 	sub, err := client.Subscribe([]string{"sync", "deploy"})
 	if err != nil {
 		config.Console.Warn("Failed to subscribe to 'mist' updates... %v", err)
