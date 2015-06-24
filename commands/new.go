@@ -44,7 +44,7 @@ func (c *NewCommand) Run(opts []string) {
 		os.Exit(1)
 	}
 
-	name := fmt.Sprintf("nanobox-%s", opts[1])
+	name := fmt.Sprintf("nanobox-%s", opts[0])
 	version := "0.0.1"
 
 	// create a new project by the name, unless it already exists
