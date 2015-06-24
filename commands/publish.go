@@ -219,7 +219,7 @@ func (c *PublishCommand) Run(opts []string) {
 		"Userid":      engine.WarehouseUser,
 		"Key":         engine.WarehouseKey,
 		"Bucketid":    engine.ID,
-		"Objectalias": "release-" + release.Version,
+		"Objectalias": "releases/" + release.Version,
 	}
 
 	//
