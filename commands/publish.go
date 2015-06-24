@@ -16,6 +16,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/ghodss/yaml"
@@ -30,13 +31,23 @@ type (
 
 	// PublishCommand satisfies the Command interface for listing a user's apps
 	PublishCommand struct{}
+
+	// Object is returned from warehouse
+	Object struct {
+		Alias    string
+		BucketID string
+		CheckSum string
+		ID       string
+		Public   bool
+		Size     int64
+	}
 )
 
 // Help prints detailed help text for the app list command
 func (c *PublishCommand) Help() {
 	ui.CPrint(`
 Description:
-  Publish your package to nanobox.io
+  Publish your engine to nanobox.io
 
 Usage:
   nanobox publish
@@ -80,24 +91,24 @@ func (c *PublishCommand) Run(opts []string) {
 		auth.ReAuthenticate()
 	}
 
-	// look for a Packagefile to parse
-	pf, err := os.Stat("./Packagefile")
+	// look for a Enginefile to parse
+	enginefile, err := os.Stat("./Enginefile")
 	if err != nil {
-		fmt.Println("Packagefile not found. Be sure to publish from a project directory. Exiting... ")
-		config.Log.Fatal("[commands.publish] os.Stat() failed %v", err)
+		fmt.Println("Enginefile not found. Be sure to publish from a project directory. Exiting... ")
+		config.Log.Fatal("[commands.publish] os.Stat() failed", err)
 		os.Exit(1)
 	}
 
 	//
-	file, err := ioutil.ReadFile(pf.Name())
+	file, err := ioutil.ReadFile(enginefile.Name())
 	if err != nil {
-		ui.LogFatal("[commands.publish] ioutil.ReadFile() failed: %v", err)
+		ui.LogFatal("[commands.publish] ioutil.ReadFile() failed", err)
 	}
 
 	//
-	release := &api.Release{}
+	release := &api.EngineReleaseCreateOptions{}
 	if err := yaml.Unmarshal(file, release); err != nil {
-		ui.LogFatal("[commands.publish] yaml.Unmarshal() failed: %v", err)
+		ui.LogFatal("[commands.publish] yaml.Unmarshal() failed", err)
 	}
 
 	// add readme to release
@@ -108,73 +119,36 @@ func (c *PublishCommand) Run(opts []string) {
 
 	release.Readme = string(b)
 
-	// set up the output file
-
-	archive := "release.tgz"
-
-	a, err := os.Create(archive)
+	// GET to API to see if engine exists
+	engine, err := api.GetEngine(release.Name)
 	if err != nil {
-		ui.LogFatal("[commands.publish] os.Create() failed: %v", err)
-	}
-	defer a.Close()
-
-	// set up the gzip writer
-	gw := gzip.NewWriter(a)
-	defer gw.Close()
-
-	// set up the tar writer
-	tw = tar.NewWriter(gw)
-	defer tw.Close()
-
-	//
-	for _, dep := range release.Dependencies {
-
-		if stat, err := os.Stat(dep); err == nil {
-
-			// if its a directory, walk the directory taring each file
-			if stat.Mode().IsDir() {
-				if err := filepath.Walk(dep, tarDir); err != nil {
-					ui.LogFatal("[commands.publish] filepath.Walk() failed: %v", err)
-				}
-
-				// if its a file tar it
-			} else {
-				tarFile(dep)
-			}
-		}
+		fmt.Println("ERR!!!", err)
+		config.Console.Info("No engines found on nanobox by the name '%v'", release.Name)
 	}
 
-	// create a checksum of tarball
-	h := md5.New()
-	tarball, _ := ioutil.ReadFile(archive)
-	h.Write(tarball)
-
-	// GET to API to see if project exists
-	pkg, err := api.GetPackage(release.Name)
-	if err != nil {
-		config.Console.Info("No packages found on nanobox by the name '%v'", release.Name)
-	}
-
-	// if no package is found create one
-	if pkg.ID == "" {
-		packageCreateOptions := &api.PackageCreateOptions{Name: release.Name, Type: release.Type}
-		if _, err := api.CreatePackage(packageCreateOptions); err != nil {
-			ui.LogFatal("[commands.publish] api.CreatePackage() failed: %v", err)
+	// if no engine is found create one
+	if engine.ID == "" {
+		engineCreateOptions := &api.EngineCreateOptions{Name: release.Name, Type: release.Type}
+		if _, err := api.CreateEngine(engineCreateOptions); err != nil {
+			ui.LogFatal("[commands.publish] api.CreateEngine() failed", err)
 		}
 
-		fmt.Print("Creating package..")
+		fmt.Print("Creating engine..")
 
-		// wait until package has been successfuly created before uploading to warehouse
+		// wait until engine has been successfuly created before uploading to warehouse
 		for {
 			fmt.Print(".")
 
-			p, err := api.GetPackage(release.Name)
+			p, err := api.GetEngine(release.Name)
 			if err != nil {
-				ui.LogFatal("[commands.publish] api.GetPackage() failed: %v", err)
+				ui.LogFatal("[commands.publish] api.GetEngine() failed", err)
 			}
 
 			// once the service has a tunnel ip and port break
 			if p.State == "active" {
+
+				// set our engine to the active one
+				engine = p
 				break
 			}
 
@@ -183,17 +157,95 @@ func (c *PublishCommand) Run(opts []string) {
 		}
 
 		fmt.Println(" complete")
+	} else {
+		config.Console.Info("Engine found on nanobox by the name '%v'", release.Name)
 	}
 
 	// upload tarball release to warehouse
 	config.Console.Info("Uploading release to warehouse...")
 
-	// POST release on API (odin)
-	releaseCreateOptions := &api.ReleaseCreateOptions{}
-	if _, err := api.CreateRelease(releaseCreateOptions); err != nil {
-		ui.LogFatal("[commands.publish] api.CreateRelease() failed: ", err)
+	//
+	h := md5.New()
+
+	//
+	pr, pw := io.Pipe()
+
+	//
+	mw := io.MultiWriter(h, pw)
+
+	//
+	gzw := gzip.NewWriter(mw)
+
+	//
+	tw = tar.NewWriter(gzw)
+
+	//
+	wg := &sync.WaitGroup{}
+
+	wg.Add(1)
+
+	//
+	go func() {
+
+		// defer is LIFO
+		defer pw.Close()
+		defer gzw.Close()
+		defer tw.Close()
+
+		for _, pf := range release.ProjectFiles {
+
+			if stat, err := os.Stat(pf); err == nil {
+
+				// if its a directory, walk the directory taring each file
+				if stat.Mode().IsDir() {
+					if err := filepath.Walk(pf, tarDir); err != nil {
+						ui.LogFatal("[commands.publish] filepath.Walk() failed", err)
+					}
+
+					// if its a file tar it
+				} else {
+					tarFile(pf)
+				}
+			}
+		}
+
+		wg.Done()
+	}()
+
+	obj := &Object{}
+
+	//
+	headers := map[string]string{
+		"Userid":      engine.WarehouseUser,
+		"Key":         engine.WarehouseKey,
+		"Bucketid":    engine.ID,
+		"Objectalias": "release-" + release.Version,
 	}
 
+	//
+	if err := api.DoRawRequest(obj, "POST", "http://warehouse.nanobox.io/objects", pr, headers); err != nil {
+		ui.LogFatal("[commands.publish] api.DoRawRequest() failed", err)
+	}
+
+	wg.Wait()
+
+	defer pr.Close()
+
+	checksum := fmt.Sprintf("%x", h.Sum(nil))
+
+	// check checksum
+	if checksum == obj.CheckSum {
+
+		release.Checksum = checksum
+
+		// POST release on API (odin)
+		if _, err := api.CreateEngineRelease(engine.Name, release); err != nil {
+			ui.LogFatal("[commands.publish] api.CreateEngineRelease() failed", err)
+		}
+	} else {
+		config.Console.Fatal("Checksums don't match!!! Exiting...")
+		os.Exit(1)
+	}
 }
 
 //

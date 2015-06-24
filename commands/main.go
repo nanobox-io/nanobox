@@ -34,6 +34,7 @@ func init() {
 		"domain":  &DomainCommand{},
 		"deploy":  &DeployCommand{},
 		"destroy": &DestroyCommand{},
+		"fetch":   &FetchCommand{},
 		"halt":    &HaltCommand{},
 		"help":    &HelpCommand{},
 		"init":    &InitCommand{},

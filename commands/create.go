@@ -71,32 +71,32 @@ func (c *CreateCommand) Run(opts []string) {
 		if err != nil {
 
 			//
-	    if perm := os.IsPermission(err); perm == true {
+			if perm := os.IsPermission(err); perm == true {
 
-	      //
-			  cmd := exec.Command("/bin/sh", "-c", "sudo " + os.Args[0] + " domain -w")
+				//
+				cmd := exec.Command("/bin/sh", "-c", "sudo "+os.Args[0]+" domain -w")
 
-			  // connect standard in/outputs
-			  cmd.Stdin = os.Stdin
-			  cmd.Stdout = os.Stdout
-			  cmd.Stderr = os.Stderr
+				// connect standard in/outputs
+				cmd.Stdin = os.Stdin
+				cmd.Stdout = os.Stdout
+				cmd.Stderr = os.Stderr
 
-			  //
+				//
 				fmt.Printf(`
 Nanobox needs your permission to write the following entry into your /etc/hosts file:
 	%v
 
 	`, fmt.Sprintf("%-15v   %s # '%v' private network (added by nanobox)", config.Boxfile.IP, config.Boxfile.Domain, config.App))
 
-			  // run command
-			  if err := cmd.Run(); err != nil {
-			    ui.LogFatal("[commands.create] cmd.Run() failed", err)
-			  }
+				// run command
+				if err := cmd.Run(); err != nil {
+					ui.LogFatal("[commands.create] cmd.Run() failed", err)
+				}
 
-	    //
-	    } else {
-	      ui.LogFatal("[commands.domain] os.OpenFile() failed", err)
-	    }
+				//
+			} else {
+				ui.LogFatal("[commands.domain] os.OpenFile() failed", err)
+			}
 		}
 	}
 

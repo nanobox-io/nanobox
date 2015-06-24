@@ -66,19 +66,6 @@ func (c *InitCommand) Run(opts []string) {
 		}
 	}
 
-	// if a plugin path is provided, add it to the synced_folders
-	if plugin := config.Boxfile.Plugin; plugin != "" {
-		if fi, _ := os.Stat(plugin); fi != nil {
-			fp, err := filepath.Abs(plugin)
-			if err != nil {
-				ui.LogFatal("[commands.init] filepath.Abs() failed", err)
-			}
-			synced_folders += fmt.Sprintf("\n  nanobox.vm.synced_folder \"%v\", \"/vagrant/plugins/%v\"", fp, plugin)
-		} else {
-			config.Console.Warn("Unable to mount '%v' (not a valid directory). Configuring as plugin...", plugin)
-		}
-	}
-
 	//
 	// create nanobox private network
 	config.Console.Info("Private network created ('%v')...", config.Boxfile.IP)
@@ -128,12 +115,23 @@ func (c *InitCommand) Run(opts []string) {
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+$wait = <<SCRIPT
+echo "Waiting for nanobox server..."
+while [ ! $(nc -z -w 4 127.0.0.1 1757) ]; do
+  sleep 1
+done
+SCRIPT
+
 Vagrant.configure(2) do |config|
 
   config.vm.define :nanobox_boot2docker do |nanobox|
 
+  	## Wait for nanobox-server to be ready before vagrant exits
+  	nanobox.vm.provision "shell", inline: $wait
+
+
 	  ## box
-	  nanobox.vm.box_url = "https://github.com/pagodabox/nanobox-boot2docker/releases/download/v0.0.1/nanobox-boot2docker.box"
+	  nanobox.vm.box_url = "https://github.com/pagodabox/nanobox-boot2docker/releases/download/v0.0.4/nanobox-boot2docker.box"
 	  nanobox.vm.box     = "nanobox/boot2docker"
 
 

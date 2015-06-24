@@ -84,28 +84,28 @@ func (c *DestroyCommand) Run(opts []string) {
 		if err != nil {
 
 			//
-	    if perm := os.IsPermission(err); perm == true {
+			if perm := os.IsPermission(err); perm == true {
 
-	      //
-			  cmd := exec.Command("/bin/sh", "-c", "sudo " + os.Args[0] + " domain -x")
+				//
+				cmd := exec.Command("/bin/sh", "-c", "sudo "+os.Args[0]+" domain -x")
 
-			  // connect standard in/outputs
-			  cmd.Stdin = os.Stdin
-			  cmd.Stdout = os.Stdout
-			  cmd.Stderr = os.Stderr
+				// connect standard in/outputs
+				cmd.Stdin = os.Stdin
+				cmd.Stdout = os.Stdout
+				cmd.Stderr = os.Stderr
 
-			  //
+				//
 				fmt.Printf("\nNanobox needs your permission to remove the '%v' network from your /etc/hosts file\n", config.App)
 
-			  // run command
-			  if err := cmd.Run(); err != nil {
-			    ui.LogFatal("[commands.create] cmd.Run() failed", err)
-			  }
+				// run command
+				if err := cmd.Run(); err != nil {
+					ui.LogFatal("[commands.create] cmd.Run() failed", err)
+				}
 
-	    //
-	    } else {
-	      ui.LogFatal("[commands.domain] os.OpenFile() failed", err)
-	    }
+				//
+			} else {
+				ui.LogFatal("[commands.domain] os.OpenFile() failed", err)
+			}
 		}
 	}
 

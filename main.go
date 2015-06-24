@@ -43,8 +43,6 @@ func init() {
 		api.Debug = true
 	}
 
-	api.APIURL = "http://api.lvh.me:3000"
-
 	//
 	config.Boxfile = config.ParseBoxfile()
 }

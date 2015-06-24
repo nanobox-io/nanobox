@@ -8,7 +8,6 @@
 package commands
 
 import (
-	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -26,46 +25,25 @@ func (c *NewCommand) Help() {
 Description:
   Generate a new nanobox project in the current working directory
 
-  type:
-    the type of project (engine/plugin/service)
-
   name:
     the name of the project
 
 Usage:
-  nanobox new <type> <name>
+  nanobox new <name>
 
-  ex. nanobox new engine nodejs
+  ex. nanobox new ruby
 
-Options:
-  -m, --minimal
-    Create a minimal version
   `)
 }
 
 // Run destroys the specified virtual machine
 func (c *NewCommand) Run(opts []string) {
 
-	fmt.Println("OTPS!", opts)
-
-	// flags
-	flags := flag.NewFlagSet("flags", flag.ContinueOnError)
-	flags.Usage = func() { c.Help() }
-
-	var fStyle bool
-	flags.BoolVar(&fStyle, "m", false, "")
-	flags.BoolVar(&fStyle, "minimal", false, "")
-
-	if err := flags.Parse(opts); err != nil {
-		ui.LogFatal("[commands.new] flags.Parse() failed", err)
-	}
-
-	if len(opts) < 2 {
-		fmt.Println("NOT ENOUGH ARGS!")
+	if len(opts) < 1 {
+		config.Console.Fatal("Please provide a name when generating a new engine, (run 'nanobox new -h' for details)")
 		os.Exit(1)
 	}
 
-	typ := opts[0]
 	name := fmt.Sprintf("nanobox-%s", opts[1])
 	version := "0.0.1"
 
@@ -76,12 +54,11 @@ func (c *NewCommand) Run(opts []string) {
 		config.Console.Info("[install] Creating '%v' directory", name)
 
 		if err := os.Mkdir(name, 0755); err != nil {
-			fmt.Println("BONK!")
+			ui.LogFatal("[commands.new] os.Mkdir() failed", err)
 		}
 
 		entry := fmt.Sprintf(`
 name: %-18s     # the name of your project
-type: %-18s     # the type of project (engine/plugin/service)
 version: %-18s  # the current version of the project
 summary:                     # a short summary of the project
 description:                 # a detailed description of the project
@@ -95,21 +72,21 @@ authors:
 
 # the list of files your project requires. These are bundled
 # into a 'release.tar.gz' and uploaded to nanobox
-includes:
+project_files:
   -
-`, name, typ, version)
+`, name, version)
 
-		config.Console.Info("[install] Creating Packagefile...")
+		config.Console.Info("[install] Creating Enginefile...")
 
-		path := name + "/Packagefile"
+		path := name + "/Enginefile"
 
 		if _, err := os.Create(path); err != nil {
-			fmt.Println("BONK!")
+			ui.LogFatal("[commands.new] os.Create() failed", err)
 		}
 
-		// write the Packagefile
+		// write the Enginefile
 		if err := ioutil.WriteFile(path, []byte(entry), 0644); err != nil {
-			fmt.Println("BONK!", err)
+			ui.LogFatal("[commands.new] ioutil.WriteFile() failed", err)
 		}
 
 	} else {

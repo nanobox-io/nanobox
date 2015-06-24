@@ -27,7 +27,6 @@ type BoxfileConfig struct {
 
 	// build
 	Engine string
-	Plugin string
 }
 
 // ParseBoxfile
@@ -46,7 +45,6 @@ func ParseBoxfile() *BoxfileConfig {
 
 		// build options
 		Engine: "",
-		Plugin: "",
 	}
 
 	//
@@ -117,12 +115,6 @@ func ParseBoxfile() *BoxfileConfig {
 	if engine := build.StringValue("engine"); engine != "" {
 		Console.Info("Engine detected (%v)...", engine)
 		b.Engine = engine
-	}
-
-	//
-	if plugin := build.StringValue("plugin"); plugin != "" {
-		Console.Info("Plugin detected (%v)...", plugin)
-		b.Plugin = plugin
 	}
 
 	return b
