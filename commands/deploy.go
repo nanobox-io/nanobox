@@ -45,8 +45,8 @@ Usage:
 func (c *DeployCommand) Run(opts []string) {
 
 	// start the vm if it's not already running
-	resume := ResumeCommand{}
-	resume.Run(opts)
+	// resume := ResumeCommand{}
+	// resume.Run(opts)
 
 	// subscribe to mist
 	client := mist.Client{}
