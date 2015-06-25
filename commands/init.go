@@ -117,7 +117,7 @@ func (c *InitCommand) Run(opts []string) {
 
 $wait = <<SCRIPT
 echo "Waiting for nanobox server..."
-while [ ! $(nc -z -w 4 127.0.0.1 1757) ]; do
+while [ $(nc -z -w 4 127.0.0.1 1757) ]; do
   sleep 1
 done
 SCRIPT
