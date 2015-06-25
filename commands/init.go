@@ -84,23 +84,23 @@ func (c *InitCommand) Run(opts []string) {
 	//
 	case "virtualbox":
 		provider = fmt.Sprintf(`
-		# VirtualBox
-		nanobox.vm.provider "virtualbox" do |p|
-			p.name = "%v"
+    # VirtualBox
+    nanobox.vm.provider "virtualbox" do |p|
+      p.name = "%v"
 
-			p.customize ["modifyvm", :id, "--cpuexecutioncap", "%v"]
-			p.cpus = %v
-			p.memory = %v
-		end`, config.App, config.Boxfile.CPUCap, config.Boxfile.CPUs, config.Boxfile.RAM)
+      p.customize ["modifyvm", :id, "--cpuexecutioncap", "%v"]
+      p.cpus = %v
+      p.memory = %v
+    end`, config.App, config.Boxfile.CPUCap, config.Boxfile.CPUs, config.Boxfile.RAM)
 
 	//
 	case "vmware":
 		provider = fmt.Sprintf(`
-	  # VMWare
-	  nanobox.vm.provider "vmware" do |p|
-		  v.vmx["numvcpus"] = "%v"
-		  v.vmx["memsize"] = "%v"
-	  end`, config.Boxfile.CPUCap, config.Boxfile.CPUs, config.Boxfile.RAM)
+    # VMWare
+    nanobox.vm.provider "vmware" do |p|
+      v.vmx["numvcpus"] = "%v"
+      v.vmx["memsize"] = "%v"
+    end`, config.Boxfile.CPUCap, config.Boxfile.CPUs, config.Boxfile.RAM)
 	}
 
 	//
@@ -126,34 +126,34 @@ Vagrant.configure(2) do |config|
 
   config.vm.define :nanobox_boot2docker do |nanobox|
 
-  	## Wait for nanobox-server to be ready before vagrant exits
-  	nanobox.vm.provision "shell", inline: $wait
+    ## Wait for nanobox-server to be ready before vagrant exits
+    nanobox.vm.provision "shell", inline: $wait
 
 
-	  ## box
-	  nanobox.vm.box_url = "https://github.com/pagodabox/nanobox-boot2docker/releases/download/v0.0.5/nanobox-boot2docker-0.0.5.box"
-	  nanobox.vm.box     = "nanobox/boot2docker"
+    ## box
+    nanobox.vm.box_url = "https://github.com/pagodabox/nanobox-boot2docker/releases/download/v0.0.5/nanobox-boot2docker-0.0.5.box"
+    nanobox.vm.box     = "nanobox/boot2docker"
 
 
-	  ## network
-	  %s
+    ## network
+    %s
 
 
-	  ## shared folders
+    ## shared folders
 
-	  # disable default /vagrant share to override...
-	  nanobox.vm.synced_folder ".", "/vagrant", disabled: true
+    # disable default /vagrant share to override...
+    nanobox.vm.synced_folder ".", "/vagrant", disabled: true
 
-	  # ...add nanobox shared folders
-	  %s
-
-
-	  ## provider configs
-	  %s
+    # ...add nanobox shared folders
+    %s
 
 
-	  ##
-	  nanobox.vm.post_up_message = "Nanobox is up and running!"
+    ## provider configs
+    %s
+
+
+    ##
+    nanobox.vm.post_up_message = "Nanobox is up and running!"
 
   end
 

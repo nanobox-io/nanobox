@@ -90,7 +90,7 @@ func (c *FetchCommand) Run(opts []string) {
 
 	//
 	engine := release
-	if len(match) >= 1{
+	if len(match) >= 1 {
 		engine = match[1]
 	}
 
