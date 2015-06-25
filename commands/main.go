@@ -56,6 +56,10 @@ func init() {
 // commands w/o contaminating a users codebase
 func runVagrantCommand(cmd *exec.Cmd) error {
 
+	// just run an init to ensure there is a Vagrantfile
+	init := InitCommand{}
+	init.Run(nil)
+
 	// run the command from ~/.nanobox/apps/<this app>
 	if err := os.Chdir(config.AppDir); err != nil {
 		return err

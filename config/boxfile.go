@@ -36,7 +36,7 @@ func ParseBoxfile() *BoxfileConfig {
 	b := &BoxfileConfig{
 
 		// nanobox
-		IP:       "0.0.0.0",
+		IP:       appNameToIP(App),
 		Domain:   "gonano.dev",
 		Provider: "virtualbox",
 		CPUCap:   50,
@@ -54,9 +54,6 @@ func ParseBoxfile() *BoxfileConfig {
 
 	//
 	Console.Info("Parsing Boxfile...")
-
-	//
-	b.IP = appNameToIP(App)
 
 	//
 	// if provider := nanobox.StringValue("provider"); provider != "" {

@@ -45,12 +45,14 @@ Usage:
 func (c *DeployCommand) Run(opts []string) {
 
 	// start the vm if it's not already running
-	// resume := ResumeCommand{}
-	// resume.Run(opts)
+	resume := ResumeCommand{}
+	resume.Run(opts)
 
 	// subscribe to mist
 	client := mist.Client{}
-	client.Connect(config.Boxfile.IP, "1445")
+	if _, err := client.Connect(config.Boxfile.IP, "1445"); err != nil {
+		ui.LogFatal("[commands deploy] client.Connect() failed ", err)
+	}
 
 	defer client.Close()
 
