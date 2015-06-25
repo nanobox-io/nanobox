@@ -99,7 +99,7 @@ func (c *DomainCommand) Run(opts []string) {
 		config.Console.Info("Adding '%v' private network to hosts file...", config.App)
 
 		//
-		entry := fmt.Sprintf("%-15v   %s # '%v' private network (added by nanobox)", config.Boxfile.IP, config.Boxfile.Domain, config.App)
+		entry := fmt.Sprintf("%-15v   %s.%s # '%v' private network (added by nanobox)", config.Boxfile.IP, config.App, config.Boxfile.Domain, config.App)
 
 		// write the entry to the hosts file
 		if _, err := f.WriteString(entry); err != nil {
