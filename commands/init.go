@@ -56,11 +56,19 @@ func (c *InitCommand) Run(opts []string) {
 	// if an engine path is provided, add it to the synced_folders
 	if engine := config.Boxfile.Engine; engine != "" {
 		if fi, _ := os.Stat(engine); fi != nil {
+
+			//
 			fp, err := filepath.Abs(engine)
 			if err != nil {
 				ui.LogFatal("[commands.init] filepath.Abs() failed", err)
 			}
-			synced_folders += fmt.Sprintf("\n  nanobox.vm.synced_folder \"%v\", \"/vagrant/engines/%v\"", fp, engine)
+
+			base := filepath.Base(fp)
+
+			//
+			config.Console.Info("Mounting directory '%v' to /vagrant/engines/'%v'", fp, base)
+
+			synced_folders += fmt.Sprintf("\n    nanobox.vm.synced_folder \"%v\", \"/vagrant/engines/%v\"", fp, base)
 		} else {
 			config.Console.Warn("Unable to mount '%v' (not a valid directory). Configuring as engine...", engine)
 		}
@@ -157,8 +165,7 @@ Vagrant.configure(2) do |config|
 
   end
 
-end
-`, network, synced_folders, provider)
+end`, network, synced_folders, provider)
 
 	// write the Vagrantfile
 	if err := ioutil.WriteFile(config.AppDir+"/Vagrantfile", []byte(vagrantfile), 0755); err != nil {
