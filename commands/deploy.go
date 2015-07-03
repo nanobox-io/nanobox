@@ -81,10 +81,14 @@ func (c *DeployCommand) Run(opts []string) {
 		ui.LogFatal("[commands deploy] client.Connect() failed ", err)
 	}
 
-	defer client.Close()
+	//
+	syncSub, err := client.Subscribe([]string{"sync"})
+	if err != nil {
+		config.Console.Warn("Failed to subscribe to 'mist' updates... %v", err)
+	}
 
 	//
-	sub, err := client.Subscribe([]string{"sync", "deploy", logLevel})
+	logSub, err := client.Subscribe([]string{"deploy", logLevel})
 	if err != nil {
 		config.Console.Warn("Failed to subscribe to 'mist' updates... %v", err)
 	}
@@ -100,8 +104,6 @@ func (c *DeployCommand) Run(opts []string) {
 	for msg := range client.Data {
 
 		entry := &Entry{}
-
-		fmt.Printf("READING THINGS!!! %q\n", msg.Data)
 
 		//
 		if err := json.Unmarshal([]byte(msg.Data), &entry); err != nil {
@@ -132,12 +134,11 @@ func (c *DeployCommand) Run(opts []string) {
 					ui.LogFatal("[commands deploy] json.Unmarshal() failed ", err)
 				}
 
-				fmt.Println("STATUS?", sync.Status)
 
 				// once the sync is 'complete' unsubscribe from mist, and close the connection
 				if sync.Status == "complete" {
-					fmt.Println("CLOSING?")
-					client.Unsubscribe(sub)
+					client.Unsubscribe(logSub)
+					client.Unsubscribe(syncSub)
 					client.Close()
 				}
 
