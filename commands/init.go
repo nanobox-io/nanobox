@@ -139,7 +139,7 @@ Vagrant.configure(2) do |config|
 
 
     ## box
-    nanobox.vm.box_url = "https://github.com/pagodabox/nanobox-boot2docker/releases/download/v0.0.6/nanobox-boot2docker.box"
+    nanobox.vm.box_url = "https://github.com/pagodabox/nanobox-boot2docker/releases/download/v0.0.7/nanobox-boot2docker.box"
     nanobox.vm.box     = "nanobox/boot2docker"
 
 

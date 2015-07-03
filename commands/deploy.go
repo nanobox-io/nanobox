@@ -9,6 +9,7 @@ package commands
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"os"
 
@@ -28,6 +29,14 @@ type (
 		ID     string `json:"id"`
 		Status string `json:"status"`
 	}
+
+	Entry struct {
+		Action string `json:"action"`
+		Document string `json:"document"`
+		Log string `json:"log"`
+		Model string `json:"model"`
+		Time string `json:"time"`
+	}
 )
 
 // Help prints detailed help text for the app list command
@@ -44,6 +53,24 @@ Usage:
 // Run displays select information about all of a user's apps
 func (c *DeployCommand) Run(opts []string) {
 
+	// flags
+	flags := flag.NewFlagSet("flags", flag.ContinueOnError)
+	flags.Usage = func() { c.Help() }
+
+	var fVerbose bool
+	flags.BoolVar(&fVerbose, "v", false, "")
+	flags.BoolVar(&fVerbose, "verbose", false, "")
+
+	if err := flags.Parse(opts); err != nil {
+		ui.LogFatal("[commands.destroy] flags.Parse() failed", err)
+	}
+
+	logLevel := "info"
+
+	if fVerbose {
+		logLevel = "debug"
+	}
+
 	// start the vm if it's not already running
 	// resume := ResumeCommand{}
 	// resume.Run(opts)
@@ -56,7 +83,8 @@ func (c *DeployCommand) Run(opts []string) {
 
 	defer client.Close()
 
-	sub, err := client.Subscribe([]string{"sync", "deploy"})
+	//
+	sub, err := client.Subscribe([]string{"sync", "deploy", logLevel})
 	if err != nil {
 		config.Console.Warn("Failed to subscribe to 'mist' updates... %v", err)
 	}
@@ -71,10 +99,13 @@ func (c *DeployCommand) Run(opts []string) {
 	// listen for messages coming from mist
 	for msg := range client.Data {
 
-		data := make(map[string]string)
+		entry := &Entry{}
+
+		fmt.Printf("READING THINGS!!! %q\n", msg.Data)
 
 		//
-		if err := json.Unmarshal([]byte(msg.Data), &data); err != nil {
+		if err := json.Unmarshal([]byte(msg.Data), &entry); err != nil {
+			fmt.Println("FAIL 1")
 			ui.LogFatal("[commands deploy] json.Unmarshal() failed ", err)
 		}
 
@@ -82,27 +113,30 @@ func (c *DeployCommand) Run(opts []string) {
 		switch {
 
 		// if the message contains the log field, the log is printed...
-		case data["log"] != "":
-			entry := fmt.Sprintf("[%v] %v", data["log"], data["time"])
-
-			fmt.Println(entry)
+		case entry.Log != "":
+			fmt.Println(fmt.Sprintf("[%v] %v", entry.Log, entry.Time))
 
 		// if the message contains the model field, handle individually
-		case data["model"] != "":
+		case entry.Model != "":
 
 			// depending on the type of model, different things may happen...
-			switch data["model"] {
+			switch entry.Model {
 
 			// in the case of a sync model, listen for a complete to close the stream
-			case "sync":
+			case "Sync", "sync":
+
 				sync := &Sync{}
 
-				if err := json.Unmarshal([]byte(data["document"]), sync); err != nil {
+				if err := json.Unmarshal([]byte(entry.Document), sync); err != nil {
+					fmt.Println("FAIL 2")
 					ui.LogFatal("[commands deploy] json.Unmarshal() failed ", err)
 				}
 
+				fmt.Println("STATUS?", sync.Status)
+
 				// once the sync is 'complete' unsubscribe from mist, and close the connection
 				if sync.Status == "complete" {
+					fmt.Println("CLOSING?")
 					client.Unsubscribe(sub)
 					client.Close()
 				}
@@ -111,7 +145,7 @@ func (c *DeployCommand) Run(opts []string) {
 			// else should fail because logic is probably missing to handle the new
 			// model
 			case "default":
-				config.Console.Error("[commands deploy] Unhandled model '%v'", data["model"])
+				config.Console.Error("[commands deploy] Unhandled model '%v'", entry.Model)
 				os.Exit(1)
 			}
 
@@ -119,7 +153,7 @@ func (c *DeployCommand) Run(opts []string) {
 		// needs to fail, because it's probably missing some logic to handle a new
 		// field
 		default:
-			config.Console.Error("[commands deploy] Unhandled data, missing 'log' or 'model': %v", data)
+			config.Console.Error("[commands deploy] Unhandled data, missing 'log' or 'model': %v", entry)
 			os.Exit(1)
 		}
 	}

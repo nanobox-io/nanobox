@@ -16,7 +16,7 @@ import (
 	"os"
 	"runtime"
 
-	"bitbucket.org/kardianos/osext"
+	"github.com/kardianos/osext"
 
 	"github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-cli/ui"

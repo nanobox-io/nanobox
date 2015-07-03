@@ -52,6 +52,51 @@ func (c *DestroyCommand) Run(opts []string) {
 		ui.LogFatal("[commands.destroy] flags.Parse() failed", err)
 	}
 
+	// if force is not passed, confirm the decision to delete...
+	if !fForce {
+		config.Console.Warn("[commands.destroy.Run] Issuing confirm delete.")
+
+		switch ui.Prompt("Are you sure you want to delete this VM (y/N)? ") {
+
+		// proceed to destroy the VM...
+		case "Y", "y":
+			config.Console.Warn("Delete request confirmed, deleting...")
+			destroy()
+
+		// exit w/o destroying the VM...
+		default:
+			config.Console.Warn("Delete request refuted, VM will not be deleted...")
+			os.Exit(0)
+		}
+	}
+
+	// if force is passed, destroy...
+	config.Console.Warn("[commands.destroy.Run] Issuing force delete.")
+	destroy()
+}
+
+// destroy
+func destroy() {
+
+	// remove app
+	if err := os.RemoveAll(config.AppDir); err != nil {
+		ui.LogFatal("[commands.destroy] os.RemoveAll() failed", err)
+	}
+
+	// remove entry
+	removeEntry()
+
+	// destroy the vm...
+	cmd := &exec.Cmd{}
+	cmd = exec.Command("vagrant", "destroy", "--force")
+	if err := runVagrantCommand(cmd); err != nil {
+		ui.LogFatal("[commands.destroy] runVagrantCommand() failed", err)
+	}
+}
+
+// removeEntry
+func removeEntry() {
+
 	// assume we wont need to remove an entry...
 	removeEntry := false
 
@@ -107,28 +152,5 @@ func (c *DestroyCommand) Run(opts []string) {
 				ui.LogFatal("[commands.domain] os.OpenFile() failed", err)
 			}
 		}
-	}
-
-	cmd := &exec.Cmd{}
-
-	// vagrant destroy
-	if fForce {
-		config.Console.Warn("[commands.destroy.Run] Issuing force delete.")
-		cmd = exec.Command("vagrant", "destroy", "--force")
-
-		//
-	} else {
-		config.Console.Warn("[commands.destroy.Run] Issuing confirm delete.")
-		cmd = exec.Command("vagrant", "destroy")
-	}
-
-	// destroy the vm...
-	if err := runVagrantCommand(cmd); err != nil {
-		ui.LogFatal("[commands.destroy] runVagrantCommand() failed", err)
-	}
-
-	// destroy the project folder in /.nanobox with the Vagrantfile and .vagrant folder
-	if err := os.RemoveAll(config.AppDir); err != nil {
-		ui.LogFatal("[commands.destroy] os.RemoveAll() failed", err)
 	}
 }

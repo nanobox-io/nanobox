@@ -92,7 +92,7 @@ func (c *PublishCommand) Run(opts []string) {
 	}
 
 	// look for a Enginefile to parse
-	enginefile, err := os.Stat("./Enginefile")
+	fi, err := os.Stat("./Enginefile")
 	if err != nil {
 		fmt.Println("Enginefile not found. Be sure to publish from a project directory. Exiting... ")
 		config.Log.Fatal("[commands.publish] os.Stat() failed", err)
@@ -100,7 +100,7 @@ func (c *PublishCommand) Run(opts []string) {
 	}
 
 	//
-	file, err := ioutil.ReadFile(enginefile.Name())
+	file, err := ioutil.ReadFile(fi.Name())
 	if err != nil {
 		ui.LogFatal("[commands.publish] ioutil.ReadFile() failed", err)
 	}
@@ -119,10 +119,12 @@ func (c *PublishCommand) Run(opts []string) {
 
 	release.Readme = string(b)
 
+	// add Enginefile to the list of a releases project_files
+	release.ProjectFiles = append(release.ProjectFiles, "Enginefile")
+
 	// GET to API to see if engine exists
-	engine, err := api.GetEngine(release.Name)
+	engine, err := api.GetEngine(api.UserSlug, release.Name)
 	if err != nil {
-		fmt.Println("ERR!!!", err)
 		config.Console.Info("No engines found on nanobox by the name '%v'", release.Name)
 	}
 
@@ -139,7 +141,7 @@ func (c *PublishCommand) Run(opts []string) {
 		for {
 			fmt.Print(".")
 
-			p, err := api.GetEngine(release.Name)
+			p, err := api.GetEngine(api.UserSlug, release.Name)
 			if err != nil {
 				ui.LogFatal("[commands.publish] api.GetEngine() failed", err)
 			}
@@ -237,6 +239,9 @@ func (c *PublishCommand) Run(opts []string) {
 	if checksum == obj.CheckSum {
 
 		release.Checksum = checksum
+
+		//
+		config.Console.Info("Publishing release to nanobox...")
 
 		// POST release on API (odin)
 		if _, err := api.CreateEngineRelease(engine.Name, release); err != nil {

@@ -95,7 +95,7 @@ func (c *FetchCommand) Run(opts []string) {
 	}
 
 	//
-	e, err := api.GetEngine(engine)
+	e, err := api.GetEngine(api.UserSlug, engine)
 	if err != nil {
 		fmt.Println("ERR!!", err)
 		config.Console.Info("No engines found on nanobox by the name '%v'", engine)
@@ -107,8 +107,13 @@ func (c *FetchCommand) Run(opts []string) {
 		version = match[2]
 	}
 
-	//
-	path := fmt.Sprintf("http://warehouse.nanobox.io/objects/release-%v", version)
+	// pull directly from warehouse
+	path := fmt.Sprintf("http://warehouse.nanobox.io/objects/releases/%v", version)
+
+	// pull from odin
+	// path := fmt.Sprintf("http://api.nanobox.io/v1/engines/%v/%v/releases/%v/download", api.UserSlug, e.Name, version)
+
+	fmt.Println("FETCH!", path)
 
 	//
 	out, err := os.Create("release.tgz")
@@ -122,8 +127,10 @@ func (c *FetchCommand) Run(opts []string) {
 		"Userid":      e.WarehouseUser,
 		"Key":         e.WarehouseKey,
 		"Bucketid":    e.ID,
-		"Objectalias": "release-" + version,
+		"Objectalias": "releases/" + version,
 	}
+
+	fmt.Printf("HEADERS! %#v\n", headers)
 
 	//
 	req, err := api.NewRequest("GET", path, nil, headers)
@@ -131,12 +138,19 @@ func (c *FetchCommand) Run(opts []string) {
 		ui.LogFatal("[commands.publish] api.DoRawRequest() failed", err)
 	}
 
+	// req, err := api.NewRequest("GET", path, nil, nil)
+	// if err != nil {
+	// 	ui.LogFatal("[commands.publish] api.DoRawRequest() failed", err)
+	// }
+
 	//
 	res, err := api.HTTPClient.Do(req)
 	if err != nil {
 		ui.LogFatal("[commands.publish] api.HTTPClient.Do() failed", err)
 	}
 	defer res.Body.Close()
+
+	fmt.Println("RESPONSE!!", res)
 
 	//
 	if _, err := io.Copy(out, res.Body); err != nil {
