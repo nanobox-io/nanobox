@@ -8,11 +8,11 @@
 package commands
 
 import (
-	// "fmt"
+	"fmt"
 	"os/exec"
 
-	// "github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-cli/ui"
+	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
 // ResumeCommand satisfies the Command interface
@@ -31,13 +31,11 @@ Usage:
 
 // Run resumes the specified virtual machine
 func (c *ResumeCommand) Run(opts []string) {
+	fmt.Printf(stylish.ProcessStart("resuming nanobox vm"))
 
-	// vagrant resume
+	// run 'vagrant resume'
 	cmd := exec.Command("vagrant", "resume")
+	runVagrantCommand(cmd)
 
-	// run command
-	if err := runVagrantCommand(cmd); err != nil {
-		ui.LogFatal("[commands.resume] runVagrantCommand() failed", err)
-	}
-
+	fmt.Printf(stylish.ProcessEnd("nanobox vm resumed"))
 }

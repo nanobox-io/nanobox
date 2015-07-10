@@ -12,8 +12,9 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/pagodabox/nanobox-cli/config"
+	// "github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-cli/ui"
+	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
 // NewCommand satisfies the Command interface
@@ -32,7 +33,6 @@ Usage:
   nanobox new <name>
 
   ex. nanobox new ruby
-
   `)
 }
 
@@ -40,18 +40,19 @@ Usage:
 func (c *NewCommand) Run(opts []string) {
 
 	if len(opts) < 1 {
-		config.Console.Fatal("Please provide a name when generating a new engine, (run 'nanobox new -h' for details)")
+		fmt.Println(stylish.Error("app name required", "Please provide a name when generating a new engine, (run 'nanobox new -h' for details)"))
 		os.Exit(1)
 	}
 
 	name := fmt.Sprintf("nanobox-%s", opts[0])
 	version := "0.0.1"
 
+	fmt.Println(stylish.Header("initializing new app: " + name))
+
 	// create a new project by the name, unless it already exists
 	if di, _ := os.Stat(name); di == nil {
 
-		//
-		config.Console.Info("[install] Creating '%v' directory", name)
+		stylish.Bullet("Creating engine at")
 
 		if err := os.Mkdir(name, 0755); err != nil {
 			ui.LogFatal("[commands.new] os.Mkdir() failed", err)
@@ -76,8 +77,6 @@ project_files:
   -
 `, name, version)
 
-		config.Console.Info("[install] Creating Enginefile...")
-
 		path := name + "/Enginefile"
 
 		if _, err := os.Create(path); err != nil {
@@ -93,4 +92,5 @@ project_files:
 		fmt.Printf("A project by the name '%s' already exists at this location...\n", name)
 	}
 
+	stylish.Bullet("Default Enginefile created at")
 }

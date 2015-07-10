@@ -16,19 +16,20 @@ import (
 	api "github.com/pagodabox/nanobox-api-client"
 	"github.com/pagodabox/nanobox-cli/commands"
 	"github.com/pagodabox/nanobox-cli/config"
-	"github.com/pagodabox/nanobox-cli/ui"
 )
 
 // init
 func init() {
 
 	// idempotent install
+	config.Console.Debug("Verifying install...")
 	if err := install(); err != nil {
 		config.Console.Fatal("Failed to install! Exiting... %v", err)
 		os.Exit(1)
 	}
 
 	// create a logger
+	config.Console.Debug("Creating logger...")
 	logger, err := lumber.NewFileLogger(config.LogFile, config.LogLevel, lumber.ROTATE, 100, 1, 100)
 	if err != nil {
 		config.Console.Fatal("Failed to create logger! Exiting... %v", err)
@@ -44,6 +45,7 @@ func init() {
 	}
 
 	//
+	config.Console.Debug("Parsing Boxfile...")
 	config.Boxfile = config.ParseBoxfile()
 }
 
@@ -144,29 +146,6 @@ func run() {
 // help
 func help() {
 	cmd := commands.Commands["help"]
-	cmd.Run(nil)
-	os.Exit(0)
-}
-
-// update
-func update() {
-
-	//
-	fmt.Println("Checking for updates...")
-
-	//
-	release, err := getRelease()
-	if err != nil {
-		ui.LogFatal("[version] getRelease() failed", err)
-	}
-
-	if less := config.Version.Less(release); !less {
-		fmt.Println("No updates available at this time.")
-		touchUpdate()
-		return
-	}
-
-	cmd := commands.Commands["update"]
 	cmd.Run(nil)
 	os.Exit(0)
 }

@@ -99,6 +99,7 @@ func (c *FetchCommand) Run(opts []string) {
 	if err != nil {
 		fmt.Println("ERR!!", err)
 		config.Console.Info("No engines found on nanobox by the name '%v'", engine)
+		os.Exit(0)
 	}
 
 	//

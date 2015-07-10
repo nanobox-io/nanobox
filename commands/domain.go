@@ -18,6 +18,7 @@ import (
 
 	"github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-cli/ui"
+	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
 // DomainCommand satisfies the Command interface
@@ -25,20 +26,7 @@ type DomainCommand struct{}
 
 // Help prints detailed help text for the app list command
 func (c *DomainCommand) Help() {
-	ui.CPrint(`
-Description:
-  Runs a specific sudo command
-
-Usage:
-  Intended for internal use only
-
-Options:
-  -w, --write
-    Write the nanobox private network domain to the hosts file
-
-  -x, --remove
-    Remove the nanobox private network domain from the hosts file
-  `)
+	ui.CPrint("Intended for internal use only")
 }
 
 // Run halts the specified virtual machine
@@ -57,58 +45,32 @@ func (c *DomainCommand) Run(opts []string) {
 	flags.BoolVar(&fRemove, "remove", false, "")
 
 	if err := flags.Parse(opts); err != nil {
-		ui.LogFatal("[commands.halt] flags.Parse() failed", err)
+		ui.LogFatal("[commands.domain] flags.Parse() failed", err)
 	}
 
-	// attempt to open /etc/hosts file...
 	f, err := os.OpenFile("/etc/hosts", os.O_RDWR|os.O_APPEND, 0644)
-
-	// if this command is run manually nanobox-cli may not have permission to
-	// manipulate the hosts file, so we'll have to do what we do in create/destroy
-	// and re-run the command as sudo
-	if err != nil {
-
-		//
-		if perm := os.IsPermission(err); perm == true {
-			//
-			cmd := exec.Command("/bin/sh", "-c", "sudo "+os.Args[0])
-
-			// connect standard in/outputs
-			cmd.Stdin = os.Stdin
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-
-			//
-			fmt.Printf("\nNanobox needs your permission to remove the '%v' network from your /etc/hosts file\n", config.App)
-
-			// run command
-			if err := cmd.Run(); err != nil {
-				ui.LogFatal("[commands.create] cmd.Run() failed", err)
-			}
-
-			//
-		} else {
-			ui.LogFatal("[commands.domain] os.OpenFile() failed", err)
-		}
-	}
-
 	defer f.Close()
 
 	//
-	if fWrite {
-		config.Console.Info("Adding '%v' private network to hosts file...", config.App)
+	if err != nil {
+		ui.LogFatal("[commands.domain] os.OpenFile() failed", err)
+	}
 
-		//
+	//
+	switch {
+
+	// write the entry to the hosts file
+	case fWrite:
 		entry := fmt.Sprintf("\n%-15v   %s.%s # '%v' private network (added by nanobox)", config.Boxfile.IP, config.App, config.Boxfile.Domain, config.App)
 
-		// write the entry to the hosts file
 		if _, err := f.WriteString(entry); err != nil {
-			ui.LogFatal("[commands.sudo] WriteString() failed", err)
+			ui.LogFatal("[commands.domain] WriteString() failed", err)
 		}
 
-		//
-	} else if fRemove {
-		config.Console.Info("Removing '%v' private network to hosts file...", config.App)
+		fmt.Println(stylish.Bullet(config.App + ".nano.dev added to /etc/hosts"))
+
+	//
+	case fRemove:
 
 		scanner := bufio.NewScanner(f)
 		contents := ""
@@ -123,16 +85,69 @@ func (c *DomainCommand) Run(opts []string) {
 			}
 		}
 
-		// write back the entirety of the hosts file minus the removed entry
-		err = ioutil.WriteFile("/etc/hosts", []byte(contents), 0644)
-		if err != nil {
+		// write back the contents of the hosts file minus the removed entry
+		if err := ioutil.WriteFile("/etc/hosts", []byte(contents), 0644); err != nil {
 			ui.LogFatal("[commands.destroy] ioutil.WriteFile failed", err)
 		}
 
-		//
-	} else {
-		config.Console.Fatal("Missing flag, please re-run the command and provide a valid flag.")
-		os.Exit(1)
+		fmt.Println(stylish.Bullet(config.App + ".nano.dev removed from /etc/hosts"))
 	}
+}
 
+// modifyHosts
+func modifyHosts(mod string) {
+
+	// attempt to open /etc/hosts file...
+	f, err := os.OpenFile("/etc/hosts", os.O_RDWR|os.O_APPEND, 0644)
+	defer f.Close()
+
+	//
+	if err != nil {
+
+		fmt.Println("ERR??", err)
+
+		// if nanobox doesn't have permission to modify the hosts file, it needs to
+		// request it
+		if perm := os.IsPermission(err); perm == true {
+
+			entry := fmt.Sprintf("%-15v   %s # '%v' private network (added by nanobox)", config.Boxfile.IP, config.Boxfile.Domain, config.App)
+
+			//
+			switch mod {
+
+			// add
+			case "w":
+				fmt.Printf(`
+Nanobox needs your permission to add the following entry to your /etc/hosts file:
+%v
+
+`, entry)
+
+			// delete
+			case "x":
+				fmt.Printf(`
+Nanobox needs your permission to remove the following entry from your /etc/hosts file:
+%v
+
+`, entry)
+			}
+
+			//
+			cmd := exec.Command("/bin/sh", "-c", fmt.Sprintf("sudo %v domain -%v", os.Args[0], mod))
+
+			// connect standard in/outputs
+			cmd.Stdin = os.Stdin
+			cmd.Stdout = os.Stdout
+			cmd.Stderr = os.Stderr
+
+			// run command
+			if err := cmd.Run(); err != nil {
+				ui.LogFatal("[commands.domain] cmd.Run() failed", err)
+			}
+
+			//
+		} else {
+			ui.LogFatal("[commands.domain] os.OpenFile() failed", err)
+		}
+	}
 }

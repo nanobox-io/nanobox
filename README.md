@@ -80,7 +80,7 @@ Passing `--debug` at the end of any command will show all API request/response o
 
 ### Documentation
 
-Complete documentation is available on [godoc](http://godoc.org/github.com/nanobox-core/cli).
+Complete documentation is available on [godoc](http://godoc.org/github.com/pagodabox/nanobox-cli).
 
 
 ### Contact

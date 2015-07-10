@@ -55,8 +55,7 @@ func init() {
 	LogLevel = lumber.INFO
 
 	// check for debug mode and set the appropriate log level
-	debug := (os.Args[len(os.Args)-1] == "--debug")
-	if debug {
+	if os.Args[len(os.Args)-1] == "--debug" {
 		LogLevel = lumber.DEBUG
 	}
 

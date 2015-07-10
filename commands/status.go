@@ -8,11 +8,11 @@
 package commands
 
 import (
-	// "fmt"
+	"fmt"
 	"os/exec"
 
-	// "github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-cli/ui"
+	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
 // StatusCommand satisfies the Command interface
@@ -31,13 +31,11 @@ Usage:
 
 // Run display status of all virtual machines
 func (c *StatusCommand) Run(opts []string) {
+	fmt.Println(stylish.ProcessStart("requesting nanobox vms"))
 
-	// vagrant status
+	// run 'vagrant status'
 	cmd := exec.Command("vagrant", "status")
+	runVagrantCommand(cmd)
 
-	// run command
-	if err := runVagrantCommand(cmd); err != nil {
-		ui.LogFatal("[commands.status] runVagrantCommand() failed", err)
-	}
-
+	fmt.Println(stylish.ProcessStart("complete"))
 }

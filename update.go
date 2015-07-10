@@ -22,7 +22,32 @@ import (
 )
 
 // update
+func update() {
+
+	//
+	fmt.Println("Checking for updates...")
+
+	//
+	release, err := getRelease()
+	if err != nil {
+		ui.LogFatal("[update] getRelease() failed", err)
+	}
+
+	if less := config.Version.Less(release); !less {
+		fmt.Println("No updates available at this time.")
+		touchUpdate()
+		return
+	}
+
+	cmd := commands.Commands["update"]
+	cmd.Run(nil)
+	os.Exit(0)
+}
+
+// update
 func checkUpdate() {
+
+	config.Console.Debug("[update] Current version %v", config.Version.String())
 
 	//
 	fi, err := os.Stat(config.UpdateFile)

@@ -6,3 +6,36 @@
 //
 
 package commands
+
+import (
+	"fmt"
+	"os/exec"
+
+	"github.com/pagodabox/nanobox-cli/ui"
+	"github.com/pagodabox/nanobox-golang-stylish"
+)
+
+// SSHCommand satisfies the Command interface
+type SSHCommand struct{}
+
+// Help prints detailed help text for the app list command
+func (c *SSHCommand) Help() {
+	ui.CPrint(`
+Description:
+  SSH into the virtual machine
+
+Usage:
+  nanobox ssh
+  `)
+}
+
+// Run sshes into the virtual machine
+func (c *SSHCommand) Run(opts []string) {
+	fmt.Printf(stylish.ProcessStart("sshing into vm"))
+
+	// run 'vagrant ssh'
+	cmd := exec.Command("vagrant", "ssh")
+	runVagrantCommand(cmd)
+
+	fmt.Printf(stylish.ProcessStart("sshing session terminated"))
+}

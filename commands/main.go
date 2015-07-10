@@ -8,10 +8,14 @@
 package commands
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/pagodabox/nanobox-cli/config"
+	"github.com/pagodabox/nanobox-cli/ui"
+	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
 // Commands represents a map of all the available commands that the Pagoda Box
@@ -43,6 +47,7 @@ func init() {
 		"publish": &PublishCommand{},
 		"reload":  &ReloadCommand{},
 		"resume":  &ResumeCommand{},
+		"ssh":     &SSHCommand{},
 		"status":  &StatusCommand{},
 		"suspend": &SuspendCommand{},
 		"up":      &UpCommand{},
@@ -54,15 +59,15 @@ func init() {
 // all standard in/outputs are connected to the command, and the directory is
 // changed to the corresponding app directory. This allows nanobox to run Vagrant
 // commands w/o contaminating a users codebase
-func runVagrantCommand(cmd *exec.Cmd) error {
+func runVagrantCommand(cmd *exec.Cmd) {
 
-	// just run an init to ensure there is a Vagrantfile
+	// run an init to ensure there is a Vagrantfile
 	init := InitCommand{}
 	init.Run(nil)
 
 	// run the command from ~/.nanobox/apps/<this app>
 	if err := os.Chdir(config.AppDir); err != nil {
-		return err
+		ui.LogFatal("[commands.runVagrantCommand] os.Chdir() failed", err)
 	}
 
 	// connect standard in/outputs
@@ -70,15 +75,16 @@ func runVagrantCommand(cmd *exec.Cmd) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	// run command
+	//
+	fmt.Printf(stylish.Bullet(fmt.Sprintf("running '%v'", strings.Trim(fmt.Sprint(cmd.Args), "[]"))))
+
+	// run command; if it fails Vagrant will output something and we'll just exit
 	if err := cmd.Run(); err != nil {
-		return err
+		os.Exit(1)
 	}
 
 	// switch back to project dir
 	if err := os.Chdir(config.CWDir); err != nil {
-		return err
+		ui.LogFatal("[commands.runVagrantCommand] os.Chdir() failed", err)
 	}
-
-	return nil
 }

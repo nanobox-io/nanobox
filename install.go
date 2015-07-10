@@ -12,21 +12,17 @@ import (
 	"os"
 
 	"github.com/pagodabox/nanobox-cli/config"
-	"github.com/pagodabox/nanobox-cli/ui"
+	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
 // Install
 func install() error {
 
-	//
-	config.Console.Info("[install] Verifying install...")
-	config.Console.Info("[install] Current version %v", config.Version.String())
-
 	// check for a ~/.nanobox dir and create one if it's not found
 	if di, _ := os.Stat(config.NanoDir); di == nil {
 
 		//
-		config.Console.Info("[install] Creating %v directory", config.NanoDir)
+		fmt.Printf(stylish.Bullet("Creating " + config.NanoDir + " directory"))
 
 		if err := os.Mkdir(config.NanoDir, 0755); err != nil {
 			return err
@@ -37,7 +33,7 @@ func install() error {
 	if di, _ := os.Stat(config.AppsDir); di == nil {
 
 		//
-		config.Console.Info("[install] Creating %v directory", config.AppsDir)
+		fmt.Printf(stylish.Bullet("Creating " + config.AppsDir + " directory"))
 
 		if err := os.Mkdir(config.AppsDir, 0755); err != nil {
 			return err
@@ -48,7 +44,7 @@ func install() error {
 	if fi, _ := os.Stat(config.AuthFile); fi == nil {
 
 		//
-		config.Console.Info("[install] Creating %v file", config.AuthFile)
+		fmt.Printf(stylish.Bullet("Creating " + config.AuthFile + " directory"))
 
 		if _, err := os.Create(config.AuthFile); err != nil {
 			return err
@@ -59,18 +55,19 @@ func install() error {
 	if fi, _ := os.Stat(config.UpdateFile); fi == nil {
 
 		//
-		config.Console.Info("[install] Creating %v file", config.UpdateFile)
+		fmt.Printf(stylish.Bullet("Creating " + config.UpdateFile + " directory"))
 
 		if _, err := os.Create(config.UpdateFile); err != nil {
 			return err
 		}
 	}
 
-	// create/override nanobox.log file
+	// create/override nanobox.log file (this should be created by the logger, but
+	// just incase it's not we'll leave this here)
 	// if fi, _ := os.Stat(config.LogFile); fi == nil {
 
 	//  //
-	//  config.Console.Info("[install] Creating %v file", config.LogFile)
+	//  fmt.Printf(stylish.Bullet("Creating " + config.LogFile + " directory"))
 
 	//  if _, err := os.Create(config.LogFile); err != nil {
 	//    return err
@@ -78,28 +75,4 @@ func install() error {
 	// }
 
 	return nil
-}
-
-//
-func uninstall(force bool) {
-
-	//
-	if force != true {
-
-		response := ui.Prompt("Are you sure you want to uninstall the Pagoda Box CLI (y/N)? ")
-
-		if response != "y" {
-			fmt.Printf("'%v' - Pagoda Box CLI will not be uninstalled. Exiting...\n", response)
-			os.Exit(0)
-		}
-	}
-
-	fmt.Print("Uninstalling... ")
-
-	//
-	if err := os.RemoveAll(config.NanoDir); err != nil {
-		ui.LogFatal("[install] os.Remove() failed", err)
-	}
-
-	ui.CPrint("[green]success[reset]")
 }

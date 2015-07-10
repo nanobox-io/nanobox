@@ -9,10 +9,11 @@ package config
 
 import (
 	"encoding/binary"
-	// "fmt"
+	"fmt"
 	"net"
 
 	"github.com/pagodabox/nanobox-boxfile"
+	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
 // BoxfileConfig represents all available/expected Boxfile configurable options
@@ -54,16 +55,17 @@ func ParseBoxfile() *BoxfileConfig {
 	build := f.Node("build")
 
 	//
-	Console.Info("Parsing Boxfile...")
+	fmt.Printf(stylish.Bullet("Parsing Boxfile"))
 
 	//
 	// if provider := nanobox.StringValue("provider"); provider != "" {
+	//  fmt.Printf(stylish.Bullet(fmt.Sprintf("   - Custom Provider detected (%v)", provider)))
 	// 	b.Provider = provider
 	// }
 
 	//
 	if domain := nanobox.StringValue("domain"); domain != "" {
-		Console.Info("Custom domain detected (%v), overriding default (%v)...", domain, b.Domain)
+		fmt.Printf(stylish.Bullet(fmt.Sprintf("   - Custom domain detected (%v)", domain)))
 		b.Domain = domain
 	}
 
@@ -74,7 +76,7 @@ func ParseBoxfile() *BoxfileConfig {
 		// default will be used.
 		switch {
 		case ram >= b.RAM:
-			Console.Info("Using custom RAM setting (%v)...", ram)
+			fmt.Printf(stylish.Bullet(fmt.Sprintf("   - Custom RAM setting detected (%v)", ram)))
 			b.RAM = ram
 		default:
 			Console.Warn("Specified RAM (%v) is less than allowed default (%v), Using default...", ram, b.RAM)
@@ -88,7 +90,7 @@ func ParseBoxfile() *BoxfileConfig {
 		// default will be used.
 		switch {
 		case cpus >= b.CPUs:
-			Console.Info("Using custom CPUs setting (%v)...", cpus)
+			fmt.Printf(stylish.Bullet(fmt.Sprintf("   - Custom CPU setting detected (%v)", cpus)))
 			b.CPUs = cpus
 		default:
 			Console.Warn("Specified CPUs (%v) is less than allowed default (%v), Using default...", cpus, b.CPUs)
@@ -102,7 +104,7 @@ func ParseBoxfile() *BoxfileConfig {
 		// default will be used.
 		switch {
 		case cpuCap <= b.CPUCap:
-			Console.Info("Using custom CPU Cap (%v)...", cpuCap)
+			fmt.Printf(stylish.Bullet(fmt.Sprintf("   - Custom custom CPU cap detected (%v)", cpuCap)))
 			b.CPUCap = cpuCap
 		default:
 			Console.Warn("Specified CPU cap (%v) is more than allowed default (%v), Using default...", cpuCap, b.CPUCap)
@@ -111,7 +113,7 @@ func ParseBoxfile() *BoxfileConfig {
 
 	//
 	if engine := build.StringValue("engine"); engine != "" {
-		Console.Info("Engine detected (%v)...", engine)
+		fmt.Printf(stylish.Bullet(fmt.Sprintf("   - Engine detected (%v)", engine)))
 		b.Engine = engine
 	}
 

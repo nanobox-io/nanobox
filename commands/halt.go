@@ -9,11 +9,10 @@ package commands
 
 import (
 	"flag"
-	// "fmt"
 	"os/exec"
 
-	"github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-cli/ui"
+	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
 // HaltCommand satisfies the Command interface
@@ -36,6 +35,7 @@ Options:
 
 // Run halts the specified virtual machine
 func (c *HaltCommand) Run(opts []string) {
+	stylish.ProcessStart("halting nanobox vm")
 
 	// flags
 	flags := flag.NewFlagSet("flags", flag.ContinueOnError)
@@ -53,18 +53,17 @@ func (c *HaltCommand) Run(opts []string) {
 
 	// vagrant halt
 	if fForce {
-		config.Console.Warn("[commands.halt.Run] Issuing force delete.")
+		stylish.Bullet("Issuing forced halt...")
 		cmd = exec.Command("vagrant", "halt", "--force")
 
 		//
 	} else {
-		config.Console.Warn("[commands.halt.Run] Issuing confirm delete.")
+		stylish.Bullet("Issuing confirm halt...")
 		cmd = exec.Command("vagrant", "halt")
 	}
 
 	// run command
-	if err := runVagrantCommand(cmd); err != nil {
-		ui.LogFatal("[commands.halt] runVagrantCommand() failed", err)
-	}
+	runVagrantCommand(cmd)
 
+	stylish.ProcessEnd("nanobox vm halted")
 }

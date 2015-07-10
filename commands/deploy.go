@@ -11,17 +11,18 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"os"
+	// "os"
 
-	mist "github.com/pagodabox/golang-mist"
+	"github.com/pagodabox/golang-mist"
 	api "github.com/pagodabox/nanobox-api-client"
 	"github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-cli/ui"
+	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
 type (
 
-	// DeployCommand satisfies the Command interface for listing a user's apps
+	// DeployCommand satisfies the Command interface for deploying to nanobox
 	DeployCommand struct{}
 
 	// Sync
@@ -30,12 +31,13 @@ type (
 		Status string `json:"status"`
 	}
 
+	// Entry
 	Entry struct {
-		Action string `json:"action"`
+		Action   string `json:"action"`
 		Document string `json:"document"`
-		Log string `json:"log"`
-		Model string `json:"model"`
-		Time string `json:"time"`
+		Log      string `json:"log"`
+		Model    string `json:"model"`
+		Time     string `json:"time"`
 	}
 )
 
@@ -43,30 +45,51 @@ type (
 func (c *DeployCommand) Help() {
 	ui.CPrint(`
 Description:
-  Deploys to your nanobox VM
+  Issues a deploy to your nanobox
 
 Usage:
   nanobox deploy
+  nanobox deploy -v
+  nanobox deploy -r
+
+Options:
+  -v, --verbose
+    Increase the level of log output from 'info' to 'debug'
+
+  -r, --reset
+    Clears cached libraries the project might use
   `)
 }
 
-// Run displays select information about all of a user's apps
+// Run issues a deploy to the running nanobox VM
 func (c *DeployCommand) Run(opts []string) {
 
 	// flags
 	flags := flag.NewFlagSet("flags", flag.ContinueOnError)
 	flags.Usage = func() { c.Help() }
 
+	//
+	var fReset bool
+	flags.BoolVar(&fReset, "r", false, "")
+	flags.BoolVar(&fReset, "reset", false, "")
+
+	// the verbose flag allows a user to request verbose output during a deploy. The
+	// default is false
 	var fVerbose bool
 	flags.BoolVar(&fVerbose, "v", false, "")
 	flags.BoolVar(&fVerbose, "verbose", false, "")
 
+	//
 	if err := flags.Parse(opts); err != nil {
 		ui.LogFatal("[commands.destroy] flags.Parse() failed", err)
 	}
 
+	// logLevel determines the amount of output that is displayed during a deploy,
+	// the default is 'info'. This can be changed to 'debug' by passing the
+	// -v or --verbose flag when running this command
 	logLevel := "info"
 
+	// if the verbose flag is included, upgrade the logLevel to 'debug'
 	if fVerbose {
 		logLevel = "debug"
 	}
@@ -75,48 +98,80 @@ func (c *DeployCommand) Run(opts []string) {
 	// resume := ResumeCommand{}
 	// resume.Run(opts)
 
-	// subscribe to mist
-	client := mist.Client{}
-	if _, err := client.Connect(config.Boxfile.IP, "1445"); err != nil {
-		ui.LogFatal("[commands deploy] client.Connect() failed ", err)
-	}
-
-	defer client.Close()
+	// create a 'mist' client to communicate with the mist server running on the
+	// guest machine
+	client := mist.Client{Host: config.Boxfile.IP, Port: "1445"}
 
 	//
-	sub, err := client.Subscribe([]string{"sync", "deploy", logLevel})
-	if err != nil {
-		config.Console.Warn("Failed to subscribe to 'mist' updates... %v", err)
+	// connect the 'mist' client to the 'mist' server
+	if err := client.Connect(); err != nil {
+		ui.LogFatal("[commands deploy] client.Connect() failed ", err)
 	}
+	defer client.Close()
 
+	// subscribe to 'sync' updates
+	fmt.Printf(stylish.Bullet("Subscribing to app logs..."))
+	syncSub, err := client.Subscribe([]string{"sync"})
+	if err != nil {
+		fmt.Printf("   [!] FAILED\n")
+	}
+	defer client.Unsubscribe(syncSub)
+
+	fmt.Printf("   [√] SUCCESS\n")
+
+	// subscribe to the deploy logs, at the desired logLevel
+	fmt.Printf(stylish.Bullet("Subscribing to deploy logs..."))
+	logSub, err := client.Subscribe([]string{"deploy", logLevel})
+	if err != nil {
+		fmt.Printf("   [!] FAILED\n")
+	}
+	defer client.Unsubscribe(logSub)
+
+	fmt.Printf("   [√] SUCCESS\n")
+
+	//
 	// issue a deploy
+
 	path := fmt.Sprintf("http://%v:1757/deploys", config.Boxfile.IP)
 
+	// if the reset flag is passed append a "reset=true" query string param
+	if fReset {
+		path += "?reset=true"
+	}
+
+	//
+	fmt.Print(stylish.Bullet("Deploying to app..."))
 	if err := api.DoRawRequest(nil, "POST", path, nil, nil); err != nil {
 		ui.LogFatal("[commands deploy] api.DoRawRequest() failed ", err)
 	}
 
+	//
+	entry := &Entry{}
+
 	// listen for messages coming from mist
+stream:
 	for msg := range client.Data {
 
-		entry := &Entry{}
-
-		fmt.Printf("READING THINGS!!! %q\n", msg.Data)
+		// check for any error message
+		if msg.Tags[0] == "err" {
+			fmt.Printf(stylish.Error("deploy stream disconnected", "An unexpected error caused the deploy stream to disconnect. Your deploy should continue as normal, and you can see the log output from your dashboard."))
+		}
 
 		//
 		if err := json.Unmarshal([]byte(msg.Data), &entry); err != nil {
-			fmt.Println("FAIL 1")
-			ui.LogFatal("[commands deploy] json.Unmarshal() failed ", err)
+			ui.LogFatal("[commands deploy] json.Unmarshal() failed", err)
 		}
 
-		// depending on what fields the data has, determines what needs to happen
+		// depending on what fields the data has, determines what needs to happen...
 		switch {
 
-		// if the message contains the log field, the log is printed...
+		// if the message contains the log field, the log is printed. The message is
+		// then checked to see if it contains a model field...
 		case entry.Log != "":
 			fmt.Println(fmt.Sprintf("[%v] %v", entry.Log, entry.Time))
+			fallthrough
 
-		// if the message contains the model field, handle individually
+		// if the message contains the model field...
 		case entry.Model != "":
 
 			// depending on the type of model, different things may happen...
@@ -128,34 +183,24 @@ func (c *DeployCommand) Run(opts []string) {
 				sync := &Sync{}
 
 				if err := json.Unmarshal([]byte(entry.Document), sync); err != nil {
-					fmt.Println("FAIL 2")
 					ui.LogFatal("[commands deploy] json.Unmarshal() failed ", err)
 				}
 
-				fmt.Println("STATUS?", sync.Status)
-
-				// once the sync is 'complete' unsubscribe from mist, and close the connection
+				// once the sync is 'complete' unsubscribe from mist
 				if sync.Status == "complete" {
-					fmt.Println("CLOSING?")
-					client.Unsubscribe(sub)
-					client.Close()
+					break stream
 				}
 
-			// the only type of model expected for the time being is a sync, anything
-			// else should fail because logic is probably missing to handle the new
-			// model
+			// report any unhandled models, incase cases need to be added to handle them
 			case "default":
-				config.Console.Error("[commands deploy] Unhandled model '%v'", entry.Model)
-				os.Exit(1)
+				config.Console.Debug("Nanobox has encountered an unknown model (%v), and doesn't know what to do with it...", entry.Model)
+				break stream
 			}
 
-		// if the message does not cotain either a 'log' or 'model' field the CLI
-		// needs to fail, because it's probably missing some logic to handle a new
-		// field
+		// report any unhandled entries, incase cases need to be added to handle them
 		default:
-			config.Console.Error("[commands deploy] Unhandled data, missing 'log' or 'model': %v", entry)
-			os.Exit(1)
+			config.Console.Debug("Nanobox has encountered an Entry with neither a 'log' nor 'model' field and doesnt know what to do...")
+			break stream
 		}
 	}
-
 }

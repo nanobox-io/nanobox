@@ -8,11 +8,11 @@
 package commands
 
 import (
-	// "fmt"
+	"fmt"
 	"os/exec"
 
-	// "github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-cli/ui"
+	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
 // SuspendCommand satisfies the Command interface
@@ -31,13 +31,11 @@ Usage:
 
 // Run suspends the specified virtual machines
 func (c *SuspendCommand) Run(opts []string) {
+	fmt.Printf(stylish.ProcessStart("suspending nanobox vm"))
 
-	// vagrant status
+	// run 'vagrant suspend'
 	cmd := exec.Command("vagrant", "suspend")
+	runVagrantCommand(cmd)
 
-	// run command
-	if err := runVagrantCommand(cmd); err != nil {
-		ui.LogFatal("[commands.suspend] runVagrantCommand() failed", err)
-	}
-
+	fmt.Printf(stylish.ProcessEnd("nanobox vm suspended"))
 }

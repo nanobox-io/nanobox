@@ -8,15 +8,14 @@
 package commands
 
 import (
-	"bufio"
 	"flag"
 	"fmt"
 	"os"
 	"os/exec"
-	"strings"
 
 	"github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-cli/ui"
+	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
 // DestroyCommand satisfies the Command interface
@@ -52,105 +51,53 @@ func (c *DestroyCommand) Run(opts []string) {
 		ui.LogFatal("[commands.destroy] flags.Parse() failed", err)
 	}
 
+	//
 	// if force is not passed, confirm the decision to delete...
 	if !fForce {
-		config.Console.Warn("[commands.destroy.Run] Issuing confirm delete.")
+		fmt.Printf("------------------------- !! DANGER ZONE !! -------------------------\n\n")
 
+		// prompt for confirmation...
 		switch ui.Prompt("Are you sure you want to delete this VM (y/N)? ") {
 
-		// proceed to destroy the VM...
+		// if positive confirmation, proceed and destroy
 		case "Y", "y":
-			config.Console.Warn("Delete request confirmed, deleting...")
+			fmt.Printf(stylish.Bullet("Delete confirmed, continuing..."))
 			destroy()
 
-		// exit w/o destroying the VM...
+		// if negative confirmation, exit w/o destroying
 		default:
-			config.Console.Warn("Delete request refuted, VM will not be deleted...")
+			fmt.Printf(stylish.Bullet("Negative confirmation, app will not be deleted, exiting..."))
 			os.Exit(0)
 		}
 	}
 
 	// if force is passed, destroy...
-	config.Console.Warn("[commands.destroy.Run] Issuing force delete.")
+	fmt.Printf(stylish.Bullet("Force delete detected, continuing..."))
 	destroy()
 }
 
 // destroy
 func destroy() {
 
-	// remove app
+	//
+	// attempt to remove the associated entry, regardless of if it's there or not
+	modifyHosts("x")
+
+	//
+	// destroy the vm...
+	fmt.Printf(stylish.ProcessStart("destroying nanobox vm"))
+
+	cmd := exec.Command("vagrant", "destroy", "--force")
+	runVagrantCommand(cmd)
+
+	fmt.Printf(stylish.ProcessEnd("nanobox vm destroyed"))
+
+	//
+	fmt.Printf(stylish.Bullet("Deleting all nanobox files at: " + config.AppDir))
+
+	// remove app; this needs to happen after the Vagrant command so that the app
+	// isn't just created again
 	if err := os.RemoveAll(config.AppDir); err != nil {
 		ui.LogFatal("[commands.destroy] os.RemoveAll() failed", err)
-	}
-
-	// remove entry
-	removeEntry()
-
-	// destroy the vm...
-	cmd := &exec.Cmd{}
-	cmd = exec.Command("vagrant", "destroy", "--force")
-	if err := runVagrantCommand(cmd); err != nil {
-		ui.LogFatal("[commands.destroy] runVagrantCommand() failed", err)
-	}
-}
-
-// removeEntry
-func removeEntry() {
-
-	// assume we wont need to remove an entry...
-	removeEntry := false
-
-	// ...then check if we actually need to...
-	f, err := os.Open("/etc/hosts")
-	if err != nil {
-		ui.LogFatal("[commands.destroy] os.Open() failed", err)
-	}
-
-	defer f.Close()
-
-	// ...read hosts file looking for an entry corresponding to this app...
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-
-		// ...remove from the file if an entry with the IP is detected
-		if strings.HasPrefix(scanner.Text(), config.Boxfile.IP) {
-			removeEntry = true
-		}
-	}
-
-	// remove entry
-	if removeEntry {
-
-		// attempt to open /etc/hosts file...
-		f, err := os.OpenFile("/etc/hosts", os.O_RDWR, 0644)
-		defer f.Close()
-
-		// ...if we're unable to open, we'll assume it's because we don't have permission
-		if err != nil {
-
-			//
-			if perm := os.IsPermission(err); perm == true {
-
-				//
-				cmd := exec.Command("/bin/sh", "-c", "sudo "+os.Args[0]+" domain -x")
-
-				// connect standard in/outputs
-				cmd.Stdin = os.Stdin
-				cmd.Stdout = os.Stdout
-				cmd.Stderr = os.Stderr
-
-				//
-				fmt.Printf("\nNanobox needs your permission to remove the '%v' network from your /etc/hosts file\n", config.App)
-
-				// run command
-				if err := cmd.Run(); err != nil {
-					ui.LogFatal("[commands.create] cmd.Run() failed", err)
-				}
-
-				//
-			} else {
-				ui.LogFatal("[commands.domain] os.OpenFile() failed", err)
-			}
-		}
 	}
 }
