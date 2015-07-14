@@ -169,7 +169,7 @@ stream:
 		// then checked to see if it contains a model field...
 		// example entry: {Time: "time", Log: "content"}
 		case entry.Log != "":
-			fmt.Println(fmt.Sprintf("%v", entry.Log))
+			fmt.Printf(entry.Log)
 			fallthrough
 
 		// if the message contains the model field...
