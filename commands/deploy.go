@@ -190,6 +190,7 @@ stream:
 
 				// once the sync is 'complete' unsubscribe from mist
 				if sync.Status == "complete" {
+					fmt.Printf(stylish.Bullet(fmt.Sprintf("Deploy complete... Navigate to %v.gonano to view your app.", config.App)))
 					break stream
 				}
 

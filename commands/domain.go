@@ -67,7 +67,7 @@ func (c *DomainCommand) Run(opts []string) {
 			ui.LogFatal("[commands.domain] WriteString() failed", err)
 		}
 
-		fmt.Println(stylish.Bullet(config.App + ".nano.dev added to /etc/hosts"))
+		fmt.Println(stylish.Bullet(config.App + ".gonano added to /etc/hosts"))
 
 	//
 	case fRemove:
@@ -90,7 +90,7 @@ func (c *DomainCommand) Run(opts []string) {
 			ui.LogFatal("[commands.destroy] ioutil.WriteFile failed", err)
 		}
 
-		fmt.Println(stylish.Bullet(config.App + ".nano.dev removed from /etc/hosts"))
+		fmt.Println(stylish.Bullet(config.App + ".gonano removed from /etc/hosts"))
 	}
 }
 
