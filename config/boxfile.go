@@ -39,7 +39,7 @@ func ParseBoxfile() *BoxfileConfig {
 
 		// nanobox
 		IP:       appNameToIP(App),
-		Domain:   "gonano.dev",
+		Domain:   "nano.dev",
 		Provider: "virtualbox",
 		CPUCap:   50,
 		CPUs:     2,
