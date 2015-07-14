@@ -37,5 +37,5 @@ func (c *SSHCommand) Run(opts []string) {
 	cmd := exec.Command("vagrant", "ssh")
 	runVagrantCommand(cmd)
 
-	fmt.Printf(stylish.ProcessStart("sshing session terminated"))
+	fmt.Printf(stylish.ProcessEnd("ssh session terminated"))
 }

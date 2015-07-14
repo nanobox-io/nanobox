@@ -167,8 +167,9 @@ stream:
 
 		// if the message contains the log field, the log is printed. The message is
 		// then checked to see if it contains a model field...
+		// example entry: {Time: "time", Log: "content"}
 		case entry.Log != "":
-			fmt.Println(fmt.Sprintf("[%v] %v", entry.Log, entry.Time))
+			fmt.Println(fmt.Sprintf("%v", entry.Log))
 			fallthrough
 
 		// if the message contains the model field...
@@ -188,6 +189,11 @@ stream:
 
 				// once the sync is 'complete' unsubscribe from mist
 				if sync.Status == "complete" {
+					break stream
+				}
+
+				if sync.Status == "errored" {
+					fmt.Printf(stylish.Error("deploy failed", "Your deploy failed to... well... deploy..."))
 					break stream
 				}
 
