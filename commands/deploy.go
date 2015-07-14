@@ -84,16 +84,6 @@ func (c *DeployCommand) Run(opts []string) {
 		ui.LogFatal("[commands.destroy] flags.Parse() failed", err)
 	}
 
-	// logLevel determines the amount of output that is displayed during a deploy,
-	// the default is 'info'. This can be changed to 'debug' by passing the
-	// -v or --verbose flag when running this command
-	logLevel := "info"
-
-	// if the verbose flag is included, upgrade the logLevel to 'debug'
-	if fVerbose {
-		logLevel = "debug"
-	}
-
 	// start the vm if it's not already running
 	// resume := ResumeCommand{}
 	// resume.Run(opts)
@@ -109,25 +99,35 @@ func (c *DeployCommand) Run(opts []string) {
 	}
 	defer client.Close()
 
+	printv(stylish.Bullet("Subscribing to mist..."), fVerbose)
+
 	// subscribe to 'sync' updates
-	fmt.Printf(stylish.Bullet("Subscribing to app logs..."))
+	printv("   - Subscribing to app logs", fVerbose)
 	syncSub, err := client.Subscribe([]string{"sync"})
 	if err != nil {
-		fmt.Printf("   [!] FAILED\n")
+		fmt.Printf(stylish.Warning("Nanobox failed to subscribe to app logs. Your deploy will continue as normal, and log output is available on your dashboard."))
 	}
 	defer client.Unsubscribe(syncSub)
 
-	fmt.Printf("   [√] SUCCESS\n")
-
-	// subscribe to the deploy logs, at the desired logLevel
-	fmt.Printf(stylish.Bullet("Subscribing to deploy logs..."))
-	logSub, err := client.Subscribe([]string{"deploy", logLevel})
+	// subscribe to the 'deploy' logs
+	printv("   - Subscribing to info logs", fVerbose)
+	infoSub, err := client.Subscribe([]string{"deploy", "info"})
 	if err != nil {
-		fmt.Printf("   [!] FAILED\n")
+		fmt.Printf(stylish.Warning("Nanobox failed to subscribe to info logs. Your deploy will continue as normal, and log output is available on your dashboard."))
 	}
-	defer client.Unsubscribe(logSub)
+	defer client.Unsubscribe(infoSub)
 
-	fmt.Printf("   [√] SUCCESS\n")
+	// if the verbose flag is included, also subscribe to the 'debug' deploy logs
+	if fVerbose {
+		printv("   - Subscribing to debug logs", fVerbose)
+		debugSub, err := client.Subscribe([]string{"deploy", "debug"})
+		if err != nil {
+			fmt.Printf(stylish.Warning("Nanobox failed to subscribe to debug logs. Your deploy will continue as normal, and log output is available on your dashboard."))
+		}
+		defer client.Unsubscribe(debugSub)
+	}
+
+	printv("   [√] SUCCESS\n", fVerbose)
 
 	//
 	// issue a deploy
@@ -140,7 +140,6 @@ func (c *DeployCommand) Run(opts []string) {
 	}
 
 	//
-	fmt.Print(stylish.Bullet("Deploying to app..."))
 	if err := api.DoRawRequest(nil, "POST", path, nil, nil); err != nil {
 		ui.LogFatal("[commands deploy] api.DoRawRequest() failed ", err)
 	}
@@ -152,9 +151,11 @@ func (c *DeployCommand) Run(opts []string) {
 stream:
 	for msg := range client.Data {
 
-		// check for any error message
+		// check for any error message that cause mist to disconnect, and release
+		// nanobox
 		if msg.Tags[0] == "err" {
-			fmt.Printf(stylish.Error("deploy stream disconnected", "An unexpected error caused the deploy stream to disconnect. Your deploy should continue as normal, and you can see the log output from your dashboard."))
+			fmt.Printf(stylish.Warning("An unexpected error caused the deploy stream to disconnect. Your deploy should continue as normal, and you can see the log output from your dashboard."))
+			break stream
 		}
 
 		//
@@ -208,5 +209,12 @@ stream:
 			config.Console.Debug("Nanobox has encountered an Entry with neither a 'log' nor 'model' field and doesnt know what to do...")
 			break stream
 		}
+	}
+}
+
+// printv (print verbose) only prints a message if the 'verbose' flag is passed
+func printv(msg string, verbose bool) {
+	if verbose {
+		fmt.Printf(msg)
 	}
 }
