@@ -25,8 +25,8 @@ type (
 	// DeployCommand satisfies the Command interface for deploying to nanobox
 	DeployCommand struct{}
 
-	// Sync
-	Sync struct {
+	// Deploy
+	Deploy struct {
 		ID     string `json:"id"`
 		Status string `json:"status"`
 	}
@@ -101,17 +101,17 @@ func (c *DeployCommand) Run(opts []string) {
 
 	printv(stylish.Bullet("Subscribing to mist..."), fVerbose)
 
-	// subscribe to 'sync' updates
+	// subscribe to 'deploy' updates
 	printv("\n   - Subscribing to app logs", fVerbose)
-	syncSub, err := client.Subscribe([]string{"sync"})
+	deploySub, err := client.Subscribe([]string{"job", "deploy"})
 	if err != nil {
 		fmt.Printf(stylish.Warning("Nanobox failed to subscribe to app logs. Your deploy will continue as normal, and log output is available on your dashboard."))
 	}
-	defer client.Unsubscribe(syncSub)
+	defer client.Unsubscribe(deploySub)
 
 	// subscribe to the 'deploy' logs
 	printv("\n   - Subscribing to info logs", fVerbose)
-	infoSub, err := client.Subscribe([]string{"deploy", "info"})
+	infoSub, err := client.Subscribe([]string{"log", "deploy", "info"})
 	if err != nil {
 		fmt.Printf(stylish.Warning("Nanobox failed to subscribe to info logs. Your deploy will continue as normal, and log output is available on your dashboard."))
 	}
@@ -120,7 +120,7 @@ func (c *DeployCommand) Run(opts []string) {
 	// if the verbose flag is included, also subscribe to the 'debug' deploy logs
 	if fVerbose {
 		printv("\n   - Subscribing to debug logs", fVerbose)
-		debugSub, err := client.Subscribe([]string{"deploy", "debug"})
+		debugSub, err := client.Subscribe([]string{"log", "deploy", "debug"})
 		if err != nil {
 			fmt.Printf(stylish.Warning("Nanobox failed to subscribe to debug logs. Your deploy will continue as normal, and log output is available on your dashboard."))
 		}
@@ -179,22 +179,23 @@ stream:
 			// depending on the type of model, different things may happen...
 			switch entry.Model {
 
-			// in the case of a sync model, listen for a complete to close the stream
-			case "Sync", "sync":
+			// in the case of a deploy model, listen for a complete to close the stream
+			case "Deploy", "deploy":
 
-				sync := &Sync{}
+				deploy := &Deploy{}
 
-				if err := json.Unmarshal([]byte(entry.Document), sync); err != nil {
+				if err := json.Unmarshal([]byte(entry.Document), deploy); err != nil {
 					ui.LogFatal("[commands deploy] json.Unmarshal() failed ", err)
 				}
 
-				// once the sync is 'complete' unsubscribe from mist
-				if sync.Status == "complete" {
+				switch deploy.Status {
+				// once the deploy is 'complete' unsubscribe from mist
+				case "compelte":
 					fmt.Printf(stylish.Bullet(fmt.Sprintf("Deploy complete... Navigate to %v.nano.dev to view your app.", config.App)))
 					break stream
-				}
 
-				if sync.Status == "errored" {
+				// if the deploy is 'errored' unsubscribe from mist
+				case "errored":
 					fmt.Printf(stylish.Error("deploy failed", "Your deploy failed to... well... deploy..."))
 					break stream
 				}
