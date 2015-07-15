@@ -64,6 +64,4 @@ func (c *HaltCommand) Run(opts []string) {
 
 	// run command
 	runVagrantCommand(cmd)
-
-	stylish.ProcessEnd("nanobox vm halted")
 }

@@ -86,18 +86,14 @@ func destroy() {
 	//
 	// destroy the vm...
 	fmt.Printf(stylish.ProcessStart("destroying nanobox vm"))
-
 	cmd := exec.Command("vagrant", "destroy", "--force")
 	runVagrantCommand(cmd)
 
-	fmt.Printf(stylish.ProcessEnd("nanobox vm destroyed"))
-
-	//
-	fmt.Printf(stylish.Bullet("Deleting all nanobox files at: " + config.AppDir))
-
 	// remove app; this needs to happen after the Vagrant command so that the app
 	// isn't just created again
+	fmt.Printf(stylish.Bullet("Deleting all nanobox files at: " + config.AppDir))
 	if err := os.RemoveAll(config.AppDir); err != nil {
 		ui.LogFatal("[commands.destroy] os.RemoveAll() failed", err)
 	}
+	fmt.Printf(stylish.ProcessEnd())
 }

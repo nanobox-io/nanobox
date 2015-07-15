@@ -31,11 +31,10 @@ Usage:
 
 // Run suspends the specified virtual machines
 func (c *SuspendCommand) Run(opts []string) {
-	fmt.Printf(stylish.ProcessStart("suspending nanobox vm"))
 
 	// run 'vagrant suspend'
+	fmt.Printf(stylish.ProcessStart("suspending nanobox vm"))
 	cmd := exec.Command("vagrant", "suspend")
 	runVagrantCommand(cmd)
-
-	fmt.Printf(stylish.ProcessEnd("nanobox vm suspended"))
+	fmt.Printf(stylish.ProcessEnd())
 }

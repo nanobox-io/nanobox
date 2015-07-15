@@ -31,11 +31,10 @@ Usage:
 
 // Run resumes the specified virtual machine
 func (c *ReloadCommand) Run(opts []string) {
-	fmt.Printf(stylish.ProcessStart("reloading nanobox vm"))
 
 	// run 'vagrant reload --provision'
+	fmt.Printf(stylish.ProcessStart("reloading nanobox vm"))
 	cmd := exec.Command("vagrant", "reload", "--provision")
 	runVagrantCommand(cmd)
-
-	fmt.Printf(stylish.ProcessEnd("nanobox vm reloaded"))
+	fmt.Printf(stylish.ProcessEnd())
 }

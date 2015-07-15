@@ -34,6 +34,7 @@ func init() {
 
 	// the map of all available commands the Pagoda Box CLI can run
 	Commands = map[string]Command{
+		"build":   &BuildCommand{},
 		"create":  &CreateCommand{},
 		"domain":  &DomainCommand{},
 		"deploy":  &DeployCommand{},

@@ -31,11 +31,10 @@ Usage:
 
 // Run display status of all virtual machines
 func (c *StatusCommand) Run(opts []string) {
-	fmt.Printf(stylish.ProcessStart("requesting nanobox vms"))
 
 	// run 'vagrant status'
+	fmt.Printf(stylish.ProcessStart("requesting nanobox vms"))
 	cmd := exec.Command("vagrant", "status")
 	runVagrantCommand(cmd)
-
-	fmt.Printf(stylish.ProcessEnd("complete"))
+	fmt.Printf(stylish.ProcessEnd())
 }

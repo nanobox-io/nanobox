@@ -95,7 +95,7 @@ func (c *PublishCommand) Run(opts []string) {
 	stylish.Header("publishing engine")
 
 	// look for a Enginefile to parse
-	stylish.Bullet("Parsing Enginefile")
+	fmt.Printf(stylish.Bullet("Parsing Enginefile"))
 	fi, err := os.Stat("./Enginefile")
 	if err != nil {
 		fmt.Println("Enginefile not found. Be sure to publish from a project directory. Exiting... ")
@@ -110,7 +110,7 @@ func (c *PublishCommand) Run(opts []string) {
 	}
 
 	//
-	stylish.Bullet("Creating release")
+	fmt.Printf(stylish.Bullet("Creating release"))
 	release := &api.EngineReleaseCreateOptions{}
 	if err := yaml.Unmarshal(file, release); err != nil {
 		ui.LogFatal("[commands.publish] yaml.Unmarshal() failed", err)
@@ -128,15 +128,15 @@ func (c *PublishCommand) Run(opts []string) {
 	release.ProjectFiles = append(release.ProjectFiles, "Enginefile")
 
 	// GET to API to see if engine exists
-	stylish.Bullet("Checking for existing engine on nanobox.io")
+	fmt.Printf(stylish.Bullet("Checking for existing engine on nanobox.io"))
 	engine, err := api.GetEngine(api.UserSlug, release.Name)
 	if err != nil {
-		stylish.Bullet("No engine found...")
+		fmt.Printf(stylish.Bullet("No engine found..."))
 	}
 
 	// if no engine is found create one
 	if engine.ID == "" {
-		stylish.SubTask("Creating new engine on nanobox.io")
+		stylish.SubTaskStart("Creating new engine on nanobox.io")
 
 		engineCreateOptions := &api.EngineCreateOptions{Name: release.Name, Type: release.Type}
 		if _, err := api.CreateEngine(engineCreateOptions); err != nil {
@@ -164,7 +164,7 @@ func (c *PublishCommand) Run(opts []string) {
 			time.Sleep(1000 * time.Millisecond)
 		}
 
-		stylish.SubTaskSuccess()
+		stylish.Success()
 	} else {
 		config.Console.Info("Engine found on nanobox by the name '%v'", release.Name)
 	}
@@ -228,7 +228,7 @@ func (c *PublishCommand) Run(opts []string) {
 	}
 
 	// upload tarball release to warehouse
-	stylish.Bullet("Uploading release to nanobox warehouse...")
+	fmt.Printf(stylish.Bullet("Uploading release to nanobox warehouse..."))
 
 	if err := api.DoRawRequest(obj, "POST", "http://warehouse.nanobox.io/objects", pr, headers); err != nil {
 		ui.LogFatal("[commands.publish] api.DoRawRequest() failed", err)
@@ -245,7 +245,7 @@ func (c *PublishCommand) Run(opts []string) {
 
 		release.Checksum = checksum
 
-		stylish.Bullet("Uploading release to nanobox.io")
+		fmt.Printf(stylish.Bullet("Uploading release to nanobox.io"))
 
 		// POST release on API (odin)
 		if _, err := api.CreateEngineRelease(engine.Name, release); err != nil {

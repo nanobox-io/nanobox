@@ -38,5 +38,4 @@ func (c *UpCommand) Run(opts []string) {
 	// ...create a deploy
 	deploy := DeployCommand{}
 	deploy.Run(opts)
-
 }

@@ -31,11 +31,10 @@ Usage:
 
 // Run sshes into the virtual machine
 func (c *SSHCommand) Run(opts []string) {
-	fmt.Printf(stylish.ProcessStart("sshing into vm"))
 
 	// run 'vagrant ssh'
+	fmt.Printf(stylish.ProcessStart("sshing into vm"))
 	cmd := exec.Command("vagrant", "ssh")
 	runVagrantCommand(cmd)
-
-	fmt.Printf(stylish.ProcessEnd("ssh session terminated"))
+	fmt.Printf(stylish.ProcessEnd())
 }

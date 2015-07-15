@@ -31,11 +31,10 @@ Usage:
 
 // Run resumes the specified virtual machine
 func (c *ResumeCommand) Run(opts []string) {
-	fmt.Printf(stylish.ProcessStart("resuming nanobox vm"))
 
 	// run 'vagrant resume'
+	fmt.Printf(stylish.ProcessStart("resuming nanobox vm"))
 	cmd := exec.Command("vagrant", "resume")
 	runVagrantCommand(cmd)
-
-	fmt.Printf(stylish.ProcessEnd("nanobox vm resumed"))
+	fmt.Printf(stylish.ProcessEnd())
 }

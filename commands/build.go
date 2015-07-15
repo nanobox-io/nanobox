@@ -22,35 +22,26 @@ import (
 
 type (
 
-	// DeployCommand satisfies the Command interface for deploying to nanobox
-	DeployCommand struct{}
+	// BuildCommand satisfies the Command interface for deploying to nanobox
+	BuildCommand struct{}
 
-	// Deploy
-	Deploy struct {
+	// Build
+	Build struct {
 		ID     string `json:"id"`
 		Status string `json:"status"`
-	}
-
-	// Entry
-	Entry struct {
-		Action   string `json:"action"`
-		Document string `json:"document"`
-		Log      string `json:"log"`
-		Model    string `json:"model"`
-		Time     string `json:"time"`
 	}
 )
 
 // Help prints detailed help text for the app list command
-func (c *DeployCommand) Help() {
+func (c *BuildCommand) Help() {
 	ui.CPrint(`
 Description:
-  Issues a deploy to your nanobox
+  Issues a build to your nanobox
 
 Usage:
-  nanobox deploy
-  nanobox deploy -v
-  nanobox deploy -r
+  nanobox build
+  nanobox build -v
+  nanobox build -r
 
 Options:
   -v, --verbose
@@ -61,8 +52,8 @@ Options:
   `)
 }
 
-// Run issues a deploy to the running nanobox VM
-func (c *DeployCommand) Run(opts []string) {
+// Run issues a build to the running nanobox VM
+func (c *BuildCommand) Run(opts []string) {
 
 	// flags
 	flags := flag.NewFlagSet("flags", flag.ContinueOnError)
@@ -73,7 +64,7 @@ func (c *DeployCommand) Run(opts []string) {
 	flags.BoolVar(&fReset, "r", false, "")
 	flags.BoolVar(&fReset, "reset", false, "")
 
-	// the verbose flag allows a user to request verbose output during a deploy. The
+	// the verbose flag allows a user to request verbose output during a build. The
 	// default is false
 	var fVerbose bool
 	flags.BoolVar(&fVerbose, "v", false, "")
@@ -95,44 +86,44 @@ func (c *DeployCommand) Run(opts []string) {
 	//
 	// connect the 'mist' client to the 'mist' server
 	if err := client.Connect(); err != nil {
-		ui.LogFatal("[commands deploy] client.Connect() failed ", err)
+		ui.LogFatal("[commands build] client.Connect() failed ", err)
 	}
 	defer client.Close()
 
 	printv(stylish.Bullet("Subscribing to mist..."), fVerbose)
 
-	// subscribe to 'deploy' updates
-	printv(stylish.SubBullet("- Subscribing to app logs"), fVerbose)
-	deploySub, err := client.Subscribe([]string{"job", "deploy"})
+	// subscribe to 'build' updates
+	printv("\n   - Subscribing to app logs", fVerbose)
+	buildSub, err := client.Subscribe([]string{"job", "build"})
 	if err != nil {
-		fmt.Printf(stylish.Warning("Nanobox failed to subscribe to app logs. Your deploy will continue as normal, and log output is available on your dashboard."))
+		fmt.Printf(stylish.Warning("Nanobox failed to subscribe to app logs. Your build will continue as normal, and log output is available on your dashboard."))
 	}
-	defer client.Unsubscribe(deploySub)
+	defer client.Unsubscribe(buildSub)
 
-	// subscribe to the 'deploy' logs
-	printv(stylish.SubBullet("- Subscribing to info logs"), fVerbose)
-	infoSub, err := client.Subscribe([]string{"log", "deploy", "info"})
+	// subscribe to the 'build' logs
+	printv("\n   - Subscribing to info logs", fVerbose)
+	infoSub, err := client.Subscribe([]string{"log", "build", "info"})
 	if err != nil {
-		fmt.Printf(stylish.Warning("Nanobox failed to subscribe to info logs. Your deploy will continue as normal, and log output is available on your dashboard."))
+		fmt.Printf(stylish.Warning("Nanobox failed to subscribe to info logs. Your build will continue as normal, and log output is available on your dashboard."))
 	}
 	defer client.Unsubscribe(infoSub)
 
-	// if the verbose flag is included, also subscribe to the 'debug' deploy logs
+	// if the verbose flag is included, also subscribe to the 'debug' build logs
 	if fVerbose {
-		printv(stylish.SubBullet("- Subscribing to debug logs"), fVerbose)
-		debugSub, err := client.Subscribe([]string{"log", "deploy", "debug"})
+		printv("\n   - Subscribing to debug logs", fVerbose)
+		debugSub, err := client.Subscribe([]string{"log", "build", "debug"})
 		if err != nil {
-			fmt.Printf(stylish.Warning("Nanobox failed to subscribe to debug logs. Your deploy will continue as normal, and log output is available on your dashboard."))
+			fmt.Printf(stylish.Warning("Nanobox failed to subscribe to debug logs. Your build will continue as normal, and log output is available on your dashboard."))
 		}
 		defer client.Unsubscribe(debugSub)
 	}
 
-	printv(stylish.Success(), fVerbose)
+	printv("   [√] SUCCESS\n", fVerbose)
 
 	//
-	// issue a deploy
+	// issue a build
 
-	path := fmt.Sprintf("http://%v:1757/deploys", config.Boxfile.IP)
+	path := fmt.Sprintf("http://%v:1757/builds", config.Boxfile.IP)
 
 	// if the reset flag is passed append a "reset=true" query string param
 	if fReset {
@@ -141,7 +132,7 @@ func (c *DeployCommand) Run(opts []string) {
 
 	//
 	if err := api.DoRawRequest(nil, "POST", path, nil, nil); err != nil {
-		ui.LogFatal("[commands deploy] api.DoRawRequest() failed ", err)
+		ui.LogFatal("[commands build] api.DoRawRequest() failed ", err)
 	}
 
 	//
@@ -154,13 +145,13 @@ stream:
 		// check for any error message that cause mist to disconnect, and release
 		// nanobox
 		if msg.Tags[0] == "err" {
-			fmt.Printf(stylish.Warning("An unexpected error caused the deploy stream to disconnect. Your deploy should continue as normal, and you can see the log output from your dashboard."))
+			fmt.Printf(stylish.Warning("An unexpected error caused the build stream to disconnect. Your build should continue as normal, and you can see the log output from your dashboard."))
 			break stream
 		}
 
 		//
 		if err := json.Unmarshal([]byte(msg.Data), &entry); err != nil {
-			ui.LogFatal("[commands deploy] json.Unmarshal() failed", err)
+			ui.LogFatal("[commands build] json.Unmarshal() failed", err)
 		}
 
 		// depending on what fields the data has, determines what needs to happen...
@@ -179,24 +170,24 @@ stream:
 			// depending on the type of model, different things may happen...
 			switch entry.Model {
 
-			// in the case of a deploy model, listen for a complete to close the stream
-			case "Deploy", "deploy":
+			// in the case of a build model, listen for a complete to close the stream
+			case "Build", "build":
 
-				deploy := &Deploy{}
+				build := &Build{}
 
-				if err := json.Unmarshal([]byte(entry.Document), deploy); err != nil {
-					ui.LogFatal("[commands deploy] json.Unmarshal() failed ", err)
+				if err := json.Unmarshal([]byte(entry.Document), build); err != nil {
+					ui.LogFatal("[commands build] json.Unmarshal() failed ", err)
 				}
 
-				switch deploy.Status {
-				// once the deploy is 'complete' unsubscribe from mist
+				switch build.Status {
+				// once the build is 'complete' unsubscribe from mist
 				case "compelete":
-					fmt.Printf(stylish.Bullet(fmt.Sprintf("Deploy complete... Navigate to %v.nano.dev to view your app.", config.App)))
+					fmt.Printf(stylish.Bullet(fmt.Sprintf("Build complete... Navigate to %v.nano.dev to view your app.", config.App)))
 					break stream
 
-				// if the deploy is 'errored' unsubscribe from mist
+				// if the build is 'errored' unsubscribe from mist
 				case "errored":
-					fmt.Printf(stylish.Error("deploy failed", "Your deploy failed to... well... deploy..."))
+					fmt.Printf(stylish.Error("build failed", "Your build failed to... well... build..."))
 					break stream
 				}
 
@@ -211,12 +202,5 @@ stream:
 			config.Console.Debug("Nanobox has encountered an Entry with neither a 'log' nor 'model' field and doesnt know what to do...")
 			break stream
 		}
-	}
-}
-
-// printv (print verbose) only prints a message if the 'verbose' flag is passed
-func printv(msg string, verbose bool) {
-	if verbose {
-		fmt.Printf(msg)
 	}
 }
