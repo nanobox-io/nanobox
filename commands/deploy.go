@@ -190,7 +190,7 @@ stream:
 
 				switch deploy.Status {
 				// once the deploy is 'complete' unsubscribe from mist
-				case "compelete":
+				case "complete":
 					fmt.Printf(stylish.Bullet(fmt.Sprintf("Deploy complete... Navigate to %v.nano.dev to view your app.", config.App)))
 					break stream
 
