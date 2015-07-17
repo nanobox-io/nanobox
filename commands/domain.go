@@ -104,8 +104,6 @@ func modifyHosts(mod string) {
 	//
 	if err != nil {
 
-		fmt.Println("ERR??", err)
-
 		// if nanobox doesn't have permission to modify the hosts file, it needs to
 		// request it
 		if perm := os.IsPermission(err); perm == true {
