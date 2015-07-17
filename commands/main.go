@@ -8,7 +8,9 @@
 package commands
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"strings"
@@ -71,17 +73,45 @@ func runVagrantCommand(cmd *exec.Cmd) {
 		ui.LogFatal("[commands.runVagrantCommand] os.Chdir() failed", err)
 	}
 
-	// connect standard in/outputs
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	// create a pipe that we can pipe the cmd standard output's too. The reason this
+	// is done rather than just piping directly to os standard outputs and .Run()ing
+	// the command (vs .Start()ing) is because the output needs to be modified
+	// according to http://nanodocs.gopagoda.io/engines/style-guide
+	//
+	// NOTE: the reason it's done this way vs using the cmd.*Pipe's is so that all
+	// the command output can be read from a single pipe, rather than having to create
+	// a new pipe/scanner for each type of output
+	pr, pw := io.Pipe()
+	defer pr.Close()
+	defer pw.Close()
+
+	// connect standard output
+	// cmd.Stdin = pr
+	cmd.Stdout = pw
+	cmd.Stderr = pw
 
 	//
 	fmt.Printf(stylish.Bullet(fmt.Sprintf("running '%v'", strings.Trim(fmt.Sprint(cmd.Args), "[]"))))
 
-	// run command; if it fails Vagrant will output something and we'll just exit
-	if err := cmd.Run(); err != nil {
-		os.Exit(1)
+	// scan the command output modifying it according to
+	// http://nanodocs.gopagoda.io/engines/style-guide
+	scanner := bufio.NewScanner(pr)
+	go func() {
+		for scanner.Scan() {
+			fmt.Printf("   %s\n", scanner.Text())
+		}
+	}()
+
+	// start the command; we need this to 'fire and forget' so that we can manually
+	// capture and modify the commands output
+	if err := cmd.Start(); err != nil {
+		ui.LogFatal("[commands.runVagrantCommand] cmd.Start() failed", err)
+	}
+
+	// wait for the command to complete/fail and exit, giving us a chance to scan
+	// the output
+	if err := cmd.Wait(); err != nil {
+		ui.LogFatal("[commands.runVagrantCommand] cmd.Wait() failed", err)
 	}
 
 	// switch back to project dir
