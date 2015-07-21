@@ -34,7 +34,6 @@ func (c *SuspendCommand) Run(opts []string) {
 
 	// run 'vagrant suspend'
 	fmt.Printf(stylish.ProcessStart("suspending nanobox vm"))
-	cmd := exec.Command("vagrant", "suspend")
-	runVagrantCommand(cmd)
+	runVagrantCommand(exec.Command("vagrant", "suspend"))
 	fmt.Printf(stylish.ProcessEnd())
 }

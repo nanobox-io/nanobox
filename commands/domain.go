@@ -21,20 +21,17 @@ import (
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
-// DomainCommand satisfies the Command interface
+// DomainCommand satisfies the internalCommand interface
 type DomainCommand struct{}
 
-// Help prints detailed help text for the app list command
-func (c *DomainCommand) Help() {
-	ui.CPrint("Intended for internal use only")
-}
+//
+func (c *DomainCommand) Help() {}
 
-// Run halts the specified virtual machine
+//
 func (c *DomainCommand) Run(opts []string) {
 
 	// flags
 	flags := flag.NewFlagSet("flags", flag.ContinueOnError)
-	flags.Usage = func() { c.Help() }
 
 	var fWrite bool
 	flags.BoolVar(&fWrite, "w", false, "")

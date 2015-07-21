@@ -49,19 +49,14 @@ func (c *HaltCommand) Run(opts []string) {
 		ui.LogFatal("[commands.halt] flags.Parse() failed", err)
 	}
 
-	cmd := &exec.Cmd{}
-
 	// vagrant halt
 	if fForce {
 		stylish.Bullet("Issuing forced halt...")
-		cmd = exec.Command("vagrant", "halt", "--force")
+		runVagrantCommand(exec.Command("vagrant", "halt", "--force"))
 
 		//
 	} else {
 		stylish.Bullet("Issuing confirm halt...")
-		cmd = exec.Command("vagrant", "halt")
+		runVagrantCommand(exec.Command("vagrant", "halt"))
 	}
-
-	// run command
-	runVagrantCommand(cmd)
 }

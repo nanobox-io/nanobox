@@ -34,7 +34,6 @@ func (c *StatusCommand) Run(opts []string) {
 
 	// run 'vagrant status'
 	fmt.Printf(stylish.ProcessStart("requesting nanobox vms"))
-	cmd := exec.Command("vagrant", "status")
-	runVagrantCommand(cmd)
+	runVagrantCommand(exec.Command("vagrant", "status"))
 	fmt.Printf(stylish.ProcessEnd())
 }

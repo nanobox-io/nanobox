@@ -20,27 +20,26 @@ import (
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
-// Commands represents a map of all the available commands that the Pagoda Box
-// CLI can run
+// Commands/subCommands represents a map of all the available nanobox cli commands
 var Commands map[string]Command
 
-// Command represents a Pagoda Box CLI command. Every command must have a Help()
-// and Run() function
+// Command represents a nanobox CLI command
 type Command interface {
 	Help()             // Prints the help text associated with this command
 	Run(opts []string) // Houses the logic that will be run upon calling this command
 }
 
-// init builds the list of available Pagoda Box CLI commands
+// init builds the list of available nanobox commands and sub commands
 func init() {
 
-	// the map of all available commands the Pagoda Box CLI can run
+	// the map of all available nanobox commands
 	Commands = map[string]Command{
 		"build":   &BuildCommand{},
 		"create":  &CreateCommand{},
-		"domain":  &DomainCommand{},
 		"deploy":  &DeployCommand{},
 		"destroy": &DestroyCommand{},
+		"domain":  &DomainCommand{},
+		"enter":   &EnterCommand{},
 		"fetch":   &FetchCommand{},
 		"halt":    &HaltCommand{},
 		"help":    &HelpCommand{},
@@ -50,6 +49,7 @@ func init() {
 		"publish": &PublishCommand{},
 		"reload":  &ReloadCommand{},
 		"resume":  &ResumeCommand{},
+		"run":     &RunCommand{},
 		"ssh":     &SSHCommand{},
 		"status":  &StatusCommand{},
 		"suspend": &SuspendCommand{},
@@ -86,7 +86,6 @@ func runVagrantCommand(cmd *exec.Cmd) {
 	defer pw.Close()
 
 	// connect standard output
-	// cmd.Stdin = pr
 	cmd.Stdout = pw
 	cmd.Stderr = pw
 

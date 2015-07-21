@@ -34,7 +34,6 @@ func (c *ReloadCommand) Run(opts []string) {
 
 	// run 'vagrant reload --provision'
 	fmt.Printf(stylish.ProcessStart("reloading nanobox vm"))
-	cmd := exec.Command("vagrant", "reload", "--provision")
-	runVagrantCommand(cmd)
+	runVagrantCommand(exec.Command("vagrant", "reload", "--provision"))
 	fmt.Printf(stylish.ProcessEnd())
 }

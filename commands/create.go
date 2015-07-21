@@ -72,7 +72,6 @@ func (c *CreateCommand) Run(opts []string) {
 	//
 	// boot the vm
 	fmt.Printf(stylish.ProcessStart("starting nanobox vm"))
-	cmd := exec.Command("vagrant", "up")
-	runVagrantCommand(cmd)
+	runVagrantCommand(exec.Command("vagrant", "up"))
 	fmt.Printf(stylish.ProcessEnd())
 }

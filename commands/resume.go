@@ -34,7 +34,6 @@ func (c *ResumeCommand) Run(opts []string) {
 
 	// run 'vagrant resume'
 	fmt.Printf(stylish.ProcessStart("resuming nanobox vm"))
-	cmd := exec.Command("vagrant", "resume")
-	runVagrantCommand(cmd)
+	runVagrantCommand(exec.Command("vagrant", "resume"))
 	fmt.Printf(stylish.ProcessEnd())
 }

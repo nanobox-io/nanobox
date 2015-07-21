@@ -158,6 +158,12 @@ while [ $(nc -z -w 4 127.0.0.1 1757) ]; do
 done
 SCRIPT
 
+# add the boot2docker user credentials to allow nanobox to freely ssh into the vm
+# w/o requiring a password
+config.ssh.shell = "bash"
+config.ssh.username = "docker"
+config.ssh.password = "tcuser"
+
 Vagrant.configure(2) do |config|
 
   config.vm.define :nanobox_boot2docker do |nanobox|

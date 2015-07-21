@@ -24,24 +24,18 @@ type (
 
 	// BuildCommand satisfies the Command interface for deploying to nanobox
 	BuildCommand struct{}
-
-	// Build
-	Build struct {
-		ID     string `json:"id"`
-		Status string `json:"status"`
-	}
 )
 
 // Help prints detailed help text for the app list command
 func (c *BuildCommand) Help() {
 	ui.CPrint(`
 Description:
-  Issues a build to your nanobox
+  Issues a deploy to your nanobox
 
 Usage:
-  nanobox build
-  nanobox build -v
-  nanobox build -r
+  nanobox deploy
+  nanobox deploy -v
+  nanobox deploy -r
 
 Options:
   -v, --verbose
@@ -52,19 +46,14 @@ Options:
   `)
 }
 
-// Run issues a build to the running nanobox VM
+// Run issues a deploy to the running nanobox VM
 func (c *BuildCommand) Run(opts []string) {
 
 	// flags
 	flags := flag.NewFlagSet("flags", flag.ContinueOnError)
 	flags.Usage = func() { c.Help() }
 
-	//
-	var fReset bool
-	flags.BoolVar(&fReset, "r", false, "")
-	flags.BoolVar(&fReset, "reset", false, "")
-
-	// the verbose flag allows a user to request verbose output during a build. The
+	// the verbose flag allows a user to request verbose output during a deploy. The
 	// default is false
 	var fVerbose bool
 	flags.BoolVar(&fVerbose, "v", false, "")
@@ -86,53 +75,48 @@ func (c *BuildCommand) Run(opts []string) {
 	//
 	// connect the 'mist' client to the 'mist' server
 	if err := client.Connect(); err != nil {
-		ui.LogFatal("[commands build] client.Connect() failed ", err)
+		ui.LogFatal("[commands deploy] client.Connect() failed ", err)
 	}
 	defer client.Close()
 
 	printv(stylish.Bullet("Subscribing to mist..."), fVerbose)
 
-	// subscribe to 'build' updates
-	printv("\n   - Subscribing to app logs", fVerbose)
-	buildSub, err := client.Subscribe([]string{"job", "build"})
+	// subscribe to 'deploy' updates
+	printv(stylish.SubBullet("- Subscribing to app logs"), fVerbose)
+	deploySub, err := client.Subscribe([]string{"job", "deploy"})
 	if err != nil {
-		fmt.Printf(stylish.Warning("Nanobox failed to subscribe to app logs. Your build will continue as normal, and log output is available on your dashboard."))
+		fmt.Printf(stylish.Warning("Nanobox failed to subscribe to app logs. Your deploy will continue as normal, and log output is available on your dashboard."))
 	}
-	defer client.Unsubscribe(buildSub)
+	defer client.Unsubscribe(deploySub)
 
-	// subscribe to the 'build' logs
-	printv("\n   - Subscribing to info logs", fVerbose)
-	infoSub, err := client.Subscribe([]string{"log", "build", "info"})
+	// subscribe to the 'deploy' logs
+	printv(stylish.SubBullet("- Subscribing to info logs"), fVerbose)
+	infoSub, err := client.Subscribe([]string{"log", "deploy", "info"})
 	if err != nil {
-		fmt.Printf(stylish.Warning("Nanobox failed to subscribe to info logs. Your build will continue as normal, and log output is available on your dashboard."))
+		fmt.Printf(stylish.Warning("Nanobox failed to subscribe to info logs. Your deploy will continue as normal, and log output is available on your dashboard."))
 	}
 	defer client.Unsubscribe(infoSub)
 
-	// if the verbose flag is included, also subscribe to the 'debug' build logs
+	// if the verbose flag is included, also subscribe to the 'debug' deploy logs
 	if fVerbose {
-		printv("\n   - Subscribing to debug logs", fVerbose)
-		debugSub, err := client.Subscribe([]string{"log", "build", "debug"})
+		printv(stylish.SubBullet("- Subscribing to debug logs"), fVerbose)
+		debugSub, err := client.Subscribe([]string{"log", "deploy", "debug"})
 		if err != nil {
-			fmt.Printf(stylish.Warning("Nanobox failed to subscribe to debug logs. Your build will continue as normal, and log output is available on your dashboard."))
+			fmt.Printf(stylish.Warning("Nanobox failed to subscribe to debug logs. Your deploy will continue as normal, and log output is available on your dashboard."))
 		}
 		defer client.Unsubscribe(debugSub)
 	}
 
-	printv("   [√] SUCCESS\n", fVerbose)
+	printv(stylish.Success(), fVerbose)
 
 	//
-	// issue a build
+	// issue a deploy
 
 	path := fmt.Sprintf("http://%v:1757/builds", config.Boxfile.IP)
 
-	// if the reset flag is passed append a "reset=true" query string param
-	if fReset {
-		path += "?reset=true"
-	}
-
 	//
 	if err := api.DoRawRequest(nil, "POST", path, nil, nil); err != nil {
-		ui.LogFatal("[commands build] api.DoRawRequest() failed ", err)
+		ui.LogFatal("[commands deploy] api.DoRawRequest() failed ", err)
 	}
 
 	//
@@ -145,13 +129,13 @@ stream:
 		// check for any error message that cause mist to disconnect, and release
 		// nanobox
 		if msg.Tags[0] == "err" {
-			fmt.Printf(stylish.Warning("An unexpected error caused the build stream to disconnect. Your build should continue as normal, and you can see the log output from your dashboard."))
+			fmt.Printf(stylish.Warning("An unexpected error caused the deploy stream to disconnect. Your deploy should continue as normal, and you can see the log output from your dashboard."))
 			break stream
 		}
 
 		//
 		if err := json.Unmarshal([]byte(msg.Data), &entry); err != nil {
-			ui.LogFatal("[commands build] json.Unmarshal() failed", err)
+			ui.LogFatal("[commands deploy] json.Unmarshal() failed", err)
 		}
 
 		// depending on what fields the data has, determines what needs to happen...
@@ -170,22 +154,22 @@ stream:
 			// depending on the type of model, different things may happen...
 			switch entry.Model {
 
-			// in the case of a build model, listen for a complete to close the stream
+			// in the case of a deploy model, listen for a complete to close the stream
 			case "Build", "build":
 
-				build := &Build{}
+				deploy := &Deploy{}
 
-				if err := json.Unmarshal([]byte(entry.Document), build); err != nil {
+				if err := json.Unmarshal([]byte(entry.Document), deploy); err != nil {
 					ui.LogFatal("[commands build] json.Unmarshal() failed ", err)
 				}
 
-				switch build.Status {
-				// once the build is 'complete' unsubscribe from mist
-				case "compelete":
+				switch deploy.Status {
+				// once the deploy is 'complete' unsubscribe from mist
+				case "complete":
 					fmt.Printf(stylish.Bullet(fmt.Sprintf("Build complete... Navigate to %v.nano.dev to view your app.", config.App)))
 					break stream
 
-				// if the build is 'errored' unsubscribe from mist
+				// if the deploy is 'errored' unsubscribe from mist
 				case "errored":
 					fmt.Printf(stylish.Error("build failed", "Your build failed to... well... build..."))
 					break stream
