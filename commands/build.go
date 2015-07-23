@@ -30,12 +30,12 @@ type (
 func (c *BuildCommand) Help() {
 	ui.CPrint(`
 Description:
-  Issues a deploy to your nanobox
+  Issues a build to your nanobox
 
 Usage:
-  nanobox deploy
-  nanobox deploy -v
-  nanobox deploy -r
+  nanobox build
+  nanobox build -v
+  nanobox build -r
 
 Options:
   -v, --verbose
@@ -83,11 +83,11 @@ func (c *BuildCommand) Run(opts []string) {
 
 	// subscribe to 'deploy' updates
 	printv(stylish.SubBullet("- Subscribing to app logs"), fVerbose)
-	deploySub, err := client.Subscribe([]string{"job", "deploy"})
+	buildSub, err := client.Subscribe([]string{"job", "build"})
 	if err != nil {
 		fmt.Printf(stylish.Warning("Nanobox failed to subscribe to app logs. Your deploy will continue as normal, and log output is available on your dashboard."))
 	}
-	defer client.Unsubscribe(deploySub)
+	defer client.Unsubscribe(buildSub)
 
 	// subscribe to the 'deploy' logs
 	printv(stylish.SubBullet("- Subscribing to info logs"), fVerbose)
