@@ -37,7 +37,7 @@ Usage:
 func (c *RunCommand) Run(opts []string) {
 
 	// create an SSH client
-	client, err := ssh.Dial("tcp", config.Boxfile.IP+":22", &ssh.ClientConfig{User: "docker", Auth: []ssh.AuthMethod{ssh.Password("tcuser")}})
+	client, err := ssh.Dial("tcp", config.Nanofile.IP+":22", &ssh.ClientConfig{User: "docker", Auth: []ssh.AuthMethod{ssh.Password("tcuser")}})
 	if err != nil {
 		ui.LogFatal("[commands.service_ssh] ssh.Dial() failed", err)
 	}

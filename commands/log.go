@@ -137,7 +137,7 @@ func (c *LogCommand) Run(opts []string) {
 		fmt.Println("Connecting to live stream...")
 
 		// subscribe to mist
-		client := mist.Client{Host: config.Boxfile.IP, Port: "1445"}
+		client := mist.Client{Host: config.Nanofile.IP, Port: "1445"}
 		if err := client.Connect(); err != nil {
 			ui.LogFatal("[commands deploy] client.Connect() failed ", err)
 		}

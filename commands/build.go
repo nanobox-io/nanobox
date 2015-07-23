@@ -70,7 +70,7 @@ func (c *BuildCommand) Run(opts []string) {
 
 	// create a 'mist' client to communicate with the mist server running on the
 	// guest machine
-	client := mist.Client{Host: config.Boxfile.IP, Port: "1445"}
+	client := mist.Client{Host: config.Nanofile.IP, Port: "1445"}
 
 	//
 	// connect the 'mist' client to the 'mist' server
@@ -112,7 +112,7 @@ func (c *BuildCommand) Run(opts []string) {
 	//
 	// issue a deploy
 
-	path := fmt.Sprintf("http://%v:1757/builds", config.Boxfile.IP)
+	path := fmt.Sprintf("http://%v:1757/builds", config.Nanofile.IP)
 
 	//
 	if err := api.DoRawRequest(nil, "POST", path, nil, nil); err != nil {

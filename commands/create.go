@@ -59,7 +59,7 @@ func (c *CreateCommand) Run(opts []string) {
 	for scanner.Scan() {
 
 		// if an entry with the IP is detected, flag the entry as not needed
-		if strings.HasPrefix(scanner.Text(), config.Boxfile.IP) {
+		if strings.HasPrefix(scanner.Text(), config.Nanofile.IP) {
 			addEntry = false
 		}
 	}

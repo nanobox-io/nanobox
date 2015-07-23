@@ -8,134 +8,70 @@
 package config
 
 import (
-	"encoding/binary"
 	"fmt"
-	"net"
+	"io/ioutil"
+	"os"
+	"path/filepath"
 
-	"github.com/pagodabox/nanobox-boxfile"
+	"github.com/ghodss/yaml"
+
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
-// BoxfileConfig represents all available/expected Boxfile configurable options
-type BoxfileConfig struct {
+type (
+	// BoxfileConfig represents all available/expected Boxfile configurable options
+	BoxfileConfig struct {
+		Build Build //
+	}
 
-	// nanobox specific
-	CPUCap   int
-	CPUs     int
-	Domain   string
-	IP       string
-	RAM      int
-	Provider string
-
-	// build
-	Engine string
-}
+	//
+	Build struct {
+		Engine string `json:"engine"` //
+	}
+)
 
 // ParseBoxfile
-func ParseBoxfile() *BoxfileConfig {
-
-	// default boxfile config options
-	b := &BoxfileConfig{
-
-		// nanobox
-		IP:       appNameToIP(App),
-		Domain:   "nano.dev",
-		Provider: "virtualbox",
-		CPUCap:   50,
-		CPUs:     2,
-		RAM:      512,
-
-		// build options
-		Engine: "",
-	}
-
-	//
-	f := boxfile.NewFromPath(CWDir + "/" + "Boxfile")
-	nanobox := f.Node("nanobox")
-	build := f.Node("build")
-
-	//
+func ParseBoxfile() (*BoxfileConfig, error) {
 	fmt.Printf(stylish.Bullet("Parsing Boxfile"))
 
-	//
-	// if provider := nanobox.StringValue("provider"); provider != "" {
-	//  fmt.Printf(stylish.Bullet(fmt.Sprintf("   - Custom Provider detected (%v)", provider)))
-	// 	b.Provider = provider
-	// }
+	// create a default BoxfileConfig
+	bc := BoxfileConfig{}
 
-	//
-	if domain := nanobox.StringValue("domain"); domain != "" {
-		fmt.Printf(stylish.Bullet(fmt.Sprintf("   - Custom domain detected (%v)", domain)))
-		b.Domain = domain
+	path := "./Boxfile"
+
+	// look for a local .nanofile first...
+	if fi, _ := os.Stat(path); fi != nil {
+		return &bc, parseBoxfile(path, &bc)
 	}
 
 	//
-	if ram := nanobox.IntValue("ram"); ram != 0 {
-
-		// use specified RAM if it's greater than the default. Otherwise warn that
-		// default will be used.
-		switch {
-		case ram >= b.RAM:
-			fmt.Printf(stylish.Bullet(fmt.Sprintf("   - Custom RAM setting detected (%v)", ram)))
-			b.RAM = ram
-		default:
-			Console.Warn("Specified RAM (%v) is less than allowed default (%v), Using default...", ram, b.RAM)
-		}
-	}
-
-	//
-	if cpus := nanobox.IntValue("cpus"); cpus != 0 {
-
-		// use specified CPUs if it's greater than the default. Otherwise warn that
-		// default will be used.
-		switch {
-		case cpus >= b.CPUs:
-			fmt.Printf(stylish.Bullet(fmt.Sprintf("   - Custom CPU setting detected (%v)", cpus)))
-			b.CPUs = cpus
-		default:
-			Console.Warn("Specified CPUs (%v) is less than allowed default (%v), Using default...", cpus, b.CPUs)
-		}
-	}
-
-	//
-	if cpuCap := nanobox.IntValue("cpu_cap"); cpuCap != 0 {
-
-		// use specified CPU cap if it's greater than the default. Otherwise warn that
-		// default will be used.
-		switch {
-		case cpuCap <= b.CPUCap:
-			fmt.Printf(stylish.Bullet(fmt.Sprintf("   - Custom custom CPU cap detected (%v)", cpuCap)))
-			b.CPUCap = cpuCap
-		default:
-			Console.Warn("Specified CPU cap (%v) is more than allowed default (%v), Using default...", cpuCap, b.CPUCap)
-		}
-	}
-
-	//
-	if engine := build.StringValue("engine"); engine != "" {
-		fmt.Printf(stylish.Bullet(fmt.Sprintf("   - Engine detected (%v)", engine)))
-		b.Engine = engine
-	}
-
-	return b
-
+	fmt.Printf(stylish.SubBullet("- Using default configuration..."))
+	fmt.Printf(stylish.Success())
+	return &bc, nil
 }
 
-// appNameToIP generates an IPv4 address based off the app name for use as a
-// vagrant private_network IP.
-func appNameToIP(name string) string {
+// parseBoxfile
+func parseBoxfile(file string, bc *BoxfileConfig) error {
 
-	var sum uint32 = 0
-	var network uint32 = 2886729728 // 172.16.0.0 network
+	fmt.Printf(stylish.SubBullet("- Configuring..."))
 
-	for _, value := range []byte(name) {
-		sum += uint32(value)
+	fp, err := filepath.Abs(file)
+	if err != nil {
+		return err
 	}
 
-	ip := make(net.IP, 4)
+	//
+	f, err := ioutil.ReadFile(fp)
+	if err != nil {
+		return err
+	}
 
-	// convert app name into a private network IP
-	binary.BigEndian.PutUint32(ip, (network + sum))
+	//
+	if err := yaml.Unmarshal(f, bc); err != nil {
+		return fmt.Errorf("Nanobox failed to parse your Boxfile. Please ensure it is valid YAML and try again.")
+	}
 
-	return ip.String()
+	fmt.Printf(stylish.Success())
+
+	return nil
 }

@@ -90,7 +90,7 @@ func (c *DeployCommand) Run(opts []string) {
 
 	// create a 'mist' client to communicate with the mist server running on the
 	// guest machine
-	client := mist.Client{Host: config.Boxfile.IP, Port: "1445"}
+	client := mist.Client{Host: config.Nanofile.IP, Port: "1445"}
 
 	//
 	// connect the 'mist' client to the 'mist' server
@@ -132,7 +132,7 @@ func (c *DeployCommand) Run(opts []string) {
 	//
 	// issue a deploy
 
-	path := fmt.Sprintf("http://%v:1757/deploys", config.Boxfile.IP)
+	path := fmt.Sprintf("http://%v:1757/deploys", config.Nanofile.IP)
 
 	// if the reset flag is passed append a "reset=true" query string param
 	if fReset {

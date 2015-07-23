@@ -16,6 +16,7 @@ import (
 	api "github.com/pagodabox/nanobox-api-client"
 	"github.com/pagodabox/nanobox-cli/commands"
 	"github.com/pagodabox/nanobox-cli/config"
+	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
 // init
@@ -24,7 +25,7 @@ func init() {
 	// idempotent install
 	config.Console.Debug("Verifying install...")
 	if err := install(); err != nil {
-		config.Console.Fatal("Failed to install! Exiting... %v", err)
+		config.Console.Fatal("Failed to install! Exiting...", err)
 		os.Exit(1)
 	}
 
@@ -32,7 +33,7 @@ func init() {
 	config.Console.Debug("Creating logger...")
 	logger, err := lumber.NewFileLogger(config.LogFile, config.LogLevel, lumber.ROTATE, 100, 1, 100)
 	if err != nil {
-		config.Console.Fatal("Failed to create logger! Exiting... %v", err)
+		config.Console.Fatal("Failed to create logger! Exiting...", err)
 		os.Exit(1)
 	}
 
@@ -44,9 +45,17 @@ func init() {
 		api.Debug = true
 	}
 
-	//
-	config.Console.Debug("Parsing Boxfile...")
-	config.Boxfile = config.ParseBoxfile()
+	// parse the boxfile
+	config.Boxfile, err = config.ParseBoxfile()
+	if err != nil {
+		fmt.Printf(stylish.Error("failed to parse Boxfile", err.Error()))
+	}
+
+	// parse the nanofile
+	config.Nanofile, err = config.ParseNanofile()
+	if err != nil {
+		fmt.Printf(stylish.Error("failed to parse .nanofile", err.Error()))
+	}
 }
 
 // main

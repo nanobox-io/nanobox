@@ -35,7 +35,7 @@ Usage:
 func (c *EnterCommand) Run(opts []string) {
 
 	// create an SSH client
-	client, err := ssh.Dial("tcp", config.Boxfile.IP+":22", &ssh.ClientConfig{User: "docker", Auth: []ssh.AuthMethod{ssh.Password("tcuser")}})
+	client, err := ssh.Dial("tcp", config.Nanofile.IP+":22", &ssh.ClientConfig{User: "docker", Auth: []ssh.AuthMethod{ssh.Password("tcuser")}})
 	if err != nil {
 		ui.LogFatal("[commands.service_ssh] ssh.Dial() failed", err)
 	}
@@ -68,15 +68,15 @@ func (c *EnterCommand) Run(opts []string) {
 
 	cmd := `
 docker \
-  run \
-    -it \
-    --rm \
-    -v /mnt/sda/var/nanobox/deploy/:/data/ \
-    -v /vagrant/code/nanobox-ruby-sample/:/code/ \
-    -w /code \
-    -e PATH=/data/sbin:/data/bin:/opt/gonano/sbin:/opt/gonano/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
-    nanobox/build \
-    /bin/bash`
+	run \
+	  -it \
+	  --rm \
+	  -v /mnt/sda/var/nanobox/deploy/:/data/ \
+	  -v /vagrant/code/nanobox-ruby-sample/:/code/ \
+	  -w /code \
+	  -e PATH=/data/sbin:/data/bin:/opt/gonano/sbin:/opt/gonano/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin \
+	  nanobox/build \
+	  /bin/bash`
 
 	// run a command
 	if err := session.Run(cmd); err != nil {

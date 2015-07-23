@@ -58,7 +58,7 @@ func (c *DomainCommand) Run(opts []string) {
 
 	// write the entry to the hosts file
 	case fWrite:
-		entry := fmt.Sprintf("\n%-15v   %s.%s # '%v' private network (added by nanobox)", config.Boxfile.IP, config.App, config.Boxfile.Domain, config.App)
+		entry := fmt.Sprintf("\n%-15v   %s.%s # '%v' private network (added by nanobox)", config.Nanofile.IP, config.App, config.Nanofile.Domain, config.App)
 
 		if _, err := f.WriteString(entry); err != nil {
 			ui.LogFatal("[commands.domain] WriteString() failed", err)
@@ -77,7 +77,7 @@ func (c *DomainCommand) Run(opts []string) {
 
 			// if the line doesn't contain the entry add it back to what is going to be
 			// re-written to the file
-			if !strings.HasPrefix(scanner.Text(), config.Boxfile.IP) {
+			if !strings.HasPrefix(scanner.Text(), config.Nanofile.IP) {
 				contents += fmt.Sprintf("%s\n", scanner.Text())
 			}
 		}
@@ -105,7 +105,7 @@ func modifyHosts(mod string) {
 		// request it
 		if perm := os.IsPermission(err); perm == true {
 
-			entry := fmt.Sprintf("%-15v   %s # '%v' private network (added by nanobox)", config.Boxfile.IP, config.Boxfile.Domain, config.App)
+			entry := fmt.Sprintf("%-15v   %s # '%v' private network (added by nanobox)", config.Nanofile.IP, config.Nanofile.Domain, config.App)
 
 			//
 			switch mod {

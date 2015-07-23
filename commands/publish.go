@@ -94,7 +94,7 @@ func (c *PublishCommand) Run(opts []string) {
 
 	stylish.Header("publishing engine")
 
-	// look for a Enginefile to parse
+	// look for an Enginefile to parse
 	fmt.Printf(stylish.Bullet("Parsing Enginefile"))
 	fi, err := os.Stat("./Enginefile")
 	if err != nil {

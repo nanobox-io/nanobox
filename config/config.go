@@ -45,7 +45,8 @@ var (
 	Version *semver.Version
 
 	//
-	Boxfile *BoxfileConfig
+	Boxfile  *BoxfileConfig
+	Nanofile *NanofileConfig
 )
 
 // Init sets up a HomeDir, and NanoDir
