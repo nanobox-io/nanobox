@@ -55,6 +55,7 @@ func init() {
 		"suspend": &SuspendCommand{},
 		"up":      &UpCommand{},
 		"update":  &UpdateCommand{},
+		"watch":   &WatchCommand{},
 	}
 }
 
