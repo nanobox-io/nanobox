@@ -24,10 +24,10 @@ import (
 // DomainCommand satisfies the internalCommand interface
 type DomainCommand struct{}
 
-//
+// Help
 func (c *DomainCommand) Help() {}
 
-//
+// Run
 func (c *DomainCommand) Run(opts []string) {
 
 	// flags

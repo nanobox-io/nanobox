@@ -41,7 +41,7 @@ type (
 	}
 )
 
-// Help prints detailed help text for the app list command
+// Help
 func (c *DeployCommand) Help() {
 	ui.CPrint(`
 Description:

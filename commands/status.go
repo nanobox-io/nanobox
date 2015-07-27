@@ -18,7 +18,7 @@ import (
 // StatusCommand satisfies the Command interface
 type StatusCommand struct{}
 
-// Help prints detailed help text for the app list command
+// Help
 func (c *StatusCommand) Help() {
 	ui.CPrint(`
 Description:

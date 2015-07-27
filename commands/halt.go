@@ -18,7 +18,7 @@ import (
 // HaltCommand satisfies the Command interface
 type HaltCommand struct{}
 
-// Help prints detailed help text for the app list command
+// Help
 func (c *HaltCommand) Help() {
 	ui.CPrint(`
 Description:

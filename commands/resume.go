@@ -18,7 +18,7 @@ import (
 // ResumeCommand satisfies the Command interface
 type ResumeCommand struct{}
 
-// Help prints detailed help text for the app list command
+// Help
 func (c *ResumeCommand) Help() {
 	ui.CPrint(`
 Description:

@@ -20,7 +20,7 @@ import (
 // NewCommand satisfies the Command interface
 type NewCommand struct{}
 
-// Help prints detailed help text for the app list command
+// Help
 func (c *NewCommand) Help() {
 	ui.CPrint(`
 Description:
@@ -36,7 +36,7 @@ Usage:
   `)
 }
 
-// Run destroys the specified virtual machine
+// Run
 func (c *NewCommand) Run(opts []string) {
 
 	if len(opts) < 1 {

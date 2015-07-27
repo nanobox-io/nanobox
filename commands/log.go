@@ -71,7 +71,7 @@ func (l Logs) Swap(i, j int) {
 	l[i], l[j] = l[j], l[i]
 }
 
-// Help prints detailed help text for the app log command
+// Help
 func (c *LogCommand) Help() {
 	ui.CPrint(`
 Description:
@@ -106,9 +106,7 @@ Options:
   `)
 }
 
-// Run attempts to display an app's logs. It takes count flag to designate how
-// many logs to print, and a stream flag to indicate the live stream rather than
-// historical. Logs are prased, colorized and printed to the terminal
+// Run
 func (c *LogCommand) Run(opts []string) {
 
 	// flags

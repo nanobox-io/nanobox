@@ -8,16 +8,15 @@
 package commands
 
 import (
-	// "fmt"
+	"flag"
 
-	// "github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-cli/ui"
 )
 
 // UpCommand satisfies the Command interface
 type UpCommand struct{}
 
-// Help prints detailed help text for the app list command
+// Help
 func (c *UpCommand) Help() {
 	ui.CPrint(`
 Description:
@@ -28,14 +27,32 @@ Usage:
   `)
 }
 
-// Run creates the specified virtual machine
+// Run creates the specified virtual machine and issues a deploy to it
 func (c *UpCommand) Run(opts []string) {
+
+	// flags
+	flags := flag.NewFlagSet("flags", flag.ContinueOnError)
+	flags.Usage = func() { c.Help() }
+
+	var fWatch bool
+	flags.BoolVar(&fWatch, "w", false, "")
+	flags.BoolVar(&fWatch, "watch", false, "")
+
+	if err := flags.Parse(opts); err != nil {
+		ui.LogFatal("[commands.destroy] flags.Parse() failed", err)
+	}
 
 	// run a create command to create a Vagrantfile and boot the VM...
 	create := CreateCommand{}
 	create.Run(opts)
 
-	// ...create a deploy
+	// ...issue a deploy...
 	deploy := DeployCommand{}
 	deploy.Run(opts)
+
+	// ...begin watching the file system for changes
+	if fWatch {
+		watch := WatchCommand{}
+		watch.Run(opts)
+	}
 }

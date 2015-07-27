@@ -25,7 +25,7 @@ type (
 	FetchCommand struct{}
 )
 
-// Help prints detailed help text for the app list command
+// Help
 func (c *FetchCommand) Help() {
 	ui.CPrint(`
 Description:
@@ -39,7 +39,7 @@ Usage:
   `)
 }
 
-// Run displays select information about all of a user's apps
+// Run
 func (c *FetchCommand) Run(opts []string) {
 
 	// check for auth

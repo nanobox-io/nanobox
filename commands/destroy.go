@@ -21,7 +21,7 @@ import (
 // DestroyCommand satisfies the Command interface
 type DestroyCommand struct{}
 
-// Help prints detailed help text for the app list command
+// Help
 func (c *DestroyCommand) Help() {
 	ui.CPrint(`
 Description:

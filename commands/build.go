@@ -26,7 +26,7 @@ type (
 	BuildCommand struct{}
 )
 
-// Help prints detailed help text for the app list command
+// Help
 func (c *BuildCommand) Help() {
 	ui.CPrint(`
 Description:
@@ -46,7 +46,7 @@ Options:
   `)
 }
 
-// Run issues a deploy to the running nanobox VM
+// Run issues a build to the running nanobox VM
 func (c *BuildCommand) Run(opts []string) {
 
 	// flags

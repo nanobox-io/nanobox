@@ -18,7 +18,7 @@ import (
 // ReloadCommand satisfies the Command interface
 type ReloadCommand struct{}
 
-// Help prints detailed help text for the app list command
+// Help
 func (c *ReloadCommand) Help() {
 	ui.CPrint(`
 Description:
@@ -29,7 +29,7 @@ Usage:
   `)
 }
 
-// Run resumes the specified virtual machine
+// Run reloads the specified virtual machine
 func (c *ReloadCommand) Run(opts []string) {
 
 	// run 'vagrant reload --provision'

@@ -20,7 +20,7 @@ import (
 // EnterCommand satisfies the Command interface
 type EnterCommand struct{}
 
-// Help prints detailed help text for the app list command
+// Help
 func (c *EnterCommand) Help() {
 	ui.CPrint(`
 Description:
@@ -31,7 +31,7 @@ Usage:
   `)
 }
 
-// Run resumes the specified virtual machine
+// Run
 func (c *EnterCommand) Run(opts []string) {
 
 	// create an SSH client

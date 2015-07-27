@@ -15,36 +15,36 @@ import (
 
 	"github.com/go-fsnotify/fsnotify"
 
-	// "github.com/pagodabox/nanobox-cli/config"
+	"github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-cli/ui"
-	// "github.com/pagodabox/nanobox-golang-stylish"
+	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
 // WatchCommand satisfies the Command interface
-type WatchCommand struct{}
+type WatchCommand struct {
+	watcher *fsnotify.Watcher
+}
 
-// Help prints detailed help text for the app list command
+// Help
 func (c *WatchCommand) Help() {}
 
-var watcher *fsnotify.Watcher
-
-// Run resumes the specified virtual machine
+// Run
 func (c *WatchCommand) Run(opts []string) {
 
-	watcher, _ = fsnotify.NewWatcher()
-	// if err != nil {
-	// 	fmt.Println("BONK!", err)
-	// }
-	defer watcher.Close()
+	// create and assign a new watcher
+	if watcher, err := fsnotify.NewWatcher(); err != nil {
+		ui.LogFatal("[commands.watch] fsnotify.NewWatcher() failed", err)
+	} else {
+		c.watcher = watcher
+	}
+	defer c.watcher.Close()
 
-	watch := config.CWDir
-
-	fmt.Println("WATCHING AT:", watch)
+	fmt.Printf(stylish.Bullet(fmt.Sprintf("Watching for chages at '%v'", config.CWDir)))
 
 	// starting at the root of the project, walk each file/directory searching for
 	// directories
-	if err := filepath.Walk(watch, watchDir); err != nil {
-		ui.LogFatal("[commands.publish] filepath.Walk() failed", err)
+	if err := filepath.Walk(config.CWDir, c.watchDir); err != nil {
+		ui.LogFatal("[commands.watch] filepath.Walk() failed", err)
 	}
 
 	//
@@ -56,27 +56,37 @@ func (c *WatchCommand) Run(opts []string) {
 			select {
 
 			// watch for events
-			case event := <-watcher.Events:
-				fmt.Printf("EVENT! %#v\n", event)
+			case event := <-c.watcher.Events:
+				fmt.Println("EVENT!", event)
+				fmt.Println("OP!", event.Op)
 
-				base := filepath.Base(event.Name)
+				// don't care about chmod updates
+				if event.Op != fsnotify.Chmod {
+					fmt.Println("HERE?")
 
-				fmt.Println("BASE!", base)
+					// if the file changes is the Boxfile do a full deploy...
+					if filepath.Base(event.Name) == "Boxfile" {
+						fmt.Printf(stylish.Bullet("Watcher issuing deploy"))
+						deploy := DeployCommand{}
+						deploy.Run(opts)
 
-				// if the name of the file is the type of  file I'm looking for (in this
-				// case a 'Boxfile'), then do a full deploy otherwise do a build
-				if base == "Boxfile" {
-					fmt.Println("DO DEPLOY!")
-				} else {
-					fmt.Println("DO BUILD!")
+						// ...otherwise just build
+					} else {
+						fmt.Printf(stylish.Bullet("Watcher issuing build"))
+						build := BuildCommand{}
+						build.Run(opts)
+					}
 				}
 
 				// watch for errors
-			case err := <-watcher.Errors:
+			case err := <-c.watcher.Errors:
 				fmt.Println("ERROR!", err)
+
 			}
 		}
 	}()
+
+	fmt.Println("BEFORE DONE?")
 
 	<-done
 
@@ -84,14 +94,12 @@ func (c *WatchCommand) Run(opts []string) {
 }
 
 // watchDir gets run as a walk func, searching for directories to add watchers to
-func watchDir(path string, fi os.FileInfo, err error) error {
-	fmt.Println("FILE!", path)
+func (c *WatchCommand) watchDir(path string, fi os.FileInfo, err error) error {
 
 	// since fsnotify can watch all the files in a directory, watchers only need
 	// to be added to each nested directory
 	if fi.Mode().IsDir() {
-		fmt.Println("ADDING WATCHER TO: ", path)
-		if err = watcher.Add(path); err != nil {
+		if err = c.watcher.Add(path); err != nil {
 			return err
 		}
 	}

@@ -25,7 +25,7 @@ import (
 // UpdateCommand satisfies the Command interface for obtaining user info
 type UpdateCommand struct{}
 
-// Help prints detailed help text for the user command
+// Help
 func (c *UpdateCommand) Help() {
 	ui.CPrint(`
 Description:
@@ -38,7 +38,7 @@ Usage:
   `)
 }
 
-// Run gets the current user and prints out select information to the terminal
+// Run
 func (c *UpdateCommand) Run(opts []string) {
 
 	fmt.Println("Updating...")

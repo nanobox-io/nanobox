@@ -22,7 +22,7 @@ import (
 // CreateCommand satisfies the Command interface
 type CreateCommand struct{}
 
-// Help prints detailed help text for the app list command
+// Help
 func (c *CreateCommand) Help() {
 	ui.CPrint(`
 Description:

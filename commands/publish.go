@@ -31,7 +31,9 @@ import (
 type (
 
 	// PublishCommand satisfies the Command interface for listing a user's apps
-	PublishCommand struct{}
+	PublishCommand struct {
+		tw *tar.Writer
+	}
 
 	// Object is returned from warehouse
 	Object struct {
@@ -44,7 +46,7 @@ type (
 	}
 )
 
-// Help prints detailed help text for the app list command
+// Help
 func (c *PublishCommand) Help() {
 	ui.CPrint(`
 Description:
@@ -55,10 +57,7 @@ Usage:
   `)
 }
 
-//
-var tw *tar.Writer
-
-// Run displays select information about all of a user's apps
+// Run
 func (c *PublishCommand) Run(opts []string) {
 
 	// check for auth
@@ -182,7 +181,7 @@ func (c *PublishCommand) Run(opts []string) {
 	gzw := gzip.NewWriter(mw)
 
 	//
-	tw = tar.NewWriter(gzw)
+	c.tw = tar.NewWriter(gzw)
 
 	//
 	wg := &sync.WaitGroup{}
@@ -195,7 +194,7 @@ func (c *PublishCommand) Run(opts []string) {
 		// defer is LIFO
 		defer pw.Close()
 		defer gzw.Close()
-		defer tw.Close()
+		defer c.tw.Close()
 
 		for _, pf := range release.ProjectFiles {
 
@@ -203,13 +202,13 @@ func (c *PublishCommand) Run(opts []string) {
 
 				// if its a directory, walk the directory taring each file
 				if stat.Mode().IsDir() {
-					if err := filepath.Walk(pf, tarDir); err != nil {
+					if err := filepath.Walk(pf, c.tarDir); err != nil {
 						ui.LogFatal("[commands.publish] filepath.Walk() failed", err)
 					}
 
 					// if its a file tar it
 				} else {
-					tarFile(pf)
+					c.tarFile(pf)
 				}
 			}
 		}
@@ -258,12 +257,12 @@ func (c *PublishCommand) Run(opts []string) {
 }
 
 // tarDir
-func tarDir(path string, fi os.FileInfo, err error) error {
+func (c *PublishCommand) tarDir(path string, fi os.FileInfo, err error) error {
 	if fi.Mode().IsDir() {
 		return nil
 	}
 
-	if err := tarFile(path); err != nil {
+	if err := c.tarFile(path); err != nil {
 		return err
 	}
 
@@ -271,7 +270,7 @@ func tarDir(path string, fi os.FileInfo, err error) error {
 }
 
 // tarFile
-func tarFile(path string) error {
+func (c *PublishCommand) tarFile(path string) error {
 
 	// open the file/dir...
 	f, err := os.Open(path)
@@ -292,12 +291,12 @@ func tarFile(path string) error {
 		}
 
 		// write the header to the tarball archive
-		if err := tw.WriteHeader(header); err != nil {
+		if err := c.tw.WriteHeader(header); err != nil {
 			return err
 		}
 
 		// copy the file data to the tarball
-		if _, err := io.Copy(tw, f); err != nil {
+		if _, err := io.Copy(c.tw, f); err != nil {
 			return err
 		}
 	}

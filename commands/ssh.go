@@ -18,7 +18,7 @@ import (
 // SSHCommand satisfies the Command interface
 type SSHCommand struct{}
 
-// Help prints detailed help text for the app list command
+// Help
 func (c *SSHCommand) Help() {
 	ui.CPrint(`
 Description:
@@ -29,7 +29,7 @@ Usage:
   `)
 }
 
-// Run resumes the specified virtual machine
+// Run
 func (c *SSHCommand) Run(opts []string) {
 
 	// run 'vagrant ssh'

@@ -41,7 +41,7 @@ func ParseNanofile() (*NanofileConfig, error) {
 		Domain:   "nano.dev",
 		IP:       appNameToIP(App),
 		Provider: "virtualbox",
-		RAM:      512,
+		RAM:      1024,
 	}
 
 	path := "./.nanofile"

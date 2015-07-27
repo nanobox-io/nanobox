@@ -22,7 +22,7 @@ import (
 // RunCommand satisfies the Command interface
 type RunCommand struct{}
 
-// Help prints detailed help text for the app list command
+// Help
 func (c *RunCommand) Help() {
 	ui.CPrint(`
 Description:
@@ -33,7 +33,7 @@ Usage:
   `)
 }
 
-// Run resumes the specified virtual machine
+// Run
 func (c *RunCommand) Run(opts []string) {
 
 	// create an SSH client
