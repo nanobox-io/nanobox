@@ -23,10 +23,9 @@ type (
 
 	//
 	Service struct {
-		CreatedAt time.Time `json:"created_at"`
-		IP        string    `json:"id"`
-		Name      string    `json:"name"`
-		Port      string    `json:"tunnel_port"`
+		CreatedAt time.Time
+		Name      string
+		Port      int
 	}
 )
 
@@ -55,9 +54,9 @@ func (c *TunnelCommand) Run(opts []string) {
 
 	//
 	fmt.Println(`
-Service         |       IP        |      Port       |      Created
+Service         |                 DOMAIN                   |      Port
 --------------------------------------------------------------------------------`)
 	for _, service := range services {
-		fmt.Printf("%-15s | %-15s | %-15s | %-25s\n", service.Name, service.IP, service.Port, service.CreatedAt.Format("01.02.06 (15:04:05) MST"))
+		fmt.Printf("%-15s | %-40s | %-15v\n", service.Name, config.Nanofile.Domain, service.Port) //, service.CreatedAt.Format("01.02.06 (15:04:05) MST"))
 	}
 }

@@ -38,7 +38,7 @@ func ParseNanofile() (*NanofileConfig, error) {
 	nc := NanofileConfig{
 		CPUCap:   50,
 		CPUs:     2,
-		Domain:   "nano.dev",
+		Domain:   fmt.Sprintf("%v.nano.dev", App),
 		IP:       appNameToIP(App),
 		Provider: "virtualbox",
 		RAM:      1024,
