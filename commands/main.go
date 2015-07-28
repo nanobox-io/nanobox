@@ -35,11 +35,12 @@ func init() {
 	// the map of all available nanobox commands
 	Commands = map[string]Command{
 		"build":   &BuildCommand{},
+		"console": &ConsoleCommand{},
 		"create":  &CreateCommand{},
 		"deploy":  &DeployCommand{},
 		"destroy": &DestroyCommand{},
 		"domain":  &DomainCommand{},
-		"enter":   &EnterCommand{},
+		"exec":    &ExecCommand{},
 		"fetch":   &FetchCommand{},
 		"halt":    &HaltCommand{},
 		"help":    &HelpCommand{},
@@ -49,7 +50,6 @@ func init() {
 		"publish": &PublishCommand{},
 		"reload":  &ReloadCommand{},
 		"resume":  &ResumeCommand{},
-		"run":     &RunCommand{},
 		"ssh":     &SSHCommand{},
 		"status":  &StatusCommand{},
 		"suspend": &SuspendCommand{},

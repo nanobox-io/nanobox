@@ -48,11 +48,6 @@ func (c *WatchCommand) Run(opts []string) {
 		ui.LogFatal("[commands.watch] filepath.Walk() failed", err)
 	}
 
-	//
-	// done := make(chan bool)
-
-	//
-	// go func() {
 	for {
 		select {
 
@@ -64,13 +59,13 @@ func (c *WatchCommand) Run(opts []string) {
 
 				// if the file changes is the Boxfile do a full deploy...
 				if filepath.Base(event.Name) == "Boxfile" {
-					fmt.Printf(stylish.Bullet("Watcher issuing deploy"))
+					fmt.Printf(stylish.Bullet("Issuing deploy"))
 					deploy := DeployCommand{}
 					deploy.Run(opts)
 
 					// ...otherwise just build
 				} else {
-					fmt.Printf(stylish.Bullet("Watcher issuing build"))
+					fmt.Printf(stylish.Bullet("Issuing build"))
 					build := BuildCommand{}
 					build.Run(opts)
 				}
@@ -81,9 +76,6 @@ func (c *WatchCommand) Run(opts []string) {
 			fmt.Println("WATCH ERROR!", err)
 		}
 	}
-	// }()
-
-	// <-done
 }
 
 // watchDir gets run as a walk func, searching for directories to add watchers to
