@@ -40,6 +40,7 @@ func (c *WatchCommand) Run(opts []string) {
 	defer c.watcher.Close()
 
 	fmt.Printf(stylish.Bullet(fmt.Sprintf("Watching for chages at '%v'", config.CWDir)))
+	fmt.Printf(stylish.SubBullet("(Ctrl + c to quit)"))
 
 	// starting at the root of the project, walk each file/directory searching for
 	// directories
@@ -48,49 +49,41 @@ func (c *WatchCommand) Run(opts []string) {
 	}
 
 	//
-	done := make(chan bool)
+	// done := make(chan bool)
 
 	//
-	go func() {
-		for {
-			select {
+	// go func() {
+	for {
+		select {
 
-			// watch for events
-			case event := <-c.watcher.Events:
-				fmt.Println("EVENT!", event)
-				fmt.Println("OP!", event.Op)
+		// watch for events
+		case event := <-c.watcher.Events:
 
-				// don't care about chmod updates
-				if event.Op != fsnotify.Chmod {
-					fmt.Println("HERE?")
+			// don't care about chmod updates
+			if event.Op != fsnotify.Chmod {
 
-					// if the file changes is the Boxfile do a full deploy...
-					if filepath.Base(event.Name) == "Boxfile" {
-						fmt.Printf(stylish.Bullet("Watcher issuing deploy"))
-						deploy := DeployCommand{}
-						deploy.Run(opts)
+				// if the file changes is the Boxfile do a full deploy...
+				if filepath.Base(event.Name) == "Boxfile" {
+					fmt.Printf(stylish.Bullet("Watcher issuing deploy"))
+					deploy := DeployCommand{}
+					deploy.Run(opts)
 
-						// ...otherwise just build
-					} else {
-						fmt.Printf(stylish.Bullet("Watcher issuing build"))
-						build := BuildCommand{}
-						build.Run(opts)
-					}
+					// ...otherwise just build
+				} else {
+					fmt.Printf(stylish.Bullet("Watcher issuing build"))
+					build := BuildCommand{}
+					build.Run(opts)
 				}
-
-				// watch for errors
-			case err := <-c.watcher.Errors:
-				fmt.Println("ERROR!", err)
-
 			}
+
+			// watch for errors
+		case err := <-c.watcher.Errors:
+			fmt.Println("WATCH ERROR!", err)
 		}
-	}()
+	}
+	// }()
 
-	fmt.Println("BEFORE DONE?")
-
-	<-done
-
-	fmt.Println("DONE!")
+	// <-done
 }
 
 // watchDir gets run as a walk func, searching for directories to add watchers to

@@ -13,13 +13,12 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"runtime"
 
 	"github.com/kardianos/osext"
 
-	"github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-cli/ui"
+	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
 // UpdateCommand satisfies the Command interface for obtaining user info
@@ -29,7 +28,7 @@ type UpdateCommand struct{}
 func (c *UpdateCommand) Help() {
 	ui.CPrint(`
 Description:
-  Update the CLI to the most recently released version.
+  Updates the nanobox CLI to the latest version
 
 Usage:
   pagoda update
@@ -41,13 +40,7 @@ Usage:
 // Run
 func (c *UpdateCommand) Run(opts []string) {
 
-	fmt.Println("Updating...")
-
-	//
-	program := os.Args[0]
-
-	//
-	config.Console.Info("[commands.update] Program: %v", program)
+	fmt.Printf(stylish.Bullet("Updating nanobox CLI..."))
 
 	//
 	path, err := osext.Executable()
@@ -56,15 +49,13 @@ func (c *UpdateCommand) Run(opts []string) {
 	}
 
 	//
-	config.Console.Info("[commands.update] Path: %v", path)
+	fmt.Printf(stylish.SubBullet(fmt.Sprintf("Nanobox CLI found running at %v", path)))
 
 	// download a new CLI from s3 that matches their os and arch
 	download := fmt.Sprintf("https://s3-us-west-2.amazonaws.com/tools.nanobox.io/cli/%v/%v/nanobox", runtime.GOOS, runtime.GOARCH)
 
-	//
-	config.Console.Info("[commands.update] Downloading new CLI from %v", download)
-
 	// create a new request
+	fmt.Printf(stylish.SubBullet(fmt.Sprintf("Downloading latest CLI from %v", download)))
 	req, err := http.NewRequest("GET", download, nil)
 	if err != nil {
 		ui.LogFatal("[commands.update] http.NewRequest() failed", err)
@@ -105,14 +96,14 @@ func (c *UpdateCommand) Run(opts []string) {
 
 		defer res.Body.Close()
 	}
-	ui.CPrint("\rDownloading... [green]success[reset]                           ")
+	ui.CPrint("\rDownloading... [green]success[reset]")
 
 	//
-	fmt.Println("Writing to", path)
+	fmt.Printf(stylish.SubBullet(fmt.Sprintf("Replacing CLI at %v", path)))
 	ioutil.WriteFile(path, buf.Bytes(), 0755)
 
 	//
-	fmt.Println("Update successful!")
+	fmt.Println(stylish.Success())
 
 	//
 	// config.Console.Debug("[commands.update] command: %v, args: %+v", os.Args[0], os.Args[1:])
