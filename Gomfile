@@ -1,5 +1,4 @@
 gom 'code.google.com/p/go-semver/version'
-gom 'code.google.com/p/go.crypto/ssh'
 gom 'code.google.com/p/gopass'
 gom 'github.com/Sirupsen/logrus'
 gom 'github.com/docker/docker/pkg/signal'
