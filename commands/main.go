@@ -53,6 +53,7 @@ func init() {
 		"ssh":     &SSHCommand{},
 		"status":  &StatusCommand{},
 		"suspend": &SuspendCommand{},
+		"tunnel":  &TunnelCommand{},
 		"up":      &UpCommand{},
 		"update":  &UpdateCommand{},
 		"upgrade": &UpgradeCommand{},
