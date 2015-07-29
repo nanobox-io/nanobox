@@ -144,12 +144,12 @@ func (c *DeployCommand) Run(opts []string) {
 		ui.LogFatal("[commands deploy] api.DoRawRequest() failed ", err)
 	}
 
-	//
-	entry := &Entry{}
-
 	// listen for messages coming from mist
 stream:
 	for msg := range client.Data {
+
+		//
+		entry := Entry{}
 
 		// check for any error message that cause mist to disconnect, and release
 		// nanobox

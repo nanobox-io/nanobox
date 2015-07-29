@@ -29,6 +29,7 @@ Description:
 
 Usage:
   nanobox destroy
+	nanobox destroy -f
 
 Options:
   -f, --force

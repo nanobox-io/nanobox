@@ -74,4 +74,8 @@ func (c *CreateCommand) Run(opts []string) {
 	fmt.Printf(stylish.ProcessStart("starting nanobox vm"))
 	runVagrantCommand(exec.Command("vagrant", "up"))
 	fmt.Printf(stylish.ProcessEnd())
+
+	// upgrade all nanobox docker images
+	upgrade := UpgradeCommand{}
+	upgrade.Run(opts)
 }
