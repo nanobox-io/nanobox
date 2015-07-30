@@ -8,9 +8,13 @@
 package commands
 
 import (
+	"flag"
 	"fmt"
+	"net/url"
+	"os"
 
 	"github.com/pagodabox/nanobox-cli/ui"
+	"github.com/pagodabox/nanobox-cli/utils"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
@@ -31,6 +35,33 @@ Usage:
 // Run
 func (c *ConsoleCommand) Run(opts []string) {
 	fmt.Printf(stylish.Bullet("Opening a nanobox console..."))
-	exec := ExecCommand{console: true}
-	exec.Run(opts)
+
+	// flags
+	flags := flag.NewFlagSet("flags", flag.ContinueOnError)
+	flags.Usage = func() { c.Help() }
+
+	//
+	var fTunnel string
+	flags.StringVar(&fTunnel, "t", "", "")
+	flags.StringVar(&fTunnel, "tunnel", "", "")
+
+	//
+	if err := flags.Parse(opts); err != nil {
+		ui.LogFatal("[commands.destroy] flags.Parse() failed", err)
+	}
+
+	//
+	if len(flags.Args()) > 0 {
+		fmt.Println("Attempting to run 'nanobox console' with a command. Use 'nanobox exec'")
+		os.Exit(0)
+	}
+
+	// add a check here to regex the fTunnel to make sure the format makes sense
+
+	//
+	v := url.Values{}
+	v.Add("forward", fTunnel)
+
+	console := utils.Docker{Params: v.Encode()}
+	console.Run()
 }

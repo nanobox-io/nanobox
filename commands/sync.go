@@ -16,7 +16,7 @@ import (
 	api "github.com/pagodabox/nanobox-api-client"
 	"github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-cli/ui"
-	"github.com/pagodabox/nanobox-cli/util"
+	"github.com/pagodabox/nanobox-cli/utils"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
@@ -61,10 +61,10 @@ func (s *nsync) run(opts []string) {
 	}
 	defer client.Close()
 
-	util.Printv(stylish.Bullet("Subscribing to mist..."), s.verbose)
+	utils.Printv(stylish.Bullet("Subscribing to mist..."), s.verbose)
 
 	// subscribe to 'sync' updates
-	util.Printv(stylish.SubBullet("- Subscribing to app logs"), s.verbose)
+	utils.Printv(stylish.SubBullet("- Subscribing to app logs"), s.verbose)
 	jobSub, err := client.Subscribe([]string{"job", s.kind})
 	if err != nil {
 		fmt.Printf(stylish.Warning("Nanobox failed to subscribe to app logs. Your sync will continue as normal, and log output is available on your dashboard."))
@@ -77,14 +77,14 @@ func (s *nsync) run(opts []string) {
 	}
 
 	// if the verbose flag is included, also subscribe to the 'debug' sync logs
-	util.Printv(stylish.SubBullet("- Subscribing to debug logs"), s.verbose)
+	utils.Printv(stylish.SubBullet("- Subscribing to debug logs"), s.verbose)
 	logSub, err := client.Subscribe([]string{"log", "deploy", logLevel})
 	if err != nil {
 		fmt.Printf(stylish.Warning("Nanobox failed to subscribe to debug logs. Your sync will continue as normal, and log output is available on your dashboard."))
 	}
 	defer client.Unsubscribe(logSub)
 
-	util.Printv(stylish.Success(), s.verbose)
+	utils.Printv(stylish.Success(), s.verbose)
 
 	//
 	// issue a sync

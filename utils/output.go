@@ -5,7 +5,7 @@
 // at http://mozilla.org/MPL/2.0/.
 //
 
-package util
+package utils
 
 import "fmt"
 
