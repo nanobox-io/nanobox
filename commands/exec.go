@@ -109,7 +109,7 @@ func (c *ExecCommand) Run(opts []string) {
 	v.Add("cmd", strings.Join(cmd, " "))
 
 	//
-	connect(fmt.Sprintf("POST /exec?%s HTTP/1.1\r\n\r\n", v.Encode()))
+	connect(fmt.Sprintf("POST /exec?%v HTTP/1.1\r\n\r\n", v.Encode()))
 }
 
 //

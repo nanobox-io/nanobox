@@ -5,7 +5,7 @@
 // at http://mozilla.org/MPL/2.0/.
 //
 
-package helpers
+package util
 
 import (
 	"errors"
