@@ -52,7 +52,7 @@ func (c *UpdateCommand) Run(opts []string) {
 	fmt.Printf(stylish.SubBullet(fmt.Sprintf("Nanobox CLI found running at %v", path)))
 
 	// download a new CLI from s3 that matches their os and arch
-	download := fmt.Sprintf("https://s3-us-west-2.amazonaws.com/tools.nanobox.io/cli/%v/%v/nanobox", runtime.GOOS, runtime.GOARCH)
+	download := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/nanobox", runtime.GOOS, runtime.GOARCH)
 
 	// create a new request
 	fmt.Printf(stylish.SubBullet(fmt.Sprintf("Downloading latest CLI from %v", download)))
