@@ -141,7 +141,7 @@ stream:
 
 				// if the sync is 'errored' unsubscribe from mist
 				case "errored":
-					fmt.Printf(stylish.Error(fmt.Sprintf("%v failed...", strings.Title(s.kind)), fmt.Sprintf("Your %v failed to uh... %v", s.kind, s.kind)))
+					fmt.Printf(stylish.Error(fmt.Sprintf("%v failed", strings.Title(s.kind)), fmt.Sprintf("Your %v failed to uh... %v", s.kind, s.kind)))
 					break stream
 				}
 

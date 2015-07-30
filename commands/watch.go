@@ -39,8 +39,8 @@ func (c *WatchCommand) Run(opts []string) {
 	}
 	defer c.watcher.Close()
 
-	fmt.Printf(stylish.Bullet(fmt.Sprintf("Watching for chages at '%v'", config.CWDir)))
-	fmt.Printf(stylish.SubBullet("(Ctrl + c to quit)"))
+	fmt.Printf("\n%v", stylish.Bullet(fmt.Sprintf("Watching for chages at '%v'", config.CWDir)))
+	fmt.Printf("%v\n", stylish.SubBullet("(Ctrl + c to quit)"))
 
 	// starting at the root of the project, walk each file/directory searching for
 	// directories
@@ -69,6 +69,9 @@ func (c *WatchCommand) Run(opts []string) {
 					build := BuildCommand{}
 					build.Run(opts)
 				}
+
+				fmt.Printf("\n%v", stylish.Bullet(fmt.Sprintf("Watching for chages at '%v'", config.CWDir)))
+				fmt.Printf("%v\n", stylish.SubBullet("(Ctrl + c to quit)"))
 			}
 
 			// watch for errors
