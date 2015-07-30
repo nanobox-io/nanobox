@@ -22,7 +22,7 @@ import (
 
 type (
 
-	// Sync
+	// nsync
 	nsync struct {
 		kind    string
 		path    string
@@ -32,7 +32,7 @@ type (
 		Status string `json:"status"`
 	}
 
-	// Entry
+	// entry
 	entry struct {
 		Action   string `json:"action"`
 		Document string `json:"document"`
