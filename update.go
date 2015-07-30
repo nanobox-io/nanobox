@@ -190,7 +190,7 @@ func getRelease() (*semver.Version, error) {
 	config.Console.Debug("[update] response from github (version): %v", string(b))
 
 	// create a release version using the version we pulled from github
-	release, err := semver.Parse(string(b))
+	release, err := semver.Parse(strings.TrimRight(string(b), "\r\n"))
 	if err != nil {
 		return nil, err
 	}

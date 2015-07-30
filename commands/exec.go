@@ -53,20 +53,19 @@ Options:
 
 // Run
 //
-// NOTE: the sibling command to this command is 'nanobox console', which simply
-// calls this command in a way that changes some of the flags it passes. The reason
-// for doing it this way, is the commands are basically aliases for eachother from
-// the servers perspective, however from the users perspective it's all about context.
+// NOTE: a sibling command to this command is 'nanobox console', which simply
+// calls this requesting a console rather than execing a command. The commands are
+// basically aliases for eachother from the servers perspective, however from the
+// users perspective it's all about context.
 //
-// In an effort to avoid duplicating a lot of the same code to get both commands
-// to run, one just calls the other. Initially exec was calling console, which
-// reduced a lot of logical checking, however that would allow for each command
-// to gracefully failover to the other. While this is a good thing, we intentially
+// In an effort to avoid duplicating a lot code one command just calls the other.
+// Initially exec was calling console, which would allow for each command to
+// gracefully failover to the other. While this is a good thing, we intentially
 // chose to hardlock the functionality of each command to avoid any confusion.
 //
 // Since exec is the command that has additional options, it's going to be the
 // one that does all the checking, and decide if the command will be a console
-// or exec, providing us with our hard locking.
+// or exec, providing us with our hardlocking.
 func (c *ExecCommand) Run(opts []string) {
 
 	// flags

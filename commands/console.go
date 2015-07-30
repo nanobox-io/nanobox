@@ -30,7 +30,7 @@ Usage:
 
 // Run
 func (c *ConsoleCommand) Run(opts []string) {
-	fmt.Printf(stylish.Bullet("Opening nanobox console"))
+	fmt.Printf(stylish.Bullet("Opening a nanobox console..."))
 	exec := ExecCommand{ console: true }
 	exec.Run(opts)
 }
