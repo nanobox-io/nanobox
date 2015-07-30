@@ -1,0 +1,79 @@
+{
+	"ImportPath": "github.com/pagodabox/nanobox-cli",
+	"GoVersion": "go1.4.2",
+	"Deps": [
+		{
+			"ImportPath": "code.google.com/p/go-semver/version",
+			"Comment": "null-1",
+			"Rev": "f5b737548ddd71c1ce5583f9c7bc008f8fc92c6d"
+		},
+		{
+			"ImportPath": "code.google.com/p/gopass",
+			"Rev": "3b39664481b57ad99d34c86bd64090c28eacc7a1"
+		},
+		{
+			"ImportPath": "github.com/Sirupsen/logrus",
+			"Comment": "v0.8.6-1-g8bca266",
+			"Rev": "8bca2664072173a3c71db4c28ca8d304079b1787"
+		},
+		{
+			"ImportPath": "github.com/docker/docker/pkg/signal",
+			"Comment": "v1.4.1-5228-g5c9e5bf",
+			"Rev": "5c9e5bfb0f9006f6c7ec98bc26cfd9f6889b459a"
+		},
+		{
+			"ImportPath": "github.com/docker/docker/pkg/term",
+			"Comment": "v1.4.1-5228-g5c9e5bf",
+			"Rev": "5c9e5bfb0f9006f6c7ec98bc26cfd9f6889b459a"
+		},
+		{
+			"ImportPath": "github.com/ghodss/yaml",
+			"Rev": "c3eb24aeea63668ebdac08d2e252f20df8b6b1ae"
+		},
+		{
+			"ImportPath": "github.com/go-fsnotify/fsnotify",
+			"Comment": "v1.2.0-1-g6549b98",
+			"Rev": "6549b98005f3e4026ad9f50ef7d5011f40ba1397"
+		},
+		{
+			"ImportPath": "github.com/jcelliott/lumber",
+			"Rev": "b31b66b90991ff0e9e292dae147f94e4b87fcdf7"
+		},
+		{
+			"ImportPath": "github.com/kardianos/osext",
+			"Rev": "6e7f843663477789fac7c02def0d0909e969b4e5"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/colorstring",
+			"Rev": "61164e49940b423ba1f12ddbdf01632ac793e5e9"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/go-homedir",
+			"Rev": "1f6da4a72e57d4e7edd4a7295a585e0a3999a2d4"
+		},
+		{
+			"ImportPath": "github.com/mitchellh/go-wordwrap",
+			"Rev": "ad45545899c7b13c020ea92b2072220eefad42b8"
+		},
+		{
+			"ImportPath": "github.com/pagodabox/golang-hatchet",
+			"Rev": "dec82651ee5b3bf6a95ec1cde070c5951a29bb14"
+		},
+		{
+			"ImportPath": "github.com/pagodabox/golang-mist",
+			"Rev": "5fbcc8d496883a951d8400b9c4ff1e1aa1c04056"
+		},
+		{
+			"ImportPath": "github.com/pagodabox/nanobox-api-client",
+			"Rev": "aec7e54c4e890d4286d84740d3c2c0807a4961eb"
+		},
+		{
+			"ImportPath": "github.com/pagodabox/nanobox-golang-stylish",
+			"Rev": "415e45279b9f721b2496eda3fab750ddbf68933b"
+		},
+		{
+			"ImportPath": "gopkg.in/yaml.v2",
+			"Rev": "7ad95dd0798a40da1ccdff6dff35fd177b5edf40"
+		}
+	]
+}
