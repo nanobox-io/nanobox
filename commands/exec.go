@@ -124,12 +124,6 @@ func connect(path string) {
 	// forward all the signals to the nanobox server
 	forwardAllSignals()
 
-	// make sure we dont just kill the connection
-	if tcpConn, ok := conn.(*net.TCPConn); ok {
-		tcpConn.SetKeepAlive(true)
-		tcpConn.SetKeepAlivePeriod(30 * time.Second)
-	}
-
 	// fake a web request
 	conn.Write([]byte(path))
 
@@ -150,8 +144,8 @@ func connect(path string) {
 	defer term.RestoreTerminal(inFd, oldState)
 
 	// pipe data
-	go io.Copy(os.Stdout, conn)
-	io.Copy(conn, os.Stdin)
+	go io.Copy(conn, os.Stdin)
+	io.Copy(os.Stdout, conn)
 }
 
 // forwardAllSignals forwards the signals you recieve and send them to nanobox server
