@@ -8,6 +8,7 @@
 package commands
 
 import (
+	"flag"
 	"fmt"
 	"io"
 	"net"
@@ -68,75 +69,52 @@ Options:
 // or exec, providing us with our hard locking.
 func (c *ExecCommand) Run(opts []string) {
 
-	//
-	v := url.Values{}
+	// flags
+	flags := flag.NewFlagSet("flags", flag.ContinueOnError)
+	flags.Usage = func() { c.Help() }
 
 	//
-	var cmd []string
+	var fTunnel string
+	flags.StringVar(&fTunnel, "t", "", "")
+	flags.StringVar(&fTunnel, "tunnel", "", "")
 
 	//
-	switch {
-
-	// a command with tunnel flag but no options
-	case len(opts) == 1 && opts[0] == "-t":
-		fmt.Println("-t flag set but missing options, exiting...")
-		os.Exit(1)
-
-	// all console command
-	case c.console:
-		switch {
-
-		// console with no tunnel flag
-		case c.console && len(opts) <= 0:
-			fallthrough
-
-		// console with tunnel flag
-		case c.console && len(opts) == 2 && opts[0] == "-t":
-			v.Add("forward", opts[1])
-
-		// console with command
-		case c.console && len(opts) >= 1 && opts[0] != "-t":
-			fmt.Println("Attempting to run 'nanobox console' with a command. Did you intend to run 'nanobox exec'?")
-			os.Exit(0)
-
-		// console with command and tunnel flag
-		case c.console && len(opts) >= 3 && opts[0] == "-t":
-			fmt.Println("Attempting to run 'nanobox console' with a command. Did you intend to run 'nanobox exec'?")
-			os.Exit(0)
-		}
-
-	// all exec related variations
-	case !c.console:
-		switch {
-
-		// exec missing a command
-		case !c.console && len(opts) <= 0:
-			cmd = append(cmd, ui.Prompt("Please specify a command you wish to exec: "))
-
-		// exec with command and no tunnel flag
-		case !c.console && len(opts) >= 1 && opts[0] != "-t":
-			cmd = opts[0:]
-
-		// exec with tunnel flag but no command
-		case !c.console && len(opts) == 2 && opts[0] == "-t":
-			v.Add("forward", opts[1])
-			cmd = append(cmd, ui.Prompt("Please specify a command you wish to exec: "))
-
-		// exec with command and tunnel flag
-		case !c.console && len(opts) >= 3 && opts[0] == "-t":
-			v.Add("forward", opts[1])
-			cmd = opts[2:]
-		}
-
-		// something I didn't think of
-		default:
-			fmt.Println("unrecognized command... exiting")
-			os.Exit(1)
+	if err := flags.Parse(opts); err != nil {
+		ui.LogFatal("[commands.destroy] flags.Parse() failed", err)
 	}
 
-	// set the command to be run (if any)
+	//
+	cmd := flags.Args()[0:]
+
+	//
+	if !c.console && len(cmd) <= 0 {
+		cmd = append(cmd, ui.Prompt("Please specify a command you wish to exec: "))
+	}
+
+	//
+	if c.console && len(flags.Args()) > 0 {
+		fmt.Println("Attempting to run 'nanobox console' with a command. Did you intend to run 'nanobox exec'?")
+		os.Exit(0)
+	}
+
+	//
+	if len(flags.Args()) >= 1 {
+
+	}
+
+	// add a check here to regex the fTunnel to make sure the format makes sense
+
+	//
+	v := url.Values{}
+	v.Add("forward", fTunnel)
 	v.Add("cmd", strings.Join(cmd, " "))
 
+	//
+	connect(fmt.Sprintf("POST /exec?%s HTTP/1.1\r\n\r\n", v.Encode()))
+}
+
+//
+func connect(path string) {
 	//
 	conn, err := net.Dial("tcp4", fmt.Sprintf("%v:1757", config.Nanofile.IP))
 	if err != nil {
@@ -154,7 +132,7 @@ func (c *ExecCommand) Run(opts []string) {
 	}
 
 	// fake a web request
-	conn.Write([]byte(fmt.Sprintf("POST /exec?%v HTTP/1.1\r\n\r\n", v.Encode())))
+	conn.Write([]byte(path))
 
 	// setup a raw terminal
 	var oldState *term.State
