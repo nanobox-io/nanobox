@@ -172,7 +172,7 @@ func forwardAllSignals() {
 			}
 
 			//
-			req, _ := http.NewRequest("POST", fmt.Sprintf("http://nanobox-ruby-sample.nano.dev:1757/killexec?signal=%s", sig), nil)
+			req, _ := http.NewRequest("POST", fmt.Sprintf("http://%v:1757/killexec?signal=%s", config.Nanofile.Domain, sig), nil)
 			_, err := http.DefaultClient.Do(req)
 			fmt.Println(err)
 		}
@@ -213,7 +213,7 @@ func monitorSize(outFd uintptr) {
 func resizeTTY(outFd uintptr) {
 	h, w := getTTYSize(outFd)
 
-	req, _ := http.NewRequest("POST", fmt.Sprintf("http://nanobox-ruby-sample.nano.dev:1757/resizeexec?h=%d&w=%d", h, w), nil)
+	req, _ := http.NewRequest("POST", fmt.Sprintf("http://%v:1757/resizeexec?h=%d&w=%d", config.Nanofile.Domain, h, w), nil)
 
 	//
 	if _, err := http.DefaultClient.Do(req); err != nil {
