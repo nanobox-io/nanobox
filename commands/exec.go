@@ -29,7 +29,7 @@ import (
 )
 
 // ExecCommand satisfies the Command interface
-type ExecCommand struct{
+type ExecCommand struct {
 	console bool
 }
 
