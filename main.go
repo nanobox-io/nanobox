@@ -16,7 +16,6 @@ import (
 	api "github.com/pagodabox/nanobox-api-client"
 	"github.com/pagodabox/nanobox-cli/commands"
 	"github.com/pagodabox/nanobox-cli/config"
-	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
 // init
@@ -44,18 +43,6 @@ func init() {
 	if config.LogLevel == lumber.DEBUG {
 		api.Debug = true
 	}
-
-	// parse the boxfile
-	config.Boxfile, err = config.ParseBoxfile()
-	if err != nil {
-		fmt.Printf(stylish.Error("failed to parse Boxfile", err.Error()))
-	}
-
-	// parse the nanofile
-	config.Nanofile, err = config.ParseNanofile()
-	if err != nil {
-		fmt.Printf(stylish.Error("failed to parse .nanofile", err.Error()))
-	}
 }
 
 // main
@@ -63,9 +50,6 @@ func main() {
 
 	// check for updates
 	// checkUpdate()
-
-	// verify that all dependancies exist before attempting to do anything
-	// verifyDependancies()
 
 	// run the CLI
 	run()

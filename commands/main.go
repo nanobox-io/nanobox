@@ -67,6 +67,16 @@ func init() {
 // commands w/o contaminating a users codebase
 func runVagrantCommand(cmd *exec.Cmd) {
 
+	// parse the boxfile
+	if err := config.Boxfile.Parse(); err != nil {
+		ui.LogFatal("commands.runVagrantcommand] config.Boxfile.Parse() failed", err)
+	}
+
+	// parse the nanofile
+	if err := config.Nanofile.Parse(); err != nil {
+		ui.LogFatal("commands.runVagrantcommand] config.Nanofile.Parse() failed", err)
+	}
+
 	// run an init to ensure there is a Vagrantfile
 	init := InitCommand{}
 	init.Run(nil)

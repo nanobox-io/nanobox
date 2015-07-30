@@ -30,24 +30,22 @@ type (
 	}
 )
 
-// ParseBoxfile
-func ParseBoxfile() (*BoxfileConfig, error) {
+// Parse
+func (bc BoxfileConfig) Parse() error {
 	fmt.Printf(stylish.Bullet("Parsing Boxfile"))
 
-	// create a default BoxfileConfig
-	bc := BoxfileConfig{}
-
+	//
 	path := "./Boxfile"
 
 	// look for a local .nanofile first...
 	if fi, _ := os.Stat(path); fi != nil {
-		return &bc, parseBoxfile(path, &bc)
+		return parseBoxfile(path, &bc)
 	}
 
 	//
 	fmt.Printf(stylish.SubBullet("- Using default configuration..."))
 	fmt.Printf(stylish.Success())
-	return &bc, nil
+	return nil
 }
 
 // parseBoxfile

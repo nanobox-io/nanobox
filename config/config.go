@@ -8,7 +8,9 @@
 package config
 
 import (
+	"encoding/binary"
 	"fmt"
+	"net"
 	"os"
 	"path"
 	"path/filepath"
@@ -48,6 +50,11 @@ var (
 	Boxfile  *BoxfileConfig
 	Nanofile *NanofileConfig
 )
+
+// Parser
+type Parser interface {
+	Parse() error //
+}
 
 // Init sets up a HomeDir, and NanoDir
 func init() {
@@ -95,11 +102,42 @@ func init() {
 	version, err := semver.Parse(VERSION)
 	if err != nil {
 		fmt.Println("Fatal error! See ~/.nanobox/nanobox.log for details. Exiting...")
-		Log.Fatal("[config] semver.Parse() failed %v", err)
+		Log.Fatal("[config] semver.Parse() failed", err)
 		Log.Close()
 		os.Exit(1)
 	}
 
 	Version = version
 
+	// create a default BoxfileConfig
+	Boxfile = &BoxfileConfig{}
+
+	// create a default NanofileConfig
+	Nanofile = &NanofileConfig{
+		CPUCap:   50,
+		CPUs:     2,
+		Domain:   fmt.Sprintf("%v.nano.dev", App),
+		IP:       appNameToIP(App),
+		Provider: "virtualbox",
+		RAM:      1024,
+	}
+}
+
+// appNameToIP generates an IPv4 address based off the app name for use as a
+// vagrant private_network IP.
+func appNameToIP(name string) string {
+
+	var sum uint32 = 0
+	var network uint32 = 2886729728 // 172.16.0.0 network
+
+	for _, value := range []byte(name) {
+		sum += uint32(value)
+	}
+
+	ip := make(net.IP, 4)
+
+	// convert app name into a private network IP
+	binary.BigEndian.PutUint32(ip, (network + sum))
+
+	return ip.String()
 }

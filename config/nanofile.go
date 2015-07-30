@@ -8,10 +8,8 @@
 package config
 
 import (
-	"encoding/binary"
 	"fmt"
 	"io/ioutil"
-	"net"
 	"os"
 	"path/filepath"
 
@@ -30,26 +28,17 @@ type NanofileConfig struct {
 	RAM      int    `json:"ram"`      //
 }
 
-// ParseNanofile
-func ParseNanofile() (*NanofileConfig, error) {
+// Parse
+func (nc NanofileConfig) Parse() error {
 	fmt.Printf(stylish.Bullet("Parsing .nanofile"))
 
-	// create a default NanofileConfig
-	nc := NanofileConfig{
-		CPUCap:   50,
-		CPUs:     2,
-		Domain:   fmt.Sprintf("%v.nano.dev", App),
-		IP:       appNameToIP(App),
-		Provider: "virtualbox",
-		RAM:      1024,
-	}
-
+	//
 	path := "./.nanofile"
 
 	// look for a local .nanofile first...
 	fmt.Printf(stylish.SubBullet("Searching for local .nanofile..."))
 	if fi, _ := os.Stat(path); fi != nil {
-		return &nc, parseNanofile(path, &nc)
+		return parseNanofile(path, &nc)
 	}
 
 	path = NanoDir + "/.nanofile"
@@ -57,13 +46,13 @@ func ParseNanofile() (*NanofileConfig, error) {
 	// then look for a global .nanofile in the ~/.nanobox directory...
 	fmt.Printf(stylish.SubBullet("Searching for global .nanofile..."))
 	if fi, _ := os.Stat(path); fi != nil {
-		return &nc, parseNanofile(path, &nc)
+		return parseNanofile(path, &nc)
 	}
 
 	//
 	fmt.Printf(stylish.SubBullet("- Using default configuration..."))
 	fmt.Printf(stylish.Success())
-	return &nc, nil
+	return nil
 }
 
 // parseNanofile
@@ -90,23 +79,4 @@ func parseNanofile(file string, nc *NanofileConfig) error {
 	fmt.Printf(stylish.Success())
 
 	return nil
-}
-
-// appNameToIP generates an IPv4 address based off the app name for use as a
-// vagrant private_network IP.
-func appNameToIP(name string) string {
-
-	var sum uint32 = 0
-	var network uint32 = 2886729728 // 172.16.0.0 network
-
-	for _, value := range []byte(name) {
-		sum += uint32(value)
-	}
-
-	ip := make(net.IP, 4)
-
-	// convert app name into a private network IP
-	binary.BigEndian.PutUint32(ip, (network + sum))
-
-	return ip.String()
 }
