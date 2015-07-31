@@ -8,16 +8,17 @@
 package commands
 
 import (
+	"bufio"
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
+	"net/http"
 	"net/url"
 	"regexp"
-	"strconv"
 	"time"
 
 	"github.com/pagodabox/golang-mist"
-	api "github.com/pagodabox/nanobox-api-client"
 	"github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-cli/ui"
 	// "github.com/pagodabox/nanobox-cli/utils"
@@ -158,18 +159,36 @@ func (c *LogCommand) Run(opts []string) {
 		v.Add("level", fLevel)
 		v.Add("reset", fmt.Sprintf("%v", fCount))
 
-		logs := []string{}
+		res, err := http.Get(fmt.Sprintf("http://%v:6362/app?%v", config.Nanofile.IP, v.Encode()))
+		if err != nil {
+			fmt.Println("BOINK!", err)
+		}
+		defer res.Body.Close()
 
-		if err := api.DoRawRequest(nil, "GET", fmt.Sprintf("%v:6362/app?%v", config.Nanofile.IP, v.Encode()), &logs, nil); err != nil {
-			ui.LogFatal("[commands sync] api.DoRawRequest() failed ", err)
+		fmt.Printf(stylish.Bullet(fmt.Sprintf("Showing last %v entries:", fCount)))
+
+		rd := bufio.NewReader(res.Body)
+
+		// read response body, which should be our version string
+		for {
+			b, err := rd.ReadBytes('\n')
+			if err != nil {
+				if err == io.EOF {
+					break
+				} else {
+					fmt.Println("BRONK!", err)
+				}
+			}
+
+			fmt.Printf("LINE??\n", string(b))
 		}
 
-		ui.CPrint("[yellow]Showing last %v log entries...[reset]", strconv.Itoa(fCount))
+		// logs := strings.Split(string(b), "\n")
 
 		// display logs
-		for _, log := range logs {
-			fmt.Println("HERE??", log)
-		}
+		// for _, log := range logs {
+		// 	fmt.Println("HERE??", log)
+		// }
 
 	}
 }

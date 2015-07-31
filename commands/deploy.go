@@ -11,6 +11,7 @@ import (
 	"flag"
 	"fmt"
 	"net/url"
+	"strconv"
 
 	"github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-cli/ui"
@@ -27,7 +28,7 @@ Description:
   Issue a deploy to the nanobox VM
 
 Usage:
-  nanobox deploy [-v] [-r]
+  nanobox deploy [-v] [-r] [-s]
 
 Options:
   -v, --verbose
@@ -35,6 +36,9 @@ Options:
 
   -r, --reset
     Clears cached libraries the project might use
+
+	-s, --sandbox
+		Create your app environment w/o webs or workers
   `)
 }
 
@@ -52,6 +56,11 @@ func (c *DeployCommand) Run(opts []string) {
 	flags.BoolVar(&fReset, "reset", false, "")
 
 	//
+	var fSandbox bool
+	flags.BoolVar(&fSandbox, "s", false, "")
+	flags.BoolVar(&fSandbox, "sandbox", false, "")
+
+	//
 	var fVerbose bool
 	flags.BoolVar(&fVerbose, "v", false, "")
 	flags.BoolVar(&fVerbose, "verbose", false, "")
@@ -63,9 +72,8 @@ func (c *DeployCommand) Run(opts []string) {
 
 	v := url.Values{}
 
-	if fReset {
-		v.Add("reset", "true")
-	}
+	v.Add("reset", strconv.FormatBool(fReset))
+	v.Add("sandbox", strconv.FormatBool(fSandbox))
 
 	//
 	deploy := nsync{
