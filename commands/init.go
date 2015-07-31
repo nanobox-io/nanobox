@@ -49,20 +49,22 @@ func (c *InitCommand) Run(opts []string) {
 		}
 	}
 
-	// parse the boxfile
-	if err := config.Boxfile.Parse(); err != nil {
-		ui.LogFatal("commands.runVagrantcommand] config.Boxfile.Parse() failed", err)
-	}
-
-	// parse the nanofile
-	if err := config.Nanofile.Parse(); err != nil {
-		ui.LogFatal("commands.runVagrantcommand] config.Nanofile.Parse() failed", err)
-	}
-
 	//
 	// generate a Vagrantfile at ~/.nanobox/apps/<app-name>/Vagrantfile if one doesn't
 	// exist
-	if fi, _ := os.Stat(config.AppDir + "/Vagrantfile"); fi == nil {
+	if fi, _ := os.Stat(config.AppDir + "/Vagrantfile"); fi != nil {
+		fmt.Printf(stylish.Bullet("Nanobox Vagrantfile detected, skipping configuration..."))
+	} else {
+
+		// parse the boxfile
+		if err := config.Boxfile.Parse(); err != nil {
+			ui.LogFatal("commands.runVagrantcommand] config.Boxfile.Parse() failed", err)
+		}
+
+		// parse the nanofile
+		if err := config.Nanofile.Parse(); err != nil {
+			ui.LogFatal("commands.runVagrantcommand] config.Nanofile.Parse() failed", err)
+		}
 
 		//
 		fmt.Printf(stylish.Bullet("Preparing nanobox Vagrantfile"))
@@ -217,7 +219,5 @@ end`, version, network, synced_folders, provider)
 
 		//
 		fmt.Println("   [√] nanobox Vagrantfile generated at: " + config.AppDir + "/Vagrantfile")
-	} else {
-		fmt.Printf(stylish.Bullet("Nanobox Vagrantfile detected, skipping configuration..."))
 	}
 }
