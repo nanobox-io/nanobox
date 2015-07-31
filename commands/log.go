@@ -16,7 +16,6 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
-	"time"
 
 	"github.com/pagodabox/golang-mist"
 	"github.com/pagodabox/nanobox-cli/config"
@@ -33,8 +32,9 @@ type (
 
 	// Log represents the structure of a log returned from Logvac or Stormpack
 	Log struct {
-		Log  string `json:"log"`
-		Time int    `json:"time"`
+		Level string `json:"level"`
+		Log   string `json:"log"`
+		Time  string `json:"time"`
 	}
 )
 
@@ -153,43 +153,43 @@ func (c *LogCommand) Run(opts []string) {
 
 		// load historical logs
 	} else {
+		fmt.Printf(stylish.Bullet(fmt.Sprintf("Showing last %v entries:", fCount)))
 
+		//
 		v := url.Values{}
-
 		v.Add("level", fLevel)
 		v.Add("reset", fmt.Sprintf("%v", fCount))
 
 		res, err := http.Get(fmt.Sprintf("http://%v:6362/app?%v", config.Nanofile.IP, v.Encode()))
 		if err != nil {
-			fmt.Println("BOINK!", err)
+			ui.LogFatal("[commands.log] http.Get() failed", err)
 		}
 		defer res.Body.Close()
 
-		fmt.Printf(stylish.Bullet(fmt.Sprintf("Showing last %v entries:", fCount)))
-
-		rd := bufio.NewReader(res.Body)
+		//
+		reParseLog := regexp.MustCompile(`\[(.*)\] \[(.*)\] (.*)`)
 
 		// read response body, which should be our version string
+		r := bufio.NewReader(res.Body)
 		for {
-			b, err := rd.ReadBytes('\n')
+			b, err := r.ReadBytes('\n')
 			if err != nil {
 				if err == io.EOF {
 					break
 				} else {
-					fmt.Println("BRONK!", err)
+					ui.LogFatal("[commands.log] bufio.ReadBytes() failed", err)
 				}
 			}
 
-			fmt.Printf("LINE??\n", string(b))
+			//
+			subMatch := reParseLog.FindStringSubmatch(string(b))
+
+			// ensure a subMatch and ensure subMatch has a length of 4, since thats how many
+			// matches we're expecting
+			if subMatch != nil && len(subMatch) >= 4 {
+				processLog(Log{Level: subMatch[2], Log: subMatch[3], Time: subMatch[1]})
+			}
 		}
-
-		// logs := strings.Split(string(b), "\n")
-
-		// display logs
-		// for _, log := range logs {
-		// 	fmt.Println("HERE??", log)
-		// }
-
 	}
 }
 
@@ -198,16 +198,10 @@ func (c *LogCommand) Run(opts []string) {
 // terminal
 func processLog(log Log) {
 
-	time := time.Unix(0, int64(log.Time)*1000).Format(time.RFC822)
+	// time := time.Unix(0, int64(log.Time)*1000).Format(time.RFC822)
 
 	//
 	reFindLog := regexp.MustCompile(`^(\w+)\.(\S+)\s+(.*)$`)
-
-	// example data stream parsed with regex
-	// log.Log  = web1.apache[access] 69.92.84.90 - - [03/Dec/2013:19:59:57 +0000] \"GET / HTTP/1.1\" 200 183 \"-\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.57 Safari/537.36\"\n"
-	// subMatch[1] = web1
-	// subMatch[2] = apache[access]
-	// subMatch[3] = 69.92.84.90 - - [03/Dec/2013:19:59:57 +0000] \"GET / HTTP/1.1\" 200 183 \"-\" \"Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/31.0.1650.57 Safari/537.36\"\n"
 
 	//
 	config.Console.Debug("[commands.app_log.processLog] Raw log -> %#v", log)
@@ -229,15 +223,15 @@ func processLog(log Log) {
 			logProcesses[process] = logColors[len(logProcesses)%len(logColors)]
 		}
 
-		ui.CPrint("[%v]%v - %v.%v :: %v[reset]", logProcesses[process], time, service, process, entry)
+		ui.CPrint("[%v]%v - %v.%v :: %v[reset]", logProcesses[process], log.Time, service, process, entry)
 
 		// if we don't have a subMatch or its length is less than 4, just print w/e
 		// is in the log
 	} else {
 		//
-		config.Console.Debug("[commands.app_log.processLog] No submatches found -> %v - %v", time, log.Log)
+		config.Console.Debug("[commands.app_log.processLog] No submatches found -> %v - %v", log.Time, log.Log)
 
-		ui.CPrint("[light_red]%v - %v[reset]", time, log.Log)
+		ui.CPrint("[light_red]%v - %v[reset]", log.Time, log.Log)
 	}
 
 }
