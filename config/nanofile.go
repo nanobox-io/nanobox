@@ -29,7 +29,7 @@ type NanofileConfig struct {
 }
 
 // Parse
-func (nc NanofileConfig) Parse() error {
+func (nc *NanofileConfig) Parse() error {
 	fmt.Printf(stylish.Bullet("Parsing .nanofile"))
 
 	//
@@ -38,7 +38,7 @@ func (nc NanofileConfig) Parse() error {
 	// look for a local .nanofile first...
 	fmt.Printf(stylish.SubBullet("Searching for local .nanofile..."))
 	if fi, _ := os.Stat(path); fi != nil {
-		return parseNanofile(path, &nc)
+		return parseNanofile(path, nc)
 	}
 
 	path = NanoDir + "/.nanofile"
@@ -46,7 +46,7 @@ func (nc NanofileConfig) Parse() error {
 	// then look for a global .nanofile in the ~/.nanobox directory...
 	fmt.Printf(stylish.SubBullet("Searching for global .nanofile..."))
 	if fi, _ := os.Stat(path); fi != nil {
-		return parseNanofile(path, &nc)
+		return parseNanofile(path, nc)
 	}
 
 	//

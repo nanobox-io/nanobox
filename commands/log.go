@@ -13,6 +13,7 @@ import (
 	"fmt"
 	"net/url"
 	"regexp"
+	"strconv"
 	"time"
 
 	"github.com/pagodabox/golang-mist"
@@ -28,9 +29,6 @@ type (
 	// LogCommand satisfies the Command interface for obtaining an app's historical
 	// and streaming logs
 	LogCommand struct{}
-
-	// Logs represents a slice of Log's
-	Logs []Log
 
 	// Log represents the structure of a log returned from Logvac or Stormpack
 	Log struct {
@@ -160,16 +158,18 @@ func (c *LogCommand) Run(opts []string) {
 		v.Add("level", fLevel)
 		v.Add("reset", fmt.Sprintf("%v", fCount))
 
-		if err := api.DoRawRequest(nil, "GET", fmt.Sprintf("%v:6362/app?%v", config.Nanofile.IP, v.Encode()), nil, nil); err != nil {
+		logs := []string{}
+
+		if err := api.DoRawRequest(nil, "GET", fmt.Sprintf("%v:6362/app?%v", config.Nanofile.IP, v.Encode()), &logs, nil); err != nil {
 			ui.LogFatal("[commands sync] api.DoRawRequest() failed ", err)
 		}
 
-		// ui.CPrint("[yellow]Showing last %v log entries...[reset]", strconv.Itoa(fCount))
+		ui.CPrint("[yellow]Showing last %v log entries...[reset]", strconv.Itoa(fCount))
 
-		// // display logs
-		// for _, log := range logvac.Logs {
-		//   processLog(log)
-		// }
+		// display logs
+		for _, log := range logs {
+			fmt.Println("HERE??", log)
+		}
 
 	}
 }

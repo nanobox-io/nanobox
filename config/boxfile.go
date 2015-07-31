@@ -31,15 +31,15 @@ type (
 )
 
 // Parse
-func (bc BoxfileConfig) Parse() error {
+func (bc *BoxfileConfig) Parse() error {
 	fmt.Printf(stylish.Bullet("Parsing Boxfile"))
 
 	//
 	path := "./Boxfile"
 
-	// look for a local .nanofile first...
+	// look for a local Boxfile first...
 	if fi, _ := os.Stat(path); fi != nil {
-		return parseBoxfile(path, &bc)
+		return parseBoxfile(path, bc)
 	}
 
 	//

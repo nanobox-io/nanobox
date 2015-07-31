@@ -78,6 +78,7 @@ Options:
 
 Available Commands:
 
+	bootstrap   : Runs an engine's bootstrap script - downloads code & launches VM
 	build       : Rebuilds/Compiles your project
 	console     : Opens an interactive terminal inside your apps context
   create      : Runs 'nanobox init' then boots the nanobox VM
