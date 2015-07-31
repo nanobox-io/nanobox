@@ -23,12 +23,10 @@ type UpgradeCommand struct{}
 func (c *UpgradeCommand) Help() {
 	ui.CPrint(`
 Description:
-  Updates the nanobox docker container images
+  Updates the nanobox docker images
 
 Usage:
   pagoda upgrade
-
-  ex. pagoda upgrade
   `)
 }
 

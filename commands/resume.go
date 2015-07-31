@@ -22,7 +22,7 @@ type ResumeCommand struct{}
 func (c *ResumeCommand) Help() {
 	ui.CPrint(`
 Description:
-  Resumes a halted/suspened nanobox VM
+  Resumes the halted/suspended nanobox VM by issuing a "vagrant resume"
 
 Usage:
   nanobox resume

@@ -49,6 +49,16 @@ func (c *InitCommand) Run(opts []string) {
 		}
 	}
 
+	// parse the boxfile
+	if err := config.Boxfile.Parse(); err != nil {
+		ui.LogFatal("commands.runVagrantcommand] config.Boxfile.Parse() failed", err)
+	}
+
+	// parse the nanofile
+	if err := config.Nanofile.Parse(); err != nil {
+		ui.LogFatal("commands.runVagrantcommand] config.Nanofile.Parse() failed", err)
+	}
+
 	//
 	// generate a Vagrantfile at ~/.nanobox/apps/<app-name>/Vagrantfile if one doesn't
 	// exist

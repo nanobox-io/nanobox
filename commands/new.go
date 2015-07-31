@@ -24,15 +24,13 @@ type NewCommand struct{}
 func (c *NewCommand) Help() {
 	ui.CPrint(`
 Description:
-  Generate a new nanobox project in the current working directory
-
-  name:
-    the name of the project
+	Generates a new engine inside the current working directory
 
 Usage:
-  nanobox new <name>
+  nanobox new <engine>
 
-  ex. nanobox new ruby
+  ex.
+		nanobox new ruby
   `)
 }
 

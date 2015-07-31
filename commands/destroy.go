@@ -25,15 +25,14 @@ type DestroyCommand struct{}
 func (c *DestroyCommand) Help() {
 	ui.CPrint(`
 Description:
-  Destroys the current nanobox VM
+  Destroy the nanobox VM by issuing a "vagrant destroy"
 
 Usage:
-  nanobox destroy
-	nanobox destroy -f
+  nanobox destroy [-f]
 
 Options:
   -f, --force
-    A force destroy [red]skips confirmation... use responsibly[reset]!
+    A force destroy skips confirmation.
   `)
 }
 

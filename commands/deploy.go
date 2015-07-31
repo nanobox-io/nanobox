@@ -24,12 +24,10 @@ type DeployCommand struct{}
 func (c *DeployCommand) Help() {
 	ui.CPrint(`
 Description:
-  Issues a deploy to your nanobox
+  Issue a deploy to the nanobox VM
 
 Usage:
-  nanobox deploy
-  nanobox deploy -v
-  nanobox deploy -r
+  nanobox deploy [-v] [-r]
 
 Options:
   -v, --verbose

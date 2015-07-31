@@ -25,17 +25,14 @@ type ExecCommand struct{}
 func (c *ExecCommand) Help() {
 	ui.CPrint(`
 Description:
-  Run's a command on an application's service.
+  Runs a command from inside your app on the nanobox VM
 
 Usage:
-  nanobox exec <COMMAND>
-	nanobox exec -t local:remote,local:remote <COMMAND>
-
-	ex. nanobox exec ls -la
+  nanobox exec [-t 80:8080] <command>
 
 Options:
-	-t --tunnel
-		Establishes a port forward for each comma delimited local:remote port combo
+	-t, --tunnel
+		Creates port forwards for all comma delimeted port:port combos
 	`)
 }
 

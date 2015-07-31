@@ -28,12 +28,10 @@ type UpdateCommand struct{}
 func (c *UpdateCommand) Help() {
 	ui.CPrint(`
 Description:
-  Updates the nanobox CLI to the latest version
+  Updates the CLI to the newest available version
 
 Usage:
   pagoda update
-
-  ex. pagoda update
   `)
 }
 

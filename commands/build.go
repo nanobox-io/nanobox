@@ -23,11 +23,10 @@ type BuildCommand struct{}
 func (c *BuildCommand) Help() {
 	ui.CPrint(`
 Description:
-  Issues a build to your nanobox
+  Rebuild/compile your project
 
 Usage:
-  nanobox build
-  nanobox build -v
+  nanobox build [-v]
 
 Options:
   -v, --verbose

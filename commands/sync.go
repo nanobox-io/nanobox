@@ -49,12 +49,10 @@ func (s *nsync) run(opts []string) {
 	// resume := ResumeCommand{}
 	// resume.Run(opts)
 
-	// subscribe
 	// create a 'mist' client to communicate with the mist server running on the
 	// guest machine
 	client := mist.Client{Host: config.Nanofile.IP, Port: "1445"}
 
-	//
 	// connect the 'mist' client to the 'mist' server
 	if err := client.Connect(); err != nil {
 		ui.LogFatal("[commands sync] client.Connect() failed ", err)

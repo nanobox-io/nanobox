@@ -22,7 +22,7 @@ type StatusCommand struct{}
 func (c *StatusCommand) Help() {
 	ui.CPrint(`
 Description:
-  Display all current nanobox VM's
+  Displays all current nanobox VM's
 
 Usage:
   nanobox status

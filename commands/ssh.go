@@ -22,10 +22,10 @@ type SSHCommand struct{}
 func (c *SSHCommand) Help() {
 	ui.CPrint(`
 Description:
-  Runs a command in your nanobox vm
+  SSHes into the nanobox VM by issuing a "vagrant ssh"
 
 Usage:
-  nanobox run rake:db seed
+  nanobox ssh
   `)
 }
 
@@ -33,7 +33,6 @@ Usage:
 func (c *SSHCommand) Run(opts []string) {
 
 	// run 'vagrant ssh'
-	fmt.Printf(stylish.ProcessStart("resuming nanobox vm"))
+	fmt.Printf(stylish.Bullet("SSHing into nanobox VM..."))
 	runVagrantCommand(exec.Command("vagrant", "ssh"))
-	fmt.Printf(stylish.ProcessEnd())
 }

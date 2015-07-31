@@ -22,10 +22,10 @@ type HaltCommand struct{}
 func (c *HaltCommand) Help() {
 	ui.CPrint(`
 Description:
-  Halts the current nanobox VM
+  Halts the running nanobox VM by issuing a "vagrant halt"
 
 Usage:
-  nanobox halt
+  nanobox halt [-f]
 
 Options:
   -f, --force

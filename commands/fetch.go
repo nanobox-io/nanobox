@@ -29,13 +29,16 @@ type (
 func (c *FetchCommand) Help() {
 	ui.CPrint(`
 Description:
-  Fetch an engine from nanobox.io
+  Fetches an engine from nanobox.io
 
 Usage:
-  nanobox fetch ruby
-  nanobox fetch nanobox/ruby
-  nanobox fetch ruby-0.0.1
-  nanobox fetch nanobox/ruby-0.0.1
+	nanobox fetch
+
+	ex:
+		nanobox fetch ruby
+  	nanobox fetch nanobox/ruby
+  	nanobox fetch ruby-0.0.1
+  	nanobox fetch nanobox/ruby-0.0.1
   `)
 }
 

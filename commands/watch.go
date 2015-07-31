@@ -10,7 +10,6 @@ package commands
 import (
 	"fmt"
 	"os"
-	// "os/exec"
 	"path/filepath"
 
 	"github.com/go-fsnotify/fsnotify"
@@ -26,7 +25,16 @@ type WatchCommand struct {
 }
 
 // Help
-func (c *WatchCommand) Help() {}
+func (c *WatchCommand) Help() {
+	ui.CPrint(`
+Description:
+  Watches your app for file changes. When a file is changed a 'nanobox build' is
+	automatically issued. If a Boxfile is modified a 'nanobox deploy' is issued
+
+Usage:
+  pagoda watch
+  `)
+}
 
 // Run
 func (c *WatchCommand) Run(opts []string) {

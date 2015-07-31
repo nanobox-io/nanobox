@@ -22,7 +22,7 @@ type ReloadCommand struct{}
 func (c *ReloadCommand) Help() {
 	ui.CPrint(`
 Description:
-  Reloads the Nanobox virtual machine
+  Reloads the nanobox VM by issuing a "vagrant reload --provision"
 
 Usage:
   nanobox reload

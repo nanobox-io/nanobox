@@ -20,7 +20,7 @@ type UpCommand struct{}
 func (c *UpCommand) Help() {
 	ui.CPrint(`
 Description:
-  Runs a 'create' and a 'deploy'
+  Runs 'nanobox create' and then 'nanobox deploy'
 
 Usage:
   nanobox up

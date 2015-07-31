@@ -21,12 +21,8 @@ Description:
   Prints help text for entire CLI
 
 Usage:
-  pagoda
-  pagoda help
-  pagoda -h
-  pagoda --help
+  nanobox [h, -h, help, --help]
 
-  ex. pagoda update
   `)
 }
 
@@ -59,43 +55,50 @@ Description:
   nanobox. If you encounter any issues or have any suggestions, [green]find us on
   IRC (freenode) at #nanobox[reset]. Our engineers are available between 8 - 5pm MST.
 
-  All commands have a short [-*] and a verbose [--*] option when passing flags.
+  All commands flags have a short [-*] and a verbose [--*] option.
 
   You can pass -h, --help, or help to any command to receive detailed information
   about that command.
 
-  You can pass --debug at the end of any command to see all request/response
+  You can pass --debug [red]at the end[reset] of any command to see all request/response
   output when making API calls.
 
 Usage:
-  pagoda (<COMMAND>:<ACTION> OR <ALIAS>) [GLOBAL FLAG] <POSITIONAL> [SUB FLAGS] [--debug]
+  nanobox COMMAND [f, flag, -f, --flag] [--debug]
 
 Options:
-  -h, --help, help
+  h, -h, help, --help
     Run anytime to receive detailed information about a command.
 
-  -v, --version, version
+  v, -v, version, --version
     Run anytime to see the current version of the CLI.
 
   --debug
-    Shows all API request/response output. [red]MUST APPEAR LAST[reset]
+    Shows all API request/response output [red](Must appear last)[reset].
 
 Available Commands:
 
-  create      : Runs an 'init' and starts a nanobox VM
-  deploy      : Deploys to your nanobox VM
-  destroy     : Destroys the current nanobox VM
-  halt        : Halts the current nanobox VM
-  help        : Display this help
+	build       : Rebuilds/Compiles your project
+	console     : Opens an interactive terminal inside your apps context
+  create      : Runs 'nanobox init' then boots the nanobox VM
+  deploy      : Deploys to the nanobox VM
+  destroy     : Destroys the nanobox VM
+	exec        : Runs a command in your apps context
+	fetch       : Fetches an engine from nanobox.io
+  halt        : Halts the nanobox VM
+  help        : Displays CLI help
   init        : Creates a nanobox flavored Vagrantfile
-  log         : Show/Stream nanobox logs
-  new         : Create a new nanobox developer project
-  publish     : Publish your nanobox live
-  reload      :
-  resume      : Resumes a halted/suspened nanobox VM
-  status      : Display all current nanobox VM's
-  suspend     : Suspends the current nanobox VM
-  up          : Runs a 'create' and a 'deploy'
-  update      : Updates this CLI to the newest version
+  log         : Shows/Streams nanobox logs
+  new         : Generates a new engine
+  publish     : Publishes an engine to nanobox.io
+  reload      : Reloads the nanobox VM
+  resume      : Resumes the halted/suspended nanobox VM
+  status      : Displays all current nanobox VM's
+  suspend     : Suspends the nanobox VM
+	tunnel      : Displays port forward information for your apps running services
+  up          : Runs 'nanobox create' and then 'nanobox deploy'
+  update      : Updates the CLI to the newest available version
+	upgrade     : Updates the nanobox docker images
+	watch       : Watches your app for file changes
   `)
 }

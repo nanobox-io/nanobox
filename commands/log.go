@@ -11,14 +11,16 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"net/url"
 	"regexp"
-	// "sort"
-	// "strconv"
 	"time"
 
-	mist "github.com/pagodabox/golang-mist"
+	"github.com/pagodabox/golang-mist"
+	api "github.com/pagodabox/nanobox-api-client"
 	"github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-cli/ui"
+	// "github.com/pagodabox/nanobox-cli/utils"
+	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
 type (
@@ -58,51 +60,27 @@ var logColors = [11]string{
 	"white",
 }
 
-// functions for sorting logs by timestamp
-func (l Logs) Len() int {
-	return len(l)
-}
-
-func (l Logs) Less(i, j int) bool {
-	return l[i].Time < l[j].Time
-}
-
-func (l Logs) Swap(i, j int) {
-	l[i], l[j] = l[j], l[i]
-}
-
 // Help
 func (c *LogCommand) Help() {
 	ui.CPrint(`
 Description:
-  Provides log output for an application.
-
-  If [app-name] is not provided, will attempt to detect [app-name] from git
-  remotes. If no app or multiple apps detected, will prompt for [app-name].
-
-  If [count] is not provided, will show the last 100 lines of the log.
-
-  If [live] is not provided, will default to showing the last 100 lines.
+  Provides the last 100 lines of historical log output by default.
 
 Usage:
-  pagoda log [-a app-name] [-c count] [-l]
-  pagoda app:log [-a app-name] [-c count] [-l]
-
-  ex. pagoda log -a app-name -c 100 -l
+  pagoda log [-c] [-l]
 
 Options:
-  -a, --app [app-name]
-    The name of the app you want to view logs for.
+  -c, --count
+    The number of lines of the historical log you wish to view.
 
-  -c, --count [count]
-    The number of lines of the log you wish to view.
+  -s, --stream
+    Stream logs live
 
-  -l, --live
-    Enable live stream
-    // emergency, alert, critical, error, warning, notice, informational, debug, log
+  -l --level
+    Filters logs by one of the following levels:
+			debug > info > warn > error > fatal
 
-  --level
-    Log level
+			note: that each level will display logs from all levels below it
   `)
 }
 
@@ -118,10 +96,11 @@ func (c *LogCommand) Run(opts []string) {
 	flags.IntVar(&fCount, "count", 100, "")
 
 	var fStream bool
-	flags.BoolVar(&fStream, "l", false, "")
-	flags.BoolVar(&fStream, "live", false, "")
+	flags.BoolVar(&fStream, "s", false, "")
+	flags.BoolVar(&fStream, "stream", false, "")
 
 	var fLevel string
+	flags.StringVar(&fLevel, "l", "info", "")
 	flags.StringVar(&fLevel, "level", "info", "")
 
 	if err := flags.Parse(opts); err != nil {
@@ -130,64 +109,60 @@ func (c *LogCommand) Run(opts []string) {
 
 	// if stream is true, we connect to the live logs
 	if fStream {
+		fmt.Printf(stylish.Bullet("Connecting to live stream..."))
 
-		// connect websocket
-		fmt.Println("Connecting to live stream...")
-
-		// subscribe to mist
+		// create a 'mist' client to communicate with the mist server running on the
+		// guest machine
 		client := mist.Client{Host: config.Nanofile.IP, Port: "1445"}
-		if err := client.Connect(); err != nil {
-			ui.LogFatal("[commands deploy] client.Connect() failed ", err)
-		}
 
+		// connect the 'mist' client to the 'mist' server
+		if err := client.Connect(); err != nil {
+			ui.LogFatal("[commands sync] client.Connect() failed ", err)
+		}
 		defer client.Close()
 
-		//
-		sub, err := client.Subscribe([]string{"app", fLevel})
+		// subscribe to 'sync' updates
+		logSub, err := client.Subscribe([]string{"log", fLevel})
 		if err != nil {
-			config.Console.Warn("Failed to subscribe to 'mist' updates... %v", err)
+			fmt.Printf(stylish.Warning("Nanobox failed to subscribe to app logs. Your sync will continue as normal, and log output is available on your dashboard."))
 		}
+		defer client.Unsubscribe(logSub)
 
 		//
-		config.Console.Debug("[commands.app_log.Run] Subscribing to logs: %#v", sub)
+		fmt.Printf(stylish.Bullet("Connecting to live stream..."))
 
-		//
-		var log Log
-
-		//
-		fmt.Println("Waiting for data...")
-
-		//
+	stream:
 		for msg := range client.Data {
 
-			data := make(map[string]string)
+			//
+			log := Log{}
 
-			if data["log"] != "" {
-
-				//
-				if err := json.Unmarshal([]byte(msg.Data), &log); err != nil {
-					ui.LogFatal("[commands.app_log] json.Unmarshal() failed", err)
-				}
-
-				processLog(log)
+			// check for any error message that cause mist to disconnect, and release
+			// nanobox
+			if msg.Tags[0] == "err" {
+				fmt.Printf(stylish.Warning("An unexpected error caused the sync stream to disconnect. Your sync should continue as normal, and you can see the log output from your dashboard."))
+				break stream
 			}
+
+			//
+			if err := json.Unmarshal([]byte(msg.Data), &log); err != nil {
+				ui.LogFatal("[commands sync] json.Unmarshal() failed", err)
+			}
+
+			processLog(log)
 		}
 
 		// load historical logs
 	} else {
 
-		// logsURL := fmt.Sprintf("https://log.pagodabox.io/app/%v?limit=%v", safeID, strconv.Itoa(fCount))
+		v := url.Values{}
 
-		// //
-		// config.Console.Debug("[commands.app_log.Run] Requesting historical logs from: %v", logsURL)
+		v.Add("level", fLevel)
+		v.Add("reset", fmt.Sprintf("%v", fCount))
 
-		// // request historical logs
-		// if err := api.DoRawRequest(&logvac.Logs, "GET", logsURL, nil, map[string]string{"X-AUTH-TOKEN": logvac.Token}); err != nil {
-		//   ui.LogFatal("[commands.app_log] api.DoRawRequest() failed", err)
-		// }
-
-		// // sort logs
-		// sort.Sort(logvac.Logs)
+		if err := api.DoRawRequest(nil, "GET", fmt.Sprintf("%v:6362/app?%v", config.Nanofile.IP, v.Encode()), nil, nil); err != nil {
+			ui.LogFatal("[commands sync] api.DoRawRequest() failed ", err)
+		}
 
 		// ui.CPrint("[yellow]Showing last %v log entries...[reset]", strconv.Itoa(fCount))
 

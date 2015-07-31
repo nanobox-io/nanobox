@@ -50,7 +50,7 @@ type (
 func (c *PublishCommand) Help() {
 	ui.CPrint(`
 Description:
-  Publish your engine to nanobox.io
+  Publishes an engine to nanobox.io
 
 Usage:
   nanobox publish
