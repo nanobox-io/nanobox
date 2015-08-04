@@ -84,4 +84,24 @@ func (c *DeployCommand) Run(opts []string) {
 
 	//
 	deploy.run(flags.Args())
+
+	//
+	switch deploy.Status {
+
+	// complete
+	case "complete":
+
+		//
+		if fSandbox {
+			fmt.Printf(stylish.Bullet("Sandbox deploy complete..."))
+			break
+		}
+
+		fmt.Printf(stylish.Bullet(fmt.Sprintf("Deploy complete... Navigate to %v.nano.dev to view your app.", config.App)))
+
+		// if the deploy fails the server should handle the message. If not, this can
+		// be re-enabled
+	case "errored":
+		// fmt.Printf(stylish.Error("Deploy failed", "Your deploy failed to well... deploy"))
+	}
 }

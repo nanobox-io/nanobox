@@ -16,6 +16,7 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	// "time"
 
 	"github.com/pagodabox/golang-mist"
 	"github.com/pagodabox/nanobox-cli/config"
@@ -198,7 +199,11 @@ func (c *LogCommand) Run(opts []string) {
 // terminal
 func processLog(log Log) {
 
-	// time := time.Unix(0, int64(log.Time)*1000).Format(time.RFC822)
+	// t := time.Now(log.Time).Format(time.RFC822)
+	// t, err := time.Parse("01/02 03:04:05PM '06 -0700", log.Time)
+	// if err != nil {
+	// 	fmt.Println("TIME BONK!", err)
+	// }
 
 	//
 	reFindLog := regexp.MustCompile(`^(\w+)\.(\S+)\s+(.*)$`)

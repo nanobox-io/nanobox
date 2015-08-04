@@ -10,7 +10,6 @@ package commands
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/pagodabox/golang-mist"
 	api "github.com/pagodabox/nanobox-api-client"
@@ -121,32 +120,9 @@ stream:
 			// if the message contains the model field...
 		case e.Model != "":
 
-			// depending on the type of model, different things may happen...
-			switch e.Model {
-
-			// in the case of a sync model, listen for a complete to close the stream
-			case strings.Title(s.kind), s.kind:
-
-				if err := json.Unmarshal([]byte(e.Document), s); err != nil {
-					ui.LogFatal("[commands sync] json.Unmarshal() failed ", err)
-				}
-
-				switch s.Status {
-				// once the sync is 'complete' unsubscribe from mist
-				case "complete":
-					fmt.Printf(stylish.Bullet(fmt.Sprintf("%v complete... Navigate to %v.nano.dev to view your app.", strings.Title(s.kind), config.App)))
-					break stream
-
-				// if the sync is 'errored' unsubscribe from mist
-				case "errored":
-					fmt.Printf(stylish.Error(fmt.Sprintf("%v failed", strings.Title(s.kind)), fmt.Sprintf("Your %v failed to uh... %v", s.kind, s.kind)))
-					break stream
-				}
-
-			// report any unhandled models, incase cases need to be added to handle them
-			case "default":
-				config.Console.Debug("Nanobox has encountered an unknown model (%v), and doesn't know what to do with it...", e.Model)
-				break stream
+			// update the model status
+			if err := json.Unmarshal([]byte(e.Document), s); err != nil {
+				ui.LogFatal("[commands sync] json.Unmarshal() failed ", err)
 			}
 
 		// report any unhandled entries, incase cases need to be added to handle them

@@ -61,4 +61,17 @@ func (c *BuildCommand) Run(opts []string) {
 
 	//
 	build.run(flags.Args())
+
+	//
+	switch build.Status {
+
+	// complete
+	case "complete":
+		fmt.Printf(stylish.Bullet(fmt.Sprintf("Build complete... Navigate to %v.nano.dev to view your app.", config.App)))
+
+		// if the build fails the server should handle the message. If not, this can
+		// be re-enabled
+	case "errored":
+		// fmt.Printf(stylish.Error("Build failed", "Your build failed to well... build"))
+	}
 }

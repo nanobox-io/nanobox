@@ -8,9 +8,9 @@
 package commands
 
 import (
+	"flag"
 	"fmt"
 
-	api "github.com/pagodabox/nanobox-api-client"
 	"github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-cli/ui"
 	"github.com/pagodabox/nanobox-golang-stylish"
@@ -32,11 +32,42 @@ Usage:
 
 // Run
 func (c *UpgradeCommand) Run(opts []string) {
+	fmt.Printf(stylish.Bullet("Updating nanobox docker images..."))
+
+	// flags
+	flags := flag.NewFlagSet("flags", flag.ContinueOnError)
+	flags.Usage = func() { c.Help() }
 
 	//
-	fmt.Printf(stylish.Bullet("Updating nanobox docker images..."))
-	if err := api.DoRawRequest(nil, "POST", fmt.Sprintf("http://%v:1757/image-update", config.Nanofile.IP), nil, nil); err != nil {
-		fmt.Printf(stylish.Error("failed to update nanobox docker images", fmt.Sprintf("nanobox was unable to updated its docker images, and failed with the following error: %v", err)))
+	var fVerbose bool
+	flags.BoolVar(&fVerbose, "v", false, "")
+	flags.BoolVar(&fVerbose, "verbose", false, "")
+
+	//
+	if err := flags.Parse(opts); err != nil {
+		ui.LogFatal("[commands.destroy] flags.Parse() failed", err)
 	}
-	fmt.Printf(stylish.Success())
+
+	//
+	upgrade := nsync{
+		kind:    "image-update",
+		path:    fmt.Sprintf("http://%v:1757/image-update", config.Nanofile.IP),
+		verbose: fVerbose,
+	}
+
+	//
+	upgrade.run(flags.Args())
+
+	//
+	switch upgrade.Status {
+
+	// complete
+	case "complete":
+		fmt.Printf(stylish.Bullet("Upgrade complete"))
+
+	// if the bootstrap fails the server should handle the message. If not, this can
+	// be re-enabled
+	case "errored":
+		// fmt.Printf(stylish.Error("Bootstrap failed", "Your app failed to bootstrap"))
+	}
 }

@@ -61,4 +61,17 @@ func (c *BootstrapCommand) Run(opts []string) {
 
 	//
 	bootstrap.run(flags.Args())
+
+	//
+	switch bootstrap.Status {
+
+	// complete
+	case "complete":
+		fmt.Printf(stylish.Bullet("Bootstrap complete"))
+
+	// if the bootstrap fails the server should handle the message. If not, this can
+	// be re-enabled
+	case "errored":
+		// fmt.Printf(stylish.Error("Bootstrap failed", "Your app failed to bootstrap"))
+	}
 }

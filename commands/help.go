@@ -53,7 +53,7 @@ func (c *HelpCommand) Run(opts []string) {
 Description:
   Welcome to the nanobox CLI! This will be your primary tool when working with
   nanobox. If you encounter any issues or have any suggestions, [green]find us on
-  IRC (freenode) at #nanobox[reset]. Our engineers are available between 8 - 5pm MST.
+  IRC (freenode) at #nanobox[reset].
 
   All commands flags have a short [-*] and a verbose [--*] option.
 
