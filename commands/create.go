@@ -26,7 +26,7 @@ type CreateCommand struct{}
 func (c *CreateCommand) Help() {
 	ui.CPrint(`
 Description:
-  Runs 'nanobox init',ni then boots the nanobox VM by issuing a "vagrant up"
+  Runs 'nanobox init', then boots the nanobox VM by issuing a "vagrant up"
 
 Usage:
   nanobox create
