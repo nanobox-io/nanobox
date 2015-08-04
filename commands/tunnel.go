@@ -33,7 +33,7 @@ type (
 func (c *TunnelCommand) Help() {
 	ui.CPrint(`
 Description:
-  Displays port forward information for your apps running services
+  Displays port forward information for your app's running services
 
 Usage:
   nanobox tunnel

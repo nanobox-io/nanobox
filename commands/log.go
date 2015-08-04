@@ -67,14 +67,14 @@ Description:
   Provides the last 100 lines of historical log output by default.
 
 Usage:
-  pagoda log [-c] [-l]
+  pagoda log [-c] [-s] [-l]
 
 Options:
   -c, --count
-    The number of lines of the historical log you wish to view.
+    Specifies the number of lines to output from the historical log.
 
   -s, --stream
-    Stream logs live
+    Streams logs live
 
   -l --level
     Filters logs by one of the following levels:

@@ -22,7 +22,7 @@ type SuspendCommand struct{}
 func (c *SuspendCommand) Help() {
 	ui.CPrint(`
 Description:
-  Suspends the nanobox VM
+  Suspends the nanobox VM by issuing a "vagrant suspend"
 
 Usage:
   nanobox suspend
