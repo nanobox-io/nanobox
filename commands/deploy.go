@@ -25,20 +25,20 @@ type DeployCommand struct{}
 func (c *DeployCommand) Help() {
 	ui.CPrint(`
 Description:
-  Issue a deploy to the nanobox VM
+  Issues a deploy to the nanobox VM
 
 Usage:
   nanobox deploy [-v] [-r] [-s]
 
 Options:
   -v, --verbose
-    Increase the level of log output from 'info' to 'debug'
+    Increases the level of log output from 'info' to 'debug'
 
   -r, --reset
     Clears cached libraries the project might use
 
 	-s, --sandbox
-		Create your app environment w/o webs or workers
+		Creates your app environment w/o webs or workers
   `)
 }
 

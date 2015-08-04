@@ -30,7 +30,7 @@ Usage:
 
 Options:
   -v, --verbose
-    Increase the level of log output from 'info' to 'debug'
+    Increases the level of log output from 'info' to 'debug'
   `)
 }
 

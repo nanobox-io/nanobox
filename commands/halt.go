@@ -29,7 +29,7 @@ Usage:
 
 Options:
   -f, --force
-    A forced halt
+    Skips confirmation and forces the nanobox VM to halt
   `)
 }
 

@@ -23,7 +23,7 @@ type BuildCommand struct{}
 func (c *BuildCommand) Help() {
 	ui.CPrint(`
 Description:
-  Rebuild/compile your project
+  Rebuilds/compiles your project
 
 Usage:
   nanobox build [-v]

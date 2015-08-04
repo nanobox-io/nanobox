@@ -25,7 +25,7 @@ type InitCommand struct{}
 func (c *InitCommand) Help() {
 	ui.CPrint(`
 Description:
-  Creates a nanobox flavored Vagrantfile
+  Creates a nanobox-flavored Vagrantfile
 
 Usage:
   nanobox init
