@@ -86,7 +86,7 @@ func (c *InitCommand) Run(opts []string) {
 				base := filepath.Base(fp)
 
 				//
-				fmt.Printf(stylish.SubBullet(fmt.Sprintf("- Adding engine directory mount (/vagrant/engines/%v)\n", base)))
+				fmt.Printf(stylish.SubBullet(fmt.Sprintf("- Adding engine directory mount (/vagrant/engines/%v)", base)))
 
 				synced_folders += fmt.Sprintf("\n    nanobox.vm.synced_folder \"%v\", \"/vagrant/engines/%v\"", fp, base)
 			}
@@ -164,11 +164,17 @@ func (c *InitCommand) Run(opts []string) {
 # pull the latest version of nanobox-boot2docker
 version = %v
 
-$wait = <<SCRIPT
+#
+$ping = <<SCRIPT
 echo "Waiting for nanobox server..."
-while [ $(nc -z -w 4 127.0.0.1 1757) ]; do
-  sleep 1
-done
+while ! nc -z 127.0.0.1 1757; do sleep 1; done;
+echo "Nanobox server found!";
+SCRIPT
+
+#
+$kill = <<SCRIPT
+echo "Killing eth1 dhcp..."
+kill -9 $(cat /var/run/udhcpc.eth1.pid)
 SCRIPT
 
 
@@ -184,7 +190,7 @@ Vagrant.configure(2) do |config|
   config.vm.define :nanobox_boot2docker do |nanobox|
 
     ## Wait for nanobox-server to be ready before vagrant exits
-    nanobox.vm.provision "shell", inline: $wait
+    nanobox.vm.provision "shell", inline: $ping
 
 
     ## box
@@ -208,8 +214,11 @@ Vagrant.configure(2) do |config|
     ## provider configs
     %s
 
-  end
+    # kill the eth1 dhcp server so that it doesn't override the assigned ip when
+    # the lease is up
+    nanobox.vm.provision "shell", inline: $kill
 
+  end
 end`, version, network, synced_folders, provider)
 
 		// write the Vagrantfile

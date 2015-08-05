@@ -125,6 +125,10 @@ stream:
 				ui.LogFatal("[commands sync] json.Unmarshal() failed ", err)
 			}
 
+			if s.Status == "errored" {
+				break stream
+			}
+
 		// report any unhandled entries, incase cases need to be added to handle them
 		default:
 			config.Console.Debug("Nanobox has encountered an Entry with neither a 'log' nor 'model' field and doesnt know what to do...")
