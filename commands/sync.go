@@ -125,9 +125,10 @@ stream:
 				ui.LogFatal("[commands sync] json.Unmarshal() failed ", err)
 			}
 
-			if s.Status == "errored" {
-				break stream
-			}
+			// break the stream once we get a model update. If we ever have intermediary
+			// status's we can throw in a case that will handle this on a status-by-status
+			// basis
+			break stream
 
 		// report any unhandled entries, incase cases need to be added to handle them
 		default:

@@ -165,7 +165,7 @@ func (c *InitCommand) Run(opts []string) {
 version = %v
 
 #
-$ping = <<SCRIPT
+$wait = <<SCRIPT
 echo "Waiting for nanobox server..."
 while ! nc -z 127.0.0.1 1757; do sleep 1; done;
 echo "Nanobox server found!";
@@ -190,7 +190,7 @@ Vagrant.configure(2) do |config|
   config.vm.define :nanobox_boot2docker do |nanobox|
 
     ## Wait for nanobox-server to be ready before vagrant exits
-    nanobox.vm.provision "shell", inline: $ping
+    nanobox.vm.provision "shell", inline: $wait
 
 
     ## box
