@@ -101,7 +101,7 @@ func runVagrantCommand(cmd *exec.Cmd) {
 	scanner := bufio.NewScanner(pr)
 	go func() {
 		for scanner.Scan() {
-			fmt.Printf("   %s\n", scanner.Text())
+			fmt.Printf("   %s\n", strings.Replace(scanner.Text(), "\r", "\n", -1))
 		}
 	}()
 

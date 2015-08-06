@@ -37,8 +37,8 @@ Options:
   -r, --reset
     Clears cached libraries the project might use
 
-	-s, --sandbox
-		Creates your app environment w/o webs or workers
+  -s, --sandbox
+    Creates your app environment w/o webs or workers
   `)
 }
 

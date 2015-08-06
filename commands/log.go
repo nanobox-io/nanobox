@@ -159,7 +159,7 @@ func (c *LogCommand) Run(opts []string) {
 		//
 		v := url.Values{}
 		v.Add("level", fLevel)
-		v.Add("reset", fmt.Sprintf("%v", fCount))
+		v.Add("limit", fmt.Sprintf("%v", fCount))
 
 		res, err := http.Get(fmt.Sprintf("http://%v:6362/app?%v", config.Nanofile.IP, v.Encode()))
 		if err != nil {

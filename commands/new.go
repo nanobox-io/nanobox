@@ -27,10 +27,7 @@ Description:
 	Generates a new engine inside the current working directory
 
 Usage:
-  nanobox new <engine>
-
-  ex.
-		nanobox new ruby
+  nanobox new ruby
   `)
 }
 

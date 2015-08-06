@@ -78,14 +78,14 @@ Options:
 
 Available Commands:
 
-	bootstrap   : Runs an engine's bootstrap script - downloads code & launches VM
-	build       : Rebuilds/Compiles your project
-	console     : Opens an interactive terminal inside your apps context
+  bootstrap   : Runs an engine's bootstrap script - downloads code & launches VM
+  build       : Rebuilds/Compiles your project
+  console     : Opens an interactive terminal inside your apps context
   create      : Runs 'nanobox init' then boots the nanobox VM
   deploy      : Deploys to the nanobox VM
   destroy     : Destroys the nanobox VM
-	exec        : Runs a command in your apps context
-	fetch       : Fetches an engine from nanobox.io
+  exec        : Runs a command in your apps context
+  fetch       : Fetches an engine from nanobox.io
   halt        : Halts the nanobox VM
   help        : Displays CLI help
   init        : Creates a nanobox flavored Vagrantfile
@@ -96,10 +96,10 @@ Available Commands:
   resume      : Resumes the halted/suspended nanobox VM
   status      : Displays all current nanobox VM's
   suspend     : Suspends the nanobox VM
-	tunnel      : Displays port forward information for your apps running services
+  tunnel      : Displays port forward information for your apps running services
   up          : Runs 'nanobox create' and then 'nanobox deploy'
   update      : Updates the CLI to the newest available version
-	upgrade     : Updates the nanobox docker images
-	watch       : Watches your app for file changes
+  upgrade     : Updates the nanobox docker images
+  watch       : Watches your app for file changes
   `)
 }

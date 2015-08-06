@@ -26,8 +26,8 @@ Usage:
   nanobox up
 
 Options:
-	-w, --watch
-		Watches your app for file changes
+  -w, --watch
+    Watches your app for file changes
   `)
 }
 
