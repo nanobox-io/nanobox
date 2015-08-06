@@ -77,7 +77,7 @@ func (c *DeployCommand) Run(opts []string) {
 
 	//
 	deploy := nsync{
-		kind:    "deploy",
+		model:   "deploy",
 		path:    fmt.Sprintf("http://%v:1757/deploys?%v", config.Nanofile.IP, v.Encode()),
 		verbose: fVerbose,
 	}

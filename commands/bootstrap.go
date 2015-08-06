@@ -54,7 +54,7 @@ func (c *BootstrapCommand) Run(opts []string) {
 
 	//
 	bootstrap := nsync{
-		kind:    "bootstrap",
+		model:   "bootstrap",
 		path:    fmt.Sprintf("http://%v:1757/bootstrap", config.Nanofile.IP),
 		verbose: fVerbose,
 	}

@@ -168,7 +168,6 @@ version = %v
 $wait = <<SCRIPT
 echo "Waiting for nanobox server..."
 while ! nc -z 127.0.0.1 1757; do sleep 1; done;
-echo "Nanobox server found!";
 SCRIPT
 
 #

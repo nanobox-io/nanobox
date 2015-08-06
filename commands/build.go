@@ -54,7 +54,7 @@ func (c *BuildCommand) Run(opts []string) {
 
 	//
 	build := nsync{
-		kind:    "build",
+		model:   "build",
 		path:    fmt.Sprintf("http://%v:1757/builds", config.Nanofile.IP),
 		verbose: fVerbose,
 	}

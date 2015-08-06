@@ -50,7 +50,7 @@ func (c *UpgradeCommand) Run(opts []string) {
 
 	//
 	upgrade := nsync{
-		kind:    "image-update",
+		model:   "imageupdate",
 		path:    fmt.Sprintf("http://%v:1757/image-update", config.Nanofile.IP),
 		verbose: fVerbose,
 	}

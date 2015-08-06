@@ -23,7 +23,7 @@ type (
 
 	// nsync
 	nsync struct {
-		kind    string
+		model   string
 		path    string
 		verbose bool
 
@@ -44,10 +44,6 @@ type (
 // run issues a sync to the running nanobox VM
 func (s *nsync) run(opts []string) {
 
-	// start the vm if it's not already running
-	// resume := ResumeCommand{}
-	// resume.Run(opts)
-
 	// create a 'mist' client to communicate with the mist server running on the
 	// guest machine
 	client := mist.Client{Host: config.Nanofile.IP, Port: "1445"}
@@ -62,7 +58,7 @@ func (s *nsync) run(opts []string) {
 
 	// subscribe to 'sync' updates
 	utils.Printv(stylish.SubBullet("- Subscribing to app logs"), s.verbose)
-	jobSub, err := client.Subscribe([]string{"job", s.kind})
+	jobSub, err := client.Subscribe([]string{"job", s.model})
 	if err != nil {
 		fmt.Printf(stylish.Warning("Nanobox failed to subscribe to app logs. Your sync will continue as normal, and log output is available on your dashboard."))
 	}
@@ -126,8 +122,8 @@ stream:
 			}
 
 			// break the stream once we get a model update. If we ever have intermediary
-			// status's we can throw in a case that will handle this on a status-by-status
-			// basis
+			// statuses we can throw in a case that will handle this on a status-by-status
+			// basis (errored, complete)
 			break stream
 
 		// report any unhandled entries, incase cases need to be added to handle them

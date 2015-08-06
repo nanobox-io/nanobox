@@ -76,6 +76,6 @@ func (c *CreateCommand) Run(opts []string) {
 	fmt.Printf(stylish.ProcessEnd())
 
 	// upgrade all nanobox docker images
-	// upgrade := UpgradeCommand{}
-	// upgrade.Run(opts)
+	upgrade := UpgradeCommand{}
+	upgrade.Run(opts)
 }
