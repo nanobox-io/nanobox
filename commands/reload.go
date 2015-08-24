@@ -7,33 +7,37 @@
 
 package commands
 
+//
 import (
 	"fmt"
 	"os/exec"
+
+	"github.com/spf13/cobra"
 
 	"github.com/pagodabox/nanobox-cli/ui"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
-// ReloadCommand satisfies the Command interface
-type ReloadCommand struct{}
-
-// Help
-func (c *ReloadCommand) Help() {
-	ui.CPrint(`
+//
+var reloadCmd = &cobra.Command{
+	Use:   "reload",
+	Short: "Reloads the nanobox VM",
+	Long: `
 Description:
-  Reloads the nanobox VM by issuing a "vagrant reload --provision"
+  Reloads the nanobox VM by issuing a "vagrant reload --provision"`,
 
-Usage:
-  nanobox reload
-  `)
+	Run: nanoReload,
 }
 
-// Run reloads the specified virtual machine
-func (c *ReloadCommand) Run(opts []string) {
+// nanoReload runs 'vagrant reload --provision'
+func nanoReload(ccmd *cobra.Command, args []string) {
 
-	// run 'vagrant reload --provision'
+	// run an init to ensure there is a Vagrantfile
+	nanoInit(nil, args)
+
 	fmt.Printf(stylish.ProcessStart("reloading nanobox vm"))
-	runVagrantCommand(exec.Command("vagrant", "reload", "--provision"))
+	if err := runVagrantCommand(exec.Command("vagrant", "reload", "--provision")); err != nil {
+		ui.LogFatal("[commands/reload] runVagrantCommand() failed", err)
+	}
 	fmt.Printf(stylish.ProcessEnd())
 }

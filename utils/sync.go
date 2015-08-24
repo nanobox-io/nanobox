@@ -5,7 +5,7 @@
 // at http://mozilla.org/MPL/2.0/.
 //
 
-package commands
+package utils
 
 import (
 	"encoding/json"
@@ -15,20 +15,18 @@ import (
 	api "github.com/pagodabox/nanobox-api-client"
 	"github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-cli/ui"
-	"github.com/pagodabox/nanobox-cli/utils"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
 type (
 
 	// nsync
-	nsync struct {
-		model   string
-		path    string
-		verbose bool
-
-		ID     string `json:"id"`
-		Status string `json:"status"`
+	Sync struct {
+		ID      string `json:"id"`
+		Model   string
+		Path    string
+		Status  string `json:"status"`
+		Verbose bool
 	}
 
 	// entry
@@ -42,7 +40,7 @@ type (
 )
 
 // run issues a sync to the running nanobox VM
-func (s *nsync) run(opts []string) {
+func (s *Sync) Run(opts []string) {
 
 	// create a 'mist' client to communicate with the mist server running on the
 	// guest machine
@@ -50,39 +48,39 @@ func (s *nsync) run(opts []string) {
 
 	// connect the 'mist' client to the 'mist' server
 	if err := client.Connect(); err != nil {
-		ui.LogFatal("[commands sync] client.Connect() failed ", err)
+		ui.LogFatal("[utils/sync] client.Connect() failed ", err)
 	}
 	defer client.Close()
 
-	utils.Printv(stylish.Bullet("Subscribing to mist..."), s.verbose)
+	Printv(stylish.Bullet("Subscribing to mist..."), s.Verbose)
 
 	// subscribe to 'sync' updates
-	utils.Printv(stylish.SubBullet("- Subscribing to app logs"), s.verbose)
-	jobSub, err := client.Subscribe([]string{"job", s.model})
+	Printv(stylish.SubBullet("- Subscribing to app logs"), s.Verbose)
+	jobSub, err := client.Subscribe([]string{"job", s.Model})
 	if err != nil {
 		fmt.Printf(stylish.Warning("Nanobox failed to subscribe to app logs. Your sync will continue as normal, and log output is available on your dashboard."))
 	}
 	defer client.Unsubscribe(jobSub)
 
 	logLevel := "info"
-	if s.verbose {
+	if s.Verbose {
 		logLevel = "debug"
 	}
 
 	// if the verbose flag is included, also subscribe to the 'debug' sync logs
-	utils.Printv(stylish.SubBullet("- Subscribing to debug logs"), s.verbose)
+	Printv(stylish.SubBullet("- Subscribing to debug logs"), s.Verbose)
 	logSub, err := client.Subscribe([]string{"log", "deploy", logLevel})
 	if err != nil {
 		fmt.Printf(stylish.Warning("Nanobox failed to subscribe to debug logs. Your sync will continue as normal, and log output is available on your dashboard."))
 	}
 	defer client.Unsubscribe(logSub)
 
-	utils.Printv(stylish.Success(), s.verbose)
+	Printv(stylish.Success(), s.Verbose)
 
 	//
 	// issue a sync
-	if err := api.DoRawRequest(nil, "POST", s.path, nil, nil); err != nil {
-		ui.LogFatal("[commands sync] api.DoRawRequest() failed ", err)
+	if err := api.DoRawRequest(nil, "POST", s.Path, nil, nil); err != nil {
+		ui.LogFatal("[utils/sync] api.DoRawRequest() failed ", err)
 	}
 
 	// handle
@@ -101,7 +99,7 @@ stream:
 
 		//
 		if err := json.Unmarshal([]byte(msg.Data), &e); err != nil {
-			ui.LogFatal("[commands sync] json.Unmarshal() failed", err)
+			ui.LogFatal("[utils/sync] json.Unmarshal() failed", err)
 		}
 
 		// depending on what fields the data has, determines what needs to happen...
@@ -118,7 +116,7 @@ stream:
 
 			// update the model status
 			if err := json.Unmarshal([]byte(e.Document), s); err != nil {
-				ui.LogFatal("[commands sync] json.Unmarshal() failed ", err)
+				ui.LogFatal("[utils/sync] json.Unmarshal() failed ", err)
 			}
 
 			// break the stream once we get a model update. If we ever have intermediary

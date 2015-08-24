@@ -7,39 +7,39 @@
 
 package commands
 
+//
 import (
 	"fmt"
 	"io/ioutil"
 	"os"
+
+	"github.com/spf13/cobra"
 
 	// "github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-cli/ui"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
-// NewCommand satisfies the Command interface
-type NewCommand struct{}
-
-// Help
-func (c *NewCommand) Help() {
-	ui.CPrint(`
+//
+var newCmd = &cobra.Command{
+	Use:   "new",
+	Short: "Generates a new engine inside the current working directory",
+	Long: `
 Description:
-	Generates a new engine inside the current working directory
+  Generates a new engine inside the current working directory`,
 
-Usage:
-  nanobox new ruby
-  `)
+	Run: nanoNew,
 }
 
-// Run
-func (c *NewCommand) Run(opts []string) {
+// nanoNew
+func nanoNew(ccmd *cobra.Command, args []string) {
 
-	if len(opts) < 1 {
+	if len(args) < 1 {
 		fmt.Println(stylish.Error("app name required", "Please provide a name when generating a new engine, (run 'nanobox new -h' for details)"))
 		os.Exit(1)
 	}
 
-	name := fmt.Sprintf("nanobox-%s", opts[0])
+	name := fmt.Sprintf("nanobox-%s", args[0])
 	version := "0.0.1"
 
 	fmt.Println(stylish.Header("initializing new app: " + name))
@@ -50,7 +50,7 @@ func (c *NewCommand) Run(opts []string) {
 		stylish.Bullet("Creating engine at")
 
 		if err := os.Mkdir(name, 0755); err != nil {
-			ui.LogFatal("[commands.new] os.Mkdir() failed", err)
+			ui.LogFatal("[commands/new] os.Mkdir() failed", err)
 		}
 
 		entry := fmt.Sprintf(`
@@ -75,12 +75,12 @@ project_files:
 		path := name + "/Enginefile"
 
 		if _, err := os.Create(path); err != nil {
-			ui.LogFatal("[commands.new] os.Create() failed", err)
+			ui.LogFatal("[commands/new] os.Create() failed", err)
 		}
 
 		// write the Enginefile
 		if err := ioutil.WriteFile(path, []byte(entry), 0644); err != nil {
-			ui.LogFatal("[commands.new] ioutil.WriteFile() failed", err)
+			ui.LogFatal("[commands/new] ioutil.WriteFile() failed", err)
 		}
 
 	} else {

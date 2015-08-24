@@ -7,48 +7,44 @@
 
 package commands
 
+//
 import (
-	"flag"
 	"fmt"
 	"os"
 	"os/exec"
 
+	"github.com/spf13/cobra"
+
 	"github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-cli/ui"
+	"github.com/pagodabox/nanobox-cli/utils"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
-// DestroyCommand satisfies the Command interface
-type DestroyCommand struct{}
-
-// Help
-func (c *DestroyCommand) Help() {
-	ui.CPrint(`
+//
+var destroyCmd = &cobra.Command{
+	Use:   "destroy",
+	Short: "Destroys the nanobox VM",
+	Long: `
 Description:
-  Destroys the nanobox VM by issuing a "vagrant destroy"
+  Destroys the nanobox VM by issuing a "vagrant destroy"`,
 
-Usage:
-  nanobox destroy [-f]
-
-Options:
-  -f, --force
-    Skips confirmation and forces the destroy
-  `)
+	Run: nanoDestroy,
 }
 
-// Run destroys the specified virtual machine
-func (c *DestroyCommand) Run(opts []string) {
+//
+func init() {
+	destroyCmd.Flags().BoolVarP(&fForce, "force", "f", false, "Skips confirmation and forces the destroy")
+}
 
-	// flags
-	flags := flag.NewFlagSet("flags", flag.ContinueOnError)
-	flags.Usage = func() { c.Help() }
+// nanoDestroy
+func nanoDestroy(ccmd *cobra.Command, args []string) {
 
-	var fForce bool
-	flags.BoolVar(&fForce, "f", false, "")
-	flags.BoolVar(&fForce, "force", false, "")
-
-	if err := flags.Parse(opts); err != nil {
-		ui.LogFatal("[commands.destroy] flags.Parse() failed", err)
+	// if nanobox is unable to access the /etc/hosts file it will need to re-run
+	// the command as sudo
+	if utils.AccessDenied() {
+		utils.SudoExec("destroy", "Attempting to remove nano.dev domain from hosts file")
+		os.Exit(0)
 	}
 
 	//
@@ -62,37 +58,33 @@ func (c *DestroyCommand) Run(opts []string) {
 		// if positive confirmation, proceed and destroy
 		case "Y", "y":
 			fmt.Printf(stylish.Bullet("Delete confirmed, continuing..."))
-			destroy()
 
 		// if negative confirmation, exit w/o destroying
 		default:
-			fmt.Printf(stylish.Bullet("Negative confirmation, app will not be deleted, exiting..."))
 			os.Exit(0)
 		}
 	}
 
-	// if force is passed, destroy...
-	fmt.Printf(stylish.Bullet("Force delete detected, continuing..."))
-	destroy()
-}
-
-// destroy
-func destroy() {
-
-	//
 	// attempt to remove the associated entry, regardless of if it's there or not
-	modifyHosts("x")
+	utils.RemoveDevDomain()
 
 	//
-	// destroy the vm...
+	// destroy the vm; this needs to happen first to ensure there is a Vagrantfile
+	// to run the command with
 	fmt.Printf(stylish.ProcessStart("destroying nanobox vm"))
-	runVagrantCommand(exec.Command("vagrant", "destroy", "--force"))
+	if err := runVagrantCommand(exec.Command("vagrant", "destroy", "--force")); err != nil {
+		if err == err.(*os.PathError) {
+			return
+		} else {
+			ui.LogFatal("[commands/destroy] runVagrantCommand() failed", err)
+		}
+	}
 
-	// remove app; this needs to happen after the Vagrant command so that the app
-	// isn't just created again
+	// remove app; this needs to happen last so that the app isn't just created
+	// again while running the vagrant command
 	fmt.Printf(stylish.Bullet("Deleting all nanobox files at: " + config.AppDir))
 	if err := os.RemoveAll(config.AppDir); err != nil {
-		ui.LogFatal("[commands.destroy] os.RemoveAll() failed", err)
+		ui.LogFatal("[commands/destroy] os.RemoveAll() failed", err)
 	}
 	fmt.Printf(stylish.ProcessEnd())
 }

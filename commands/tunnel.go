@@ -7,41 +7,37 @@
 
 package commands
 
+//
 import (
 	"fmt"
 	"time"
 
+	"github.com/spf13/cobra"
+
 	api "github.com/pagodabox/nanobox-api-client"
 	"github.com/pagodabox/nanobox-cli/config"
-	"github.com/pagodabox/nanobox-cli/ui"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
-type (
-	// TunnelCommand satisfies the Command interface
-	TunnelCommand struct{}
-
-	//
-	Service struct {
-		CreatedAt time.Time
-		Name      string
-		Port      int
-	}
-)
-
-// Help
-func (c *TunnelCommand) Help() {
-	ui.CPrint(`
-Description:
-  Displays port forward information for your app's running services
-
-Usage:
-  nanobox tunnel
-  `)
+type Service struct {
+	CreatedAt time.Time
+	Name      string
+	Port      int
 }
 
-// Run
-func (c *TunnelCommand) Run(opts []string) {
+//
+var tunnelCmd = &cobra.Command{
+	Use:   "tunnel",
+	Short: "Displays port forward information for your app's running services",
+	Long: `
+Description:
+  Displays port forward information for your app's running services`,
+
+	Run: nanoTunnel,
+}
+
+//
+func nanoTunnel(ccmd *cobra.Command, args []string) {
 
 	var services []Service
 

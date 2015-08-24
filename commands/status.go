@@ -7,33 +7,37 @@
 
 package commands
 
+//
 import (
 	"fmt"
 	"os/exec"
+
+	"github.com/spf13/cobra"
 
 	"github.com/pagodabox/nanobox-cli/ui"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
-// StatusCommand satisfies the Command interface
-type StatusCommand struct{}
-
-// Help
-func (c *StatusCommand) Help() {
-	ui.CPrint(`
+//
+var statusCmd = &cobra.Command{
+	Use:   "status",
+	Short: "Displays all current nanobox VM's",
+	Long: `
 Description:
-  Displays all current nanobox VM's
+  Displays all current nanobox VM's`,
 
-Usage:
-  nanobox status
-  `)
+	Run: nanoStatus,
 }
 
-// Run display status of all virtual machines
-func (c *StatusCommand) Run(opts []string) {
+// nanoStatus runs 'vagrant status'
+func nanoStatus(ccmd *cobra.Command, args []string) {
 
-	// run 'vagrant status'
+	// run an init to ensure there is a Vagrantfile
+	nanoInit(nil, args)
+
 	fmt.Printf(stylish.ProcessStart("requesting nanobox vms"))
-	runVagrantCommand(exec.Command("vagrant", "status"))
+	if err := runVagrantCommand(exec.Command("vagrant", "status")); err != nil {
+		ui.LogFatal("[commands/status] runVagrantCommand() failed", err)
+	}
 	fmt.Printf(stylish.ProcessEnd())
 }

@@ -7,60 +7,46 @@
 
 package commands
 
+//
 import (
-	"flag"
 	"fmt"
 
+	"github.com/spf13/cobra"
+
 	"github.com/pagodabox/nanobox-cli/config"
-	"github.com/pagodabox/nanobox-cli/ui"
+	"github.com/pagodabox/nanobox-cli/utils"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
-// BuildCommand satisfies the Command interface for deploying to nanobox
-type BuildCommand struct{}
-
-// Help
-func (c *BuildCommand) Help() {
-	ui.CPrint(`
+//
+var buildCmd = &cobra.Command{
+	Use:   "build",
+	Short: "Rebuilds/compiles your project",
+	Long: `
 Description:
-  Rebuilds/compiles your project
+  Rebuilds/compiles your project`,
 
-Usage:
-  nanobox build [-v]
-
-Options:
-  -v, --verbose
-    Increase the level of log output from 'info' to 'debug'
-  `)
+	Run: nanoBuild,
 }
 
-// Run issues a deploy to the running nanobox VM
-func (c *BuildCommand) Run(opts []string) {
+//
+func init() {
+	buildCmd.Flags().BoolVarP(&fVerbose, "verbose", "v", false, "Increase the level of log output from 'info' to 'debug'")
+}
+
+// nanoBuild
+func nanoBuild(ccmd *cobra.Command, args []string) {
 	fmt.Printf(stylish.Bullet("Building codebase..."))
 
-	// flags
-	flags := flag.NewFlagSet("flags", flag.ContinueOnError)
-	flags.Usage = func() { c.Help() }
-
 	//
-	var fVerbose bool
-	flags.BoolVar(&fVerbose, "v", false, "")
-	flags.BoolVar(&fVerbose, "verbose", false, "")
-
-	//
-	if err := flags.Parse(opts); err != nil {
-		ui.LogFatal("[commands.destroy] flags.Parse() failed", err)
+	build := utils.Sync{
+		Model:   "build",
+		Path:    fmt.Sprintf("http://%v:1757/builds", config.Nanofile.IP),
+		Verbose: fVerbose,
 	}
 
 	//
-	build := nsync{
-		model:   "build",
-		path:    fmt.Sprintf("http://%v:1757/builds", config.Nanofile.IP),
-		verbose: fVerbose,
-	}
-
-	//
-	build.run(flags.Args())
+	build.Run(args)
 
 	//
 	switch build.Status {

@@ -15,7 +15,7 @@ import "code.google.com/p/gopass"
 func PPrompt(p string) string {
 	password, err := gopass.GetPass(p)
 	if err != nil {
-		LogFatal("[ui.ui_unix] PPrompt() failed", err)
+		LogFatal("[ui/ui_unix] PPrompt() failed", err)
 	}
 
 	return password

@@ -7,33 +7,37 @@
 
 package commands
 
+//
 import (
 	"fmt"
 	"os/exec"
+
+	"github.com/spf13/cobra"
 
 	"github.com/pagodabox/nanobox-cli/ui"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
-// SuspendCommand satisfies the Command interface
-type SuspendCommand struct{}
-
-// Help
-func (c *SuspendCommand) Help() {
-	ui.CPrint(`
+//
+var suspendCmd = &cobra.Command{
+	Use:   "suspend",
+	Short: "Suspends the nanobox VM",
+	Long: `
 Description:
-  Suspends the nanobox VM by issuing a "vagrant suspend"
+  Suspends the nanobox VM by issuing a "vagrant suspend"`,
 
-Usage:
-  nanobox suspend
-  `)
+	Run: nanoSuspend,
 }
 
-// Run suspends the specified virtual machines
-func (c *SuspendCommand) Run(opts []string) {
+// nanoSuspend runs 'vagrant suspend'
+func nanoSuspend(ccmd *cobra.Command, args []string) {
 
-	// run 'vagrant suspend'
+	// run an init to ensure there is a Vagrantfile
+	nanoInit(nil, args)
+
 	fmt.Printf(stylish.ProcessStart("suspending nanobox vm"))
-	runVagrantCommand(exec.Command("vagrant", "suspend"))
+	if err := runVagrantCommand(exec.Command("vagrant", "suspend")); err != nil {
+		ui.LogFatal("[commands/suspend] runVagrantCommand() failed", err)
+	}
 	fmt.Printf(stylish.ProcessEnd())
 }

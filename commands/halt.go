@@ -7,56 +7,56 @@
 
 package commands
 
+//
 import (
-	"flag"
+	"fmt"
+	"os"
 	"os/exec"
+
+	"github.com/spf13/cobra"
 
 	"github.com/pagodabox/nanobox-cli/ui"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
-// HaltCommand satisfies the Command interface
-type HaltCommand struct{}
-
-// Help
-func (c *HaltCommand) Help() {
-	ui.CPrint(`
+//
+var haltCmd = &cobra.Command{
+	Use:   "halt",
+	Short: "Halts the running nanobox VM",
+	Long: `
 Description:
-  Halts the running nanobox VM by issuing a "vagrant halt"
+  Halts the running nanobox VM by issuing a "vagrant halt"`,
 
-Usage:
-  nanobox halt [-f]
-
-Options:
-  -f, --force
-    Skips confirmation and forces the nanobox VM to halt
-  `)
+	Run: nanoHalt,
 }
 
-// Run halts the specified virtual machine
-func (c *HaltCommand) Run(opts []string) {
-	stylish.ProcessStart("halting nanobox vm")
+//
+func init() {
+	haltCmd.Flags().BoolVarP(&fForce, "force", "f", false, "Skips confirmation and forces the nanobox VM to halt")
+}
 
-	// flags
-	flags := flag.NewFlagSet("flags", flag.ContinueOnError)
-	flags.Usage = func() { c.Help() }
+// nanoHalt
+func nanoHalt(ccmd *cobra.Command, args []string) {
 
-	var fForce bool
-	flags.BoolVar(&fForce, "f", false, "")
-	flags.BoolVar(&fForce, "force", false, "")
+	if !fForce {
 
-	if err := flags.Parse(opts); err != nil {
-		ui.LogFatal("[commands.halt] flags.Parse() failed", err)
+		// prompt for confirmation...
+		switch ui.Prompt("Are you sure you want to halt this VM (y/N)? ") {
+
+		// if positive confirmation, proceed and halt
+		case "Y", "y":
+			fmt.Printf(stylish.Bullet("Halt confirmed, continuing..."))
+
+		// if negative confirmation, exit w/o halting
+		default:
+			os.Exit(0)
+		}
 	}
 
-	// vagrant halt
-	if fForce {
-		stylish.Bullet("Issuing forced halt...")
-		runVagrantCommand(exec.Command("vagrant", "halt", "--force"))
-
-		//
-	} else {
-		stylish.Bullet("Issuing confirm halt...")
-		runVagrantCommand(exec.Command("vagrant", "halt"))
+	// halt the vm...
+	fmt.Printf(stylish.ProcessStart("halting nanobox vm"))
+	if err := runVagrantCommand(exec.Command("vagrant", "halt", "--force")); err != nil {
+		ui.LogFatal("[commands/halt] runVagrantCommand() failed", err)
 	}
+	fmt.Printf(stylish.ProcessEnd())
 }

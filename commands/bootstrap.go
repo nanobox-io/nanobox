@@ -8,59 +8,44 @@
 package commands
 
 import (
-	"flag"
 	"fmt"
 
+	"github.com/spf13/cobra"
+
 	"github.com/pagodabox/nanobox-cli/config"
-	"github.com/pagodabox/nanobox-cli/ui"
+	"github.com/pagodabox/nanobox-cli/utils"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
-// BootstrapCommand satisfies the Command interface for deploying to nanobox
-type BootstrapCommand struct{}
-
-// Help
-func (c *BootstrapCommand) Help() {
-	ui.CPrint(`
+//
+var bootstrapCmd = &cobra.Command{
+	Use:   "bootstrap",
+	Short: "Runs an engine's bootstrap script - downloads code & launches VM",
+	Long: `
 Description:
-  Runs an engine's bootstrap script - downloads code & launches VM
+  Runs an engine's bootstrap script - downloads code & launches VM`,
 
-Usage:
-  nanobox bootstrap [-v]
-
-Options:
-  -v, --verbose
-    Increases the level of log output from 'info' to 'debug'
-  `)
+	Run: nanoBootstrap,
 }
 
-// Run issues a deploy to the running nanobox VM
-func (c *BootstrapCommand) Run(opts []string) {
+//
+func init() {
+	bootstrapCmd.Flags().BoolVarP(&fVerbose, "verbose", "v", false, "Increases the level of log output from 'info' to 'debug'")
+}
+
+//
+func nanoBootstrap(ccmd *cobra.Command, args []string) {
 	fmt.Printf(stylish.Bullet("Bootstrapping code..."))
 
-	// flags
-	flags := flag.NewFlagSet("flags", flag.ContinueOnError)
-	flags.Usage = func() { c.Help() }
-
 	//
-	var fVerbose bool
-	flags.BoolVar(&fVerbose, "v", false, "")
-	flags.BoolVar(&fVerbose, "verbose", false, "")
-
-	//
-	if err := flags.Parse(opts); err != nil {
-		ui.LogFatal("[commands.destroy] flags.Parse() failed", err)
+	bootstrap := utils.Sync{
+		Model:   "bootstrap",
+		Path:    fmt.Sprintf("http://%v:1757/bootstrap", config.Nanofile.IP),
+		Verbose: fVerbose,
 	}
 
 	//
-	bootstrap := nsync{
-		model:   "bootstrap",
-		path:    fmt.Sprintf("http://%v:1757/bootstrap", config.Nanofile.IP),
-		verbose: fVerbose,
-	}
-
-	//
-	bootstrap.run(flags.Args())
+	bootstrap.Run(args)
 
 	//
 	switch bootstrap.Status {

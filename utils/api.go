@@ -39,19 +39,19 @@ func HandleAPIError(err error) error {
 
 			subMatch := reFindError.FindStringSubmatch(apiError.Body)
 			if subMatch == nil {
-				ui.LogFatal("[helpers.error] reFindError.FindStringSubmatch() failed", errors.New(fmt.Sprintf("No matches found for api error: %v", apiError.Body)))
+				ui.LogFatal("[utils/api] reFindError.FindStringSubmatch() failed", errors.New(fmt.Sprintf("No matches found for api error: %v", apiError.Body)))
 			}
 
-			return errors.New(fmt.Sprintf("[helpers.error] %d %v - %v", 422, subMatch[1], subMatch[2]))
+			return errors.New(fmt.Sprintf("[utils/api] %d %v - %v", 422, subMatch[1], subMatch[2]))
 
 		// some error we're not aware of
 		default:
-			return errors.New(fmt.Sprintf("[helpers.error] Unhandled API error - %v", err))
+			return errors.New(fmt.Sprintf("[utils/api] Unhandled API error - %v", err))
 		}
 
 		// ...if not, just write to the log
 	} else {
-		return errors.New(fmt.Sprintf("[helpers.error] Unhandled error - %v", err))
+		return errors.New(fmt.Sprintf("[utils/api] Unhandled error - %v", err))
 	}
 
 	return nil

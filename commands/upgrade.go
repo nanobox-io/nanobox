@@ -7,56 +7,46 @@
 
 package commands
 
+//
 import (
-	"flag"
 	"fmt"
 
+	"github.com/spf13/cobra"
+
 	"github.com/pagodabox/nanobox-cli/config"
-	"github.com/pagodabox/nanobox-cli/ui"
+	"github.com/pagodabox/nanobox-cli/utils"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
-// UpgradeCommand satisfies the Command interface for obtaining user info
-type UpgradeCommand struct{}
-
-// Help
-func (c *UpgradeCommand) Help() {
-	ui.CPrint(`
+//
+var upgradeCmd = &cobra.Command{
+	Use:   "upgrade",
+	Short: "Updates the nanobox docker images",
+	Long: `
 Description:
-  Updates the nanobox docker images
+  Updates the nanobox docker images`,
 
-Usage:
-  pagoda upgrade
-  `)
+	Run: nanoUpgrade,
 }
 
-// Run
-func (c *UpgradeCommand) Run(opts []string) {
+//
+func init() {
+	upgradeCmd.Flags().BoolVarP(&fVerbose, "verbose", "v", false, "Increases the level of log output from 'info' to 'debug'")
+}
+
+// nanoUpgrade
+func nanoUpgrade(ccmd *cobra.Command, args []string) {
 	fmt.Printf(stylish.Bullet("Updating nanobox docker images..."))
 
-	// flags
-	flags := flag.NewFlagSet("flags", flag.ContinueOnError)
-	flags.Usage = func() { c.Help() }
-
 	//
-	var fVerbose bool
-	flags.BoolVar(&fVerbose, "v", false, "")
-	flags.BoolVar(&fVerbose, "verbose", false, "")
-
-	//
-	if err := flags.Parse(opts); err != nil {
-		ui.LogFatal("[commands.destroy] flags.Parse() failed", err)
+	upgrade := utils.Sync{
+		Model:   "imageupdate",
+		Path:    fmt.Sprintf("http://%v:1757/image-update", config.Nanofile.IP),
+		Verbose: fVerbose,
 	}
 
 	//
-	upgrade := nsync{
-		model:   "imageupdate",
-		path:    fmt.Sprintf("http://%v:1757/image-update", config.Nanofile.IP),
-		verbose: fVerbose,
-	}
-
-	//
-	upgrade.run(flags.Args())
+	upgrade.Run(args)
 
 	//
 	switch upgrade.Status {

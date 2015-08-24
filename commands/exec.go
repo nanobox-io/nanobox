@@ -7,59 +7,41 @@
 
 package commands
 
+//
 import (
-	"flag"
 	"fmt"
 	"net/url"
 	"strings"
+
+	"github.com/spf13/cobra"
 
 	"github.com/pagodabox/nanobox-cli/ui"
 	"github.com/pagodabox/nanobox-cli/utils"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
-// ExecCommand satisfies the Command interface
-type ExecCommand struct{}
-
-// Help
-func (c *ExecCommand) Help() {
-	ui.CPrint(`
+var execCmd = &cobra.Command{
+	Use:   "exec",
+	Short: "Runs a command from inside your app on the nanobox VM",
+	Long: `
 Description:
-  Runs a command from inside your app on the nanobox VM
+  Runs a command from inside your app on the nanobox VM`,
 
-Usage:
-  nanobox exec [-t 80:8080] <command>
-
-Options:
-  -t, --tunnel
-    Creates port forwards for all comma delimeted port:port combos
-	`)
+	Run: nanoExec,
 }
 
-// Run
-func (c *ExecCommand) Run(opts []string) {
-	fmt.Printf(stylish.Bullet("Running command..."))
+//
+func init() {
+	execCmd.Flags().StringVarP(&fTunnel, "tunnel", "t", "", "Creates port forwards for all comma delimeted port:port combos")
+}
 
-	// flags
-	flags := flag.NewFlagSet("flags", flag.ContinueOnError)
-	flags.Usage = func() { c.Help() }
-
-	//
-	var fTunnel string
-	flags.StringVar(&fTunnel, "t", "", "")
-	flags.StringVar(&fTunnel, "tunnel", "", "")
+// nanoExec
+func nanoExec(ccmd *cobra.Command, args []string) {
+	fmt.Printf(stylish.Bullet("Opening a nanobox console..."))
 
 	//
-	if err := flags.Parse(opts); err != nil {
-		ui.LogFatal("[commands.destroy] flags.Parse() failed", err)
-	}
-
-	//
-	cmd := flags.Args()[0:]
-
-	//
-	if len(cmd) <= 0 {
-		cmd = append(cmd, ui.Prompt("Please specify a command you wish to exec: "))
+	if len(args) <= 0 {
+		args = append(args, ui.Prompt("Please specify a command you wish to exec: "))
 	}
 
 	// add a check here to regex the fTunnel to make sure the format makes sense
@@ -67,8 +49,8 @@ func (c *ExecCommand) Run(opts []string) {
 	//
 	v := url.Values{}
 	v.Add("forward", fTunnel)
-	v.Add("cmd", strings.Join(cmd, " "))
+	v.Add("cmd", strings.Join(args, " "))
 
-	exec := utils.Docker{Params: v.Encode()}
-	exec.Run()
+	docker := utils.Docker{Params: v.Encode()}
+	docker.Run()
 }

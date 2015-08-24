@@ -7,68 +7,40 @@
 
 package commands
 
+//
 import (
-	"flag"
 	"fmt"
 	"net/url"
 	"strconv"
 
+	"github.com/spf13/cobra"
+
 	"github.com/pagodabox/nanobox-cli/config"
-	"github.com/pagodabox/nanobox-cli/ui"
+	"github.com/pagodabox/nanobox-cli/utils"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
-// DeployCommand satisfies the Command interface for deploying to nanobox
-type DeployCommand struct{}
-
-// Help
-func (c *DeployCommand) Help() {
-	ui.CPrint(`
+//
+var deployCmd = &cobra.Command{
+	Use:   "deploy",
+	Short: "Issues a deploy to the nanobox VM",
+	Long: `
 Description:
-  Issues a deploy to the nanobox VM
+  Issues a deploy to the nanobox VM`,
 
-Usage:
-  nanobox deploy [-v] [-r] [-s]
-
-Options:
-  -v, --verbose
-    Increases the level of log output from 'info' to 'debug'
-
-  -r, --reset
-    Clears cached libraries the project might use
-
-  -s, --sandbox
-    Creates your app environment w/o webs or workers
-  `)
+	Run: nanoDeploy,
 }
 
-// Run issues a deploy to the running nanobox VM
-func (c *DeployCommand) Run(opts []string) {
+//
+func init() {
+	deployCmd.Flags().BoolVarP(&fReset, "reset", "r", false, "Clears cached libraries the project might use")
+	deployCmd.Flags().BoolVarP(&fSandbox, "sandbox", "s", false, "Creates your app environment w/o webs or workers")
+	deployCmd.Flags().BoolVarP(&fVerbose, "verbose", "v", false, "Increases the level of log output from 'info' to 'debug'")
+}
+
+// nanoDeploy
+func nanoDeploy(ccmd *cobra.Command, args []string) {
 	fmt.Printf(stylish.Bullet("Deploying codebase..."))
-
-	// flags
-	flags := flag.NewFlagSet("flags", flag.ContinueOnError)
-	flags.Usage = func() { c.Help() }
-
-	//
-	var fReset bool
-	flags.BoolVar(&fReset, "r", false, "")
-	flags.BoolVar(&fReset, "reset", false, "")
-
-	//
-	var fSandbox bool
-	flags.BoolVar(&fSandbox, "s", false, "")
-	flags.BoolVar(&fSandbox, "sandbox", false, "")
-
-	//
-	var fVerbose bool
-	flags.BoolVar(&fVerbose, "v", false, "")
-	flags.BoolVar(&fVerbose, "verbose", false, "")
-
-	//
-	if err := flags.Parse(opts); err != nil {
-		ui.LogFatal("[commands.destroy] flags.Parse() failed", err)
-	}
 
 	v := url.Values{}
 
@@ -76,14 +48,14 @@ func (c *DeployCommand) Run(opts []string) {
 	v.Add("sandbox", strconv.FormatBool(fSandbox))
 
 	//
-	deploy := nsync{
-		model:   "deploy",
-		path:    fmt.Sprintf("http://%v:1757/deploys?%v", config.Nanofile.IP, v.Encode()),
-		verbose: fVerbose,
+	deploy := utils.Sync{
+		Model:   "deploy",
+		Path:    fmt.Sprintf("http://%v:1757/deploys?%v", config.Nanofile.IP, v.Encode()),
+		Verbose: fVerbose,
 	}
 
 	//
-	deploy.run(flags.Args())
+	deploy.Run(args)
 
 	//
 	switch deploy.Status {

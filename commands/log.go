@@ -7,16 +7,18 @@
 
 package commands
 
+//
 import (
 	"bufio"
 	"encoding/json"
-	"flag"
 	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"regexp"
 	// "time"
+
+	"github.com/spf13/cobra"
 
 	"github.com/pagodabox/golang-mist"
 	"github.com/pagodabox/nanobox-cli/config"
@@ -25,87 +27,56 @@ import (
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
-type (
+//
+var logCmd = &cobra.Command{
+	Use:   "log",
+	Short: "Provides the last 100 lines of historical log output by default.",
+	Long: `
+Description:
+  Provides the last 100 lines of historical log output by default.`,
 
-	// LogCommand satisfies the Command interface for obtaining an app's historical
-	// and streaming logs
-	LogCommand struct{}
+	Run: nanoLog,
+}
 
-	// Log represents the structure of a log returned from Logvac or Stormpack
-	Log struct {
-		Level string `json:"level"`
-		Log   string `json:"log"`
-		Time  string `json:"time"`
+// Log represents the structure of a log returned from Logvac or Stormpack
+type Log struct {
+	Level string `json:"level"`
+	Log   string `json:"log"`
+	Time  string `json:"time"`
+}
+
+var (
+	// a map of each type of 'process' that we encounter to then be used when assigning
+	// a unique color to that 'process'
+	logProcesses = make(map[string]string)
+
+	// an array of the colors used to colorize the logs
+	logColors = [11]string{
+		// "red",
+		"green",
+		"yellow",
+		"blue",
+		"magenta",
+		"cyan",
+		// "light_red", // this is reserved for a failover output
+		"light_green",
+		"light_yellow",
+		"light_blue",
+		"light_magenta",
+		"light_cyan",
+		"white",
 	}
 )
 
-// a map of each type of 'process' that we encounter to then be used when assigning
-// a unique color to that 'process'
-var logProcesses = make(map[string]string)
-
-// an array of the colors used to colorize the logs
-var logColors = [11]string{
-	// "red",
-	"green",
-	"yellow",
-	"blue",
-	"magenta",
-	"cyan",
-	// "light_red", // this is reserved for a failover output
-	"light_green",
-	"light_yellow",
-	"light_blue",
-	"light_magenta",
-	"light_cyan",
-	"white",
+//
+func init() {
+	logCmd.Flags().IntVarP(&fCount, "count", "c", 100, "Specifies the number of lines to output from the historical log.")
+	logCmd.Flags().BoolVarP(&fStream, "stream", "s", false, "Streams logs live")
+	logCmd.Flags().StringVarP(&fLevel, "level", "l", "info", "Filters logs by one of the following levels: debug > info > warn > error > fatal")
 }
 
-// Help
-func (c *LogCommand) Help() {
-	ui.CPrint(`
-Description:
-  Provides the last 100 lines of historical log output by default.
-
-Usage:
-  pagoda log [-c] [-s] [-l]
-
-Options:
-  -c, --count
-    Specifies the number of lines to output from the historical log.
-
-  -s, --stream
-    Streams logs live
-
-  -l --level
-    Filters logs by one of the following levels:
-			debug > info > warn > error > fatal
-
-			note: that each level will display logs from all levels below it
-  `)
-}
-
-// Run
-func (c *LogCommand) Run(opts []string) {
-
-	// flags
-	flags := flag.NewFlagSet("flags", flag.ContinueOnError)
-	flags.Usage = func() { c.Help() }
-
-	var fCount int
-	flags.IntVar(&fCount, "c", 100, "")
-	flags.IntVar(&fCount, "count", 100, "")
-
-	var fStream bool
-	flags.BoolVar(&fStream, "s", false, "")
-	flags.BoolVar(&fStream, "stream", false, "")
-
-	var fLevel string
-	flags.StringVar(&fLevel, "l", "info", "")
-	flags.StringVar(&fLevel, "level", "info", "")
-
-	if err := flags.Parse(opts); err != nil {
-		ui.LogFatal("[commands.app_log] flags.Parse()", err)
-	}
+// nanoLog
+func nanoLog(ccmd *cobra.Command, args []string) {
 
 	// if stream is true, we connect to the live logs
 	if fStream {
@@ -117,14 +88,14 @@ func (c *LogCommand) Run(opts []string) {
 
 		// connect the 'mist' client to the 'mist' server
 		if err := client.Connect(); err != nil {
-			ui.LogFatal("[commands sync] client.Connect() failed ", err)
+			ui.LogFatal("[commands/log] client.Connect() failed ", err)
 		}
 		defer client.Close()
 
-		// subscribe to 'sync' updates
+		// subscribe to 'log' updates
 		logSub, err := client.Subscribe([]string{"log", fLevel})
 		if err != nil {
-			fmt.Printf(stylish.Warning("Nanobox failed to subscribe to app logs. Your sync will continue as normal, and log output is available on your dashboard."))
+			fmt.Printf(stylish.Warning("Nanobox failed to subscribe to app logs."))
 		}
 		defer client.Unsubscribe(logSub)
 
@@ -140,13 +111,13 @@ func (c *LogCommand) Run(opts []string) {
 			// check for any error message that cause mist to disconnect, and release
 			// nanobox
 			if msg.Tags[0] == "err" {
-				fmt.Printf(stylish.Warning("An unexpected error caused the sync stream to disconnect. Your sync should continue as normal, and you can see the log output from your dashboard."))
+				fmt.Printf(stylish.Warning("An unexpected error caused the sync stream to disconnect."))
 				break stream
 			}
 
 			//
 			if err := json.Unmarshal([]byte(msg.Data), &log); err != nil {
-				ui.LogFatal("[commands sync] json.Unmarshal() failed", err)
+				ui.LogFatal("[commands/log] json.Unmarshal() failed", err)
 			}
 
 			processLog(log)
@@ -163,7 +134,7 @@ func (c *LogCommand) Run(opts []string) {
 
 		res, err := http.Get(fmt.Sprintf("http://%v:6362/app?%v", config.Nanofile.IP, v.Encode()))
 		if err != nil {
-			ui.LogFatal("[commands.log] http.Get() failed", err)
+			ui.LogFatal("[commands/log] http.Get() failed", err)
 		}
 		defer res.Body.Close()
 
@@ -178,7 +149,7 @@ func (c *LogCommand) Run(opts []string) {
 				if err == io.EOF {
 					break
 				} else {
-					ui.LogFatal("[commands.log] bufio.ReadBytes() failed", err)
+					ui.LogFatal("[commands/log] bufio.ReadBytes() failed", err)
 				}
 			}
 
@@ -209,7 +180,7 @@ func processLog(log Log) {
 	reFindLog := regexp.MustCompile(`^(\w+)\.(\S+)\s+(.*)$`)
 
 	//
-	config.Console.Debug("[commands.app_log.processLog] Raw log -> %#v", log)
+	config.Console.Debug("[commands/log] Raw log -> %#v", log)
 
 	subMatch := reFindLog.FindStringSubmatch(log.Log)
 
@@ -222,7 +193,7 @@ func processLog(log Log) {
 		entry := subMatch[3]
 
 		//
-		config.Console.Debug("[commands.app_log.processLog] Processed log -> service: %v, process: %v, entry: %v\n", service, process, entry)
+		config.Console.Debug("[commands/log] Processed log -> service: %v, process: %v, entry: %v\n", service, process, entry)
 
 		if _, ok := logProcesses[process]; !ok {
 			logProcesses[process] = logColors[len(logProcesses)%len(logColors)]
@@ -234,7 +205,7 @@ func processLog(log Log) {
 		// is in the log
 	} else {
 		//
-		config.Console.Debug("[commands.app_log.processLog] No submatches found -> %v - %v", log.Time, log.Log)
+		config.Console.Debug("[commands/log] No submatches found -> %v - %v", log.Time, log.Log)
 
 		ui.CPrint("[light_red]%v - %v[reset]", log.Time, log.Log)
 	}

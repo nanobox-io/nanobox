@@ -74,7 +74,7 @@ func init() {
 	homeDir, err := homedir.Dir()
 	if err != nil {
 		fmt.Println("Fatal error! See ~/.nanobox/nanobox.log for details. Exiting...")
-		Log.Fatal("[config] homedir.Dir() failed %v\n", err)
+		Log.Fatal("[config/config] homedir.Dir() failed %v\n", err)
 		Log.Close()
 		os.Exit(1)
 	}
@@ -102,7 +102,7 @@ func init() {
 	version, err := semver.Parse(VERSION)
 	if err != nil {
 		fmt.Println("Fatal error! See ~/.nanobox/nanobox.log for details. Exiting...")
-		Log.Fatal("[config] semver.Parse() failed", err)
+		Log.Fatal("[config/config] semver.Parse() failed", err)
 		Log.Close()
 		os.Exit(1)
 	}

@@ -7,11 +7,14 @@
 
 package commands
 
+//
 import (
 	"fmt"
 	"io"
 	"os"
 	"regexp"
+
+	"github.com/spf13/cobra"
 
 	api "github.com/pagodabox/nanobox-api-client"
 	"github.com/pagodabox/nanobox-cli/auth"
@@ -19,28 +22,19 @@ import (
 	"github.com/pagodabox/nanobox-cli/ui"
 )
 
-type (
-
-	// FetchCommand satisfies the Command interface for listing a user's apps
-	FetchCommand struct{}
-)
-
-// Help
-func (c *FetchCommand) Help() {
-	ui.CPrint(`
+//
+var fetchCmd = &cobra.Command{
+	Use:   "fetch",
+	Short: "Fetches an engine from nanobox.io",
+	Long: `
 Description:
-  Fetches an engine from nanobox.io
+  Fetches an engine from nanobox.io`,
 
-Usage:
-  nanobox fetch ruby
-  nanobox fetch nanobox/ruby
-  nanobox fetch ruby-0.0.1
-  nanobox fetch nanobox/ruby-0.0.1
-  `)
+	Run: nanoFetch,
 }
 
-// Run
-func (c *FetchCommand) Run(opts []string) {
+// nanoFetch
+func nanoFetch(ccmd *cobra.Command, args []string) {
 
 	// check for auth
 	if !auth.IsAuthenticated() {
@@ -73,12 +67,12 @@ func (c *FetchCommand) Run(opts []string) {
 		auth.ReAuthenticate()
 	}
 
-	if len(opts) < 1 {
+	if len(args) < 1 {
 		config.Console.Fatal("Please provide the name of an engine you would like to fetch, (run 'nanobox fetch -h' for details)")
 		os.Exit(1)
 	}
 
-	release := opts[0]
+	release := args[0]
 
 	// reExplodeRelease := regexp.MustCompile(`^(\w*\/)?(\w*)-?([0-9.]+)?$`)
 	// release := reExplodeRelease.FindStringSubmatch(opts[0])

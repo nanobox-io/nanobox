@@ -7,56 +7,38 @@
 
 package commands
 
+//
 import (
-	"flag"
-
-	"github.com/pagodabox/nanobox-cli/ui"
+	"github.com/spf13/cobra"
 )
 
-// UpCommand satisfies the Command interface
-type UpCommand struct{}
-
-// Help
-func (c *UpCommand) Help() {
-	ui.CPrint(`
+//
+var upCmd = &cobra.Command{
+	Use:   "up",
+	Short: "Resumes the halted/suspended nanobox VM",
+	Long: `
 Description:
-  Runs 'nanobox create' and then 'nanobox deploy'
+  Runs 'nanobox create' and then 'nanobox deploy'`,
 
-Usage:
-  nanobox up
-
-Options:
-  -w, --watch
-    Watches your app for file changes
-  `)
+	Run: nanoUp,
 }
 
-// Run creates the specified virtual machine and issues a deploy to it
-func (c *UpCommand) Run(opts []string) {
+//
+func init() {
+	upCmd.Flags().BoolVarP(&fWatch, "watch", "w", false, "Watches your app for file changes")
+}
 
-	// flags
-	flags := flag.NewFlagSet("flags", flag.ContinueOnError)
-	flags.Usage = func() { c.Help() }
-
-	var fWatch bool
-	flags.BoolVar(&fWatch, "w", false, "")
-	flags.BoolVar(&fWatch, "watch", false, "")
-
-	if err := flags.Parse(opts); err != nil {
-		ui.LogFatal("[commands.destroy] flags.Parse() failed", err)
-	}
+// nanoUp runs 'vagrant up'
+func nanoUp(ccmd *cobra.Command, args []string) {
 
 	// run a create command to create a Vagrantfile and boot the VM...
-	create := CreateCommand{}
-	create.Run(opts)
+	nanoCreate(nil, args)
 
 	// ...issue a deploy...
-	deploy := DeployCommand{}
-	deploy.Run(opts)
+	nanoDeploy(nil, args)
 
 	// ...begin watching the file system for changes
 	if fWatch {
-		watch := WatchCommand{}
-		watch.Run(opts)
+		nanoWatch(nil, args)
 	}
 }

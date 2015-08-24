@@ -7,6 +7,7 @@
 
 package commands
 
+//
 import (
 	"bufio"
 	"fmt"
@@ -14,37 +15,34 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/spf13/cobra"
+
 	"github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-cli/ui"
+	"github.com/pagodabox/nanobox-cli/utils"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
-// CreateCommand satisfies the Command interface
-type CreateCommand struct{}
-
-// Help
-func (c *CreateCommand) Help() {
-	ui.CPrint(`
+//
+var createCmd = &cobra.Command{
+	Use:   "create",
+	Short: "Runs 'nanobox init', then boots the nanobox VM",
+	Long: `
 Description:
-  Runs 'nanobox init', then boots the nanobox VM by issuing a "vagrant up"
+  Runs 'nanobox init', then boots the nanobox VM by issuing a "vagrant up"`,
 
-Usage:
-  nanobox create
-  `)
+	Run: nanoCreate,
 }
 
-// Run creates the specified virtual machine
-func (c *CreateCommand) Run(opts []string) {
-
-	// run an init to create a Vagrantfile...
-	// init := InitCommand{}
-	// init.Run(opts)
+//
+// nanoCreate
+func nanoCreate(ccmd *cobra.Command, args []string) {
 
 	//
 	// open the /etc/hosts file for scanning...
 	f, err := os.Open("/etc/hosts")
 	if err != nil {
-		ui.LogFatal("[commands.create] os.Open() failed", err)
+		ui.LogFatal("[commands/create] os.Open() failed", err)
 	}
 	defer f.Close()
 
@@ -64,18 +62,32 @@ func (c *CreateCommand) Run(opts []string) {
 		}
 	}
 
-	// add the entry as needed
+	// add the entry if needed
 	if addEntry {
-		modifyHosts("w")
+		if utils.AccessDenied() {
+			utils.SudoExec("create", "Attempting to add nano.dev domain to hosts file")
+			os.Exit(0)
+		}
+
+		utils.AddDevDomain()
 	}
+
+	// run an init to ensure there is a Vagrantfile
+	nanoInit(nil, args)
 
 	//
 	// boot the vm
 	fmt.Printf(stylish.ProcessStart("starting nanobox vm"))
-	runVagrantCommand(exec.Command("vagrant", "up"))
+	if err := runVagrantCommand(exec.Command("vagrant", "up")); err != nil {
+		ui.LogFatal("[commands/create] runVagrantCommand() failed", err)
+	}
 	fmt.Printf(stylish.ProcessEnd())
 
 	// upgrade all nanobox docker images
-	upgrade := UpgradeCommand{}
-	upgrade.Run(opts)
+	nanoUpgrade(nil, args)
+}
+
+//
+func create() {
+	utils.AddDevDomain()
 }

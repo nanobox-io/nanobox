@@ -15,66 +15,93 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/spf13/cobra"
+
 	"github.com/pagodabox/nanobox-cli/config"
-	"github.com/pagodabox/nanobox-cli/ui"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
-// Commands/subCommands represents a map of all the available nanobox cli commands
-var Commands map[string]Command
+//
+var (
+	NanoboxCmd = &cobra.Command{
+		Use:   "nanobox",
+		Short: "",
+		Long:  ``,
 
-// Command represents a nanobox CLI command
-type Command interface {
-	Help()             // Prints the help text associated with this command
-	Run(opts []string) // Houses the logic that will be run upon calling this command
-}
+		//
+		// Run: func(cmd *cobra.Command, args []string) {},
+	}
+
+	productionCmd = &cobra.Command{
+		Use:   "nanobox production",
+		Short: "",
+		Long:  ``,
+
+		//
+		// Run: func(cmd *cobra.Command, args []string) {},
+	}
+
+	// flags
+	fCount   int    //
+	fDebug   bool   //
+	fForce   bool   //
+	fLevel   string //
+	fRemove  bool   //
+	fReset   bool   //
+	fSandbox bool   //
+	fStream  bool   //
+	fTunnel  string //
+	fVerbose bool   //
+	fWatch   bool   //
+	fWrite   bool   //
+)
 
 // init builds the list of available nanobox commands and sub commands
 func init() {
 
-	// the map of all available nanobox commands
-	Commands = map[string]Command{
-		"bootstrap": &BootstrapCommand{},
-		"build":     &BuildCommand{},
-		"console":   &ConsoleCommand{},
-		"create":    &CreateCommand{},
-		"deploy":    &DeployCommand{},
-		"destroy":   &DestroyCommand{},
-		"domain":    &DomainCommand{},
-		"exec":      &ExecCommand{},
-		"fetch":     &FetchCommand{},
-		"halt":      &HaltCommand{},
-		"help":      &HelpCommand{},
-		"init":      &InitCommand{},
-		"log":       &LogCommand{},
-		"new":       &NewCommand{},
-		"publish":   &PublishCommand{},
-		"reload":    &ReloadCommand{},
-		"resume":    &ResumeCommand{},
-		"ssh":       &SSHCommand{},
-		"status":    &StatusCommand{},
-		"suspend":   &SuspendCommand{},
-		"tunnel":    &TunnelCommand{},
-		"up":        &UpCommand{},
-		"update":    &UpdateCommand{},
-		"upgrade":   &UpgradeCommand{},
-		"watch":     &WatchCommand{},
-	}
+	NanoboxCmd.PersistentFlags().BoolVarP(&fDebug, "debug", "d", false, "display debug output")
+	// NanoboxCmd.SetUsageFunc(nanoHelp)
+
+	// all available nanobox commands
+	NanoboxCmd.AddCommand(bootstrapCmd)
+	NanoboxCmd.AddCommand(buildCmd)
+	NanoboxCmd.AddCommand(consoleCmd)
+	NanoboxCmd.AddCommand(createCmd)
+	NanoboxCmd.AddCommand(deployCmd)
+	NanoboxCmd.AddCommand(destroyCmd)
+	NanoboxCmd.AddCommand(execCmd)
+	NanoboxCmd.AddCommand(fetchCmd)
+	NanoboxCmd.AddCommand(haltCmd)
+	NanoboxCmd.AddCommand(initCmd)
+	NanoboxCmd.AddCommand(logCmd)
+	NanoboxCmd.AddCommand(newCmd)
+	NanoboxCmd.AddCommand(publishCmd)
+	NanoboxCmd.AddCommand(reloadCmd)
+	NanoboxCmd.AddCommand(resumeCmd)
+	NanoboxCmd.AddCommand(sshCmd)
+	NanoboxCmd.AddCommand(statusCmd)
+	NanoboxCmd.AddCommand(suspendCmd)
+	NanoboxCmd.AddCommand(tunnelCmd)
+	NanoboxCmd.AddCommand(upCmd)
+	NanoboxCmd.AddCommand(updateCmd)
+	NanoboxCmd.AddCommand(upgradeCmd)
+	NanoboxCmd.AddCommand(versionCmd)
+	NanoboxCmd.AddCommand(watchCmd)
+
+	NanoboxCmd.AddCommand(productionCmd)
+	// productionCmd.AddCommand(deployCmd)
 }
 
 // runVagrantCommand provides a wrapper around a standard cmd.Run() in which
 // all standard in/outputs are connected to the command, and the directory is
 // changed to the corresponding app directory. This allows nanobox to run Vagrant
 // commands w/o contaminating a users codebase
-func runVagrantCommand(cmd *exec.Cmd) {
+func runVagrantCommand(cmd *exec.Cmd) error {
 
-	// run an init to ensure there is a Vagrantfile
-	init := InitCommand{}
-	init.Run(nil)
-
-	// run the command from ~/.nanobox/apps/<this app>
+	// run the command from ~/.nanobox/apps/<config.App>. if the directory doesn't
+	// exist, simply return
 	if err := os.Chdir(config.AppDir); err != nil {
-		ui.LogFatal("[commands.runVagrantCommand] os.Chdir() failed", err)
+		return err
 	}
 
 	// create a pipe that we can pipe the cmd standard output's too. The reason this
@@ -108,17 +135,19 @@ func runVagrantCommand(cmd *exec.Cmd) {
 	// start the command; we need this to 'fire and forget' so that we can manually
 	// capture and modify the commands output
 	if err := cmd.Start(); err != nil {
-		ui.LogFatal("[commands.runVagrantCommand] cmd.Start() failed", err)
+		return err
 	}
 
 	// wait for the command to complete/fail and exit, giving us a chance to scan
 	// the output
 	if err := cmd.Wait(); err != nil {
-		ui.LogFatal("[commands.runVagrantCommand] cmd.Wait() failed", err)
+		return err
 	}
 
 	// switch back to project dir
 	if err := os.Chdir(config.CWDir); err != nil {
-		ui.LogFatal("[commands.runVagrantCommand] os.Chdir() failed", err)
+		return err
 	}
+
+	return nil
 }

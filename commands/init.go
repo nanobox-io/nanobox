@@ -7,33 +7,33 @@
 
 package commands
 
+//
 import (
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 
+	"github.com/spf13/cobra"
+
 	"github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-cli/ui"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
-// InitCommand satisfies the Command interface
-type InitCommand struct{}
-
-// Help
-func (c *InitCommand) Help() {
-	ui.CPrint(`
+//
+var initCmd = &cobra.Command{
+	Use:   "init",
+	Short: "Creates a nanobox-flavored Vagrantfile",
+	Long: `
 Description:
-  Creates a nanobox-flavored Vagrantfile
+  Creates a nanobox-flavored Vagrantfile`,
 
-Usage:
-  nanobox init
-  `)
+	Run: nanoInit,
 }
 
-// Run creates a Vagrantfile
-func (c *InitCommand) Run(opts []string) {
+// nanoInit
+func nanoInit(ccmd *cobra.Command, args []string) {
 
 	//
 	// creates a project folder at ~/.nanobox/apps/<app-name> (if it doesn't already
@@ -58,12 +58,12 @@ func (c *InitCommand) Run(opts []string) {
 
 		// parse the boxfile
 		if err := config.Boxfile.Parse(); err != nil {
-			ui.LogFatal("commands.runVagrantcommand] config.Boxfile.Parse() failed", err)
+			ui.LogFatal("commands/init] config.Boxfile.Parse() failed", err)
 		}
 
 		// parse the nanofile
 		if err := config.Nanofile.Parse(); err != nil {
-			ui.LogFatal("commands.runVagrantcommand] config.Nanofile.Parse() failed", err)
+			ui.LogFatal("commands/init] config.Nanofile.Parse() failed", err)
 		}
 
 		//
@@ -80,7 +80,7 @@ func (c *InitCommand) Run(opts []string) {
 				//
 				fp, err := filepath.Abs(engine)
 				if err != nil {
-					ui.LogFatal("[commands.init] filepath.Abs() failed", err)
+					ui.LogFatal("[commands/init] filepath.Abs() failed", err)
 				}
 
 				base := filepath.Base(fp)
@@ -222,7 +222,7 @@ end`, version, network, synced_folders, provider)
 
 		// write the Vagrantfile
 		if err := ioutil.WriteFile(config.AppDir+"/Vagrantfile", []byte(vagrantfile), 0755); err != nil {
-			ui.LogFatal("[commands.init] ioutil.WriteFile() failed", err)
+			ui.LogFatal("[commands/init] ioutil.WriteFile() failed", err)
 		}
 
 		//

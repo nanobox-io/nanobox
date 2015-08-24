@@ -7,27 +7,15 @@
 
 package commands
 
+//
 import (
+	"github.com/spf13/cobra"
+
 	"github.com/pagodabox/nanobox-cli/ui"
 )
 
-// HelpCommand satisfies the Command interface for obtaining user info
-type HelpCommand struct{}
-
-// Help prints detailed help text for the user command
-func (c *HelpCommand) Help() {
-	ui.CPrint(`
-Description:
-  Prints help text for entire CLI
-
-Usage:
-  nanobox [h, -h, help, --help]
-
-  `)
-}
-
-// Run prints out the help text for the entire CLI
-func (c *HelpCommand) Run(opts []string) {
+// nanoHelp
+func nanoHelp(ccmd *cobra.Command) error {
 	ui.CPrint(`
 
                                      ***
@@ -102,4 +90,6 @@ Available Commands:
   upgrade     : Updates the nanobox docker images
   watch       : Watches your app for file changes
   `)
+
+	return nil
 }

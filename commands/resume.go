@@ -7,33 +7,37 @@
 
 package commands
 
+//
 import (
 	"fmt"
 	"os/exec"
+
+	"github.com/spf13/cobra"
 
 	"github.com/pagodabox/nanobox-cli/ui"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
-// ResumeCommand satisfies the Command interface
-type ResumeCommand struct{}
-
-// Help
-func (c *ResumeCommand) Help() {
-	ui.CPrint(`
+//
+var resumeCmd = &cobra.Command{
+	Use:   "resume",
+	Short: "Resumes the halted/suspended nanobox VM",
+	Long: `
 Description:
-  Resumes the halted/suspended nanobox VM by issuing a "vagrant resume"
+  Resumes the halted/suspended nanobox VM by issuing a "vagrant resume"`,
 
-Usage:
-  nanobox resume
-  `)
+	Run: nanoResume,
 }
 
-// Run resumes the specified virtual machine
-func (c *ResumeCommand) Run(opts []string) {
+// nanoResume runs 'vagrant resume'
+func nanoResume(ccmd *cobra.Command, args []string) {
 
-	// run 'vagrant resume'
+	// run an init to ensure there is a Vagrantfile
+	nanoInit(nil, args)
+
 	fmt.Printf(stylish.ProcessStart("resuming nanobox vm"))
-	runVagrantCommand(exec.Command("vagrant", "resume"))
+	if err := runVagrantCommand(exec.Command("vagrant", "resume")); err != nil {
+		ui.LogFatal("[commands/resume] runVagrantCommand() failed", err)
+	}
 	fmt.Printf(stylish.ProcessEnd())
 }

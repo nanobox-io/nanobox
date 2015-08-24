@@ -7,55 +7,39 @@
 
 package commands
 
+//
 import (
-	"flag"
 	"fmt"
 	"net/url"
 	"os"
 
-	"github.com/pagodabox/nanobox-cli/ui"
+	"github.com/spf13/cobra"
+
 	"github.com/pagodabox/nanobox-cli/utils"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
-// ConsoleCommand satisfies the Command interface
-type ConsoleCommand struct{}
-
-// Help
-func (c *ConsoleCommand) Help() {
-	ui.CPrint(`
+var consoleCmd = &cobra.Command{
+	Use:   "console",
+	Short: "Opens an interactive terminal from inside your app on the nanobox VM",
+	Long: `
 Description:
-  Opens an interactive terminal from inside your app on the nanobox VM
+  Opens an interactive terminal from inside your app on the nanobox VM`,
 
-Usage:
-  nanobox console [-t 80:8080]
-
-Options:
-  -t, --tunnel
-    Creates port forwards for all comma delimeted port:port combos
-  `)
+	Run: nanoConsole,
 }
 
-// Run
-func (c *ConsoleCommand) Run(opts []string) {
+//
+func init() {
+	consoleCmd.Flags().StringVarP(&fTunnel, "tunnel", "t", "", "Creates port forwards for all comma delimeted port:port combos")
+}
+
+// nanoConsole
+func nanoConsole(ccmd *cobra.Command, args []string) {
 	fmt.Printf(stylish.Bullet("Opening a nanobox console..."))
 
-	// flags
-	flags := flag.NewFlagSet("flags", flag.ContinueOnError)
-	flags.Usage = func() { c.Help() }
-
 	//
-	var fTunnel string
-	flags.StringVar(&fTunnel, "t", "", "")
-	flags.StringVar(&fTunnel, "tunnel", "", "")
-
-	//
-	if err := flags.Parse(opts); err != nil {
-		ui.LogFatal("[commands.destroy] flags.Parse() failed", err)
-	}
-
-	//
-	if len(flags.Args()) > 0 {
+	if len(args) > 0 {
 		fmt.Println("Attempting to run 'nanobox console' with a command. Use 'nanobox exec'")
 		os.Exit(0)
 	}
@@ -66,6 +50,6 @@ func (c *ConsoleCommand) Run(opts []string) {
 	v := url.Values{}
 	v.Add("forward", fTunnel)
 
-	console := utils.Docker{Params: v.Encode()}
-	console.Run()
+	docker := utils.Docker{Params: v.Encode()}
+	docker.Run()
 }

@@ -7,6 +7,7 @@
 
 package commands
 
+//
 import (
 	"archive/tar"
 	"compress/gzip"
@@ -20,6 +21,7 @@ import (
 	"time"
 
 	"github.com/ghodss/yaml"
+	"github.com/spf13/cobra"
 
 	api "github.com/pagodabox/nanobox-api-client"
 	"github.com/pagodabox/nanobox-cli/auth"
@@ -28,37 +30,31 @@ import (
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
-type (
-
-	// PublishCommand satisfies the Command interface for listing a user's apps
-	PublishCommand struct {
-		tw *tar.Writer
-	}
-
-	// Object is returned from warehouse
-	Object struct {
-		Alias    string
-		BucketID string
-		CheckSum string
-		ID       string
-		Public   bool
-		Size     int64
-	}
-)
-
-// Help
-func (c *PublishCommand) Help() {
-	ui.CPrint(`
-Description:
-  Publishes an engine to nanobox.io
-
-Usage:
-  nanobox publish
-  `)
+// Object is returned from warehouse
+type Object struct {
+	Alias    string
+	BucketID string
+	CheckSum string
+	ID       string
+	Public   bool
+	Size     int64
 }
 
-// Run
-func (c *PublishCommand) Run(opts []string) {
+var tw *tar.Writer
+
+//
+var publishCmd = &cobra.Command{
+	Use:   "publish",
+	Short: "Publishes an engine to nanobox.io",
+	Long: `
+Description:
+  Publishes an engine to nanobox.io`,
+
+	Run: nanoPublish,
+}
+
+// nanoPublish
+func nanoPublish(ccmd *cobra.Command, args []string) {
 
 	// check for auth
 	if !auth.IsAuthenticated() {
@@ -181,7 +177,7 @@ func (c *PublishCommand) Run(opts []string) {
 	gzw := gzip.NewWriter(mw)
 
 	//
-	c.tw = tar.NewWriter(gzw)
+	tw = tar.NewWriter(gzw)
 
 	//
 	wg := &sync.WaitGroup{}
@@ -194,7 +190,7 @@ func (c *PublishCommand) Run(opts []string) {
 		// defer is LIFO
 		defer pw.Close()
 		defer gzw.Close()
-		defer c.tw.Close()
+		defer tw.Close()
 
 		for _, pf := range release.ProjectFiles {
 
@@ -202,13 +198,13 @@ func (c *PublishCommand) Run(opts []string) {
 
 				// if its a directory, walk the directory taring each file
 				if stat.Mode().IsDir() {
-					if err := filepath.Walk(pf, c.tarDir); err != nil {
+					if err := filepath.Walk(pf, tarDir); err != nil {
 						ui.LogFatal("[commands.publish] filepath.Walk() failed", err)
 					}
 
 					// if its a file tar it
 				} else {
-					c.tarFile(pf)
+					tarFile(pf)
 				}
 			}
 		}
@@ -257,12 +253,12 @@ func (c *PublishCommand) Run(opts []string) {
 }
 
 // tarDir
-func (c *PublishCommand) tarDir(path string, fi os.FileInfo, err error) error {
+func tarDir(path string, fi os.FileInfo, err error) error {
 	if fi.Mode().IsDir() {
 		return nil
 	}
 
-	if err := c.tarFile(path); err != nil {
+	if err := tarFile(path); err != nil {
 		return err
 	}
 
@@ -270,7 +266,7 @@ func (c *PublishCommand) tarDir(path string, fi os.FileInfo, err error) error {
 }
 
 // tarFile
-func (c *PublishCommand) tarFile(path string) error {
+func tarFile(path string) error {
 
 	// open the file/dir...
 	f, err := os.Open(path)
@@ -291,12 +287,12 @@ func (c *PublishCommand) tarFile(path string) error {
 		}
 
 		// write the header to the tarball archive
-		if err := c.tw.WriteHeader(header); err != nil {
+		if err := tw.WriteHeader(header); err != nil {
 			return err
 		}
 
 		// copy the file data to the tarball
-		if _, err := io.Copy(c.tw, f); err != nil {
+		if _, err := io.Copy(tw, f); err != nil {
 			return err
 		}
 	}
