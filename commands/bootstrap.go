@@ -29,11 +29,6 @@ Description:
 }
 
 //
-func init() {
-	bootstrapCmd.Flags().BoolVarP(&fVerbose, "verbose", "v", false, "Increases the level of log output from 'info' to 'debug'")
-}
-
-//
 func nanoBootstrap(ccmd *cobra.Command, args []string) {
 	fmt.Printf(stylish.Bullet("Bootstrapping code..."))
 

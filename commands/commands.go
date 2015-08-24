@@ -45,6 +45,7 @@ var (
 	fCount   int    //
 	fDebug   bool   //
 	fForce   bool   //
+	fFile    string //
 	fLevel   string //
 	fRemove  bool   //
 	fReset   bool   //
@@ -60,6 +61,7 @@ var (
 func init() {
 
 	NanoboxCmd.PersistentFlags().BoolVarP(&fDebug, "debug", "d", false, "display debug output")
+	NanoboxCmd.PersistentFlags().BoolVarP(&fVerbose, "verbose", "v", false, "increase level of output")
 	// NanoboxCmd.SetUsageFunc(nanoHelp)
 
 	// all available nanobox commands

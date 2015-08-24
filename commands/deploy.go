@@ -35,7 +35,6 @@ Description:
 func init() {
 	deployCmd.Flags().BoolVarP(&fReset, "reset", "r", false, "Clears cached libraries the project might use")
 	deployCmd.Flags().BoolVarP(&fSandbox, "sandbox", "s", false, "Creates your app environment w/o webs or workers")
-	deployCmd.Flags().BoolVarP(&fVerbose, "verbose", "v", false, "Increases the level of log output from 'info' to 'debug'")
 }
 
 // nanoDeploy

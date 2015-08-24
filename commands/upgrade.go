@@ -29,11 +29,6 @@ Description:
 	Run: nanoUpgrade,
 }
 
-//
-func init() {
-	upgradeCmd.Flags().BoolVarP(&fVerbose, "verbose", "v", false, "Increases the level of log output from 'info' to 'debug'")
-}
-
 // nanoUpgrade
 func nanoUpgrade(ccmd *cobra.Command, args []string) {
 	fmt.Printf(stylish.Bullet("Updating nanobox docker images..."))

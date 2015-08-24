@@ -28,8 +28,20 @@ type NanofileConfig struct {
 	RAM      int    `json:"ram"`      //
 }
 
+// create default nanofilconfig
+func init() {
+	Nanofile = &NanofileConfig{
+		CPUCap:   50,
+		CPUs:     2,
+		Domain:   fmt.Sprintf("%v.nano.dev", App),
+		IP:       appNameToIP(App),
+		Provider: "virtualbox",
+		RAM:      1024,
+	}
+}
+
 // Parse
-func (nc *NanofileConfig) Parse() error {
+func (c *NanofileConfig) Parse() error {
 	fmt.Printf(stylish.Bullet("Parsing .nanofile"))
 
 	//
@@ -38,7 +50,7 @@ func (nc *NanofileConfig) Parse() error {
 	// look for a local .nanofile first...
 	fmt.Printf(stylish.SubBullet("Searching for local .nanofile..."))
 	if fi, _ := os.Stat(path); fi != nil {
-		return parseNanofile(path, nc)
+		return c.parse(path)
 	}
 
 	path = NanoDir + "/.nanofile"
@@ -46,7 +58,7 @@ func (nc *NanofileConfig) Parse() error {
 	// then look for a global .nanofile in the ~/.nanobox directory...
 	fmt.Printf(stylish.SubBullet("Searching for global .nanofile..."))
 	if fi, _ := os.Stat(path); fi != nil {
-		return parseNanofile(path, nc)
+		return c.parse(path)
 	}
 
 	//
@@ -56,11 +68,11 @@ func (nc *NanofileConfig) Parse() error {
 }
 
 // parseNanofile
-func parseNanofile(file string, nc *NanofileConfig) error {
+func (c *NanofileConfig) parse(path string) error {
 
 	fmt.Printf(stylish.SubBullet("- Configuring..."))
 
-	fp, err := filepath.Abs(file)
+	fp, err := filepath.Abs(path)
 	if err != nil {
 		return err
 	}
@@ -72,8 +84,8 @@ func parseNanofile(file string, nc *NanofileConfig) error {
 	}
 
 	//
-	if err := yaml.Unmarshal(f, nc); err != nil {
-		return fmt.Errorf("Nanobox failed to parse your .nanofile found at %s. Please ensure it is valid YAML and try again.", file)
+	if err := yaml.Unmarshal(f, c); err != nil {
+		return fmt.Errorf("Nanobox failed to parse your .nanofile found at %s. Please ensure it is valid YAML and try again.", path)
 	}
 
 	fmt.Printf(stylish.Success())

@@ -29,11 +29,6 @@ Description:
 	Run: nanoBuild,
 }
 
-//
-func init() {
-	buildCmd.Flags().BoolVarP(&fVerbose, "verbose", "v", false, "Increase the level of log output from 'info' to 'debug'")
-}
-
 // nanoBuild
 func nanoBuild(ccmd *cobra.Command, args []string) {
 	fmt.Printf(stylish.Bullet("Building codebase..."))

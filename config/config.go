@@ -47,8 +47,10 @@ var (
 	Version *semver.Version
 
 	//
-	Boxfile  *BoxfileConfig
-	Nanofile *NanofileConfig
+	Authfile   *AuthfileConfig
+	Boxfile    *BoxfileConfig
+	Nanofile   *NanofileConfig
+	Enginefile *EnginefileConfig
 )
 
 // Parser
@@ -108,19 +110,6 @@ func init() {
 	}
 
 	Version = version
-
-	// create a default BoxfileConfig
-	Boxfile = &BoxfileConfig{}
-
-	// create a default NanofileConfig
-	Nanofile = &NanofileConfig{
-		CPUCap:   50,
-		CPUs:     2,
-		Domain:   fmt.Sprintf("%v.nano.dev", App),
-		IP:       appNameToIP(App),
-		Provider: "virtualbox",
-		RAM:      1024,
-	}
 }
 
 // appNameToIP generates an IPv4 address based off the app name for use as a

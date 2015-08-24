@@ -30,16 +30,21 @@ type (
 	}
 )
 
+// create default boxfile config
+func init() {
+	Boxfile = &BoxfileConfig{}
+}
+
 // Parse
-func (bc *BoxfileConfig) Parse() error {
+func (c *BoxfileConfig) Parse() error {
 	fmt.Printf(stylish.Bullet("Parsing Boxfile"))
 
 	//
 	path := "./Boxfile"
 
-	// look for a local Boxfile first...
+	// look for a Boxfile...
 	if fi, _ := os.Stat(path); fi != nil {
-		return parseBoxfile(path, bc)
+		return c.parse(path)
 	}
 
 	//
@@ -48,12 +53,12 @@ func (bc *BoxfileConfig) Parse() error {
 	return nil
 }
 
-// parseBoxfile
-func parseBoxfile(file string, bc *BoxfileConfig) error {
+// parse
+func (c *BoxfileConfig) parse(path string) error {
 
 	fmt.Printf(stylish.SubBullet("- Configuring..."))
 
-	fp, err := filepath.Abs(file)
+	fp, err := filepath.Abs(path)
 	if err != nil {
 		return err
 	}
@@ -65,7 +70,7 @@ func parseBoxfile(file string, bc *BoxfileConfig) error {
 	}
 
 	//
-	if err := yaml.Unmarshal(f, bc); err != nil {
+	if err := yaml.Unmarshal(f, c); err != nil {
 		return fmt.Errorf("Nanobox failed to parse your Boxfile. Please ensure it is valid YAML and try again.")
 	}
 
