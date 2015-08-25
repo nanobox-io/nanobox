@@ -42,38 +42,40 @@ type (
 // run issues a sync to the running nanobox VM
 func (s *Sync) Run(opts []string) {
 
-	// create a 'mist' client to communicate with the mist server running on the
-	// guest machine
-	client := mist.Client{Host: config.Nanofile.IP, Port: "1445"}
-
-	// connect the 'mist' client to the 'mist' server
-	if err := client.Connect(); err != nil {
+	// connect 'mist' to the server running on the guest machine
+	client, err := mist.NewRemoteClient(config.Nanofile.IP + ":1445")
+	if err != nil {
 		ui.LogFatal("[utils/sync] client.Connect() failed ", err)
 	}
 	defer client.Close()
+
+	// add a new 'mist' client to 'mist'
+	// client := m.NewClient(0)
 
 	Printv(stylish.Bullet("Subscribing to mist..."), s.Verbose)
 
 	// subscribe to 'sync' updates
 	Printv(stylish.SubBullet("- Subscribing to app logs"), s.Verbose)
-	jobSub, err := client.Subscribe([]string{"job", s.Model})
-	if err != nil {
+
+	jobTags := []string{"job", s.Model}
+	if err := client.Subscribe(jobTags); err != nil {
 		fmt.Printf(stylish.Warning("Nanobox failed to subscribe to app logs. Your sync will continue as normal, and log output is available on your dashboard."))
 	}
-	defer client.Unsubscribe(jobSub)
+	defer client.Unsubscribe(jobTags)
 
 	logLevel := "info"
 	if s.Verbose {
 		logLevel = "debug"
 	}
 
-	// if the verbose flag is included, also subscribe to the 'debug' sync logs
+	// if the verbose flag is included, also subscribe to the 'debug' logs
 	Printv(stylish.SubBullet("- Subscribing to debug logs"), s.Verbose)
-	logSub, err := client.Subscribe([]string{"log", "deploy", logLevel})
-	if err != nil {
+
+	logTags := []string{"log", "deploy", logLevel}
+	if err := client.Subscribe(logTags); err != nil {
 		fmt.Printf(stylish.Warning("Nanobox failed to subscribe to debug logs. Your sync will continue as normal, and log output is available on your dashboard."))
 	}
-	defer client.Unsubscribe(logSub)
+	defer client.Unsubscribe(logTags)
 
 	Printv(stylish.Success(), s.Verbose)
 
@@ -85,7 +87,7 @@ func (s *Sync) Run(opts []string) {
 
 	// handle
 stream:
-	for msg := range client.Data {
+	for msg := range client.Messages() {
 
 		//
 		e := &entry{}

@@ -48,7 +48,6 @@ func init() {
 	// no default is set here because we define the value later, once we know the
 	// name and version of the engine they are fetching
 	fetchCmd.Flags().StringVarP(&fFile, "ouput-document", "O", "", "specify where to save the engine")
-	fetchCmd.Flags().BoolVarP(&fStream, "stream", "s", false, "stream the file download to stdout")
 }
 
 // nanoFetch
@@ -57,7 +56,7 @@ func nanoFetch(ccmd *cobra.Command, args []string) {
 	//
 	// api.UserSlug, api.AuthToken = auth.Authenticate()
 
-	if len(args) < 1 {
+	if len(args) == 0 {
 		config.Console.Fatal("Please provide the name of an engine you would like to fetch, (run 'nanobox fetch -h' for details)")
 		os.Exit(1)
 	}
@@ -65,18 +64,20 @@ func nanoFetch(ccmd *cobra.Command, args []string) {
 	fmt.Printf(stylish.Bullet(fmt.Sprintf("Attempting to fetch '%v'", args[0])))
 
 	//
-	var archive, engine, user, version string
+	var archive, engine, user, version string // various string values used to store pieces of the engine
+	var split []string                        // used in strings.Split()
+	var dest io.Writer                        // the destination used in io.Copy()
 
 	// split args on "/" looking for a user:
 	// user/engine-name
 	// user/engine-name-0.0.1
-	split := strings.Split(args[0], "/")
+	split = strings.Split(args[0], "/")
 
 	// switch on the length to determin if the split resulted in a user and a engine
 	// or just an engine
 	switch len(split) {
 
-		// if len is 1 then only a download was found (no user specified)
+	// if len is 1 then only a download was found (no user specified)
 	case 1:
 		archive = split[0]
 
@@ -124,20 +125,11 @@ func nanoFetch(ccmd *cobra.Command, args []string) {
 	}
 	defer res.Body.Close()
 
-	// if streaming, pipe the ouput to os.Stdout
-	if fStream {
-		//
-		if _, err := io.Copy(os.Stdout, res.Body); err != nil {
-			ui.LogFatal("[commands.fetch] io.Copy() failed", err)
-		}
+	//
+	switch {
 
-		// otherwise write it to the local filesystem
-	} else {
-		// if no file is specified download the file as the name-of-engine-version
-		if fFile == "" {
-			fFile = fmt.Sprintf("./%v-%v.tgz", engine, version)
-		}
-
+	// write the download to the local file system
+	case fFile != "":
 		fmt.Printf(stylish.Bullet(fmt.Sprintf("Saving engine as '%v'", fFile)))
 
 		//
@@ -148,8 +140,16 @@ func nanoFetch(ccmd *cobra.Command, args []string) {
 		defer release.Close()
 
 		//
-		if _, err := io.Copy(release, res.Body); err != nil {
-			ui.LogFatal("[commands.fetch] io.Copy() failed", err)
-		}
+		dest = release
+
+		// pipe the ouput to os.Stdout
+	default:
+		fmt.Printf(stylish.Bullet("Piping download to stdout"))
+		dest = os.Stdout
+	}
+
+	// write the file
+	if _, err := io.Copy(dest, res.Body); err != nil {
+		ui.LogFatal("[commands.fetch] io.Copy() failed", err)
 	}
 }

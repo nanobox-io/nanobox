@@ -9,87 +9,136 @@ package mist
 
 import (
 	"bufio"
-	"encoding/binary"
-	"encoding/json"
+	"fmt"
 	"io"
 	"net"
 	"strings"
-
-	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
-// start starts a tcp server listening on the specified port (default 1445), it
-// then continually reads from the server handling any incoming connections
-func (m *Mist) start() {
-	m.log.Info(stylish.Bullet("Starting mist server..."))
+// build a small applicationController so that we don't have to play with a large
+// switch statement
+type (
+	handler struct {
+		argCount int
+		handle   func(*localSubscriber, []string) string
+	}
+)
 
-	//
+var (
+	commandMap = map[string]handler{
+		"list":        {0, handleList},
+		"subscribe":   {1, handleSubscribe},
+		"unsubscribe": {1, handleUnubscribe},
+		"publish":     {2, handlePublish},
+		"ping":        {0, handlePing},
+	}
+)
+
+//
+func handlePing(client *localSubscriber, args []string) string {
+	return "pong\n"
+}
+
+//
+func handleSubscribe(client *localSubscriber, args []string) string {
+	tags := strings.Split(args[0], ",")
+	client.Subscribe(tags)
+	return ""
+}
+
+//
+func handleUnubscribe(client *localSubscriber, args []string) string {
+	tags := strings.Split(args[0], ",")
+	client.Unsubscribe(tags)
+	return ""
+}
+
+//
+func handleList(client *localSubscriber, args []string) string {
+	list, err := client.List()
+	if err != nil {
+		return err.Error()
+	}
+	tmp := make([]string, len(list))
+
+	for idx, subscription := range list {
+		tmp[idx] = strings.Join(subscription, ",")
+	}
+
+	response := strings.Join(tmp, " ")
+	return fmt.Sprintf("list %v\n", response)
+}
+
+//
+func handlePublish(client *localSubscriber, args []string) string {
+	tags := strings.Split(args[0], ",")
+	client.Publish(tags, args[1])
+	return ""
+}
+
+// start starts a tcp server listening on the specified address (default 127.0.0.1:1445),
+// it then continually reads from the server handling any incoming connections
+func (m *Mist) Listen(address string) (net.Listener, error) {
+	if address == "" {
+		address = "127.0.0.1:1445"
+	}
+	serverSocket, err := net.Listen("tcp", address)
+	if err != nil {
+		return nil, err
+	}
+
 	go func() {
-
-		//
-		l, err := net.Listen("tcp", ":"+m.port)
-		if err != nil {
-			m.log.Error("%+v\n", err)
-		}
-
-		defer l.Close()
-
-		m.log.Info(stylish.Bullet("Mist listening on port " + m.port))
-
+		defer serverSocket.Close()
 		// Continually listen for any incoming connections.
 		for {
-			conn, err := l.Accept()
+			conn, err := serverSocket.Accept()
 			if err != nil {
-				m.log.Error("%+v\n", err)
+				// what should we do with the error?
+				return
 			}
 
 			// handle each connection individually (non-blocking)
 			go m.handleConnection(conn)
 		}
 	}()
+	return serverSocket, nil
 }
 
 // handleConnection takes an incoming connection from a mist client (or other client)
 // and sets up a new subscription for that connection, and a 'publish handler'
 // that is used to publish messages to the data channel of the subscription
 func (m *Mist) handleConnection(conn net.Conn) {
-	m.log.Debug("[MIST :: SERVER] New connection detected: %+v\n", conn)
 
-	// create a new subscription
-	sub := Subscription{
-		Sub: make(chan Message),
-	}
+	// create a new client to match with this connection
+
+	client := NewLocalClient(m, 0)
 
 	// make a done channel
 	done := make(chan bool)
+
+	// clean up everything that we have setup
+	defer func() {
+		conn.Close()
+		client.Close()
+		close(done)
+	}()
 
 	// create a 'publish handler'
 	go func() {
 		for {
 
-			// when a message is recieved on the subscriptions channel, append the length
-			// of the message into the first 4 bytes so clients can know how big of a
-			// message they should expect, and then write the message to the connection
+			// when a message is recieved on the subscriptions channel write the message
+			// to the connection
 			select {
-			case msg := <-sub.Sub:
+			case msg := <-client.Messages():
 
-				b, err := json.Marshal(msg)
-				if err != nil {
-					m.log.Error("[MIST :: SERVER] Failed to marshal message: %v\n", err)
-				}
-
-				//
-				bsize := make([]byte, 4)
-				binary.LittleEndian.PutUint32(bsize, uint32(len(b)))
-
-				if _, err := conn.Write(append(bsize, b...)); err != nil {
+				if _, err := conn.Write([]byte(fmt.Sprintf("publish %v %v\n", strings.Join(msg.Tags, ","), msg.Data))); err != nil {
 					break
 				}
 
-			// once the server is done sending messages issue a 'done'
+			// return if we are done
 			case <-done:
-				break
-
+				return
 			}
 		}
 	}()
@@ -101,42 +150,38 @@ func (m *Mist) handleConnection(conn net.Conn) {
 	for {
 
 		// read messages coming across the tcp channel
-		l, err := r.ReadString('\n')
-		if err != nil {
-
-			// if communication stops, close the connection, unsubscribe, and issue 'done'
-			if err == io.EOF {
-				conn.Close()
-				m.Unsubscribe(sub)
-				done <- true
-
-				// the channel is not closed here, because this is left up to the client
-				// close(sub.Sub)
-				break
-
-				// some unexpected error happened
-			} else {
-				m.log.Error("[MIST :: SERVER] Error reading stream: %+v\n", err.Error())
-			}
+		line, err := r.ReadString('\n')
+		if err != nil && err != io.EOF {
+			// some unexpected error happened
+			return
 		}
 
-		split := strings.Split(strings.TrimSpace(l), " ")
+		line = strings.TrimSuffix(line, "\n")
+
+		// this is the general format of the commands that are accepted
+		// ["cmd" ,"tag,tag2", "all the rest"]
+		split := strings.SplitN(line, " ", 3)
 		cmd := split[0]
 
-		//
-		switch cmd {
-		case "subscribe":
-			sub.Tags = strings.Split(split[1], ",")
-			m.Subscribe(sub)
-		case "unsubscribe":
-			sub.Tags = strings.Split(split[1], ",")
-			m.Unsubscribe(sub)
-		case "subscriptions":
-			m.List()
+		handler, found := commandMap[cmd]
+
+		var response string
+		args := split[1:]
+
+		switch {
+		case !found:
+			response = fmt.Sprintf("error Unknown command '%v'\n", cmd)
+		case handler.argCount != len(args):
+			response = fmt.Sprintf("error Incorrect number of arguments for '%v'\n", cmd)
 		default:
-			m.log.Error("[MIST :: SERVER] Unknown command: %+v\n", cmd)
+			response = handler.handle(client, args)
+		}
+
+		if response != "" {
+			// Is it safe to send from 2 gorountines at the same time?
+			if _, err := conn.Write([]byte(response)); err != nil {
+				break
+			}
 		}
 	}
-
-	return
 }

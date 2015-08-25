@@ -82,28 +82,25 @@ func nanoLog(ccmd *cobra.Command, args []string) {
 	if fStream {
 		fmt.Printf(stylish.Bullet("Connecting to live stream..."))
 
-		// create a 'mist' client to communicate with the mist server running on the
-		// guest machine
-		client := mist.Client{Host: config.Nanofile.IP, Port: "1445"}
-
-		// connect the 'mist' client to the 'mist' server
-		if err := client.Connect(); err != nil {
+		// connect 'mist' to the server running on the guest machine
+		client, err := mist.NewRemoteClient(config.Nanofile.IP + ":1445")
+		if err != nil {
 			ui.LogFatal("[commands/log] client.Connect() failed ", err)
 		}
 		defer client.Close()
 
 		// subscribe to 'log' updates
-		logSub, err := client.Subscribe([]string{"log", fLevel})
-		if err != nil {
+		logTags := []string{"log", fLevel}
+		if err := client.Subscribe([]string{"log", fLevel}); err != nil {
 			fmt.Printf(stylish.Warning("Nanobox failed to subscribe to app logs."))
 		}
-		defer client.Unsubscribe(logSub)
+		defer client.Unsubscribe(logTags)
 
 		//
 		fmt.Printf(stylish.Bullet("Connecting to live stream..."))
 
 	stream:
-		for msg := range client.Data {
+		for msg := range client.Messages() {
 
 			//
 			log := Log{}

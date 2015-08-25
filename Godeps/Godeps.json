@@ -61,7 +61,7 @@
 		},
 		{
 			"ImportPath": "github.com/pagodabox/golang-mist",
-			"Rev": "5fbcc8d496883a951d8400b9c4ff1e1aa1c04056"
+			"Rev": "93c1ce7d62e078aa73748dd829c98b488946b707"
 		},
 		{
 			"ImportPath": "github.com/pagodabox/nanobox-api-client",
