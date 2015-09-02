@@ -15,8 +15,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/pagodabox/nanobox-cli/ui"
-	"github.com/pagodabox/nanobox-cli/utils"
+	"github.com/pagodabox/nanobox-cli/util"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
@@ -41,7 +40,7 @@ func nanoExec(ccmd *cobra.Command, args []string) {
 
 	//
 	if len(args) <= 0 {
-		args = append(args, ui.Prompt("Please specify a command you wish to exec: "))
+		args = append(args, util.Prompt("Please specify a command you wish to exec: "))
 	}
 
 	// add a check here to regex the fTunnel to make sure the format makes sense
@@ -51,6 +50,6 @@ func nanoExec(ccmd *cobra.Command, args []string) {
 	v.Add("forward", fTunnel)
 	v.Add("cmd", strings.Join(args, " "))
 
-	docker := utils.Docker{Params: v.Encode()}
+	docker := util.Docker{Params: v.Encode()}
 	docker.Run()
 }

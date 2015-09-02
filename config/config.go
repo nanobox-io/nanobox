@@ -15,7 +15,7 @@ import (
 	"path"
 	"path/filepath"
 
-	semver "code.google.com/p/go-semver/version"
+	semver "github.com/coreos/go-semver/semver"
 
 	"github.com/jcelliott/lumber"
 	"github.com/mitchellh/go-homedir"
@@ -101,7 +101,7 @@ func init() {
 	AppDir = fmt.Sprintf("%s/%s", AppsDir, App)
 
 	//
-	version, err := semver.Parse(VERSION)
+	version, err := semver.NewVersion(VERSION)
 	if err != nil {
 		fmt.Println("Fatal error! See ~/.nanobox/nanobox.log for details. Exiting...")
 		Log.Fatal("[config/config] semver.Parse() failed", err)

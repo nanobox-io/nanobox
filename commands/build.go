@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/pagodabox/nanobox-cli/config"
-	"github.com/pagodabox/nanobox-cli/utils"
+	"github.com/pagodabox/nanobox-cli/util"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
@@ -34,7 +34,7 @@ func nanoBuild(ccmd *cobra.Command, args []string) {
 	fmt.Printf(stylish.Bullet("Building codebase..."))
 
 	//
-	build := utils.Sync{
+	build := util.Sync{
 		Model:   "build",
 		Path:    fmt.Sprintf("http://%v:1757/builds", config.Nanofile.IP),
 		Verbose: fVerbose,

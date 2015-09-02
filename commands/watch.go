@@ -17,7 +17,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/pagodabox/nanobox-cli/config"
-	"github.com/pagodabox/nanobox-cli/ui"
+	"github.com/pagodabox/nanobox-cli/util"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
@@ -41,7 +41,7 @@ func nanoWatch(ccmd *cobra.Command, args []string) {
 	// create and assign a new watcher
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		ui.LogFatal("[commands/watch] fsnotify.NewWatcher() failed", err)
+		util.LogFatal("[commands/watch] fsnotify.NewWatcher() failed", err)
 	}
 	defer watcher.Close()
 
@@ -51,7 +51,7 @@ func nanoWatch(ccmd *cobra.Command, args []string) {
 	// starting at the root of the project, walk each file/directory searching for
 	// directories
 	if err := filepath.Walk(config.CWDir, watchDir); err != nil {
-		ui.LogFatal("[commands/watch] filepath.Walk() failed", err)
+		util.LogFatal("[commands/watch] filepath.Walk() failed", err)
 	}
 
 	for {

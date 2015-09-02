@@ -17,7 +17,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/pagodabox/nanobox-cli/config"
-	"github.com/pagodabox/nanobox-cli/ui"
+	"github.com/pagodabox/nanobox-cli/util"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
@@ -58,12 +58,12 @@ func nanoInit(ccmd *cobra.Command, args []string) {
 
 		// parse the boxfile
 		if err := config.Boxfile.Parse(); err != nil {
-			ui.LogFatal("commands/init] config.Boxfile.Parse() failed", err)
+			util.LogFatal("commands/init] config.Boxfile.Parse() failed", err)
 		}
 
 		// parse the nanofile
 		if err := config.Nanofile.Parse(); err != nil {
-			ui.LogFatal("commands/init] config.Nanofile.Parse() failed", err)
+			util.LogFatal("commands/init] config.Nanofile.Parse() failed", err)
 		}
 
 		//
@@ -80,7 +80,7 @@ func nanoInit(ccmd *cobra.Command, args []string) {
 				//
 				fp, err := filepath.Abs(engine)
 				if err != nil {
-					ui.LogFatal("[commands/init] filepath.Abs() failed", err)
+					util.LogFatal("[commands/init] filepath.Abs() failed", err)
 				}
 
 				base := filepath.Base(fp)
@@ -222,7 +222,7 @@ end`, version, network, synced_folders, provider)
 
 		// write the Vagrantfile
 		if err := ioutil.WriteFile(config.AppDir+"/Vagrantfile", []byte(vagrantfile), 0755); err != nil {
-			ui.LogFatal("[commands/init] ioutil.WriteFile() failed", err)
+			util.LogFatal("[commands/init] ioutil.WriteFile() failed", err)
 		}
 
 		//

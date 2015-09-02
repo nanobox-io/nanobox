@@ -17,7 +17,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/pagodabox/nanobox-cli/config"
-	"github.com/pagodabox/nanobox-cli/ui"
+	"github.com/pagodabox/nanobox-cli/util"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
@@ -41,7 +41,7 @@ func nanoSSH(ccmd *cobra.Command, args []string) {
 
 	// run the command from ~/.nanobox/apps/<this app>
 	if err := os.Chdir(config.AppDir); err != nil {
-		ui.LogFatal("[commands/ssh] os.Chdir() failed", err)
+		util.LogFatal("[commands/ssh] os.Chdir() failed", err)
 	}
 
 	cmd := exec.Command("vagrant", "ssh")
@@ -56,6 +56,6 @@ func nanoSSH(ccmd *cobra.Command, args []string) {
 	// start the command; we need this to 'fire and forget' so that we can manually
 	// capture and modify the commands output
 	if err := cmd.Run(); err != nil {
-		ui.LogFatal("[commands/ssh] cmd.Run() failed", err)
+		util.LogFatal("[commands/ssh] cmd.Run() failed", err)
 	}
 }

@@ -14,7 +14,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/pagodabox/nanobox-cli/ui"
+	"github.com/pagodabox/nanobox-cli/util"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
@@ -37,7 +37,7 @@ func nanoSuspend(ccmd *cobra.Command, args []string) {
 
 	fmt.Printf(stylish.ProcessStart("suspending nanobox vm"))
 	if err := runVagrantCommand(exec.Command("vagrant", "suspend")); err != nil {
-		ui.LogFatal("[commands/suspend] runVagrantCommand() failed", err)
+		util.LogFatal("[commands/suspend] runVagrantCommand() failed", err)
 	}
 	fmt.Printf(stylish.ProcessEnd())
 }

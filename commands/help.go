@@ -11,12 +11,12 @@ package commands
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/pagodabox/nanobox-cli/ui"
+	"github.com/pagodabox/nanobox-cli/util"
 )
 
 // nanoHelp
 func nanoHelp(ccmd *cobra.Command) error {
-	ui.CPrint(`
+	util.CPrint(`
 
                                      ***
                                   *********

@@ -13,7 +13,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/pagodabox/nanobox-cli/config"
-	"github.com/pagodabox/nanobox-cli/utils"
+	"github.com/pagodabox/nanobox-cli/util"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
@@ -33,7 +33,7 @@ func nanoBootstrap(ccmd *cobra.Command, args []string) {
 	fmt.Printf(stylish.Bullet("Bootstrapping code..."))
 
 	//
-	bootstrap := utils.Sync{
+	bootstrap := util.Sync{
 		Model:   "bootstrap",
 		Path:    fmt.Sprintf("http://%v:1757/bootstrap", config.Nanofile.IP),
 		Verbose: fVerbose,

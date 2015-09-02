@@ -16,8 +16,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/pagodabox/nanobox-cli/config"
-	"github.com/pagodabox/nanobox-cli/ui"
-	"github.com/pagodabox/nanobox-cli/utils"
+	"github.com/pagodabox/nanobox-cli/util"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
@@ -42,8 +41,8 @@ func nanoDestroy(ccmd *cobra.Command, args []string) {
 
 	// if nanobox is unable to access the /etc/hosts file it will need to re-run
 	// the command as sudo
-	if utils.AccessDenied() {
-		utils.SudoExec("destroy", "Attempting to remove nano.dev domain from hosts file")
+	if util.AccessDenied() {
+		util.SudoExec("destroy", "Attempting to remove nano.dev domain from hosts file")
 		os.Exit(0)
 	}
 
@@ -53,7 +52,7 @@ func nanoDestroy(ccmd *cobra.Command, args []string) {
 		fmt.Printf("------------------------- !! DANGER ZONE !! -------------------------\n\n")
 
 		// prompt for confirmation...
-		switch ui.Prompt("Are you sure you want to delete this VM (y/N)? ") {
+		switch util.Prompt("Are you sure you want to delete this VM (y/N)? ") {
 
 		// if positive confirmation, proceed and destroy
 		case "Y", "y":
@@ -66,7 +65,7 @@ func nanoDestroy(ccmd *cobra.Command, args []string) {
 	}
 
 	// attempt to remove the associated entry, regardless of if it's there or not
-	utils.RemoveDevDomain()
+	util.RemoveDevDomain()
 
 	//
 	// destroy the vm; this needs to happen first to ensure there is a Vagrantfile
@@ -76,7 +75,7 @@ func nanoDestroy(ccmd *cobra.Command, args []string) {
 		if err == err.(*os.PathError) {
 			return
 		} else {
-			ui.LogFatal("[commands/destroy] runVagrantCommand() failed", err)
+			util.LogFatal("[commands/destroy] runVagrantCommand() failed", err)
 		}
 	}
 
@@ -84,7 +83,7 @@ func nanoDestroy(ccmd *cobra.Command, args []string) {
 	// again while running the vagrant command
 	fmt.Printf(stylish.Bullet("Deleting all nanobox files at: " + config.AppDir))
 	if err := os.RemoveAll(config.AppDir); err != nil {
-		ui.LogFatal("[commands/destroy] os.RemoveAll() failed", err)
+		util.LogFatal("[commands/destroy] os.RemoveAll() failed", err)
 	}
 	fmt.Printf(stylish.ProcessEnd())
 }

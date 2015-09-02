@@ -12,7 +12,7 @@ import (
 	"os"
 
 	"github.com/pagodabox/nanobox-cli/config"
-	"github.com/pagodabox/nanobox-cli/ui"
+	"github.com/pagodabox/nanobox-cli/util"
 )
 
 //
@@ -21,7 +21,7 @@ func uninstall(force bool) {
 	//
 	if force != true {
 
-		response := ui.Prompt("Are you sure you want to uninstall the Pagoda Box CLI (y/N)? ")
+		response := util.Prompt("Are you sure you want to uninstall the Pagoda Box CLI (y/N)? ")
 
 		if response != "y" {
 			fmt.Printf("'%v' - Pagoda Box CLI will not be uninstalled. Exiting...\n", response)
@@ -33,8 +33,8 @@ func uninstall(force bool) {
 
 	//
 	if err := os.RemoveAll(config.NanoDir); err != nil {
-		ui.LogFatal("[install] os.Remove() failed", err)
+		util.LogFatal("[install] os.Remove() failed", err)
 	}
 
-	ui.CPrint("[green]success[reset]")
+	util.CPrint("[green]success[reset]")
 }

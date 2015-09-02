@@ -15,7 +15,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/pagodabox/nanobox-cli/ui"
+	"github.com/pagodabox/nanobox-cli/util"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
@@ -41,7 +41,7 @@ func nanoHalt(ccmd *cobra.Command, args []string) {
 	if !fForce {
 
 		// prompt for confirmation...
-		switch ui.Prompt("Are you sure you want to halt this VM (y/N)? ") {
+		switch util.Prompt("Are you sure you want to halt this VM (y/N)? ") {
 
 		// if positive confirmation, proceed and halt
 		case "Y", "y":
@@ -56,7 +56,7 @@ func nanoHalt(ccmd *cobra.Command, args []string) {
 	// halt the vm...
 	fmt.Printf(stylish.ProcessStart("halting nanobox vm"))
 	if err := runVagrantCommand(exec.Command("vagrant", "halt", "--force")); err != nil {
-		ui.LogFatal("[commands/halt] runVagrantCommand() failed", err)
+		util.LogFatal("[commands/halt] runVagrantCommand() failed", err)
 	}
 	fmt.Printf(stylish.ProcessEnd())
 }

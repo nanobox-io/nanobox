@@ -27,8 +27,7 @@ import (
 	api "github.com/pagodabox/nanobox-api-client"
 	"github.com/pagodabox/nanobox-cli/auth"
 	"github.com/pagodabox/nanobox-cli/config"
-	"github.com/pagodabox/nanobox-cli/ui"
-	"github.com/pagodabox/nanobox-cli/utils"
+	"github.com/pagodabox/nanobox-cli/util"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
@@ -56,7 +55,7 @@ func nanoPublish(ccmd *cobra.Command, args []string) {
 
 	// attempt to parse an enginefile
 	if err := config.Enginefile.Parse(); err != nil {
-		ui.LogFatal("commands/init] config.Enginefile.Parse() failed", err)
+		util.LogFatal("commands/init] config.Enginefile.Parse() failed", err)
 	}
 
 	// create a new release based off the enginefile config options
@@ -84,7 +83,7 @@ func nanoPublish(ccmd *cobra.Command, args []string) {
 			//
 			engineCreateOptions := &api.EngineCreateOptions{Name: release.Name}
 			if _, err := api.CreateEngine(engineCreateOptions); err != nil {
-				ui.LogFatal("[commands.publish] api.CreateEngine() failed", err)
+				util.LogFatal("[commands.publish] api.CreateEngine() failed", err)
 			}
 
 			// wait until engine has been successfuly created before uploading to s3
@@ -93,7 +92,7 @@ func nanoPublish(ccmd *cobra.Command, args []string) {
 
 				p, err := api.GetEngine(api.UserSlug, release.Name)
 				if err != nil {
-					ui.LogFatal("[commands.publish] api.GetEngine() failed", err)
+					util.LogFatal("[commands.publish] api.GetEngine() failed", err)
 				}
 
 				// once the engine is "active", break
@@ -107,7 +106,7 @@ func nanoPublish(ccmd *cobra.Command, args []string) {
 
 			// generically handle any other errors
 		} else {
-			ui.LogFatal("[commands publish] api.GetEngine failed", err)
+			util.LogFatal("[commands publish] api.GetEngine failed", err)
 		}
 
 		stylish.Success()
@@ -119,10 +118,9 @@ func nanoPublish(ccmd *cobra.Command, args []string) {
 
 	// archive, err := os.Create(fmt.Sprintf("%v-%v.release.tgz", release.Name, release.Version))
 	// if err != nil {
-	// 	ui.LogFatal("[commands.publish] os.Create() failed", err)
+	// 	util.LogFatal("[commands.publish] os.Create() failed", err)
 	// }
 	// defer archive.Close()
-
 
 	// create an empty buffer for writing the file contents to for the subsequent
 	// upload
@@ -152,7 +150,7 @@ func nanoPublish(ccmd *cobra.Command, args []string) {
 
 		for _, files := range release.ProjectFiles {
 			if err := filepath.Walk(files, tarFile); err != nil {
-				ui.LogFatal("[commands.publish] filepath.Walk() failed", err)
+				util.LogFatal("[commands.publish] filepath.Walk() failed", err)
 			}
 		}
 
@@ -170,14 +168,14 @@ func nanoPublish(ccmd *cobra.Command, args []string) {
 	v.Add("version", release.Version)
 
 	//
-	s3url, err := utils.RequestS3URL(fmt.Sprintf("http://api.nanobox.io/v1/engines/%v/request_upload?%v", release.Name, v.Encode()))
+	s3url, err := util.RequestS3URL(fmt.Sprintf("http://api.nanobox.io/v1/engines/%v/request_upload?%v", release.Name, v.Encode()))
 	if err != nil {
-		ui.LogFatal("[commands/publish] utils.RequestS3URL failed", err)
+		util.LogFatal("[commands/publish] util.RequestS3URL failed", err)
 	}
 
 	//
-	if err := utils.S3Upload(s3url, archive); err != nil {
-		ui.LogFatal("[commands/publish] utils.S3Upload failed", err)
+	if err := util.S3Upload(s3url, archive); err != nil {
+		util.LogFatal("[commands/publish] util.S3Upload failed", err)
 	}
 
 	// add readme to release (if any)
@@ -194,7 +192,7 @@ func nanoPublish(ccmd *cobra.Command, args []string) {
 	// if the release uploaded successfully to s3, created one on odin
 	fmt.Printf(stylish.Bullet("Uploading release to nanobox.io"))
 	if _, err := api.CreateEngineRelease(release.Name, release); err != nil {
-		ui.LogFatal("[commands.publish] api.CreateEngineRelease() failed", err)
+		util.LogFatal("[commands.publish] api.CreateEngineRelease() failed", err)
 	}
 }
 

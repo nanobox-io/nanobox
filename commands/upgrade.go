@@ -14,7 +14,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/pagodabox/nanobox-cli/config"
-	"github.com/pagodabox/nanobox-cli/utils"
+	"github.com/pagodabox/nanobox-cli/util"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
@@ -34,7 +34,7 @@ func nanoUpgrade(ccmd *cobra.Command, args []string) {
 	fmt.Printf(stylish.Bullet("Updating nanobox docker images..."))
 
 	//
-	upgrade := utils.Sync{
+	upgrade := util.Sync{
 		Model:   "imageupdate",
 		Path:    fmt.Sprintf("http://%v:1757/image-update", config.Nanofile.IP),
 		Verbose: fVerbose,

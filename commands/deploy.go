@@ -16,7 +16,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/pagodabox/nanobox-cli/config"
-	"github.com/pagodabox/nanobox-cli/utils"
+	"github.com/pagodabox/nanobox-cli/util"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
@@ -47,7 +47,7 @@ func nanoDeploy(ccmd *cobra.Command, args []string) {
 	v.Add("sandbox", strconv.FormatBool(fSandbox))
 
 	//
-	deploy := utils.Sync{
+	deploy := util.Sync{
 		Model:   "deploy",
 		Path:    fmt.Sprintf("http://%v:1757/deploys?%v", config.Nanofile.IP, v.Encode()),
 		Verbose: fVerbose,

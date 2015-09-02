@@ -16,7 +16,7 @@ package main
 // 	"strings"
 // 	"time"
 //
-// 	semver "code.google.com/p/go-semver/version"
+// 	semver "github.com/coreos/go-semver/semver"
 //
 // 	"github.com/pagodabox/nanobox-cli/commands"
 // 	"github.com/pagodabox/nanobox-cli/config"
@@ -32,10 +32,10 @@ package main
 // 	//
 // 	release, err := getRelease()
 // 	if err != nil {
-// 		ui.LogFatal("[update] getRelease() failed", err)
+// 		util.LogFatal("[update] getRelease() failed", err)
 // 	}
 //
-// 	if less := config.Version.Less(release); !less {
+// 	if less := config.Version.LessThan(*release); !less {
 // 		fmt.Println("No updates available at this time.")
 // 		touchUpdate()
 // 		return
@@ -54,7 +54,7 @@ package main
 // 	//
 // 	fi, err := os.Stat(config.UpdateFile)
 // 	if err != nil {
-// 		ui.LogFatal("[update] os.Stat() failed", err)
+// 		util.LogFatal("[update] os.Stat() failed", err)
 // 	}
 //
 // 	// check when the last time our .update file was modified
@@ -75,17 +75,17 @@ package main
 // 		//
 // 		release, err := getRelease()
 // 		if err != nil {
-// 			ui.LogFatal("[update] getRelease() failed", err)
+// 			util.LogFatal("[update] getRelease() failed", err)
 // 		}
 //
 // 		// check to see if the current version of the CLI is less than the release
 // 		// version. If so, check to see what type of update is needed.
-// 		if less := config.Version.Less(release); less {
+// 		if less := config.Version.LessThan(*release); less {
 //
 // 			//
 // 			config.Console.Info("[update] update required...")
 //
-// 			ui.CPrint(`
+// 			util.CPrint(`
 // There is a newer version of the CLI available:
 // [yellow]Current version: %v[reset]
 // [green]Available version: %v[reset]
@@ -97,7 +97,7 @@ package main
 // 				//
 // 				config.Console.Info("[update] major update detected")
 //
-// 				ui.CPrint(`
+// 				util.CPrint(`
 // This is a [red]major[reset] update (required). Major updates contain fixes for
 // breaking issues and bugs, or updates needed for the CLI to continue working with
 // other Pagodab Box services. [red]The CLI will not function without this update![reset]`)
@@ -110,7 +110,7 @@ package main
 // 				//
 // 				config.Console.Info("[update] minor update detected")
 //
-// 				ui.CPrint(`
+// 				util.CPrint(`
 // This is a [yellow]minor[reset] update (not required). Minor updates contain
 // fixes to small issues or bugs that may effect workflow. You can continue to use
 // the CLI, however its recommneded you update.`)
@@ -123,7 +123,7 @@ package main
 // 				//
 // 				config.Console.Info("[update] patch update detected")
 //
-// 				ui.CPrint(`
+// 				util.CPrint(`
 // This is a [green]patch[reset] (not required). Patches contain fixes to output,
 // help text, or improvements to performance that may enhance the quality of the
 // CLI. You can continue to use the CLI or update with [green]'pagoda update'[reset].`)
@@ -137,11 +137,11 @@ package main
 // // runUpdate
 // func runUpdate() {
 //
-// 	choice := ui.Prompt("Would you like to update the CLI now (y/N)? ")
+// 	choice := util.Prompt("Would you like to update the CLI now (y/N)? ")
 //
 // 	// unless choice is yes...
 // 	if choice != "y" {
-// 		ui.CPrint("You can manually update at any time with [green]'pagoda update'[reset].", choice)
+// 		util.CPrint("You can manually update at any time with [green]'pagoda update'[reset].", choice)
 // 		os.Exit(0)
 // 	}
 //
@@ -153,7 +153,7 @@ package main
 // // touchUpdate updates the modification time of the .update file
 // func touchUpdate() {
 // 	if err := os.Chtimes(config.UpdateFile, time.Now(), time.Now()); err != nil {
-// 		ui.LogFatal("[commands.update] os.Chtimes() failed", err)
+// 		util.LogFatal("[commands.update] os.Chtimes() failed", err)
 // 	}
 //
 // 	os.Exit(0)

@@ -18,8 +18,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/pagodabox/nanobox-cli/config"
-	"github.com/pagodabox/nanobox-cli/ui"
-	"github.com/pagodabox/nanobox-cli/utils"
+	"github.com/pagodabox/nanobox-cli/util"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
@@ -42,7 +41,7 @@ func nanoCreate(ccmd *cobra.Command, args []string) {
 	// open the /etc/hosts file for scanning...
 	f, err := os.Open("/etc/hosts")
 	if err != nil {
-		ui.LogFatal("[commands/create] os.Open() failed", err)
+		util.LogFatal("[commands/create] os.Open() failed", err)
 	}
 	defer f.Close()
 
@@ -64,12 +63,12 @@ func nanoCreate(ccmd *cobra.Command, args []string) {
 
 	// add the entry if needed
 	if addEntry {
-		if utils.AccessDenied() {
-			utils.SudoExec("create", "Attempting to add nano.dev domain to hosts file")
+		if util.AccessDenied() {
+			util.SudoExec("create", "Attempting to add nano.dev domain to hosts file")
 			os.Exit(0)
 		}
 
-		utils.AddDevDomain()
+		util.AddDevDomain()
 	}
 
 	// run an init to ensure there is a Vagrantfile
@@ -79,7 +78,7 @@ func nanoCreate(ccmd *cobra.Command, args []string) {
 	// boot the vm
 	fmt.Printf(stylish.ProcessStart("starting nanobox vm"))
 	if err := runVagrantCommand(exec.Command("vagrant", "up")); err != nil {
-		ui.LogFatal("[commands/create] runVagrantCommand() failed", err)
+		util.LogFatal("[commands/create] runVagrantCommand() failed", err)
 	}
 	fmt.Printf(stylish.ProcessEnd())
 
@@ -89,5 +88,5 @@ func nanoCreate(ccmd *cobra.Command, args []string) {
 
 //
 func create() {
-	utils.AddDevDomain()
+	util.AddDevDomain()
 }

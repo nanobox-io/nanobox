@@ -15,7 +15,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/pagodabox/nanobox-cli/utils"
+	"github.com/pagodabox/nanobox-cli/util"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
@@ -50,6 +50,6 @@ func nanoConsole(ccmd *cobra.Command, args []string) {
 	v := url.Values{}
 	v.Add("forward", fTunnel)
 
-	docker := utils.Docker{Params: v.Encode()}
+	docker := util.Docker{Params: v.Encode()}
 	docker.Run()
 }

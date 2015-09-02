@@ -19,7 +19,7 @@ import (
 	"github.com/kardianos/osext"
 	"github.com/spf13/cobra"
 
-	"github.com/pagodabox/nanobox-cli/ui"
+	"github.com/pagodabox/nanobox-cli/util"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
@@ -42,7 +42,7 @@ func nanoUpdate(ccmd *cobra.Command, args []string) {
 	//
 	path, err := osext.Executable()
 	if err != nil {
-		ui.LogFatal("[commands/update] osext.ExecutableFolder() failed", err)
+		util.LogFatal("[commands/update] osext.ExecutableFolder() failed", err)
 	}
 
 	//
@@ -55,13 +55,13 @@ func nanoUpdate(ccmd *cobra.Command, args []string) {
 	fmt.Printf(stylish.SubBullet(fmt.Sprintf("Downloading latest CLI from %v", download)))
 	req, err := http.NewRequest("GET", download, nil)
 	if err != nil {
-		ui.LogFatal("[commands/update] http.NewRequest() failed", err)
+		util.LogFatal("[commands/update] http.NewRequest() failed", err)
 	}
 
 	// download the new CLI
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		ui.LogFatal("[commands/update] http.DefaultClient.Do() failed", err)
+		util.LogFatal("[commands/update] http.DefaultClient.Do() failed", err)
 	}
 
 	var buf bytes.Buffer
@@ -87,13 +87,13 @@ func nanoUpdate(ccmd *cobra.Command, args []string) {
 			if err == io.EOF {
 				break
 			} else {
-				ui.LogFatal("[commands/update] res.Body.Read() failed", err)
+				util.LogFatal("[commands/update] res.Body.Read() failed", err)
 			}
 		}
 
 		defer res.Body.Close()
 	}
-	ui.CPrint("\rDownloading... [green]success[reset]")
+	util.CPrint("\rDownloading... [green]success[reset]")
 
 	//
 	fmt.Printf(stylish.SubBullet(fmt.Sprintf("Replacing CLI at %v", path)))
@@ -111,7 +111,7 @@ func nanoUpdate(ccmd *cobra.Command, args []string) {
 	//  // run the command that was being run to begin with
 	//  out, err := exec.Command(os.Args[0], os.Args[1:]...).Output()
 	//  if err != nil {
-	//    ui.LogFatal("[commands.update] exec.Command()", err)
+	//    util.LogFatal("[commands.update] exec.Command()", err)
 	//  }
 
 	//  // show the output of the command that is run

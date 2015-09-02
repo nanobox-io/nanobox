@@ -20,7 +20,7 @@ import (
 	api "github.com/pagodabox/nanobox-api-client"
 	// "github.com/pagodabox/nanobox-cli/auth"
 	"github.com/pagodabox/nanobox-cli/config"
-	"github.com/pagodabox/nanobox-cli/ui"
+	"github.com/pagodabox/nanobox-cli/util"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
@@ -121,7 +121,7 @@ func nanoFetch(ccmd *cobra.Command, args []string) {
 
 	res, err := http.Get(path)
 	if err != nil {
-		ui.LogFatal("[commands.fetch] http.Get() failed", err)
+		util.LogFatal("[commands.fetch] http.Get() failed", err)
 	}
 	defer res.Body.Close()
 
@@ -135,7 +135,7 @@ func nanoFetch(ccmd *cobra.Command, args []string) {
 		//
 		release, err := os.Create(fFile)
 		if err != nil {
-			ui.LogFatal("[commands.fetch] os.Create() failed", err)
+			util.LogFatal("[commands.fetch] os.Create() failed", err)
 		}
 		defer release.Close()
 
@@ -150,6 +150,6 @@ func nanoFetch(ccmd *cobra.Command, args []string) {
 
 	// write the file
 	if _, err := io.Copy(dest, res.Body); err != nil {
-		ui.LogFatal("[commands.fetch] io.Copy() failed", err)
+		util.LogFatal("[commands.fetch] io.Copy() failed", err)
 	}
 }

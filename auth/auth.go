@@ -14,7 +14,7 @@ import (
 
 	api "github.com/pagodabox/nanobox-api-client"
 	"github.com/pagodabox/nanobox-cli/config"
-	"github.com/pagodabox/nanobox-cli/ui"
+	"github.com/pagodabox/nanobox-cli/util"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
@@ -23,7 +23,7 @@ func authenticated() bool {
 
 	//
 	if err := config.Authfile.Parse(); err != nil {
-		ui.LogFatal("auth/auth] config.Authfile.Parse() failed", err)
+		util.LogFatal("auth/auth] config.Authfile.Parse() failed", err)
 	}
 
 	//
@@ -49,8 +49,8 @@ func Authenticate() (string, string) {
 	if !authenticated() {
 		fmt.Println("Before continuing, please login to your account:")
 
-		userslug := ui.Prompt("Username: ")
-		password := ui.PPrompt("Password: ")
+		userslug := util.Prompt("Username: ")
+		password := util.PPrompt("Password: ")
 
 		// authenticate
 		return authenticate(userslug, password)
@@ -66,8 +66,8 @@ It appears the Username or API token the CLI is trying to use does not match wha
 we have on record. To continue, please login to verify your account:
   `)
 
-	userslug := ui.Prompt("Username: ")
-	password := ui.PPrompt("Password: ")
+	userslug := util.Prompt("Username: ")
+	password := util.PPrompt("Password: ")
 
 	// authenticate
 	return authenticate(userslug, password)
@@ -81,18 +81,18 @@ func authenticate(userslug, password string) (string, string) {
 	// get auth_token
 	user, err := api.GetAuthToken(userslug, password)
 	if err != nil {
-		ui.CPrint("[red]failure![reset]")
+		util.CPrint("[red]failure![reset]")
 		fmt.Println("Unable to login... please verify your username and password are correct.")
 		os.Exit(1)
 	}
 
 	//
 	if err := saveCredentials(user.ID, user.AuthenticationToken); err != nil {
-		ui.LogFatal("[auth/auth] saveCredentials failed", err)
+		util.LogFatal("[auth/auth] saveCredentials failed", err)
 	}
 
 	//
-	ui.CPrint("[green]success![reset]")
+	util.CPrint("[green]success![reset]")
 
 	return user.ID, user.AuthenticationToken
 }

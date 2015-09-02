@@ -22,8 +22,7 @@ import (
 
 	"github.com/pagodabox/golang-mist"
 	"github.com/pagodabox/nanobox-cli/config"
-	"github.com/pagodabox/nanobox-cli/ui"
-	// "github.com/pagodabox/nanobox-cli/utils"
+	"github.com/pagodabox/nanobox-cli/util"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
@@ -85,7 +84,7 @@ func nanoLog(ccmd *cobra.Command, args []string) {
 		// connect 'mist' to the server running on the guest machine
 		client, err := mist.NewRemoteClient(config.Nanofile.IP + ":1445")
 		if err != nil {
-			ui.LogFatal("[commands/log] client.Connect() failed ", err)
+			util.LogFatal("[commands/log] client.Connect() failed ", err)
 		}
 		defer client.Close()
 
@@ -114,7 +113,7 @@ func nanoLog(ccmd *cobra.Command, args []string) {
 
 			//
 			if err := json.Unmarshal([]byte(msg.Data), &log); err != nil {
-				ui.LogFatal("[commands/log] json.Unmarshal() failed", err)
+				util.LogFatal("[commands/log] json.Unmarshal() failed", err)
 			}
 
 			processLog(log)
@@ -131,7 +130,7 @@ func nanoLog(ccmd *cobra.Command, args []string) {
 
 		res, err := http.Get(fmt.Sprintf("http://%v:6362/app?%v", config.Nanofile.IP, v.Encode()))
 		if err != nil {
-			ui.LogFatal("[commands/log] http.Get() failed", err)
+			util.LogFatal("[commands/log] http.Get() failed", err)
 		}
 		defer res.Body.Close()
 
@@ -146,7 +145,7 @@ func nanoLog(ccmd *cobra.Command, args []string) {
 				if err == io.EOF {
 					break
 				} else {
-					ui.LogFatal("[commands/log] bufio.ReadBytes() failed", err)
+					util.LogFatal("[commands/log] bufio.ReadBytes() failed", err)
 				}
 			}
 
@@ -196,7 +195,7 @@ func processLog(log Log) {
 			logProcesses[process] = logColors[len(logProcesses)%len(logColors)]
 		}
 
-		ui.CPrint("[%v]%v - %v.%v :: %v[reset]", logProcesses[process], log.Time, service, process, entry)
+		util.CPrint("[%v]%v - %v.%v :: %v[reset]", logProcesses[process], log.Time, service, process, entry)
 
 		// if we don't have a subMatch or its length is less than 4, just print w/e
 		// is in the log
@@ -204,7 +203,7 @@ func processLog(log Log) {
 		//
 		config.Console.Debug("[commands/log] No submatches found -> %v - %v", log.Time, log.Log)
 
-		ui.CPrint("[light_red]%v - %v[reset]", log.Time, log.Log)
+		util.CPrint("[light_red]%v - %v[reset]", log.Time, log.Log)
 	}
 
 }
