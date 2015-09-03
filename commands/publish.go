@@ -78,13 +78,13 @@ func nanoPublish(ccmd *cobra.Command, args []string) {
 	// enough that all cases will return the same message, and this looks better than
 	// a single giant case (var == "" || var == "" || ...)
 	switch {
-	case release.Name == "":
-		fallthrough
-	case release.Version == "":
-		fallthrough
 	case release.Language == "":
 		fallthrough
+	case release.Name == "":
+		fallthrough
 	case release.Summary == "":
+		fallthrough
+	case release.Version == "":
 		fmt.Printf(stylish.Error("required fields missing", `Your Enginefile is missing one or more of the following required fields for publishing:
 
   name:      # the name of your project
