@@ -20,15 +20,15 @@ import (
 
 // EnginefileConfig represents all available/expected Enginefile configurable options
 type EnginefileConfig struct {
-	Authors      []string `json:"authors"`       //
-	Description  string   `json:"description"`   //
-	License      string   `json:"license"`       //
-	Name         string   `json:"name"`          //
-	ProjectFiles []string `json:"project_files"` //
-	Readme       string   `json:"readme"`        //
-	Stability    string   `json:"stability"`     //
-	Summary      string   `json:"summary"`       //
-	Version      string   `json:"version"`       //
+	Authors   []string `json:"authors"`   //
+	Generic   string   `json:"generic"`   //
+	Language  string   `json:"language"`  //
+	License   string   `json:"license"`   //
+	Name      string   `json:"name"`      //
+	Readme    string   `json:"readme"`    //
+	Stability string   `json:"stability"` //
+	Summary   string   `json:"summary"`   //
+	Version   string   `json:"version"`   //
 }
 
 // create default enginefile config

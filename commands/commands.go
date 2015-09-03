@@ -44,6 +44,7 @@ var (
 	// flags
 	fCount   int    //
 	fDebug   bool   //
+	fDevmode bool   //
 	fForce   bool   //
 	fFile    string //
 	fLevel   string //
@@ -60,8 +61,10 @@ var (
 // init builds the list of available nanobox commands and sub commands
 func init() {
 
-	NanoboxCmd.PersistentFlags().BoolVarP(&fDebug, "debug", "d", false, "display debug output")
-	NanoboxCmd.PersistentFlags().BoolVarP(&fVerbose, "verbose", "v", false, "increase level of output")
+	NanoboxCmd.PersistentFlags().BoolVarP(&fDebug, "debug", "d", false, "Display any command debug output.")
+	NanoboxCmd.PersistentFlags().BoolVarP(&fDevmode, "dev", "", false, "Run command in 'devmode' (effect varies per command).")
+	NanoboxCmd.PersistentFlags().BoolVarP(&fForce, "force", "f", false, "Force a command to run (effect varies per command).")
+	NanoboxCmd.PersistentFlags().BoolVarP(&fVerbose, "verbose", "v", false, "Increase command output from 'info' to 'debug'.")
 	// NanoboxCmd.SetUsageFunc(nanoHelp)
 
 	// all available nanobox commands

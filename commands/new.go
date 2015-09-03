@@ -53,21 +53,17 @@ func nanoNew(ccmd *cobra.Command, args []string) {
 		}
 
 		entry := fmt.Sprintf(`
-name: %-18s     # the name of your project
-version: %-18s  # the current version of the project
-summary:                     # a short summary of the project
-description:                 # a detailed description of the project
+name: %-18s     # the name of your project (required)
+version: %-18s  # the current version of the project (required)
+language:                    # the lanauge (ruby, golang, etc.) of the engine (required)
+summary:                     # a 140 character short summary of the project (required)
 stability: alpha             # the current stability of the project (alpha/beta/stable)
+generic: false               # is the engine generic enough to encompass multiple frameworks
+                             # within the given language
 license: MIT                 # the license to be applied to this software
-readme: README.md            # the path/to/your/readme.file
 
 # a list of authors/contributors
 authors:
-  -
-
-# the list of files your project requires. These are bundled
-# into a 'release.tar.gz' and uploaded to nanobox
-project_files:
   -
 `, name, version)
 

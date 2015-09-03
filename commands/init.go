@@ -36,6 +36,9 @@ Description:
 func nanoInit(ccmd *cobra.Command, args []string) {
 
 	//
+	var provider, devmode string
+
+	//
 	// creates a project folder at ~/.nanobox/apps/<app-name> (if it doesn't already
 	// exists) where the Vagrantfile and .vagrant dir will live for each app
 	if di, _ := os.Stat(config.AppDir); di == nil {
@@ -50,88 +53,103 @@ func nanoInit(ccmd *cobra.Command, args []string) {
 	}
 
 	//
-	// generate a Vagrantfile at ~/.nanobox/apps/<app-name>/Vagrantfile if one doesn't
-	// exist
-	if fi, _ := os.Stat(config.AppDir + "/Vagrantfile"); fi != nil {
-		fmt.Printf(stylish.Bullet("Nanobox Vagrantfile detected, skipping configuration..."))
-	} else {
-
-		// parse the boxfile
-		if err := config.Boxfile.Parse(); err != nil {
-			util.LogFatal("commands/init] config.Boxfile.Parse() failed", err)
+	// generate a Vagrantfile at ~/.nanobox/apps/<app-name>/Vagrantfile
+	// only if one doesn't already exist (unless forced)
+	if !fForce {
+		if fi, _ := os.Stat(config.AppDir + "/Vagrantfile"); fi != nil {
+			fmt.Printf(stylish.Bullet("Nanobox Vagrantfile detected, skipping configuration..."))
+			return
 		}
+	}
 
-		// parse the nanofile
-		if err := config.Nanofile.Parse(); err != nil {
-			util.LogFatal("commands/init] config.Nanofile.Parse() failed", err)
-		}
+	// parse the boxfile
+	if err := config.Boxfile.Parse(); err != nil {
+		util.LogFatal("commands/init] config.Boxfile.Parse() failed", err)
+	}
 
-		//
-		fmt.Printf(stylish.Bullet("Preparing nanobox Vagrantfile"))
-		fmt.Printf(stylish.SubBullet(fmt.Sprintf("- Adding code directory mount (/vagrant/code/%v)", config.App)))
+	// parse the nanofile
+	if err := config.Nanofile.Parse(); err != nil {
+		util.LogFatal("commands/init] config.Nanofile.Parse() failed", err)
+	}
 
-		// create synced folders
-		synced_folders := fmt.Sprintf("nanobox.vm.synced_folder \"%v\", \"/vagrant/code/%v\"", config.CWDir, config.App)
+	//
+	fmt.Printf(stylish.Bullet("Preparing nanobox Vagrantfile"))
+	fmt.Printf(stylish.SubBullet(fmt.Sprintf("- Adding code directory mount (/vagrant/code/%v)", config.App)))
 
-		// if an engine path is provided, add it to the synced_folders
-		if engine := config.Boxfile.Build.Engine; engine != "" {
-			if fi, _ := os.Stat(engine); fi != nil {
+	// create synced folders
+	synced_folders := fmt.Sprintf("nanobox.vm.synced_folder \"%v\", \"/vagrant/code/%v\"", config.CWDir, config.App)
 
-				//
-				fp, err := filepath.Abs(engine)
-				if err != nil {
-					util.LogFatal("[commands/init] filepath.Abs() failed", err)
-				}
+	// if an engine path is provided, add it to the synced_folders
+	if engine := config.Boxfile.Build.Engine; engine != "" {
+		if fi, _ := os.Stat(engine); fi != nil {
 
-				base := filepath.Base(fp)
-
-				//
-				fmt.Printf(stylish.SubBullet(fmt.Sprintf("- Adding engine directory mount (/vagrant/engines/%v)", base)))
-
-				synced_folders += fmt.Sprintf("\n    nanobox.vm.synced_folder \"%v\", \"/vagrant/engines/%v\"", fp, base)
+			//
+			fp, err := filepath.Abs(engine)
+			if err != nil {
+				util.LogFatal("[commands/init] filepath.Abs() failed", err)
 			}
+
+			base := filepath.Base(fp)
+
+			//
+			fmt.Printf(stylish.SubBullet(fmt.Sprintf("- Adding engine directory mount (/vagrant/engines/%v)", base)))
+
+			synced_folders += fmt.Sprintf("\n    nanobox.vm.synced_folder \"%v\", \"/vagrant/engines/%v\"", fp, base)
 		}
+	}
 
-		//
-		// create nanobox private network
-		fmt.Printf(stylish.SubBullet(fmt.Sprintf("- Adding nanobox private network (%v)", config.Nanofile.IP)))
-		network := fmt.Sprintf("nanobox.vm.network \"private_network\", ip: \"%v\"", config.Nanofile.IP)
+	//
+	// create nanobox private network
+	fmt.Printf(stylish.SubBullet(fmt.Sprintf("- Adding nanobox private network (%v)", config.Nanofile.IP)))
+	network := fmt.Sprintf("nanobox.vm.network \"private_network\", ip: \"%v\"", config.Nanofile.IP)
 
-		//
-		// configure provider
-		fmt.Printf(stylish.SubBullet(fmt.Sprintf("- Adding detected provider (%v)", config.Nanofile.Provider)))
+	//
+	// configure provider
+	fmt.Printf(stylish.SubBullet(fmt.Sprintf("- Adding detected provider (%v)", config.Nanofile.Provider)))
 
-		provider := ""
+	//
+	switch config.Nanofile.Provider {
 
-		//
-		switch config.Nanofile.Provider {
+	//
+	case "virtualbox":
+		provider = fmt.Sprintf(`# VirtualBox
+  nanobox.vm.provider "virtualbox" do |p|
+    p.name = "%v"
 
-		//
-		case "virtualbox":
-			provider = fmt.Sprintf(`# VirtualBox
-    nanobox.vm.provider "virtualbox" do |p|
-      p.name = "%v"
+    p.customize ["modifyvm", :id, "--cpuexecutioncap", "%v"]
+    p.cpus = %v
+    p.memory = %v
+  end`, config.App, config.Nanofile.CPUCap, config.Nanofile.CPUs, config.Nanofile.RAM)
 
-      p.customize ["modifyvm", :id, "--cpuexecutioncap", "%v"]
-      p.cpus = %v
-      p.memory = %v
-    end`, config.App, config.Nanofile.CPUCap, config.Nanofile.CPUs, config.Nanofile.RAM)
+	//
+	case "vmware":
+		provider = fmt.Sprintf(`# VMWare
+  nanobox.vm.provider "vmware" do |p|
+    v.vmx["numvcpus"] = "%v"
+    v.vmx["memsize"] = "%v"
+  end`, config.Nanofile.CPUCap, config.Nanofile.CPUs, config.Nanofile.RAM)
+	}
 
-		//
-		case "vmware":
-			provider = fmt.Sprintf(`# VMWare
-    nanobox.vm.provider "vmware" do |p|
-      v.vmx["numvcpus"] = "%v"
-      v.vmx["memsize"] = "%v"
-    end`, config.Nanofile.CPUCap, config.Nanofile.CPUs, config.Nanofile.RAM)
-		}
+	// command to pull the latest verison of boot2docker
+	version := "`curl -s https://api.github.com/repos/pagodabox/nanobox-boot2docker/releases/latest | awk '/^  \"name\": / {print $2}' | tr -d ',\n\"'`.strip"
 
-		// command to pull the latest verison of boot2docker
-		version := "`curl -s https://api.github.com/repos/pagodabox/nanobox-boot2docker/releases/latest | awk '/^  \"name\": / {print $2}' | tr -d ',\n\"'`.strip"
+	// insert a provision script that will indicate to nanobox-server to boot into
+	// 'devmode'
+	if fDevmode {
+		fmt.Printf(stylish.SubBullet("- --dev detected, configuring vm to run in 'devmode'"))
 
-		//
-		// create Vagrantfile
-		vagrantfile := fmt.Sprintf(`
+		devmode = `# added because --dev was detected; boots the server into 'devmode'
+	$devmode = <<SCRIPT
+	echo "Starting VM in dev mode..."
+	touch /mnt/sda/var/nanobox/DEV
+	SCRIPT
+
+	nanobox.vm.provision "shell", inline: $devmode`
+	}
+
+	//
+	// create Vagrantfile
+	vagrantfile := fmt.Sprintf(`
 ################################################################################
 ##                                                                            ##
 ##                                   ***                                      ##
@@ -180,52 +198,53 @@ SCRIPT
 #
 Vagrant.configure(2) do |config|
 
-  # add the boot2docker user credentials to allow nanobox to freely ssh into the vm
-  # w/o requiring a password
-  config.ssh.shell = "bash"
-  config.ssh.username = "docker"
-  config.ssh.password = "tcuser"
+	# add the boot2docker user credentials to allow nanobox to freely ssh into the vm
+	# w/o requiring a password
+	config.ssh.shell = "bash"
+	config.ssh.username = "docker"
+	config.ssh.password = "tcuser"
 
-  config.vm.define :nanobox_boot2docker do |nanobox|
+	config.vm.define :nanobox_boot2docker do |nanobox|
 
-    ## Wait for nanobox-server to be ready before vagrant exits
-    nanobox.vm.provision "shell", inline: $wait
-
-
-    ## box
-    nanobox.vm.box_url = "https://github.com/pagodabox/nanobox-boot2docker/releases/download/#{version}/nanobox-boot2docker.box"
-    nanobox.vm.box     = "nanobox/boot2docker"
+	  ## Wait for nanobox-server to be ready before vagrant exits
+	  nanobox.vm.provision "shell", inline: $wait
 
 
-    ## network
-    %s
+	  ## box
+	  nanobox.vm.box_url = "https://github.com/pagodabox/nanobox-boot2docker/releases/download/#{version}/nanobox-boot2docker.box"
+	  nanobox.vm.box     = "nanobox/boot2docker"
 
 
-    ## shared folders
-
-    # disable default /vagrant share to override...
-    nanobox.vm.synced_folder ".", "/vagrant", disabled: true
-
-    # ...add nanobox shared folders
-    %s
+	  ## network
+	  %s
 
 
-    ## provider configs
-    %s
+	  ## shared folders
 
-    # kill the eth1 dhcp server so that it doesn't override the assigned ip when
-    # the lease is up
-    nanobox.vm.provision "shell", inline: $kill
+	  # disable default /vagrant share (overridden below)
+	  nanobox.vm.synced_folder ".", "/vagrant", disabled: true
 
-  end
-end`, version, network, synced_folders, provider)
+	  # add nanobox shared folders
+	  %s
 
-		// write the Vagrantfile
-		if err := ioutil.WriteFile(config.AppDir+"/Vagrantfile", []byte(vagrantfile), 0755); err != nil {
-			util.LogFatal("[commands/init] ioutil.WriteFile() failed", err)
-		}
 
-		//
-		fmt.Println("   [√] nanobox Vagrantfile generated at: " + config.AppDir + "/Vagrantfile")
+	  ## provider configs
+	  %s
+
+	  # kill the eth1 dhcp server so that it doesn't override the assigned ip when
+	  # the lease is up
+	  nanobox.vm.provision "shell", inline: $kill
+
+		%s
+
+	end
+end`, version, network, synced_folders, provider, devmode)
+
+	// write the Vagrantfile
+	if err := ioutil.WriteFile(config.AppDir+"/Vagrantfile", []byte(vagrantfile), 0755); err != nil {
+		util.LogFatal("[commands/init] ioutil.WriteFile() failed", err)
 	}
+
+	//
+	fmt.Println("   [√] nanobox Vagrantfile generated at: " + config.AppDir + "/Vagrantfile")
 }

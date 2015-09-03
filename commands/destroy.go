@@ -31,11 +31,6 @@ Description:
 	Run: nanoDestroy,
 }
 
-//
-func init() {
-	destroyCmd.Flags().BoolVarP(&fForce, "force", "f", false, "Skips confirmation and forces the destroy")
-}
-
 // nanoDestroy
 func nanoDestroy(ccmd *cobra.Command, args []string) {
 

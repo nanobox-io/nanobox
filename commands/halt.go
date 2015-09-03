@@ -30,11 +30,6 @@ Description:
 	Run: nanoHalt,
 }
 
-//
-func init() {
-	haltCmd.Flags().BoolVarP(&fForce, "force", "f", false, "Skips confirmation and forces the nanobox VM to halt")
-}
-
 // nanoHalt
 func nanoHalt(ccmd *cobra.Command, args []string) {
 

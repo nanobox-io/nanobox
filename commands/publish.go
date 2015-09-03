@@ -61,16 +61,53 @@ func nanoPublish(ccmd *cobra.Command, args []string) {
 	// create a new release based off the enginefile config options
 	fmt.Printf(stylish.Bullet("Creating release..."))
 	release := &api.EngineReleaseCreateOptions{
-		Authors:      config.Enginefile.Authors,
-		Description:  config.Enginefile.Description,
-		License:      config.Enginefile.License,
-		Name:         config.Enginefile.Name,
-		ProjectFiles: config.Enginefile.ProjectFiles,
-		Readme:       config.Enginefile.Readme,
-		Stability:    config.Enginefile.Stability,
-		Summary:      config.Enginefile.Summary,
-		Version:      config.Enginefile.Version,
+		Authors:   config.Enginefile.Authors,
+		Generic:   config.Enginefile.Generic,
+		Language:  config.Enginefile.Language,
+		License:   config.Enginefile.License,
+		Name:      config.Enginefile.Name,
+		Readme:    config.Enginefile.Readme,
+		Stability: config.Enginefile.Stability,
+		Summary:   config.Enginefile.Summary,
+		Version:   config.Enginefile.Version,
 	}
+
+	// determine if any required fields (name, version, language, summary) are missing,
+	// if any are found to be missing exit 1
+	// NOTE: I do this using fallthrough for asthetics onlye. The message is generic
+	// enough that all cases will return the same message, and this looks better than
+	// a single giant case (var == "" || var == "" || ...)
+	switch {
+	case release.Name == "":
+		fallthrough
+	case release.Version == "":
+		fallthrough
+	case release.Language == "":
+		fallthrough
+	case release.Summary == "":
+		fmt.Printf(stylish.Error("required fields missing", `Your Enginefile is missing one or more of the following required fields for publishing:
+
+  name:      # the name of your project
+  version:   # the current version of the project
+  language:  # the lanauge (ruby, golang, etc.) of the engine
+  summary:   # a 140 character summary of the project
+
+Please ensure all required fields are provided and try again.`))
+
+		os.Exit(1)
+	}
+
+	// attempt to read a README.md file and add it to the release...
+	b, err := ioutil.ReadFile("./README.md")
+	if err != nil {
+
+		// this only fails if the file is not found, EOF is not an error. If no Readme
+		// is found exit 1
+		fmt.Printf(stylish.Error("missing readme", "Your engine is missing a README.md file. This file is required for publishing, as it is the only way for you to communicate how to use your engine. Please add a README.md and try again."))
+		os.Exit(1)
+	}
+
+	release.Readme = string(b)
 
 	// GET to API to see if engine exists
 	fmt.Printf(stylish.Bullet("Checking for existing engine on nanobox.io"))
@@ -78,7 +115,8 @@ func nanoPublish(ccmd *cobra.Command, args []string) {
 
 		// if no engine is found create one
 		if apiErr, _ := err.(api.APIError); apiErr.Code == 404 {
-			stylish.SubTaskStart("No engine found, creating new engine on nanobox.io...")
+
+			fmt.Printf(stylish.SubTaskStart("Creating new engine on nanobox.io"))
 
 			//
 			engineCreateOptions := &api.EngineCreateOptions{Name: release.Name}
@@ -116,6 +154,7 @@ func nanoPublish(ccmd *cobra.Command, args []string) {
 	// readers instead of the writer. the writer will block until readers are done
 	// reading, so there may not be a need for the wait groups.
 
+	// write the archive to a local file
 	// archive, err := os.Create(fmt.Sprintf("%v-%v.release.tgz", release.Name, release.Version))
 	// if err != nil {
 	// 	util.LogFatal("[commands.publish] os.Create() failed", err)
@@ -148,8 +187,27 @@ func nanoPublish(ccmd *cobra.Command, args []string) {
 		defer gzw.Close()
 		defer tw.Close()
 
-		for _, files := range release.ProjectFiles {
-			if err := filepath.Walk(files, tarFile); err != nil {
+		// this is our predefined list of everything that gets archived as part
+		// of the engine being published
+		files := []string{
+			"./bin",
+			"./lib",
+			"./templates",
+			"./files",
+			"./Enginefile",
+		}
+
+		// check to ensure no required files are missing
+		for _, f := range files {
+			if fi, _ := os.Stat(f); fi == nil {
+				fmt.Printf(stylish.Error("required files missing", "Your Engine is missing one or more required files for publishing. Please read docs.nanobox.io/engines/project-creation/#example-engine-file-structure to ensure all required files are included and try again."))
+				os.Exit(1)
+			}
+		}
+
+		// if not required files are missing, tarball the engine for publishing
+		for _, f := range files {
+			if err := filepath.Walk(f, tarFile); err != nil {
 				util.LogFatal("[commands.publish] filepath.Walk() failed", err)
 			}
 		}
@@ -158,6 +216,12 @@ func nanoPublish(ccmd *cobra.Command, args []string) {
 	}()
 
 	wg.Wait()
+
+	// add the checksum for the new release once its finished being archived
+	release.Checksum = fmt.Sprintf("%x", h.Sum(nil))
+
+	//
+	// attempt to upload the release to S3
 
 	//
 	fmt.Printf(stylish.Bullet("Uploading release to s3..."))
@@ -178,17 +242,7 @@ func nanoPublish(ccmd *cobra.Command, args []string) {
 		util.LogFatal("[commands/publish] util.S3Upload failed", err)
 	}
 
-	// add readme to release (if any)
-	b, err := ioutil.ReadFile(release.Readme)
-	if err != nil {
-		config.Console.Warn("No readme found at '%v', continuing...", release.Readme)
-	}
-
-	// prepare the release for upload
-	release.Checksum = fmt.Sprintf("%x", h.Sum(nil))
-	release.ProjectFiles = append(release.ProjectFiles, "Enginefile")
-	release.Readme = string(b)
-
+	//
 	// if the release uploaded successfully to s3, created one on odin
 	fmt.Printf(stylish.Bullet("Uploading release to nanobox.io"))
 	if _, err := api.CreateEngineRelease(release.Name, release); err != nil {
