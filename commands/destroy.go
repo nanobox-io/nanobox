@@ -34,10 +34,10 @@ Description:
 // nanoDestroy
 func nanoDestroy(ccmd *cobra.Command, args []string) {
 
-	// if nanobox is unable to access the /etc/hosts file it will need to re-run
-	// the command as sudo
-	if util.AccessDenied() {
-		util.SudoExec("destroy", "Attempting to remove nano.dev domain from hosts file")
+	// if the command is being run with the "remove" flag, it means an entry needs
+	// to be removed from the hosts file and execution yielded back to the parent
+	if len(args) > 0 && args[0] == "remove" {
+		util.RemoveDevDomain()
 		os.Exit(0)
 	}
 
@@ -59,9 +59,6 @@ func nanoDestroy(ccmd *cobra.Command, args []string) {
 		}
 	}
 
-	// attempt to remove the associated entry, regardless of if it's there or not
-	util.RemoveDevDomain()
-
 	//
 	// destroy the vm; this needs to happen first to ensure there is a Vagrantfile
 	// to run the command with
@@ -81,4 +78,7 @@ func nanoDestroy(ccmd *cobra.Command, args []string) {
 		util.LogFatal("[commands/destroy] os.RemoveAll() failed", err)
 	}
 	fmt.Printf(stylish.ProcessEnd())
+
+	// attempt to remove the entry regardless of whether its there or not
+	util.SudoExec("destroy remove", "Attempting to remove nano.dev domain from hosts file")
 }

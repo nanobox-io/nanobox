@@ -17,23 +17,36 @@ import (
 )
 
 // Exec
-// func Exec(cmd, msg string) {
+// func Exec(command string) {
+//
+// 	//
+// 	cmd := exec.Command(command)
+//
+// 	// connect standard in/outputs
+// 	cmd.Stdin = os.Stdin
+// 	cmd.Stdout = os.Stdout
+// 	cmd.Stderr = os.Stderr
+//
+// 	// run command
+// 	if err := cmd.Run(); err != nil {
+// 		LogFatal("[utils/exec] cmd.Run() failed", err)
+// 	}
 // }
 
 // SudoExec
-func SudoExec(cmd, msg string) {
+func SudoExec(command, msg string) {
 	fmt.Printf(stylish.Bullet(msg))
 
 	//
-	scmd := exec.Command("/bin/sh", "-c", fmt.Sprintf("sudo %v %v", os.Args[0], cmd))
+	cmd := exec.Command("/bin/sh", "-c", fmt.Sprintf("sudo %v %v", os.Args[0], command))
 
 	// connect standard in/outputs
-	scmd.Stdin = os.Stdin
-	scmd.Stdout = os.Stdout
-	scmd.Stderr = os.Stderr
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 
 	// run command
-	if err := scmd.Run(); err != nil {
+	if err := cmd.Run(); err != nil {
 		LogFatal("[utils/exec] scmd.Run() failed", err)
 	}
 }

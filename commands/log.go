@@ -134,9 +134,6 @@ func nanoLog(ccmd *cobra.Command, args []string) {
 		}
 		defer res.Body.Close()
 
-		//
-		reParseLog := regexp.MustCompile(`\[(.*)\] \[(.*)\] (.*)`)
-
 		// read response body, which should be our version string
 		r := bufio.NewReader(res.Body)
 		for {
@@ -150,7 +147,7 @@ func nanoLog(ccmd *cobra.Command, args []string) {
 			}
 
 			//
-			subMatch := reParseLog.FindStringSubmatch(string(b))
+			subMatch := regexp.MustCompile(`\[(.*)\] \[(.*)\] (.*)`).FindStringSubmatch(string(b))
 
 			// ensure a subMatch and ensure subMatch has a length of 4, since thats how many
 			// matches we're expecting
@@ -173,12 +170,9 @@ func processLog(log Log) {
 	// }
 
 	//
-	reFindLog := regexp.MustCompile(`^(\w+)\.(\S+)\s+(.*)$`)
-
-	//
 	config.Console.Debug("[commands/log] Raw log -> %#v", log)
 
-	subMatch := reFindLog.FindStringSubmatch(log.Log)
+	subMatch := regexp.MustCompile(`^(\w+)\.(\S+)\s+(.*)$`).FindStringSubmatch(log.Log)
 
 	// ensure a subMatch and ensure subMatch has a length of 4, since thats how many
 	// matches we're expecting

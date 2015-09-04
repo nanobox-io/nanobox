@@ -34,6 +34,9 @@ func nanoUp(ccmd *cobra.Command, args []string) {
 	// run a create command to create a Vagrantfile and boot the VM...
 	nanoCreate(nil, args)
 
+	// upgrade all nanobox docker images
+	nanoUpgrade(nil, args)
+
 	// ...issue a deploy...
 	nanoDeploy(nil, args)
 

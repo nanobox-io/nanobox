@@ -19,18 +19,6 @@ import (
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
-// AccessDenied
-func AccessDenied() bool {
-
-	// attempt to open /etc/hosts file...
-	f, err := os.OpenFile("/etc/hosts", os.O_RDWR|os.O_APPEND, 0644)
-	defer f.Close()
-
-	// if nanobox doesn't have permission to modify the hosts file, it needs to
-	// request it
-	return os.IsPermission(err)
-}
-
 // AddDevDomain
 func AddDevDomain() {
 

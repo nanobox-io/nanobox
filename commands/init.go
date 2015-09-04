@@ -139,12 +139,11 @@ func nanoInit(ccmd *cobra.Command, args []string) {
 		fmt.Printf(stylish.SubBullet("- --dev detected, configuring vm to run in 'devmode'"))
 
 		devmode = `# added because --dev was detected; boots the server into 'devmode'
-	$devmode = <<SCRIPT
-	echo "Starting VM in dev mode..."
-	touch /mnt/sda/var/nanobox/DEV
-	SCRIPT
-
-	nanobox.vm.provision "shell", inline: $devmode`
+    config.vm.provision "shell", inline: <<-DEVMODE
+      echo "Starting VM in dev mode..."
+      mkdir -p /mnt/sda/var/nanobox
+      touch /mnt/sda/var/nanobox/DEV
+    DEVMODE`
 	}
 
 	//
@@ -183,19 +182,6 @@ func nanoInit(ccmd *cobra.Command, args []string) {
 version = %v
 
 #
-$wait = <<SCRIPT
-echo "Waiting for nanobox server..."
-while ! nc -z 127.0.0.1 1757; do sleep 1; done;
-SCRIPT
-
-#
-$kill = <<SCRIPT
-echo "Killing eth1 dhcp..."
-kill -9 $(cat /var/run/udhcpc.eth1.pid)
-SCRIPT
-
-
-#
 Vagrant.configure(2) do |config|
 
 	# add the boot2docker user credentials to allow nanobox to freely ssh into the vm
@@ -204,11 +190,13 @@ Vagrant.configure(2) do |config|
 	config.ssh.username = "docker"
 	config.ssh.password = "tcuser"
 
-	config.vm.define :nanobox_boot2docker do |nanobox|
+	config.vm.define :'%v' do |nanobox|
 
 	  ## Wait for nanobox-server to be ready before vagrant exits
-	  nanobox.vm.provision "shell", inline: $wait
-
+	  nanobox.vm.provision "shell", inline: <<-WAIT
+      echo "Waiting for nanobox server..."
+      while ! nc -z 127.0.0.1 1757; do sleep 1; done;
+    WAIT
 
 	  ## box
 	  nanobox.vm.box_url = "https://github.com/pagodabox/nanobox-boot2docker/releases/download/#{version}/nanobox-boot2docker.box"
@@ -233,12 +221,15 @@ Vagrant.configure(2) do |config|
 
 	  # kill the eth1 dhcp server so that it doesn't override the assigned ip when
 	  # the lease is up
-	  nanobox.vm.provision "shell", inline: $kill
+	  nanobox.vm.provision "shell", inline: <<-KILL
+      echo "Killing eth1 dhcp..."
+      kill -9 $(cat /var/run/udhcpc.eth1.pid)
+    KILL
 
 		%s
 
 	end
-end`, version, network, synced_folders, provider, devmode)
+end`, version, config.App, network, synced_folders, provider, devmode)
 
 	// write the Vagrantfile
 	if err := ioutil.WriteFile(config.AppDir+"/Vagrantfile", []byte(vagrantfile), 0755); err != nil {

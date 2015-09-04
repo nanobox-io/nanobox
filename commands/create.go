@@ -37,38 +37,11 @@ Description:
 // nanoCreate
 func nanoCreate(ccmd *cobra.Command, args []string) {
 
-	//
-	// open the /etc/hosts file for scanning...
-	f, err := os.Open("/etc/hosts")
-	if err != nil {
-		util.LogFatal("[commands/create] os.Open() failed", err)
-	}
-	defer f.Close()
-
-	// a new scanner for scanning the /etc/hosts file
-	scanner := bufio.NewScanner(f)
-
-	// determines whether or not an entry needs to be added to the /etc/hosts file
-	// (an entry will be added unless it's confirmed that it's not needed)
-	addEntry := true
-
-	// scan hosts file looking for an entry corresponding to this app...
-	for scanner.Scan() {
-
-		// if an entry with the IP is detected, flag the entry as not needed
-		if strings.HasPrefix(scanner.Text(), config.Nanofile.IP) {
-			addEntry = false
-		}
-	}
-
-	// add the entry if needed
-	if addEntry {
-		if util.AccessDenied() {
-			util.SudoExec("create", "Attempting to add nano.dev domain to hosts file")
-			os.Exit(0)
-		}
-
+	// if the command is being run with the "add" flag, it means an entry needs to
+	// be added to the hosts file and execution yielded back to the parent
+	if len(args) > 0 && args[0] == "add" {
 		util.AddDevDomain()
+		os.Exit(0)
 	}
 
 	// run an init to ensure there is a Vagrantfile
@@ -82,11 +55,37 @@ func nanoCreate(ccmd *cobra.Command, args []string) {
 	}
 	fmt.Printf(stylish.ProcessEnd())
 
-	// upgrade all nanobox docker images
-	nanoUpgrade(nil, args)
-}
+	//
+	// open the /etc/hosts file for scanning...
+	f, err := os.Open("/etc/hosts")
+	if err != nil {
+		util.LogFatal("[commands/create] os.Open() failed", err)
+	}
+	defer f.Close()
 
-//
-func create() {
-	util.AddDevDomain()
+	// determines whether or not an entry needs to be added to the /etc/hosts file
+	// (an entry will be added unless it's confirmed that it's not needed)
+	addEntry := true
+
+	// scan hosts file looking for an entry corresponding to this app...
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+
+		// if an entry with the IP is detected, flag the entry as not needed
+		if strings.HasPrefix(scanner.Text(), config.Nanofile.IP) {
+			addEntry = false
+		}
+	}
+
+	// add the entry if needed
+	// if addEntry && util.AccessDenied() {
+	if addEntry {
+		util.SudoExec("create add", "Attempting to add nano.dev domain to hosts file")
+	}
+
+	// if devmode is detected, the machine needs to be rebooted for devmode to take
+	// effect
+	if fDevmode {
+		nanoReload(nil, args)
+	}
 }

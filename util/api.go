@@ -34,11 +34,9 @@ func HandleAPIError(err error) error {
 		case 422:
 
 			// separate the custom 422 error from the message (ex. {"upgrade":["Cannot exceed free limit"]})
-			reFindError := regexp.MustCompile(`^\{\s*\"(.*)\"\s*\:\s*\[\s*\"(.*)\"\s*\]\s*\}$`)
-
-			subMatch := reFindError.FindStringSubmatch(apiError.Body)
+			subMatch := regexp.MustCompile(`^\{\s*\"(.*)\"\s*\:\s*\[\s*\"(.*)\"\s*\]\s*\}$`).FindStringSubmatch(apiError.Body)
 			if subMatch == nil {
-				LogFatal("[utils/api] reFindError.FindStringSubmatch() failed", errors.New(fmt.Sprintf("No matches found for api error: %v", apiError.Body)))
+				LogFatal("[utils/api] FindStringSubmatch() failed", errors.New(fmt.Sprintf("No matches found for api error: %v", apiError.Body)))
 			}
 
 			return errors.New(fmt.Sprintf("[utils/api] %d %v - %v", 422, subMatch[1], subMatch[2]))
