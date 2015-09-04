@@ -86,6 +86,7 @@ func nanoCreate(ccmd *cobra.Command, args []string) {
 	// if devmode is detected, the machine needs to be rebooted for devmode to take
 	// effect
 	if fDevmode {
+		fmt.Printf(stylish.Bullet("Rebooting machine to finalize 'devmode' configuration..."))
 		nanoReload(nil, args)
 	}
 }
