@@ -37,7 +37,10 @@ func nanoSSH(ccmd *cobra.Command, args []string) {
 	fmt.Printf(stylish.Bullet("SSHing into nanobox VM..."))
 
 	// run an init to ensure there is a Vagrantfile
-	nanoInit(nil, args)
+	nanoCreate(nil, args)
+
+	// NOTE: this command is run manually (vs runVagrantCommand) because the output
+	// needs to be hooked up a little to accomodate Stdin
 
 	// run the command from ~/.nanobox/apps/<this app>
 	if err := os.Chdir(config.AppDir); err != nil {
