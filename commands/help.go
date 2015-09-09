@@ -14,8 +14,19 @@ import (
 	"github.com/pagodabox/nanobox-cli/util"
 )
 
+//
+var helpCmd = &cobra.Command{
+	Use:   "help",
+	Short: "Usage for this CLI",
+	Long: `
+Description:
+  Displays usage information for this CLI`,
+
+	Run: nanoHelp,
+}
+
 // nanoHelp
-func nanoHelp(ccmd *cobra.Command) error {
+func nanoHelp(ccmd *cobra.Command, args []string) {
 	util.CPrint(`
 
                                      ***
@@ -90,6 +101,4 @@ Available Commands:
   upgrade     : Updates the nanobox docker images
   watch       : Watches your app for file changes
   `)
-
-	return nil
 }

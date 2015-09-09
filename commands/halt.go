@@ -25,7 +25,9 @@ var haltCmd = &cobra.Command{
 	Short: "Halts the running nanobox VM",
 	Long: `
 Description:
-  Halts the running nanobox VM by issuing a "vagrant halt"`,
+  Halts the running nanobox VM by issuing a "vagrant halt"
+
+  -f, --force[=false]: Skips confirmation and forces the nanobox VM to halt`,
 
 	Run: nanoHalt,
 }

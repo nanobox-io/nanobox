@@ -26,14 +26,15 @@ var deployCmd = &cobra.Command{
 	Short: "Issues a deploy to the nanobox VM",
 	Long: `
 Description:
-  Issues a deploy to the nanobox VM`,
+  Issues a deploy to the nanobox VM
+
+  -f, --force[=false]: Clears cached libraries the project might use`,
 
 	Run: nanoDeploy,
 }
 
 //
 func init() {
-	deployCmd.Flags().BoolVarP(&fReset, "reset", "r", false, "Clears cached libraries the project might use")
 	deployCmd.Flags().BoolVarP(&fSandbox, "sandbox", "s", false, "Creates your app environment w/o webs or workers")
 }
 
@@ -43,7 +44,7 @@ func nanoDeploy(ccmd *cobra.Command, args []string) {
 
 	v := url.Values{}
 
-	v.Add("reset", strconv.FormatBool(fReset))
+	v.Add("reset", strconv.FormatBool(fForce))
 	v.Add("sandbox", strconv.FormatBool(fSandbox))
 
 	//

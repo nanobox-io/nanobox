@@ -49,7 +49,6 @@ var (
 	fFile    string //
 	fLevel   string //
 	fRemove  bool   //
-	fReset   bool   //
 	fSandbox bool   //
 	fStream  bool   //
 	fTunnel  string //
@@ -61,11 +60,22 @@ var (
 // init builds the list of available nanobox commands and sub commands
 func init() {
 
-	NanoboxCmd.PersistentFlags().BoolVarP(&fDebug, "debug", "d", false, "Display any command debug output.")
-	NanoboxCmd.PersistentFlags().BoolVarP(&fDevmode, "dev", "", false, "Run command in 'devmode' (effect varies per command).")
-	NanoboxCmd.PersistentFlags().BoolVarP(&fForce, "force", "f", false, "Force a command to run (effect varies per command).")
+	//
+	NanoboxCmd.PersistentFlags().BoolVarP(&fForce, "force", "f", false, "Forces a command to run (effects very per command).")
 	NanoboxCmd.PersistentFlags().BoolVarP(&fVerbose, "verbose", "v", false, "Increase command output from 'info' to 'debug'.")
-	// NanoboxCmd.SetUsageFunc(nanoHelp)
+
+	// intended for internal use only
+	NanoboxCmd.PersistentFlags().BoolVarP(&fDebug, "debug", "", false, "")
+	NanoboxCmd.PersistentFlags().BoolVarP(&fDevmode, "dev", "", false, "")
+	NanoboxCmd.PersistentFlags().MarkHidden("debug")
+	NanoboxCmd.PersistentFlags().MarkHidden("dev")
+
+	//
+	// NanoboxCmd.SetHelpCommand(helpCmd)
+	// NanoboxCmd.SetHelpFunc(nanoHelp)
+	// NanoboxCmd.SetHelpTemplate("")
+	// NanoboxCmd.SetUsageFunc(usageCmd)
+	// NanoboxCmd.SetUsageTemplate("")
 
 	// all available nanobox commands
 	NanoboxCmd.AddCommand(bootstrapCmd)
@@ -93,7 +103,8 @@ func init() {
 	NanoboxCmd.AddCommand(versionCmd)
 	NanoboxCmd.AddCommand(watchCmd)
 
-	NanoboxCmd.AddCommand(productionCmd)
+	//
+	// NanoboxCmd.AddCommand(productionCmd)
 	// productionCmd.AddCommand(deployCmd)
 }
 

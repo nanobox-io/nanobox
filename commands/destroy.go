@@ -26,7 +26,9 @@ var destroyCmd = &cobra.Command{
 	Short: "Destroys the nanobox VM",
 	Long: `
 Description:
-  Destroys the nanobox VM by issuing a "vagrant destroy"`,
+  Destroys the nanobox VM by issuing a "vagrant destroy"
+
+  -f, --force[=false]: Skips confirmation and forces the nanobox VM to be destroyed`,
 
 	Run: nanoDestroy,
 }
