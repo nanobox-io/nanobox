@@ -67,6 +67,8 @@ func nanoPublish(ccmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
+	fmt.Printf(stylish.Bullet("Verifying engine is publishable..."))
+
 	// determine if any required fields (name, version, language, summary) are missing,
 	// if any are found to be missing exit 1
 	// NOTE: I do this using fallthrough for asthetics onlye. The message is generic
@@ -105,6 +107,25 @@ Please ensure all required fields are provided and try again.`))
 	//
 	release.Readme = string(b)
 
+	// this is our predefined list of everything that gets archived as part of the
+	// engine being published
+	files := []string{
+		"./bin",
+		"./lib",
+		"./templates",
+		"./files",
+		"./Enginefile",
+	}
+
+	// check to ensure no required files are missing
+	for _, f := range files {
+		if fi, _ := os.Stat(f); fi == nil {
+			fmt.Printf(stylish.Error("required files missing", "Your Engine is missing one or more required files for publishing. Please read the following documentation to ensure all required files are included and try again.:\n\ndocs.nanobox.io/engines/project-creation/#example-engine-file-structure\n"))
+			os.Exit(1)
+		}
+	}
+
+	//
 	// GET to API to see if engine exists
 	fmt.Printf(stylish.Bullet("Checking for existing engine on nanobox.io"))
 	if _, err := api.GetEngine(api.UserSlug, release.Name); err != nil {
@@ -182,24 +203,6 @@ Please ensure all required fields are provided and try again.`))
 
 		defer gzw.Close()
 		defer tw.Close()
-
-		// this is our predefined list of everything that gets archived as part
-		// of the engine being published
-		files := []string{
-			"./bin",
-			"./lib",
-			"./templates",
-			"./files",
-			"./Enginefile",
-		}
-
-		// check to ensure no required files are missing
-		for _, f := range files {
-			if fi, _ := os.Stat(f); fi == nil {
-				fmt.Printf(stylish.Error("required files missing", "Your Engine is missing one or more required files for publishing. Please read docs.nanobox.io/engines/project-creation/#example-engine-file-structure to ensure all required files are included and try again."))
-				os.Exit(1)
-			}
-		}
 
 		// if not required files are missing, tarball the engine for publishing
 		for _, f := range files {

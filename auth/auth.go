@@ -27,8 +27,8 @@ var (
 
 // credentials represents all available/expected .authfile configurable options
 type credentials struct {
-	userslug  string `json:"user_slug"`  //
-	authtoken string `json:"auth_token"` //
+	Userslug  string `json:"user_slug"`  //
+	Authtoken string `json:"auth_token"` //
 }
 
 // init
@@ -56,13 +56,13 @@ func init() {
 func authenticated() bool {
 
 	//
-	if creds.userslug == "" || creds.authtoken == "" {
+	if creds.Userslug == "" || creds.Authtoken == "" {
 		return false
 	}
 
 	// do a quick check to see if the cli needs to reauthenticate due to a user
 	// changing their authenticate token via the dashboard.
-	// if _, err := api.GetUser(creds.userslug); err != nil {
+	// if _, err := api.GetUser(creds.Userslug); err != nil {
 	// 	config.Log.Warn("Failed login attempt (%v): Credentials do not match! Reauthenticating...", err)
 	// 	Reauthenticate()
 	// }
@@ -78,14 +78,14 @@ func Authenticate() (string, string) {
 	if !authenticated() {
 		fmt.Println("Before continuing, please login to your account:")
 
-		userslug := util.Prompt("Username: ")
+		Userslug := util.Prompt("Username: ")
 		password := util.PPrompt("Password: ")
 
 		// authenticate
-		return authenticate(userslug, password)
+		return authenticate(Userslug, password)
 	}
 
-	return creds.userslug, creds.authtoken
+	return creds.Userslug, creds.Authtoken
 }
 
 // Reauthenticate
@@ -95,20 +95,20 @@ It appears the Username or API token the CLI is trying to use does not match wha
 we have on record. To continue, please login to verify your account:
   `)
 
-	userslug := util.Prompt("Username: ")
+	Userslug := util.Prompt("Username: ")
 	password := util.PPrompt("Password: ")
 
 	// authenticate
-	return authenticate(userslug, password)
+	return authenticate(Userslug, password)
 }
 
 // authenticate
-func authenticate(userslug, password string) (string, string) {
+func authenticate(Userslug, password string) (string, string) {
 
-	fmt.Printf("\nAttempting login for %v... ", userslug)
+	fmt.Printf("\nAttempting login for %v... ", Userslug)
 
 	// get auth_token
-	user, err := api.GetAuthToken(userslug, password)
+	user, err := api.GetAuthToken(Userslug, password)
 	if err != nil {
 		util.CPrint("[red]failure![reset]")
 		fmt.Println("Unable to login... please verify your username and password are correct.")
@@ -130,8 +130,8 @@ func authenticate(userslug, password string) (string, string) {
 func saveCredentials(userid, authtoken string) error {
 
 	//
-	creds.userslug = userid
-	creds.authtoken = authtoken
+	creds.Userslug = userid
+	creds.Authtoken = authtoken
 
 	//
 	return ioutil.WriteFile(authfile, []byte(fmt.Sprintf("user_slug: %v\nauth_token: %v", userid, authtoken)), 0755)
