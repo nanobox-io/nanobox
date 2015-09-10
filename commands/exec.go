@@ -76,6 +76,6 @@ func nanoExec(ccmd *cobra.Command, args []string) {
 
 	// add a check here to regex the fTunnel to make sure the format makes sense
 
-	docker := util.Docker{Params: v.Encode()}
+	docker := &util.Docker{Params: v.Encode()}
 	docker.Run()
 }

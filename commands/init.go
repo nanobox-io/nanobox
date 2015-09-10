@@ -59,8 +59,10 @@ func nanoInit(ccmd *cobra.Command, args []string) {
 
 	//
 	// boxfile config
+	boxfile := config.ParseBoxfile()
+
 	// if an engine path is provided, add it to the synced_folders
-	if engine := config.Boxfile.Build.Engine; engine != "" {
+	if engine := boxfile.Build.Engine; engine != "" {
 		if fi, _ := os.Stat(engine); fi != nil {
 
 			//

@@ -32,7 +32,7 @@ func ParseNanofile() *NanofileConfig {
 	// any default options found.
 	if fi, _ := os.Stat(nanofile.path); fi != nil {
 		if err := ParseConfig(nanofile.path, nanofile); err != nil {
-			fmt.Printf("Nanobox failed to parse your Boxfile. Please ensure it is valid YAML and try again.\n")
+			fmt.Printf("Nanobox failed to parse your .nanofile. Please ensure it is valid YAML and try again.\n")
 			os.Exit(1)
 		}
 	}
@@ -43,7 +43,7 @@ func ParseNanofile() *NanofileConfig {
 	// options found
 	if fi, _ := os.Stat(nanofile.path); fi != nil {
 		if err := ParseConfig(nanofile.path, nanofile); err != nil {
-			fmt.Printf("Nanobox failed to parse your Boxfile. Please ensure it is valid YAML and try again.\n")
+			fmt.Printf("Nanobox failed to parse your .nanofile. Please ensure it is valid YAML and try again.\n")
 			os.Exit(1)
 		}
 	}

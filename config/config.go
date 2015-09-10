@@ -38,8 +38,7 @@ var (
 	IP     string // the guest vm's private network ip (generated from app name)
 	Root   string // nanobox's root directory path (~.nanobox)
 
-	// configs
-	Boxfile  *BoxfileConfig  // parsed boxfile options
+	//
 	Nanofile *NanofileConfig // parsed nanofile options
 
 	//
@@ -62,7 +61,7 @@ type (
 		Engine string `json:"engine"` //
 	}
 
-	// NanofileConfig represents all available/expected Boxfile configurable options
+	// NanofileConfig represents all available/expected .nanofile configurable options
 	NanofileConfig struct {
 		path     string //
 		CPUCap   int    `json:"cpu_cap"`  // max %CPU usage allowed to the guest vm
@@ -109,9 +108,8 @@ func init() {
 		}
 	}
 
-	// the Boxfile and Nanofile need to be parsed right away so that their config
-	// options are available throughout the rest of the configuration
-	Boxfile = ParseBoxfile()
+	// the .nanofile needs to be parsed right away so that its config options are
+	// available as soon as possible
 	Nanofile = ParseNanofile()
 
 	//

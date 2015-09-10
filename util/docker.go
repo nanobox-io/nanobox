@@ -21,7 +21,6 @@ import (
 	"github.com/docker/docker/pkg/term"
 
 	"github.com/pagodabox/nanobox-cli/config"
-	// "github.com/pagodabox/nanobox-golang-stylish"
 )
 
 // run satisfies the Command interface
@@ -30,7 +29,7 @@ type Docker struct {
 }
 
 // Run
-func (d Docker) Run() {
+func (d *Docker) Run() {
 
 	//
 	conn, err := net.Dial("tcp4", config.ServerURI)
@@ -52,7 +51,7 @@ func (d Docker) Run() {
 	outFd, _ := term.GetFdInfo(stdOut)
 
 	// monitor the window size and send a request whenever we resize
-	monitorSize(outFd)
+	monitorSize(outFd, d.Params)
 
 	oldState, err = term.SetRawTerminal(inFd)
 	if err != nil {
@@ -99,8 +98,8 @@ func forwardAllSignals() {
 }
 
 // monitorSize
-func monitorSize(outFd uintptr) {
-	resizeTTY(outFd)
+func monitorSize(outFd uintptr, params string) {
+	resizeTTY(outFd, params)
 
 	if runtime.GOOS == "windows" {
 		go func() {
@@ -110,7 +109,7 @@ func monitorSize(outFd uintptr) {
 				h, w := getTTYSize(outFd)
 
 				if prevW != w || prevH != h {
-					resizeTTY(outFd)
+					resizeTTY(outFd, params)
 				}
 				prevH = h
 				prevW = w
@@ -121,17 +120,17 @@ func monitorSize(outFd uintptr) {
 		ossignal.Notify(sigchan, signal.SIGWINCH)
 		go func() {
 			for range sigchan {
-				resizeTTY(outFd)
+				resizeTTY(outFd, params)
 			}
 		}()
 	}
 }
 
 // resizeTTY
-func resizeTTY(outFd uintptr) {
+func resizeTTY(outFd uintptr, params string) {
 	h, w := getTTYSize(outFd)
 
-	req, _ := http.NewRequest("POST", fmt.Sprintf("http://%s/resizeexec?h=%d&w=%d", config.ServerURI, h, w), nil)
+	req, _ := http.NewRequest("POST", fmt.Sprintf("http://%s/resizeexec?h=%d&w=%d&%v", config.ServerURI, h, w, params), nil)
 
 	//
 	if _, err := http.DefaultClient.Do(req); err != nil {
