@@ -41,7 +41,7 @@ func nanoNew(ccmd *cobra.Command, args []string) {
 	name := fmt.Sprintf("nanobox-%s", args[0])
 	version := "0.0.1"
 
-	fmt.Println(stylish.Header("initializing new app: " + name))
+	fmt.Println(stylish.Header("initializing new app: %s", name))
 
 	// create a new project by the name, unless it already exists
 	if di, _ := os.Stat(name); di == nil {

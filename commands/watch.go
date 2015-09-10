@@ -45,7 +45,7 @@ func nanoWatch(ccmd *cobra.Command, args []string) {
 	}
 	defer watcher.Close()
 
-	fmt.Printf("\n%v", stylish.Bullet(fmt.Sprintf("Watching for chages at '%v'", config.CWDir)))
+	fmt.Printf("\n%v", stylish.Bullet("Watching for chages at '%s'", config.CWDir))
 	fmt.Printf("%v\n", stylish.SubBullet("(Ctrl + c to quit)"))
 
 	// starting at the root of the project, walk each file/directory searching for
@@ -74,7 +74,7 @@ func nanoWatch(ccmd *cobra.Command, args []string) {
 					nanoBuild(nil, args)
 				}
 
-				fmt.Printf("\n%v", stylish.Bullet(fmt.Sprintf("Watching for chages at '%v'", config.CWDir)))
+				fmt.Printf("\n%v", stylish.Bullet("Watching for chages at '%s'", config.CWDir))
 				fmt.Printf("%v\n", stylish.SubBullet("(Ctrl + c to quit)"))
 			}
 

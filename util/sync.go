@@ -42,7 +42,7 @@ type (
 func (s *Sync) Run(opts []string) {
 
 	// connect 'mist' to the server running on the guest machine
-	client, err := mist.NewRemoteClient(config.Nanofile.IP + ":1445")
+	client, err := mist.NewRemoteClient(config.MistURI)
 	if err != nil {
 		LogFatal("[utils/sync] client.Connect() failed ", err)
 	}

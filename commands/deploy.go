@@ -50,7 +50,7 @@ func nanoDeploy(ccmd *cobra.Command, args []string) {
 	//
 	deploy := util.Sync{
 		Model:   "deploy",
-		Path:    fmt.Sprintf("http://%v:1757/deploys?%v", config.Nanofile.IP, v.Encode()),
+		Path:    fmt.Sprintf("http://%s/deploys?%v", config.ServerURI, v.Encode()),
 		Verbose: fVerbose,
 	}
 
@@ -69,7 +69,7 @@ func nanoDeploy(ccmd *cobra.Command, args []string) {
 			break
 		}
 
-		fmt.Printf(stylish.Bullet(fmt.Sprintf("Deploy complete... Navigate to %v.nano.dev to view your app.", config.App)))
+		fmt.Printf(stylish.Bullet("Deploy complete... Navigate to %v.nano.dev to view your app.", config.App))
 
 		// if the deploy fails the server should handle the message. If not, this can
 		// be re-enabled

@@ -10,7 +10,6 @@ package commands
 //
 import (
 	"fmt"
-	"time"
 
 	"github.com/spf13/cobra"
 
@@ -18,12 +17,6 @@ import (
 	"github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
-
-type Service struct {
-	CreatedAt time.Time
-	Name      string
-	Port      int
-}
 
 //
 var tunnelCmd = &cobra.Command{
@@ -43,7 +36,7 @@ func nanoTunnel(ccmd *cobra.Command, args []string) {
 
 	//
 	fmt.Printf(stylish.Bullet("Requesting services..."))
-	if err := api.DoRawRequest(&services, "GET", fmt.Sprintf("http://%v:1757/services", config.Nanofile.IP), nil, nil); err != nil {
+	if err := api.DoRawRequest(&services, "GET", fmt.Sprintf("http://%s/services", config.ServerURI), nil, nil); err != nil {
 		fmt.Printf(stylish.Error("failed to get tunnel information", fmt.Sprintf("nanobox was unable to get tunnel information, and failed with the following error: %v", err)))
 	}
 	fmt.Printf(stylish.Success())

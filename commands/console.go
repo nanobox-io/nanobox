@@ -19,6 +19,7 @@ import (
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
+//
 var consoleCmd = &cobra.Command{
 	Use:   "console",
 	Short: "Opens an interactive terminal from inside your app on the nanobox VM",
@@ -39,16 +40,26 @@ func nanoConsole(ccmd *cobra.Command, args []string) {
 	fmt.Printf(stylish.Bullet("Opening a nanobox console..."))
 
 	//
-	if len(args) > 0 {
-		fmt.Println("Attempting to run 'nanobox console' with a command. Use 'nanobox exec'")
-		os.Exit(0)
+	v := url.Values{}
+	v.Add("forward", fTunnel)
+
+	switch {
+
+	// if no args are passed run console as normal
+	case len(args) == 0:
+		return
+
+		// if 1 args is passed it's assumed to be a container to console directly into
+	case len(args) == 1:
+		v.Add("container", args[0])
+
+		// if more than 1 args is passed, exit...
+	case len(args) > 1:
+		fmt.Printf("Expecting 0 or 1 arguments, received %v. Exiting...\n", len(args))
+		os.Exit(1)
 	}
 
 	// add a check here to regex the fTunnel to make sure the format makes sense
-
-	//
-	v := url.Values{}
-	v.Add("forward", fTunnel)
 
 	docker := util.Docker{Params: v.Encode()}
 	docker.Run()

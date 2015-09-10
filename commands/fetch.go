@@ -61,7 +61,7 @@ func nanoFetch(ccmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	fmt.Printf(stylish.Bullet(fmt.Sprintf("Attempting to fetch '%v'", args[0])))
+	fmt.Printf(stylish.Bullet("Attempting to fetch '%v'", args[0]))
 
 	//
 	var archive, engine, user, version string // various string values used to store pieces of the engine
@@ -117,7 +117,7 @@ func nanoFetch(ccmd *cobra.Command, args []string) {
 		path = fmt.Sprintf("http://api.nanobox.io/v1/engines/%v/%v/releases/%v/download", user, engine, version)
 	}
 
-	fmt.Printf(stylish.Bullet(fmt.Sprintf("Fetching engine at '%v'", path)))
+	fmt.Printf(stylish.Bullet("Fetching engine at '%s'", path))
 
 	res, err := http.Get(path)
 	if err != nil {
@@ -130,7 +130,7 @@ func nanoFetch(ccmd *cobra.Command, args []string) {
 
 	// write the download to the local file system
 	case fFile != "":
-		fmt.Printf(stylish.Bullet(fmt.Sprintf("Saving engine as '%v'", fFile)))
+		fmt.Printf(stylish.Bullet("Saving engine as '%s'", fFile))
 
 		//
 		release, err := os.Create(fFile)

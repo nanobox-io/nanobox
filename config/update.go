@@ -5,23 +5,37 @@
 // at http://mozilla.org/MPL/2.0/.
 //
 
-package main
+package config
 
-//
-// import (
-// 	"fmt"
-// 	"io/ioutil"
-// 	"net/http"
-// 	"os"
-// 	"strings"
-// 	"time"
-//
-// 	semver "github.com/coreos/go-semver/semver"
-//
-// 	"github.com/pagodabox/nanobox-cli/commands"
-// 	"github.com/pagodabox/nanobox-cli/config"
-// 	"github.com/pagodabox/nanobox-cli/ui"
-// )
+import (
+	"fmt"
+	"path/filepath"
+	// "io/ioutil"
+	// "net/http"
+	"os"
+	// "strings"
+	// "time"
+
+	// semver "github.com/coreos/go-semver/semver"
+
+	// "github.com/pagodabox/pagodabox-cli/commands"
+	// "github.com/pagodabox/pagodabox-cli/util"
+	"github.com/pagodabox/nanobox-golang-stylish"
+)
+
+// init
+func init() {
+
+	// check for a ~/.nanobox/.update file and create one if it's not found
+	updatefile := filepath.Clean(Root + "/.update")
+	if fi, _ := os.Stat(updatefile); fi == nil {
+		fmt.Printf(stylish.Bullet("Creating %s directory", updatefile))
+		if _, err := os.Create(updatefile); err != nil {
+			panic(err)
+		}
+	}
+}
+
 //
 // // update
 // func update() {
@@ -42,7 +56,7 @@ package main
 // 	}
 //
 // 	cmd := commands.Commands["update"]
-// 	cmd.Run(nil)
+// 	cmd.Run("", nil)
 // 	os.Exit(0)
 // }
 //
@@ -64,7 +78,7 @@ package main
 // 	config.Console.Info("[update] last updated %f hours ago", lastUpdate)
 //
 // 	// set the time (in hours) that we should wait before we check again for updates
-// 	updateAfter := 24.0
+// 	updateAfter := 168.0 // 7 days
 //
 // 	// if the last update was longer ago than our wait time, start the update process
 // 	if lastUpdate >= updateAfter {
@@ -89,7 +103,7 @@ package main
 // There is a newer version of the CLI available:
 // [yellow]Current version: %v[reset]
 // [green]Available version: %v[reset]
-//       `, config.Version.String(), release.String())
+// 			`, config.Version.String(), release.String())
 //
 // 			// major update
 // 			if config.Version.Major < release.Major {
@@ -137,17 +151,21 @@ package main
 // // runUpdate
 // func runUpdate() {
 //
-// 	choice := util.Prompt("Would you like to update the CLI now (y/N)? ")
+// 	switch util.Prompt("Would you like to update the CLI now (y/N)? ") {
 //
-// 	// unless choice is yes...
-// 	if choice != "y" {
-// 		util.CPrint("You can manually update at any time with [green]'pagoda update'[reset].", choice)
+// 	// if yes just return and run the update command
+// 	case "Yes", "yes", "Y", "y":
+// 		return
+//
+// 		// otherwise exit
+// 	default:
+// 		util.CPrint("You can manually update at any time with [green]'pagoda update'[reset].")
 // 		os.Exit(0)
 // 	}
 //
 // 	// ...run the update
 // 	cmd := commands.Commands["update"]
-// 	cmd.Run(nil)
+// 	cmd.Run("", nil)
 // }
 //
 // // touchUpdate updates the modification time of the .update file
@@ -163,7 +181,7 @@ package main
 // func getRelease() (*semver.Version, error) {
 //
 // 	// create a request to get the most recent version from github
-// 	req, err := http.NewRequest("GET", "https://api.github.com/repos/pagodabox/nanobox-cli/contents/version", nil)
+// 	req, err := http.NewRequest("GET", "https://api.github.com/repos/pagodabox/pagodabox-cli/contents/version", nil)
 // 	if err != nil {
 // 		return nil, err
 // 	}
@@ -189,13 +207,14 @@ package main
 // 	defer res.Body.Close()
 //
 // 	//
-// 	config.Console.Debug("[update] response from github (version): %v", string(b))
+// 	config.Console.Debug("[update] response from github (version): %q", string(b))
+//
+// 	// trim the version of all newlines and returns
+// 	version := strings.TrimSpace(string(b))
+//
+// 	//
+// 	config.Console.Debug("[update] trimmed version: %q", version)
 //
 // 	// create a release version using the version we pulled from github
-// 	release, err := semver.Parse(strings.TrimRight(string(b), "\r\n"))
-// 	if err != nil {
-// 		return nil, err
-// 	}
-//
-// 	return release, nil
+// 	return semver.NewVersion(version)
 // }

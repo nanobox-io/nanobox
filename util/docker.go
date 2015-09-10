@@ -33,7 +33,7 @@ type Docker struct {
 func (d Docker) Run() {
 
 	//
-	conn, err := net.Dial("tcp4", fmt.Sprintf("%v:1757", config.Nanofile.IP))
+	conn, err := net.Dial("tcp4", config.ServerURI)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -90,7 +90,7 @@ func forwardAllSignals() {
 			}
 
 			//
-			req, _ := http.NewRequest("POST", fmt.Sprintf("http://%v:1757/killexec?signal=%s", config.Nanofile.Domain, sig), nil)
+			req, _ := http.NewRequest("POST", fmt.Sprintf("http://%s/killexec?signal=%s", config.ServerURI, sig), nil)
 			_, err := http.DefaultClient.Do(req)
 			fmt.Println(err)
 		}
@@ -131,7 +131,7 @@ func monitorSize(outFd uintptr) {
 func resizeTTY(outFd uintptr) {
 	h, w := getTTYSize(outFd)
 
-	req, _ := http.NewRequest("POST", fmt.Sprintf("http://%v:1757/resizeexec?h=%d&w=%d", config.Nanofile.Domain, h, w), nil)
+	req, _ := http.NewRequest("POST", fmt.Sprintf("http://%s/resizeexec?h=%d&w=%d", config.ServerURI, h, w), nil)
 
 	//
 	if _, err := http.DefaultClient.Do(req); err != nil {

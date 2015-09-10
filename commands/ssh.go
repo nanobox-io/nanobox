@@ -55,7 +55,7 @@ func nanoSSH(ccmd *cobra.Command, args []string) {
 	cmd.Stderr = os.Stderr
 
 	//
-	fmt.Printf(stylish.Bullet(fmt.Sprintf("running '%v'", strings.Trim(fmt.Sprint(cmd.Args), "[]"))))
+	fmt.Printf(stylish.Bullet("running '%v'", strings.Trim(fmt.Sprint(cmd.Args), "[]")))
 
 	// start the command; we need this to 'fire and forget' so that we can manually
 	// capture and modify the commands output

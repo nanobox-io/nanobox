@@ -36,7 +36,7 @@ func nanoUpgrade(ccmd *cobra.Command, args []string) {
 	//
 	upgrade := util.Sync{
 		Model:   "imageupdate",
-		Path:    fmt.Sprintf("http://%v:1757/image-update", config.Nanofile.IP),
+		Path:    fmt.Sprintf("http://%s/image-update", config.ServerURI),
 		Verbose: fVerbose,
 	}
 

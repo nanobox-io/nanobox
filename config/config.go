@@ -8,125 +8,151 @@
 package config
 
 import (
-	"encoding/binary"
 	"fmt"
-	"net"
+	"io/ioutil"
 	"os"
-	"path"
 	"path/filepath"
 
-	semver "github.com/coreos/go-semver/semver"
-
-	"github.com/jcelliott/lumber"
+	"github.com/ghodss/yaml"
 	"github.com/mitchellh/go-homedir"
+
+	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
 //
 const (
-	VERSION = "0.8.2"
+	SERVER_PORT = ":1757"
+	MIST_PORT   = ":1445"
+	LOGTAP_PORT = ":6361"
 )
 
 //
 var (
-	App        string
-	AppDir     string
-	AppsDir    string
-	AuthFile   string
-	CWDir      string
-	LogFile    string
-	HomeDir    string
-	NanoDir    string
-	UpdateFile string
+	err error //
 
 	//
-	Console  *lumber.ConsoleLogger
-	Log      *lumber.FileLogger
-	LogLevel int
+	App    string // the name of the application
+	AppDir string // the path to the application (~.nanobox/apps/<app>)
+	CWDir  string // the current working directory
+	Home   string // the users home directory (~)
+	IP     string // the guest vm's private network ip (generated from app name)
+	Root   string // nanobox's root directory path (~.nanobox)
+
+	// configs
+	Boxfile  *BoxfileConfig  // parsed boxfile options
+	Nanofile *NanofileConfig // parsed nanofile options
 
 	//
-	Version *semver.Version
-
-	//
-	Authfile   *AuthfileConfig
-	Boxfile    *BoxfileConfig
-	Nanofile   *NanofileConfig
-	Enginefile *EnginefileConfig
+	ServerURI string // nanobox-server host:port combo (IP:1757)
+	MistURI   string // mist's host:port combo (IP:1445)
+	LogtapURI string // logtap's host:port combo (IP:6361)
 )
 
-// Parser
-type Parser interface {
-	Parse() error //
-}
+//
+type (
 
-// Init sets up a HomeDir, and NanoDir
+	// BoxfileConfig represents all available/expected Boxfile configurable options
+	BoxfileConfig struct {
+		path  string //
+		Build Build  //
+	}
+
+	// Build represents a possible node in the Boxfile with it's own set of options
+	Build struct {
+		Engine string `json:"engine"` //
+	}
+
+	// NanofileConfig represents all available/expected Boxfile configurable options
+	NanofileConfig struct {
+		path     string //
+		CPUCap   int    `json:"cpu_cap"`  // max %CPU usage allowed to the guest vm
+		CPUs     int    `json:"cpus"`     // number of CPUs to dedicate to the guest vm
+		Domain   string `json:"domain"`   // the domain to use in conjuntion with the ip when accesing the guest vm (defaults to <Name>.nano.dev)
+		IP       string `json:"ip"`       // the ip added to the /etc/hosts file for accessing the guest vm
+		Name     string `json:"name"`     // the name given to the project (defaults to cwd)
+		Provider string `json:"provider"` // guest vm provider (virtual box, vmware, etc)
+		RAM      int    `json:"ram"`      // ammount of RAM to dedicate to the guest vm
+	}
+)
+
+//
 func init() {
 
-	// set the default log level
-	LogLevel = lumber.INFO
-
-	// check for debug mode and set the appropriate log level
-	if os.Args[len(os.Args)-1] == "--debug" {
-		LogLevel = lumber.DEBUG
+	// set the current working directory first, as it's used in other steps of the
+	// configuration process
+	if CWDir, err = os.Getwd(); err != nil {
+		panic(err)
 	}
+
+	// set Home based off the users homedir (~)
+	if Home, err = homedir.Dir(); err != nil {
+		panic(err)
+	}
+
+	// set nanobox's root directory;
+	Root = filepath.Clean(Home + "/.nanobox")
+
+	// check for a ~/.nanobox dir and create one if it's not found
+	if di, _ := os.Stat(Root); di == nil {
+		fmt.Printf(stylish.Bullet("Creating %s directory", Root))
+		if err := os.Mkdir(Root, 0755); err != nil {
+			panic(err)
+		}
+	}
+
+	// check for a ~/.nanobox/apps dir and create one if it's not found
+	apps := filepath.Clean(Root + "/apps")
+	if di, _ := os.Stat(apps); di == nil {
+		fmt.Printf(stylish.Bullet("Creating %s directory", apps))
+		if err := os.Mkdir(apps, 0755); err != nil {
+			panic(err)
+		}
+	}
+
+	// the Boxfile and Nanofile need to be parsed right away so that their config
+	// options are available throughout the rest of the configuration
+	Boxfile = ParseBoxfile()
+	Nanofile = ParseNanofile()
 
 	//
-	Console = lumber.NewConsoleLogger(LogLevel)
+	ServerURI = Nanofile.IP + SERVER_PORT
+	MistURI = Nanofile.IP + MIST_PORT
+	LogtapURI = Nanofile.IP + LOGTAP_PORT
 
-	//
-	homeDir, err := homedir.Dir()
-	if err != nil {
-		fmt.Println("Fatal error! See ~/.nanobox/nanobox.log for details. Exiting...")
-		Log.Fatal("[config/config] homedir.Dir() failed %v\n", err)
-		Log.Close()
-		os.Exit(1)
+	// set the 'App' first so it can be used in subsequent configurations; the 'App'
+	// is set to the name of the cwd; this can be overriden from a .nanofile
+	App = Nanofile.Name
+	AppDir = apps + "/" + App
+
+	// creates a project folder at ~/.nanobox/apps/<name> (if it doesn't already
+	// exists) where the Vagrantfile and .vagrant dir will live for each app
+	if di, _ := os.Stat(AppDir); di == nil {
+		fmt.Printf(stylish.Bullet("Creating project directory at: %s", AppDir))
+		if err := os.Mkdir(AppDir, 0755); err != nil {
+			panic(err)
+		}
 	}
-
-	HomeDir = homeDir
-	NanoDir = path.Clean(HomeDir + "/.nanobox")
-	AuthFile = filepath.Clean(NanoDir + "/.auth")
-	LogFile = path.Clean(NanoDir + "/nanobox.log")
-	UpdateFile = path.Clean(NanoDir + "/.update")
-
-	// get the current working directory
-	cwd, err := os.Getwd()
-	if err != nil {
-		fmt.Println("BONK!", err)
-	}
-
-	CWDir = cwd
-
-	// the 'app' name is the base folder of the cwd
-	App = path.Base(cwd)
-	AppsDir = path.Clean(NanoDir + "/apps")
-	AppDir = fmt.Sprintf("%s/%s", AppsDir, App)
-
-	//
-	version, err := semver.NewVersion(VERSION)
-	if err != nil {
-		fmt.Println("Fatal error! See ~/.nanobox/nanobox.log for details. Exiting...")
-		Log.Fatal("[config/config] semver.Parse() failed", err)
-		Log.Close()
-		os.Exit(1)
-	}
-
-	Version = version
 }
 
-// appNameToIP generates an IPv4 address based off the app name for use as a
-// vagrant private_network IP.
-func appNameToIP(name string) string {
+// ParseConfig
+func ParseConfig(path string, v interface{}) error {
 
-	var sum uint32 = 0
-	var network uint32 = 2886729728 // 172.16.0.0 network
-
-	for _, value := range []byte(name) {
-		sum += uint32(value)
+	//
+	fp, err := filepath.Abs(path)
+	if err != nil {
+		return err
 	}
 
-	ip := make(net.IP, 4)
+	//
+	f, err := ioutil.ReadFile(fp)
+	if err != nil {
+		return err
+	}
 
-	// convert app name into a private network IP
-	binary.BigEndian.PutUint32(ip, (network + sum))
+	//
+	if err := yaml.Unmarshal(f, v); err != nil {
+		return err
+	}
 
-	return ip.String()
+	return nil
 }

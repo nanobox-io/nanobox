@@ -14,6 +14,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 
@@ -56,6 +57,13 @@ var (
 	fWatch   bool   //
 	fWrite   bool   //
 )
+
+//
+type Service struct {
+	CreatedAt time.Time
+	Name      string
+	Port      int
+}
 
 // init builds the list of available nanobox commands and sub commands
 func init() {
@@ -137,14 +145,22 @@ func runVagrantCommand(cmd *exec.Cmd) error {
 	cmd.Stderr = pw
 
 	//
-	fmt.Printf(stylish.Bullet(fmt.Sprintf("running '%v'", strings.Trim(fmt.Sprint(cmd.Args), "[]"))))
+	fmt.Printf(stylish.Bullet("running '%v'", strings.Trim(fmt.Sprint(cmd.Args), "[]")))
 
 	// scan the command output modifying it according to
 	// http://nanodocs.gopagoda.io/engines/style-guide
 	scanner := bufio.NewScanner(pr)
 	go func() {
 		for scanner.Scan() {
-			fmt.Printf("   %s\n", strings.Replace(scanner.Text(), "\r", "\n", -1))
+
+			// replace all hard returns with new lines
+			out := strings.Replace(scanner.Text(), "\r", "\n", -1)
+
+			// trim all \r\n\t from ends of string
+			// out = strings.TrimSpace(out)
+
+			// print line
+			fmt.Printf("   %s\n", out)
 		}
 	}()
 

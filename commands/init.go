@@ -41,20 +41,6 @@ func nanoInit(ccmd *cobra.Command, args []string) {
 	var provider, devmode string
 
 	//
-	// creates a project folder at ~/.nanobox/apps/<app-name> (if it doesn't already
-	// exists) where the Vagrantfile and .vagrant dir will live for each app
-	if di, _ := os.Stat(config.AppDir); di == nil {
-
-		//
-		fmt.Printf(stylish.Bullet("Creating project directory at: " + config.AppDir))
-
-		if err := os.Mkdir(config.AppDir, 0755); err != nil {
-			fmt.Println("There was an error creating a project directory for '%v' at '%v'. Exiting... %v", config.App, config.AppDir, err)
-			os.Exit(1)
-		}
-	}
-
-	//
 	// generate a Vagrantfile at ~/.nanobox/apps/<app-name>/Vagrantfile
 	// only if one doesn't already exist (unless forced)
 	if !fForce {
@@ -64,23 +50,15 @@ func nanoInit(ccmd *cobra.Command, args []string) {
 		}
 	}
 
-	// parse the boxfile
-	if err := config.Boxfile.Parse(); err != nil {
-		util.LogFatal("commands/init] config.Boxfile.Parse() failed", err)
-	}
-
-	// parse the nanofile
-	if err := config.Nanofile.Parse(); err != nil {
-		util.LogFatal("commands/init] config.Nanofile.Parse() failed", err)
-	}
-
 	//
 	fmt.Printf(stylish.Bullet("Preparing nanobox Vagrantfile"))
-	fmt.Printf(stylish.SubBullet(fmt.Sprintf("- Adding code directory mount (/vagrant/code/%v)", config.App)))
+	fmt.Printf(stylish.SubBullet("- Adding code directory mount (/vagrant/code/%v)", config.App))
 
 	// create synced folders
 	synced_folders := fmt.Sprintf("nanobox.vm.synced_folder \"%v\", \"/vagrant/code/%v\"", config.CWDir, config.App)
 
+	//
+	// boxfile config
 	// if an engine path is provided, add it to the synced_folders
 	if engine := config.Boxfile.Build.Engine; engine != "" {
 		if fi, _ := os.Stat(engine); fi != nil {
@@ -94,20 +72,21 @@ func nanoInit(ccmd *cobra.Command, args []string) {
 			base := filepath.Base(fp)
 
 			//
-			fmt.Printf(stylish.SubBullet(fmt.Sprintf("- Adding engine directory mount (/vagrant/engines/%v)", base)))
+			fmt.Printf(stylish.SubBullet("- Adding engine directory mount (/vagrant/engines/%v)", base))
 
 			synced_folders += fmt.Sprintf("\n    nanobox.vm.synced_folder \"%v\", \"/vagrant/engines/%v\"", fp, base)
 		}
 	}
 
 	//
+	// nanofile config
 	// create nanobox private network
-	fmt.Printf(stylish.SubBullet(fmt.Sprintf("- Adding nanobox private network (%v)", config.Nanofile.IP)))
+	fmt.Printf(stylish.SubBullet("- Adding nanobox private network (%v)", config.Nanofile.IP))
 	network := fmt.Sprintf("nanobox.vm.network \"private_network\", ip: \"%v\"", config.Nanofile.IP)
 
 	//
 	// configure provider
-	fmt.Printf(stylish.SubBullet(fmt.Sprintf("- Adding detected provider (%v)", config.Nanofile.Provider)))
+	fmt.Printf(stylish.SubBullet("- Adding detected provider (%v)", config.Nanofile.Provider))
 
 	//
 	switch config.Nanofile.Provider {

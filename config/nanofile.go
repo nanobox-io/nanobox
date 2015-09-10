@@ -8,87 +8,68 @@
 package config
 
 import (
+	"encoding/binary"
 	"fmt"
-	"io/ioutil"
+	"net"
 	"os"
 	"path/filepath"
-
-	"github.com/ghodss/yaml"
-
-	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
-// NanofileConfig represents all available/expected Boxfile configurable options
-type NanofileConfig struct {
-	CPUCap   int    `json:"cpu_cap"`  //
-	CPUs     int    `json:"cpus"`     //
-	Domain   string `json:"domain"`   //
-	IP       string `json:"ip"`       //
-	Provider string `json:"provider"` //
-	RAM      int    `json:"ram"`      //
-}
+// ParseNanofile
+func ParseNanofile() *NanofileConfig {
 
-// create default nanofilconfig
-func init() {
-	Nanofile = &NanofileConfig{
+	//
+	nanofile := &NanofileConfig{
+		path:     Root + "/.nanofile",
 		CPUCap:   50,
 		CPUs:     2,
-		Domain:   fmt.Sprintf("%v.nano.dev", App),
-		IP:       appNameToIP(App),
+		Name:     filepath.Base(CWDir),
 		Provider: "virtualbox",
 		RAM:      1024,
 	}
+
+	// look for a global .nanofile first in the ~/.nanobox directory, and override
+	// any default options found.
+	if fi, _ := os.Stat(nanofile.path); fi != nil {
+		if err := ParseConfig(nanofile.path, nanofile); err != nil {
+			fmt.Printf("Nanobox failed to parse your Boxfile. Please ensure it is valid YAML and try again.\n")
+			os.Exit(1)
+		}
+	}
+
+	nanofile.path = "./.nanofile"
+
+	// then look for a local .nanofile and override any global, or remaining default
+	// options found
+	if fi, _ := os.Stat(nanofile.path); fi != nil {
+		if err := ParseConfig(nanofile.path, nanofile); err != nil {
+			fmt.Printf("Nanobox failed to parse your Boxfile. Please ensure it is valid YAML and try again.\n")
+			os.Exit(1)
+		}
+	}
+
+	// set name specific options after potential .nanofiles have been parsed
+	nanofile.Domain = fmt.Sprintf("%s.nano.dev", nanofile.Name)
+	nanofile.IP = appNameToIP(nanofile.Name)
+
+	return nanofile
 }
 
-// Parse
-func (c *NanofileConfig) Parse() error {
-	fmt.Printf(stylish.Bullet("Parsing .nanofile"))
+// appNameToIP generates an IPv4 address based off the app name for use as a
+// vagrant private_network IP.
+func appNameToIP(name string) string {
 
-	//
-	path := "./.nanofile"
+	var sum uint32 = 0
+	var network uint32 = 2886729728 // 172.16.0.0 network
 
-	// look for a local .nanofile first...
-	fmt.Printf(stylish.SubBullet("Searching for local .nanofile..."))
-	if fi, _ := os.Stat(path); fi != nil {
-		return c.parse(path)
+	for _, value := range []byte(name) {
+		sum += uint32(value)
 	}
 
-	path = NanoDir + "/.nanofile"
+	ip := make(net.IP, 4)
 
-	// then look for a global .nanofile in the ~/.nanobox directory...
-	fmt.Printf(stylish.SubBullet("Searching for global .nanofile..."))
-	if fi, _ := os.Stat(path); fi != nil {
-		return c.parse(path)
-	}
+	// convert app name into a private network IP
+	binary.BigEndian.PutUint32(ip, (network + sum))
 
-	//
-	fmt.Printf(stylish.SubBullet("- Using default configuration..."))
-	fmt.Printf(stylish.Success())
-	return nil
-}
-
-// parseNanofile
-func (c *NanofileConfig) parse(path string) error {
-
-	fmt.Printf(stylish.SubBullet("- Configuring..."))
-
-	fp, err := filepath.Abs(path)
-	if err != nil {
-		return err
-	}
-
-	//
-	f, err := ioutil.ReadFile(fp)
-	if err != nil {
-		return err
-	}
-
-	//
-	if err := yaml.Unmarshal(f, c); err != nil {
-		return fmt.Errorf("Nanobox failed to parse your .nanofile found at %s. Please ensure it is valid YAML and try again.", path)
-	}
-
-	fmt.Printf(stylish.Success())
-
-	return nil
+	return ip.String()
 }

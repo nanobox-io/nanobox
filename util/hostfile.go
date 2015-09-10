@@ -35,7 +35,7 @@ func AddDevDomain() {
 		LogFatal("[utils/hostfile] WriteString() failed", err)
 	}
 
-	fmt.Println(stylish.Bullet(config.App + ".nano.dev added to /etc/hosts"))
+	fmt.Println(stylish.Bullet("%s.nano.dev added to /etc/hosts", config.App))
 }
 
 // RemoveDevDomain
@@ -66,5 +66,5 @@ func RemoveDevDomain() {
 		LogFatal("[utils/hostfile] ioutil.WriteFile failed", err)
 	}
 
-	fmt.Println(stylish.Bullet(config.App + ".nano.dev removed from /etc/hosts"))
+	fmt.Println(stylish.Bullet("%s.nano.dev removed from /etc/hosts", config.App))
 }

@@ -82,7 +82,7 @@ func nanoLog(ccmd *cobra.Command, args []string) {
 		fmt.Printf(stylish.Bullet("Connecting to live stream..."))
 
 		// connect 'mist' to the server running on the guest machine
-		client, err := mist.NewRemoteClient(config.Nanofile.IP + ":1445")
+		client, err := mist.NewRemoteClient(config.MistURI)
 		if err != nil {
 			util.LogFatal("[commands/log] client.Connect() failed ", err)
 		}
@@ -94,9 +94,6 @@ func nanoLog(ccmd *cobra.Command, args []string) {
 			fmt.Printf(stylish.Warning("Nanobox failed to subscribe to app logs."))
 		}
 		defer client.Unsubscribe(logTags)
-
-		//
-		fmt.Printf(stylish.Bullet("Connecting to live stream..."))
 
 	stream:
 		for msg := range client.Messages() {
@@ -121,14 +118,15 @@ func nanoLog(ccmd *cobra.Command, args []string) {
 
 		// load historical logs
 	} else {
-		fmt.Printf(stylish.Bullet(fmt.Sprintf("Showing last %v entries:", fCount)))
+		fmt.Printf(stylish.Bullet("Showing last %v entries:", fCount))
 
 		//
 		v := url.Values{}
+		// v.Add("offset", fOffset)
 		v.Add("level", fLevel)
 		v.Add("limit", fmt.Sprintf("%v", fCount))
 
-		res, err := http.Get(fmt.Sprintf("http://%v:6362/app?%v", config.Nanofile.IP, v.Encode()))
+		res, err := http.Get(fmt.Sprintf("http://%v:1757/logs?%v", config.Nanofile.IP, v.Encode()))
 		if err != nil {
 			util.LogFatal("[commands/log] http.Get() failed", err)
 		}
@@ -172,6 +170,7 @@ func processLog(log Log) {
 	//
 	config.Console.Debug("[commands/log] Raw log -> %#v", log)
 
+	//
 	subMatch := regexp.MustCompile(`^(\w+)\.(\S+)\s+(.*)$`).FindStringSubmatch(log.Log)
 
 	// ensure a subMatch and ensure subMatch has a length of 4, since thats how many

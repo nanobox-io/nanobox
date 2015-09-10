@@ -46,13 +46,13 @@ func nanoUpdate(ccmd *cobra.Command, args []string) {
 	}
 
 	//
-	fmt.Printf(stylish.SubBullet(fmt.Sprintf("Nanobox CLI found running at %v", path)))
+	fmt.Printf(stylish.SubBullet("Nanobox CLI found running at %s", path))
 
 	// download a new CLI from s3 that matches their os and arch
 	download := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/nanobox", runtime.GOOS, runtime.GOARCH)
 
 	// create a new request
-	fmt.Printf(stylish.SubBullet(fmt.Sprintf("Downloading latest CLI from %v", download)))
+	fmt.Printf(stylish.SubBullet("Downloading latest CLI from %v", download))
 	req, err := http.NewRequest("GET", download, nil)
 	if err != nil {
 		util.LogFatal("[commands/update] http.NewRequest() failed", err)
@@ -96,7 +96,7 @@ func nanoUpdate(ccmd *cobra.Command, args []string) {
 	util.CPrint("\rDownloading... [green]success[reset]")
 
 	//
-	fmt.Printf(stylish.SubBullet(fmt.Sprintf("Replacing CLI at %v", path)))
+	fmt.Printf(stylish.SubBullet("Replacing CLI at %s", path))
 	ioutil.WriteFile(path, buf.Bytes(), 0755)
 
 	//

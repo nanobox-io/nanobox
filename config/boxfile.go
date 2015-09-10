@@ -9,72 +9,26 @@ package config
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
-	"path/filepath"
-
-	"github.com/ghodss/yaml"
-
-	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
-type (
-	// BoxfileConfig represents all available/expected Boxfile configurable options
-	BoxfileConfig struct {
-		Build Build //
+// ParseBoxfile
+func ParseBoxfile() *BoxfileConfig {
+
+	boxfile := &BoxfileConfig{path: "./Boxfile"}
+
+	//
+	if _, err := os.Stat(boxfile.path); err != nil {
+		fmt.Println("Boxfile not found in current working directory. Exiting... ")
+		os.Exit(1)
 	}
 
 	//
-	Build struct {
-		Engine string `json:"engine"` //
-	}
-)
-
-// create default boxfile config
-func init() {
-	Boxfile = &BoxfileConfig{}
-}
-
-// Parse
-func (c *BoxfileConfig) Parse() error {
-	fmt.Printf(stylish.Bullet("Parsing Boxfile"))
-
-	//
-	path := "./Boxfile"
-
-	// look for a Boxfile...
-	if fi, _ := os.Stat(path); fi != nil {
-		return c.parse(path)
+	if err := ParseConfig(boxfile.path, boxfile); err != nil {
+		fmt.Printf("Nanobox failed to parse your Boxfile. Please ensure it is valid YAML and try again.\n")
+		os.Exit(1)
 	}
 
 	//
-	fmt.Printf(stylish.SubBullet("- Using default configuration..."))
-	fmt.Printf(stylish.Success())
-	return nil
-}
-
-// parse
-func (c *BoxfileConfig) parse(path string) error {
-
-	fmt.Printf(stylish.SubBullet("- Configuring..."))
-
-	fp, err := filepath.Abs(path)
-	if err != nil {
-		return err
-	}
-
-	//
-	f, err := ioutil.ReadFile(fp)
-	if err != nil {
-		return err
-	}
-
-	//
-	if err := yaml.Unmarshal(f, c); err != nil {
-		return fmt.Errorf("Nanobox failed to parse your Boxfile. Please ensure it is valid YAML and try again.")
-	}
-
-	fmt.Printf(stylish.Success())
-
-	return nil
+	return boxfile
 }

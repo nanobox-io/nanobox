@@ -36,7 +36,7 @@ func nanoBuild(ccmd *cobra.Command, args []string) {
 	//
 	build := util.Sync{
 		Model:   "build",
-		Path:    fmt.Sprintf("http://%v:1757/builds", config.Nanofile.IP),
+		Path:    fmt.Sprintf("http://%s/builds", config.ServerURI),
 		Verbose: fVerbose,
 	}
 
@@ -48,7 +48,7 @@ func nanoBuild(ccmd *cobra.Command, args []string) {
 
 	// complete
 	case "complete":
-		fmt.Printf(stylish.Bullet(fmt.Sprintf("Build complete... Navigate to %v.nano.dev to view your app.", config.App)))
+		fmt.Printf(stylish.Bullet("Build complete... Navigate to %v.nano.dev to view your app.", config.App))
 
 		// if the build fails the server should handle the message. If not, this can
 		// be re-enabled

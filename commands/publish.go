@@ -46,30 +46,25 @@ Description:
 
 // nanoPublish
 func nanoPublish(ccmd *cobra.Command, args []string) {
+	//
+	stylish.Header("publishing engine")
 
 	//
 	api.UserSlug, api.AuthToken = auth.Authenticate()
 
-	//
-	stylish.Header("publishing engine")
+	// create a new release
+	fmt.Printf(stylish.Bullet("Creating release..."))
+	release := &api.EngineReleaseCreateOptions{}
 
-	// attempt to parse an enginefile
-	if err := config.Enginefile.Parse(); err != nil {
-		util.LogFatal("commands/init] config.Enginefile.Parse() failed", err)
+	//
+	if _, err := os.Stat("./Enginefile"); err != nil {
+		fmt.Println("Enginefile not found. Be sure to publish from a project directory. Exiting... ")
+		os.Exit(1)
 	}
 
-	// create a new release based off the enginefile config options
-	fmt.Printf(stylish.Bullet("Creating release..."))
-	release := &api.EngineReleaseCreateOptions{
-		Authors:   config.Enginefile.Authors,
-		Generic:   config.Enginefile.Generic,
-		Language:  config.Enginefile.Language,
-		License:   config.Enginefile.License,
-		Name:      config.Enginefile.Name,
-		Readme:    config.Enginefile.Readme,
-		Stability: config.Enginefile.Stability,
-		Summary:   config.Enginefile.Summary,
-		Version:   config.Enginefile.Version,
+	if err := config.ParseConfig("./Enginefile", release); err != nil {
+		fmt.Printf("Nanobox failed to parse your Enginefile. Please ensure it is valid YAML and try again.\n")
+		os.Exit(1)
 	}
 
 	// determine if any required fields (name, version, language, summary) are missing,
@@ -107,6 +102,7 @@ Please ensure all required fields are provided and try again.`))
 		os.Exit(1)
 	}
 
+	//
 	release.Readme = string(b)
 
 	// GET to API to see if engine exists

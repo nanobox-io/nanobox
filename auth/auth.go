@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 
 	api "github.com/pagodabox/nanobox-api-client"
 	"github.com/pagodabox/nanobox-cli/config"
@@ -18,22 +19,50 @@ import (
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
+//
+var (
+	creds    *credentials //
+	authfile string       //
+)
+
+// credentials represents all available/expected .authfile configurable options
+type credentials struct {
+	userslug  string `json:"user_slug"`  //
+	authtoken string `json:"auth_token"` //
+}
+
+// init
+func init() {
+
+	// check for a ~/.nanobox/.auth file and create one if it's not found
+	authfile = filepath.Clean(config.Root + "/.auth")
+	if fi, _ := os.Stat(authfile); fi == nil {
+		fmt.Printf(stylish.Bullet("Creating %s directory", authfile))
+		if _, err := os.Create(authfile); err != nil {
+			panic(err)
+		}
+	}
+
+	creds = &credentials{}
+
+	//
+	if err := config.ParseConfig(authfile, creds); err != nil {
+		fmt.Printf("Nanobox failed to parse the .auth file.\n")
+		os.Exit(1)
+	}
+}
+
 // authenticated checks to see if there is a .auth file in the home dir
 func authenticated() bool {
 
 	//
-	if err := config.Authfile.Parse(); err != nil {
-		util.LogFatal("auth/auth] config.Authfile.Parse() failed", err)
-	}
-
-	//
-	if config.Authfile.UserSlug == "" || config.Authfile.AuthToken == "" {
+	if creds.userslug == "" || creds.authtoken == "" {
 		return false
 	}
 
 	// do a quick check to see if the cli needs to reauthenticate due to a user
 	// changing their authenticate token via the dashboard.
-	// if _, err := api.GetUser(config.Authfile.UserSlug); err != nil {
+	// if _, err := api.GetUser(creds.userslug); err != nil {
 	// 	config.Log.Warn("Failed login attempt (%v): Credentials do not match! Reauthenticating...", err)
 	// 	Reauthenticate()
 	// }
@@ -41,7 +70,7 @@ func authenticated() bool {
 	return true
 }
 
-//
+// Authenticate
 func Authenticate() (string, string) {
 	fmt.Printf(stylish.Bullet("Authenticating..."))
 
@@ -56,7 +85,7 @@ func Authenticate() (string, string) {
 		return authenticate(userslug, password)
 	}
 
-	return config.Authfile.UserSlug, config.Authfile.AuthToken
+	return creds.userslug, creds.authtoken
 }
 
 // Reauthenticate
@@ -101,9 +130,9 @@ func authenticate(userslug, password string) (string, string) {
 func saveCredentials(userid, authtoken string) error {
 
 	//
-	config.Authfile.UserSlug = userid
-	config.Authfile.AuthToken = authtoken
+	creds.userslug = userid
+	creds.authtoken = authtoken
 
 	//
-	return ioutil.WriteFile(config.AuthFile, []byte(fmt.Sprintf("user_slug: %v\nauth_token: %v", userid, authtoken)), 0755)
+	return ioutil.WriteFile(authfile, []byte(fmt.Sprintf("user_slug: %v\nauth_token: %v", userid, authtoken)), 0755)
 }
