@@ -109,19 +109,22 @@ Please ensure all required fields are provided and try again.`))
 
 	// this is our predefined list of everything that gets archived as part of the
 	// engine being published
-	files := []string{
-		"./bin",
-		// "./lib",
-		// "./templates",
-		// "./files",
-		"./Enginefile",
+	files := map[string][]string{
+		"required": []string{"./bin", "./Enginefile"},
+		"optional": []string{"./lib", "./templates", "./files"},
 	}
 
-	// check to ensure no required files are missing
-	for _, f := range files {
-		if fi, _ := os.Stat(f); fi == nil {
-			fmt.Printf(stylish.Error("required files missing", "Your Engine is missing one or more required files for publishing. Please read the following documentation to ensure all required files are included and try again.:\n\ndocs.nanobox.io/engines/project-creation/#example-engine-file-structure\n"))
-			os.Exit(1)
+	//
+	for k, v := range files {
+		if k == "required" {
+
+			// check to ensure no required files are missing
+			for _, f := range v {
+				if fi, _ := os.Stat(f); fi == nil {
+					fmt.Printf(stylish.Error("required files missing", "Your Engine is missing one or more required files for publishing. Please read the following documentation to ensure all required files are included and try again.:\n\ndocs.nanobox.io/engines/project-creation/#example-engine-file-structure\n"))
+					os.Exit(1)
+				}
+			}
 		}
 	}
 
@@ -204,10 +207,22 @@ Please ensure all required fields are provided and try again.`))
 		defer gzw.Close()
 		defer tw.Close()
 
-		// if not required files are missing, tarball the engine for publishing
-		for _, f := range files {
-			if err := filepath.Walk(f, tarFile); err != nil {
-				util.LogFatal("[commands.publish] filepath.Walk() failed", err)
+		// range over each file type...
+		for _, v := range files {
+
+			// range over each file for each type...
+			for _, f := range v {
+
+				// required files have alrady been checked, so skip any remaining (optional)
+				// files/folders that arent here
+				if fi, _ := os.Stat(f); fi == nil {
+					continue
+				}
+
+				// tarball any remaining files/folders that are found
+				if err := filepath.Walk(f, tarFile); err != nil {
+					util.LogFatal("[commands.publish] filepath.Walk() failed", err)
+				}
 			}
 		}
 
