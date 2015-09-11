@@ -24,8 +24,31 @@ import (
 
 //
 var (
+
+	//
 	NanoboxCmd = &cobra.Command{
 		Use:   "nanobox",
+		Short: "",
+		Long:  ``,
+
+		//
+		Run: func(ccmd *cobra.Command, args []string) {
+
+			// hijack the verbose flag (-v), and use it to display the version of the
+			// CLI
+			if fVerbose {
+				fmt.Printf("nanobox %v\n", config.Version.String())
+				os.Exit(0)
+			}
+
+			// fall back on default help if no args/flags are passed
+			ccmd.HelpFunc()(ccmd, args)
+		},
+	}
+
+	//
+	productionCmd = &cobra.Command{
+		Use:   "production",
 		Short: "",
 		Long:  ``,
 
@@ -33,8 +56,9 @@ var (
 		// Run: func(cmd *cobra.Command, args []string) {},
 	}
 
-	productionCmd = &cobra.Command{
-		Use:   "nanobox production",
+	//
+	imagesCmd = &cobra.Command{
+		Use:   "images",
 		Short: "",
 		Long:  ``,
 
@@ -108,12 +132,15 @@ func init() {
 	NanoboxCmd.AddCommand(upCmd)
 	NanoboxCmd.AddCommand(updateCmd)
 	NanoboxCmd.AddCommand(upgradeCmd)
-	NanoboxCmd.AddCommand(versionCmd)
 	NanoboxCmd.AddCommand(watchCmd)
 
 	//
-	// NanoboxCmd.AddCommand(productionCmd)
+	NanoboxCmd.AddCommand(productionCmd)
 	// productionCmd.AddCommand(deployCmd)
+
+	//
+	NanoboxCmd.AddCommand(imagesCmd)
+	imagesCmd.AddCommand(imagesUpdateCmd)
 }
 
 // runVagrantCommand provides a wrapper around a standard cmd.Run() in which
