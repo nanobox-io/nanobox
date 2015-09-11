@@ -121,15 +121,6 @@ func init() {
 	// is set to the name of the cwd; this can be overriden from a .nanofile
 	App = Nanofile.Name
 	AppDir = apps + "/" + App
-
-	// creates a project folder at ~/.nanobox/apps/<name> (if it doesn't already
-	// exists) where the Vagrantfile and .vagrant dir will live for each app
-	if di, _ := os.Stat(AppDir); di == nil {
-		fmt.Printf(stylish.Bullet("Creating project directory at: %s", AppDir))
-		if err := os.Mkdir(AppDir, 0755); err != nil {
-			panic(err)
-		}
-	}
 }
 
 // ParseConfig

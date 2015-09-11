@@ -40,6 +40,15 @@ func nanoInit(ccmd *cobra.Command, args []string) {
 	//
 	var provider, devmode string
 
+	// creates a project folder at ~/.nanobox/apps/<name> (if it doesn't already
+	// exists) where the Vagrantfile and .vagrant dir will live for each app
+	if di, _ := os.Stat(config.AppDir); di == nil {
+		fmt.Printf(stylish.Bullet("Creating project directory at: %s", config.AppDir))
+		if err := os.Mkdir(config.AppDir, 0755); err != nil {
+			panic(err)
+		}
+	}
+
 	//
 	// generate a Vagrantfile at ~/.nanobox/apps/<app-name>/Vagrantfile
 	// only if one doesn't already exist (unless forced)
