@@ -35,7 +35,7 @@ func nanoUp(ccmd *cobra.Command, args []string) {
 	nanoCreate(nil, args)
 
 	// upgrade all nanobox docker images
-	nanoUpgrade(nil, args)
+	imagesUpdate(nil, args)
 
 	// ...issue a deploy...
 	nanoDeploy(nil, args)

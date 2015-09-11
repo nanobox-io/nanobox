@@ -136,7 +136,6 @@ func init() {
 	NanoboxCmd.AddCommand(tunnelCmd)
 	NanoboxCmd.AddCommand(upCmd)
 	NanoboxCmd.AddCommand(updateCmd)
-	NanoboxCmd.AddCommand(upgradeCmd)
 	NanoboxCmd.AddCommand(watchCmd)
 
 	// 'production' subcommands
