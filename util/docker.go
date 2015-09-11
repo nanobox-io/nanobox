@@ -53,11 +53,14 @@ func (d *Docker) Run() {
 	// monitor the window size and send a request whenever we resize
 	monitorSize(outFd, d.Params)
 
+	// 
 	oldState, err = term.SetRawTerminal(inFd)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+
+	//
 	defer term.RestoreTerminal(inFd, oldState)
 
 	// pipe data

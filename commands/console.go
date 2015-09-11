@@ -47,13 +47,14 @@ func nanoConsole(ccmd *cobra.Command, args []string) {
 
 	// if no args are passed run console as normal
 	case len(args) == 0:
-		return
+		break
 
 		// if 1 args is passed it's assumed to be a container to console directly into
+		// since console doesn't take any additional arguments (like exec)
 	case len(args) == 1:
 		v.Add("container", args[0])
 
-		// if more than 1 args is passed, exit...
+		// if more than 1 args is passed fail and exit...
 	case len(args) > 1:
 		fmt.Printf("Expecting 0 or 1 arguments, received %v. Exiting...\n", len(args))
 		os.Exit(1)

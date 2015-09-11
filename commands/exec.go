@@ -60,9 +60,12 @@ func nanoExec(ccmd *cobra.Command, args []string) {
 	//
 	found := false
 
-	// range over the services to find a potential match for args[0]
+	//
 	for _, service := range services {
-		if args[0] == service.Name {
+
+		// range over the services to find a potential match for args[0] or make an
+		// exception for 'build1' since that wont show up on the list.
+		if args[0] == service.Name || args[0] == "build1" {
 			found = true
 		}
 	}

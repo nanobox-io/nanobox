@@ -111,9 +111,9 @@ Please ensure all required fields are provided and try again.`))
 	// engine being published
 	files := []string{
 		"./bin",
-		"./lib",
-		"./templates",
-		"./files",
+		// "./lib",
+		// "./templates",
+		// "./files",
 		"./Enginefile",
 	}
 

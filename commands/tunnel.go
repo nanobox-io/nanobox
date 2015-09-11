@@ -46,6 +46,7 @@ func nanoTunnel(ccmd *cobra.Command, args []string) {
 Service         |                 DOMAIN                   |      Port
 --------------------------------------------------------------------------------`)
 	for _, service := range services {
+		fmt.Printf("%#v\n", service)
 		fmt.Printf("%-15s | %-40s | %-15v\n", service.Name, config.Nanofile.Domain, service.Port) //, service.CreatedAt.Format("01.02.06 (15:04:05) MST"))
 	}
 }
