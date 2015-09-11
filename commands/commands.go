@@ -36,7 +36,7 @@ var (
 
 			// hijack the verbose flag (-v), and use it to display the version of the
 			// CLI
-			if fVerbose {
+			if fVersion || fVerbose {
 				fmt.Printf("nanobox %v\n", config.Version.String())
 				os.Exit(0)
 			}
@@ -78,6 +78,7 @@ var (
 	fStream  bool   //
 	fTunnel  string //
 	fVerbose bool   //
+	fVersion bool   //
 	fWatch   bool   //
 	fWrite   bool   //
 )
@@ -92,6 +93,7 @@ type Service struct {
 // init builds the list of available nanobox commands and sub commands
 func init() {
 
+	// persistent flags
 	//
 	NanoboxCmd.PersistentFlags().BoolVarP(&fForce, "force", "f", false, "Forces a command to run (effects very per command).")
 	NanoboxCmd.PersistentFlags().BoolVarP(&fVerbose, "verbose", "v", false, "Increase command output from 'info' to 'debug'.")
@@ -101,6 +103,9 @@ func init() {
 	NanoboxCmd.PersistentFlags().BoolVarP(&fDevmode, "dev", "", false, "")
 	NanoboxCmd.PersistentFlags().MarkHidden("debug")
 	NanoboxCmd.PersistentFlags().MarkHidden("dev")
+
+	// local flags
+	NanoboxCmd.Flags().BoolVarP(&fVersion, "version", "", false, "Display the current version if this CLI")
 
 	//
 	// NanoboxCmd.SetHelpCommand(helpCmd)
@@ -134,11 +139,11 @@ func init() {
 	NanoboxCmd.AddCommand(upgradeCmd)
 	NanoboxCmd.AddCommand(watchCmd)
 
-	//
+	// 'production' subcommands
 	NanoboxCmd.AddCommand(productionCmd)
 	// productionCmd.AddCommand(deployCmd)
 
-	//
+	// 'images' subcommands
 	NanoboxCmd.AddCommand(imagesCmd)
 	imagesCmd.AddCommand(imagesUpdateCmd)
 }
