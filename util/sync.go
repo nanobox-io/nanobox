@@ -30,11 +30,17 @@ type (
 
 	// entry
 	entry struct {
+
+		// 'model' message fields
 		Action   string `json:"action"`
 		Document string `json:"document"`
-		Log      string `json:"log"`
 		Model    string `json:"model"`
+
+		// 'log' message fields
+		Content  string `json:"content"`
+		Priority int    `json:"priority"`
 		Time     string `json:"time"`
+		Type     string `json:"type"`
 	}
 )
 
@@ -83,7 +89,11 @@ func (s *Sync) Run(opts []string) {
 stream:
 	for msg := range client.Messages() {
 
-		//
+		// unmarshal the incoming message; a message will be of two possible 'types'
+		// 1. A log entry that has type, time, priority, and content
+		// 2. A 'model' update with model, action, and document
+		// once parsed, the following case statemt will determine what time of message
+		// was received and what to do about it.
 		e := &entry{}
 		if err := json.Unmarshal([]byte(msg.Data), &e); err != nil {
 			LogFatal("[utils/sync] json.Unmarshal() failed", err)
@@ -95,8 +105,8 @@ stream:
 		// if the message contains the log field, the log is printed. The message is
 		// then checked to see if it contains a model field...
 		// example entry: {Time: "time", Log: "content"}
-		case e.Log != "":
-			fmt.Printf(e.Log)
+		case e.Content != "":
+			fmt.Printf(e.Content)
 
 			// if the message contains the model field...
 		case e.Model != "":
