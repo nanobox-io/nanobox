@@ -87,7 +87,9 @@ var (
 type Service struct {
 	CreatedAt time.Time
 	Name      string
-	Port      int
+	Password  string
+	Ports     []int
+	Username  string
 }
 
 // init builds the list of available nanobox commands and sub commands

@@ -50,14 +50,14 @@ func (s *Sync) Run(opts []string) {
 
 	Printv(stylish.Bullet("Subscribing to mist..."), s.Verbose)
 
-	// subscribe to 'sync' updates
-	Printv(stylish.SubBullet("- Subscribing to app logs"), s.Verbose)
-
+	// subscribe to job updates
 	jobTags := []string{"job", s.Model}
 	if err := client.Subscribe(jobTags); err != nil {
 		fmt.Printf(stylish.Warning("Nanobox failed to subscribe to app logs. Your sync will continue as normal, and log output is available on your dashboard."))
 	}
 	defer client.Unsubscribe(jobTags)
+
+	Printv(stylish.SubBullet("- Subscribed to app logs"), s.Verbose)
 
 	logLevel := "info"
 	if s.Verbose {
@@ -65,15 +65,13 @@ func (s *Sync) Run(opts []string) {
 	}
 
 	// if the verbose flag is included, also subscribe to the 'debug' logs
-	Printv(stylish.SubBullet("- Subscribing to debug logs"), s.Verbose)
-
 	logTags := []string{"log", "deploy", logLevel}
 	if err := client.Subscribe(logTags); err != nil {
 		fmt.Printf(stylish.Warning("Nanobox failed to subscribe to debug logs. Your sync will continue as normal, and log output is available on your dashboard."))
 	}
 	defer client.Unsubscribe(logTags)
 
-	Printv(stylish.Success(), s.Verbose)
+	Printv(stylish.SubBullet("- Subscribed to debug logs"), s.Verbose)
 
 	//
 	// issue a sync

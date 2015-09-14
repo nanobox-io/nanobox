@@ -37,16 +37,15 @@ func nanoTunnel(ccmd *cobra.Command, args []string) {
 	//
 	fmt.Printf(stylish.Bullet("Requesting services..."))
 	if err := api.DoRawRequest(&services, "GET", fmt.Sprintf("http://%s/services", config.ServerURI), nil, nil); err != nil {
-		fmt.Printf(stylish.Error("failed to get tunnel information", fmt.Sprintf("nanobox was unable to get tunnel information, and failed with the following error: %v", err)))
+		fmt.Printf(stylish.Error("failed to get services", fmt.Sprintf("nanobox was unable to get services information, and failed with the following error: %v", err)))
 	}
-	fmt.Printf(stylish.Success())
 
 	//
-	fmt.Println(`
-Service         |                 DOMAIN                   |      Port
---------------------------------------------------------------------------------`)
+	fmt.Printf(`
+Service                        | Username, Password         | Ports
+--------------------------------------------------------------------------------
+`)
 	for _, service := range services {
-		fmt.Printf("%#v\n", service)
-		fmt.Printf("%-15s | %-40s | %-15v\n", service.Name, config.Nanofile.Domain, service.Port) //, service.CreatedAt.Format("01.02.06 (15:04:05) MST"))
+		fmt.Printf("%-30s | %s, %-15s | %-20v\n", service.Name, service.Username, service.Password, service.Ports)
 	}
 }
