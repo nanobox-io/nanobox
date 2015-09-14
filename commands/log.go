@@ -9,10 +9,9 @@ package commands
 
 //
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -37,11 +36,12 @@ Description:
 	Run: nanoLog,
 }
 
-// Log represents the structure of a log returned from Logvac or Stormpack
+// Log represents the structure of a log returned from Logtap or Stormpack
 type Log struct {
-	Level string `json:"level"`
-	Log   string `json:"log"`
-	Time  string `json:"time"`
+	Content  string `json:"content"`
+	Priority int    `json:"priority"`
+	Time     string `json:"time"`
+	Type     string `json:"Type"`
 }
 
 var (
@@ -69,15 +69,17 @@ var (
 
 //
 func init() {
-	logCmd.Flags().IntVarP(&fCount, "count", "c", 100, "Specifies the number of lines to output from the historical log.")
 	logCmd.Flags().BoolVarP(&fStream, "stream", "s", false, "Streams logs live")
+
+	logCmd.Flags().IntVarP(&fCount, "count", "c", 100, "Specifies the number of lines to output from the historical log.")
 	logCmd.Flags().StringVarP(&fLevel, "level", "l", "info", "Filters logs by one of the following levels: debug > info > warn > error > fatal")
+	logCmd.Flags().IntVarP(&fOffset, "offset", "o", 0, "Specifies the entry at which to start pulling <count> from")
 }
 
 // nanoLog
 func nanoLog(ccmd *cobra.Command, args []string) {
 
-	// if stream is true, we connect to the live logs
+	// if stream is true, we connect to the live logs...
 	if fStream {
 		fmt.Printf(stylish.Bullet("Connecting to live stream..."))
 
@@ -95,63 +97,52 @@ func nanoLog(ccmd *cobra.Command, args []string) {
 		}
 		defer client.Unsubscribe(logTags)
 
-	stream:
+		//
 		for msg := range client.Messages() {
 
 			//
 			log := Log{}
-
-			// check for any error message that cause mist to disconnect, and release
-			// nanobox
-			if msg.Tags[0] == "err" {
-				fmt.Printf(stylish.Warning("An unexpected error caused the sync stream to disconnect."))
-				break stream
-			}
-
-			//
 			if err := json.Unmarshal([]byte(msg.Data), &log); err != nil {
 				util.LogFatal("[commands/log] json.Unmarshal() failed", err)
 			}
 
+			//
 			processLog(log)
 		}
 
-		// load historical logs
+		// ...otherwise load historical logs
 	} else {
-		fmt.Printf(stylish.Bullet("Showing last %v entries:", fCount))
 
 		//
 		v := url.Values{}
-		// v.Add("offset", fOffset)
 		v.Add("level", fLevel)
 		v.Add("limit", fmt.Sprintf("%v", fCount))
+		v.Add("offset", fmt.Sprintf("%v", fOffset))
 
-		res, err := http.Get(fmt.Sprintf("http://%v:1757/logs?%v", config.Nanofile.IP, v.Encode()))
+		//
+		res, err := http.Get(fmt.Sprintf("http://%v/logs?%v", config.ServerURI, v.Encode()))
 		if err != nil {
 			util.LogFatal("[commands/log] http.Get() failed", err)
 		}
 		defer res.Body.Close()
 
-		// read response body, which should be our version string
-		r := bufio.NewReader(res.Body)
-		for {
-			b, err := r.ReadBytes('\n')
-			if err != nil {
-				if err == io.EOF {
-					break
-				} else {
-					util.LogFatal("[commands/log] bufio.ReadBytes() failed", err)
-				}
-			}
+		//
+		b, err := ioutil.ReadAll(res.Body)
+		if err != nil {
+			util.LogFatal("[commands/log] ioutil.ReadAll() failed", err)
+		}
 
-			//
-			subMatch := regexp.MustCompile(`\[(.*)\] \[(.*)\] (.*)`).FindStringSubmatch(string(b))
+		//
+		logs := []Log{}
+		if err := json.Unmarshal(b, &logs); err != nil {
+			util.LogFatal("[commands/log] json.Unmarshal() failed", err)
+		}
 
-			// ensure a subMatch and ensure subMatch has a length of 4, since thats how many
-			// matches we're expecting
-			if subMatch != nil && len(subMatch) >= 4 {
-				processLog(Log{Level: subMatch[2], Log: subMatch[3], Time: subMatch[1]})
-			}
+		fmt.Printf(stylish.Bullet("Showing last %v entries:", len(logs)))
+
+		//
+		for _, log := range logs {
+			processLog(log)
 		}
 	}
 }
@@ -168,10 +159,10 @@ func processLog(log Log) {
 	// }
 
 	//
-	config.Console.Debug("[commands/log] Raw log -> %#v", log)
+	config.Console.Debug("[commands/log] Raw log -> %#q", log)
 
 	//
-	subMatch := regexp.MustCompile(`^(\w+)\.(\S+)\s+(.*)$`).FindStringSubmatch(log.Log)
+	subMatch := regexp.MustCompile(`^(\w+)\.(\S+)\s+(.*)$`).FindStringSubmatch(log.Content)
 
 	// ensure a subMatch and ensure subMatch has a length of 4, since thats how many
 	// matches we're expecting
@@ -179,24 +170,25 @@ func processLog(log Log) {
 
 		service := subMatch[1]
 		process := subMatch[2]
-		entry := subMatch[3]
+		content := subMatch[3]
 
 		//
-		config.Console.Debug("[commands/log] Processed log -> service: %v, process: %v, entry: %v\n", service, process, entry)
+		config.Console.Debug("[commands/log] Processed log -> service: %q, process: %q, content: %q\n", service, process, content)
 
 		if _, ok := logProcesses[process]; !ok {
 			logProcesses[process] = logColors[len(logProcesses)%len(logColors)]
 		}
 
-		util.CPrint("[%v]%v - %v.%v :: %v[reset]", logProcesses[process], log.Time, service, process, entry)
+		// util.CPrint("[%v]%v - %v.%v :: %v[reset]", logProcesses[process], log.Time, service, process, content)
+		util.CPrint("[%v]%v (%v) :: %v[reset]", logProcesses[process], service, process, content)
 
 		// if we don't have a subMatch or its length is less than 4, just print w/e
 		// is in the log
 	} else {
 		//
-		config.Console.Debug("[commands/log] No submatches found -> %v - %v", log.Time, log.Log)
+		config.Console.Debug("[commands/log] No submatches found -> %v - %v", log.Time, log.Content)
 
-		util.CPrint("[light_red]%v - %v[reset]", log.Time, log.Log)
+		util.CPrint("[light_red]%v - %v[reset]", log.Time, log.Content)
 	}
 
 }

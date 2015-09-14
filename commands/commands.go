@@ -73,6 +73,7 @@ var (
 	fForce   bool   //
 	fFile    string //
 	fLevel   string //
+	fOffset  int    //
 	fRemove  bool   //
 	fSandbox bool   //
 	fStream  bool   //

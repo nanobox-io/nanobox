@@ -85,15 +85,6 @@ stream:
 
 		//
 		e := &entry{}
-
-		// check for any error message that cause mist to disconnect, and release
-		// nanobox
-		// if msg.Tags[0] == "err" {
-		// 	fmt.Printf(stylish.Warning("An unexpected error caused the sync stream to disconnect. Your sync should continue as normal, and you can see the log output from your dashboard."))
-		// 	break stream
-		// }
-
-		//
 		if err := json.Unmarshal([]byte(msg.Data), &e); err != nil {
 			LogFatal("[utils/sync] json.Unmarshal() failed", err)
 		}
