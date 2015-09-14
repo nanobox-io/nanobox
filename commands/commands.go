@@ -184,17 +184,17 @@ func runVagrantCommand(cmd *exec.Cmd) error {
 	// scan the command output modifying it according to
 	// http://nanodocs.gopagoda.io/engines/style-guide
 	scanner := bufio.NewScanner(pr)
+	scanner.Split(bufio.ScanRunes)
 	go func() {
 		for scanner.Scan() {
 
-			// replace all hard returns with new lines
-			out := strings.Replace(scanner.Text(), "\r", "\n", -1)
-
-			// trim all \r\n\t from ends of string
-			// out = strings.TrimSpace(out)
-
 			// print line
-			fmt.Printf("   %s\n", out)
+			switch scanner.Text() {
+			case "\n", "\r":
+				fmt.Printf("%s   ", scanner.Text())
+			default:
+				fmt.Print(scanner.Text())
+			}
 		}
 	}()
 
