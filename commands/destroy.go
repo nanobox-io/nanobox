@@ -62,27 +62,26 @@ func nanoDestroy(ccmd *cobra.Command, args []string) {
 	}
 
 	//
-	// destroy the vm; this needs to happen first to ensure there is a Vagrantfile
-	// to run the command with
+	// destroy the vm; this needs to happen before cleaning up the app to ensure
+	// there is a Vagrantfile to run the command with (otherwise it will just get
+	// re-created)
 	fmt.Printf(stylish.ProcessStart("destroying nanobox vm"))
 	if err := runVagrantCommand(exec.Command("vagrant", "destroy", "--force")); err != nil {
 
 		// dont care if the project no longer exists... thats what we're doing anyway
-		if err == err.(*os.PathError) {
-			return
-		} else {
+		if err != err.(*os.PathError) {
 			util.LogFatal("[commands/destroy] runVagrantCommand() failed", err)
 		}
 	}
 
-	// attempt to remove the entry regardless of whether its there or not
-	util.SudoExec("destroy remove", "Attempting to remove nano.dev domain from hosts file")
-
-	// remove app; this needs to happen last so that the app isn't just created
-	// again while running the vagrant command
+	// remove app; this needs to happen after the VM is destroyed so that the app
+	// isn't just created again upon running the vagrant command
 	fmt.Printf(stylish.Bullet("Deleting all nanobox files at: %s", config.AppDir))
 	if err := os.RemoveAll(config.AppDir); err != nil {
 		util.LogFatal("[commands/destroy] os.RemoveAll() failed", err)
 	}
 	fmt.Printf(stylish.ProcessEnd())
+
+	// attempt to remove the entry regardless of whether its there or not
+	util.SudoExec("destroy remove", "Attempting to remove nano.dev domain from hosts file")
 }

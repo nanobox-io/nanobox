@@ -19,7 +19,7 @@ func ParseBoxfile() *BoxfileConfig {
 
 	//
 	if _, err := os.Stat(boxfile.path); err != nil {
-		fmt.Println("Boxfile not found in current working directory. Exiting... ")
+		fmt.Println("Boxfile not found in current working directory, unable to continue...")
 		os.Exit(1)
 	}
 

@@ -40,6 +40,11 @@ func nanoInit(ccmd *cobra.Command, args []string) {
 	//
 	var provider, devmode string
 
+	//
+	// attempt to parse the boxfile first; we don't want to create an app folder
+	// if the app isn't able to be created
+	boxfile := config.ParseBoxfile()
+
 	// creates a project folder at ~/.nanobox/apps/<name> (if it doesn't already
 	// exists) where the Vagrantfile and .vagrant dir will live for each app
 	if di, _ := os.Stat(config.AppDir); di == nil {
@@ -65,10 +70,6 @@ func nanoInit(ccmd *cobra.Command, args []string) {
 
 	// create synced folders
 	synced_folders := fmt.Sprintf("nanobox.vm.synced_folder \"%v\", \"/vagrant/code/%v\"", config.CWDir, config.App)
-
-	//
-	// boxfile config
-	boxfile := config.ParseBoxfile()
 
 	// if an engine path is provided, add it to the synced_folders
 	if engine := boxfile.Build.Engine; engine != "" {

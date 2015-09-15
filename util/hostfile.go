@@ -30,7 +30,7 @@ func AddDevDomain() {
 	defer f.Close()
 
 	// write the entry to the file
-	entry := fmt.Sprintf("\n%-15v   %s # '%v' private network (added by nanobox)", config.Nanofile.IP, config.Nanofile.Domain, config.App)
+	entry := fmt.Sprintf("\n\n%-15v   %s # '%v' private network (added by nanobox)", config.Nanofile.IP, config.Nanofile.Domain, config.App)
 	if _, err := f.WriteString(entry); err != nil {
 		LogFatal("[utils/hostfile] WriteString() failed", err)
 	}
@@ -41,25 +41,30 @@ func AddDevDomain() {
 // RemoveDevDomain
 func RemoveDevDomain() {
 
+	var contents string
+
 	// open hosts file
-	f, err := os.OpenFile("/etc/hosts", os.O_RDWR|os.O_APPEND, 0644)
+	f, err := os.OpenFile("/etc/hosts", os.O_RDWR, 0644)
 	if err != nil {
 		LogFatal("[utils/hostfile] os.OpenFile() failed", err)
 	}
 	defer f.Close()
 
-	scanner := bufio.NewScanner(f)
-	contents := ""
-
 	// remove entry from /etc/hosts
+	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
 
-		// if the line doesn't contain the entry add it back to what is going to be
-		// re-written to the file
-		if !strings.HasPrefix(scanner.Text(), config.Nanofile.IP) {
-			contents += fmt.Sprintf("%s\n", scanner.Text())
+		// if the line contain the entry skip it
+		if strings.HasPrefix(scanner.Text(), config.Nanofile.IP) {
+			continue
 		}
+
+		// add each line back into the file
+		contents += fmt.Sprintf("%s\n", scanner.Text())
 	}
+
+	// trim the contents to avoid any extra newlines
+	contents = strings.TrimSpace(contents)
 
 	// write back the contents of the hosts file minus the removed entry
 	if err := ioutil.WriteFile("/etc/hosts", []byte(contents), 0644); err != nil {
