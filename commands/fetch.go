@@ -34,9 +34,9 @@ Description:
 
   Allowed formats when fetching an engine
   - engine-name
+	- engine-name=0.0.1
   - user/engine-name
-  - engine-name-0.0.1
-  - user/engine-name-0.0.1
+  - user/engine-name=0.0.1
 	`,
 
 	Run: nanoFetch,
@@ -70,10 +70,10 @@ func nanoFetch(ccmd *cobra.Command, args []string) {
 
 	// split args on "/" looking for a user:
 	// user/engine-name
-	// user/engine-name-0.0.1
+	// user/engine-name=0.0.1
 	split = strings.Split(args[0], "/")
 
-	// switch on the length to determin if the split resulted in a user and a engine
+	// switch on the length to determine if the split resulted in a user and a engine
 	// or just an engine
 	switch len(split) {
 
@@ -93,39 +93,53 @@ func nanoFetch(ccmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	// split on the archive to find the engine and the release (the release version
-	// being the last index in the split)
-	split = strings.Split(archive, "-")
+	// split on the archive to find the engine and the release
+	split = strings.Split(archive, "=")
 
-	// the engine name is reconstructed from the previous split, joining each index
-	// from the split upto but not including the final element (which should be the
-	// version)
-	engine = strings.Join(split[0:(len(split)-1)], "-")
+	// switch on the length to determine if the split resulted in a engine and version
+	// or just an engine
+	switch len(split) {
 
-	// the version is extracted from the split (being the last index in the split)
-	version = split[len(split)-1]
+	// if len is 1 then just an engine was found (no version specified)
+	case 1:
+		engine = split[0]
+
+		// if len is 2 then an engine and version were found
+	case 2:
+		engine = split[0]
+		version = split[1]
+	}
 
 	//
-	if _, err := api.GetEngine(api.UserSlug, engine); err != nil {
+	e, err := api.GetEngine(user, engine)
+	if err != nil {
 		config.Console.Info("Failed to GET engine '%v' - %v", engine, err)
 		os.Exit(1)
 	}
 
+	// if no version is provided, fetch the latest release
+	if version == "" {
+		version = e.ActiveReleaseID
+	}
+
 	//
 	path := fmt.Sprintf("http://api.nanobox.io/v1/engines/%v/releases/%v/download", engine, version)
+
+	// if a user is found, pull the engine from their engines
 	if user != "" {
 		path = fmt.Sprintf("http://api.nanobox.io/v1/engines/%v/%v/releases/%v/download", user, engine, version)
 	}
 
 	fmt.Printf(stylish.Bullet("Fetching engine at '%s'", path))
 
+	//
 	res, err := http.Get(path)
 	if err != nil {
 		util.LogFatal("[commands.fetch] http.Get() failed", err)
 	}
 	defer res.Body.Close()
 
-	//
+	// determine if the file is to be streamed to stdout or to a file
 	switch {
 
 	// write the download to the local file system
@@ -135,7 +149,8 @@ func nanoFetch(ccmd *cobra.Command, args []string) {
 		//
 		release, err := os.Create(fFile)
 		if err != nil {
-			util.LogFatal("[commands.fetch] os.Create() failed", err)
+			fmt.Printf("-> %v\n", err)
+			os.Exit(1)
 		}
 		defer release.Close()
 

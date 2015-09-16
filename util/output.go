@@ -15,3 +15,10 @@ func Printv(msg string, verbose bool) {
 		fmt.Printf(msg)
 	}
 }
+
+//
+func Debug(msg string, debug bool) {
+	if debug {
+		fmt.Printf(msg)
+	}
+}
