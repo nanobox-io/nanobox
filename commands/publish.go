@@ -147,8 +147,7 @@ Please ensure all required fields are provided and try again.`))
 
 			//
 			if _, err := api.CreateEngine(engine); err != nil {
-				fmt.Printf(stylish.ErrorHead("unable to create engine"))
-				fmt.Printf(stylish.ErrorBody("nanobox was unable to create and engine for your release due to the following error from the API:\n%v", err))
+				fmt.Printf(stylish.ErrBullet("Unable to create engine (%v).", err))
 				os.Exit(1)
 			}
 
@@ -268,8 +267,7 @@ Please ensure all required fields are provided and try again.`))
 	// if the release uploaded successfully to s3, created one on odin
 	fmt.Printf(stylish.Bullet("Uploading release to nanobox.io"))
 	if _, err := api.CreateEngineRelease(release.Name, release); err != nil {
-		fmt.Printf(stylish.ErrorHead("unable to publish release"))
-		fmt.Printf(stylish.ErrorBody("nanobox was unable to publish your release due to the following error from the API:\n%v", err))
+		fmt.Printf(stylish.ErrBullet("Unable to publish release (%v).", err))
 		os.Exit(1)
 	}
 }

@@ -113,7 +113,7 @@ func nanoFetch(ccmd *cobra.Command, args []string) {
 	//
 	e, err := api.GetEngine(user, engine)
 	if err != nil {
-		config.Console.Info("Failed to GET engine '%v' - %v", engine, err)
+		fmt.Printf(stylish.ErrBullet("No official engine, or engine for that user found."))
 		os.Exit(1)
 	}
 
@@ -139,6 +139,20 @@ func nanoFetch(ccmd *cobra.Command, args []string) {
 	}
 	defer res.Body.Close()
 
+	//
+	switch res.StatusCode / 100 {
+	case 2, 3:
+		break
+	case 4:
+		fmt.Printf(stylish.ErrBullet("No release by that version found for engine '%v'", engine))
+		os.Exit(1)
+	case 5:
+		fmt.Printf(stylish.ErrBullet("Failed to fetch release (%v).", res.Status))
+		os.Exit(1)
+	}
+
+	os.Exit(0)
+
 	// determine if the file is to be streamed to stdout or to a file
 	switch {
 
@@ -149,7 +163,7 @@ func nanoFetch(ccmd *cobra.Command, args []string) {
 		//
 		release, err := os.Create(fFile)
 		if err != nil {
-			fmt.Printf("-> %v\n", err)
+			fmt.Printf(stylish.ErrBullet("%v", err))
 			os.Exit(1)
 		}
 		defer release.Close()
