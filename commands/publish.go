@@ -54,7 +54,7 @@ func nanoPublish(ccmd *cobra.Command, args []string) {
 
 	// create a new release
 	fmt.Printf(stylish.Bullet("Creating release..."))
-	release := &api.EngineReleaseCreateOptions{}
+	release := &api.EngineRelease{}
 
 	//
 	if _, err := os.Stat("./Enginefile"); err != nil {
@@ -139,14 +139,14 @@ Please ensure all required fields are provided and try again.`))
 			fmt.Printf(stylish.SubTaskStart("Creating new engine on nanobox.io"))
 
 			//
-			engineCreateOptions := &api.EngineCreateOptions{
+			engine := &api.Engine{
 				Generic:      release.Generic,
 				LanguageName: release.Language,
 				Name:         release.Name,
 			}
 
 			//
-			if _, err := api.CreateEngine(engineCreateOptions); err != nil {
+			if _, err := api.CreateEngine(engine); err != nil {
 				fmt.Printf(stylish.ErrorHead("unable to create engine"))
 				fmt.Printf(stylish.ErrorBody("nanobox was unable to create and engine for your release due to the following error from the API:\n%v", err))
 				os.Exit(1)
