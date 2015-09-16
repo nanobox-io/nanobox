@@ -139,7 +139,13 @@ Please ensure all required fields are provided and try again.`))
 			fmt.Printf(stylish.SubTaskStart("Creating new engine on nanobox.io"))
 
 			//
-			engineCreateOptions := &api.EngineCreateOptions{Name: release.Name}
+			engineCreateOptions := &api.EngineCreateOptions{
+				Generic:      release.Generic,
+				LanguageName: release.Language,
+				Name:         release.Name,
+			}
+
+			//
 			if _, err := api.CreateEngine(engineCreateOptions); err != nil {
 				fmt.Printf(stylish.ErrorHead("unable to create engine"))
 				fmt.Printf(stylish.ErrorBody("nanobox was unable to create and engine for your release due to the following error from the API:\n%v", err))
