@@ -151,8 +151,6 @@ func nanoFetch(ccmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	os.Exit(0)
-
 	// determine if the file is to be streamed to stdout or to a file
 	switch {
 
