@@ -10,7 +10,6 @@ package commands
 //
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 
 	"github.com/go-fsnotify/fsnotify"
@@ -33,13 +32,11 @@ Description:
 	Run: nanoWatch,
 }
 
-var watcher *fsnotify.Watcher
-
 // nanoWatch
 func nanoWatch(ccmd *cobra.Command, args []string) {
 
 	// create and assign a new watcher
-	watcher, err := fsnotify.NewWatcher()
+	watcher, err := util.Watch()
 	if err != nil {
 		util.LogFatal("[commands/watch] fsnotify.NewWatcher() failed", err)
 	}
@@ -47,12 +44,6 @@ func nanoWatch(ccmd *cobra.Command, args []string) {
 
 	fmt.Printf("\n%v", stylish.Bullet("Watching for chages at '%s'", config.CWDir))
 	fmt.Printf("%v\n", stylish.SubBullet("(Ctrl + c to quit)"))
-
-	// starting at the root of the project, walk each file/directory searching for
-	// directories
-	if err := filepath.Walk(config.CWDir, watchDir); err != nil {
-		util.LogFatal("[commands/watch] filepath.Walk() failed", err)
-	}
 
 	for {
 		select {
@@ -83,18 +74,4 @@ func nanoWatch(ccmd *cobra.Command, args []string) {
 			fmt.Println("WATCH ERROR!", err)
 		}
 	}
-}
-
-// watchDir gets run as a walk func, searching for directories to add watchers to
-func watchDir(path string, fi os.FileInfo, err error) error {
-
-	// since fsnotify can watch all the files in a directory, watchers only need
-	// to be added to each nested directory
-	if fi.Mode().IsDir() {
-		if err = watcher.Add(path); err != nil {
-			return err
-		}
-	}
-
-	return nil
 }
