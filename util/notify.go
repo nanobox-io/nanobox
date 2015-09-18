@@ -16,7 +16,32 @@ import (
 var watcher *fsnotify.Watcher
 var libDirs = []string{}
 
-func Watch() (*fsnotify.Watcher, error) {
+func WatchCWD(fn func(e *fsnotify.Event, err error)) {
+	watcher, err := watch()
+	if err != nil {
+		fn(nil, err)
+		return
+	}
+	for {
+		select {
+		case event := <-watcher.Events:
+			if event.Op == fsnotify.Create {
+				file, err := os.Open(event.Name)
+				if err == nil {
+					fi, err := file.Stat()
+					if err == nil && fi.Mode().IsDir() {
+						watcher.Add(event.Name)
+					}
+				}
+			}
+			fn(&event, nil)
+		case err := <-watcher.Errors:
+			fn(nil, err)
+		}
+	}
+}
+
+func watch() (*fsnotify.Watcher, error) {
 	SetLibDirs()
 
 	var err error

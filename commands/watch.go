@@ -36,42 +36,33 @@ Description:
 func nanoWatch(ccmd *cobra.Command, args []string) {
 
 	// create and assign a new watcher
-	watcher, err := util.Watch()
-	if err != nil {
-		util.LogFatal("[commands/watch] fsnotify.NewWatcher() failed", err)
-	}
-	defer watcher.Close()
-
 	fmt.Printf("\n%v", stylish.Bullet("Watching for chages at '%s'", config.CWDir))
 	fmt.Printf("%v\n", stylish.SubBullet("(Ctrl + c to quit)"))
 
-	for {
-		select {
 
-		// watch for events
-		case event := <-watcher.Events:
+	util.WatchCWD(func(event *fsnotify.Event, err error) {
+		if err != nil {
+			fmt.Println("WATCH ERROR!", err)
+			return
+		}
+		if event.Op != fsnotify.Chmod {
 
-			// don't care about chmod updates
-			if event.Op != fsnotify.Chmod {
+			// if the file changes is the Boxfile do a full deploy...
+			if filepath.Base(event.Name) == "Boxfile" {
+				fmt.Printf(stylish.Bullet("Issuing deploy"))
+				nanoDeploy(nil, args)
 
-				// if the file changes is the Boxfile do a full deploy...
-				if filepath.Base(event.Name) == "Boxfile" {
-					fmt.Printf(stylish.Bullet("Issuing deploy"))
-					nanoDeploy(nil, args)
-
-					// ...otherwise just build
-				} else {
-					fmt.Printf(stylish.Bullet("Issuing build"))
-					nanoBuild(nil, args)
-				}
-
-				fmt.Printf("\n%v", stylish.Bullet("Watching for chages at '%s'", config.CWDir))
-				fmt.Printf("%v\n", stylish.SubBullet("(Ctrl + c to quit)"))
+				// ...otherwise just build
+			} else {
+				fmt.Printf(stylish.Bullet("Issuing build"))
+				nanoBuild(nil, args)
 			}
 
-			// watch for errors
-		case err := <-watcher.Errors:
-			fmt.Println("WATCH ERROR!", err)
+			fmt.Printf("\n%v", stylish.Bullet("Watching for chages at '%s'", config.CWDir))
+			fmt.Printf("%v\n", stylish.SubBullet("(Ctrl + c to quit)"))
 		}
-	}
+
+
+	})
+
 }

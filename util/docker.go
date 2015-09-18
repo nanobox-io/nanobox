@@ -42,7 +42,7 @@ func (d *Docker) Run() {
 
 	// forward all the signals to the nanobox server
 	forwardAllSignals()
-	notifyChanges()
+	go WatchCWD(notifyChanges)
 
 	// fake a web request
 	conn.Write([]byte(fmt.Sprintf("POST /exec?%v HTTP/1.1\r\n\r\n", d.Params)))
@@ -103,35 +103,21 @@ func forwardAllSignals() {
 	return
 }
 
-func notifyChanges() {
-	go func() {
-		watcher, err := Watch()
-		if err != nil {
-			return
+func notifyChanges(event *fsnotify.Event, err error) {
+	if err != nil {
+		fmt.Println("ERR!", err)
+		return
+	}
+
+	if event.Op != fsnotify.Chmod {
+		event.Name = strings.Replace(event.Name, config.CWDir, "", -1)
+		req, _ := http.NewRequest("POST", fmt.Sprintf("http://%s/file-change?filename=%s", config.ServerURI, event.Name), nil)
+
+		//
+		if _, err := http.DefaultClient.Do(req); err != nil {
+			fmt.Println("ERR!", err)
 		}
-		for {
-			select {
-
-			// watch for events
-			case event := <-watcher.Events:
-				// don't care about chmod updates
-				if event.Op != fsnotify.Chmod {
-					event.Name = strings.Replace(event.Name, config.CWDir, "", -1)
-					req, _ := http.NewRequest("POST", fmt.Sprintf("http://%s/file-change?filename=%s", config.ServerURI, event.Name), nil)
-
-					//
-					if _, err := http.DefaultClient.Do(req); err != nil {
-						fmt.Println("ERR!", err)
-					}
-				}
-
-				// watch for errors
-			case err := <-watcher.Errors:
-				fmt.Println("WATCH ERROR!", err)
-			}
-		}
-
-	}()
+	}
 }
 
 // monitorSize
