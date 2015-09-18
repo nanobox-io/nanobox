@@ -47,6 +47,16 @@ var (
 	}
 
 	//
+	imagesCmd = &cobra.Command{
+		Use:   "images",
+		Short: "",
+		Long:  ``,
+
+		//
+		// Run: func(cmd *cobra.Command, args []string) {},
+	}
+
+	//
 	productionCmd = &cobra.Command{
 		Use:   "production",
 		Short: "",
@@ -57,13 +67,13 @@ var (
 	}
 
 	//
-	imagesCmd = &cobra.Command{
-		Use:   "images",
+	sandboxCmd = &cobra.Command{
+		Use:   "sandbox",
 		Short: "",
 		Long:  ``,
 
 		//
-		// Run: func(cmd *cobra.Command, args []string) {},
+		Run: nanoSandbox,
 	}
 
 	// flags
@@ -141,13 +151,16 @@ func init() {
 	NanoboxCmd.AddCommand(updateCmd)
 	NanoboxCmd.AddCommand(watchCmd)
 
+	// 'images' subcommands
+	NanoboxCmd.AddCommand(imagesCmd)
+	imagesCmd.AddCommand(imagesUpdateCmd)
+
 	// 'production' subcommands
 	NanoboxCmd.AddCommand(productionCmd)
 	// productionCmd.AddCommand(deployCmd)
 
-	// 'images' subcommands
-	NanoboxCmd.AddCommand(imagesCmd)
-	imagesCmd.AddCommand(imagesUpdateCmd)
+	// 'sandbox' subcommands
+	NanoboxCmd.AddCommand(sandboxCmd)
 }
 
 // runVagrantCommand provides a wrapper around a standard cmd.Run() in which
