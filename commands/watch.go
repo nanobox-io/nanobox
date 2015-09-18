@@ -39,7 +39,6 @@ func nanoWatch(ccmd *cobra.Command, args []string) {
 	fmt.Printf("\n%v", stylish.Bullet("Watching for chages at '%s'", config.CWDir))
 	fmt.Printf("%v\n", stylish.SubBullet("(Ctrl + c to quit)"))
 
-
 	util.WatchCWD(func(event *fsnotify.Event, err error) {
 		if err != nil {
 			fmt.Println("WATCH ERROR!", err)
@@ -61,7 +60,6 @@ func nanoWatch(ccmd *cobra.Command, args []string) {
 			fmt.Printf("\n%v", stylish.Bullet("Watching for chages at '%s'", config.CWDir))
 			fmt.Printf("%v\n", stylish.SubBullet("(Ctrl + c to quit)"))
 		}
-
 
 	})
 
