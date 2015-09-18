@@ -19,13 +19,12 @@ func ParseBoxfile() *BoxfileConfig {
 
 	//
 	if _, err := os.Stat(boxfile.path); err != nil {
-		fmt.Println("Boxfile not found in current working directory, unable to continue...")
-		os.Exit(1)
+		fmt.Printf(stylish.Bullet("Boxfile not found, using defaults..."))
 	}
 
 	//
 	if err := ParseConfig(boxfile.path, boxfile); err != nil {
-		fmt.Printf("Nanobox failed to parse your Boxfile. Please ensure it is valid YAML and try again.\n")
+		fmt.Printf("Nanobox failed to parse Boxfile. Please ensure it is valid YAML and try again.\n")
 		os.Exit(1)
 	}
 
