@@ -10,7 +10,6 @@ package commands
 //
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 
 	"github.com/go-fsnotify/fsnotify"
@@ -33,68 +32,35 @@ Description:
 	Run: nanoWatch,
 }
 
-var watcher *fsnotify.Watcher
-
 // nanoWatch
 func nanoWatch(ccmd *cobra.Command, args []string) {
 
 	// create and assign a new watcher
-	watcher, err := fsnotify.NewWatcher()
-	if err != nil {
-		util.LogFatal("[commands/watch] fsnotify.NewWatcher() failed", err)
-	}
-	defer watcher.Close()
-
 	fmt.Printf("\n%v", stylish.Bullet("Watching for chages at '%s'", config.CWDir))
 	fmt.Printf("%v\n", stylish.SubBullet("(Ctrl + c to quit)"))
 
-	// starting at the root of the project, walk each file/directory searching for
-	// directories
-	if err := filepath.Walk(config.CWDir, watchDir); err != nil {
-		util.LogFatal("[commands/watch] filepath.Walk() failed", err)
-	}
+	util.WatchCWD(func(event *fsnotify.Event, err error) {
+		if err != nil {
+			fmt.Println("WATCH ERROR!", err)
+			return
+		}
+		if event.Op != fsnotify.Chmod {
 
-	for {
-		select {
+			// if the file changes is the Boxfile do a full deploy...
+			if filepath.Base(event.Name) == "Boxfile" {
+				fmt.Printf(stylish.Bullet("Issuing deploy"))
+				nanoDeploy(nil, args)
 
-		// watch for events
-		case event := <-watcher.Events:
-
-			// don't care about chmod updates
-			if event.Op != fsnotify.Chmod {
-
-				// if the file changes is the Boxfile do a full deploy...
-				if filepath.Base(event.Name) == "Boxfile" {
-					fmt.Printf(stylish.Bullet("Issuing deploy"))
-					nanoDeploy(nil, args)
-
-					// ...otherwise just build
-				} else {
-					fmt.Printf(stylish.Bullet("Issuing build"))
-					nanoBuild(nil, args)
-				}
-
-				fmt.Printf("\n%v", stylish.Bullet("Watching for chages at '%s'", config.CWDir))
-				fmt.Printf("%v\n", stylish.SubBullet("(Ctrl + c to quit)"))
+				// ...otherwise just build
+			} else {
+				fmt.Printf(stylish.Bullet("Issuing build"))
+				nanoBuild(nil, args)
 			}
 
-			// watch for errors
-		case err := <-watcher.Errors:
-			fmt.Println("WATCH ERROR!", err)
+			fmt.Printf("\n%v", stylish.Bullet("Watching for chages at '%s'", config.CWDir))
+			fmt.Printf("%v\n", stylish.SubBullet("(Ctrl + c to quit)"))
 		}
-	}
-}
 
-// watchDir gets run as a walk func, searching for directories to add watchers to
-func watchDir(path string, fi os.FileInfo, err error) error {
+	})
 
-	// since fsnotify can watch all the files in a directory, watchers only need
-	// to be added to each nested directory
-	if fi.Mode().IsDir() {
-		if err = watcher.Add(path); err != nil {
-			return err
-		}
-	}
-
-	return nil
 }

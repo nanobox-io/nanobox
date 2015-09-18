@@ -15,10 +15,12 @@ import (
 	"os"
 	ossignal "os/signal"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/docker/docker/pkg/signal"
 	"github.com/docker/docker/pkg/term"
+	"github.com/go-fsnotify/fsnotify"
 
 	"github.com/pagodabox/nanobox-cli/config"
 )
@@ -40,6 +42,7 @@ func (d *Docker) Run() {
 
 	// forward all the signals to the nanobox server
 	forwardAllSignals()
+	go WatchCWD(notifyChanges)
 
 	// fake a web request
 	conn.Write([]byte(fmt.Sprintf("POST /exec?%v HTTP/1.1\r\n\r\n", d.Params)))
@@ -53,7 +56,7 @@ func (d *Docker) Run() {
 	// monitor the window size and send a request whenever we resize
 	monitorSize(outFd, d.Params)
 
-	// 
+	//
 	oldState, err = term.SetRawTerminal(inFd)
 	if err != nil {
 		fmt.Println(err)
@@ -98,6 +101,23 @@ func forwardAllSignals() {
 		}
 	}()
 	return
+}
+
+func notifyChanges(event *fsnotify.Event, err error) {
+	if err != nil {
+		fmt.Println("ERR!", err)
+		return
+	}
+
+	if event.Op != fsnotify.Chmod {
+		event.Name = strings.Replace(event.Name, config.CWDir, "", -1)
+		req, _ := http.NewRequest("POST", fmt.Sprintf("http://%s/file-change?filename=%s", config.ServerURI, event.Name), nil)
+
+		//
+		if _, err := http.DefaultClient.Do(req); err != nil {
+			fmt.Println("ERR!", err)
+		}
+	}
 }
 
 // monitorSize
