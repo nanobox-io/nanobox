@@ -25,7 +25,8 @@ var bootstrapCmd = &cobra.Command{
 Description:
   Runs an engine's bootstrap script - downloads code & launches VM`,
 
-	Run: nanoBootstrap,
+	PreRun: VMIsRunning,
+	Run:    nanoBootstrap,
 }
 
 //

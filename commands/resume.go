@@ -26,7 +26,8 @@ var resumeCmd = &cobra.Command{
 Description:
   Resumes the halted/suspended nanobox VM by issuing a "vagrant resume"`,
 
-	Run: nanoResume,
+	PreRun: CheckDependencies,
+	Run:    nanoResume,
 }
 
 // nanoResume runs 'vagrant resume'

@@ -30,7 +30,7 @@ func AddDevDomain() {
 	defer f.Close()
 
 	// write the entry to the file
-	entry := fmt.Sprintf("\n\n%-15v   %s # '%v' private network (added by nanobox)", config.Nanofile.IP, config.Nanofile.Domain, config.App)
+	entry := fmt.Sprintf("\n%-15v   %s # '%v' private network (added by nanobox)", config.Nanofile.IP, config.Nanofile.Domain, config.App)
 	if _, err := f.WriteString(entry); err != nil {
 		Fatal("[utils/hostfile] WriteString() failed", err)
 	}

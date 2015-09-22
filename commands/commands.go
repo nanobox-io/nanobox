@@ -15,6 +15,8 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/pagodabox/nanobox-cli/config"
+	"github.com/pagodabox/nanobox-cli/util"
+	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
 //
@@ -157,4 +159,22 @@ func init() {
 
 	// 'sandbox' subcommands
 	NanoboxCmd.AddCommand(sandboxCmd)
+}
+
+// PRERUN COMMANDS
+
+// VMIsRunning
+func VMIsRunning(ccmd *cobra.Command, args []string) {
+	if util.GetVMStatus() != "running" {
+		fmt.Printf(stylish.ErrBullet("Please start your virtual machine before running this command."))
+		os.Exit(1)
+	}
+}
+
+// CheckDependencies
+func CheckDependencies(ccmd *cobra.Command, args []string) {
+	if fi, _ := os.Stat(config.AppDir); fi == nil {
+		fmt.Printf(stylish.ErrBullet("Please create your project before running this command."))
+		os.Exit(1)
+	}
 }

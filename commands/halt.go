@@ -9,14 +9,12 @@ package commands
 
 //
 import (
-	"fmt"
 	"os"
 	"os/exec"
 
 	"github.com/spf13/cobra"
 
 	"github.com/pagodabox/nanobox-cli/util"
-	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
 //
@@ -29,6 +27,7 @@ Description:
 
   -f, --force[=false]: Skips confirmation and forces the nanobox VM to halt`,
 
+	PreRun: CheckDependencies,
 	Run: nanoHalt,
 }
 
@@ -41,8 +40,8 @@ func nanoHalt(ccmd *cobra.Command, args []string) {
 		switch util.Prompt("Are you sure you want to halt this VM (y/N)? ") {
 
 		// if positive confirmation, proceed and halt
-		case "Y", "y":
-			fmt.Printf(stylish.Bullet("Halt confirmed, continuing..."))
+		case "Y", "y", "yes":
+			break
 
 		// if negative confirmation, exit w/o halting
 		default:
@@ -51,9 +50,7 @@ func nanoHalt(ccmd *cobra.Command, args []string) {
 	}
 
 	// halt the vm...
-	fmt.Printf(stylish.ProcessStart("halting nanobox vm"))
 	if err := util.RunVagrantCommand(exec.Command("vagrant", "halt", "--force")); err != nil {
 		util.Fatal("[commands/halt] util.RunVagrantCommand() failed", err)
 	}
-	fmt.Printf(stylish.ProcessEnd())
 }

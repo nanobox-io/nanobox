@@ -33,7 +33,8 @@ var logCmd = &cobra.Command{
 Description:
   Provides the last 100 lines of historical log output by default.`,
 
-	Run: nanoLog,
+	PreRun: VMIsRunning,
+	Run:    nanoLog,
 }
 
 // Log represents the structure of a log returned from Logtap or Stormpack

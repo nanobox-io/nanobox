@@ -27,7 +27,8 @@ var consoleCmd = &cobra.Command{
 Description:
   Opens an interactive terminal from inside your app on the nanobox VM`,
 
-	Run: nanoConsole,
+	PreRun: VMIsRunning,
+	Run:    nanoConsole,
 }
 
 //

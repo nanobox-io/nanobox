@@ -21,53 +21,70 @@ import (
 )
 
 // GetVMUUID tries to return the VMs uuid found in it's corresponding .vangrant
-// folder. If a uuid is not found than the VM has not yet been created.
-func GetVMUUID() ([]byte, error) {
-	return ioutil.ReadFile(fmt.Sprintf("%v/.vagrant/machines/%v/%v/index_uuid", config.AppDir, config.App, config.Nanofile.Provider))
+// folder. If a uuid is not found than the VM has not yet been created. Don't
+// really care about the error here since the value will be "" if there is no
+// file to read
+func GetVMUUID() string {
+	b, _ := ioutil.ReadFile(fmt.Sprintf("%v/.vagrant/machines/%v/%v/index_uuid", config.AppDir, config.App, config.Nanofile.Provider))
+	return string(b)
 }
 
 //
-func GetVMStatus() error {
+func GetVMStatus() string {
+
+	var status string
+
+	uuid := GetVMUUID()
+	if uuid == "" {
+		return ""
+	}
 
 	//
 	cmd := exec.Command("vagrant", "global-status")
 
+	//
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		panic(err)
 	}
 
 	//
+	uuid = string([]rune(uuid))[:7]
+
+	//
 	scanner := bufio.NewScanner(stdout)
-	scanner.Split(bufio.ScanRunes)
 	go func() {
 		for scanner.Scan() {
 
-			fmt.Println(scanner.Text())
+			if strings.HasPrefix(scanner.Text(), uuid) {
 
-			// print line
-			// switch scanner.Text() {
-			// case "\n", "\r":
-			// 	fmt.Printf("%s   ", scanner.Text())
-			// default:
-			// 	fmt.Print(scanner.Text())
-			// }
+				// this is the most straight forward way to extract the VM status (since
+				// only a few are needed)
+				switch {
+				case strings.Contains(scanner.Text(), "running"):
+					status = "running"
+				case strings.Contains(scanner.Text(), "suspended"):
+					status = "suspended"
+				case strings.Contains(scanner.Text(), "not created"):
+					status = "halted"
+				}
+			}
 		}
 	}()
 
 	// start the command; we need this to 'fire and forget' so that we can manually
 	// capture and modify the commands output
 	if err := cmd.Start(); err != nil {
-		return err
+		panic(err)
 	}
 
 	// wait for the command to complete/fail and exit, giving us a chance to scan
 	// the output
 	if err := cmd.Wait(); err != nil {
-		return err
+		panic(err)
 	}
 
-	return nil
+	return status
 }
 
 // RunVagrantCommand provides a wrapper around a standard cmd.Run() in which
@@ -76,11 +93,6 @@ func GetVMStatus() error {
 // commands w/o contaminating a users codebase.
 func RunVagrantCommand(cmd *exec.Cmd) error {
 
-	// GetVMStatus()
-	// os.Exit(0)
-
-	fmt.Printf(stylish.Bullet("running '%v'", strings.Trim(fmt.Sprint(cmd.Args), "[]")))
-
 	// run the command from ~/.nanobox/apps/<config.App>. if the directory doesn't
 	// exist, simply return; running the command from the directory that contains
 	// the Vagratfile ensure that the command can atleast run (especially in cases
@@ -88,6 +100,9 @@ func RunVagrantCommand(cmd *exec.Cmd) error {
 	if err := os.Chdir(config.AppDir); err != nil {
 		return err
 	}
+
+	// fmt.Printf(stylish.ProcessStart("%ving nanobox vm", cmd.Args[1]))
+	fmt.Printf(stylish.Bullet("running '%v'", strings.Trim(fmt.Sprint(cmd.Args), "[]")))
 
 	// create a pipe that we can pipe the cmd standard output's too. The reason this
 	// is done rather than just piping directly to os standard outputs and .Run()ing
@@ -138,6 +153,8 @@ func RunVagrantCommand(cmd *exec.Cmd) error {
 	if err := os.Chdir(config.CWDir); err != nil {
 		return err
 	}
+
+	fmt.Printf(stylish.ProcessEnd())
 
 	return nil
 }

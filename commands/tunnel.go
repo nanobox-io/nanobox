@@ -26,7 +26,8 @@ var tunnelCmd = &cobra.Command{
 Description:
   Displays port forward information for your app's running services`,
 
-	Run: nanoTunnel,
+	PreRun: VMIsRunning,
+	Run:    nanoTunnel,
 }
 
 //

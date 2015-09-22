@@ -51,7 +51,6 @@ func init() {
 	Console = lumber.NewConsoleLogger(loglvl)
 
 	// create a logger
-	Console.Debug("Creating logger...")
 	if Log, err = lumber.NewFileLogger(logfile, loglvl, lumber.ROTATE, 100, 1, 100); err != nil {
 		panic(err)
 	}

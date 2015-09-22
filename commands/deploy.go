@@ -30,7 +30,8 @@ Description:
 
   -f, --force[=false]: Clears cached libraries the project might use`,
 
-	Run: nanoDeploy,
+	PreRun: VMIsRunning,
+	Run:    nanoDeploy,
 }
 
 //

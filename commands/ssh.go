@@ -28,9 +28,10 @@ var sshCmd = &cobra.Command{
 	Long: `
 Description:
   SSHes into the nanobox VM by issuing a "vagrant ssh"`,
-
-	Run:    nanoSSH,
 	Hidden: true,
+
+	PreRun: VMIsRunning,
+	Run:    nanoSSH,
 }
 
 // nanoSSH

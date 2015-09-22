@@ -26,7 +26,8 @@ var reloadCmd = &cobra.Command{
 Description:
   Reloads the nanobox VM by issuing a "vagrant reload --provision"`,
 
-	Run: nanoReload,
+	PreRun: CheckDependencies,
+	Run:    nanoReload,
 }
 
 // nanoReload runs 'vagrant reload --provision'

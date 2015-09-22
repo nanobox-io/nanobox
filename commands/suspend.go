@@ -26,7 +26,8 @@ var suspendCmd = &cobra.Command{
 Description:
   Suspends the nanobox VM by issuing a "vagrant suspend"`,
 
-	Run: nanoSuspend,
+	PreRun: CheckDependencies,
+	Run:    nanoSuspend,
 }
 
 // nanoSuspend runs 'vagrant suspend'

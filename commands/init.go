@@ -59,14 +59,14 @@ func nanoInit(ccmd *cobra.Command, args []string) {
 	// only if one doesn't already exist (unless forced)
 	if !fForce {
 		if fi, _ := os.Stat(config.AppDir + "/Vagrantfile"); fi != nil {
-			fmt.Printf(stylish.Bullet("Nanobox Vagrantfile detected, skipping configuration..."))
+			// fmt.Printf(stylish.Bullet("Nanobox Vagrantfile detected, skipping configuration..."))
 			return
 		}
 	}
 
 	//
 	fmt.Printf(stylish.Bullet("Preparing nanobox Vagrantfile"))
-	fmt.Printf(stylish.SubBullet("- Adding code directory mount (/vagrant/code/%v)", config.App))
+	// fmt.Printf(stylish.SubBullet("- Adding code directory mount (/vagrant/code/%v)", config.App))
 
 	// create synced folders
 	synced_folders := fmt.Sprintf("nanobox.vm.synced_folder \"%v\", \"/vagrant/code/%v\"", config.CWDir, config.App)
@@ -84,7 +84,7 @@ func nanoInit(ccmd *cobra.Command, args []string) {
 			base := filepath.Base(fp)
 
 			//
-			fmt.Printf(stylish.SubBullet("- Adding engine directory mount (/vagrant/engines/%v)", base))
+			// fmt.Printf(stylish.SubBullet("- Adding engine directory mount (/vagrant/engines/%v)", base))
 
 			synced_folders += fmt.Sprintf("\n    nanobox.vm.synced_folder \"%v\", \"/vagrant/engines/%v\"", fp, base)
 		}
@@ -93,12 +93,12 @@ func nanoInit(ccmd *cobra.Command, args []string) {
 	//
 	// nanofile config
 	// create nanobox private network
-	fmt.Printf(stylish.SubBullet("- Adding nanobox private network (%v)", config.Nanofile.IP))
+	// fmt.Printf(stylish.SubBullet("- Adding nanobox private network (%v)", config.Nanofile.IP))
 	network := fmt.Sprintf("nanobox.vm.network \"private_network\", ip: \"%v\"", config.Nanofile.IP)
 
 	//
 	// configure provider
-	fmt.Printf(stylish.SubBullet("- Adding detected provider (%v)", config.Nanofile.Provider))
+	// fmt.Printf(stylish.SubBullet("- Adding detected provider (%v)", config.Nanofile.Provider))
 
 	//
 	switch config.Nanofile.Provider {
@@ -230,5 +230,5 @@ end`, version, config.App, network, synced_folders, provider, devmode)
 	}
 
 	//
-	fmt.Println("   [√] nanobox Vagrantfile generated at: " + config.AppDir + "/Vagrantfile")
+	fmt.Printf("Vagrantfile generated at '%v/Vagrantfile'\n", config.AppDir)
 }

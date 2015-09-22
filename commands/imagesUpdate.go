@@ -26,7 +26,8 @@ var imagesUpdateCmd = &cobra.Command{
 Description:
   Updates the nanobox docker images`,
 
-	Run: imagesUpdate,
+	PreRun: VMIsRunning,
+	Run:    imagesUpdate,
 }
 
 // imagesUpdate

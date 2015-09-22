@@ -26,7 +26,8 @@ var buildCmd = &cobra.Command{
 Description:
   Rebuilds/compiles your project`,
 
-	Run: nanoBuild,
+	PreRun: VMIsRunning,
+	Run:    nanoBuild,
 }
 
 // nanoBuild

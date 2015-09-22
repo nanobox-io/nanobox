@@ -19,7 +19,6 @@ func ParseBoxfile() *BoxfileConfig {
 
 	//
 	if _, err := os.Stat(boxfile.path); err != nil {
-		fmt.Printf("Boxfile not found, using defaults...\n")
 		return boxfile
 	}
 

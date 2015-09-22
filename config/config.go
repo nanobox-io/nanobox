@@ -102,7 +102,6 @@ func init() {
 	// check for a ~/.nanobox/apps dir and create one if it's not found
 	apps := filepath.Clean(Root + "/apps")
 	if di, _ := os.Stat(apps); di == nil {
-		fmt.Printf(stylish.Bullet("Creating %s directory", apps))
 		if err := os.Mkdir(apps, 0755); err != nil {
 			panic(err)
 		}

@@ -8,7 +8,7 @@
 package config
 
 import (
-	"fmt"
+	// "fmt"
 	"path/filepath"
 	// "io/ioutil"
 	// "net/http"
@@ -20,7 +20,7 @@ import (
 
 	// "github.com/pagodabox/pagodabox-cli/commands"
 	// "github.com/pagodabox/pagodabox-cli/util"
-	"github.com/pagodabox/nanobox-golang-stylish"
+	// "github.com/pagodabox/nanobox-golang-stylish"
 )
 
 // init
@@ -29,7 +29,6 @@ func init() {
 	// check for a ~/.nanobox/.update file and create one if it's not found
 	updatefile := filepath.Clean(Root + "/.update")
 	if fi, _ := os.Stat(updatefile); fi == nil {
-		fmt.Printf(stylish.Bullet("Creating %s directory", updatefile))
 		if _, err := os.Create(updatefile); err != nil {
 			panic(err)
 		}
