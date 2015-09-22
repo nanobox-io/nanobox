@@ -23,6 +23,8 @@ import (
 
 //
 var initCmd = &cobra.Command{
+	Hidden: true,
+
 	Use:   "init",
 	Short: "Creates a nanobox-flavored Vagrantfile",
 	Long: `

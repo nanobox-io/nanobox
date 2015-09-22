@@ -51,12 +51,7 @@ func nanoBuild(ccmd *cobra.Command, args []string) {
 	case "complete":
 		fmt.Printf(stylish.Bullet("Build complete... Navigate to %v.nano.dev to view your app.", config.App))
 
-		// failed sync's wont be handled here, as the server or hooks should already
-		// be providing output
-	case "errored":
-		// fmt.Printf(stylish.Error("Build failed", "Your build failed to well... build"))
-
-		// if a build is run w/o having first run a deploy
+	// if a build is run w/o having first run a deploy
 	case "unavailable":
 		fmt.Printf(stylish.ErrBullet("Before you can run a build, you must first deploy."))
 	}

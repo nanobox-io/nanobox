@@ -44,6 +44,16 @@ var (
 	}
 
 	//
+	engineCmd = &cobra.Command{
+		Use:   "engine",
+		Short: "",
+		Long:  ``,
+
+		//
+		// Run: func(cmd *cobra.Command, args []string) {},
+	}
+
+	//
 	imagesCmd = &cobra.Command{
 		Use:   "images",
 		Short: "",
@@ -63,16 +73,6 @@ var (
 		// Run: func(cmd *cobra.Command, args []string) {},
 	}
 
-	//
-	sandboxCmd = &cobra.Command{
-		Use:   "sandbox",
-		Short: "",
-		Long:  ``,
-
-		//
-		Run: nanoSandbox,
-	}
-
 	// persistent (global) flags
 	fDebug   bool //
 	fDevmode bool //
@@ -85,6 +85,7 @@ var (
 	fLevel   string //
 	fOffset  int    //
 	fRemove  bool   //
+	fRun     bool   //
 	fSandbox bool   //
 	fStream  bool   //
 	fTunnel  string //
@@ -107,8 +108,9 @@ func init() {
 
 	// internal flags
 	NanoboxCmd.PersistentFlags().BoolVarP(&fDebug, "debug", "", false, "")
-	NanoboxCmd.PersistentFlags().BoolVarP(&fDevmode, "dev", "", false, "")
 	NanoboxCmd.PersistentFlags().MarkHidden("debug")
+
+	NanoboxCmd.PersistentFlags().BoolVarP(&fDevmode, "dev", "", false, "")
 	NanoboxCmd.PersistentFlags().MarkHidden("dev")
 
 	// persistent flags
@@ -126,22 +128,25 @@ func init() {
 	// NanoboxCmd.SetUsageTemplate("")
 
 	// all available nanobox commands
+
+	// 'hidden' commands
+	NanoboxCmd.AddCommand(createCmd)
+	NanoboxCmd.AddCommand(initCmd)
+	NanoboxCmd.AddCommand(sshCmd)
+
+	// 'public' commands
 	NanoboxCmd.AddCommand(bootstrapCmd)
 	NanoboxCmd.AddCommand(buildCmd)
 	NanoboxCmd.AddCommand(consoleCmd)
-	NanoboxCmd.AddCommand(createCmd)
 	NanoboxCmd.AddCommand(deployCmd)
 	NanoboxCmd.AddCommand(destroyCmd)
 	NanoboxCmd.AddCommand(execCmd)
-	NanoboxCmd.AddCommand(fetchCmd)
 	NanoboxCmd.AddCommand(haltCmd)
-	NanoboxCmd.AddCommand(initCmd)
 	NanoboxCmd.AddCommand(logCmd)
 	NanoboxCmd.AddCommand(newCmd)
 	NanoboxCmd.AddCommand(publishCmd)
 	NanoboxCmd.AddCommand(reloadCmd)
 	NanoboxCmd.AddCommand(resumeCmd)
-	NanoboxCmd.AddCommand(sshCmd)
 	NanoboxCmd.AddCommand(statusCmd)
 	NanoboxCmd.AddCommand(suspendCmd)
 	NanoboxCmd.AddCommand(tunnelCmd)
@@ -149,16 +154,17 @@ func init() {
 	NanoboxCmd.AddCommand(updateCmd)
 	NanoboxCmd.AddCommand(watchCmd)
 
-	// 'images' subcommands
-	NanoboxCmd.AddCommand(imagesCmd)
-	imagesCmd.AddCommand(imagesUpdateCmd)
+	// 'engine' subcommand
+	NanoboxCmd.AddCommand(engineCmd)
+	engineCmd.AddCommand(engineFetchCmd)
+	engineCmd.AddCommand(enginePublishCmd)
 
-	// 'production' subcommands
+	// 'images' subcommand
+	NanoboxCmd.AddCommand(imagesCmd)
+
+	// 'production' subcommand
 	NanoboxCmd.AddCommand(productionCmd)
 	// productionCmd.AddCommand(deployCmd)
-
-	// 'sandbox' subcommands
-	NanoboxCmd.AddCommand(sandboxCmd)
 }
 
 // PRERUN COMMANDS
@@ -171,8 +177,8 @@ func VMIsRunning(ccmd *cobra.Command, args []string) {
 	}
 }
 
-// CheckDependencies
-func CheckDependencies(ccmd *cobra.Command, args []string) {
+// ProjectIsCreated
+func ProjectIsCreated(ccmd *cobra.Command, args []string) {
 	if fi, _ := os.Stat(config.AppDir); fi == nil {
 		fmt.Printf(stylish.ErrBullet("Please create your project before running this command."))
 		os.Exit(1)

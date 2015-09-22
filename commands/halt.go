@@ -27,7 +27,7 @@ Description:
 
   -f, --force[=false]: Skips confirmation and forces the nanobox VM to halt`,
 
-	PreRun: CheckDependencies,
+	PreRun: ProjectIsCreated,
 	Run: nanoHalt,
 }
 

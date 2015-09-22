@@ -26,7 +26,7 @@ var statusCmd = &cobra.Command{
 Description:
   Displays all current nanobox VM's`,
 
-	PreRun: CheckDependencies,
+	PreRun: ProjectIsCreated,
 	Run:    nanoStatus,
 }
 

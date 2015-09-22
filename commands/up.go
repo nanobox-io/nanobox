@@ -15,7 +15,7 @@ import (
 //
 var upCmd = &cobra.Command{
 	Use:   "up",
-	Short: "Resumes the halted/suspended nanobox VM",
+	Short: "",
 	Long: `
 Description:
   Runs 'nanobox create' and then 'nanobox deploy'`,
@@ -25,23 +25,29 @@ Description:
 
 //
 func init() {
-	upCmd.Flags().BoolVarP(&fWatch, "watch", "w", false, "Watches your app for file changes")
+	upCmd.Flags().BoolVarP(&fRun, "run", "", false, "Watches your app for file changes")
 }
 
-// nanoUp runs 'vagrant up'
+//
 func nanoUp(ccmd *cobra.Command, args []string) {
 
-	// run a create command to create a Vagrantfile and boot the VM...
-	nanoCreate(nil, args)
+	switch {
 
-	// upgrade all nanobox docker images
-	imagesUpdate(nil, args)
+	// by default, create the environment, update all images, issue a deploy and
+	// drop the user into a console
+	default:
+		nanoCreate(nil, args)
+		imagesUpdate(nil, args)
+		nanoDeploy(nil, args)
+		nanoConsole(nil, args)
 
-	// ...issue a deploy...
-	nanoDeploy(nil, args)
-
-	// ...begin watching the file system for changes
-	if fWatch {
-		nanoWatch(nil, args)
+	// if the --run flag is found, create the environment, update docker images,
+	// issue a deploy --run, and watch for file changes, and show logs
+	case fRun:
+		nanoCreate(nil, args)
+		imagesUpdate(nil, args)
+		nanoDeploy(nil, []string{"--run"})
+		go nanoWatch(nil, args)
+		go nanoLog(nil, []string{"--stream"})
 	}
 }

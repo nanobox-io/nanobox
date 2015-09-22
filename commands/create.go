@@ -24,6 +24,8 @@ import (
 
 //
 var createCmd = &cobra.Command{
+	Hidden: true,
+
 	Use:   "create",
 	Short: "Runs 'nanobox init', then boots the nanobox VM",
 	Long: `

@@ -25,7 +25,7 @@ import (
 )
 
 //
-var fetchCmd = &cobra.Command{
+var engineFetchCmd = &cobra.Command{
 	Use:   "fetch",
 	Short: "Fetches an engine from nanobox.io",
 	Long: `
@@ -39,7 +39,7 @@ Description:
   - user/engine-name=0.0.1
 	`,
 
-	Run: nanoFetch,
+	Run: nanoEngineFetch,
 }
 
 //
@@ -47,11 +47,11 @@ func init() {
 
 	// no default is set here because we define the value later, once we know the
 	// name and version of the engine they are fetching
-	fetchCmd.Flags().StringVarP(&fFile, "ouput-document", "O", "", "specify where to save the engine")
+	engineFetchCmd.Flags().StringVarP(&fFile, "ouput-document", "O", "", "specify where to save the engine")
 }
 
-// nanoFetch
-func nanoFetch(ccmd *cobra.Command, args []string) {
+// nanoEngineFetch
+func nanoEngineFetch(ccmd *cobra.Command, args []string) {
 
 	//
 	// api.UserSlug, api.AuthToken = auth.Authenticate()
