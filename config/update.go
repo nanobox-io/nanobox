@@ -46,7 +46,7 @@ func init() {
 // 	//
 // 	release, err := getRelease()
 // 	if err != nil {
-// 		util.LogFatal("[update] getRelease() failed", err)
+// 		util.Fatal("[update] getRelease() failed", err)
 // 	}
 //
 // 	if less := config.Version.LessThan(*release); !less {
@@ -68,7 +68,7 @@ func init() {
 // 	//
 // 	fi, err := os.Stat(config.UpdateFile)
 // 	if err != nil {
-// 		util.LogFatal("[update] os.Stat() failed", err)
+// 		util.Fatal("[update] os.Stat() failed", err)
 // 	}
 //
 // 	// check when the last time our .update file was modified
@@ -89,7 +89,7 @@ func init() {
 // 		//
 // 		release, err := getRelease()
 // 		if err != nil {
-// 			util.LogFatal("[update] getRelease() failed", err)
+// 			util.Fatal("[update] getRelease() failed", err)
 // 		}
 //
 // 		// check to see if the current version of the CLI is less than the release
@@ -99,7 +99,7 @@ func init() {
 // 			//
 // 			config.Console.Info("[update] update required...")
 //
-// 			util.CPrint(`
+// 			util.Printc(`
 // There is a newer version of the CLI available:
 // [yellow]Current version: %v[reset]
 // [green]Available version: %v[reset]
@@ -111,7 +111,7 @@ func init() {
 // 				//
 // 				config.Console.Info("[update] major update detected")
 //
-// 				util.CPrint(`
+// 				util.Printc(`
 // This is a [red]major[reset] update (required). Major updates contain fixes for
 // breaking issues and bugs, or updates needed for the CLI to continue working with
 // other Pagodab Box services. [red]The CLI will not function without this update![reset]`)
@@ -124,7 +124,7 @@ func init() {
 // 				//
 // 				config.Console.Info("[update] minor update detected")
 //
-// 				util.CPrint(`
+// 				util.Printc(`
 // This is a [yellow]minor[reset] update (not required). Minor updates contain
 // fixes to small issues or bugs that may effect workflow. You can continue to use
 // the CLI, however its recommneded you update.`)
@@ -137,7 +137,7 @@ func init() {
 // 				//
 // 				config.Console.Info("[update] patch update detected")
 //
-// 				util.CPrint(`
+// 				util.Printc(`
 // This is a [green]patch[reset] (not required). Patches contain fixes to output,
 // help text, or improvements to performance that may enhance the quality of the
 // CLI. You can continue to use the CLI or update with [green]'pagoda update'[reset].`)
@@ -159,7 +159,7 @@ func init() {
 //
 // 		// otherwise exit
 // 	default:
-// 		util.CPrint("You can manually update at any time with [green]'pagoda update'[reset].")
+// 		util.Printc("You can manually update at any time with [green]'pagoda update'[reset].")
 // 		os.Exit(0)
 // 	}
 //
@@ -171,7 +171,7 @@ func init() {
 // // touchUpdate updates the modification time of the .update file
 // func touchUpdate() {
 // 	if err := os.Chtimes(config.UpdateFile, time.Now(), time.Now()); err != nil {
-// 		util.LogFatal("[commands.update] os.Chtimes() failed", err)
+// 		util.Fatal("[commands.update] os.Chtimes() failed", err)
 // 	}
 //
 // 	os.Exit(0)

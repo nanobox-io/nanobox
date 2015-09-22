@@ -52,8 +52,8 @@ func nanoHalt(ccmd *cobra.Command, args []string) {
 
 	// halt the vm...
 	fmt.Printf(stylish.ProcessStart("halting nanobox vm"))
-	if err := runVagrantCommand(exec.Command("vagrant", "halt", "--force")); err != nil {
-		util.LogFatal("[commands/halt] runVagrantCommand() failed", err)
+	if err := util.RunVagrantCommand(exec.Command("vagrant", "halt", "--force")); err != nil {
+		util.Fatal("[commands/halt] util.RunVagrantCommand() failed", err)
 	}
 	fmt.Printf(stylish.ProcessEnd())
 }

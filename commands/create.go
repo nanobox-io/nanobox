@@ -50,8 +50,8 @@ func nanoCreate(ccmd *cobra.Command, args []string) {
 	//
 	// boot the vm
 	fmt.Printf(stylish.ProcessStart("starting nanobox vm"))
-	if err := runVagrantCommand(exec.Command("vagrant", "up")); err != nil {
-		util.LogFatal("[commands/create] runVagrantCommand() failed", err)
+	if err := util.RunVagrantCommand(exec.Command("vagrant", "up")); err != nil {
+		util.Fatal("[commands/create] util.RunVagrantCommand() failed", err)
 	}
 	fmt.Printf(stylish.ProcessEnd())
 
@@ -59,7 +59,7 @@ func nanoCreate(ccmd *cobra.Command, args []string) {
 	// open the /etc/hosts file for scanning...
 	f, err := os.Open("/etc/hosts")
 	if err != nil {
-		util.LogFatal("[commands/create] os.Open() failed", err)
+		util.Fatal("[commands/create] os.Open() failed", err)
 	}
 	defer f.Close()
 

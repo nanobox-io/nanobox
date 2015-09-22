@@ -27,7 +27,7 @@ Description:
 
 // nanoHelp
 func nanoHelp(ccmd *cobra.Command, args []string) {
-	util.CPrint(`
+	util.Printc(`
 
                                      ***
                                   *********

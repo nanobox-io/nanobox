@@ -78,7 +78,7 @@ func nanoInit(ccmd *cobra.Command, args []string) {
 			//
 			fp, err := filepath.Abs(engine)
 			if err != nil {
-				util.LogFatal("[commands/init] filepath.Abs() failed", err)
+				util.Fatal("[commands/init] filepath.Abs() failed", err)
 			}
 
 			base := filepath.Base(fp)
@@ -226,7 +226,7 @@ end`, version, config.App, network, synced_folders, provider, devmode)
 
 	// write the Vagrantfile
 	if err := ioutil.WriteFile(config.AppDir+"/Vagrantfile", []byte(vagrantfile), 0755); err != nil {
-		util.LogFatal("[commands/init] ioutil.WriteFile() failed", err)
+		util.Fatal("[commands/init] ioutil.WriteFile() failed", err)
 	}
 
 	//

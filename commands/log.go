@@ -86,7 +86,7 @@ func nanoLog(ccmd *cobra.Command, args []string) {
 		// connect 'mist' to the server running on the guest machine
 		client, err := mist.NewRemoteClient(config.MistURI)
 		if err != nil {
-			util.LogFatal("[commands/log] client.Connect() failed ", err)
+			util.Fatal("[commands/log] client.Connect() failed ", err)
 		}
 		defer client.Close()
 
@@ -103,7 +103,7 @@ func nanoLog(ccmd *cobra.Command, args []string) {
 			//
 			log := Log{}
 			if err := json.Unmarshal([]byte(msg.Data), &log); err != nil {
-				util.LogFatal("[commands/log] json.Unmarshal() failed", err)
+				util.Fatal("[commands/log] json.Unmarshal() failed", err)
 			}
 
 			//
@@ -122,20 +122,20 @@ func nanoLog(ccmd *cobra.Command, args []string) {
 		//
 		res, err := http.Get(fmt.Sprintf("http://%v/logs?%v", config.ServerURI, v.Encode()))
 		if err != nil {
-			util.LogFatal("[commands/log] http.Get() failed", err)
+			util.Fatal("[commands/log] http.Get() failed", err)
 		}
 		defer res.Body.Close()
 
 		//
 		b, err := ioutil.ReadAll(res.Body)
 		if err != nil {
-			util.LogFatal("[commands/log] ioutil.ReadAll() failed", err)
+			util.Fatal("[commands/log] ioutil.ReadAll() failed", err)
 		}
 
 		//
 		logs := []Log{}
 		if err := json.Unmarshal(b, &logs); err != nil {
-			util.LogFatal("[commands/log] json.Unmarshal() failed", err)
+			util.Fatal("[commands/log] json.Unmarshal() failed", err)
 		}
 
 		fmt.Printf(stylish.Bullet("Showing last %v entries:", len(logs)))
@@ -179,8 +179,8 @@ func processLog(log Log) {
 			logProcesses[process] = logColors[len(logProcesses)%len(logColors)]
 		}
 
-		// util.CPrint("[%v]%v - %v.%v :: %v[reset]", logProcesses[process], log.Time, service, process, content)
-		util.CPrint("[%v]%v (%v) :: %v[reset]", logProcesses[process], service, process, content)
+		// util.Printc("[%v]%v - %v.%v :: %v[reset]", logProcesses[process], log.Time, service, process, content)
+		util.Printc("[%v]%v (%v) :: %v[reset]", logProcesses[process], service, process, content)
 
 		// if we don't have a subMatch or its length is less than 4, just print w/e
 		// is in the log
@@ -188,7 +188,7 @@ func processLog(log Log) {
 		//
 		config.Console.Debug("[commands/log] No submatches found -> %v - %v", log.Time, log.Content)
 
-		util.CPrint("[light_red]%v - %v[reset]", log.Time, log.Content)
+		util.Printc("[light_red]%v - %v[reset]", log.Time, log.Content)
 	}
 
 }

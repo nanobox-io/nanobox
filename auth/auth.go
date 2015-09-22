@@ -110,18 +110,18 @@ func authenticate(Userslug, password string) (string, string) {
 	// get auth_token
 	user, err := api.GetAuthToken(Userslug, password)
 	if err != nil {
-		util.CPrint("[red]failure![reset]")
+		util.Printc("[red]failure![reset]")
 		fmt.Println("Unable to login... please verify your username and password are correct.")
 		os.Exit(1)
 	}
 
 	//
 	if err := saveCredentials(user.ID, user.AuthenticationToken); err != nil {
-		util.LogFatal("[auth/auth] saveCredentials failed", err)
+		util.Fatal("[auth/auth] saveCredentials failed", err)
 	}
 
 	//
-	util.CPrint("[green]success![reset]")
+	util.Printc("[green]success![reset]")
 
 	return user.ID, user.AuthenticationToken
 }

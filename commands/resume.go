@@ -36,8 +36,8 @@ func nanoResume(ccmd *cobra.Command, args []string) {
 	nanoInit(nil, args)
 
 	fmt.Printf(stylish.ProcessStart("resuming nanobox vm"))
-	if err := runVagrantCommand(exec.Command("vagrant", "resume")); err != nil {
-		util.LogFatal("[commands/resume] runVagrantCommand() failed", err)
+	if err := util.RunVagrantCommand(exec.Command("vagrant", "resume")); err != nil {
+		util.Fatal("[commands/resume] util.RunVagrantCommand() failed", err)
 	}
 	fmt.Printf(stylish.ProcessEnd())
 }

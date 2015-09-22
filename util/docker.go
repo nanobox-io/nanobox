@@ -42,7 +42,9 @@ func (d *Docker) Run() {
 
 	// forward all the signals to the nanobox server
 	forwardAllSignals()
-	go WatchCWD(notifyChanges)
+
+	// begin watching for changes to the project
+	go Watch(config.CWDir, handleFileEvent)
 
 	// fake a web request
 	conn.Write([]byte(fmt.Sprintf("POST /exec?%v HTTP/1.1\r\n\r\n", d.Params)))
@@ -103,19 +105,25 @@ func forwardAllSignals() {
 	return
 }
 
-func notifyChanges(event *fsnotify.Event, err error) {
+// handleFileEvent
+func handleFileEvent(event *fsnotify.Event, err error) {
+
+	//
 	if err != nil {
-		fmt.Println("ERR!", err)
+		// need to log this error, or print it out after or something
 		return
 	}
 
+	//
 	if event.Op != fsnotify.Chmod {
 		event.Name = strings.Replace(event.Name, config.CWDir, "", -1)
+
 		req, _ := http.NewRequest("POST", fmt.Sprintf("http://%s/file-change?filename=%s", config.ServerURI, event.Name), nil)
 
 		//
 		if _, err := http.DefaultClient.Do(req); err != nil {
-			fmt.Println("ERR!", err)
+			// need to log this error, or print it out after or something
+			return
 		}
 	}
 }

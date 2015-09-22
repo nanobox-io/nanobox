@@ -10,6 +10,7 @@ package commands
 //
 import (
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"github.com/go-fsnotify/fsnotify"
@@ -35,15 +36,17 @@ Description:
 // nanoWatch
 func nanoWatch(ccmd *cobra.Command, args []string) {
 
-	// create and assign a new watcher
-	fmt.Printf("\n%v", stylish.Bullet("Watching for chages at '%s'", config.CWDir))
-	fmt.Printf("%v\n", stylish.SubBullet("(Ctrl + c to quit)"))
+	fmt.Printf("\n%v", stylish.Bullet("Watching for chages at '%s' (Ctrl + c to quit)", config.CWDir))
 
-	util.WatchCWD(func(event *fsnotify.Event, err error) {
+	// begin watching for file changes at cwd
+	if err := util.Watch(config.CWDir, func(event *fsnotify.Event, err error) {
+
+		//
 		if err != nil {
-			fmt.Println("WATCH ERROR!", err)
-			return
+			fmt.Println(stylish.ErrBullet("Error detecting file change (%v)", err.Error()))
 		}
+
+		//
 		if event.Op != fsnotify.Chmod {
 
 			// if the file changes is the Boxfile do a full deploy...
@@ -57,10 +60,10 @@ func nanoWatch(ccmd *cobra.Command, args []string) {
 				nanoBuild(nil, args)
 			}
 
-			fmt.Printf("\n%v", stylish.Bullet("Watching for chages at '%s'", config.CWDir))
-			fmt.Printf("%v\n", stylish.SubBullet("(Ctrl + c to quit)"))
+			fmt.Printf("\n%v", stylish.Bullet("Watching for chages at '%s' (Ctrl + c to quit)", config.CWDir))
 		}
-
-	})
-
+	}); err != nil {
+		fmt.Printf(stylish.ErrBullet("Unable to detect file changes (%v)", err.Error()))
+		os.Exit(1)
+	}
 }

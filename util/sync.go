@@ -50,7 +50,7 @@ func (s *Sync) Run(opts []string) {
 	// connect 'mist' to the server running on the guest machine
 	client, err := mist.NewRemoteClient(config.MistURI)
 	if err != nil {
-		LogFatal("[utils/sync] client.Connect() failed ", err)
+		Fatal("[utils/sync] client.Connect() failed ", err)
 	}
 	defer client.Close()
 
@@ -82,7 +82,7 @@ func (s *Sync) Run(opts []string) {
 	//
 	// issue a sync
 	if err := api.DoRawRequest(nil, "POST", s.Path, nil, nil); err != nil {
-		LogFatal("[utils/sync] api.DoRawRequest() failed ", err)
+		Fatal("[utils/sync] api.DoRawRequest() failed ", err)
 	}
 
 	// handle
@@ -96,7 +96,7 @@ stream:
 		// was received and what to do about it.
 		e := &entry{}
 		if err := json.Unmarshal([]byte(msg.Data), &e); err != nil {
-			LogFatal("[utils/sync] json.Unmarshal() failed", err)
+			Fatal("[utils/sync] json.Unmarshal() failed", err)
 		}
 
 		// depending on what fields the data has, determines what needs to happen...
@@ -113,7 +113,7 @@ stream:
 
 			// update the model status
 			if err := json.Unmarshal([]byte(e.Document), s); err != nil {
-				LogFatal("[utils/sync] json.Unmarshal() failed ", err)
+				Fatal("[utils/sync] json.Unmarshal() failed ", err)
 			}
 
 			// break the stream once we get a model update. If we ever have intermediary
@@ -123,8 +123,8 @@ stream:
 
 		// report any unhandled entries, incase cases need to be added to handle them
 		default:
-			config.Console.Debug("Nanobox has encountered an Entry with neither a 'log' nor 'model' field and doesnt know what to do...")
-			break stream
+			fmt.Printf(stylish.ErrBullet("Malformed Entry..."))
+			// break stream
 		}
 	}
 }

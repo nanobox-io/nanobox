@@ -36,8 +36,8 @@ func nanoStatus(ccmd *cobra.Command, args []string) {
 	nanoInit(nil, args)
 
 	fmt.Printf(stylish.ProcessStart("requesting nanobox vms"))
-	if err := runVagrantCommand(exec.Command("vagrant", "status")); err != nil {
-		util.LogFatal("[commands/status] runVagrantCommand() failed", err)
+	if err := util.RunVagrantCommand(exec.Command("vagrant", "status")); err != nil {
+		util.Fatal("[commands/status] util.RunVagrantCommand() failed", err)
 	}
 	fmt.Printf(stylish.ProcessEnd())
 }

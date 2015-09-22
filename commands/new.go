@@ -33,6 +33,12 @@ Description:
 // nanoNew
 func nanoNew(ccmd *cobra.Command, args []string) {
 
+	// this will be removed once the new command is more fleshed out
+	fmt.Println(`
+This area of the CLI is under construction. For details on how to create an engine
+please see the documentation provided here: https://docs.nanobox.io/engines/`)
+	os.Exit(0)
+
 	if len(args) < 1 {
 		fmt.Println(stylish.Error("app name required", "Please provide a name when generating a new engine, (run 'nanobox new -h' for details)"))
 		os.Exit(1)
@@ -49,7 +55,7 @@ func nanoNew(ccmd *cobra.Command, args []string) {
 		stylish.Bullet("Creating engine at")
 
 		if err := os.Mkdir(name, 0755); err != nil {
-			util.LogFatal("[commands/new] os.Mkdir() failed", err)
+			util.Fatal("[commands/new] os.Mkdir() failed", err)
 		}
 
 		entry := fmt.Sprintf(`
@@ -70,12 +76,12 @@ authors:
 		path := name + "/Enginefile"
 
 		if _, err := os.Create(path); err != nil {
-			util.LogFatal("[commands/new] os.Create() failed", err)
+			util.Fatal("[commands/new] os.Create() failed", err)
 		}
 
 		// write the Enginefile
 		if err := ioutil.WriteFile(path, []byte(entry), 0644); err != nil {
-			util.LogFatal("[commands/new] ioutil.WriteFile() failed", err)
+			util.Fatal("[commands/new] ioutil.WriteFile() failed", err)
 		}
 
 	} else {

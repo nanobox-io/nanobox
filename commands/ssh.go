@@ -37,15 +37,12 @@ Description:
 func nanoSSH(ccmd *cobra.Command, args []string) {
 	fmt.Printf(stylish.Bullet("SSHing into nanobox VM..."))
 
-	// run an init to ensure there is a Vagrantfile
-	nanoCreate(nil, args)
-
-	// NOTE: this command is run manually (vs runVagrantCommand) because the output
-	// needs to be hooked up a little to accomodate Stdin
+	// NOTE: this command is run manually (vs util.RunVagrantCommand) because the output
+	// needs to be hooked up a little different to accomodate Stdin
 
 	// run the command from ~/.nanobox/apps/<this app>
 	if err := os.Chdir(config.AppDir); err != nil {
-		util.LogFatal("[commands/ssh] os.Chdir() failed", err)
+		util.Fatal("[commands/ssh] os.Chdir() failed", err)
 	}
 
 	cmd := exec.Command("vagrant", "ssh")
@@ -60,6 +57,6 @@ func nanoSSH(ccmd *cobra.Command, args []string) {
 	// start the command; we need this to 'fire and forget' so that we can manually
 	// capture and modify the commands output
 	if err := cmd.Run(); err != nil {
-		util.LogFatal("[commands/ssh] cmd.Run() failed", err)
+		util.Fatal("[commands/ssh] cmd.Run() failed", err)
 	}
 }

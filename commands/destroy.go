@@ -66,11 +66,11 @@ func nanoDestroy(ccmd *cobra.Command, args []string) {
 	// there is a Vagrantfile to run the command with (otherwise it will just get
 	// re-created)
 	fmt.Printf(stylish.ProcessStart("destroying nanobox vm"))
-	if err := runVagrantCommand(exec.Command("vagrant", "destroy", "--force")); err != nil {
+	if err := util.RunVagrantCommand(exec.Command("vagrant", "destroy", "--force")); err != nil {
 
 		// dont care if the project no longer exists... thats what we're doing anyway
 		if err != err.(*os.PathError) {
-			util.LogFatal("[commands/destroy] runVagrantCommand() failed", err)
+			util.Fatal("[commands/destroy] util.RunVagrantCommand() failed", err)
 		}
 	}
 
@@ -78,7 +78,7 @@ func nanoDestroy(ccmd *cobra.Command, args []string) {
 	// isn't just created again upon running the vagrant command
 	fmt.Printf(stylish.Bullet("Deleting all nanobox files at: %s", config.AppDir))
 	if err := os.RemoveAll(config.AppDir); err != nil {
-		util.LogFatal("[commands/destroy] os.RemoveAll() failed", err)
+		util.Fatal("[commands/destroy] os.RemoveAll() failed", err)
 	}
 	fmt.Printf(stylish.ProcessEnd())
 

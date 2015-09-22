@@ -8,18 +8,13 @@
 package commands
 
 import (
-	"bufio"
 	"fmt"
-	"io"
 	"os"
-	"os/exec"
-	"strings"
 	"time"
 
 	"github.com/spf13/cobra"
 
 	"github.com/pagodabox/nanobox-cli/config"
-	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
 //
@@ -76,11 +71,14 @@ var (
 		Run: nanoSandbox,
 	}
 
-	// flags
+	// persistent (global) flags
+	fDebug   bool //
+	fDevmode bool //
+	fForce   bool //
+	fVerbose bool //
+
+	// local flags
 	fCount   int    //
-	fDebug   bool   //
-	fDevmode bool   //
-	fForce   bool   //
 	fFile    string //
 	fLevel   string //
 	fOffset  int    //
@@ -88,7 +86,6 @@ var (
 	fSandbox bool   //
 	fStream  bool   //
 	fTunnel  string //
-	fVerbose bool   //
 	fVersion bool   //
 	fWatch   bool   //
 	fWrite   bool   //
@@ -103,22 +100,21 @@ type Service struct {
 	Username  string
 }
 
-// init builds the list of available nanobox commands and sub commands
+// init creates the list of available nanobox commands and sub commands
 func init() {
 
-	// persistent flags
-	//
-	NanoboxCmd.PersistentFlags().BoolVarP(&fForce, "force", "f", false, "Forces a command to run (effects very per command).")
-	NanoboxCmd.PersistentFlags().BoolVarP(&fVerbose, "verbose", "v", false, "Increase command output from 'info' to 'debug'.")
-
-	// intended for internal use only
+	// internal flags
 	NanoboxCmd.PersistentFlags().BoolVarP(&fDebug, "debug", "", false, "")
 	NanoboxCmd.PersistentFlags().BoolVarP(&fDevmode, "dev", "", false, "")
 	NanoboxCmd.PersistentFlags().MarkHidden("debug")
 	NanoboxCmd.PersistentFlags().MarkHidden("dev")
 
+	// persistent flags
+	NanoboxCmd.PersistentFlags().BoolVarP(&fForce, "force", "f", false, "Forces a command to run (effects very per command).")
+	NanoboxCmd.PersistentFlags().BoolVarP(&fVerbose, "verbose", "v", false, "Increase command output from 'info' to 'debug'.")
+
 	// local flags
-	NanoboxCmd.Flags().BoolVarP(&fVersion, "version", "", false, "Display the current version if this CLI")
+	NanoboxCmd.Flags().BoolVarP(&fVersion, "version", "", false, "Display the current version of this CLI")
 
 	//
 	// NanoboxCmd.SetHelpCommand(helpCmd)
@@ -161,72 +157,4 @@ func init() {
 
 	// 'sandbox' subcommands
 	NanoboxCmd.AddCommand(sandboxCmd)
-}
-
-// runVagrantCommand provides a wrapper around a standard cmd.Run() in which
-// all standard in/outputs are connected to the command, and the directory is
-// changed to the corresponding app directory. This allows nanobox to run Vagrant
-// commands w/o contaminating a users codebase
-func runVagrantCommand(cmd *exec.Cmd) error {
-
-	// run the command from ~/.nanobox/apps/<config.App>. if the directory doesn't
-	// exist, simply return
-	if err := os.Chdir(config.AppDir); err != nil {
-		return err
-	}
-
-	// create a pipe that we can pipe the cmd standard output's too. The reason this
-	// is done rather than just piping directly to os standard outputs and .Run()ing
-	// the command (vs .Start()ing) is because the output needs to be modified
-	// according to http://nanodocs.gopagoda.io/engines/style-guide
-	//
-	// NOTE: the reason it's done this way vs using the cmd.*Pipe's is so that all
-	// the command output can be read from a single pipe, rather than having to create
-	// a new pipe/scanner for each type of output
-	pr, pw := io.Pipe()
-	defer pr.Close()
-	defer pw.Close()
-
-	// connect standard output
-	cmd.Stdout = pw
-	cmd.Stderr = pw
-
-	//
-	fmt.Printf(stylish.Bullet("running '%v'", strings.Trim(fmt.Sprint(cmd.Args), "[]")))
-
-	// scan the command output modifying it according to
-	// http://nanodocs.gopagoda.io/engines/style-guide
-	scanner := bufio.NewScanner(pr)
-	scanner.Split(bufio.ScanRunes)
-	go func() {
-		for scanner.Scan() {
-
-			// print line
-			switch scanner.Text() {
-			case "\n", "\r":
-				fmt.Printf("%s   ", scanner.Text())
-			default:
-				fmt.Print(scanner.Text())
-			}
-		}
-	}()
-
-	// start the command; we need this to 'fire and forget' so that we can manually
-	// capture and modify the commands output
-	if err := cmd.Start(); err != nil {
-		return err
-	}
-
-	// wait for the command to complete/fail and exit, giving us a chance to scan
-	// the output
-	if err := cmd.Wait(); err != nil {
-		return err
-	}
-
-	// switch back to project dir
-	if err := os.Chdir(config.CWDir); err != nil {
-		return err
-	}
-
-	return nil
 }
