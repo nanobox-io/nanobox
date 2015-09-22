@@ -28,7 +28,7 @@ Description:
   -f, --force[=false]: Skips confirmation and forces the nanobox VM to halt`,
 
 	PreRun: ProjectIsCreated,
-	Run: nanoHalt,
+	Run:    nanoHalt,
 }
 
 // nanoHalt
@@ -39,13 +39,13 @@ func nanoHalt(ccmd *cobra.Command, args []string) {
 		// prompt for confirmation...
 		switch util.Prompt("Are you sure you want to halt this VM (y/N)? ") {
 
+		//
+		default:
+			os.Exit(0)
+
 		// if positive confirmation, proceed and halt
 		case "Y", "y", "yes":
 			break
-
-		// if negative confirmation, exit w/o halting
-		default:
-			os.Exit(0)
 		}
 	}
 

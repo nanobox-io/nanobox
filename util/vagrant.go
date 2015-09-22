@@ -129,10 +129,14 @@ func RunVagrantCommand(cmd *exec.Cmd) error {
 
 			// print line
 			switch scanner.Text() {
-			case "\n", "\r":
-				fmt.Printf("%s   ", scanner.Text())
+
+			//
 			default:
 				fmt.Print(scanner.Text())
+
+			//
+			case "\n", "\r":
+				fmt.Printf("%s   ", scanner.Text())
 			}
 		}
 	}()

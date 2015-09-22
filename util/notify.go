@@ -41,8 +41,9 @@ func Watch(path string, fn func(e *fsnotify.Event, err error)) error {
 	}
 
 	// the watcher needs to watch itself to see if any directories are added to then
-	// add them to the list of watched files
-	watch(func(event *fsnotify.Event, err error) {
+	// add them to the list of watched files; this needs to be non-blocking and
+	// will always just run in the background as part of core watch functionality
+	go addWatchHandler(func(event *fsnotify.Event, err error) {
 		if event.Op == fsnotify.Create {
 			fi, err := os.Stat(event.Name)
 			if err := watchDir(event.Name, fi, err); err != nil {
@@ -51,11 +52,14 @@ func Watch(path string, fn func(e *fsnotify.Event, err error)) error {
 		}
 	})
 
+	// add the handler that was passed in
+	addWatchHandler(fn)
+
 	return nil
 }
 
-// watch runs the loop over fsnotify passing back events to the handler
-func watch(fn func(e *fsnotify.Event, err error)) {
+// addWatchHandler
+func addWatchHandler(fn func(e *fsnotify.Event, err error)) {
 
 	for {
 		select {

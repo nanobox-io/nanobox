@@ -77,6 +77,11 @@ func nanoEngineFetch(ccmd *cobra.Command, args []string) {
 	// or just an engine
 	switch len(split) {
 
+	//
+	default:
+		// fmt.Printf("%v is not a valid format when fetching an engine (see help).\n", args[0])
+		os.Exit(1)
+
 	// if len is 1 then only a download was found (no user specified)
 	case 1:
 		archive = split[0]
@@ -85,12 +90,6 @@ func nanoEngineFetch(ccmd *cobra.Command, args []string) {
 	case 2:
 		user = split[0]
 		archive = split[1]
-
-		// if some other length was found, then the split 'failed' (meaning the
-		// format of the fetch was probably incorrect)
-	default:
-		// fmt.Printf("%v is not a valid format when fetching an engine (see help).\n", args[0])
-		os.Exit(1)
 	}
 
 	// split on the archive to find the engine and the release
@@ -154,6 +153,11 @@ func nanoEngineFetch(ccmd *cobra.Command, args []string) {
 	// determine if the file is to be streamed to stdout or to a file
 	switch {
 
+	// pipe the ouput to os.Stdout
+	default:
+		// fmt.Printf(stylish.Bullet("Piping download to stdout"))
+		dest = os.Stdout
+
 	// write the download to the local file system
 	case fFile != "":
 		// fmt.Printf(stylish.Bullet("Saving engine as '%s'", fFile))
@@ -168,11 +172,6 @@ func nanoEngineFetch(ccmd *cobra.Command, args []string) {
 
 		//
 		dest = release
-
-		// pipe the ouput to os.Stdout
-	default:
-		// fmt.Printf(stylish.Bullet("Piping download to stdout"))
-		dest = os.Stdout
 	}
 
 	// write the file

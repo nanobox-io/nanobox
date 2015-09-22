@@ -9,6 +9,10 @@ package commands
 
 //
 import (
+	"os"
+	"os/signal"
+	"sync"
+
 	"github.com/spf13/cobra"
 )
 
@@ -42,12 +46,35 @@ func nanoUp(ccmd *cobra.Command, args []string) {
 		nanoConsole(nil, args)
 
 	// if the --run flag is found, create the environment, update docker images,
-	// issue a deploy --run, and watch for file changes, and show logs
+	// issue a deploy --run, watch for file changes, and display streaming logs
 	case fRun:
+		var wg sync.WaitGroup
+
+		// create a channel that listens for user interrupts
+		sigChan := make(chan os.Signal, 1)
+		signal.Notify(sigChan, os.Interrupt)
+
+		// listen for anything on the channel (doesn't matter what) and exit
+		go func() {
+			for _ = range sigChan {
+				wg.Done()
+				// os.Exit(0)
+			}
+		}()
+
 		nanoCreate(nil, args)
 		imagesUpdate(nil, args)
-		nanoDeploy(nil, []string{"--run"})
+		nanoDeploy(nil, args)
+
+		wg.Add(1)
+
+		// set logs to streaming
+		fStream = true
+
+		go nanoLog(nil, args)
 		go nanoWatch(nil, args)
-		go nanoLog(nil, []string{"--stream"})
+
+		wg.Wait()
+
 	}
 }

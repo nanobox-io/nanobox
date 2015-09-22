@@ -102,6 +102,11 @@ stream:
 		// depending on what fields the data has, determines what needs to happen...
 		switch {
 
+		// report any unhandled entries, incase cases need to be added to handle them
+		default:
+			fmt.Printf(stylish.ErrBullet("Malformed Entry..."))
+			// break stream
+
 		// if the message contains the log field, the log is printed. The message is
 		// then checked to see if it contains a model field...
 		// example entry: {Time: "time", Log: "content"}
@@ -120,11 +125,6 @@ stream:
 			// statuses we can throw in a case that will handle this on a status-by-status
 			// basis (errored, complete)
 			break stream
-
-		// report any unhandled entries, incase cases need to be added to handle them
-		default:
-			fmt.Printf(stylish.ErrBullet("Malformed Entry..."))
-			// break stream
 		}
 	}
 }

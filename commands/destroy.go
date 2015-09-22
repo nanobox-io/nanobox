@@ -51,13 +51,13 @@ func nanoDestroy(ccmd *cobra.Command, args []string) {
 		// prompt for confirmation...
 		switch util.Prompt("Are you sure you want to delete this VM (y/N)? ") {
 
-		// if positive confirmation, proceed and destroy
-		case "Y", "y":
-			fmt.Printf(stylish.Bullet("Delete confirmed, continuing..."))
-
 		// if negative confirmation, exit w/o destroying
 		default:
 			os.Exit(0)
+
+		// if positive confirmation, proceed and destroy
+		case "Y", "y":
+			fmt.Printf(stylish.Bullet("Delete confirmed, continuing..."))
 		}
 	}
 

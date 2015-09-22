@@ -67,7 +67,7 @@ func nanoInit(ccmd *cobra.Command, args []string) {
 	}
 
 	//
-	fmt.Printf(stylish.Bullet("Preparing nanobox Vagrantfile"))
+	// fmt.Printf(stylish.Bullet("Preparing nanobox Vagrantfile"))
 	// fmt.Printf(stylish.SubBullet("- Adding code directory mount (/vagrant/code/%v)", config.App))
 
 	// create synced folders
@@ -232,5 +232,5 @@ end`, version, config.App, network, synced_folders, provider, devmode)
 	}
 
 	//
-	fmt.Printf("Vagrantfile generated at '%v/Vagrantfile'\n", config.AppDir)
+	fmt.Printf(stylish.Bullet("Vagrantfile generated at '%v/Vagrantfile'\n", config.AppDir))
 }
