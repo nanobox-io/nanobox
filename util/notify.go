@@ -109,6 +109,7 @@ func getIgnoreDirs() error {
 	return json.Unmarshal(b, &ignoreDirs)
 }
 
+// set my rlimit to the maximum rlimit
 func setFileLimit() {
 	rlm := &syscall.Rlimit{}
 	syscall.Getrlimit(syscall.RLIMIT_NOFILE, rlm)
