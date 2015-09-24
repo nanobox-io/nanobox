@@ -11,6 +11,7 @@ package commands
 import (
 	"fmt"
 	"os"
+	"syscall"
 	"path/filepath"
 
 	"github.com/go-fsnotify/fsnotify"
@@ -63,6 +64,9 @@ func nanoWatch(ccmd *cobra.Command, args []string) {
 			fmt.Printf("\n%v", stylish.Bullet("Watching for chages at '%s' (Ctrl + c to quit)", config.CWDir))
 		}
 	}); err != nil {
+		if _, ok := err.(syscall.Errno); ok {
+			fmt.Printf(stylish.ErrBullet("Insert error message for file error here"))
+		}
 		fmt.Printf(stylish.ErrBullet("Unable to detect file changes (%v)", err.Error()))
 		os.Exit(1)
 	}

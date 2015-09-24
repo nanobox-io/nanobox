@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"syscall"
 
 	"github.com/go-fsnotify/fsnotify"
 
@@ -18,7 +19,7 @@ var ignoreDirs = []string{}
 
 //
 func Watch(path string, fn func(e *fsnotify.Event, err error)) error {
-
+	setFileLimit()
 	// get a list of directories that should not be watched; this is done because
 	// there is a limit to how many files can be watched at a time, so folders like
 	// node_modules, bower_components, vendor, etc...
@@ -106,4 +107,11 @@ func getIgnoreDirs() error {
 	}
 
 	return json.Unmarshal(b, &ignoreDirs)
+}
+
+func setFileLimit() {
+	rlm := &syscall.Rlimit{}
+	syscall.Getrlimit(syscall.RLIMIT_NOFILE, rlm)
+	rlm.Cur = rlm.Max
+	syscall.Setrlimit(syscall.RLIMIT_NOFILE, rlm)
 }

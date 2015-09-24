@@ -17,12 +17,14 @@ import (
 	"runtime"
 	"strings"
 	"time"
+	"syscall"
 
 	"github.com/docker/docker/pkg/signal"
 	"github.com/docker/docker/pkg/term"
 	"github.com/go-fsnotify/fsnotify"
 
 	"github.com/pagodabox/nanobox-cli/config"
+	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
 // run satisfies the Command interface
@@ -32,6 +34,9 @@ type Docker struct {
 
 // Run
 func (d *Docker) Run() {
+
+	// begin watching for changes to the project
+	go Watch(config.CWDir, handleFileEvent)
 
 	//
 	conn, err := net.Dial("tcp4", config.ServerURI)
@@ -43,8 +48,6 @@ func (d *Docker) Run() {
 	// forward all the signals to the nanobox server
 	forwardAllSignals()
 
-	// begin watching for changes to the project
-	go Watch(config.CWDir, handleFileEvent)
 
 	// fake a web request
 	conn.Write([]byte(fmt.Sprintf("POST /exec?%v HTTP/1.1\r\n\r\n", d.Params)))
@@ -110,6 +113,10 @@ func handleFileEvent(event *fsnotify.Event, err error) {
 
 	//
 	if err != nil {
+		if _, ok := err.(syscall.Errno); ok {
+			fmt.Printf(stylish.ErrBullet("Insert error message for file error here"))
+		}
+
 		// need to log this error, or print it out after or something
 		return
 	}
