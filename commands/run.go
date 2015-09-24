@@ -31,7 +31,7 @@ var runCmd = &cobra.Command{
 
 //
 func init() {
-	runCmd.Flags().BoolVarP(&fRun, "reset-cache", "", false, "resets stuff")
+	runCmd.Flags().BoolVarP(&fForce, "reset-cache", "", false, "resets stuff")
 }
 
 //
@@ -46,6 +46,9 @@ func nanoRun(ccmd *cobra.Command, args []string) {
 	default:
 		nanoReload(nil, args)
 	}
+
+	fRun = true
+	nanoDeploy(nil, args)
 
 	fmt.Printf("[√] App successfully built")
 
@@ -69,7 +72,8 @@ func nanoRun(ccmd *cobra.Command, args []string) {
 
 	go nanoWatch(nil, args)
 
-	fmt.Printf(`----------------------------------
+	fmt.Printf(`
+----------------------------------
 DEV URL : %v
 ----------------------------------
 

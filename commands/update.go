@@ -37,7 +37,7 @@ Description:
 // nanoUpdate
 func nanoUpdate(ccmd *cobra.Command, args []string) {
 
-	fmt.Printf(stylish.Bullet("Updating nanobox CLI..."))
+	fmt.Printf(stylish.Bullet("Updating nanobox CLI"))
 
 	//
 	path, err := osext.Executable()
@@ -45,14 +45,11 @@ func nanoUpdate(ccmd *cobra.Command, args []string) {
 		util.Fatal("[commands/update] osext.ExecutableFolder() failed", err)
 	}
 
-	//
-	fmt.Printf(stylish.SubBullet("Nanobox CLI found running at %s", path))
-
 	// download a new CLI from s3 that matches their os and arch
 	download := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/nanobox", runtime.GOOS, runtime.GOARCH)
 
 	// create a new request
-	fmt.Printf(stylish.SubBullet("Downloading latest CLI from %v", download))
+	fmt.Printf(stylish.SubBullet("- Downloading latest CLI from %v", download))
 	req, err := http.NewRequest("GET", download, nil)
 	if err != nil {
 		util.Fatal("[commands/update] http.NewRequest() failed", err)
@@ -81,7 +78,7 @@ func nanoUpdate(ccmd *cobra.Command, args []string) {
 		total += n
 
 		// show how download progress
-		fmt.Printf("\rDownloading... %d/%d", total, res.ContentLength)
+		fmt.Printf("\r   [******************** %20d/%d]", total/1024*2, res.ContentLength/1024*2)
 
 		if err != nil {
 			if err == io.EOF {
@@ -93,10 +90,10 @@ func nanoUpdate(ccmd *cobra.Command, args []string) {
 
 		defer res.Body.Close()
 	}
-	util.Printc("\rDownloading... [green]success[reset]")
+	util.Printc("\r   [green]success[reset]")
 
 	//
-	fmt.Printf(stylish.SubBullet("Replacing CLI at %s", path))
+	fmt.Printf(stylish.SubBullet("- Replacing CLI at %s", path))
 	ioutil.WriteFile(path, buf.Bytes(), 0755)
 
 	//

@@ -29,7 +29,7 @@ var upCmd = &cobra.Command{
 
 //
 func init() {
-	upCmd.Flags().BoolVarP(&fRun, "rebuild", "", false, "Rebuilds")
+	upCmd.Flags().BoolVarP(&fRebuild, "rebuild", "", false, "Rebuilds")
 }
 
 //
