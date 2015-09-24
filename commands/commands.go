@@ -149,6 +149,7 @@ func init() {
 	NanoboxCmd.AddCommand(execCmd)
 	NanoboxCmd.AddCommand(infoCmd)
 	NanoboxCmd.AddCommand(publishCmd)
+	NanoboxCmd.AddCommand(runCmd)
 	NanoboxCmd.AddCommand(upCmd)
 	NanoboxCmd.AddCommand(updateCmd)
 

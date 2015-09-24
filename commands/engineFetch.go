@@ -19,8 +19,6 @@ import (
 
 	api "github.com/pagodabox/nanobox-api-client"
 	// "github.com/pagodabox/nanobox-cli/auth"
-	// "github.com/pagodabox/nanobox-cli/config"
-	// "github.com/pagodabox/nanobox-cli/util"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
