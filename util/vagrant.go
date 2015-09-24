@@ -10,7 +10,7 @@ package util
 import (
 	"bufio"
 	"fmt"
-	"io"
+	// "io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -100,47 +100,46 @@ func RunVagrantCommand(cmd *exec.Cmd) error {
 		return err
 	}
 
-	// create a pipe that we can pipe the cmd standard output's too. The reason this
-	// is done rather than just piping directly to os standard outputs and .Run()ing
-	// the command (vs .Start()ing) is because the output needs to be modified
-	// according to http://nanodocs.gopagoda.io/engines/style-guide
-	//
-	// NOTE: the reason it's done this way vs using the cmd.*Pipe's is so that all
-	// the command output can be read from a single pipe, rather than having to create
-	// a new pipe/scanner for each type of output
-	pr, pw := io.Pipe()
-	defer pr.Close()
-	defer pw.Close()
+	// create a stdout pipe that will allow for scanning the output line-by-line;
+	// if needed a stderr pipe could also be created at some point
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		panic(err)
+	}
 
-	// connect standard output
-	cmd.Stdout = pw
-	cmd.Stderr = pw
-
-	//
+	// start a goroutine that will act as an 'outputer' allowing us to add 'dots'
+	// to the end of each line (as these lines are a reduced version of the actual
+	// output there will be some delay between output)
 	output := make(chan string)
-
-	//
 	go func() {
 
 		tick := time.Second
 
+		// block until any one message outputs
+		msg, ok := <-output
+
+		// print initial message to 'get the ball rolling' on our 'outputer'
+		fmt.Printf("   - %s", msg)
+
+		// begin a loop to read off the channel until it's closed
 		for {
 			select {
 
-			//
-			case msg, ok := <-output:
+			// print any messages and reset ticker
+			case msg, ok = <-output:
 
-				//
+				// once the channel closes print the final newline and close the goroutine
 				if !ok {
 					fmt.Println("")
 					return
 				}
 
-				//
 				fmt.Printf("\n   - %s", msg)
+
 				tick = time.Second
 
-			//
+			// after every tick print a '.' until we get another message one the channel
+			// (at which point ticker is reset and it starts all over again)
 			case <-time.After(tick):
 				fmt.Print(".")
 
@@ -150,14 +149,14 @@ func RunVagrantCommand(cmd *exec.Cmd) error {
 		}
 	}()
 
-	// scan the command output modifying it according to
-	// http://nanodocs.gopagoda.io/engines/style-guide
-	scanner := bufio.NewScanner(pr)
+	// scan the command output intercepting only 'important' lines of vagrant output'
+	// and tailoring their message so as to not flood the output.
+	// styled according to: http://nanodocs.gopagoda.io/engines/style-guide
+	scanner := bufio.NewScanner(stdout)
 	go func() {
 		for scanner.Scan() {
 
-			// intercept and modify only 'important' lines of vagrant output' so as to
-			// not flood the output
+			//
 			switch scanner.Text() {
 			case fmt.Sprintf("==> %v: Importing base box 'nanobox/boot2docker'...", config.Nanofile.Name):
 				output <- "Importing nanobox base image"
@@ -182,7 +181,7 @@ func RunVagrantCommand(cmd *exec.Cmd) error {
 			}
 		}
 
-		// close the channel
+		// close the output channel once all lines of command output have been read
 		close(output)
 	}()
 
