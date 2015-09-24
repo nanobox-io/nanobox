@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"syscall"
 
 	"github.com/go-fsnotify/fsnotify"
 
@@ -112,10 +111,3 @@ func getIgnoreDirs() error {
 	return json.Unmarshal(b, &ignoreDirs)
 }
 
-// set my rlimit to the maximum rlimit
-func setFileLimit() {
-	rlm := &syscall.Rlimit{}
-	syscall.Getrlimit(syscall.RLIMIT_NOFILE, rlm)
-	rlm.Cur = rlm.Max
-	syscall.Setrlimit(syscall.RLIMIT_NOFILE, rlm)
-}
