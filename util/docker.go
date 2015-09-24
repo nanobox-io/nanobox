@@ -16,8 +16,8 @@ import (
 	ossignal "os/signal"
 	"runtime"
 	"strings"
-	"time"
 	"syscall"
+	"time"
 
 	"github.com/docker/docker/pkg/signal"
 	"github.com/docker/docker/pkg/term"
@@ -47,7 +47,6 @@ func (d *Docker) Run() {
 
 	// forward all the signals to the nanobox server
 	forwardAllSignals()
-
 
 	// fake a web request
 	conn.Write([]byte(fmt.Sprintf("POST /exec?%v HTTP/1.1\r\n\r\n", d.Params)))

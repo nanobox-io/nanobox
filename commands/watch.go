@@ -11,8 +11,8 @@ package commands
 import (
 	"fmt"
 	"os"
-	"syscall"
 	"path/filepath"
+	"syscall"
 
 	"github.com/go-fsnotify/fsnotify"
 	"github.com/spf13/cobra"
