@@ -120,7 +120,7 @@ Please ensure all required fields are provided and try again.`))
 
 			// check to ensure no required files are missing
 			for _, f := range v {
-				if fi, _ := os.Stat(f); fi == nil {
+				if _, err := os.Stat(f); err != nil {
 					fmt.Printf(stylish.Error("required files missing", "Your Engine is missing one or more required files for publishing. Please read the following documentation to ensure all required files are included and try again.:\n\ndocs.nanobox.io/engines/project-creation/#example-engine-file-structure\n"))
 					os.Exit(1)
 				}
@@ -222,7 +222,7 @@ Please ensure all required fields are provided and try again.`))
 
 				// required files have alrady been checked, so skip any remaining (optional)
 				// files/folders that arent here
-				if fi, _ := os.Stat(f); fi == nil {
+				if _, err := os.Stat(f); err != nil {
 					continue
 				}
 

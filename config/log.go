@@ -29,7 +29,7 @@ func init() {
 	// NOTE: this is handled by the current logger (Lumber) however this may not
 	// always be the case, so this is left in as a fallback
 	logfile := filepath.Clean(Root + "/nanobox.log")
-	// if fi, _ := os.Stat(logfile); fi == nil {
+	// if _, err := os.Stat(logfile); err != nil {
 	//  fmt.Printf(stylish.Bullet("Creating %s directory", logfile))
 	//  if _, err := os.Create(logfile); err != nil {
 	//    return err

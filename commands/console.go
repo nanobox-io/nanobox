@@ -15,8 +15,9 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-cli/util"
-	"github.com/pagodabox/nanobox-golang-stylish"
+	// "github.com/pagodabox/nanobox-golang-stylish"
 )
 
 //
@@ -27,7 +28,7 @@ var consoleCmd = &cobra.Command{
 Description:
   Opens an interactive terminal from inside your app on the nanobox VM`,
 
-	PreRun: VMIsRunning,
+	PreRun: vmIsRunning,
 	Run:    nanoConsole,
 }
 
@@ -38,7 +39,29 @@ func init() {
 
 // nanoConsole
 func nanoConsole(ccmd *cobra.Command, args []string) {
-	fmt.Printf(stylish.Bullet("Opening a nanobox console..."))
+	fmt.Printf(`
++> Opening nanobox console:
+
+
+                                 **
+                              ********
+                           ***************
+                        *********************
+                          *****************
+                        ::    *********    ::
+                           ::    ***    ::
+                         ++   :::   :::   ++
+                            ++   :::   ++
+                               ++   ++
+                                  +
+
+ ------------------------------------------------------------------
+ + You are in a virtual machine (vm)
+ + Your local source code has been mounted into the vm, and changes
+   in either the vm or local will be mirrored.
+ + If you run a server, access it at >> %s
+ ------------------------------------------------------------------
+`, config.Nanofile.Domain)
 
 	//
 	v := url.Values{}
@@ -57,7 +80,7 @@ func nanoConsole(ccmd *cobra.Command, args []string) {
 
 		// if more than 1 args is passed fail and exit...
 	case len(args) > 1:
-		fmt.Printf("Expecting 0 or 1 arguments, received %v. Exiting...\n", len(args))
+		fmt.Printf("Expecting 0 or 1 arguments. Exiting...\n")
 		os.Exit(1)
 	}
 

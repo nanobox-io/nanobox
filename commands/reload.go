@@ -20,13 +20,15 @@ import (
 
 //
 var reloadCmd = &cobra.Command{
+	Hidden: true,
+
 	Use:   "reload",
 	Short: "Reloads the nanobox VM",
 	Long: `
 Description:
   Reloads the nanobox VM by issuing a "vagrant reload --provision"`,
 
-	PreRun: ProjectIsCreated,
+	PreRun: projectIsCreated,
 	Run:    nanoReload,
 }
 
@@ -36,9 +38,8 @@ func nanoReload(ccmd *cobra.Command, args []string) {
 	// run an init to ensure there is a Vagrantfile
 	nanoInit(nil, args)
 
-	fmt.Printf(stylish.ProcessStart("reloading nanobox vm"))
+	fmt.Printf(stylish.Bullet("Reloading nanobox VM"))
 	if err := util.RunVagrantCommand(exec.Command("vagrant", "reload", "--provision")); err != nil {
 		util.Fatal("[commands/reload] util.RunVagrantCommand() failed", err)
 	}
-	fmt.Printf(stylish.ProcessEnd())
 }

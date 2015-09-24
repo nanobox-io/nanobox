@@ -20,13 +20,15 @@ import (
 
 //
 var buildCmd = &cobra.Command{
+	Hidden: true,
+
 	Use:   "build",
 	Short: "Rebuilds/compiles your project",
 	Long: `
 Description:
   Rebuilds/compiles your project`,
 
-	PreRun: VMIsRunning,
+	PreRun: vmIsRunning,
 	Run:    nanoBuild,
 }
 
@@ -49,7 +51,7 @@ func nanoBuild(ccmd *cobra.Command, args []string) {
 
 	// sync completed successfully
 	case "complete":
-		fmt.Printf(stylish.Bullet("Build complete... Navigate to %v.nano.dev to view your app.", config.App))
+		fmt.Printf(stylish.Bullet("Build complete... Navigate to %v to view your app.", config.Nanofile.Domain))
 
 	// if a build is run w/o having first run a deploy
 	case "unavailable":

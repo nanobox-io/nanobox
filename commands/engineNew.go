@@ -20,18 +20,18 @@ import (
 )
 
 //
-var newCmd = &cobra.Command{
+var engineNewCmd = &cobra.Command{
 	Use:   "new",
 	Short: "Generates a new engine inside the current working directory",
 	Long: `
 Description:
   Generates a new engine inside the current working directory`,
 
-	Run: nanoNew,
+	Run: nanoEngineNew,
 }
 
-// nanoNew
-func nanoNew(ccmd *cobra.Command, args []string) {
+// nanoEngineNew
+func nanoEngineNew(ccmd *cobra.Command, args []string) {
 
 	// this will be removed once the new command is more fleshed out
 	fmt.Println(`
@@ -50,7 +50,7 @@ please see the documentation provided here: https://docs.nanobox.io/engines/`)
 	fmt.Println(stylish.Header("initializing new app: %s", name))
 
 	// create a new project by the name, unless it already exists
-	if di, _ := os.Stat(name); di == nil {
+	if _, err := os.Stat(name); err != nil {
 
 		stylish.Bullet("Creating engine at")
 

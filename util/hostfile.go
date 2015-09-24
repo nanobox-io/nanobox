@@ -16,7 +16,6 @@ import (
 	"strings"
 
 	"github.com/pagodabox/nanobox-cli/config"
-	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
 // AddDevDomain
@@ -30,12 +29,10 @@ func AddDevDomain() {
 	defer f.Close()
 
 	// write the entry to the file
-	entry := fmt.Sprintf("\n%-15v   %s # '%v' private network (added by nanobox)", config.Nanofile.IP, config.Nanofile.Domain, config.App)
+	entry := fmt.Sprintf("\n%-15v   %s # '%v' private network (added by nanobox)", config.Nanofile.IP, config.Nanofile.Domain, config.Nanofile.Name)
 	if _, err := f.WriteString(entry); err != nil {
 		Fatal("[utils/hostfile] WriteString() failed", err)
 	}
-
-	fmt.Printf(stylish.Bullet("Entry for %v (%s.nano.dev) added to /etc/hosts", config.Nanofile.IP, config.App))
 }
 
 // RemoveDevDomain
@@ -70,6 +67,4 @@ func RemoveDevDomain() {
 	if err := ioutil.WriteFile("/etc/hosts", []byte(contents), 0644); err != nil {
 		Fatal("[utils/hostfile] ioutil.WriteFile failed", err)
 	}
-
-	fmt.Printf(stylish.Bullet("Entry for %v (%s.nano.dev) removed from /etc/hosts", config.Nanofile.IP, config.App))
 }

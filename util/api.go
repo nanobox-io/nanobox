@@ -26,10 +26,6 @@ func HandleAPIError(err error) error {
 		//
 		switch apiError.Code {
 
-		//
-		default:
-			return errors.New(fmt.Sprintf("[utils/api] Unhandled API error - %v", err))
-
 		// Unauthorized, Forbidden, Not Found, Internal Server Error, Bad Gateway
 		case 401, 403, 404, 500, 502:
 			return errors.New(apiError.Body)
@@ -44,6 +40,10 @@ func HandleAPIError(err error) error {
 			}
 
 			return errors.New(fmt.Sprintf("[utils/api] %d %v - %v", 422, subMatch[1], subMatch[2]))
+
+		//
+		default:
+			return errors.New(fmt.Sprintf("[utils/api] Unhandled API error - %v", err))
 		}
 
 		// ...if not, just write to the log

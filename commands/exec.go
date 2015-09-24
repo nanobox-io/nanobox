@@ -29,7 +29,7 @@ var execCmd = &cobra.Command{
 Description:
   Runs a command from inside your app on the nanobox VM`,
 
-	PreRun: VMIsRunning,
+	PreRun: vmIsRunning,
 	Run:    nanoExec,
 }
 

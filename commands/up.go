@@ -9,72 +9,81 @@ package commands
 
 //
 import (
-	"os"
-	"os/signal"
-	"sync"
+	"fmt"
+	"net/http"
 
 	"github.com/spf13/cobra"
+
+	"github.com/pagodabox/nanobox-cli/config"
+	"github.com/pagodabox/nanobox-cli/util"
 )
 
 //
 var upCmd = &cobra.Command{
 	Use:   "up",
 	Short: "",
-	Long: `
-Description:
-  Runs 'nanobox create' and then 'nanobox deploy'`,
+	Long:  ``,
 
 	Run: nanoUp,
 }
 
 //
 func init() {
-	upCmd.Flags().BoolVarP(&fRun, "run", "", false, "Watches your app for file changes")
+	upCmd.Flags().BoolVarP(&fRun, "rebuild", "", false, "Rebuilds")
 }
 
 //
 func nanoUp(ccmd *cobra.Command, args []string) {
 
-	switch {
-
-	// by default, create the environment, update all images, issue a deploy and
-	// drop the user into a console
+	//
+	switch util.GetVMStatus() {
+	case "not created":
+		nanoCreate(nil, args)
+	case "saved":
+		nanoResume(nil, args)
 	default:
-		nanoCreate(nil, args)
-		imagesUpdate(nil, args)
+		nanoReload(nil, args)
+	}
+
+	// only deploy if the vm has not been created or a rebuild is passed
+	if util.GetVMStatus() == "not created" || util.AppDeployed() || fRebuild {
 		nanoDeploy(nil, args)
-		nanoConsole(nil, args)
+	}
 
-	// if the --run flag is found, create the environment, update docker images,
-	// issue a deploy --run, watch for file changes, and display streaming logs
-	case fRun:
-		var wg sync.WaitGroup
+	nanoConsole(nil, args)
 
-		// create a channel that listens for user interrupts
-		sigChan := make(chan os.Signal, 1)
-		signal.Notify(sigChan, os.Interrupt)
+	// assume the machine can be suspended
+	suspendable := true
 
-		// listen for anything on the channel (doesn't matter what) and exit
-		go func() {
-			for _ = range sigChan {
-				wg.Done()
-				// os.Exit(0)
-			}
-		}()
+	//
+	req, err := http.NewRequest("PUT", fmt.Sprintf("http://%s/suspend", config.ServerURI), nil)
+	if err != nil {
+		panic(err)
+	}
 
-		nanoCreate(nil, args)
-		imagesUpdate(nil, args)
-		nanoDeploy(nil, args)
+	//
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		panic(err)
+	}
+	defer res.Body.Close()
 
-		wg.Add(1)
+	//
+	switch res.StatusCode / 100 {
 
-		// set logs to streaming
-		fStream = true
+	// anything but 200 CANNOT suspend
+	default:
+		suspendable = false
+		fmt.Printf("\nNote: The VM has not been suspended because there there is still a console conected.\n")
 
-		go nanoLog(nil, args)
-		go nanoWatch(nil, args)
+	// ok to suspend
+	case 2:
+		break
+	}
 
-		wg.Wait()
-
+	// suspend the machine if not active consoles are connected and the command was
+	// not run in debug mode
+	if suspendable && !fDebug {
+		nanoDown(nil, args)
 	}
 }

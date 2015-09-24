@@ -77,11 +77,6 @@ func nanoEngineFetch(ccmd *cobra.Command, args []string) {
 	// or just an engine
 	switch len(split) {
 
-	//
-	default:
-		// fmt.Printf("%v is not a valid format when fetching an engine (see help).\n", args[0])
-		os.Exit(1)
-
 	// if len is 1 then only a download was found (no user specified)
 	case 1:
 		archive = split[0]
@@ -90,6 +85,11 @@ func nanoEngineFetch(ccmd *cobra.Command, args []string) {
 	case 2:
 		user = split[0]
 		archive = split[1]
+
+	// any other number or args
+	default:
+		// fmt.Printf("%v is not a valid format when fetching an engine (see help).\n", args[0])
+		os.Exit(1)
 	}
 
 	// split on the archive to find the engine and the release

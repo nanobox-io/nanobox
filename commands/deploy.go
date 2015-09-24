@@ -11,6 +11,7 @@ package commands
 import (
 	"fmt"
 	"net/url"
+	"os"
 	"strconv"
 
 	"github.com/spf13/cobra"
@@ -22,6 +23,8 @@ import (
 
 //
 var deployCmd = &cobra.Command{
+	Hidden: true,
+
 	Use:   "deploy",
 	Short: "Issues a deploy to the nanobox VM",
 	Long: `
@@ -30,7 +33,7 @@ Description:
 
   -f, --force[=false]: Clears cached libraries the project might use`,
 
-	PreRun: VMIsRunning,
+	PreRun: vmIsRunning,
 	Run:    nanoDeploy,
 }
 
@@ -63,10 +66,14 @@ func nanoDeploy(ccmd *cobra.Command, args []string) {
 
 	// complete
 	case "complete":
-		fmt.Printf(stylish.Bullet("Deploy complete... Navigate to %v.nano.dev to view your app.", config.App))
+		fmt.Printf(stylish.Bullet("Deploy complete... Navigate to %v to view your app.", config.Nanofile.Domain))
 
-	//
+	// errored
 	case "errored":
-		// fmt.Printf(stylish.Error("Deploy failed", "Your deploy failed to well... deploy"))
+		if !fDebug {
+			nanoDestroy(nil, args)
+		}
+
+		os.Exit(1)
 	}
 }

@@ -19,26 +19,26 @@ import (
 )
 
 //
-var statusCmd = &cobra.Command{
-	Use:   "status",
-	Short: "Displays all current nanobox VM's",
+var downCmd = &cobra.Command{
+	Use:   "down",
+	Short: "Suspends the nanobox VM",
 	Long: `
 Description:
-  Displays all current nanobox VM's`,
+  Suspends the nanobox VM by issuing a "vagrant suspend"`,
 
-	PreRun: ProjectIsCreated,
-	Run:    nanoStatus,
+	PreRun: projectIsCreated,
+	Run:    nanoDown,
 }
 
-// nanoStatus runs 'vagrant status'
-func nanoStatus(ccmd *cobra.Command, args []string) {
+// nanoDown runs 'vagrant suspend'
+func nanoDown(ccmd *cobra.Command, args []string) {
 
 	// run an init to ensure there is a Vagrantfile
 	nanoInit(nil, args)
 
-	fmt.Printf(stylish.ProcessStart("requesting nanobox vms"))
-	if err := util.RunVagrantCommand(exec.Command("vagrant", "status")); err != nil {
-		util.Fatal("[commands/status] util.RunVagrantCommand() failed", err)
+	fmt.Printf(stylish.Bullet("Saving nanobox VM"))
+	if err := util.RunVagrantCommand(exec.Command("vagrant", "suspend")); err != nil {
+		util.Fatal("[commands/suspend] util.RunVagrantCommand() failed", err)
 	}
-	fmt.Printf(stylish.ProcessEnd())
+	fmt.Printf(stylish.Bullet("Exiting"))
 }

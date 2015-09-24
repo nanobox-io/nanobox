@@ -36,7 +36,7 @@ func init() {
 
 	// check for a ~/.nanobox/.auth file and create one if it's not found
 	authfile = filepath.Clean(config.Root + "/.auth")
-	if fi, _ := os.Stat(authfile); fi == nil {
+	if _, err := os.Stat(authfile); err != nil {
 		fmt.Printf(stylish.Bullet("Creating %s directory", authfile))
 		if _, err := os.Create(authfile); err != nil {
 			panic(err)

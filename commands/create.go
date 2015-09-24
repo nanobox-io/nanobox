@@ -41,7 +41,7 @@ func nanoCreate(ccmd *cobra.Command, args []string) {
 
 	// if the command is being run with the "add" flag, it means an entry needs to
 	// be added to the hosts file and execution yielded back to the parent
-	if len(args) > 0 && args[0] == "add" {
+	if len(args) > 0 && args[0] == "--add-entry" {
 		util.AddDevDomain()
 		os.Exit(0)
 	}
@@ -51,7 +51,7 @@ func nanoCreate(ccmd *cobra.Command, args []string) {
 
 	//
 	// boot the vm
-	fmt.Printf(stylish.ProcessStart("creating nanobox vm"))
+	fmt.Printf(stylish.Bullet("Creating nanobox VM"))
 	if err := util.RunVagrantCommand(exec.Command("vagrant", "up")); err != nil {
 		util.Fatal("[commands/create] util.RunVagrantCommand() failed", err)
 	}
@@ -81,7 +81,7 @@ func nanoCreate(ccmd *cobra.Command, args []string) {
 	// add the entry if needed
 	// if addEntry && util.AccessDenied() {
 	if addEntry {
-		util.SudoExec("create add", "Attempting to add nano.dev domain to hosts file")
+		util.SudoExec("create --add-entry", fmt.Sprintf("Adding %v domain to hosts file", config.Nanofile.Domain))
 	}
 
 	// if devmode is detected, the machine needs to be rebooted for devmode to take

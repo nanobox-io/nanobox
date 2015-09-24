@@ -10,6 +10,7 @@ package util
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 
 	"github.com/pagodabox/golang-mist"
 	api "github.com/pagodabox/nanobox-api-client"
@@ -82,7 +83,7 @@ func (s *Sync) Run(opts []string) {
 	//
 	// issue a sync
 	if err := api.DoRawRequest(nil, "POST", s.Path, nil, nil); err != nil {
-		Fatal("[utils/sync] api.DoRawRequest() failed ", err)
+		Fatal("[utils/sync] api.DoRawRequest() failed", err)
 	}
 
 	// handle
@@ -102,11 +103,6 @@ stream:
 		// depending on what fields the data has, determines what needs to happen...
 		switch {
 
-		// report any unhandled entries, incase cases need to be added to handle them
-		default:
-			fmt.Printf(stylish.ErrBullet("Malformed Entry..."))
-			// break stream
-
 		// if the message contains the log field, the log is printed. The message is
 		// then checked to see if it contains a model field...
 		// example entry: {Time: "time", Log: "content"}
@@ -121,10 +117,42 @@ stream:
 				Fatal("[utils/sync] json.Unmarshal() failed ", err)
 			}
 
+			switch s.Status {
+
+			// for each successful deploy create/update the .nanobox/apps/<app>/.deployed
+			// file
+			case "complete":
+				if _, err := os.Create(config.AppDir + "/.deployed"); err != nil {
+					Fatal("[utils/sync] os.Create() failed ", err)
+				}
+
+			// case "unavailable":
+
+			// if a deploy ever errors, remove the deployed file
+			case "errored":
+				if err := os.Remove(config.AppDir + "/.deployed"); err != nil {
+					Fatal("[utils/sync] os.Remove() failed ", err)
+				}
+			}
+
 			// break the stream once we get a model update. If we ever have intermediary
 			// statuses we can throw in a case that will handle this on a status-by-status
-			// basis (errored, complete)
+			// basis (current statuses: complete, unavailable, errored)
 			break stream
+
+		// report any unhandled entries, incase cases need to be added to handle them
+		default:
+			fmt.Printf(stylish.ErrBullet("Malformed Entry..."))
+			// break stream
 		}
 	}
+}
+
+// AppDeployed
+func AppDeployed() bool {
+	if _, err := os.Stat(config.AppDir + "/.deployed"); err != nil {
+		return false
+	}
+
+	return true
 }

@@ -31,7 +31,6 @@ var (
 	err error //
 
 	//
-	App    string // the name of the application
 	AppDir string // the path to the application (~.nanobox/apps/<app>)
 	CWDir  string // the current working directory
 	Home   string // the users home directory (~)
@@ -66,7 +65,7 @@ type (
 		path     string //
 		CPUCap   int    `json:"cpu_cap"`  // max %CPU usage allowed to the guest vm
 		CPUs     int    `json:"cpus"`     // number of CPUs to dedicate to the guest vm
-		Domain   string `json:"domain"`   // the domain to use in conjuntion with the ip when accesing the guest vm (defaults to <Name>.nano.dev)
+		Domain   string `json:"domain"`   // the domain to use in conjuntion with the ip when accesing the guest vm (defaults to <Name>.dev)
 		IP       string `json:"ip"`       // the ip added to the /etc/hosts file for accessing the guest vm
 		Name     string `json:"name"`     // the name given to the project (defaults to cwd)
 		Provider string `json:"provider"` // guest vm provider (virtual box, vmware, etc)
@@ -92,7 +91,7 @@ func init() {
 	Root = filepath.Clean(Home + "/.nanobox")
 
 	// check for a ~/.nanobox dir and create one if it's not found
-	if di, _ := os.Stat(Root); di == nil {
+	if _, err := os.Stat(Root); err != nil {
 		fmt.Printf(stylish.Bullet("Creating %s directory", Root))
 		if err := os.Mkdir(Root, 0755); err != nil {
 			panic(err)
@@ -101,7 +100,7 @@ func init() {
 
 	// check for a ~/.nanobox/apps dir and create one if it's not found
 	apps := filepath.Clean(Root + "/apps")
-	if di, _ := os.Stat(apps); di == nil {
+	if _, err := os.Stat(apps); err != nil {
 		if err := os.Mkdir(apps, 0755); err != nil {
 			panic(err)
 		}
@@ -118,8 +117,7 @@ func init() {
 
 	// set the 'App' first so it can be used in subsequent configurations; the 'App'
 	// is set to the name of the cwd; this can be overriden from a .nanofile
-	App = Nanofile.Name
-	AppDir = apps + "/" + App
+	AppDir = apps + "/" + Nanofile.Name
 }
 
 // ParseConfig

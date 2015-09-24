@@ -27,13 +27,15 @@ import (
 
 //
 var logCmd = &cobra.Command{
+	Hidden: true,
+
 	Use:   "log",
 	Short: "Provides the last 100 lines of historical log output by default.",
 	Long: `
 Description:
   Provides the last 100 lines of historical log output by default.`,
 
-	PreRun: VMIsRunning,
+	PreRun: vmIsRunning,
 	Run:    nanoLog,
 }
 
@@ -82,7 +84,6 @@ func nanoLog(ccmd *cobra.Command, args []string) {
 
 	// if stream is true, we connect to the live logs...
 	if fStream {
-		fmt.Printf(stylish.Bullet("Connecting to live stream..."))
 
 		// connect 'mist' to the server running on the guest machine
 		client, err := mist.NewRemoteClient(config.MistURI)
@@ -99,6 +100,7 @@ func nanoLog(ccmd *cobra.Command, args []string) {
 		defer client.Unsubscribe(logTags)
 
 		//
+		fmt.Printf("Streaming App Logs:\n")
 		for msg := range client.Messages() {
 
 			//
@@ -139,9 +141,8 @@ func nanoLog(ccmd *cobra.Command, args []string) {
 			util.Fatal("[commands/log] json.Unmarshal() failed", err)
 		}
 
-		fmt.Printf(stylish.Bullet("Showing last %v entries:", len(logs)))
-
 		//
+		fmt.Printf(stylish.Bullet("Showing last %v entries:", len(logs)))
 		for _, log := range logs {
 			processLog(log)
 		}
@@ -160,9 +161,6 @@ func processLog(log Log) {
 	// }
 
 	//
-	config.Console.Debug("[commands/log] Raw log -> %#q", log)
-
-	//
 	subMatch := regexp.MustCompile(`^(\w+)\.(\S+)\s+(.*)$`).FindStringSubmatch(log.Content)
 
 	// ensure a subMatch and ensure subMatch has a length of 4, since thats how many
@@ -174,8 +172,6 @@ func processLog(log Log) {
 		content := subMatch[3]
 
 		//
-		config.Console.Debug("[commands/log] Processed log -> service: %q, process: %q, content: %q\n", service, process, content)
-
 		if _, ok := logProcesses[process]; !ok {
 			logProcesses[process] = logColors[len(logProcesses)%len(logColors)]
 		}
@@ -186,9 +182,6 @@ func processLog(log Log) {
 		// if we don't have a subMatch or its length is less than 4, just print w/e
 		// is in the log
 	} else {
-		//
-		config.Console.Debug("[commands/log] No submatches found -> %v - %v", log.Time, log.Content)
-
 		util.Printc("[light_red]%v - %v[reset]", log.Time, log.Content)
 	}
 

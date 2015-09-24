@@ -24,8 +24,10 @@ import (
 
 //
 var watchCmd = &cobra.Command{
+	Hidden: true,
+
 	Use:   "watch",
-	Short: "Resumes the halted/suspended nanobox VM",
+	Short: "",
 	Long: `
 Description:
   Watches your app for file changes. When a file is changed a 'nanobox build' is
@@ -37,7 +39,8 @@ Description:
 // nanoWatch
 func nanoWatch(ccmd *cobra.Command, args []string) {
 
-	fmt.Printf("\n%v", stylish.Bullet("Watching for chages at '%s' (Ctrl + c to quit)", config.CWDir))
+	// 
+	fmt.Printf("[√] Watching app files for changes")
 
 	// begin watching for file changes at cwd
 	if err := util.Watch(config.CWDir, func(event *fsnotify.Event, err error) {
@@ -60,13 +63,14 @@ func nanoWatch(ccmd *cobra.Command, args []string) {
 				fmt.Printf(stylish.Bullet("Issuing build"))
 				nanoBuild(nil, args)
 			}
-
-			fmt.Printf("\n%v", stylish.Bullet("Watching for chages at '%s' (Ctrl + c to quit)", config.CWDir))
 		}
 	}); err != nil {
+
+		//
 		if _, ok := err.(syscall.Errno); ok {
 			fmt.Printf(stylish.ErrBullet("Insert error message for file error here"))
 		}
+
 		fmt.Printf(stylish.ErrBullet("Unable to detect file changes (%v)", err.Error()))
 		os.Exit(1)
 	}

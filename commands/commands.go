@@ -16,7 +16,7 @@ import (
 
 	"github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-cli/util"
-	"github.com/pagodabox/nanobox-golang-stylish"
+	// "github.com/pagodabox/nanobox-golang-stylish"
 )
 
 //
@@ -85,8 +85,8 @@ var (
 	fLevel   string //
 	fOffset  int    //
 	fRemove  bool   //
+	fRebuild bool   //
 	fRun     bool   //
-	fSandbox bool   //
 	fStream  bool   //
 	fTunnel  string //
 	fVersion bool   //
@@ -101,6 +101,7 @@ type Service struct {
 	Password  string
 	Ports     []int
 	Username  string
+	UID       string
 }
 
 // init creates the list of available nanobox commands and sub commands
@@ -131,32 +132,30 @@ func init() {
 
 	// 'hidden' commands
 	NanoboxCmd.AddCommand(createCmd)
+	NanoboxCmd.AddCommand(deployCmd)
 	NanoboxCmd.AddCommand(initCmd)
+	NanoboxCmd.AddCommand(logCmd)
+	NanoboxCmd.AddCommand(reloadCmd)
+	NanoboxCmd.AddCommand(resumeCmd)
 	NanoboxCmd.AddCommand(sshCmd)
+	NanoboxCmd.AddCommand(watchCmd)
 
 	// 'public' commands
 	NanoboxCmd.AddCommand(bootstrapCmd)
 	NanoboxCmd.AddCommand(buildCmd)
 	NanoboxCmd.AddCommand(consoleCmd)
-	NanoboxCmd.AddCommand(deployCmd)
 	NanoboxCmd.AddCommand(destroyCmd)
+	NanoboxCmd.AddCommand(downCmd)
 	NanoboxCmd.AddCommand(execCmd)
-	NanoboxCmd.AddCommand(haltCmd)
-	NanoboxCmd.AddCommand(logCmd)
-	NanoboxCmd.AddCommand(newCmd)
+	NanoboxCmd.AddCommand(infoCmd)
 	NanoboxCmd.AddCommand(publishCmd)
-	NanoboxCmd.AddCommand(reloadCmd)
-	NanoboxCmd.AddCommand(resumeCmd)
-	NanoboxCmd.AddCommand(statusCmd)
-	NanoboxCmd.AddCommand(suspendCmd)
-	NanoboxCmd.AddCommand(tunnelCmd)
 	NanoboxCmd.AddCommand(upCmd)
 	NanoboxCmd.AddCommand(updateCmd)
-	NanoboxCmd.AddCommand(watchCmd)
 
 	// 'engine' subcommand
 	NanoboxCmd.AddCommand(engineCmd)
 	engineCmd.AddCommand(engineFetchCmd)
+	engineCmd.AddCommand(engineNewCmd)
 	engineCmd.AddCommand(enginePublishCmd)
 
 	// 'images' subcommand
@@ -169,18 +168,18 @@ func init() {
 
 // PRERUN COMMANDS
 
-// VMIsRunning
-func VMIsRunning(ccmd *cobra.Command, args []string) {
+// vmIsRunning
+func vmIsRunning(ccmd *cobra.Command, args []string) {
 	if util.GetVMStatus() != "running" {
-		fmt.Printf(stylish.ErrBullet("Please start your virtual machine before running this command."))
+		fmt.Printf("Your VM is not running. Run 'nanobox up' first")
 		os.Exit(1)
 	}
 }
 
-// ProjectIsCreated
-func ProjectIsCreated(ccmd *cobra.Command, args []string) {
-	if fi, _ := os.Stat(config.AppDir); fi == nil {
-		fmt.Printf(stylish.ErrBullet("Please create your project before running this command."))
+// projectIsCreated
+func projectIsCreated(ccmd *cobra.Command, args []string) {
+	if _, err := os.Stat(config.AppDir); err != nil {
+		fmt.Printf("Your App is not created. Run 'nanobox up' first")
 		os.Exit(1)
 	}
 }

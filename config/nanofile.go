@@ -30,7 +30,7 @@ func ParseNanofile() *NanofileConfig {
 
 	// look for a global .nanofile first in the ~/.nanobox directory, and override
 	// any default options found.
-	if fi, _ := os.Stat(nanofile.path); fi != nil {
+	if _, err := os.Stat(nanofile.path); err == nil {
 		if err := ParseConfig(nanofile.path, nanofile); err != nil {
 			fmt.Printf("Nanobox failed to parse your .nanofile. Please ensure it is valid YAML and try again.\n")
 			os.Exit(1)
@@ -41,7 +41,7 @@ func ParseNanofile() *NanofileConfig {
 
 	// then look for a local .nanofile and override any global, or remaining default
 	// options found
-	if fi, _ := os.Stat(nanofile.path); fi != nil {
+	if _, err := os.Stat(nanofile.path); err == nil {
 		if err := ParseConfig(nanofile.path, nanofile); err != nil {
 			fmt.Printf("Nanobox failed to parse your .nanofile. Please ensure it is valid YAML and try again.\n")
 			os.Exit(1)
@@ -49,7 +49,7 @@ func ParseNanofile() *NanofileConfig {
 	}
 
 	// set name specific options after potential .nanofiles have been parsed
-	nanofile.Domain = fmt.Sprintf("%s.nano.dev", nanofile.Name)
+	nanofile.Domain = fmt.Sprintf("%s.dev", nanofile.Name)
 	nanofile.IP = appNameToIP(nanofile.Name)
 
 	return nanofile

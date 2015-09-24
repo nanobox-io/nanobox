@@ -26,13 +26,13 @@ var imagesUpdateCmd = &cobra.Command{
 Description:
   Updates the nanobox docker images`,
 
-	PreRun: VMIsRunning,
+	PreRun: vmIsRunning,
 	Run:    imagesUpdate,
 }
 
 // imagesUpdate
 func imagesUpdate(ccmd *cobra.Command, args []string) {
-	fmt.Printf(stylish.Bullet("Updating nanobox docker images..."))
+	fmt.Printf(stylish.Bullet("Updating docker images..."))
 
 	//
 	update := util.Sync{
@@ -49,7 +49,7 @@ func imagesUpdate(ccmd *cobra.Command, args []string) {
 
 	// complete
 	case "complete":
-		fmt.Printf(stylish.Bullet("Update complete"))
+		fmt.Printf(stylish.SubBullet("Update complete"))
 
 	// if the bootstrap fails the server should handle the message. If not, this can
 	// be re-enabled
