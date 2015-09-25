@@ -42,7 +42,7 @@ func GetVMStatus() string {
 	uuid := GetVMUUID()
 
 	if uuid == "" {
-		return uuid
+		return "not created"
 	}
 
 	// run the command with the uuid; this allows the command to be run from any
