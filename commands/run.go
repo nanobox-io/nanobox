@@ -79,6 +79,7 @@ func nanoRun(ccmd *cobra.Command, args []string) {
 	// the waitgroup (blocking)
 	go func() {
 		<-sigChan
+		close(sigChan)
 		wg.Done()
 	}()
 
@@ -90,7 +91,6 @@ func nanoRun(ccmd *cobra.Command, args []string) {
 ----------------------------------
 DEV URL : %v
 ----------------------------------
-
 `, config.Nanofile.Domain)
 
 	// set logs to streaming
@@ -99,8 +99,6 @@ DEV URL : %v
 
 	wg.Wait()
 
-	// suspend the machine if not debug mode
-	if !fDebug {
-		nanoDown(nil, args)
-	}
+	//
+	nanoDown(nil, args)
 }

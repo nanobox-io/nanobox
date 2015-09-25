@@ -46,8 +46,8 @@ func init() {
 func nanoDeploy(ccmd *cobra.Command, args []string) {
 	fmt.Printf(stylish.Bullet("Deploying codebase..."))
 
+	//
 	v := url.Values{}
-
 	v.Add("reset", strconv.FormatBool(fForce))
 	v.Add("run", strconv.FormatBool(fRun))
 
@@ -66,14 +66,11 @@ func nanoDeploy(ccmd *cobra.Command, args []string) {
 
 	// complete
 	case "complete":
-		fmt.Printf(stylish.Bullet("Deploy complete... Navigate to %v to view your app.", config.Nanofile.Domain))
+		break
 
 	// errored
 	case "errored":
-		if !fDebug {
-			nanoDestroy(nil, args)
-		}
-
+		nanoDown(nil, args)
 		os.Exit(1)
 	}
 }

@@ -10,6 +10,7 @@ package commands
 //
 import (
 	"fmt"
+	"os"
 	"os/exec"
 
 	"github.com/spf13/cobra"
@@ -37,6 +38,12 @@ func nanoDown(ccmd *cobra.Command, args []string) {
 	// run an init to ensure there is a Vagrantfile
 	nanoInit(nil, args)
 
+	// if in debug mode don't suspend the VM
+	if fDebug {
+		os.Exit(0)
+	}
+
+	//
 	fmt.Printf(stylish.Bullet("Saving nanobox VM"))
 	if err := util.RunVagrantCommand(exec.Command("vagrant", "suspend")); err != nil {
 		config.Fatal("[commands/suspend] util.RunVagrantCommand() failed", err)

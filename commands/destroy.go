@@ -45,7 +45,6 @@ func nanoDestroy(ccmd *cobra.Command, args []string) {
 	// destroy the vm; this needs to happen before cleaning up the app to ensure
 	// there is a Vagrantfile to run the command with (otherwise it will just get
 	// re-created)
-	fmt.Printf(stylish.Bullet("Destroying nanobox VM"))
 	if err := util.RunVagrantCommand(exec.Command("vagrant", "destroy", "--force")); err != nil {
 
 		// dont care if the project no longer exists... thats what we're doing anyway

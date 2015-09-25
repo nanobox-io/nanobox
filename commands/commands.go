@@ -171,7 +171,7 @@ func init() {
 // vmIsRunning
 func vmIsRunning(ccmd *cobra.Command, args []string) {
 	if util.GetVMStatus() != "running" {
-		fmt.Printf("Your VM is not running. Run 'nanobox up' first")
+		fmt.Printf("Your nanobox VM is not running. Run 'nanobox up' first")
 		os.Exit(1)
 	}
 }
@@ -179,7 +179,7 @@ func vmIsRunning(ccmd *cobra.Command, args []string) {
 // projectIsCreated
 func projectIsCreated(ccmd *cobra.Command, args []string) {
 	if _, err := os.Stat(config.AppDir); err != nil {
-		fmt.Printf("Your App is not created. Run 'nanobox up' first")
+		fmt.Printf("Your nanobox files have not been created. Run 'nanobox up' first")
 		os.Exit(1)
 	}
 }

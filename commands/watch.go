@@ -39,6 +39,9 @@ Description:
 // nanoWatch
 func nanoWatch(ccmd *cobra.Command, args []string) {
 
+	// when watching files, we dont want to suspend the VM if a deploy fails
+	fDebug = true
+
 	//
 	fmt.Printf("[√] Watching app files for changes\n")
 

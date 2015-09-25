@@ -34,7 +34,8 @@ Description:
 
 // nanoConsole
 func nanoConsole(ccmd *cobra.Command, args []string) {
-	fmt.Printf(`+> Opening nanobox console:
+	fmt.Printf(`
++> Opening nanobox console:
 
 
                                  **

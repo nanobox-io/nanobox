@@ -49,7 +49,7 @@ func imagesUpdate(ccmd *cobra.Command, args []string) {
 
 	// complete
 	case "complete":
-		fmt.Printf(stylish.SubBullet("Update complete"))
+		fmt.Printf(stylish.SubBullet("- Update complete"))
 
 	// if the bootstrap fails the server should handle the message. If not, this can
 	// be re-enabled

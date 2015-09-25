@@ -135,7 +135,7 @@ func RunVagrantCommand(cmd *exec.Cmd) error {
 					return
 				}
 
-				fmt.Printf("\n   - %s", msg)
+				fmt.Printf("\n%s", msg)
 
 				tick = time.Second
 
@@ -160,25 +160,25 @@ func RunVagrantCommand(cmd *exec.Cmd) error {
 			//
 			switch scanner.Text() {
 			case fmt.Sprintf("==> %v: Importing base box 'nanobox/boot2docker'...", config.Nanofile.Name):
-				output <- "Importing nanobox base image"
+				output <- "   - Importing nanobox base image"
 			case fmt.Sprintf("==> %v: Booting VM...", config.Nanofile.Name):
-				output <- "Booting virtual machine"
+				output <- "   - Booting virtual machine"
 			case fmt.Sprintf("==> %v: Configuring and enabling network interfaces...", config.Nanofile.Name):
-				output <- "Configuring virtual network"
+				output <- "   - Configuring virtual network"
 			case fmt.Sprintf("==> %v: Mounting shared folders...", config.Nanofile.Name):
-				output <- fmt.Sprintf("Mounting source code (%s)", config.CWDir)
+				output <- fmt.Sprintf("   - Mounting source code (%s)", config.CWDir)
 			case fmt.Sprintf("==> %v: Waiting for nanobox server...", config.Nanofile.Name):
-				output <- "Starting nanobox server"
+				output <- "   - Starting nanobox server"
 			case fmt.Sprintf("==> %v: Attempting graceful shutdown of VM...", config.Nanofile.Name):
-				output <- "Shutting down virtual machine"
+				output <- "   - Shutting down virtual machine"
 			case fmt.Sprintf("==> %v: Destroying VM and associated drives...", config.Nanofile.Name):
-				output <- "Destroying virtual machine"
+				output <- "+> Destroying virtual machine"
 			case fmt.Sprintf("==> %v: Forcing shutdown of VM...", config.Nanofile.Name):
-				output <- "Shutting down virtual machine"
+				output <- "   - Shutting down virtual machine"
 			case fmt.Sprintf("==> %v: Saving VM state and suspending execution...", config.Nanofile.Name):
-				output <- "Suspending virtual machine"
+				output <- "   - Suspending virtual machine"
 			case fmt.Sprintf("==> %v: Resuming suspended VM...", config.Nanofile.Name):
-				output <- "Resuming virtual machine"
+				output <- "+> Resuming virtual machine"
 			}
 		}
 

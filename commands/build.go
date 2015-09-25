@@ -10,6 +10,7 @@ package commands
 //
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 
@@ -51,10 +52,16 @@ func nanoBuild(ccmd *cobra.Command, args []string) {
 
 	// sync completed successfully
 	case "complete":
-		fmt.Printf(stylish.Bullet("Build complete... Navigate to %v to view your app.", config.Nanofile.Domain))
+		break
 
 	// if a build is run w/o having first run a deploy
 	case "unavailable":
 		fmt.Printf(stylish.ErrBullet("Before you can run a build, you must first deploy."))
+		os.Exit(0)
+
+	// errored
+	case "errored":
+		nanoDown(nil, args)
+		os.Exit(1)
 	}
 }
