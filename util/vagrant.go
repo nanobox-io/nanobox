@@ -67,7 +67,14 @@ func GetVMStatus() string {
 
 				// pull the status out of the line; it's easiest to just pull the exact
 				// states out of the string since there aren't that many
-				status = regexp.MustCompile(`\s(running|saved|poweroff|not created)\s`).FindStringSubmatch(scanner.Text())[1]
+				submatch := regexp.MustCompile(`\s(running|saved|poweroff|not created|aborted)\s`).FindStringSubmatch(scanner.Text())
+
+				//
+				if len(submatch) > 1 {
+					status = submatch[1]
+				} else {
+					config.Fatal("[util/vagrant] Unknown status: ", scanner.Text())
+				}
 			}
 		}
 	}()
@@ -120,7 +127,7 @@ func RunVagrantCommand(cmd *exec.Cmd) error {
 		msg, ok := <-output
 
 		// print initial message to 'get the ball rolling' on our 'outputer'
-		fmt.Printf("   - %s", msg)
+		fmt.Printf("%s", msg)
 
 		// begin a loop to read off the channel until it's closed
 		for {

@@ -47,13 +47,8 @@ func imagesUpdate(ccmd *cobra.Command, args []string) {
 	//
 	switch update.Status {
 
-	// complete
-	case "complete":
-		fmt.Printf(stylish.SubBullet("- Update complete"))
-
-	// if the bootstrap fails the server should handle the message. If not, this can
-	// be re-enabled
-	case "errored":
-		// fmt.Printf(stylish.Error("Bootstrap failed", "Your app failed to bootstrap"))
+	//
+	case "complete", "errored":
+		break
 	}
 }

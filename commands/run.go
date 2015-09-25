@@ -67,7 +67,12 @@ func nanoRun(ccmd *cobra.Command, args []string) {
 	fRun = true
 	nanoDeploy(nil, args)
 
-	fmt.Printf("[√] App successfully built")
+	fmt.Printf(`
+[√] App successfully built
+----------------------------------
+DEV URL : %v
+----------------------------------
+`, config.Nanofile.Domain)
 
 	var wg sync.WaitGroup
 
@@ -79,19 +84,13 @@ func nanoRun(ccmd *cobra.Command, args []string) {
 	// the waitgroup (blocking)
 	go func() {
 		<-sigChan
-		close(sigChan)
 		wg.Done()
+		close(sigChan)
 	}()
 
 	wg.Add(1)
 
 	go nanoWatch(nil, args)
-
-	fmt.Printf(`
-----------------------------------
-DEV URL : %v
-----------------------------------
-`, config.Nanofile.Domain)
 
 	// set logs to streaming
 	fStream = true
