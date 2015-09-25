@@ -17,7 +17,7 @@ import (
 )
 
 //
-const VERSION = "0.12.4"
+const VERSION = "0.12.5"
 
 //
 var Version *semver.Version
