@@ -14,8 +14,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/pagodabox/nanobox-cli/util"
 	"github.com/pagodabox/nanobox-cli/config"
+	"github.com/pagodabox/nanobox-cli/util"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
@@ -39,7 +39,7 @@ func nanoReload(ccmd *cobra.Command, args []string) {
 	// run an init to ensure there is a Vagrantfile
 	nanoInit(nil, args)
 
-	fmt.Printf(stylish.Bullet("Reloading nanobox VM"))
+	fmt.Printf(stylish.Bullet("Reloading nanobox VM..."))
 	if err := util.RunVagrantCommand(exec.Command("vagrant", "reload", "--provision")); err != nil {
 		config.Fatal("[commands/reload] util.RunVagrantCommand() failed", err.Error())
 	}
