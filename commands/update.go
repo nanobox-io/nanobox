@@ -13,8 +13,10 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"runtime"
+	"strings"
 
 	"github.com/kardianos/osext"
 	"github.com/spf13/cobra"
@@ -63,7 +65,11 @@ func nanoUpdate(ccmd *cobra.Command, args []string) {
 
 	var buf bytes.Buffer
 	p := make([]byte, 2048)
-	total := 0
+
+	var percent float64
+
+	down := 0
+	total := float64(res.ContentLength) / math.Pow(1024, 2)
 
 	// replace the existing CLI with the new CLI
 	for {
@@ -75,13 +81,16 @@ func nanoUpdate(ccmd *cobra.Command, args []string) {
 		buf.Write(p[:n])
 
 		// update the total bytes read
-		total += n
+		down += n
+
+		percent = (float64(down) / float64(res.ContentLength)) * 100
 
 		// show how download progress
-		fmt.Printf("\r   [******************** %20d/%d]", total/1024*2, res.ContentLength/1024*2)
+		fmt.Printf("\r   %.2f/%.2fMB [%-41s %.2f%%]", float64(down)/math.Pow(1024, 2), total, strings.Repeat("*", int(percent/2.5)), percent)
 
 		if err != nil {
 			if err == io.EOF {
+				fmt.Println("")
 				break
 			} else {
 				util.Fatal("[commands/update] res.Body.Read() failed", err)
@@ -90,7 +99,6 @@ func nanoUpdate(ccmd *cobra.Command, args []string) {
 
 		defer res.Body.Close()
 	}
-	util.Printc("\r   [green]success[reset]")
 
 	//
 	fmt.Printf(stylish.SubBullet("- Replacing CLI at %s", path))
