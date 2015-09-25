@@ -47,7 +47,7 @@ func nanoUpdate(ccmd *cobra.Command, args []string) {
 	//
 	res, err := http.Get(download)
 	if err != nil {
-		config.Fatal("[commands/update] http.NewRequest() failed", err)
+		config.Fatal("[commands/update] http.NewRequest() failed", err.Error())
 	}
 	defer res.Body.Close()
 
@@ -87,7 +87,7 @@ func nanoUpdate(ccmd *cobra.Command, args []string) {
 				fmt.Println("")
 				break
 			} else {
-				config.Fatal("[commands/update] res.Body.Read() failed", err)
+				config.Fatal("[commands/update] res.Body.Read() failed", err.Error())
 			}
 		}
 	}
@@ -95,7 +95,7 @@ func nanoUpdate(ccmd *cobra.Command, args []string) {
 	// get the path of the current executing CLI
 	path, err := osext.Executable()
 	if err != nil {
-		config.Fatal("[commands/update] osext.ExecutableFolder() failed", err)
+		config.Fatal("[commands/update] osext.ExecutableFolder() failed", err.Error())
 	}
 
 	// replace the existing CLI with the new CLI
@@ -114,7 +114,7 @@ func nanoUpdate(ccmd *cobra.Command, args []string) {
 	//  // run the command that was being run to begin with
 	//  out, err := exec.Command(os.Args[0], os.Args[1:]...).Output()
 	//  if err != nil {
-	//    config.Fatal("[commands.update] exec.Command()", err)
+	//    config.Fatal("[commands.update] exec.Command()", err.Error())
 	//  }
 
 	//  // show the output of the command that is run

@@ -77,15 +77,15 @@ func nanoUp(ccmd *cobra.Command, args []string) {
 	suspendable := true
 
 	//
-	req, err := http.NewRequest("PUT", fmt.Sprintf("http://%s/suspend", config.ServerURI), nil)
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/suspend", config.ServerURL), nil)
 	if err != nil {
-		config.Fatal("[commands/up] http.NewRequest() failed", err)
+		config.Fatal("[commands/up] http.NewRequest() failed", err.Error())
 	}
 
 	//
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		config.Fatal("[commands/up] http.DefaultClient.Do() failed", err)
+		config.Fatal("[commands/up] http.DefaultClient.Do() failed", err.Error())
 	}
 	defer res.Body.Close()
 

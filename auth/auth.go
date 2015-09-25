@@ -39,7 +39,7 @@ func init() {
 	if _, err := os.Stat(authfile); err != nil {
 		fmt.Printf(stylish.Bullet("Creating %s directory", authfile))
 		if _, err := os.Create(authfile); err != nil {
-			config.Fatal("[auth/auth] os.Create() failed", err)
+			config.Fatal("[auth/auth] os.Create() failed", err.Error())
 		}
 	}
 
@@ -63,7 +63,7 @@ func authenticated() bool {
 	// do a quick check to see if the cli needs to reauthenticate due to a user
 	// changing their authenticate token via the dashboard.
 	// if _, err := api.GetUser(creds.Userslug); err != nil {
-	// 	config.Log.Warn("Failed login attempt (%v): Credentials do not match! Reauthenticating...", err)
+	// 	config.Log.Warn("Failed login attempt (%s): Credentials do not match! Reauthenticating...", err.Error())
 	// 	Reauthenticate()
 	// }
 
@@ -117,7 +117,7 @@ func authenticate(Userslug, password string) (string, string) {
 
 	//
 	if err := saveCredentials(user.ID, user.AuthenticationToken); err != nil {
-		config.Fatal("[auth/auth] saveCredentials failed", err)
+		config.Fatal("[auth/auth] saveCredentials failed", err.Error())
 	}
 
 	//

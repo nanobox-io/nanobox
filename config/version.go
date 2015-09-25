@@ -9,12 +9,7 @@
 package config
 
 //
-import (
-	"fmt"
-	"os"
-
-	semver "github.com/coreos/go-semver/semver"
-)
+import semver "github.com/coreos/go-semver/semver"
 
 //
 const VERSION = "0.12.12"
@@ -27,9 +22,6 @@ func init() {
 
 	// set the version
 	if Version, err = semver.NewVersion(VERSION); err != nil {
-		fmt.Println("Fatal error! See ~/.nanobox/nanobox.log for details. Exiting...")
-		Log.Fatal("[version] semver.NewVersion() failed", err)
-		Log.Close()
-		os.Exit(1)
+		Fatal("[version] semver.NewVersion() failed", err.Error())
 	}
 }

@@ -48,7 +48,7 @@ func nanoExec(ccmd *cobra.Command, args []string) {
 
 	// fetch services to see if the command is trying to run on a specific container
 	var services []Service
-	if err := api.DoRawRequest(&services, "GET", fmt.Sprintf("http://%s/services", config.ServerURI), nil, nil); err != nil {
+	if err := api.DoRawRequest(&services, "GET", fmt.Sprintf("%s/services", config.ServerURL), nil, nil); err != nil {
 		fmt.Printf(stylish.Error("failed to get tunnel information", fmt.Sprintf("nanobox was unable to get tunnel information, and failed with the following error: %v", err)))
 	}
 

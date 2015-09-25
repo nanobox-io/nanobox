@@ -41,6 +41,6 @@ func nanoReload(ccmd *cobra.Command, args []string) {
 
 	fmt.Printf(stylish.Bullet("Reloading nanobox VM"))
 	if err := util.RunVagrantCommand(exec.Command("vagrant", "reload", "--provision")); err != nil {
-		config.Fatal("[commands/reload] util.RunVagrantCommand() failed", err)
+		config.Fatal("[commands/reload] util.RunVagrantCommand() failed", err.Error())
 	}
 }

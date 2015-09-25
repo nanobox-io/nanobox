@@ -30,7 +30,7 @@ import (
 //
 // 	// run command
 // 	if err := cmd.Run(); err != nil {
-// 		Fatal("[utils/exec] cmd.Run() failed", err)
+// 		config.Fatal("[utils/exec] cmd.Run() failed", err.Error())
 // 	}
 // }
 
@@ -48,6 +48,6 @@ func SudoExec(command, msg string) {
 
 	// run command
 	if err := cmd.Run(); err != nil {
-		config.Fatal("[utils/exec] scmd.Run() failed", err)
+		config.Fatal("[utils/exec] scmd.Run() failed", err.Error())
 	}
 }

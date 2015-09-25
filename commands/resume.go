@@ -38,6 +38,6 @@ func nanoResume(ccmd *cobra.Command, args []string) {
 	nanoInit(nil, args)
 
 	if err := util.RunVagrantCommand(exec.Command("vagrant", "resume")); err != nil {
-		config.Fatal("[commands/resume] util.RunVagrantCommand() failed", err)
+		config.Fatal("[commands/resume] util.RunVagrantCommand() failed", err.Error())
 	}
 }

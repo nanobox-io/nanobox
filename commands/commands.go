@@ -34,7 +34,7 @@ var (
 			// hijack the verbose flag (-v), and use it to display the version of the
 			// CLI
 			if fVersion || fVerbose {
-				fmt.Printf("nanobox %v\n", config.Version.String())
+				fmt.Printf("nanobox %s\n", config.Version.String())
 				os.Exit(0)
 			}
 

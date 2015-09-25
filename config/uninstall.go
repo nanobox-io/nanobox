@@ -32,7 +32,7 @@ package config
 //
 // 	//
 // 	if err := os.RemoveAll(nanoDir); err != nil {
-// 		config.Fatal("[install] os.Remove() failed", err)
+// 		config.Fatal("[install] os.Remove() failed", err.Error())
 // 	}
 //
 // 	util.Printc("[green]success[reset]")

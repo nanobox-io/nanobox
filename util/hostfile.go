@@ -24,14 +24,14 @@ func AddDevDomain() {
 	// open hosts file
 	f, err := os.OpenFile("/etc/hosts", os.O_RDWR|os.O_APPEND, 0644)
 	if err != nil {
-		config.Fatal("[utils/hostfile] os.OpenFile() failed", err)
+		config.Fatal("[utils/hostfile] os.OpenFile() failed", err.Error())
 	}
 	defer f.Close()
 
 	// write the entry to the file
 	entry := fmt.Sprintf("\n%-15v   %s # '%v' private network (added by nanobox)", config.Nanofile.IP, config.Nanofile.Domain, config.Nanofile.Name)
 	if _, err := f.WriteString(entry); err != nil {
-		config.Fatal("[utils/hostfile] WriteString() failed", err)
+		config.Fatal("[utils/hostfile] WriteString() failed", err.Error())
 	}
 }
 
@@ -43,7 +43,7 @@ func RemoveDevDomain() {
 	// open hosts file
 	f, err := os.OpenFile("/etc/hosts", os.O_RDWR, 0644)
 	if err != nil {
-		config.Fatal("[utils/hostfile] os.OpenFile() failed", err)
+		config.Fatal("[utils/hostfile] os.OpenFile() failed", err.Error())
 	}
 	defer f.Close()
 
@@ -65,6 +65,6 @@ func RemoveDevDomain() {
 
 	// write back the contents of the hosts file minus the removed entry
 	if err := ioutil.WriteFile("/etc/hosts", []byte(contents), 0644); err != nil {
-		config.Fatal("[utils/hostfile] ioutil.WriteFile failed", err)
+		config.Fatal("[utils/hostfile] ioutil.WriteFile failed", err.Error())
 	}
 }

@@ -36,7 +36,7 @@ func nanoBootstrap(ccmd *cobra.Command, args []string) {
 	//
 	bootstrap := util.Sync{
 		Model:   "bootstrap",
-		Path:    fmt.Sprintf("http://%s/bootstrap", config.ServerURI),
+		Path:    fmt.Sprintf("%s/bootstrap", config.ServerURL),
 		Verbose: fVerbose,
 	}
 

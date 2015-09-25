@@ -133,7 +133,7 @@ func nanoEngineFetch(ccmd *cobra.Command, args []string) {
 	//
 	res, err := http.Get(path)
 	if err != nil {
-		config.Fatal("[commands/engine fetch] http.Get() failed", err)
+		config.Fatal("[commands/engine fetch] http.Get() failed", err.Error())
 	}
 	defer res.Body.Close()
 

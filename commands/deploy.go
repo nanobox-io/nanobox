@@ -18,7 +18,7 @@ import (
 
 	"github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-cli/util"
-	"github.com/pagodabox/nanobox-golang-stylish"
+	// "github.com/pagodabox/nanobox-golang-stylish"
 )
 
 //
@@ -44,7 +44,6 @@ func init() {
 
 // nanoDeploy
 func nanoDeploy(ccmd *cobra.Command, args []string) {
-	fmt.Printf(stylish.Bullet("Deploying codebase..."))
 
 	//
 	v := url.Values{}
@@ -54,7 +53,7 @@ func nanoDeploy(ccmd *cobra.Command, args []string) {
 	//
 	deploy := util.Sync{
 		Model:   "deploy",
-		Path:    fmt.Sprintf("http://%s/deploys?%v", config.ServerURI, v.Encode()),
+		Path:    fmt.Sprintf("%s/deploys?%v", config.ServerURL, v.Encode()),
 		Verbose: fVerbose,
 	}
 

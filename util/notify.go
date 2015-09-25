@@ -19,27 +19,26 @@ var ignoreDirs = []string{}
 //
 func Watch(path string, fn func(e *fsnotify.Event, err error)) error {
 
+	var err error
+
 	//
 	setFileLimit()
 
 	// get a list of directories that should not be watched; this is done because
 	// there is a limit to how many files can be watched at a time, so folders like
 	// node_modules, bower_components, vendor, etc...
-	if err := getIgnoreDirs(); err != nil {
+	if err = getIgnoreDirs(); err != nil {
 		return err
 	}
 
 	// create a new file watcher
-	w, err := fsnotify.NewWatcher()
+	watcher, err = fsnotify.NewWatcher()
 	if err != nil {
 		return err
 	}
 
-	// this is dumb
-	watcher = w
-
 	// recursivly walk directories, beginning at 'root' (path), adding watchers
-	if err := filepath.Walk(path, watchDir); err != nil {
+	if err = filepath.Walk(path, watchDir); err != nil {
 		return err
 	}
 
@@ -96,7 +95,7 @@ func isIgnoreDir(name string) bool {
 
 // getIgnoreDirs
 func getIgnoreDirs() error {
-	res, err := http.Get(fmt.Sprintf("http://%s/libdirs", config.ServerURI))
+	res, err := http.Get(fmt.Sprintf("%s/libdirs", config.ServerURL))
 	if err != nil {
 		return err
 	}
@@ -110,4 +109,3 @@ func getIgnoreDirs() error {
 
 	return json.Unmarshal(b, &ignoreDirs)
 }
-

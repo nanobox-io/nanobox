@@ -53,10 +53,7 @@ func init() {
 
 	// create a logger
 	if Log, err = lumber.NewFileLogger(logfile, loglvl, lumber.ROTATE, 100, 1, 100); err != nil {
-		fmt.Println("Fatal error! See ~/.nanobox/nanobox.log for details. Exiting...")
-		Log.Fatal("[config/log] lumber.NewFileLogger() failed", err)
-		Log.Close()
-		os.Exit(1)
+		Fatal("[config/log] lumber.NewFileLogger() failed", err.Error())
 	}
 }
 
@@ -73,9 +70,9 @@ func Info(msg string, debug bool) {
 }
 
 // Fatal
-func Fatal(msg string, err error) {
-	fmt.Println("Fatal error! See ~/.nanobox/nanobox.log for details. Exiting...")
-	Log.Fatal(fmt.Sprintf("%v - %v", msg, err))
+func Fatal(msg, err string) {
+	fmt.Println("A fatal error occurred (See ~/.nanobox/nanobox.log for details). Exiting...")
+	Log.Fatal(fmt.Sprintf("%s - %s", msg, err))
 	Log.Close()
 	os.Exit(1)
 }

@@ -51,7 +51,7 @@ func (s *Sync) Run(opts []string) {
 	// connect 'mist' to the server running on the guest machine
 	client, err := mist.NewRemoteClient(config.MistURI)
 	if err != nil {
-		config.Fatal("[utils/sync] client.Connect() failed ", err)
+		config.Fatal("[utils/sync] client.Connect() failed ", err.Error())
 	}
 	defer client.Close()
 
@@ -83,7 +83,7 @@ func (s *Sync) Run(opts []string) {
 	//
 	// issue a sync
 	if err := api.DoRawRequest(nil, "POST", s.Path, nil, nil); err != nil {
-		config.Fatal("[utils/sync] api.DoRawRequest() failed", err)
+		config.Fatal("[utils/sync] api.DoRawRequest() failed", err.Error())
 	}
 
 	// handle
@@ -97,7 +97,7 @@ stream:
 		// was received and what to do about it.
 		e := &entry{}
 		if err := json.Unmarshal([]byte(msg.Data), &e); err != nil {
-			config.Fatal("[utils/sync] json.Unmarshal() failed", err)
+			config.Fatal("[utils/sync] json.Unmarshal() failed", err.Error())
 		}
 
 		// depending on what fields the data has, determines what needs to happen...
@@ -114,7 +114,7 @@ stream:
 
 			// update the model status
 			if err := json.Unmarshal([]byte(e.Document), s); err != nil {
-				config.Fatal("[utils/sync] json.Unmarshal() failed ", err)
+				config.Fatal("[utils/sync] json.Unmarshal() failed ", err.Error())
 			}
 
 			switch s.Status {
@@ -123,7 +123,7 @@ stream:
 			// file
 			case "complete":
 				if _, err := os.Create(config.AppDir + "/.deployed"); err != nil {
-					config.Fatal("[utils/sync] os.Create() failed ", err)
+					config.Fatal("[utils/sync] os.Create() failed ", err.Error())
 				}
 
 			// case "unavailable":

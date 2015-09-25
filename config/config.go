@@ -42,6 +42,7 @@ var (
 
 	//
 	ServerURI string // nanobox-server host:port combo (IP:1757)
+	ServerURL string // nanobox-server host:port combo (IP:1757) (http)
 	MistURI   string // mist's host:port combo (IP:1445)
 	LogtapURI string // logtap's host:port combo (IP:6361)
 )
@@ -79,12 +80,12 @@ func init() {
 	// set the current working directory first, as it's used in other steps of the
 	// configuration process
 	if CWDir, err = os.Getwd(); err != nil {
-		Log.Fatal("[config/config] os.Getwd() failed", err)
+		Log.Fatal("[config/config] os.Getwd() failed", err.Error())
 	}
 
 	// set Home based off the users homedir (~)
 	if Home, err = homedir.Dir(); err != nil {
-		Log.Fatal("[config/config] homedir.Dir() failed", err)
+		Log.Fatal("[config/config] homedir.Dir() failed", err.Error())
 	}
 
 	// set nanobox's root directory;
@@ -94,7 +95,7 @@ func init() {
 	if _, err := os.Stat(Root); err != nil {
 		fmt.Printf(stylish.Bullet("Creating %s directory", Root))
 		if err := os.Mkdir(Root, 0755); err != nil {
-			Log.Fatal("[config/config] os.Mkdir() failed", err)
+			Log.Fatal("[config/config] os.Mkdir() failed", err.Error())
 		}
 	}
 
@@ -102,7 +103,7 @@ func init() {
 	apps := filepath.Clean(Root + "/apps")
 	if _, err := os.Stat(apps); err != nil {
 		if err := os.Mkdir(apps, 0755); err != nil {
-			Log.Fatal("[config/config] os.Mkdir() failed", err)
+			Log.Fatal("[config/config] os.Mkdir() failed", err.Error())
 		}
 	}
 
@@ -112,6 +113,7 @@ func init() {
 
 	//
 	ServerURI = Nanofile.IP + SERVER_PORT
+	ServerURL = "http://" + ServerURI
 	MistURI = Nanofile.IP + MIST_PORT
 	LogtapURI = Nanofile.IP + LOGTAP_PORT
 

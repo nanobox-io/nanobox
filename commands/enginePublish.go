@@ -157,7 +157,7 @@ Please ensure all required fields are provided and try again.`))
 
 				p, err := api.GetEngine(api.UserSlug, release.Name)
 				if err != nil {
-					config.Fatal("[commands/publish] api.GetEngine failed", err)
+					config.Fatal("[commands/publish] api.GetEngine failed", err.Error())
 				}
 
 				// once the engine is "active", break
@@ -171,7 +171,7 @@ Please ensure all required fields are provided and try again.`))
 
 			// generically handle any other errors
 		} else {
-			config.Fatal("[commands/publish] api.GetEngine failed", err)
+			config.Fatal("[commands/publish] api.GetEngine failed", err.Error())
 		}
 
 		stylish.Success()
@@ -184,7 +184,7 @@ Please ensure all required fields are provided and try again.`))
 	// write the archive to a local file
 	// archive, err := os.Create(fmt.Sprintf("%v-%v.release.tgz", release.Name, release.Version))
 	// if err != nil {
-	// 	config.Fatal("[commands/publish] os.Create() failed", err)
+	// 	config.Fatal("[commands/publish] os.Create() failed", err.Error())
 	// }
 	// defer archive.Close()
 
@@ -228,7 +228,7 @@ Please ensure all required fields are provided and try again.`))
 
 				// tarball any remaining files/folders that are found
 				if err := filepath.Walk(f, tarFile); err != nil {
-					config.Fatal("[commands/publish] filepath.Walk() failed", err)
+					config.Fatal("[commands/publish] filepath.Walk() failed", err.Error())
 				}
 			}
 		}
@@ -255,12 +255,12 @@ Please ensure all required fields are provided and try again.`))
 	//
 	s3url, err := util.RequestS3URL(fmt.Sprintf("http://api.nanobox.io/v1/engines/%v/request_upload?%v", release.Name, v.Encode()))
 	if err != nil {
-		config.Fatal("[commands/publish] util.RequestS3URL failed", err)
+		config.Fatal("[commands/publish] util.RequestS3URL failed", err.Error())
 	}
 
 	//
 	if err := util.S3Upload(s3url, archive); err != nil {
-		config.Fatal("[commands/publish] util.S3Upload failed", err)
+		config.Fatal("[commands/publish] util.S3Upload failed", err.Error())
 	}
 
 	//

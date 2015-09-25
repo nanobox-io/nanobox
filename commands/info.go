@@ -47,17 +47,17 @@ Nanobox Files  : %s
 	var services []Service
 
 	//
-	if err := api.DoRawRequest(&services, "GET", fmt.Sprintf("http://%s/services", config.ServerURI), nil, nil); err != nil {
+	if err := api.DoRawRequest(&services, "GET", fmt.Sprintf("%s/services", config.ServerURL), nil, nil); err != nil {
 		fmt.Printf(stylish.Error("failed to get services", fmt.Sprintf("nanobox was unable to get services information, and failed with the following error: %v", err)))
 	}
 
 	//
 	if len(services) >= 1 {
-		fmt.Printf("///////// SERVICES /////////\n")
+		info := "///////// SERVICES /////////\n"
 
 		//
 		for _, service := range services {
-			info := fmt.Sprintf(`
+			info += fmt.Sprintf(`
 	%s :
 	  name : %s
 		host : %s
@@ -74,6 +74,9 @@ Nanobox Files  : %s
 				info += fmt.Sprintf("password : %s", service.Password)
 			}
 		}
+
+		//
+		fmt.Println(info)
 	}
 }
 

@@ -8,7 +8,7 @@
 package config
 
 import (
-	"fmt"
+	// "fmt"
 	"path/filepath"
 	// "io/ioutil"
 	// "net/http"
@@ -18,9 +18,9 @@ import (
 
 	// semver "github.com/coreos/go-semver/semver"
 
+	// "github.com/pagodabox/nanobox-golang-stylish"
 	// "github.com/pagodabox/pagodabox-cli/commands"
 	// "github.com/pagodabox/pagodabox-cli/util"
-	// "github.com/pagodabox/nanobox-golang-stylish"
 )
 
 // init
@@ -30,10 +30,7 @@ func init() {
 	updatefile := filepath.Clean(Root + "/.update")
 	if _, err := os.Stat(updatefile); err != nil {
 		if _, err := os.Create(updatefile); err != nil {
-			fmt.Println("Fatal error! See ~/.nanobox/nanobox.log for details. Exiting...")
-			Log.Fatal("[config/update] os.Create() failed", err)
-			Log.Close()
-			os.Exit(1)
+			Fatal("[config/update] os.Create() failed", err.Error())
 		}
 	}
 }
@@ -48,7 +45,7 @@ func init() {
 // 	//
 // 	release, err := getRelease()
 // 	if err != nil {
-// 		config.Fatal("[update] getRelease() failed", err)
+// 		config.Fatal("[update] getRelease() failed", err.Error())
 // 	}
 //
 // 	if less := config.Version.LessThan(*release); !less {
@@ -70,7 +67,7 @@ func init() {
 // 	//
 // 	fi, err := os.Stat(config.UpdateFile)
 // 	if err != nil {
-// 		config.Fatal("[update] os.Stat() failed", err)
+// 		config.Fatal("[update] os.Stat() failed", err.Error())
 // 	}
 //
 // 	// check when the last time our .update file was modified
@@ -91,7 +88,7 @@ func init() {
 // 		//
 // 		release, err := getRelease()
 // 		if err != nil {
-// 			config.Fatal("[update] getRelease() failed", err)
+// 			config.Fatal("[update] getRelease() failed", err.Error())
 // 		}
 //
 // 		// check to see if the current version of the CLI is less than the release
@@ -173,7 +170,7 @@ func init() {
 // // touchUpdate updates the modification time of the .update file
 // func touchUpdate() {
 // 	if err := os.Chtimes(config.UpdateFile, time.Now(), time.Now()); err != nil {
-// 		config.Fatal("[commands.update] os.Chtimes() failed", err)
+// 		config.Fatal("[commands.update] os.Chtimes() failed", err.Error())
 // 	}
 //
 // 	os.Exit(0)

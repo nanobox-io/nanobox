@@ -40,7 +40,7 @@ func nanoBuild(ccmd *cobra.Command, args []string) {
 	//
 	build := util.Sync{
 		Model:   "build",
-		Path:    fmt.Sprintf("http://%s/builds", config.ServerURI),
+		Path:    fmt.Sprintf("%s/builds", config.ServerURL),
 		Verbose: fVerbose,
 	}
 

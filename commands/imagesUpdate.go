@@ -37,7 +37,7 @@ func imagesUpdate(ccmd *cobra.Command, args []string) {
 	//
 	update := util.Sync{
 		Model:   "imageupdate",
-		Path:    fmt.Sprintf("http://%s/image-update", config.ServerURI),
+		Path:    fmt.Sprintf("%s/image-update", config.ServerURL),
 		Verbose: fVerbose,
 	}
 

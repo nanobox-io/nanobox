@@ -99,7 +99,7 @@ func forwardAllSignals() {
 			}
 
 			//
-			req, _ := http.NewRequest("POST", fmt.Sprintf("http://%s/killexec?signal=%s", config.ServerURI, sig), nil)
+			req, _ := http.NewRequest("POST", fmt.Sprintf("%s/killexec?signal=%s", config.ServerURL, sig), nil)
 			_, err := http.DefaultClient.Do(req)
 			fmt.Println(err)
 		}
@@ -124,7 +124,7 @@ func handleFileEvent(event *fsnotify.Event, err error) {
 	if event.Op != fsnotify.Chmod {
 		event.Name = strings.Replace(event.Name, config.CWDir, "", -1)
 
-		req, _ := http.NewRequest("POST", fmt.Sprintf("http://%s/file-change?filename=%s", config.ServerURI, event.Name), nil)
+		req, _ := http.NewRequest("POST", fmt.Sprintf("%s/file-change?filename=%s", config.ServerURL, event.Name), nil)
 
 		//
 		if _, err := http.DefaultClient.Do(req); err != nil {
@@ -167,7 +167,7 @@ func monitorSize(outFd uintptr, params string) {
 func resizeTTY(outFd uintptr, params string) {
 	h, w := getTTYSize(outFd)
 
-	req, _ := http.NewRequest("POST", fmt.Sprintf("http://%s/resizeexec?h=%d&w=%d&%v", config.ServerURI, h, w, params), nil)
+	req, _ := http.NewRequest("POST", fmt.Sprintf("%s/resizeexec?h=%d&w=%d&%v", config.ServerURL, h, w, params), nil)
 
 	//
 	if _, err := http.DefaultClient.Do(req); err != nil {
