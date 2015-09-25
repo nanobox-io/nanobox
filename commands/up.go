@@ -57,11 +57,20 @@ func nanoUp(ccmd *cobra.Command, args []string) {
 		nanoReload(nil, args)
 	}
 
-	// only deploy if the vm has not been created or a rebuild is passed
-	if util.GetVMStatus() == "not created" || util.AppDeployed() || fRebuild {
+	//
+	switch {
+
+	// if the vm is 'new' deploy and update images
+	case util.GetVMStatus() == "not created" || !util.AppDeployed():
+		nanoDeploy(nil, args)
+		imagesUpdate(nil, args)
+
+	// if fRebuild is detected only deploy
+	case fRebuild:
 		nanoDeploy(nil, args)
 	}
 
+	//
 	nanoConsole(nil, args)
 
 	// assume the machine can be suspended

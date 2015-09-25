@@ -59,6 +59,11 @@ func nanoRun(ccmd *cobra.Command, args []string) {
 		nanoReload(nil, args)
 	}
 
+	// if the vm is 'new' update images
+	if util.GetVMStatus() == "not created" || !util.AppDeployed() {
+		imagesUpdate(nil, args)
+	}
+
 	fRun = true
 	nanoDeploy(nil, args)
 

@@ -128,11 +128,10 @@ stream:
 
 			// case "unavailable":
 
-			// if a deploy ever errors, remove the deployed file
+			// if a deploy ever errors, remove the deployed file; don't need to handle
+			// an error here because it just means the file already doesn't exist
 			case "errored":
-				if err := os.Remove(config.AppDir + "/.deployed"); err != nil {
-					config.Fatal("[utils/sync] os.Remove() failed ", err)
-				}
+				os.Remove(config.AppDir + "/.deployed")
 			}
 
 			// break the stream once we get a model update. If we ever have intermediary

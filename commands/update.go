@@ -103,6 +103,9 @@ func nanoUpdate(ccmd *cobra.Command, args []string) {
 	ioutil.WriteFile(path, buf.Bytes(), 0755)
 
 	//
+	fmt.Printf(stylish.SubBullet("- Now running %s", config.VERSION))
+
+	//
 	fmt.Println(stylish.Success())
 
 	// // attempt to run the command that was being run to begin with (unless its update)
