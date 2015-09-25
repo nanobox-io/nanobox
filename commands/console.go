@@ -50,12 +50,17 @@ func nanoConsole(ccmd *cobra.Command, args []string) {
                                ++   ++
                                   +
 
+                  _  _ ____ _  _ ____ ___  ____ _  _
+                  |\ | |__| |\ | |  | |__) |  |  \/ 
+                  | \| |  | | \| |__| |__) |__| _/\_
+
  ------------------------------------------------------------------
  + You are in a virtual machine (vm)
  + Your local source code has been mounted into the vm, and changes
    in either the vm or local will be mirrored.
  + If you run a server, access it at >> %s
  ------------------------------------------------------------------
+ 
 `, config.Nanofile.Domain)
 
 	//
