@@ -36,8 +36,6 @@ func init() {
 //
 func nanoUp(ccmd *cobra.Command, args []string) {
 
-	fmt.Println("STATUS", util.GetVMStatus())
-
 	//
 	switch util.GetVMStatus() {
 

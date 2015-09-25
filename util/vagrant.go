@@ -41,6 +41,7 @@ func GetVMStatus() string {
 	//
 	uuid := GetVMUUID()
 
+	// if no uuid is found the vm has not yet been created
 	if uuid == "" {
 		return "not created"
 	}
