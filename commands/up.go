@@ -103,8 +103,8 @@ func nanoUp(ccmd *cobra.Command, args []string) {
 	}
 
 	// suspend the machine if not active consoles are connected and the command was
-	// not run in debug mode
-	if suspendable && !fDebug {
+	// not run in background mode
+	if suspendable && !fBackground {
 		nanoDown(nil, args)
 	}
 }

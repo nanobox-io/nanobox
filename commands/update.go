@@ -100,7 +100,9 @@ func nanoUpdate(ccmd *cobra.Command, args []string) {
 
 	// replace the existing CLI with the new CLI
 	fmt.Printf(stylish.SubBullet("- Replacing CLI at %s", path))
-	ioutil.WriteFile(path, buf.Bytes(), 0755)
+	if err := ioutil.WriteFile(path, buf.Bytes(), 0755); err != nil {
+		fmt.Println("ERR! %#v", err)
+	}
 
 	//
 	fmt.Printf(stylish.SubBullet("- Now running %s", config.VERSION))

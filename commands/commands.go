@@ -74,10 +74,10 @@ var (
 	}
 
 	// persistent (global) flags
-	fDebug   bool //
-	fDevmode bool //
-	fForce   bool //
-	fVerbose bool //
+	fBackground bool //
+	fDevmode    bool //
+	fForce      bool //
+	fVerbose    bool //
 
 	// local flags
 	fCount   int    //
@@ -107,8 +107,8 @@ type Service struct {
 func init() {
 
 	// internal flags
-	NanoboxCmd.PersistentFlags().BoolVarP(&fDebug, "debug", "", false, "")
-	NanoboxCmd.PersistentFlags().MarkHidden("debug")
+	NanoboxCmd.PersistentFlags().BoolVarP(&fBackground, "background", "", false, "")
+	NanoboxCmd.PersistentFlags().MarkHidden("background")
 
 	NanoboxCmd.PersistentFlags().BoolVarP(&fDevmode, "dev", "", false, "")
 	NanoboxCmd.PersistentFlags().MarkHidden("dev")

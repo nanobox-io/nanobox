@@ -61,6 +61,13 @@ func nanoBuild(ccmd *cobra.Command, args []string) {
 
 	// errored
 	case "errored":
+
+		// this is pretty nasty; need to think this over
+		if fWatch {
+			fBackground = true
+		}
+
+		//
 		nanoDown(nil, args)
 		os.Exit(1)
 	}

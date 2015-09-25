@@ -14,7 +14,7 @@ import (
 
 	"github.com/jcelliott/lumber"
 
-	api "github.com/pagodabox/nanobox-api-client"
+	// api "github.com/pagodabox/nanobox-api-client"
 )
 
 //
@@ -41,12 +41,12 @@ func init() {
 	loglvl := lumber.INFO
 
 	// check for debug mode and set the appropriate log level
-	if os.Args[len(os.Args)-1] == "--debug" {
-		loglvl = lumber.DEBUG
-
-		//
-		api.Debug = true
-	}
+	// if os.Args[len(os.Args)-1] == "--debug" {
+	// 	loglvl = lumber.DEBUG
+	//
+	// 	//
+	// 	api.Debug = true
+	// }
 
 	//
 	Console = lumber.NewConsoleLogger(loglvl)

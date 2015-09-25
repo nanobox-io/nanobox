@@ -38,8 +38,8 @@ func nanoDown(ccmd *cobra.Command, args []string) {
 	// run an init to ensure there is a Vagrantfile
 	nanoInit(nil, args)
 
-	// if in debug mode don't suspend the VM
-	if fDebug {
+	// if the CLI is running in background mode dont suspend the VM
+	if fBackground {
 		os.Exit(0)
 	}
 
