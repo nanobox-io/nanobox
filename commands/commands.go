@@ -88,7 +88,6 @@ var (
 	fRebuild bool   //
 	fRun     bool   //
 	fStream  bool   //
-	fTunnel  string //
 	fVersion bool   //
 	fWatch   bool   //
 	fWrite   bool   //

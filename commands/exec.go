@@ -33,11 +33,6 @@ Description:
 	Run:    nanoExec,
 }
 
-//
-func init() {
-	execCmd.Flags().StringVarP(&fTunnel, "tunnel", "t", "", "Creates port forwards for all comma delimeted port:port combos")
-}
-
 // nanoExec
 func nanoExec(ccmd *cobra.Command, args []string) {
 	fmt.Printf(stylish.Bullet("Opening a nanobox console..."))
@@ -49,7 +44,6 @@ func nanoExec(ccmd *cobra.Command, args []string) {
 
 	//
 	v := url.Values{}
-	v.Add("forward", fTunnel)
 	v.Add("cmd", strings.Join(args[0:], " "))
 
 	// fetch services to see if the command is trying to run on a specific container

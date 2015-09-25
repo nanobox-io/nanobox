@@ -32,15 +32,9 @@ Description:
 	Run:    nanoConsole,
 }
 
-//
-func init() {
-	consoleCmd.Flags().StringVarP(&fTunnel, "tunnel", "t", "", "Creates port forwards for all comma delimeted port:port combos")
-}
-
 // nanoConsole
 func nanoConsole(ccmd *cobra.Command, args []string) {
-	fmt.Printf(`
-+> Opening nanobox console:
+	fmt.Printf(`+> Opening nanobox console:
 
 
                                  **
@@ -65,8 +59,8 @@ func nanoConsole(ccmd *cobra.Command, args []string) {
 
 	//
 	v := url.Values{}
-	v.Add("forward", fTunnel)
 
+	//
 	switch {
 
 	// if no args are passed run console as normal
