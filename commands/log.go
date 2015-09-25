@@ -92,12 +92,12 @@ func nanoLog(ccmd *cobra.Command, args []string) {
 		}
 		defer client.Close()
 
-		// subscribe to 'log' updates
-		logTags := []string{"log", fLevel}
-		if err := client.Subscribe([]string{"log", fLevel}); err != nil {
+		// subscribe to app updates
+		appTags := []string{"log", "app", fLevel}
+		if err := client.Subscribe(appTags); err != nil {
 			fmt.Printf(stylish.Warning("Nanobox failed to subscribe to app logs."))
 		}
-		defer client.Unsubscribe(logTags)
+		defer client.Unsubscribe(appTags)
 
 		//
 		fmt.Printf("Streaming App Logs:\n")

@@ -71,7 +71,7 @@ func (s *Sync) Run(opts []string) {
 		logLevel = "debug"
 	}
 
-	// if the verbose flag is included, also subscribe to the 'debug' logs
+	// subscirbe to deploy logs; if verbose, also subscribe to the 'debug' logs
 	logTags := []string{"log", "deploy", logLevel}
 	if err := client.Subscribe(logTags); err != nil {
 		fmt.Printf(stylish.Warning("Nanobox failed to subscribe to debug logs. Your sync will continue as normal, and log output is available on your dashboard."))
