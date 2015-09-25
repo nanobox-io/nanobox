@@ -174,6 +174,11 @@ Vagrant.configure(2) do |config|
 
 	config.vm.define :'%v' do |nanobox|
 
+		## Set the hostname of the vm to the app domain
+		nanobox.vm.provision "shell", inline: <<-SCRIPT
+			sudo hostname %v
+		SCRIPT
+
 	  ## Wait for nanobox-server to be ready before vagrant exits
 	  nanobox.vm.provision "shell", inline: <<-WAIT
       echo "Waiting for nanobox server..."
@@ -211,7 +216,7 @@ Vagrant.configure(2) do |config|
 		%s
 
 	end
-end`, version, config.Nanofile.Name, network, synced_folders, provider, devmode)
+end`, version, config.Nanofile.Name, config.Nanofile.Domain, network, synced_folders, provider, devmode)
 
 	// write the Vagrantfile
 	if err := ioutil.WriteFile(config.AppDir+"/Vagrantfile", []byte(vagrantfile), 0755); err != nil {
