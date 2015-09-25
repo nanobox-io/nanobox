@@ -88,7 +88,7 @@ func nanoLog(ccmd *cobra.Command, args []string) {
 		// connect 'mist' to the server running on the guest machine
 		client, err := mist.NewRemoteClient(config.MistURI)
 		if err != nil {
-			util.Fatal("[commands/log] client.Connect() failed ", err)
+			config.Fatal("[commands/log] client.Connect() failed ", err)
 		}
 		defer client.Close()
 
@@ -106,7 +106,7 @@ func nanoLog(ccmd *cobra.Command, args []string) {
 			//
 			log := Log{}
 			if err := json.Unmarshal([]byte(msg.Data), &log); err != nil {
-				util.Fatal("[commands/log] json.Unmarshal() failed", err)
+				config.Fatal("[commands/log] json.Unmarshal() failed", err)
 			}
 
 			//
@@ -125,20 +125,20 @@ func nanoLog(ccmd *cobra.Command, args []string) {
 		//
 		res, err := http.Get(fmt.Sprintf("http://%v/logs?%v", config.ServerURI, v.Encode()))
 		if err != nil {
-			util.Fatal("[commands/log] http.Get() failed", err)
+			config.Fatal("[commands/log] http.Get() failed", err)
 		}
 		defer res.Body.Close()
 
 		//
 		b, err := ioutil.ReadAll(res.Body)
 		if err != nil {
-			util.Fatal("[commands/log] ioutil.ReadAll() failed", err)
+			config.Fatal("[commands/log] ioutil.ReadAll() failed", err)
 		}
 
 		//
 		logs := []Log{}
 		if err := json.Unmarshal(b, &logs); err != nil {
-			util.Fatal("[commands/log] json.Unmarshal() failed", err)
+			config.Fatal("[commands/log] json.Unmarshal() failed", err)
 		}
 
 		//

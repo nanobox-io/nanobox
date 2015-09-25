@@ -14,6 +14,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-cli/util"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
@@ -40,6 +41,6 @@ func nanoResume(ccmd *cobra.Command, args []string) {
 
 	fmt.Printf(stylish.Bullet("Resuming nanobox VM"))
 	if err := util.RunVagrantCommand(exec.Command("vagrant", "resume")); err != nil {
-		util.Fatal("[commands/resume] util.RunVagrantCommand() failed", err)
+		config.Fatal("[commands/resume] util.RunVagrantCommand() failed", err)
 	}
 }

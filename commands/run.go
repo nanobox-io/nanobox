@@ -18,6 +18,7 @@ import (
 
 	"github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-cli/util"
+	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
 //
@@ -39,10 +40,21 @@ func nanoRun(ccmd *cobra.Command, args []string) {
 
 	//
 	switch util.GetVMStatus() {
-	case "not created":
-		nanoCreate(nil, args)
+
+	// vm is running; do nothing
+	case "running":
+		fmt.Printf(stylish.Bullet("Nanobox VM already running"))
+		break
+
+	// vm is suspended; resume it
 	case "saved":
 		nanoResume(nil, args)
+
+	// vm has not been created; create it
+	case "not created":
+		nanoCreate(nil, args)
+
+	// vm is in some other state; reload just incase
 	default:
 		nanoReload(nil, args)
 	}
@@ -58,17 +70,14 @@ func nanoRun(ccmd *cobra.Command, args []string) {
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt)
 
-	// listen for anything on the channel (doesn't matter what) and exit
+	// listen for any one event on the channel, doesn't matter what, then decrement
+	// the waitgroup (blocking)
 	go func() {
-		for _ = range sigChan {
-			wg.Done()
-		}
+		<-sigChan
+		wg.Done()
 	}()
 
 	wg.Add(1)
-
-	// set logs to streaming
-	fStream = true
 
 	go nanoWatch(nil, args)
 
@@ -79,6 +88,8 @@ DEV URL : %v
 
 `, config.Nanofile.Domain)
 
+	// set logs to streaming
+	fStream = true
 	go nanoLog(nil, args)
 
 	wg.Wait()

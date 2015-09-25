@@ -16,6 +16,7 @@ import (
 
 	"github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-cli/util"
+	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
 //
@@ -35,14 +36,25 @@ func init() {
 //
 func nanoUp(ccmd *cobra.Command, args []string) {
 
-	// fmt.Println("STATUS", util.GetVMStatus())
+	fmt.Println("STATUS", util.GetVMStatus())
 
 	//
 	switch util.GetVMStatus() {
-	case "not created":
-		nanoCreate(nil, args)
+
+	// vm is running; do nothing
+	case "running":
+		fmt.Printf(stylish.Bullet("Nanobox VM already running..."))
+		break
+
+	// vm is suspended; resume it
 	case "saved":
 		nanoResume(nil, args)
+
+	// vm has not been created; create it
+	case "not created":
+		nanoCreate(nil, args)
+
+	// vm is in some other state; reload just incase
 	default:
 		nanoReload(nil, args)
 	}
@@ -60,13 +72,13 @@ func nanoUp(ccmd *cobra.Command, args []string) {
 	//
 	req, err := http.NewRequest("PUT", fmt.Sprintf("http://%s/suspend", config.ServerURI), nil)
 	if err != nil {
-		panic(err)
+		config.Fatal("[commands/up] http.NewRequest() failed", err)
 	}
 
 	//
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
-		panic(err)
+		config.Fatal("[commands/up] http.DefaultClient.Do() failed", err)
 	}
 	defer res.Body.Close()
 

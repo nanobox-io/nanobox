@@ -31,26 +31,6 @@ func Printc(msg string, v ...interface{}) {
 	fmt.Println(colorstring.Color(fmt.Sprintf(msg, v...)))
 }
 
-// Debug
-func Debug(msg string, debug bool) {
-	if debug {
-		fmt.Printf(msg)
-	}
-}
-
-// Log
-func Log(msg string, debug bool) {
-	config.Log.Info(msg)
-}
-
-// Fatal
-func Fatal(msg string, err error) {
-	fmt.Println("Fatal error! See ~/.nanobox/nanobox.log for details. Exiting...")
-	config.Log.Fatal(fmt.Sprintf("%v - %v", msg, err))
-	config.Log.Close()
-	os.Exit(1)
-}
-
 // Prompt will prompt for input from the shell and return a trimmed response
 func Prompt(p string, v ...interface{}) string {
 	reader := bufio.NewReader(os.Stdin)
@@ -60,7 +40,7 @@ func Prompt(p string, v ...interface{}) string {
 
 	input, err := reader.ReadString('\n')
 	if err != nil {
-		Fatal("[utils/ui] reader.ReadString() failed", err)
+		config.Fatal("[utils/ui] reader.ReadString() failed", err)
 	}
 
 	return strings.TrimSpace(input)

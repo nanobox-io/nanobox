@@ -13,6 +13,7 @@ import (
 	"regexp"
 
 	api "github.com/pagodabox/nanobox-api-client"
+	"github.com/pagodabox/nanobox-cli/config"
 )
 
 // HandleAPIError takes an error returned from an API call, break it down and
@@ -36,7 +37,7 @@ func HandleAPIError(err error) error {
 			// separate the custom 422 error from the message (ex. {"upgrade":["Cannot exceed free limit"]})
 			subMatch := regexp.MustCompile(`^\{\s*\"(.*)\"\s*\:\s*\[\s*\"(.*)\"\s*\]\s*\}$`).FindStringSubmatch(apiError.Body)
 			if subMatch == nil {
-				Fatal("[utils/api] FindStringSubmatch() failed", errors.New(fmt.Sprintf("No matches found for api error: %v", apiError.Body)))
+				config.Fatal("[utils/api] FindStringSubmatch() failed", errors.New(fmt.Sprintf("No matches found for api error: %v", apiError.Body)))
 			}
 
 			return errors.New(fmt.Sprintf("[utils/api] %d %v - %v", 422, subMatch[1], subMatch[2]))

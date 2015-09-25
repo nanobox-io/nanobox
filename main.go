@@ -20,7 +20,7 @@ func main() {
 
 	// do a quick ping to make sure we can communicate properly with the API
 	// if err := api.DoRawRequest(nil, "GET", "https://api.pagodabox.io/v1/ping", nil, nil); err != nil {
-	// 	util.Fatal("[main] The CLI was unable to communicate with the API", err)
+	// 	config.Fatal("[main] The CLI was unable to communicate with the API", err)
 	// }
 
 	//

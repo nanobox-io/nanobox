@@ -8,7 +8,7 @@
 package config
 
 import (
-	// "fmt"
+	"fmt"
 	"path/filepath"
 	// "io/ioutil"
 	// "net/http"
@@ -30,7 +30,10 @@ func init() {
 	updatefile := filepath.Clean(Root + "/.update")
 	if _, err := os.Stat(updatefile); err != nil {
 		if _, err := os.Create(updatefile); err != nil {
-			panic(err)
+			fmt.Println("Fatal error! See ~/.nanobox/nanobox.log for details. Exiting...")
+			Log.Fatal("[config/update] os.Create() failed", err)
+			Log.Close()
+			os.Exit(1)
 		}
 	}
 }
@@ -45,7 +48,7 @@ func init() {
 // 	//
 // 	release, err := getRelease()
 // 	if err != nil {
-// 		util.Fatal("[update] getRelease() failed", err)
+// 		config.Fatal("[update] getRelease() failed", err)
 // 	}
 //
 // 	if less := config.Version.LessThan(*release); !less {
@@ -67,7 +70,7 @@ func init() {
 // 	//
 // 	fi, err := os.Stat(config.UpdateFile)
 // 	if err != nil {
-// 		util.Fatal("[update] os.Stat() failed", err)
+// 		config.Fatal("[update] os.Stat() failed", err)
 // 	}
 //
 // 	// check when the last time our .update file was modified
@@ -88,7 +91,7 @@ func init() {
 // 		//
 // 		release, err := getRelease()
 // 		if err != nil {
-// 			util.Fatal("[update] getRelease() failed", err)
+// 			config.Fatal("[update] getRelease() failed", err)
 // 		}
 //
 // 		// check to see if the current version of the CLI is less than the release
@@ -170,7 +173,7 @@ func init() {
 // // touchUpdate updates the modification time of the .update file
 // func touchUpdate() {
 // 	if err := os.Chtimes(config.UpdateFile, time.Now(), time.Now()); err != nil {
-// 		util.Fatal("[commands.update] os.Chtimes() failed", err)
+// 		config.Fatal("[commands.update] os.Chtimes() failed", err)
 // 	}
 //
 // 	os.Exit(0)

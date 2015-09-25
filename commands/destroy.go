@@ -50,7 +50,7 @@ func nanoDestroy(ccmd *cobra.Command, args []string) {
 
 		// dont care if the project no longer exists... thats what we're doing anyway
 		if err != err.(*os.PathError) {
-			util.Fatal("[commands/destroy] util.RunVagrantCommand() failed", err)
+			config.Fatal("[commands/destroy] util.RunVagrantCommand() failed", err)
 		}
 	}
 
@@ -58,7 +58,7 @@ func nanoDestroy(ccmd *cobra.Command, args []string) {
 	// isn't just created again upon running the vagrant command
 	fmt.Printf(stylish.Bullet("Deleting nanobox files (%s)", config.AppDir))
 	if err := os.RemoveAll(config.AppDir); err != nil {
-		util.Fatal("[commands/destroy] os.RemoveAll() failed", err)
+		config.Fatal("[commands/destroy] os.RemoveAll() failed", err)
 	}
 
 	// attempt to remove the entry regardless of whether its there or not

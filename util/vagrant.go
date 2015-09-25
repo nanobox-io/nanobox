@@ -52,7 +52,7 @@ func GetVMStatus() string {
 	//
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		panic(err)
+		config.Fatal("[util/vagrant] cmd.StdoutPipe() failed", err)
 	}
 
 	//
@@ -74,13 +74,13 @@ func GetVMStatus() string {
 	// start the command; we need this to 'fire and forget' so that we can manually
 	// capture and modify the commands output
 	if err := cmd.Start(); err != nil {
-		panic(err)
+		config.Fatal("[util/vagrant] cmd.Start() failed", err)
 	}
 
 	// wait for the command to complete/fail and exit, giving us a chance to scan
 	// the output
 	if err := cmd.Wait(); err != nil {
-		panic(err)
+		config.Fatal("[util/vagrant] cmd.Wait() failed", err)
 	}
 
 	return status
@@ -104,7 +104,7 @@ func RunVagrantCommand(cmd *exec.Cmd) error {
 	// if needed a stderr pipe could also be created at some point
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		panic(err)
+		config.Fatal("[util/vagrant] cmd.StdoutPipe() failed", err)
 	}
 
 	// start a goroutine that will act as an 'outputer' allowing us to add 'dots'

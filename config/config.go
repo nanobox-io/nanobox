@@ -79,12 +79,12 @@ func init() {
 	// set the current working directory first, as it's used in other steps of the
 	// configuration process
 	if CWDir, err = os.Getwd(); err != nil {
-		panic(err)
+		Log.Fatal("[config/config] os.Getwd() failed", err)
 	}
 
 	// set Home based off the users homedir (~)
 	if Home, err = homedir.Dir(); err != nil {
-		panic(err)
+		Log.Fatal("[config/config] homedir.Dir() failed", err)
 	}
 
 	// set nanobox's root directory;
@@ -94,7 +94,7 @@ func init() {
 	if _, err := os.Stat(Root); err != nil {
 		fmt.Printf(stylish.Bullet("Creating %s directory", Root))
 		if err := os.Mkdir(Root, 0755); err != nil {
-			panic(err)
+			Log.Fatal("[config/config] os.Mkdir() failed", err)
 		}
 	}
 
@@ -102,7 +102,7 @@ func init() {
 	apps := filepath.Clean(Root + "/apps")
 	if _, err := os.Stat(apps); err != nil {
 		if err := os.Mkdir(apps, 0755); err != nil {
-			panic(err)
+			Log.Fatal("[config/config] os.Mkdir() failed", err)
 		}
 	}
 

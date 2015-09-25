@@ -13,6 +13,7 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
@@ -47,6 +48,6 @@ func SudoExec(command, msg string) {
 
 	// run command
 	if err := cmd.Run(); err != nil {
-		Fatal("[utils/exec] scmd.Run() failed", err)
+		config.Fatal("[utils/exec] scmd.Run() failed", err)
 	}
 }

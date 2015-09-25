@@ -19,6 +19,7 @@ import (
 
 	api "github.com/pagodabox/nanobox-api-client"
 	// "github.com/pagodabox/nanobox-cli/auth"
+	"github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
@@ -132,7 +133,7 @@ func nanoEngineFetch(ccmd *cobra.Command, args []string) {
 	//
 	res, err := http.Get(path)
 	if err != nil {
-		panic(err)
+		config.Fatal("[commands/engine fetch] http.Get() failed", err)
 	}
 	defer res.Body.Close()
 

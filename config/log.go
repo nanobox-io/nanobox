@@ -8,6 +8,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -52,6 +53,29 @@ func init() {
 
 	// create a logger
 	if Log, err = lumber.NewFileLogger(logfile, loglvl, lumber.ROTATE, 100, 1, 100); err != nil {
-		panic(err)
+		fmt.Println("Fatal error! See ~/.nanobox/nanobox.log for details. Exiting...")
+		Log.Fatal("[config/log] lumber.NewFileLogger() failed", err)
+		Log.Close()
+		os.Exit(1)
 	}
+}
+
+// Debug
+func Debug(msg string, debug bool) {
+	if debug {
+		fmt.Printf(msg)
+	}
+}
+
+// Info
+func Info(msg string, debug bool) {
+	Log.Info(msg)
+}
+
+// Fatal
+func Fatal(msg string, err error) {
+	fmt.Println("Fatal error! See ~/.nanobox/nanobox.log for details. Exiting...")
+	Log.Fatal(fmt.Sprintf("%v - %v", msg, err))
+	Log.Close()
+	os.Exit(1)
 }

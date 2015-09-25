@@ -17,7 +17,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/pagodabox/nanobox-cli/config"
-	"github.com/pagodabox/nanobox-cli/util"
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
@@ -51,7 +50,7 @@ func nanoInit(ccmd *cobra.Command, args []string) {
 	// exists) where the Vagrantfile and .vagrant dir will live for each app
 	if _, err := os.Stat(config.AppDir); err != nil {
 		if err := os.Mkdir(config.AppDir, 0755); err != nil {
-			panic(err)
+			config.Fatal("[commands/init] os.Mkdir() failed", err)
 		}
 	}
 
@@ -74,7 +73,7 @@ func nanoInit(ccmd *cobra.Command, args []string) {
 			//
 			fp, err := filepath.Abs(engine)
 			if err != nil {
-				util.Fatal("[commands/init] filepath.Abs() failed", err)
+				config.Fatal("[commands/init] filepath.Abs() failed", err)
 			}
 
 			base := filepath.Base(fp)
@@ -216,6 +215,6 @@ end`, version, config.Nanofile.Name, network, synced_folders, provider, devmode)
 
 	// write the Vagrantfile
 	if err := ioutil.WriteFile(config.AppDir+"/Vagrantfile", []byte(vagrantfile), 0755); err != nil {
-		util.Fatal("[commands/init] ioutil.WriteFile() failed", err)
+		config.Fatal("[commands/init] ioutil.WriteFile() failed", err)
 	}
 }

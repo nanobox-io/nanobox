@@ -39,7 +39,7 @@ func init() {
 	if _, err := os.Stat(authfile); err != nil {
 		fmt.Printf(stylish.Bullet("Creating %s directory", authfile))
 		if _, err := os.Create(authfile); err != nil {
-			panic(err)
+			config.Fatal("[auth/auth] os.Create() failed", err)
 		}
 	}
 
@@ -117,7 +117,7 @@ func authenticate(Userslug, password string) (string, string) {
 
 	//
 	if err := saveCredentials(user.ID, user.AuthenticationToken); err != nil {
-		util.Fatal("[auth/auth] saveCredentials failed", err)
+		config.Fatal("[auth/auth] saveCredentials failed", err)
 	}
 
 	//
