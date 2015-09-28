@@ -45,45 +45,11 @@ var (
 		},
 	}
 
-	//
-	boxCmd = &cobra.Command{
-		Use:   "box",
-		Short: "",
-		Long:  ``,
-
-		//
-		// Run: func(cmd *cobra.Command, args []string) {},
-	}
-
-	//
-	engineCmd = &cobra.Command{
-		Use:   "engine",
-		Short: "",
-		Long:  ``,
-
-		//
-		// Run: func(cmd *cobra.Command, args []string) {},
-	}
-
-	//
-	imagesCmd = &cobra.Command{
-		Use:   "images",
-		Short: "",
-		Long:  ``,
-
-		//
-		// Run: func(cmd *cobra.Command, args []string) {},
-	}
-
-	//
-	productionCmd = &cobra.Command{
-		Use:   "production",
-		Short: "",
-		Long:  ``,
-
-		//
-		// Run: func(cmd *cobra.Command, args []string) {},
-	}
+	// subcommands
+	boxCmd        = &cobra.Command{Use: "box", Short: "", Long: ``}
+	engineCmd     = &cobra.Command{Use: "engine", Short: "", Long: ``}
+	imagesCmd     = &cobra.Command{Use: "images", Short: "", Long: ``}
+	productionCmd = &cobra.Command{Use: "production", Short: "", Long: ``}
 
 	// persistent (global) flags
 	fBackground bool //
@@ -128,7 +94,7 @@ func init() {
 	NanoboxCmd.PersistentFlags().MarkHidden("dev")
 
 	// persistent flags
-	NanoboxCmd.PersistentFlags().BoolVarP(&fForce, "force", "f", false, "Forces a command to run (effects very per command).")
+	NanoboxCmd.PersistentFlags().BoolVarP(&fForce, "force", "f", false, "Forces a command to run (effects vary per command).")
 	NanoboxCmd.PersistentFlags().BoolVarP(&fVerbose, "verbose", "v", false, "Increase command output from 'info' to 'debug'.")
 
 	// local flags

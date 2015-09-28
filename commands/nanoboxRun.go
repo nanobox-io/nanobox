@@ -24,7 +24,7 @@ import (
 //
 var nanoboxRunCmd = &cobra.Command{
 	Use:   "run",
-	Short: "",
+	Short: "Starts the nanobox VM, provisions app, & runs the app's exec",
 	Long:  ``,
 
 	PreRun:  bootVM,

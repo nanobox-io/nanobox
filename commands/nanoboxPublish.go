@@ -16,11 +16,11 @@ import (
 
 //
 var nanoboxPublishCmd = &cobra.Command{
-	Use:   "publish",
-	Short: "(coming soon)",
-	Long: `
-Description:
-  Pushed app to production`,
+	Hidden: true,
+	
+	Use:    "publish",
+	Short:  "(coming soon)",
+	Long:   ``,
 
 	Run: nanoboxPublish,
 }

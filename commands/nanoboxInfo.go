@@ -22,7 +22,7 @@ import (
 //
 var nanoboxInfoCmd = &cobra.Command{
 	Use:   "info",
-	Short: "",
+	Short: "Displays information about your nanobox app and VM",
 	Long:  ``,
 
 	Run: nanoboxInfo,

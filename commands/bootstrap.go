@@ -19,6 +19,8 @@ import (
 
 //
 var bootstrapCmd = &cobra.Command{
+	Hidden: true,
+
 	Use:   "bootstrap",
 	Short: "Runs an engine's bootstrap script - downloads code & launches VM",
 	Long: `
