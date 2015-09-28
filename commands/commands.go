@@ -46,6 +46,16 @@ var (
 	}
 
 	//
+	boxCmd = &cobra.Command{
+		Use:   "box",
+		Short: "",
+		Long:  ``,
+
+		//
+		// Run: func(cmd *cobra.Command, args []string) {},
+	}
+
+	//
 	engineCmd = &cobra.Command{
 		Use:   "engine",
 		Short: "",
@@ -157,6 +167,11 @@ func init() {
 	NanoboxCmd.AddCommand(nanoboxInfoCmd)
 	NanoboxCmd.AddCommand(nanoboxPublishCmd)
 	NanoboxCmd.AddCommand(nanoboxRunCmd)
+
+	// 'box' subcommand
+	NanoboxCmd.AddCommand(boxCmd)
+	boxCmd.AddCommand(boxInstallCmd)
+	boxCmd.AddCommand(boxUpdateCmd)
 
 	// 'engine' subcommand
 	NanoboxCmd.AddCommand(engineCmd)
