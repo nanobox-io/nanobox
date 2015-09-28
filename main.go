@@ -21,13 +21,13 @@ func main() {
 	var err error
 
 	// ensure vagrant is installed
-	err = exec.Command("vagrant").Run()
+	err = exec.Command("vagrant", "-v").Run()
 	if err != nil {
-		fmt.Println("Nanobox required 'Vagrant' (https://www.vagrantup.com/) to run. Please download and install it to continue.")
+		fmt.Println("Nanobox requires 'Vagrant' (https://www.vagrantup.com/) to run. Please download and install it to continue.")
 	}
 
 	// ensure virtualbox is installed
-	err = exec.Command("vboxmanage").Run()
+	err = exec.Command("vboxmanage", "-v").Run()
 	if err != nil {
 		fmt.Println("Nanobox requires 'Virtualbox' (https://www.virtualbox.org/wiki/Downloads) to run. Please download and install it to continue.")
 	}
