@@ -15,17 +15,17 @@ import (
 )
 
 //
-var publishCmd = &cobra.Command{
+var nanoboxPublishCmd = &cobra.Command{
 	Use:   "publish",
 	Short: "(coming soon)",
 	Long: `
 Description:
   Pushed app to production`,
 
-	Run: nanoPublish,
+	Run: nanoboxPublish,
 }
 
-// nanoPublish
-func nanoPublish(ccmd *cobra.Command, args []string) {
+// nanoboxPublish
+func nanoboxPublish(ccmd *cobra.Command, args []string) {
 	fmt.Println("coming soon (http://production.nanobox.io)")
 }

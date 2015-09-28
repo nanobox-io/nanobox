@@ -54,6 +54,9 @@ func nanoInit(ccmd *cobra.Command, args []string) {
 		}
 	}
 
+	// 'parse' the .vmfile (either creating one, or parsing it)
+	config.VMfile = config.ParseVMfile()
+
 	//
 	// generate a Vagrantfile at ~/.nanobox/apps/<app-name>/Vagrantfile
 	// only if one doesn't already exist (unless forced)

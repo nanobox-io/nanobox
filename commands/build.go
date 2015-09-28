@@ -29,12 +29,15 @@ var buildCmd = &cobra.Command{
 Description:
   Rebuilds/compiles your project`,
 
-	PreRun: vmIsRunning,
+	PreRun: bootVM,
 	Run:    nanoBuild,
 }
 
 // nanoBuild
 func nanoBuild(ccmd *cobra.Command, args []string) {
+
+	// PreRun: bootVM
+
 	fmt.Printf(stylish.Bullet("Building codebase..."))
 
 	//
@@ -62,13 +65,13 @@ func nanoBuild(ccmd *cobra.Command, args []string) {
 	// errored
 	case "errored":
 
-		// this is pretty nasty; need to think this over
+		// this could probably be better
 		if fWatch {
-			fBackground = true
+			config.VMfile.ModeIs("background")
 		}
 
 		//
-		nanoDown(nil, args)
+		nanoboxDown(nil, args)
 		os.Exit(1)
 	}
 }

@@ -20,16 +20,16 @@ import (
 )
 
 //
-var infoCmd = &cobra.Command{
+var nanoboxInfoCmd = &cobra.Command{
 	Use:   "info",
 	Short: "",
 	Long:  ``,
 
-	Run: nanoInfo,
+	Run: nanoboxInfo,
 }
 
-// nanoInfo runs 'vagrant status'
-func nanoInfo(ccmd *cobra.Command, args []string) {
+// nanoboxInfo runs 'vagrant status'
+func nanoboxInfo(ccmd *cobra.Command, args []string) {
 
 	status := util.GetVMStatus()
 

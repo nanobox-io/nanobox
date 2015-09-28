@@ -31,10 +31,12 @@ func init() {
 	// always be the case, so this is left in as a fallback
 	logfile := filepath.Clean(Root + "/nanobox.log")
 	// if _, err := os.Stat(logfile); err != nil {
-	//  fmt.Printf(stylish.Bullet("Creating %s directory", logfile))
-	//  if _, err := os.Create(logfile); err != nil {
-	//    return err
-	//  }
+	// 	fmt.Printf(stylish.Bullet("Creating %s directory", logfile))
+	// 	f, err := os.Create(logfile)
+	// 	if err != nil {
+	// 		return err
+	// 	}
+	// 	defer f.Close()
 	// }
 
 	// set the default log level

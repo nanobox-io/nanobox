@@ -22,19 +22,23 @@ import (
 )
 
 //
-var execCmd = &cobra.Command{
+var nanoboxExecCmd = &cobra.Command{
 	Use:   "exec",
 	Short: "Runs a command from inside your app on the nanobox VM",
 	Long: `
 Description:
   Runs a command from inside your app on the nanobox VM`,
 
-	PreRun: vmIsRunning,
-	Run:    nanoExec,
+	PreRun:  bootVM,
+	Run:     nanoboxExec,
+	PostRun: saveVM,
 }
 
-// nanoExec
-func nanoExec(ccmd *cobra.Command, args []string) {
+// nanoboxExec
+func nanoboxExec(ccmd *cobra.Command, args []string) {
+
+	// PreRun: bootVM
+
 	fmt.Printf(stylish.Bullet("Opening a nanobox console..."))
 
 	//
@@ -76,4 +80,6 @@ func nanoExec(ccmd *cobra.Command, args []string) {
 
 	docker := &util.Docker{Params: v.Encode()}
 	docker.Run()
+
+	// PostRun: saveVM
 }

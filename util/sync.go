@@ -10,7 +10,6 @@ package util
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 
 	"github.com/pagodabox/golang-mist"
 	api "github.com/pagodabox/nanobox-api-client"
@@ -60,7 +59,7 @@ func (s *Sync) Run(opts []string) {
 	// subscribe to job updates
 	jobTags := []string{"job", s.Model}
 	if err := client.Subscribe(jobTags); err != nil {
-		fmt.Printf(stylish.Warning("Nanobox failed to subscribe to app logs. Your sync will continue as normal, and log output is available on your dashboard."))
+		fmt.Printf(stylish.ErrBullet("Nanobox failed to subscribe to app logs. Your sync will continue as normal, and log output is available on your dashboard."))
 	}
 	defer client.Unsubscribe(jobTags)
 
@@ -74,7 +73,7 @@ func (s *Sync) Run(opts []string) {
 	// subscirbe to deploy logs; if verbose, also subscribe to the 'debug' logs
 	logTags := []string{"log", "deploy", logLevel}
 	if err := client.Subscribe(logTags); err != nil {
-		fmt.Printf(stylish.Warning("Nanobox failed to subscribe to debug logs. Your sync will continue as normal, and log output is available on your dashboard."))
+		fmt.Printf(stylish.ErrBullet("Nanobox failed to subscribe to debug logs. Your sync will continue as normal, and log output is available on your dashboard."))
 	}
 	defer client.Unsubscribe(logTags)
 
@@ -117,41 +116,15 @@ stream:
 				config.Fatal("[utils/sync] json.Unmarshal() failed ", err.Error())
 			}
 
-			switch s.Status {
-
-			// for each successful deploy create/update the .nanobox/apps/<app>/.deployed
-			// file
-			case "complete":
-				if _, err := os.Create(config.AppDir + "/.deployed"); err != nil {
-					config.Fatal("[utils/sync] os.Create() failed ", err.Error())
-				}
-
-			// case "unavailable":
-
-			// if a deploy ever errors, remove the deployed file; don't need to handle
-			// an error here because it just means the file already doesn't exist
-			case "errored":
-				os.Remove(config.AppDir + "/.deployed")
-			}
-
 			// break the stream once we get a model update. If we ever have intermediary
 			// statuses we can throw in a case that will handle this on a status-by-status
 			// basis (current statuses: complete, unavailable, errored)
 			break stream
 
-		// report any unhandled entries, incase cases need to be added to handle them
+		// nanobox didn't know what to do with this message
 		default:
 			fmt.Printf(stylish.ErrBullet("Malformed Entry..."))
 			// break stream
 		}
 	}
-}
-
-// AppDeployed
-func AppDeployed() bool {
-	if _, err := os.Stat(config.AppDir + "/.deployed"); err != nil {
-		return false
-	}
-
-	return true
 }

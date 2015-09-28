@@ -25,12 +25,15 @@ var bootstrapCmd = &cobra.Command{
 Description:
   Runs an engine's bootstrap script - downloads code & launches VM`,
 
-	PreRun: vmIsRunning,
+	PreRun: bootVM,
 	Run:    nanoBootstrap,
 }
 
 //
 func nanoBootstrap(ccmd *cobra.Command, args []string) {
+
+	// PreRun: bootVM
+
 	fmt.Printf(stylish.Bullet("Bootstrapping code..."))
 
 	//

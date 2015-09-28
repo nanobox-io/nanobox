@@ -26,12 +26,15 @@ var imagesUpdateCmd = &cobra.Command{
 Description:
   Updates the nanobox docker images`,
 
-	PreRun: vmIsRunning,
+	PreRun: bootVM,
 	Run:    imagesUpdate,
 }
 
 // imagesUpdate
 func imagesUpdate(ccmd *cobra.Command, args []string) {
+
+	// PreRun: bootVM
+
 	fmt.Printf(stylish.Bullet("Updating docker images..."))
 
 	//

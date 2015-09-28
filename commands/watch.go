@@ -43,7 +43,7 @@ func nanoWatch(ccmd *cobra.Command, args []string) {
 	fWatch = true
 
 	//
-	fmt.Printf("[√] Watching app files for changes\n")
+	fmt.Printf(stylish.Bullet("Watching app files for changes"))
 
 	// begin watching for file changes at cwd
 	if err := util.Watch(config.CWDir, func(event *fsnotify.Event, err error) {

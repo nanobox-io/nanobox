@@ -29,15 +29,14 @@ var reloadCmd = &cobra.Command{
 Description:
   Reloads the nanobox VM by issuing a "vagrant reload --provision"`,
 
-	PreRun: projectIsCreated,
+	PreRun: nanoInit,
 	Run:    nanoReload,
 }
 
 // nanoReload runs 'vagrant reload --provision'
 func nanoReload(ccmd *cobra.Command, args []string) {
 
-	// run an init to ensure there is a Vagrantfile
-	nanoInit(nil, args)
+	// PreRun: nanoInit
 
 	fmt.Printf(stylish.Bullet("Reloading nanobox VM..."))
 	if err := util.RunVagrantCommand(exec.Command("vagrant", "reload", "--provision")); err != nil {

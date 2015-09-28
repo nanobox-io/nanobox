@@ -38,9 +38,11 @@ func init() {
 	authfile = filepath.Clean(config.Root + "/.auth")
 	if _, err := os.Stat(authfile); err != nil {
 		fmt.Printf(stylish.Bullet("Creating %s directory", authfile))
-		if _, err := os.Create(authfile); err != nil {
+		f, err := os.Create(authfile)
+		if err != nil {
 			config.Fatal("[auth/auth] os.Create() failed", err.Error())
 		}
+		defer f.Close()
 	}
 
 	creds = &credentials{}

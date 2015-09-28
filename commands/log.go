@@ -35,8 +35,7 @@ var logCmd = &cobra.Command{
 Description:
   Provides the last 100 lines of historical log output by default.`,
 
-	PreRun: vmIsRunning,
-	Run:    nanoLog,
+	Run: nanoLog,
 }
 
 // Log represents the structure of a log returned from Logtap or Stormpack
@@ -95,12 +94,12 @@ func nanoLog(ccmd *cobra.Command, args []string) {
 		// subscribe to app updates
 		appTags := []string{"log", "app", fLevel}
 		if err := client.Subscribe(appTags); err != nil {
-			fmt.Printf(stylish.Warning("Nanobox failed to subscribe to app logs."))
+			fmt.Printf(stylish.ErrBullet("Nanobox failed to subscribe to app logs."))
 		}
 		defer client.Unsubscribe(appTags)
 
 		//
-		fmt.Printf("Streaming App Logs:\n")
+		fmt.Printf(stylish.Bullet("Opening log stream"))
 		for msg := range client.Messages() {
 
 			//

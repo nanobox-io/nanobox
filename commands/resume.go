@@ -29,15 +29,14 @@ var resumeCmd = &cobra.Command{
 Description:
   Resumes the halted/suspended nanobox VM by issuing a "vagrant resume"`,
 
-	PreRun: projectIsCreated,
+	PreRun: nanoInit,
 	Run:    nanoResume,
 }
 
 // nanoResume runs 'vagrant resume'
 func nanoResume(ccmd *cobra.Command, args []string) {
 
-	// run an init to ensure there is a Vagrantfile
-	nanoInit(nil, args)
+	// PreRun: nanoInit
 
 	fmt.Printf(stylish.Bullet("Resuming nanobox VM..."))
 	if err := util.RunVagrantCommand(exec.Command("vagrant", "resume")); err != nil {

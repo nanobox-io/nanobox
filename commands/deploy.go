@@ -33,7 +33,7 @@ Description:
 
   -f, --force[=false]: Clears cached libraries the project might use`,
 
-	PreRun: vmIsRunning,
+	PreRun: bootVM,
 	Run:    nanoDeploy,
 }
 
@@ -44,6 +44,8 @@ func init() {
 
 // nanoDeploy
 func nanoDeploy(ccmd *cobra.Command, args []string) {
+
+	// PreRun: bootVM
 
 	//
 	v := url.Values{}
@@ -63,20 +65,24 @@ func nanoDeploy(ccmd *cobra.Command, args []string) {
 	//
 	switch deploy.Status {
 
-	// complete
+	// for each successful deploy create/update the .nanobox/apps/<app>/.deployed
+	// file
 	case "complete":
+		config.VMfile.DeployedIs(true)
 		break
 
-	// errored
+	// if a deploy ever errors, remove the deployed file; don't need to handle
+	// an error here because it just means the file already doesn't exist
 	case "errored":
+		config.VMfile.DeployedIs(false)
 
-		// this is pretty nasty; need to think this over
+		// this could probably be better
 		if fWatch {
-			fBackground = true
+			config.VMfile.Mode = "background"
 		}
 
-		// 
-		nanoDown(nil, args)
+		//
+		nanoboxDown(nil, args)
 		os.Exit(1)
 	}
 }

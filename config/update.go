@@ -29,9 +29,11 @@ func init() {
 	// check for a ~/.nanobox/.update file and create one if it's not found
 	updatefile := filepath.Clean(Root + "/.update")
 	if _, err := os.Stat(updatefile); err != nil {
-		if _, err := os.Create(updatefile); err != nil {
+		f, err := os.Create(updatefile)
+		if err != nil {
 			Fatal("[config/update] os.Create() failed", err.Error())
 		}
+		defer f.Close()
 	}
 }
 

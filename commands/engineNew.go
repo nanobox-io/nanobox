@@ -73,14 +73,16 @@ authors:
   -
 `, name, version)
 
-		path := name + "/Enginefile"
+		enginefilePath := name + "/Enginefile"
 
-		if _, err := os.Create(path); err != nil {
+		f, err := os.Create(enginefilePath)
+		if err != nil {
 			config.Fatal("[commands/new] os.Create() failed", err.Error())
 		}
+		defer f.Close()
 
 		// write the Enginefile
-		if err := ioutil.WriteFile(path, []byte(entry), 0644); err != nil {
+		if err := ioutil.WriteFile(enginefilePath, []byte(entry), 0644); err != nil {
 			config.Fatal("[commands/new] ioutil.WriteFile() failed", err.Error())
 		}
 

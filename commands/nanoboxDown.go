@@ -10,7 +10,6 @@ package commands
 //
 import (
 	"fmt"
-	"os"
 	"os/exec"
 
 	"github.com/spf13/cobra"
@@ -21,27 +20,21 @@ import (
 )
 
 //
-var downCmd = &cobra.Command{
+var nanoboxDownCmd = &cobra.Command{
 	Use:   "down",
 	Short: "Suspends the nanobox VM",
 	Long: `
 Description:
   Suspends the nanobox VM by issuing a "vagrant suspend"`,
 
-	PreRun: projectIsCreated,
-	Run:    nanoDown,
+	PreRun: nanoInit,
+	Run:    nanoboxDown,
 }
 
-// nanoDown runs 'vagrant suspend'
-func nanoDown(ccmd *cobra.Command, args []string) {
+// nanoboxDown runs 'vagrant suspend'
+func nanoboxDown(ccmd *cobra.Command, args []string) {
 
-	// run an init to ensure there is a Vagrantfile
-	nanoInit(nil, args)
-
-	// if the CLI is running in background mode dont suspend the VM
-	if fBackground {
-		os.Exit(0)
-	}
+	// PreRun: nanoInit
 
 	//
 	fmt.Printf(stylish.Bullet("Suspending nanobox VM..."))
@@ -49,4 +42,7 @@ func nanoDown(ccmd *cobra.Command, args []string) {
 		config.Fatal("[commands/suspend] util.RunVagrantCommand() failed", err.Error())
 	}
 	fmt.Printf(stylish.Bullet("Exiting"))
+
+	// set the mode to be forground next time the machine boots
+	config.VMfile.ModeIs("foreground")
 }

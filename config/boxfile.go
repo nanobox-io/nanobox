@@ -15,15 +15,16 @@ import (
 // ParseBoxfile
 func ParseBoxfile() *BoxfileConfig {
 
-	boxfile := &BoxfileConfig{path: "./Boxfile"}
+	boxfile := &BoxfileConfig{}
+	boxfilePath := "./Boxfile"
 
 	//
-	if _, err := os.Stat(boxfile.path); err != nil {
+	if _, err := os.Stat(boxfilePath); err != nil {
 		return boxfile
 	}
 
 	//
-	if err := ParseConfig(boxfile.path, boxfile); err != nil {
+	if err := ParseConfig(boxfilePath, boxfile); err != nil {
 		fmt.Printf("Nanobox failed to parse Boxfile. Please ensure it is valid YAML and try again.\n")
 		os.Exit(1)
 	}

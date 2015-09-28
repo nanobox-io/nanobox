@@ -15,6 +15,7 @@ import (
 	"io/ioutil"
 	"math"
 	"net/http"
+	"os"
 	"runtime"
 	"strings"
 
@@ -101,7 +102,11 @@ func nanoUpdate(ccmd *cobra.Command, args []string) {
 	// replace the existing CLI with the new CLI
 	fmt.Printf(stylish.SubBullet("- Replacing CLI at %s", path))
 	if err := ioutil.WriteFile(path, buf.Bytes(), 0755); err != nil {
-		fmt.Println("ERR! %#v", err)
+		if os.IsPermission(err) {
+			fmt.Printf(stylish.SubBullet("[x] FAILED"))
+			fmt.Printf("\nNanobox needs your permission to update.\nPlease run this command with sudo/admin privileges")
+			os.Exit(0)
+		}
 	}
 
 	//

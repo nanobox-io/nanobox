@@ -10,8 +10,10 @@ package config
 import (
 	"fmt"
 	"io/ioutil"
+	"net"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"github.com/ghodss/yaml"
 	"github.com/mitchellh/go-homedir"
@@ -28,7 +30,10 @@ const (
 
 //
 var (
-	err error //
+	err   error //
+	mutex *sync.Mutex
+
+	Lock net.Conn //
 
 	//
 	AppDir string // the path to the application (~.nanobox/apps/<app>)
@@ -39,6 +44,7 @@ var (
 
 	//
 	Nanofile *NanofileConfig // parsed nanofile options
+	VMfile   *VMfileConfig   // parsed nanofile options
 
 	//
 	ServerURI string // nanobox-server host:port combo (IP:1757)
@@ -52,8 +58,7 @@ type (
 
 	// BoxfileConfig represents all available/expected Boxfile configurable options
 	BoxfileConfig struct {
-		path  string //
-		Build Build  //
+		Build Build //
 	}
 
 	// Build represents a possible node in the Boxfile with it's own set of options
@@ -63,7 +68,6 @@ type (
 
 	// NanofileConfig represents all available/expected .nanofile configurable options
 	NanofileConfig struct {
-		path     string //
 		CPUCap   int    `json:"cpu_cap"`  // max %CPU usage allowed to the guest vm
 		CPUs     int    `json:"cpus"`     // number of CPUs to dedicate to the guest vm
 		Domain   string `json:"domain"`   // the domain to use in conjuntion with the ip when accesing the guest vm (defaults to <Name>.dev)
@@ -71,6 +75,15 @@ type (
 		Name     string `json:"name"`     // the name given to the project (defaults to cwd)
 		Provider string `json:"provider"` // guest vm provider (virtual box, vmware, etc)
 		RAM      int    `json:"ram"`      // ammount of RAM to dedicate to the guest vm
+	}
+
+	// VMfileConfig represents all available/expected .vmfile configurable options
+	VMfileConfig struct {
+		Deployed    bool   // was the most recent deploy successufl
+		Mode        string // foreground/background
+		Status      string // the current staus of the VM
+		Suspendable bool   // is the VM able to be suspended
+		UUID        string // the UUID of the VM
 	}
 )
 
@@ -141,6 +154,35 @@ func ParseConfig(path string, v interface{}) error {
 	if err := yaml.Unmarshal(f, v); err != nil {
 		return err
 	}
+
+	return nil
+}
+
+// writeConfig
+func writeConfig(path string, v interface{}) error {
+
+	// take a config objects path and create (and truncate) the file, preparing it
+	// to receive new configurations
+	f, err := os.Create(path)
+	if err != nil {
+		Fatal("[config/config] os.Create() failed", err.Error())
+	}
+	defer f.Close()
+
+	// marshal the config object
+	b, err := yaml.Marshal(v)
+	if err != nil {
+		return err
+	}
+
+	// mutex.Lock()
+
+	// write it back to the file
+	if _, err := f.Write(b); err != nil {
+		return err
+	}
+
+	// mutex.Unlock()
 
 	return nil
 }

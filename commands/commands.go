@@ -9,6 +9,8 @@ package commands
 
 import (
 	"fmt"
+	"net"
+	"net/http"
 	"os"
 	"time"
 
@@ -16,7 +18,7 @@ import (
 
 	"github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-cli/util"
-	// "github.com/pagodabox/nanobox-golang-stylish"
+	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
 //
@@ -79,18 +81,20 @@ var (
 	fForce      bool //
 	fVerbose    bool //
 
-	// local flags
-	fCount   int    //
-	fFile    string //
-	fLevel   string //
-	fOffset  int    //
-	fRemove  bool   //
-	fRebuild bool   //
-	fRun     bool   //
-	fStream  bool   //
-	fVersion bool   //
-	fWatch   bool   //
-	fWrite   bool   //
+	// flags
+	fAddEntry    bool   //
+	fCount       int    //
+	fFile        string //
+	fLevel       string //
+	fOffset      int    //
+	fRebuild     bool   //
+	fRemove      bool   //
+	fRemoveEntry bool   //
+	fRun         bool   //
+	fStream      bool   //
+	fVersion     bool   //
+	fWatch       bool   //
+	fWrite       bool   //
 )
 
 //
@@ -130,6 +134,7 @@ func init() {
 	// all available nanobox commands
 
 	// 'hidden' commands
+	NanoboxCmd.AddCommand(buildCmd)
 	NanoboxCmd.AddCommand(createCmd)
 	NanoboxCmd.AddCommand(deployCmd)
 	NanoboxCmd.AddCommand(initCmd)
@@ -140,17 +145,18 @@ func init() {
 	NanoboxCmd.AddCommand(watchCmd)
 
 	// 'public' commands
-	NanoboxCmd.AddCommand(bootstrapCmd)
-	NanoboxCmd.AddCommand(buildCmd)
-	NanoboxCmd.AddCommand(consoleCmd)
-	NanoboxCmd.AddCommand(destroyCmd)
-	NanoboxCmd.AddCommand(downCmd)
-	NanoboxCmd.AddCommand(execCmd)
-	NanoboxCmd.AddCommand(infoCmd)
-	NanoboxCmd.AddCommand(publishCmd)
-	NanoboxCmd.AddCommand(runCmd)
-	NanoboxCmd.AddCommand(upCmd)
 	NanoboxCmd.AddCommand(updateCmd)
+
+	// 'nanobox' commands
+	NanoboxCmd.AddCommand(bootstrapCmd)
+	NanoboxCmd.AddCommand(nanoboxConsoleCmd)
+	NanoboxCmd.AddCommand(nanoboxDestroyCmd)
+	NanoboxCmd.AddCommand(nanoboxDevCmd)
+	NanoboxCmd.AddCommand(nanoboxDownCmd)
+	NanoboxCmd.AddCommand(nanoboxExecCmd)
+	NanoboxCmd.AddCommand(nanoboxInfoCmd)
+	NanoboxCmd.AddCommand(nanoboxPublishCmd)
+	NanoboxCmd.AddCommand(nanoboxRunCmd)
 
 	// 'engine' subcommand
 	NanoboxCmd.AddCommand(engineCmd)
@@ -176,10 +182,106 @@ func vmIsRunning(ccmd *cobra.Command, args []string) {
 	}
 }
 
-// projectIsCreated
-func projectIsCreated(ccmd *cobra.Command, args []string) {
-	if _, err := os.Stat(config.AppDir); err != nil {
-		fmt.Printf("Your nanobox files have not been created. Run 'nanobox up' first")
-		os.Exit(1)
+// bootVM
+func bootVM(ccmd *cobra.Command, args []string) {
+
+	// ensure a Vagrantfile is available before attempting to boot the VM
+	nanoInit(nil, args)
+
+	// get the status to know what needs to happen with the VM
+	status := util.GetVMStatus()
+	switch status {
+
+	// vm is running - do nothing
+	case "running":
+		fmt.Printf(stylish.Bullet("Nanobox VM already running..."))
+		break
+
+	// vm is suspended - resume it
+	case "saved":
+		nanoResume(nil, args)
+
+	// vm is not created - create it
+	case "not created":
+		nanoCreate(nil, args)
+
+	// vm is in some unknown state - reload it
+	default:
+		fmt.Printf(stylish.Bullet("Nanobox VM is in an unknown state."))
+		nanoReload(nil, args)
+	}
+
+	// open a 'lock' with the server; this is done so we can know how many clients
+	// are currently connected to the server
+	// NOTE: the connection is NOT closed here. It is closed when saving the VM
+	conn, err := net.Dial("tcp", config.ServerURI)
+	if err != nil {
+		config.Fatal("[commands/commands] new.Dial() failed", err.Error())
+	}
+
+	conn.Write([]byte(fmt.Sprintf("PUT /lock? HTTP/1.1\r\n\r\n")))
+
+	//
+	config.Lock = conn
+
+	// after the VM is running updated the .vmfile
+	config.VMfile.StatusIs(status)
+	config.VMfile.UUIDIs(util.GetVMUUID())
+
+	if fBackground {
+		config.VMfile.ModeIs("background")
+	}
+}
+
+// saveVM
+func saveVM(ccmd *cobra.Command, args []string) {
+
+	// close the connection to the server (indicating that a client is disconnecting)
+	if config.Lock != nil {
+		config.Lock.Close()
+	}
+
+	// if the CLI is running in background mode dont suspend the VM
+	if config.VMfile.IsMode("background") {
+		fmt.Printf(stylish.Bullet("Nanobox VM not suspended (running in background). To suspend the VM run 'nanobox down'"))
+		os.Exit(0)
+	}
+
+	// check to see if the VM is able to be suspended
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%s/suspend", config.ServerURL), nil)
+	if err != nil {
+		config.Fatal("[commands/commands] http.NewRequest() failed", err.Error())
+	}
+
+	//
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		config.Fatal("[commands/commands] http.DefaultClient.Do() failed", err.Error())
+	}
+	defer res.Body.Close()
+
+	//
+	switch res.StatusCode / 100 {
+
+	// anything but 200 CANNOT suspend
+	default:
+		config.VMfile.SuspendableIs(false)
+
+	// ok to suspend
+	case 2:
+		break
+	}
+
+	// suspend the machine if not active consoles are connected and the command was
+	// not run in background mode
+	switch {
+	case !config.VMfile.IsSuspendable():
+		fmt.Printf("\nNote: The VM has not been suspended because there there are still consoles connected.\n")
+		break
+	case config.VMfile.IsMode("background"):
+		fmt.Printf(stylish.Bullet("Nanobox VM not suspended (running in background). To suspend the VM run 'nanobox down'"))
+		break
+	default:
+		nanoboxDown(nil, args)
 	}
 }

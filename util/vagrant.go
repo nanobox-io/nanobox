@@ -91,6 +91,9 @@ func GetVMStatus() string {
 		config.Fatal("[util/vagrant] cmd.Wait() failed", err.Error())
 	}
 
+	// set the status in the .vmfile (currently not used)
+	// config.VMfile.StatusIs(status)
+
 	return status
 }
 
@@ -184,8 +187,8 @@ func RunVagrantCommand(cmd *exec.Cmd) error {
 				output <- "Shutting down virtual machine"
 			case fmt.Sprintf("==> %v: Saving VM state and suspending execution...", config.Nanofile.Name):
 				output <- "Saving virtual machine"
-			// case fmt.Sprintf("==> %v: Resuming suspended VM...", config.Nanofile.Name):
-			// 	output <- "Resuming virtual machine"
+				// case fmt.Sprintf("==> %v: Resuming suspended VM...", config.Nanofile.Name):
+				// 	output <- "Resuming virtual machine"
 			}
 		}
 

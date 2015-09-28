@@ -20,7 +20,6 @@ func ParseNanofile() *NanofileConfig {
 
 	//
 	nanofile := &NanofileConfig{
-		path:     Root + "/.nanofile",
 		CPUCap:   50,
 		CPUs:     2,
 		Name:     filepath.Base(CWDir),
@@ -28,21 +27,23 @@ func ParseNanofile() *NanofileConfig {
 		RAM:      1024,
 	}
 
+	nanofilePath := Root + "/.nanofile"
+
 	// look for a global .nanofile first in the ~/.nanobox directory, and override
 	// any default options found.
-	if _, err := os.Stat(nanofile.path); err == nil {
-		if err := ParseConfig(nanofile.path, nanofile); err != nil {
+	if _, err := os.Stat(nanofilePath); err == nil {
+		if err := ParseConfig(nanofilePath, nanofile); err != nil {
 			fmt.Printf("Nanobox failed to parse your .nanofile. Please ensure it is valid YAML and try again.\n")
 			os.Exit(1)
 		}
 	}
 
-	nanofile.path = "./.nanofile"
+	nanofilePath = "./.nanofile"
 
 	// then look for a local .nanofile and override any global, or remaining default
 	// options found
-	if _, err := os.Stat(nanofile.path); err == nil {
-		if err := ParseConfig(nanofile.path, nanofile); err != nil {
+	if _, err := os.Stat(nanofilePath); err == nil {
+		if err := ParseConfig(nanofilePath, nanofile); err != nil {
 			fmt.Printf("Nanobox failed to parse your .nanofile. Please ensure it is valid YAML and try again.\n")
 			os.Exit(1)
 		}

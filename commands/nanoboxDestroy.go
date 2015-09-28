@@ -21,22 +21,28 @@ import (
 )
 
 //
-var destroyCmd = &cobra.Command{
+var nanoboxDestroyCmd = &cobra.Command{
 	Use:   "destroy",
 	Short: "Destroys the nanobox VM",
 	Long: `
 Description:
   Destroys the nanobox VM by issuing a "vagrant destroy"`,
 
-	Run: nanoDestroy,
+	Run: nanoboxDestroy,
 }
 
-// nanoDestroy
-func nanoDestroy(ccmd *cobra.Command, args []string) {
+//
+func init() {
+	nanoboxDestroyCmd.Flags().BoolVarP(&fRemoveEntry, "remove-entry", "", false, "")
+	nanoboxDestroyCmd.Flags().MarkHidden("remove-entry")
+}
+
+// nanoboxDestroy
+func nanoboxDestroy(ccmd *cobra.Command, args []string) {
 
 	// if the command is being run with the "remove" flag, it means an entry needs
 	// to be removed from the hosts file and execution yielded back to the parent
-	if len(args) > 0 && args[0] == "remove-entry" {
+	if fRemoveEntry {
 		util.RemoveDevDomain()
 		os.Exit(0)
 	}
@@ -63,4 +69,6 @@ func nanoDestroy(ccmd *cobra.Command, args []string) {
 
 	// attempt to remove the entry regardless of whether its there or not
 	util.SudoExec("destroy remove-entry", fmt.Sprintf("Removing %s domain from /etc/hosts", config.Nanofile.Domain))
+
+	// PostRun: saveVM
 }

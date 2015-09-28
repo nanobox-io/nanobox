@@ -32,22 +32,28 @@ var createCmd = &cobra.Command{
 Description:
   Runs 'nanobox init', then boots the nanobox VM by issuing a "vagrant up"`,
 
-	Run: nanoCreate,
+	PreRun: nanoInit,
+	Run:    nanoCreate,
+}
+
+//
+func init() {
+	createCmd.Flags().BoolVarP(&fAddEntry, "add-entry", "", false, "")
+	createCmd.Flags().MarkHidden("add-entry")
 }
 
 //
 // nanoCreate
 func nanoCreate(ccmd *cobra.Command, args []string) {
 
+	// PreRun: nanoInit
+
 	// if the command is being run with the "add" flag, it means an entry needs to
 	// be added to the hosts file and execution yielded back to the parent
-	if len(args) > 0 && args[0] == "add-entry" {
+	if fAddEntry {
 		util.AddDevDomain()
 		os.Exit(0)
 	}
-
-	// run an init to ensure there is a Vagrantfile
-	nanoInit(nil, args)
 
 	//
 	// boot the vm

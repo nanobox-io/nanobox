@@ -21,19 +21,23 @@ import (
 )
 
 //
-var consoleCmd = &cobra.Command{
+var nanoboxConsoleCmd = &cobra.Command{
 	Use:   "console",
 	Short: "Opens an interactive terminal from inside your app on the nanobox VM",
 	Long: `
 Description:
   Opens an interactive terminal from inside your app on the nanobox VM`,
 
-	PreRun: vmIsRunning,
-	Run:    nanoConsole,
+	PreRun:  bootVM,
+	Run:     nanoboxConsole,
+	PostRun: saveVM,
 }
 
-// nanoConsole
-func nanoConsole(ccmd *cobra.Command, args []string) {
+// nanoboxConsole
+func nanoboxConsole(ccmd *cobra.Command, args []string) {
+
+	// PreRun: bootVM
+
 	fmt.Printf(`
 +> Opening nanobox console:
 
@@ -88,4 +92,6 @@ func nanoConsole(ccmd *cobra.Command, args []string) {
 
 	docker := &util.Docker{Params: v.Encode()}
 	docker.Run()
+
+	// PostRun: saveVM
 }

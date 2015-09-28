@@ -18,61 +18,37 @@ import (
 
 	"github.com/pagodabox/nanobox-cli/config"
 	"github.com/pagodabox/nanobox-cli/util"
-	"github.com/pagodabox/nanobox-golang-stylish"
+	// "github.com/pagodabox/nanobox-golang-stylish"
 )
 
 //
-var runCmd = &cobra.Command{
+var nanoboxRunCmd = &cobra.Command{
 	Use:   "run",
 	Short: "",
 	Long:  ``,
 
-	Run: nanoRun,
+	PreRun:  bootVM,
+	Run:     nanoboxRun,
+	PostRun: saveVM,
 }
 
 //
 func init() {
-	runCmd.Flags().BoolVarP(&fForce, "reset-cache", "", false, "resets stuff")
+	nanoboxRunCmd.Flags().BoolVarP(&fForce, "reset-cache", "", false, "resets stuff")
 }
 
-//
-func nanoRun(ccmd *cobra.Command, args []string) {
+// nanoboxRun
+func nanoboxRun(ccmd *cobra.Command, args []string) {
 
-	//
-	switch util.GetVMStatus() {
-
-	// vm is running; do nothing
-	case "running":
-		fmt.Printf(stylish.Bullet("Nanobox VM already running"))
-		break
-
-	// vm is suspended; resume it
-	case "saved":
-		nanoResume(nil, args)
-
-	// vm has not been created; create it
-	case "not created":
-		nanoCreate(nil, args)
-
-	// vm is in some other state; reload just incase
-	default:
-		nanoReload(nil, args)
-	}
+	// PreRun: bootVM
 
 	// if the vm is 'new' update images
-	if util.GetVMStatus() == "not created" || !util.AppDeployed() {
+	if util.GetVMStatus() == "not created" || !config.VMfile.HasDeployed() {
 		imagesUpdate(nil, args)
 	}
 
 	fRun = true
 	nanoDeploy(nil, args)
-
-	fmt.Printf(`
-[√] App successfully built
-----------------------------------
-DEV URL : %v
-----------------------------------
-`, config.Nanofile.Domain)
 
 	var wg sync.WaitGroup
 
@@ -96,8 +72,15 @@ DEV URL : %v
 	fStream = true
 	go nanoLog(nil, args)
 
+	fmt.Printf(`
+--------------------------------------------------------------------------------
+[√] APP SUCCESSFULLY BUILT   ///   DEV URL : %v
+--------------------------------------------------------------------------------
+
+++> STREAMING LOGS (ctrl-c to exit) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+`, config.Nanofile.Domain)
+
 	wg.Wait()
 
-	//
-	nanoDown(nil, args)
+	// PostRun: saveVM
 }
