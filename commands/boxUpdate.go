@@ -27,5 +27,14 @@ var boxUpdateCmd = &cobra.Command{
 
 // boxUpdate
 func boxUpdate(ccmd *cobra.Command, args []string) {
-
+	// Install()
+	// 	release := latestVersion()
+	// 	if currentVersion() >= release.version() {
+	// 		fmt.Println("I already have the latest")
+	// 		return
+	// 	}
+	// 	// asset := release.Assets[0]
+	// 	// put file downloader here downloading from asset.DownloadURL
+	// 	setVersion(release.version())
+	// 	// vagrant box add ~/.nanobox/boot2docker.box
 }

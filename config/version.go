@@ -12,7 +12,7 @@ package config
 import semver "github.com/coreos/go-semver/semver"
 
 //
-const VERSION = "0.13.2"
+const VERSION = "0.13.3"
 
 //
 var Version *semver.Version

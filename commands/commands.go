@@ -250,6 +250,7 @@ func saveVM(ccmd *cobra.Command, args []string) {
 
 	// ok to suspend
 	case 2:
+		config.VMfile.SuspendableIs(true)
 		break
 	}
 
