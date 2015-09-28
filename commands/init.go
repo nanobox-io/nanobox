@@ -115,9 +115,6 @@ func nanoInit(ccmd *cobra.Command, args []string) {
   end`, config.Nanofile.CPUCap, config.Nanofile.CPUs, config.Nanofile.RAM)
 	}
 
-	// command to pull the latest verison of boot2docker
-	version := "`curl -s https://api.github.com/repos/pagodabox/nanobox-boot2docker/releases/latest | awk '/^  \"name\": / {print $2}' | tr -d ',\n\"'`.strip"
-
 	// insert a provision script that will indicate to nanobox-server to boot into
 	// 'devmode'
 	if fDevmode {
@@ -163,9 +160,6 @@ func nanoInit(ccmd *cobra.Command, args []string) {
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-# pull the latest version of nanobox-boot2docker
-version = %v
-
 #
 Vagrant.configure(2) do |config|
 
@@ -189,7 +183,7 @@ Vagrant.configure(2) do |config|
     WAIT
 
 	  ## box
-	  nanobox.vm.box_url = "https://github.com/pagodabox/nanobox-boot2docker/releases/download/#{version}/nanobox-boot2docker.box"
+	  # nanobox.vm.box_url = "https://github.com/pagodabox/nanobox-boot2docker/releases/download/<version>/nanobox-boot2docker.box"
 	  nanobox.vm.box     = "nanobox/boot2docker"
 
 
@@ -219,7 +213,7 @@ Vagrant.configure(2) do |config|
 		%s
 
 	end
-end`, version, config.Nanofile.Name, config.Nanofile.Domain, network, synced_folders, provider, devmode)
+end`, config.Nanofile.Name, config.Nanofile.Domain, network, synced_folders, provider, devmode)
 
 	// write the Vagrantfile
 	if err := ioutil.WriteFile(config.AppDir+"/Vagrantfile", []byte(vagrantfile), 0755); err != nil {
