@@ -75,10 +75,9 @@ func needBox() bool {
 
 // boxInstall
 func boxInstall(ccmd *cobra.Command, args []string) {
-	fmt.Println("Install new box")
 
+	// check to see if a box even needs to be installed
 	if getMD5() == compairMD5() && !needBox() {
-		fmt.Println("NO INSTALL NEEDED!")
 		return
 	}
 
@@ -104,7 +103,7 @@ func boxInstall(ccmd *cobra.Command, args []string) {
 		p := make([]byte, 2048)
 
 		//
-		fmt.Printf(stylish.SubBullet("- Downloading docker image from %v", boxpath))
+		fmt.Printf(stylish.SubBullet("- Downloading virtual machine image from %v", boxpath))
 		for {
 
 			// read the response body (streaming)
@@ -139,10 +138,6 @@ func boxInstall(ccmd *cobra.Command, args []string) {
 			config.Fatal("[commands/boxInstall] ioutil.WriteFile() failed", err.Error())
 		}
 
-		//
-		//
-		//
-		//
 		//
 		md5, err := http.Get("https://s3.amazonaws.com/tools.nanobox.io/boxes/vagrant/nanobox-boot2docker.md5")
 		if err != nil {

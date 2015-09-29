@@ -19,7 +19,7 @@ import (
 
 	"github.com/nanobox-io/nanobox-cli/config"
 	// "github.com/nanobox-io/nanobox-cli/util"
-	// "github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
 //
@@ -66,14 +66,14 @@ func compairMD5() string {
 // boxUpdate
 func boxUpdate(ccmd *cobra.Command, args []string) {
 
+	// check to see if an update is even needed
 	if getMD5() == compairMD5() {
-		fmt.Println("NO UPDATE NEEDED!")
 		return
 	}
 
 	//
 	if !needBox() {
-		fmt.Println("Uninstall old box")
+		fmt.Printf(stylish.Bullet("Uninstalling previous virtual machine image..."))
 		if err := exec.Command("vagrant", "box", "remove", "--force", "nanobox/boot2docker").Run(); err != nil {
 			config.Fatal("[commands/boxUpdate] exec.Command() failed", err.Error())
 		}
