@@ -9,17 +9,17 @@ package commands
 
 //
 import (
-	"fmt"
+	// "fmt"
 	"io/ioutil"
 	"net/http"
 	"os"
-	"os/exec"
+	// "os/exec"
 
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox-cli/config"
 	// "github.com/nanobox-io/nanobox-cli/util"
-	"github.com/nanobox-io/nanobox-golang-stylish"
+	// "github.com/nanobox-io/nanobox-golang-stylish"
 )
 
 //
