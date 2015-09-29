@@ -146,7 +146,7 @@ func boxInstall(ccmd *cobra.Command, args []string) {
 		//
 		//
 		//
-		md5, err := http.Get("https://s3.amazonaws.com/tools.nanobox.io/boxes/vagrant/nanobox-boot2docker.box.md5")
+		md5, err := http.Get("https://s3.amazonaws.com/tools.nanobox.io/boxes/vagrant/nanobox-boot2docker.md5")
 		if err != nil {
 			config.Fatal("[commands/boxInstall] http.Get() failed", err.Error())
 		}
@@ -157,13 +157,13 @@ func boxInstall(ccmd *cobra.Command, args []string) {
 			config.Fatal("[commands/boxInstall] ioutil.ReadAll() failed", err.Error())
 		}
 
-		if err := ioutil.WriteFile(config.Root+"/nanobox-boot2docker.box.md5", b, 0755); err != nil {
+		if err := ioutil.WriteFile(config.Root+"/nanobox-boot2docker.md5", b, 0755); err != nil {
 			config.Fatal("[commands/boxInstall] ioutil.WriteFile() failed", err.Error())
 		}
 	}
 
 	//
-	if err := exec.Command("vagrant", "box", "add", "--name", "nanobox/boot2docker", boxfile).Run(); err != nil {
+	if err := exec.Command("vagrant", "box", "add", "--name", config.Root+"nanobox/boot2docker", boxfile).Run(); err != nil {
 		config.Fatal("[commands/boxInstall] exec.Command() failed", err.Error())
 	}
 }

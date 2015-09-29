@@ -68,7 +68,7 @@ func nanoboxDestroy(ccmd *cobra.Command, args []string) {
 	}
 
 	// attempt to remove the entry regardless of whether its there or not
-	util.SudoExec("destroy remove-entry", fmt.Sprintf("Removing %s domain from /etc/hosts", config.Nanofile.Domain))
+	util.SudoExec("destroy --remove-entry", fmt.Sprintf("Removing %s domain from /etc/hosts", config.Nanofile.Domain))
 
 	// PostRun: saveVM
 }

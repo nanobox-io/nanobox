@@ -48,6 +48,9 @@ func nanoCreate(ccmd *cobra.Command, args []string) {
 
 	// PreRun: nanoInit
 
+	// check to see if a box needs to be installed
+	boxInstall(nil, args)
+
 	// if the command is being run with the "add" flag, it means an entry needs to
 	// be added to the hosts file and execution yielded back to the parent
 	if fAddEntry {
@@ -87,7 +90,7 @@ func nanoCreate(ccmd *cobra.Command, args []string) {
 	// add the entry if needed
 	// if addEntry && util.AccessDenied() {
 	if addEntry {
-		util.SudoExec("create add-entry", fmt.Sprintf("Adding %v domain to hosts file", config.Nanofile.Domain))
+		util.SudoExec("create --add-entry", fmt.Sprintf("Adding %v domain to hosts file", config.Nanofile.Domain))
 	}
 
 	// if devmode is detected, the machine needs to be rebooted for devmode to take
