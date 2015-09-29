@@ -10,11 +10,14 @@ package commands
 //
 import (
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"os"
 	"os/exec"
 
 	"github.com/spf13/cobra"
 
-	// "github.com/nanobox-io/nanobox-cli/config"
+	"github.com/nanobox-io/nanobox-cli/config"
 	// "github.com/nanobox-io/nanobox-cli/util"
 	// "github.com/nanobox-io/nanobox-golang-stylish"
 )
@@ -28,11 +31,54 @@ var boxUpdateCmd = &cobra.Command{
 	Run: boxUpdate,
 }
 
-// boxUpdate
-func boxUpdate(ccmd *cobra.Command, args []string) {
-	if err := exec.Command("vagrant", "box", "remove", "--force", "nanobox/boot2docker").Run(); err != nil {
-		fmt.Println("BGLOINK 1!", err)
+//
+func getMD5() string {
+	md5, err := http.Get("https://s3.amazonaws.com/tools.nanobox.io/boxes/vagrant/nanobox-boot2docker.md5")
+	if err != nil {
+		config.Fatal("[commands/boxInstall] http.Get() failed", err.Error())
+	}
+	defer md5.Body.Close()
+
+	b, err := ioutil.ReadAll(md5.Body)
+	if err != nil {
+		config.Fatal("[commands/boxInstall] ioutil.ReadAll() failed", err.Error())
 	}
 
+	return string(b)
+}
+
+//
+func compairMD5() string {
+	f, err := os.Open(config.Root + "/nanobox-boot2docker.md5")
+	if err != nil {
+		return ""
+	}
+	defer f.Close()
+
+	b, err := ioutil.ReadAll(f)
+	if err != nil {
+		config.Fatal("[commands/boxInstall] ioutil.ReadAll() failed", err.Error())
+	}
+
+	return string(b)
+}
+
+// boxUpdate
+func boxUpdate(ccmd *cobra.Command, args []string) {
+
+	if getMD5() == compairMD5() {
+		fmt.Println("NO UPDATE NEEDED!")
+		return
+	}
+
+	//
+	if !needBox() {
+		fmt.Println("Uninstall old box")
+		if err := exec.Command("vagrant", "box", "remove", "--force", "nanobox/boot2docker").Run(); err != nil {
+			config.Fatal("[commands/boxUpdate] exec.Command() failed", err.Error())
+		}
+	}
+
+	//
 	boxInstall(nil, args)
 }

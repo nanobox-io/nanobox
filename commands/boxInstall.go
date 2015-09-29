@@ -37,7 +37,8 @@ var boxInstallCmd = &cobra.Command{
 	Run: boxInstall,
 }
 
-func hasBox() bool {
+//
+func needBox() bool {
 
 	need := true
 
@@ -46,7 +47,7 @@ func hasBox() bool {
 	//
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		config.Fatal("[util/vagrant] cmd.StdoutPipe() failed", err.Error())
+		config.Fatal("[commands/boxInstall] cmd.StdoutPipe() failed", err.Error())
 	}
 
 	//
@@ -61,53 +62,55 @@ func hasBox() bool {
 
 	//
 	if err := cmd.Start(); err != nil {
-		fmt.Println("BOINK!", err)
+		config.Fatal("[commands/boxInstall] cmd.Start() failed", err.Error())
 	}
 
 	//
 	if err := cmd.Wait(); err != nil {
-		fmt.Println("BOONK!", err)
+		config.Fatal("[commands/boxInstall] cmd.Wait() failed", err.Error())
 	}
+
+	fmt.Println("NEED??", need)
 
 	return need
 }
 
 // boxInstall
 func boxInstall(ccmd *cobra.Command, args []string) {
+	fmt.Println("Install new box")
 
-	hasBox()
+	if getMD5() == compairMD5() && !needBox() {
+		fmt.Println("NO INSTALL NEEDED!")
+		return
+	}
 
-	boxmd5path := "https://s3.amazonaws.com/tools.nanobox.io/boxes/vagrant/boot2docker.box.md5"
-	boxfilemd5 := filepath.Clean(config.Root + "/nanobox-boot2docker.box.md5")
-
-	boxpath := "https://s3.amazonaws.com/tools.nanobox.io/boxes/vagrant/boot2docker.box"
+	boxpath := "https://s3.amazonaws.com/tools.nanobox.io/boxes/vagrant/nanobox-boot2docker.box"
 	boxfile := filepath.Clean(config.Root + "/nanobox-boot2docker.box")
-
-	if _, err := os.Stat(boxfilemd5); err != nil {
+	if _, err := os.Stat(boxfile); err != nil {
 
 		//
-		res, err := http.Get(boxpath)
+		box, err := http.Get(boxpath)
 		if err != nil {
-			config.Fatal("[commands/update] http.NewRequest() failed", err.Error())
+			config.Fatal("[commands/boxInstall] http.Get() failed", err.Error())
 		}
-		defer res.Body.Close()
+		defer box.Body.Close()
 
 		var buf bytes.Buffer
 		var percent float64
 		var down int
 
 		// format the response content length to be more 'friendly'
-		total := float64(res.ContentLength) / math.Pow(1024, 2)
+		total := float64(box.ContentLength) / math.Pow(1024, 2)
 
 		// create a 'buffer' to read into
 		p := make([]byte, 2048)
 
 		//
-		fmt.Printf(stylish.SubBullet("- Downloading latest CLI from %v", boxpath))
+		fmt.Printf(stylish.SubBullet("- Downloading docker image from %v", boxpath))
 		for {
 
 			// read the response body (streaming)
-			n, err := res.Body.Read(p)
+			n, err := box.Body.Read(p)
 
 			// write to our buffer
 			buf.Write(p[:n])
@@ -116,7 +119,7 @@ func boxInstall(ccmd *cobra.Command, args []string) {
 			down += n
 
 			// update the percent downloaded
-			percent = (float64(down) / float64(res.ContentLength)) * 100
+			percent = (float64(down) / float64(box.ContentLength)) * 100
 
 			// show how download progress:
 			// down/totalMB [*** progress *** %]
@@ -128,50 +131,39 @@ func boxInstall(ccmd *cobra.Command, args []string) {
 					fmt.Println("")
 					break
 				} else {
-					config.Fatal("[commands/update] res.Body.Read() failed", err.Error())
+					config.Fatal("[commands/boxInstall] res.Body.Read() failed", err.Error())
 				}
 			}
 		}
 
-		// replace the existing CLI with the new CLI
-		fmt.Printf(stylish.SubBullet("- Replacing CLI at %s", boxfile))
+		//
 		if err := ioutil.WriteFile(boxfile, buf.Bytes(), 0755); err != nil {
-			if os.IsPermission(err) {
-				fmt.Printf(stylish.SubBullet("[x] FAILED"))
-				fmt.Printf("\nNanobox needs your permission to update.\nPlease run this command with sudo/admin privileges")
-				os.Exit(0)
-			}
+			config.Fatal("[commands/boxInstall] ioutil.WriteFile() failed", err.Error())
 		}
 
 		//
 		//
 		//
 		//
-		md5res, err := http.Get(boxmd5path)
+		//
+		md5, err := http.Get("https://s3.amazonaws.com/tools.nanobox.io/boxes/vagrant/nanobox-boot2docker.box.md5")
 		if err != nil {
-			config.Fatal("[commands/update] http.NewRequest() failed", err.Error())
+			config.Fatal("[commands/boxInstall] http.Get() failed", err.Error())
 		}
-		defer res.Body.Close()
+		defer md5.Body.Close()
 
-		b, err := ioutil.ReadAll(md5res.Body)
+		b, err := ioutil.ReadAll(md5.Body)
 		if err != nil {
-			fmt.Println("BOIOIOIOIOINK", err)
+			config.Fatal("[commands/boxInstall] ioutil.ReadAll() failed", err.Error())
 		}
 
-		if err := ioutil.WriteFile(boxfilemd5, b, 0755); err != nil {
-			if os.IsPermission(err) {
-				fmt.Printf(stylish.SubBullet("[x] FAILED"))
-				fmt.Printf("\nNanobox needs your permission to update.\nPlease run this command with sudo/admin privileges")
-				os.Exit(0)
-			}
+		if err := ioutil.WriteFile(config.Root+"/nanobox-boot2docker.box.md5", b, 0755); err != nil {
+			config.Fatal("[commands/boxInstall] ioutil.WriteFile() failed", err.Error())
 		}
-
-	} else {
-		fmt.Println("ALREADY HAVE!")
 	}
 
 	//
 	if err := exec.Command("vagrant", "box", "add", "--name", "nanobox/boot2docker", boxfile).Run(); err != nil {
-		fmt.Println("BGLOINK 2!", err)
+		config.Fatal("[commands/boxInstall] exec.Command() failed", err.Error())
 	}
 }

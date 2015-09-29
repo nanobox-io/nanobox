@@ -183,7 +183,6 @@ Vagrant.configure(2) do |config|
     WAIT
 
 	  ## box
-	  # nanobox.vm.box_url = "https://github.com/nanobox-io/nanobox-boot2docker/releases/download/<version>/nanobox-boot2docker.box"
 	  nanobox.vm.box     = "nanobox/boot2docker"
 
 

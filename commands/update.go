@@ -42,23 +42,40 @@ func nanoUpdate(ccmd *cobra.Command, args []string) {
 
 	fmt.Printf(stylish.Bullet("Updating nanobox CLI"))
 
-	// download a new CLI from s3 that matches their os and arch
-	download := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/nanobox", runtime.GOOS, runtime.GOARCH)
-	downloadmd5 := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/nanobox.md5")
+	//
+	// download md5
+	md5, err := http.Get("https://s3.amazonaws.com/tools.nanobox.io/cli/nanobox.md5")
+	if err != nil {
+		config.Fatal("[commands/update] http.Get() failed", err.Error())
+	}
+	defer md5.Body.Close()
+
+	b, err := ioutil.ReadAll(md5.Body)
+	if err != nil {
+		config.Fatal("[commands/update] http.ReadAll() failed", err.Error())
+	}
+
+	if err := ioutil.WriteFile(config.Root+"/nanobox.md5", b, 0755); err != nil {
+		config.Fatal("[commands/update] ioutil.WriteFile() failed", err.Error())
+	}
 
 	//
-	res, err := http.Get(download)
+	// download a new CLI from s3 that matches their os and arch
+	download := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/nanobox", runtime.GOOS, runtime.GOARCH)
+
+	//
+	cli, err := http.Get(download)
 	if err != nil {
 		config.Fatal("[commands/update] http.NewRequest() failed", err.Error())
 	}
-	defer res.Body.Close()
+	defer cli.Body.Close()
 
 	var buf bytes.Buffer
 	var percent float64
 	var down int
 
 	// format the response content length to be more 'friendly'
-	total := float64(res.ContentLength) / math.Pow(1024, 2)
+	total := float64(cli.ContentLength) / math.Pow(1024, 2)
 
 	// create a 'buffer' to read into
 	p := make([]byte, 2048)
@@ -68,7 +85,7 @@ func nanoUpdate(ccmd *cobra.Command, args []string) {
 	for {
 
 		// read the response body (streaming)
-		n, err := res.Body.Read(p)
+		n, err := cli.Body.Read(p)
 
 		// write to our buffer
 		buf.Write(p[:n])
@@ -77,7 +94,7 @@ func nanoUpdate(ccmd *cobra.Command, args []string) {
 		down += n
 
 		// update the percent downloaded
-		percent = (float64(down) / float64(res.ContentLength)) * 100
+		percent = (float64(down) / float64(cli.ContentLength)) * 100
 
 		// show how download progress:
 		// down/totalMB [*** progress *** %]
@@ -111,33 +128,7 @@ func nanoUpdate(ccmd *cobra.Command, args []string) {
 	}
 
 	//
-	//
-	//
-	//
-	md5res, err := http.Get(downloadmd5)
-	if err != nil {
-		config.Fatal("[commands/update] http.NewRequest() failed", err.Error())
-	}
-	defer res.Body.Close()
-
-	b, err := ioutil.ReadAll(md5res.Body)
-	if err != nil {
-		fmt.Println("BOIOIOIOIOINK", err)
-	}
-
-	if err := ioutil.WriteFile(config.Root+"/nanobox.md5", b, 0755); err != nil {
-		if os.IsPermission(err) {
-			fmt.Printf(stylish.SubBullet("[x] FAILED"))
-			fmt.Printf("\nNanobox needs your permission to update.\nPlease run this command with sudo/admin privileges")
-			os.Exit(0)
-		}
-	}
-
-	//
-	fmt.Printf(stylish.SubBullet("- Now running %s", config.VERSION))
-
-	//
-	fmt.Println(stylish.Success())
+	fmt.Printf(stylish.SubBullet("[√] Now running %s", config.VERSION))
 
 	// // attempt to run the command that was being run to begin with (unless its update)
 	// if os.Args[1] != "update" {
