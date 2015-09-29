@@ -72,12 +72,12 @@ func boxUpdate(ccmd *cobra.Command, args []string) {
 	}
 
 	//
-	if !needBox() {
-		fmt.Printf(stylish.Bullet("Uninstalling previous virtual machine image..."))
-		if err := exec.Command("vagrant", "box", "remove", "--force", "nanobox/boot2docker").Run(); err != nil {
-			config.Fatal("[commands/boxUpdate] exec.Command() failed", err.Error())
-		}
-	}
+	// if !needBox() {
+	// 	fmt.Printf(stylish.Bullet("Uninstalling previous virtual machine image..."))
+	// 	if err := exec.Command("vagrant", "box", "remove", "--force", "nanobox/boot2docker").Run(); err != nil {
+	// 		config.Fatal("[commands/boxUpdate] exec.Command() failed", err.Error())
+	// 	}
+	// }
 
 	//
 	boxInstall(nil, args)

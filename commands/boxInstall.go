@@ -156,7 +156,7 @@ func boxInstall(ccmd *cobra.Command, args []string) {
 	}
 
 	//
-	if err := exec.Command("vagrant", "box", "add", "--name", "nanobox/boot2docker", config.Root+"/nanobox-boot2docker.box", boxfile).Run(); err != nil {
+	if err := exec.Command("vagrant", "box", "add", "--force", "--name", "nanobox/boot2docker", boxfile).Run(); err != nil {
 		config.Fatal("[commands/boxInstall] exec.Command() failed", err.Error())
 	}
 }
