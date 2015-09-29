@@ -15,7 +15,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/pagodabox/nanobox-cli/config"
+	"github.com/nanobox-io/nanobox-cli/config"
 )
 
 // AddDevDomain

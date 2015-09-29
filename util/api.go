@@ -12,8 +12,8 @@ import (
 	"fmt"
 	"regexp"
 
-	api "github.com/pagodabox/nanobox-api-client"
-	"github.com/pagodabox/nanobox-cli/config"
+	api "github.com/nanobox-io/nanobox-api-client"
+	"github.com/nanobox-io/nanobox-cli/config"
 )
 
 // HandleAPIError takes an error returned from an API call, break it down and

@@ -16,7 +16,7 @@ import (
 	"github.com/howeyc/gopass"
 	"github.com/mitchellh/colorstring"
 
-	"github.com/pagodabox/nanobox-cli/config"
+	"github.com/nanobox-io/nanobox-cli/config"
 )
 
 // Printv (print verbose) only prints a message if the 'verbose' flag is passed

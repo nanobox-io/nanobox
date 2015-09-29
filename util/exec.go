@@ -13,8 +13,8 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/pagodabox/nanobox-cli/config"
-	"github.com/pagodabox/nanobox-golang-stylish"
+	"github.com/nanobox-io/nanobox-cli/config"
+	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
 // Exec

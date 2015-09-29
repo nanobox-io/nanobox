@@ -14,7 +14,7 @@ import (
 
 	"github.com/jcelliott/lumber"
 
-	// api "github.com/pagodabox/nanobox-api-client"
+	// api "github.com/nanobox-io/nanobox-api-client"
 )
 
 //

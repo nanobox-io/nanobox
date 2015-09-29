@@ -36,7 +36,7 @@ It is _**highly recommended**_ that you use [git bash](http://git-scm.com/downlo
 #### From source:
 
 1. `cd` into the folder on your GOPATH where you want the project to live.
-2. `git clone git@github.com/pagodabox/nanobox-cli`.
+2. `git clone git@github.com/nanobox-io/nanobox-cli`.
 3. install [gom](https://github.com/mattn/gom). This is how the CLI manages dependancies. Skipping this step requires that you `go get` **each** dependancy in order to use the CLI.
 3. `cd` into the new directory and run `gom install` or `gom build`.
 4. Type `nanobox` and follow the instructions to authenticate the CLI with Nanobox.
@@ -80,7 +80,7 @@ Passing `--debug` at the end of any command will show all API request/response o
 
 ### Documentation
 
-Complete documentation is available on [godoc](http://godoc.org/github.com/pagodabox/nanobox-cli).
+Complete documentation is available on [godoc](http://godoc.org/github.com/nanobox-io/nanobox-cli).
 
 
 ### Contact

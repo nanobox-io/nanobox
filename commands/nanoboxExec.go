@@ -15,10 +15,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	api "github.com/pagodabox/nanobox-api-client"
-	"github.com/pagodabox/nanobox-cli/config"
-	"github.com/pagodabox/nanobox-cli/util"
-	"github.com/pagodabox/nanobox-golang-stylish"
+	api "github.com/nanobox-io/nanobox-api-client"
+	"github.com/nanobox-io/nanobox-cli/config"
+	"github.com/nanobox-io/nanobox-cli/util"
+	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
 //

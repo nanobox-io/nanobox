@@ -11,8 +11,8 @@ import (
 	"fmt"
 	"os/exec"
 
-	// api "github.com/pagodabox/nanobox-api-client"
-	"github.com/pagodabox/nanobox-cli/commands"
+	// api "github.com/nanobox-io/nanobox-api-client"
+	"github.com/nanobox-io/nanobox-cli/commands"
 )
 
 // main

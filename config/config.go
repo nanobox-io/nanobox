@@ -18,7 +18,7 @@ import (
 	"github.com/ghodss/yaml"
 	"github.com/mitchellh/go-homedir"
 
-	"github.com/pagodabox/nanobox-golang-stylish"
+	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
 //

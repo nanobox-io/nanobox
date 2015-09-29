@@ -18,9 +18,9 @@ import (
 
 	// semver "github.com/coreos/go-semver/semver"
 
-	// "github.com/pagodabox/nanobox-golang-stylish"
-	// "github.com/pagodabox/pagodabox-cli/commands"
-	// "github.com/pagodabox/pagodabox-cli/util"
+	// "github.com/nanobox-io/nanobox-golang-stylish"
+	// "github.com/nanoboxpagodabox-cli/commands"
+	// "github.com/nanoboxpagodabox-cli/util"
 )
 
 // init

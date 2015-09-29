@@ -11,8 +11,8 @@ package commands
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/pagodabox/nanobox-cli/config"
-	"github.com/pagodabox/nanobox-cli/util"
+	"github.com/nanobox-io/nanobox-cli/config"
+	"github.com/nanobox-io/nanobox-cli/util"
 )
 
 //

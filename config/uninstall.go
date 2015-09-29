@@ -11,7 +11,7 @@ package config
 // 	"fmt"
 // 	"os"
 //
-// 	"github.com/pagodabox/nanobox-cli/util"
+// 	"github.com/nanobox-io/nanobox-cli/util"
 // )
 //
 // //

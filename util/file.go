@@ -16,8 +16,8 @@ import (
 	// "path/filepath"
 	// "sync"
 
-	// "github.com/pagodabox/nanobox-cli/auth"
-	// "github.com/pagodabox/nanobox-cli/ui"
+	// "github.com/nanobox-io/nanobox-cli/auth"
+	// "github.com/nanobox-io/nanobox-cli/ui"
 )
 
 var tw *tar.Writer

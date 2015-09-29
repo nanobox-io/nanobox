@@ -16,8 +16,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/pagodabox/nanobox-cli/config"
-	"github.com/pagodabox/nanobox-golang-stylish"
+	"github.com/nanobox-io/nanobox-cli/config"
+	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
 //
@@ -183,7 +183,7 @@ Vagrant.configure(2) do |config|
     WAIT
 
 	  ## box
-	  # nanobox.vm.box_url = "https://github.com/pagodabox/nanobox-boot2docker/releases/download/<version>/nanobox-boot2docker.box"
+	  # nanobox.vm.box_url = "https://github.com/nanobox-io/nanobox-boot2docker/releases/download/<version>/nanobox-boot2docker.box"
 	  nanobox.vm.box     = "nanobox/boot2docker"
 
 

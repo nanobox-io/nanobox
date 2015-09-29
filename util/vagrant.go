@@ -18,8 +18,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/pagodabox/nanobox-cli/config"
-	// "github.com/pagodabox/nanobox-golang-stylish"
+	"github.com/nanobox-io/nanobox-cli/config"
+	// "github.com/nanobox-io/nanobox-golang-stylish"
 )
 
 // GetVMUUID tries to return the VMs uuid found in it's corresponding .vangrant

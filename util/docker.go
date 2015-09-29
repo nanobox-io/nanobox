@@ -23,8 +23,8 @@ import (
 	"github.com/docker/docker/pkg/term"
 	"github.com/go-fsnotify/fsnotify"
 
-	"github.com/pagodabox/nanobox-cli/config"
-	"github.com/pagodabox/nanobox-golang-stylish"
+	"github.com/nanobox-io/nanobox-cli/config"
+	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
 // run satisfies the Command interface
