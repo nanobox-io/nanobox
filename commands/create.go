@@ -48,21 +48,18 @@ func nanoCreate(ccmd *cobra.Command, args []string) {
 
 	// PreRun: nanoInit
 
-	// check to see if a box needs to be installed
-	boxInstall(nil, args)
-
 	// if the command is being run with the "add" flag, it means an entry needs to
 	// be added to the hosts file and execution yielded back to the parent
 	if fAddEntry {
-		util.AddDevDomain()
+		util.HostfileAddDomain()
 		os.Exit(0)
 	}
 
 	//
 	// boot the vm
 	fmt.Printf(stylish.Bullet("Creating nanobox VM"))
-	if err := util.RunVagrantCommand(exec.Command("vagrant", "up")); err != nil {
-		config.Fatal("[commands/create] util.RunVagrantCommand() failed", err.Error())
+	if err := util.VagrantRun(exec.Command("vagrant", "up")); err != nil {
+		config.Fatal("[commands/create] util.VagrantRun() failed", err.Error())
 	}
 
 	//

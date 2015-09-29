@@ -41,7 +41,7 @@ func nanoSSH(ccmd *cobra.Command, args []string) {
 
 	fmt.Printf(stylish.Bullet("SSHing into nanobox VM..."))
 
-	// NOTE: this command is run manually (vs util.RunVagrantCommand) because the output
+	// NOTE: this command is run manually (vs util.VagrantRun) because the output
 	// needs to be hooked up a little different to accomodate Stdin
 
 	// run the command from ~/.nanobox/apps/<this app>

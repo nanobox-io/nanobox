@@ -43,7 +43,7 @@ func nanoboxDestroy(ccmd *cobra.Command, args []string) {
 	// if the command is being run with the "remove" flag, it means an entry needs
 	// to be removed from the hosts file and execution yielded back to the parent
 	if fRemoveEntry {
-		util.RemoveDevDomain()
+		util.HostfileRemoveDomain()
 		os.Exit(0)
 	}
 
@@ -52,11 +52,11 @@ func nanoboxDestroy(ccmd *cobra.Command, args []string) {
 	// there is a Vagrantfile to run the command with (otherwise it will just get
 	// re-created)
 	fmt.Printf(stylish.Bullet("Destroying nanobox VM..."))
-	if err := util.RunVagrantCommand(exec.Command("vagrant", "destroy", "--force")); err != nil {
+	if err := util.VagrantRun(exec.Command("vagrant", "destroy", "--force")); err != nil {
 
 		// dont care if the project no longer exists... thats what we're doing anyway
 		if err != err.(*os.PathError) {
-			config.Fatal("[commands/destroy] util.RunVagrantCommand() failed", err.Error())
+			config.Fatal("[commands/destroy] util.VagrantRun() failed", err.Error())
 		}
 	}
 

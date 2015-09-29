@@ -31,7 +31,7 @@ var nanoboxInfoCmd = &cobra.Command{
 // nanoboxInfo runs 'vagrant status'
 func nanoboxInfo(ccmd *cobra.Command, args []string) {
 
-	status := util.GetVMStatus()
+	status := util.VagrantStatus()
 
 	fmt.Printf(`
 Local Domain   : %s
@@ -58,10 +58,10 @@ Nanobox Files  : %s
 		//
 		for _, service := range services {
 			info += fmt.Sprintf(`
-	%s :
-	  name : %s
-		host : %s
-		ports : %v
+  %s :
+    name : %s
+    host : %s
+    ports : %v
 			`, service.UID, service.Name, config.Nanofile.Domain, service.Ports)
 
 			//

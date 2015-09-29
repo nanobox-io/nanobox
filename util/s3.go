@@ -16,7 +16,7 @@ import (
 )
 
 //
-func RequestS3URL(path string) (string, error) {
+func S3RequestURL(path string) (string, error) {
 
 	//
 	res, err := http.DefaultClient.Get(path)

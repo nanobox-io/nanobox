@@ -22,24 +22,24 @@ import (
 	// "github.com/nanobox-io/nanobox-golang-stylish"
 )
 
-// GetVMUUID tries to return the VMs uuid found in it's corresponding .vangrant
+// VagrantUUID tries to return the VMs uuid found in it's corresponding .vangrant
 // folder. If a uuid is not found than the VM has not yet been created. Don't
 // really care about the error here since the value will be "" if there is no
 // file to read
-func GetVMUUID() string {
+func VagrantUUID() string {
 	b, _ := ioutil.ReadFile(fmt.Sprintf("%v/.vagrant/machines/%v/%v/index_uuid", config.AppDir, config.Nanofile.Name, config.Nanofile.Provider))
 	return string(b)
 }
 
-// GetVMStatus returns the current status of the VM; this command needs to be run
+// VagrantStatus returns the current status of the VM; this command needs to be run
 // in a way independant of a Vagrantfile to ensure that the status will always
 // be available
-func GetVMStatus() string {
+func VagrantStatus() string {
 
 	var status string
 
 	//
-	uuid := GetVMUUID()
+	uuid := VagrantUUID()
 
 	// if no uuid is found the vm has not yet been created
 	if uuid == "" {
@@ -97,11 +97,11 @@ func GetVMStatus() string {
 	return status
 }
 
-// RunVagrantCommand provides a wrapper around a standard cmd.Run() in which
+// VagrantRun provides a wrapper around a standard cmd.Run() in which
 // all standard in/outputs are connected to the command, and the directory is
 // changed to the corresponding app directory. This allows nanobox to run Vagrant
 // commands w/o contaminating a users codebase.
-func RunVagrantCommand(cmd *exec.Cmd) error {
+func VagrantRun(cmd *exec.Cmd) error {
 
 	// run the command from ~/.nanobox/apps/<config.App>. if the directory doesn't
 	// exist, simply return; running the command from the directory that contains
@@ -169,6 +169,8 @@ func RunVagrantCommand(cmd *exec.Cmd) error {
 
 			//
 			switch scanner.Text() {
+			case fmt.Sprintf("==> %v: VirtualBox VM is already running.", config.Nanofile.Name):
+				continue
 			case fmt.Sprintf("==> %v: Importing base box 'nanobox/boot2docker'...", config.Nanofile.Name):
 				output <- "Importing nanobox base image"
 			case fmt.Sprintf("==> %v: Booting VM...", config.Nanofile.Name):

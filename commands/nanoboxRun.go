@@ -43,7 +43,7 @@ func nanoboxRun(ccmd *cobra.Command, args []string) {
 	// PreRun: bootVM
 
 	// if the vm is 'new' update images
-	if util.GetVMStatus() == "not created" || !config.VMfile.HasDeployed() {
+	if util.VagrantStatus() == "not created" || !config.VMfile.HasDeployed() {
 		imagesUpdate(nil, args)
 	}
 

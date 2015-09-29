@@ -40,7 +40,7 @@ func nanoboxDev(ccmd *cobra.Command, args []string) {
 	switch {
 
 	// if the vm is 'new' deploy and update images
-	case util.GetVMStatus() == "not created" || !config.VMfile.HasDeployed():
+	case util.VagrantStatus() == "not created" || !config.VMfile.HasDeployed():
 		imagesUpdate(nil, args)
 		nanoDeploy(nil, args)
 

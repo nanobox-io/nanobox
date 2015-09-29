@@ -253,9 +253,9 @@ Please ensure all required fields are provided and try again.`))
 	v.Add("version", release.Version)
 
 	//
-	s3url, err := util.RequestS3URL(fmt.Sprintf("http://api.nanobox.io/v1/engines/%v/request_upload?%v", release.Name, v.Encode()))
+	s3url, err := util.S3RequestURL(fmt.Sprintf("http://api.nanobox.io/v1/engines/%v/request_upload?%v", release.Name, v.Encode()))
 	if err != nil {
-		config.Fatal("[commands/publish] util.RequestS3URL failed", err.Error())
+		config.Fatal("[commands/publish] util.S3RequestURL failed", err.Error())
 	}
 
 	//

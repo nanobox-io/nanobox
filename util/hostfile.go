@@ -18,8 +18,8 @@ import (
 	"github.com/nanobox-io/nanobox-cli/config"
 )
 
-// AddDevDomain
-func AddDevDomain() {
+// HostfileAddDomain
+func HostfileAddDomain() {
 
 	// open hosts file
 	f, err := os.OpenFile("/etc/hosts", os.O_RDWR|os.O_APPEND, 0644)
@@ -35,8 +35,8 @@ func AddDevDomain() {
 	}
 }
 
-// RemoveDevDomain
-func RemoveDevDomain() {
+// HostfileRemoveDomain
+func HostfileRemoveDomain() {
 
 	var contents string
 

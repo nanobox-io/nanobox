@@ -110,6 +110,7 @@ func init() {
 	// all available nanobox commands
 
 	// 'hidden' commands
+
 	NanoboxCmd.AddCommand(buildCmd)
 	NanoboxCmd.AddCommand(createCmd)
 	NanoboxCmd.AddCommand(deployCmd)
@@ -124,15 +125,15 @@ func init() {
 	NanoboxCmd.AddCommand(updateCmd)
 
 	// 'nanobox' commands
-	NanoboxCmd.AddCommand(bootstrapCmd)
-	NanoboxCmd.AddCommand(nanoboxConsoleCmd)
-	NanoboxCmd.AddCommand(nanoboxDestroyCmd)
-	NanoboxCmd.AddCommand(nanoboxDevCmd)
-	NanoboxCmd.AddCommand(nanoboxDownCmd)
-	NanoboxCmd.AddCommand(nanoboxExecCmd)
-	NanoboxCmd.AddCommand(nanoboxInfoCmd)
-	NanoboxCmd.AddCommand(nanoboxPublishCmd)
 	NanoboxCmd.AddCommand(nanoboxRunCmd)
+	NanoboxCmd.AddCommand(bootstrapCmd)
+	NanoboxCmd.AddCommand(nanoboxDevCmd)
+	NanoboxCmd.AddCommand(nanoboxInfoCmd)
+	NanoboxCmd.AddCommand(nanoboxConsoleCmd)
+	NanoboxCmd.AddCommand(nanoboxExecCmd)
+	NanoboxCmd.AddCommand(nanoboxDownCmd)
+	NanoboxCmd.AddCommand(nanoboxDestroyCmd)
+	NanoboxCmd.AddCommand(nanoboxPublishCmd)
 
 	// 'box' subcommand
 	NanoboxCmd.AddCommand(boxCmd)
@@ -157,7 +158,7 @@ func init() {
 
 // vmIsRunning
 func vmIsRunning(ccmd *cobra.Command, args []string) {
-	if util.GetVMStatus() != "running" {
+	if util.VagrantStatus() != "running" {
 		fmt.Printf("Your nanobox VM is not running. Run 'nanobox up' first")
 		os.Exit(1)
 	}
@@ -166,11 +167,14 @@ func vmIsRunning(ccmd *cobra.Command, args []string) {
 // bootVM
 func bootVM(ccmd *cobra.Command, args []string) {
 
+	// check to see if a box needs to be installed
+	boxInstall(nil, args)
+
 	// ensure a Vagrantfile is available before attempting to boot the VM
 	nanoInit(nil, args)
 
 	// get the status to know what needs to happen with the VM
-	status := util.GetVMStatus()
+	status := util.VagrantStatus()
 	switch status {
 
 	// vm is running - do nothing
@@ -207,7 +211,7 @@ func bootVM(ccmd *cobra.Command, args []string) {
 
 	// after the VM is running updated the .vmfile
 	config.VMfile.StatusIs(status)
-	config.VMfile.UUIDIs(util.GetVMUUID())
+	config.VMfile.UUIDIs(util.VagrantUUID())
 
 	if fBackground {
 		config.VMfile.ModeIs("background")
@@ -258,10 +262,10 @@ func saveVM(ccmd *cobra.Command, args []string) {
 	// not run in background mode
 	switch {
 	case !config.VMfile.IsSuspendable():
-		fmt.Printf("\nNote: The VM has not been suspended because there there are still consoles connected.\n")
+		fmt.Printf("\n   Note: The nanobox VM has not been suspended because there are other active console sessions.\n\n")
 		break
 	case config.VMfile.IsMode("background"):
-		fmt.Printf(stylish.Bullet("Nanobox VM not suspended (running in background). To suspend the VM run 'nanobox down'"))
+		fmt.Printf(stylish.Bullet("\n   Note: the nanobox VM not suspended (running in background). To suspend the VM run 'nanobox down'\n\n"))
 		break
 	default:
 		nanoboxDown(nil, args)

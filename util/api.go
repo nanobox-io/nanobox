@@ -16,10 +16,10 @@ import (
 	"github.com/nanobox-io/nanobox-cli/config"
 )
 
-// HandleAPIError takes an error returned from an API call, break it down and
+// APIHandleError takes an error returned from an API call, break it down and
 // return important information regarding the error. The Pagoda Box API returns
 // custom errors in some instances that need to have very specific handlers.
-func HandleAPIError(err error) error {
+func APIHandleError(err error) error {
 
 	// if its a pagodabox.Error we have special things we want to do...
 	if apiError, ok := err.(api.APIError); ok {
