@@ -11,7 +11,6 @@ package commands
 import (
 	"bufio"
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -22,23 +21,12 @@ import (
 	"path/filepath"
 	"strings"
 
-	semver "github.com/coreos/go-semver/semver"
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox-cli/config"
 	// "github.com/nanobox-io/nanobox-cli/util"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 )
-
-type asset struct {
-	Name        string `json:"name"`
-	DownloadURL string `json:"browser_download_url"`
-}
-
-type release struct {
-	Assets  []asset
-	Version string `json:"name"`
-}
 
 //
 var boxInstallCmd = &cobra.Command{
@@ -50,6 +38,9 @@ var boxInstallCmd = &cobra.Command{
 }
 
 func hasBox() bool {
+
+	need := true
+
 	cmd := exec.Command("vagrant", "box", "list")
 
 	//
@@ -63,18 +54,10 @@ func hasBox() bool {
 	go func() {
 		for scanner.Scan() {
 			if strings.HasPrefix(scanner.Text(), "nanobox/boot2docker") {
-				return true
+				need = false
 			}
 		}
 	}()
-
-	return false
-}
-
-// boxInstall
-func boxInstall(ccmd *cobra.Command, args []string) {
-
-	hasBox()
 
 	//
 	if err := cmd.Start(); err != nil {
@@ -86,58 +69,24 @@ func boxInstall(ccmd *cobra.Command, args []string) {
 		fmt.Println("BOONK!", err)
 	}
 
-	if !need {
-		// only on update, remove old box
+	return need
+}
 
-		return
-	}
+// boxInstall
+func boxInstall(ccmd *cobra.Command, args []string) {
 
-	releases := []release{}
+	hasBox()
 
-	//
-	res, err := http.Get("https://api.github.com/repos/pagodabox/nanobox-boot2docker/releases")
-	if err != nil {
-		fmt.Println("BRANK!", err)
-	}
-	defer res.Body.Close()
+	boxmd5path := "https://s3.amazonaws.com/tools.nanobox.io/boxes/vagrant/boot2docker.box.md5"
+	boxfilemd5 := filepath.Clean(config.Root + "/nanobox-boot2docker.box.md5")
 
-	//
-	body, err := ioutil.ReadAll(res.Body)
-	if err := json.Unmarshal(body, &releases); err != nil {
-		fmt.Println("BRUNK!", err)
-	}
-
-	latestRelease := release{}
-	latest, err := semver.NewVersion("0.0.0")
-	if err != nil {
-		fmt.Println("BUZUNK!", err)
-	}
-
-	//
-	for _, release := range releases {
-		if release.Version != "" {
-
-			ver, err := semver.NewVersion(strings.Replace(release.Version, "v", "", -1))
-			if err != nil {
-				fmt.Println("BRUOONK!", err)
-			}
-
-			if latest.LessThan(*ver) {
-				latestRelease = release
-				latest = ver
-			}
-		}
-	}
-
-	fmt.Printf("LATEST RELEASE %#v\n", latestRelease)
-
+	boxpath := "https://s3.amazonaws.com/tools.nanobox.io/boxes/vagrant/boot2docker.box"
 	boxfile := filepath.Clean(config.Root + "/nanobox-boot2docker.box")
 
-	if _, err := os.Stat(boxfile); err != nil {
-		fmt.Println("LATEST RELEASE!", latestRelease)
+	if _, err := os.Stat(boxfilemd5); err != nil {
 
 		//
-		res, err := http.Get(latestRelease.Assets[0].DownloadURL)
+		res, err := http.Get(boxpath)
 		if err != nil {
 			config.Fatal("[commands/update] http.NewRequest() failed", err.Error())
 		}
@@ -154,7 +103,7 @@ func boxInstall(ccmd *cobra.Command, args []string) {
 		p := make([]byte, 2048)
 
 		//
-		fmt.Printf(stylish.SubBullet("- Downloading latest CLI from %v", latestRelease.Assets[0].DownloadURL))
+		fmt.Printf(stylish.SubBullet("- Downloading latest CLI from %v", boxpath))
 		for {
 
 			// read the response body (streaming)
@@ -194,57 +143,35 @@ func boxInstall(ccmd *cobra.Command, args []string) {
 			}
 		}
 
-		// download the thang
-		// f, err := os.Create(boxfile)
-		// if err != nil {
-		// 	config.Fatal("[config/update] os.Create() failed", err.Error())
-		// }
-		// defer f.Close()
+		//
+		//
+		//
+		//
+		md5res, err := http.Get(boxmd5path)
+		if err != nil {
+			config.Fatal("[commands/update] http.NewRequest() failed", err.Error())
+		}
+		defer res.Body.Close()
+
+		b, err := ioutil.ReadAll(md5res.Body)
+		if err != nil {
+			fmt.Println("BOIOIOIOIOINK", err)
+		}
+
+		if err := ioutil.WriteFile(boxfilemd5, b, 0755); err != nil {
+			if os.IsPermission(err) {
+				fmt.Printf(stylish.SubBullet("[x] FAILED"))
+				fmt.Printf("\nNanobox needs your permission to update.\nPlease run this command with sudo/admin privileges")
+				os.Exit(0)
+			}
+		}
+
 	} else {
 		fmt.Println("ALREADY HAVE!")
 	}
 
 	//
-	if err := exec.Command("vagrant", "box", "add", "--name", "nanobox/boot2docker", config.Root+"/nanobox-boot2docker.box").Run(); err != nil {
+	if err := exec.Command("vagrant", "box", "add", "--name", "nanobox/boot2docker", boxfile).Run(); err != nil {
 		fmt.Println("BGLOINK 2!", err)
 	}
-
-	// curver, err := ioutil.ReadFile("/Users/sdomino/.nanobox/.box")
-	// if err != nil {
-	// 	fmt.Println("BRIZZLE!", err)
-	// }
-	//
-	// currentVersion, err := semver.NewVersion(string(curver))
-	// if err != nil {
-	// 	fmt.Println("BRUNKS", err)
-	// }
-	//
-	// fmt.Println("CURRENT VER", currentVersion, latest)
-
-	// fmt.Printf("LATEST RELEASE! %#v\n", latestRelease)
-
-	// if currentVersion() != 0 {
-	// 	fmt.Println("I already have a version")
-	// 	return
-	// }
-	// release := latestVersion()
-	// asset := release.Assets[0]
-	// put file downloader here downloading from asset.DownloadURL
-	// setVersion(release.version())
-	// vagrant box add ~/.nanobox/boot2docker.box
 }
-
-// func releases() []release {
-// 	releases := []release{}
-// 	resp, err := http.Get("https://api.github.com/repos/pagodabox/nanobox-boot2docker/releases")
-// 	if err != nil {
-// 		return releases
-// 	}
-//
-// 	body, err := ioutil.ReadAll(resp.Body)
-// 	err = json.Unmarshal(body, &releases)
-// 	if err != nil {
-// 		return releases
-// 	}
-// 	return releases
-// }

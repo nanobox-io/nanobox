@@ -44,6 +44,7 @@ func nanoUpdate(ccmd *cobra.Command, args []string) {
 
 	// download a new CLI from s3 that matches their os and arch
 	download := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/nanobox", runtime.GOOS, runtime.GOARCH)
+	downloadmd5 := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/nanobox.md5")
 
 	//
 	res, err := http.Get(download)
@@ -102,6 +103,29 @@ func nanoUpdate(ccmd *cobra.Command, args []string) {
 	// replace the existing CLI with the new CLI
 	fmt.Printf(stylish.SubBullet("- Replacing CLI at %s", path))
 	if err := ioutil.WriteFile(path, buf.Bytes(), 0755); err != nil {
+		if os.IsPermission(err) {
+			fmt.Printf(stylish.SubBullet("[x] FAILED"))
+			fmt.Printf("\nNanobox needs your permission to update.\nPlease run this command with sudo/admin privileges")
+			os.Exit(0)
+		}
+	}
+
+	//
+	//
+	//
+	//
+	md5res, err := http.Get(downloadmd5)
+	if err != nil {
+		config.Fatal("[commands/update] http.NewRequest() failed", err.Error())
+	}
+	defer res.Body.Close()
+
+	b, err := ioutil.ReadAll(md5res.Body)
+	if err != nil {
+		fmt.Println("BOIOIOIOIOINK", err)
+	}
+
+	if err := ioutil.WriteFile(config.Root+"/nanobox.md5", b, 0755); err != nil {
 		if os.IsPermission(err) {
 			fmt.Printf(stylish.SubBullet("[x] FAILED"))
 			fmt.Printf("\nNanobox needs your permission to update.\nPlease run this command with sudo/admin privileges")

@@ -9,19 +9,19 @@
 package config
 
 //
-import semver "github.com/coreos/go-semver/semver"
+// import semver "github.com/coreos/go-semver/semver"
 
 //
 const VERSION = "0.13.3"
 
 //
-var Version *semver.Version
+// var Version *semver.Version
 
 // init
 func init() {
 
 	// set the version
-	if Version, err = semver.NewVersion(VERSION); err != nil {
-		Fatal("[version] semver.NewVersion() failed", err.Error())
-	}
+	// if Version, err = semver.NewVersion(VERSION); err != nil {
+	// 	Fatal("[version] semver.NewVersion() failed", err.Error())
+	// }
 }
