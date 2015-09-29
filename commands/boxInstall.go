@@ -70,8 +70,6 @@ func needBox() bool {
 		config.Fatal("[commands/boxInstall] cmd.Wait() failed", err.Error())
 	}
 
-	fmt.Println("NEED??", need)
-
 	return need
 }
 
@@ -163,7 +161,7 @@ func boxInstall(ccmd *cobra.Command, args []string) {
 	}
 
 	//
-	if err := exec.Command("vagrant", "box", "add", "--name", config.Root+"nanobox/boot2docker", boxfile).Run(); err != nil {
+	if err := exec.Command("vagrant", "box", "add", "--name", "nanobox/boot2docker", config.Root+"/nanobox-boot2docker.box", boxfile).Run(); err != nil {
 		config.Fatal("[commands/boxInstall] exec.Command() failed", err.Error())
 	}
 }
