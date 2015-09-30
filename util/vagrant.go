@@ -166,7 +166,6 @@ func VagrantRun(cmd *exec.Cmd) error {
 	scanner := bufio.NewScanner(stdout)
 	go func() {
 		for scanner.Scan() {
-
 			//
 			switch scanner.Text() {
 			case fmt.Sprintf("==> %v: VirtualBox VM is already running.", config.Nanofile.Name):

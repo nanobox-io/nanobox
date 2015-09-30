@@ -71,10 +71,12 @@ func nanoWatch(ccmd *cobra.Command, args []string) {
 
 		//
 		if _, ok := err.(syscall.Errno); ok {
-			fmt.Printf(stylish.ErrBullet("Insert error message for file error here"))
+			fmt.Printf(stylish.ErrBullet(`! WARNING !
+Failed to watch files, max file descriptor limit reached. Nanobox will not be able to propagate filesystem events to the virtual machine. Consider increasing your max file descriptor limit to re-enable this functionality.`))
+		} else {
+			fmt.Printf(stylish.ErrBullet("Unable to detect file changes (%v)", err.Error()))
 		}
-
-		fmt.Printf(stylish.ErrBullet("Unable to detect file changes (%v)", err.Error()))
+		
 		os.Exit(1)
 	}
 }
