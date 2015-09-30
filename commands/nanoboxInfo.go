@@ -38,6 +38,7 @@ Local Domain   : %s
 App Name       : %s
 VM state       : %s
 Nanobox Files  : %s
+
 `, config.Nanofile.Domain, config.Nanofile.Name, status, config.AppDir)
 
 	if status != "running" {
@@ -53,16 +54,15 @@ Nanobox Files  : %s
 
 	//
 	if len(services) >= 1 {
-		info := "\n///////// SERVICES /////////\n"
+		info := "///////// SERVICES /////////\n"
 
 		//
 		for _, service := range services {
 			info += fmt.Sprintf(`
   %s :
-    name : %s
     host : %s
     ports : %v
-			`, service.UID, service.Name, config.Nanofile.Domain, service.Ports)
+			`, service.Name, config.Nanofile.Domain, service.Ports)
 
 			//
 			if service.Username != "" {

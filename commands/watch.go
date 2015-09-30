@@ -58,12 +58,12 @@ func nanoWatch(ccmd *cobra.Command, args []string) {
 
 			// if the file changes is the Boxfile do a full deploy...
 			if filepath.Base(event.Name) == "Boxfile" {
-				fmt.Printf(stylish.Bullet("Issuing deploy"))
+				fmt.Printf(stylish.Bullet("Rebuilding environment"))
 				nanoDeploy(nil, args)
 
 				// ...otherwise just build
 			} else {
-				fmt.Printf(stylish.Bullet("Issuing build"))
+				fmt.Printf(stylish.Bullet("Rebuilding code"))
 				nanoBuild(nil, args)
 			}
 		}
@@ -80,7 +80,7 @@ increasing your max file descriptor limit to re-enable this functionality.
 		} else {
 			fmt.Printf(stylish.ErrBullet("Unable to detect file changes (%v)", err.Error()))
 		}
-		
+
 		os.Exit(1)
 	}
 }
