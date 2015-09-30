@@ -54,28 +54,30 @@ Nanobox Files  : %s
 
 	//
 	if len(services) >= 1 {
-		info := "///////// SERVICES /////////\n"
+		info := "///////// SERVICES /////////\n\n"
 
 		//
 		for _, service := range services {
-			info += fmt.Sprintf(`
-  %s :
-    host : %s
-    ports : %v
-			`, service.Name, config.Nanofile.Domain, service.Ports)
+			info += fmt.Sprintf("%s :\n", service.UID)
+
+			if service.Name != "" {
+				info += fmt.Sprintf("   name : %s\n", service.Name)
+			}
+
+			info += fmt.Sprintf("   host : %s\n   ports : %v\n", config.Nanofile.Domain, service.Ports)
 
 			//
 			if service.Username != "" {
-				info += fmt.Sprintf("username : %s", service.Username)
+				info += fmt.Sprintf("   username : %s\n", service.Username)
 			}
 
 			//
 			if service.Password != "" {
-				info += fmt.Sprintf("password : %s", service.Password)
+				info += fmt.Sprintf("   password : %s\n", service.Password)
 			}
 		}
 
 		//
-		fmt.Println(info)
+		fmt.Printf("%s\n\n", info)
 	}
 }

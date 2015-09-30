@@ -23,9 +23,7 @@ import (
 var engineNewCmd = &cobra.Command{
 	Use:   "new",
 	Short: "Generates a new engine inside the current working directory",
-	Long: `
-Description:
-  Generates a new engine inside the current working directory`,
+	Long:  ``,
 
 	Run: nanoEngineNew,
 }

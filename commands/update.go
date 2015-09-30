@@ -25,9 +25,7 @@ import (
 var updateCmd = &cobra.Command{
 	Use:   "update",
 	Short: "Updates the CLI to the newest available version",
-	Long: `
-Description:
-  Updates the CLI to the newest available version`,
+	Long:  ``,
 
 	Run: nanoUpdate,
 }
@@ -35,17 +33,13 @@ Description:
 // nanoUpdate
 func nanoUpdate(ccmd *cobra.Command, args []string) {
 
-	fmt.Printf(stylish.Bullet("Updating nanobox CLI"))
-
-	//
-	md5, err := os.Create(config.Root + "/nanobox.md5")
-	if err != nil {
-		config.Fatal("[commands/update] os.Create() failed", err.Error())
+	// if the local md5 matches the remote md5 there is no need to update
+	if util.MD5sMatch(config.Root+"/nanobox.md5", "https://s3.amazonaws.com/tools.nanobox.io/cli/nanobox.md5") {
+		fmt.Printf("Nanobox is up to date (running v%s)", config.VERSION)
+		return
 	}
-	defer md5.Close()
 
-	// download the cli md5
-	util.Download("https://s3.amazonaws.com/tools.nanobox.io/cli/nanobox.md5", md5)
+	fmt.Printf(stylish.Bullet("Updating nanobox"))
 
 	//
 	// get the path of the current executing CLI
@@ -54,16 +48,27 @@ func nanoUpdate(ccmd *cobra.Command, args []string) {
 		config.Fatal("[commands/update] osext.ExecutableFolder() failed", err.Error())
 	}
 
-	//
+	// download the CLI
 	cli, err := os.Create(path)
 	if err != nil {
 		config.Fatal("[commands/update] os.Create() failed", err.Error())
 	}
 	defer cli.Close()
 
-	// download the CLI with a progres bar
-	util.Progress(fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/nanobox", runtime.GOOS, runtime.GOARCH), cli)
+	//
+	util.FileProgress(fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/nanobox", runtime.GOOS, runtime.GOARCH), cli)
 
 	//
-	fmt.Printf(stylish.SubBullet("[√] Now running %s", config.VERSION))
+	// download the CLI md5
+	md5, err := os.Create(config.Root + "/nanobox.md5")
+	if err != nil {
+		config.Fatal("[commands/update] os.Create() failed", err.Error())
+	}
+	defer md5.Close()
+
+	//
+	util.FileDownload("https://s3.amazonaws.com/tools.nanobox.io/cli/nanobox.md5", md5)
+
+	//
+	fmt.Printf(stylish.SubBullet("[√] Now running v%s", config.VERSION))
 }

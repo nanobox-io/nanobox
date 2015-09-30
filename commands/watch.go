@@ -28,10 +28,7 @@ var watchCmd = &cobra.Command{
 
 	Use:   "watch",
 	Short: "",
-	Long: `
-Description:
-  Watches your app for file changes. When a file is changed a 'nanobox build' is
-  automatically issued. If a Boxfile is modified a 'nanobox deploy' is issued.`,
+	Long:  ``,
 
 	Run: nanoWatch,
 }

@@ -37,9 +37,7 @@ var tw *tar.Writer
 var enginePublishCmd = &cobra.Command{
 	Use:   "publish",
 	Short: "Publishes an engine to nanobox.io",
-	Long: `
-Description:
-  Publishes an engine to nanobox.io`,
+	Long:  ``,
 
 	Run: nanoEnginePublish,
 }

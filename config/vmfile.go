@@ -70,7 +70,6 @@ func (c *VMfileConfig) IsSuspendable() bool {
 	if err := ParseConfig(AppDir+"/.vmfile", c); err != nil {
 		Fatal("[config/vmfile] ParseConfig() failed", err.Error())
 	}
-
 	return c.Suspendable
 }
 

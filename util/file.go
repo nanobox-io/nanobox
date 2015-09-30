@@ -81,8 +81,8 @@ func tarFile(path string, fi os.FileInfo, err error) error {
 	return nil
 }
 
-// Download
-func Download(path string, w io.Writer) {
+// FileDownload
+func FileDownload(path string, w io.Writer) {
 	res, err := http.Get(path)
 	if err != nil {
 		config.Fatal("[commands/update] http.Get() failed", err.Error())
@@ -97,8 +97,8 @@ func Download(path string, w io.Writer) {
 	w.Write(b)
 }
 
-// Progress
-func Progress(path string, w io.Writer) {
+// FileProgress
+func FileProgress(path string, w io.Writer) {
 
 	//
 	download, err := http.Get(path)

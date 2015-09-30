@@ -22,10 +22,8 @@ var bootstrapCmd = &cobra.Command{
 	Hidden: true,
 
 	Use:   "bootstrap",
-	Short: "Runs an engine's bootstrap script - downloads code & launches VM",
-	Long: `
-Description:
-  Runs an engine's bootstrap script - downloads code & launches VM`,
+	Short: "Runs an engine's bootstrap script - downloads code & launches a nanobox",
+	Long:  ``,
 
 	PreRun: bootVM,
 	Run:    nanoBootstrap,

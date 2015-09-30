@@ -76,6 +76,7 @@ var (
 //
 type Service struct {
 	CreatedAt time.Time
+	IP        string
 	Name      string
 	Password  string
 	Ports     []int
@@ -172,7 +173,7 @@ func bootVM(ccmd *cobra.Command, args []string) {
 
 	// vm is running - do nothing
 	case "running":
-		fmt.Printf(stylish.Bullet("Nanobox already running..."))
+		fmt.Printf(stylish.Bullet("Nanobox is already running"))
 		break
 
 	// vm is suspended - resume it
@@ -219,10 +220,15 @@ func saveVM(ccmd *cobra.Command, args []string) {
 		config.Lock.Close()
 	}
 
+	// this sleep is important because there needs to be enough time for the guest
+	// machine to register that our connection has been broken, before we ask if
+	// the machine can be suspended (w/o there is a race condition)
+	time.Sleep(1 * time.Second)
+
 	// if the CLI is running in background mode dont suspend the VM
 	if config.VMfile.IsMode("background") {
 		fmt.Printf("\n   Note: nanobox is running in background mode. To suspend it run 'nanobox down'\n\n")
-		os.Exit(0)
+		return
 	}
 
 	// check to see if the VM is able to be suspended
@@ -253,14 +259,11 @@ func saveVM(ccmd *cobra.Command, args []string) {
 
 	// suspend the machine if not active consoles are connected and the command was
 	// not run in background mode
-	switch {
-	case !config.VMfile.IsSuspendable():
+	if !config.VMfile.IsSuspendable() {
 		fmt.Printf("\n   Note: nanobox has NOT been suspended because there are other active console sessions.\n\n")
-		break
-	case config.VMfile.IsMode("background"):
-		fmt.Printf("\n   Note: nanobox is running in background mode. To suspend it run 'nanobox down'\n\n")
-		break
-	default:
-		nanoboxDown(nil, args)
+		return
 	}
+
+	//
+	nanoboxDown(nil, args)
 }
