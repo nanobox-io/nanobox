@@ -38,7 +38,7 @@ func nanoboxConsole(ccmd *cobra.Command, args []string) {
 
 	// PreRun: bootVM
 
-	fmt.Printf(`
+	msg := `
 +> Opening nanobox console:
 
 
@@ -55,17 +55,9 @@ func nanoboxConsole(ccmd *cobra.Command, args []string) {
                                   +
 
                   _  _ ____ _  _ ____ ___  ____ _  _
-                  |\ | |__| |\ | |  | |__) |  |  \/ 
+                  |\ | |__| |\ | |  | |__) |  |  \/
                   | \| |  | | \| |__| |__) |__| _/\_
-
- ------------------------------------------------------------------
- + You are in a virtual machine (vm)
- + Your local source code has been mounted into the vm, and changes
-   in either the vm or local will be mirrored.
- + If you run a server, access it at >> %s
- ------------------------------------------------------------------
- 
-`, config.Nanofile.Domain)
+`
 
 	//
 	v := url.Values{}
@@ -75,6 +67,14 @@ func nanoboxConsole(ccmd *cobra.Command, args []string) {
 
 	// if no args are passed run console as normal
 	case len(args) == 0:
+		msg += fmt.Sprintf(`
+------------------------------------------------------------------
++ You are in a virtual machine (vm)
++ Your local source code has been mounted into the vm, and changes
+ in either the vm or local will be mirrored.
++ If you run a server, access it at >> %s
+------------------------------------------------------------------
+	`, config.Nanofile.Domain)
 		break
 
 		// if 1 args is passed it's assumed to be a container to console directly into
@@ -88,8 +88,9 @@ func nanoboxConsole(ccmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	// add a check here to regex the fTunnel to make sure the format makes sense
+	fmt.Println(msg)
 
+	//
 	docker := &util.Docker{Params: v.Encode()}
 	docker.Run()
 

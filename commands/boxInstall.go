@@ -38,14 +38,14 @@ func boxInstall(ccmd *cobra.Command, args []string) {
 
 	//
 	if _, err := os.Stat(boxfile); err != nil {
-		fmt.Printf(stylish.Bullet("Installing virtual machine"))
+		fmt.Printf(stylish.Bullet("Installing VM image..."))
 
 		//
 		util.VMDownload()
 
 		// always replace the existing box with the new box
-		if err := exec.Command("vagrant", "box", "add", "--force", "--name", "nanobox/boot2docker", boxfile).Run(); err != nil {
-			config.Fatal("[commands/boxInstall] exec.Command() failed", err.Error())
+		if out, err := exec.Command("vagrant", "box", "add", "--force", "--name", "nanobox/boot2docker", boxfile).CombinedOutput(); err != nil {
+			config.Fatal(fmt.Sprintf("[commands/boxInstall] %s", err.Error()), string(out))
 		}
 	}
 }

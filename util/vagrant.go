@@ -111,13 +111,6 @@ func VagrantRun(cmd *exec.Cmd) error {
 		return err
 	}
 
-	// create a stdout pipe that will allow for scanning the output line-by-line;
-	// if needed a stderr pipe could also be created at some point
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		config.Fatal("[util/vagrant] cmd.StdoutPipe() failed", err.Error())
-	}
-
 	// start a goroutine that will act as an 'outputer' allowing us to add 'dots'
 	// to the end of each line (as these lines are a reduced version of the actual
 	// output there will be some delay between output)
@@ -160,14 +153,22 @@ func VagrantRun(cmd *exec.Cmd) error {
 		}
 	}()
 
+	// create a stdout pipe that will allow for scanning the output line-by-line;
+	// if needed a stderr pipe could also be created at some point
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return err
+	}
+
 	// scan the command output intercepting only 'important' lines of vagrant output'
 	// and tailoring their message so as to not flood the output.
 	// styled according to: http://nanodocs.gopagoda.io/engines/style-guide
-	scanner := bufio.NewScanner(stdout)
+	stdoutScanner := bufio.NewScanner(stdout)
 	go func() {
-		for scanner.Scan() {
+		for stdoutScanner.Scan() {
+
 			//
-			switch scanner.Text() {
+			switch stdoutScanner.Text() {
 			case fmt.Sprintf("==> %v: VirtualBox VM is already running.", config.Nanofile.Name):
 				continue
 			case fmt.Sprintf("==> %v: Importing base box 'nanobox/boot2docker'...", config.Nanofile.Name):
@@ -195,6 +196,20 @@ func VagrantRun(cmd *exec.Cmd) error {
 
 		// close the output channel once all lines of command output have been read
 		close(output)
+	}()
+
+	// create a stderr pipe that will write any error messages to the log
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		return err
+	}
+
+	// log any command errors to the log
+	stderrScanner := bufio.NewScanner(stderr)
+	go func() {
+		for stderrScanner.Scan() {
+			config.Log.Error(stderrScanner.Text())
+		}
 	}()
 
 	// start the command; we need this to 'fire and forget' so that we can manually

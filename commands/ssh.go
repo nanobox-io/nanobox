@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -52,15 +51,10 @@ func nanoSSH(ccmd *cobra.Command, args []string) {
 	cmd := exec.Command("vagrant", "ssh")
 
 	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	//
-	fmt.Printf(stylish.Bullet("running '%v'", strings.Trim(fmt.Sprint(cmd.Args), "[]")))
 
 	// start the command; we need this to 'fire and forget' so that we can manually
 	// capture and modify the commands output
-	if err := cmd.Run(); err != nil {
-		config.Fatal("[commands/ssh] cmd.Run() failed", err.Error())
+	if out, err := cmd.CombinedOutput(); err != nil {
+		config.Fatal(fmt.Sprintf("[commands/ssh] %s", err.Error()), string(out))
 	}
 }

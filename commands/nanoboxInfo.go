@@ -53,7 +53,7 @@ Nanobox Files  : %s
 
 	//
 	if len(services) >= 1 {
-		info := "///////// SERVICES /////////\n"
+		info := "\n///////// SERVICES /////////\n"
 
 		//
 		for _, service := range services {

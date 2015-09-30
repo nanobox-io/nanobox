@@ -18,21 +18,22 @@ import (
 // main
 func main() {
 
-	var err error
+	pass := true
 
 	// ensure vagrant is installed
-	err = exec.Command("vagrant", "-v").Run()
-	if err != nil {
-		fmt.Println("Nanobox requires 'Vagrant' (https://www.vagrantup.com/) to run. Please download and install it to continue.")
+	if err := exec.Command("vagrant", "-v").Run(); err != nil {
+		fmt.Println("Missing dependency 'Vagrant'. Please download and install it to continue (https://www.vagrantup.com/).")
+		pass = false
 	}
 
 	// ensure virtualbox is installed
-	err = exec.Command("vboxmanage", "-v").Run()
-	if err != nil {
-		fmt.Println("Nanobox requires 'Virtualbox' (https://www.virtualbox.org/wiki/Downloads) to run. Please download and install it to continue.")
+	if err := exec.Command("vboxmanage", "-v").Run(); err != nil {
+		fmt.Println("Missing dependency 'Virtualbox'. Please download and install it to continue (https://www.virtualbox.org/wiki/Downloads).")
+		pass = false
 	}
 
-	if err != nil {
+	// if a dependency check fails, exit
+	if !pass {
 		return
 	}
 

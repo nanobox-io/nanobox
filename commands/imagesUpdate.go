@@ -26,8 +26,9 @@ var imagesUpdateCmd = &cobra.Command{
 Description:
   Updates the nanobox docker images`,
 
-	PreRun: bootVM,
-	Run:    imagesUpdate,
+	PreRun:  bootVM,
+	Run:     imagesUpdate,
+	PostRun: saveVM,
 }
 
 // imagesUpdate
@@ -51,7 +52,12 @@ func imagesUpdate(ccmd *cobra.Command, args []string) {
 	switch update.Status {
 
 	//
-	case "complete", "errored":
+	case "complete":
 		break
+
+	case "errored":
+		fmt.Printf("Nanobox failed to update images")
 	}
+
+	// PostRun: saveVM
 }

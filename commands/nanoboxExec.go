@@ -76,8 +76,7 @@ func nanoboxExec(ccmd *cobra.Command, args []string) {
 		v.Set("cmd", strings.Join(args[1:], " "))
 	}
 
-	// add a check here to regex the fTunnel to make sure the format makes sense
-
+	//
 	docker := &util.Docker{Params: v.Encode()}
 	docker.Run()
 

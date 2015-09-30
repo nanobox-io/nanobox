@@ -23,14 +23,11 @@ import (
 // 	//
 // 	cmd := exec.Command(command)
 //
-// 	// connect standard in/outputs
 // 	cmd.Stdin = os.Stdin
-// 	cmd.Stdout = os.Stdout
-// 	cmd.Stderr = os.Stderr
 //
 // 	// run command
-// 	if err := cmd.Run(); err != nil {
-// 		config.Fatal("[utils/exec] cmd.Run() failed", err.Error())
+// 	if out, err := cmd.CombinedOutput(); err != nil {
+// 		config.Fatal(fmt.Sprintf("[utils/exec] %s", err.Error()), string(out))
 // 	}
 // }
 
@@ -41,13 +38,10 @@ func SudoExec(command, msg string) {
 	//
 	cmd := exec.Command("/bin/sh", "-c", fmt.Sprintf("sudo %v %v", os.Args[0], command))
 
-	// connect standard in/outputs
 	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
 
 	// run command
-	if err := cmd.Run(); err != nil {
-		config.Fatal("[utils/exec] scmd.Run() failed", err.Error())
+	if out, err := cmd.CombinedOutput(); err != nil {
+		config.Fatal(fmt.Sprintf("[utils/exec] %s", err.Error()), string(out))
 	}
 }

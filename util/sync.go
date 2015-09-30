@@ -10,9 +10,9 @@ package util
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
 
 	"github.com/nanobox-io/golang-mist"
-	api "github.com/nanobox-io/nanobox-api-client"
 	"github.com/nanobox-io/nanobox-cli/config"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 )
@@ -54,16 +54,12 @@ func (s *Sync) Run(opts []string) {
 	}
 	defer client.Close()
 
-	Printv(stylish.Bullet("Subscribing to mist..."), s.Verbose)
-
 	// subscribe to job updates
 	jobTags := []string{"job", s.Model}
 	if err := client.Subscribe(jobTags); err != nil {
 		fmt.Printf(stylish.ErrBullet("Nanobox failed to subscribe to app logs. Your sync will continue as normal, and log output is available on your dashboard."))
 	}
 	defer client.Unsubscribe(jobTags)
-
-	Printv(stylish.SubBullet("- Subscribed to app logs"), s.Verbose)
 
 	logLevel := "info"
 	if s.Verbose {
@@ -77,13 +73,13 @@ func (s *Sync) Run(opts []string) {
 	}
 	defer client.Unsubscribe(logTags)
 
-	Printv(stylish.SubBullet("- Subscribed to debug logs"), s.Verbose)
-
 	//
 	// issue a sync
-	if err := api.DoRawRequest(nil, "POST", s.Path, nil, nil); err != nil {
+	res, err := http.Post(s.Path, "text/plain", nil)
+	if err != nil {
 		config.Fatal("[utils/sync] api.DoRawRequest() failed", err.Error())
 	}
+	defer res.Body.Close()
 
 	// handle
 stream:

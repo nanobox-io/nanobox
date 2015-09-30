@@ -40,7 +40,7 @@ func init() {
 // nanoboxDestroy
 func nanoboxDestroy(ccmd *cobra.Command, args []string) {
 
-	// if the command is being run with the "remove" flag, it means an entry needs
+	// if the command is being run with --remove-entry, it means an entry needs
 	// to be removed from the hosts file and execution yielded back to the parent
 	if fRemoveEntry {
 		util.HostfileRemoveDomain()
@@ -69,6 +69,4 @@ func nanoboxDestroy(ccmd *cobra.Command, args []string) {
 
 	// attempt to remove the entry regardless of whether its there or not
 	util.SudoExec("destroy --remove-entry", fmt.Sprintf("Removing %s domain from /etc/hosts", config.Nanofile.Domain))
-
-	// PostRun: saveVM
 }

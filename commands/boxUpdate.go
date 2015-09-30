@@ -34,7 +34,7 @@ func boxUpdate(ccmd *cobra.Command, args []string) {
 
 	// if the local md5 doesn't match remote md5, download the box
 	if util.VMLocalMD5() != util.VMRemoteMD5() {
-		fmt.Printf(stylish.Bullet("Updating virtual machine"))
+		fmt.Printf(stylish.Bullet("Updating VM image..."))
 		util.VMDownload()
 	}
 }

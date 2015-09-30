@@ -263,10 +263,10 @@ func saveVM(ccmd *cobra.Command, args []string) {
 	// not run in background mode
 	switch {
 	case !config.VMfile.IsSuspendable():
-		fmt.Printf("\n   Note: The nanobox VM has not been suspended because there are other active console sessions.\n\n")
+		fmt.Printf("\n\n   Note: The nanobox VM has not been suspended because there are other active console sessions.\n\n")
 		break
 	case config.VMfile.IsMode("background"):
-		fmt.Printf(stylish.Bullet("\n   Note: the nanobox VM not suspended (running in background). To suspend the VM run 'nanobox down'\n\n"))
+		fmt.Printf(stylish.Bullet("\n\n   Note: the nanobox VM not suspended (running in background). To suspend the VM run 'nanobox down'\n\n"))
 		break
 	default:
 		nanoboxDown(nil, args)
