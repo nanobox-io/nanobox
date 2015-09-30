@@ -148,6 +148,7 @@ func init() {
 
 	// 'images' subcommand
 	NanoboxCmd.AddCommand(imagesCmd)
+	imagesCmd.AddCommand(imagesUpdateCmd)
 
 	// 'production' subcommand
 	NanoboxCmd.AddCommand(productionCmd)

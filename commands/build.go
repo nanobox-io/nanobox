@@ -65,6 +65,12 @@ func nanoBuild(ccmd *cobra.Command, args []string) {
 	// errored
 	case "errored":
 
+		fmt.Println(`
+! AN ERROR PREVENTED NANOBOX FROM BUILDING YOUR ENVIRONMENT !
+- View the output above to diagnose the source of the problem
+- You can also retry with --verbose for more detailed output
+`)
+
 		// this could probably be better
 		if fWatch {
 			config.VMfile.ModeIs("background")

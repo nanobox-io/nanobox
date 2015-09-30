@@ -74,12 +74,18 @@ func nanoDeploy(ccmd *cobra.Command, args []string) {
 	// if a deploy ever errors, remove the deployed file; don't need to handle
 	// an error here because it just means the file already doesn't exist
 	case "errored":
-		config.VMfile.DeployedIs(false)
-
+		fmt.Println(`
+! AN ERROR PREVENTED NANOBOX FROM BUILDING YOUR ENVIRONMENT !
+- View the output above to diagnose the source of the problem
+- You can also retry with --verbose for more detailed output
+`)
 		// this could probably be better
 		if fWatch {
 			config.VMfile.Mode = "background"
 		}
+
+		// deploy failed
+		config.VMfile.DeployedIs(false)
 
 		//
 		nanoboxDown(nil, args)

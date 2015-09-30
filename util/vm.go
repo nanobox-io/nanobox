@@ -91,6 +91,16 @@ func VMLocalMD5() string {
 // VMDownload
 func VMDownload() {
 
+	// download md5 file
+	md5, err := os.Create(config.Root + "/nanobox-boot2docker.md5")
+	if err != nil {
+		config.Fatal("[commands/update] os.Create() failed", err.Error())
+	}
+	defer md5.Close()
+
+	// download the cli md5
+	Download("https://s3.amazonaws.com/tools.nanobox.io/cli/nanobox.md5", md5)
+
 	//
 	box, err := os.Create(config.Root + "/nanobox-boot2docker.box")
 	if err != nil {

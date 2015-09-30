@@ -17,7 +17,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox-cli/config"
-	"github.com/nanobox-io/nanobox-cli/util"
+	// "github.com/nanobox-io/nanobox-cli/util"
 	// "github.com/nanobox-io/nanobox-golang-stylish"
 )
 
@@ -41,11 +41,6 @@ func init() {
 func nanoboxRun(ccmd *cobra.Command, args []string) {
 
 	// PreRun: bootVM
-
-	// if the vm is 'new' update images
-	if util.VagrantStatus() == "not created" || !config.VMfile.HasDeployed() {
-		imagesUpdate(nil, args)
-	}
 
 	fRun = true
 	nanoDeploy(nil, args)

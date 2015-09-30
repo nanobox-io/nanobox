@@ -9,6 +9,7 @@ package commands
 
 //
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -17,7 +18,7 @@ import (
 
 	"github.com/nanobox-io/nanobox-cli/config"
 	"github.com/nanobox-io/nanobox-cli/util"
-	// "github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
 //
@@ -37,16 +38,7 @@ func boxInstall(ccmd *cobra.Command, args []string) {
 
 	//
 	if _, err := os.Stat(boxfile); err != nil {
-
-		// download md5 file
-		md5, err := os.Create(config.Root + "/nanobox-boot2docker.md5")
-		if err != nil {
-			config.Fatal("[commands/update] os.Create() failed", err.Error())
-		}
-		defer md5.Close()
-
-		// download the cli md5
-		util.Download("https://s3.amazonaws.com/tools.nanobox.io/cli/nanobox.md5", md5)
+		fmt.Printf(stylish.Bullet("Installing virtual machine"))
 
 		//
 		util.VMDownload()

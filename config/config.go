@@ -23,6 +23,8 @@ import (
 
 //
 const (
+	VERSION = "0.13.3"
+
 	SERVER_PORT = ":1757"
 	MIST_PORT   = ":1445"
 	LOGTAP_PORT = ":6361"

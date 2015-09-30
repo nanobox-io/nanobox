@@ -37,7 +37,6 @@ func init() {
 	// check for a ~/.nanobox/.auth file and create one if it's not found
 	authfile = filepath.Clean(config.Root + "/.auth")
 	if _, err := os.Stat(authfile); err != nil {
-		fmt.Printf(stylish.Bullet("Creating %s directory", authfile))
 		f, err := os.Create(authfile)
 		if err != nil {
 			config.Fatal("[auth/auth] os.Create() failed", err.Error())
@@ -136,5 +135,5 @@ func saveCredentials(userid, authtoken string) error {
 	creds.Authtoken = authtoken
 
 	//
-	return ioutil.WriteFile(authfile, []byte(fmt.Sprintf("user_slug: %v\nauth_token: %v", userid, authtoken)), 0755)
+	return ioutil.WriteFile(authfile, []byte(fmt.Sprintf("user_slug: %v\nauth_token: %v", userid, authtoken)), 0644)
 }

@@ -62,6 +62,9 @@ func nanoCreate(ccmd *cobra.Command, args []string) {
 		config.Fatal("[commands/create] util.VagrantRun() failed", err.Error())
 	}
 
+	// after the machine boots, update the docker images
+	imagesUpdate(nil, args)
+
 	//
 	// open the /etc/hosts file for scanning...
 	f, err := os.Open("/etc/hosts")

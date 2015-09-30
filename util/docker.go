@@ -24,7 +24,7 @@ import (
 	"github.com/go-fsnotify/fsnotify"
 
 	"github.com/nanobox-io/nanobox-cli/config"
-	"github.com/nanobox-io/nanobox-golang-stylish"
+	// "github.com/nanobox-io/nanobox-golang-stylish"
 )
 
 // run satisfies the Command interface
@@ -113,7 +113,12 @@ func handleFileEvent(event *fsnotify.Event, err error) {
 	//
 	if err != nil {
 		if _, ok := err.(syscall.Errno); ok {
-			fmt.Printf(stylish.ErrBullet("Insert error message for file error here"))
+			fmt.Printf(`
+! WARNING !
+Failed to watch files, max file descriptor limit reached. Nanobox will not
+be able to propagate filesystem events to the virtual machine. Consider
+increasing your max file descriptor limit to re-enable this functionality.
+`)
 		}
 
 		// need to log this error, or print it out after or something

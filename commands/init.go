@@ -215,7 +215,7 @@ Vagrant.configure(2) do |config|
 end`, config.Nanofile.Name, config.Nanofile.Domain, network, synced_folders, provider, devmode)
 
 	// write the Vagrantfile
-	if err := ioutil.WriteFile(config.AppDir+"/Vagrantfile", []byte(vagrantfile), 0755); err != nil {
+	if err := ioutil.WriteFile(config.AppDir+"/Vagrantfile", []byte(vagrantfile), 0644); err != nil {
 		config.Fatal("[commands/init] ioutil.WriteFile() failed", err.Error())
 	}
 }

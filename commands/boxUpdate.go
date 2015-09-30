@@ -9,11 +9,12 @@ package commands
 
 //
 import (
+	"fmt"
 	"github.com/spf13/cobra"
 
 	// "github.com/nanobox-io/nanobox-cli/config"
 	"github.com/nanobox-io/nanobox-cli/util"
-	// "github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
 //
@@ -33,6 +34,7 @@ func boxUpdate(ccmd *cobra.Command, args []string) {
 
 	// if the local md5 doesn't match remote md5, download the box
 	if util.VMLocalMD5() != util.VMRemoteMD5() {
+		fmt.Printf(stylish.Bullet("Updating virtual machine"))
 		util.VMDownload()
 	}
 }
