@@ -24,10 +24,8 @@ var sshCmd = &cobra.Command{
 	Hidden: true,
 
 	Use:   "ssh",
-	Short: "SSH into the nanobox VM",
-	Long: `
-Description:
-  SSHes into the nanobox VM by issuing a "vagrant ssh"`,
+	Short: "SSH into the nanobox",
+	Long:  ``,
 
 	PreRun: bootVM,
 	Run:    nanoSSH,
@@ -38,7 +36,7 @@ func nanoSSH(ccmd *cobra.Command, args []string) {
 
 	// PreRun: bootVM
 
-	fmt.Printf(stylish.Bullet("SSHing into nanobox VM..."))
+	fmt.Printf(stylish.Bullet("SSHing into nanobox..."))
 
 	// NOTE: this command is run manually (vs util.VagrantRun) because the output
 	// needs to be hooked up a little different to accomodate Stdin

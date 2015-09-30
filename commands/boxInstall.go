@@ -38,7 +38,7 @@ func boxInstall(ccmd *cobra.Command, args []string) {
 
 	//
 	if _, err := os.Stat(boxfile); err != nil {
-		fmt.Printf(stylish.Bullet("Installing VM image..."))
+		fmt.Printf(stylish.Bullet("Installing nanobox image..."))
 
 		//
 		util.VMDownload()

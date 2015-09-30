@@ -22,10 +22,8 @@ import (
 //
 var nanoboxDownCmd = &cobra.Command{
 	Use:   "down",
-	Short: "Suspends the nanobox VM",
-	Long: `
-Description:
-  Suspends the nanobox VM by issuing a "vagrant suspend"`,
+	Short: "Suspends the nanobox",
+	Long:  ``,
 
 	PreRun: nanoInit,
 	Run:    nanoboxDown,
@@ -37,7 +35,7 @@ func nanoboxDown(ccmd *cobra.Command, args []string) {
 	// PreRun: nanoInit
 
 	//
-	fmt.Printf("\n%s", stylish.Bullet("Suspending nanobox VM..."))
+	fmt.Printf("\n%s", stylish.Bullet("Suspending nanobox..."))
 	if err := util.VagrantRun(exec.Command("vagrant", "suspend")); err != nil {
 		config.Fatal("[commands/suspend] util.VagrantRun() failed", err.Error())
 	}

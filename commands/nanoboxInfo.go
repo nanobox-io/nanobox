@@ -16,13 +16,13 @@ import (
 	api "github.com/nanobox-io/nanobox-api-client"
 	"github.com/nanobox-io/nanobox-cli/config"
 	"github.com/nanobox-io/nanobox-cli/util"
-	"github.com/nanobox-io/nanobox-golang-stylish"
+	// "github.com/nanobox-io/nanobox-golang-stylish"
 )
 
 //
 var nanoboxInfoCmd = &cobra.Command{
 	Use:   "info",
-	Short: "Displays information about your nanobox app and VM",
+	Short: "Displays information about the nanobox and your app",
 	Long:  ``,
 
 	Run: nanoboxInfo,
@@ -36,7 +36,7 @@ func nanoboxInfo(ccmd *cobra.Command, args []string) {
 	fmt.Printf(`
 Local Domain   : %s
 App Name       : %s
-VM state       : %s
+Nanobox state  : %s
 Nanobox Files  : %s
 
 `, config.Nanofile.Domain, config.Nanofile.Name, status, config.AppDir)
@@ -49,7 +49,7 @@ Nanobox Files  : %s
 
 	//
 	if err := api.DoRawRequest(&services, "GET", fmt.Sprintf("%s/services", config.ServerURL), nil, nil); err != nil {
-		fmt.Printf(stylish.Error("failed to get services", fmt.Sprintf("nanobox was unable to get services information, and failed with the following error: %v", err)))
+		panic(err)
 	}
 
 	//
@@ -79,9 +79,3 @@ Nanobox Files  : %s
 		fmt.Println(info)
 	}
 }
-
-// ///////// ENV VARS /////////
-//
-// somevar : "nothing"
-// var1    : "hello"
-// var2    : "world"

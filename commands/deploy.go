@@ -26,12 +26,8 @@ var deployCmd = &cobra.Command{
 	Hidden: true,
 
 	Use:   "deploy",
-	Short: "Issues a deploy to the nanobox VM",
-	Long: `
-Description:
-  Issues a deploy to the nanobox VM
-
-  -f, --force[=false]: Clears cached libraries the project might use`,
+	Short: "Deploys code to the nanobox",
+	Long:  ``,
 
 	PreRun: bootVM,
 	Run:    nanoDeploy,

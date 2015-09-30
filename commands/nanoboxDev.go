@@ -18,7 +18,7 @@ import (
 //
 var nanoboxDevCmd = &cobra.Command{
 	Use:   "dev",
-	Short: "Starts the nanobox VM, provisions app, & opens an interactive terminal",
+	Short: "Starts the nanobox, provisions app, & opens an interactive terminal",
 	Long:  ``,
 
 	PreRun:  bootVM,

@@ -30,10 +30,8 @@ var logCmd = &cobra.Command{
 	Hidden: true,
 
 	Use:   "log",
-	Short: "Provides the last 100 lines of historical log output by default.",
-	Long: `
-Description:
-  Provides the last 100 lines of historical log output by default.`,
+	Short: "Provides the last 100 lines of historical log output (default).",
+	Long:  ``,
 
 	Run: nanoLog,
 }

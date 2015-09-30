@@ -24,10 +24,8 @@ import (
 //
 var nanoboxExecCmd = &cobra.Command{
 	Use:   "exec",
-	Short: "Runs a command from inside your app on the nanobox VM",
-	Long: `
-Description:
-  Runs a command from inside your app on the nanobox VM`,
+	Short: "Runs a command from inside your app on the nanobox",
+	Long:  ``,
 
 	PreRun:  bootVM,
 	Run:     nanoboxExec,

@@ -23,10 +23,8 @@ import (
 //
 var nanoboxConsoleCmd = &cobra.Command{
 	Use:   "console",
-	Short: "Opens an interactive terminal from inside your app on the nanobox VM",
-	Long: `
-Description:
-  Opens an interactive terminal from inside your app on the nanobox VM`,
+	Short: "Opens an interactive terminal from inside your app on the nanobox",
+	Long:  ``,
 
 	PreRun:  bootVM,
 	Run:     nanoboxConsole,
@@ -38,7 +36,7 @@ func nanoboxConsole(ccmd *cobra.Command, args []string) {
 
 	// PreRun: bootVM
 
-	msg := `+> Opening nanobox console:
+	msg := `+> Opening a nanobox console:
 
 
                                  **

@@ -24,10 +24,8 @@ var buildCmd = &cobra.Command{
 	Hidden: true,
 
 	Use:   "build",
-	Short: "Rebuilds/compiles your project",
-	Long: `
-Description:
-  Rebuilds/compiles your project`,
+	Short: "Rebuilds/compiles your app",
+	Long:  ``,
 
 	PreRun: bootVM,
 	Run:    nanoBuild,

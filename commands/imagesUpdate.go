@@ -22,9 +22,7 @@ import (
 var imagesUpdateCmd = &cobra.Command{
 	Use:   "update",
 	Short: "Updates the nanobox docker images",
-	Long: `
-Description:
-  Updates the nanobox docker images`,
+	Long:  ``,
 
 	PreRun:  bootVM,
 	Run:     imagesUpdate,
@@ -36,7 +34,7 @@ func imagesUpdate(ccmd *cobra.Command, args []string) {
 
 	// PreRun: bootVM
 
-	fmt.Printf(stylish.Bullet("Updating docker images..."))
+	fmt.Printf(stylish.Bullet("Updating nanobox docker images..."))
 
 	//
 	update := util.Sync{
@@ -56,7 +54,7 @@ func imagesUpdate(ccmd *cobra.Command, args []string) {
 		break
 
 	case "errored":
-		fmt.Printf("Nanobox failed to update images")
+		fmt.Printf("Nanobox failed to update docker images")
 	}
 
 	// PostRun: saveVM

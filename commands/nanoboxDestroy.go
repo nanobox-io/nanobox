@@ -23,10 +23,8 @@ import (
 //
 var nanoboxDestroyCmd = &cobra.Command{
 	Use:   "destroy",
-	Short: "Destroys the nanobox VM",
-	Long: `
-Description:
-  Destroys the nanobox VM by issuing a "vagrant destroy"`,
+	Short: "Destroys the nanobox",
+	Long:  ``,
 
 	Run: nanoboxDestroy,
 }
@@ -51,7 +49,7 @@ func nanoboxDestroy(ccmd *cobra.Command, args []string) {
 	// destroy the vm; this needs to happen before cleaning up the app to ensure
 	// there is a Vagrantfile to run the command with (otherwise it will just get
 	// re-created)
-	fmt.Printf(stylish.Bullet("Destroying nanobox VM..."))
+	fmt.Printf(stylish.Bullet("Destroying nanobox..."))
 	if err := util.VagrantRun(exec.Command("vagrant", "destroy", "--force")); err != nil {
 
 		// dont care if the project no longer exists... thats what we're doing anyway

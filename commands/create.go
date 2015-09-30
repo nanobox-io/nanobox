@@ -27,10 +27,8 @@ var createCmd = &cobra.Command{
 	Hidden: true,
 
 	Use:   "create",
-	Short: "Runs 'nanobox init', then boots the nanobox VM",
-	Long: `
-Description:
-  Runs 'nanobox init', then boots the nanobox VM by issuing a "vagrant up"`,
+	Short: "Creates a new nanobox",
+	Long:  ``,
 
 	PreRun: nanoInit,
 	Run:    nanoCreate,
@@ -57,7 +55,7 @@ func nanoCreate(ccmd *cobra.Command, args []string) {
 
 	//
 	// boot the vm
-	fmt.Printf(stylish.Bullet("Creating nanobox VM"))
+	fmt.Printf(stylish.Bullet("Creating a nanobox"))
 	if err := util.VagrantRun(exec.Command("vagrant", "up")); err != nil {
 		config.Fatal("[commands/create] util.VagrantRun() failed", err.Error())
 	}

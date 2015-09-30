@@ -24,10 +24,8 @@ var resumeCmd = &cobra.Command{
 	Hidden: true,
 
 	Use:   "resume",
-	Short: "Resumes the suspended nanobox VM",
-	Long: `
-Description:
-  Resumes the halted/suspended nanobox VM by issuing a "vagrant resume"`,
+	Short: "Resumes the nanobox",
+	Long:  ``,
 
 	PreRun: nanoInit,
 	Run:    nanoResume,
@@ -38,7 +36,7 @@ func nanoResume(ccmd *cobra.Command, args []string) {
 
 	// PreRun: nanoInit
 
-	fmt.Printf(stylish.Bullet("Resuming nanobox VM..."))
+	fmt.Printf(stylish.Bullet("Resuming nanobox..."))
 	if err := util.VagrantRun(exec.Command("vagrant", "resume")); err != nil {
 		config.Fatal("[commands/resume] util.VagrantRun() failed", err.Error())
 	}

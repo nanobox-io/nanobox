@@ -26,11 +26,7 @@ var initCmd = &cobra.Command{
 
 	Use:   "init",
 	Short: "Creates a nanobox-flavored Vagrantfile",
-	Long: `
-Description:
-  Creates a nanobox-flavored Vagrantfile
-
-  -f, --force[=false]: Generate a fresh Vagrantfile (overriding the existing Vagrantfile)`,
+	Long:  ``,
 
 	Run: nanoInit,
 }
