@@ -38,8 +38,7 @@ func nanoboxConsole(ccmd *cobra.Command, args []string) {
 
 	// PreRun: bootVM
 
-	msg := `
-+> Opening nanobox console:
+	msg := `+> Opening nanobox console:
 
 
                                  **
