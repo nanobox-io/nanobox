@@ -75,8 +75,8 @@ func nanoboxExec(ccmd *cobra.Command, args []string) {
 	}
 
 	//
-	docker := &util.Docker{Params: v.Encode()}
-	docker.Run()
+	server := &util.Server{Params: v.Encode()}
+	server.Run()
 
 	// PostRun: saveVM
 }

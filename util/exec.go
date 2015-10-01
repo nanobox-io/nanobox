@@ -17,21 +17,7 @@ import (
 	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
-// Exec
-// func Exec(command string) {
-//
-// 	//
-// 	cmd := exec.Command(command)
-//
-// 	cmd.Stdin = os.Stdin
-//
-// 	// run command
-// 	if out, err := cmd.CombinedOutput(); err != nil {
-// 		config.Fatal(fmt.Sprintf("[utils/exec] %s", err.Error()), string(out))
-// 	}
-// }
-
-// SudoExec
+// SudoExec runs a command as sudo
 func SudoExec(command, msg string) {
 	fmt.Printf(stylish.Bullet(msg))
 
@@ -39,9 +25,11 @@ func SudoExec(command, msg string) {
 	cmd := exec.Command("/bin/sh", "-c", fmt.Sprintf("sudo %v %v", os.Args[0], command))
 
 	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 
 	// run command
-	if out, err := cmd.CombinedOutput(); err != nil {
-		config.Fatal(fmt.Sprintf("[utils/exec] %s", err.Error()), string(out))
+	if err := cmd.Run(); err != nil {
+		config.Fatal("[utils/exec]", err.Error())
 	}
 }

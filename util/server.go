@@ -28,12 +28,12 @@ import (
 )
 
 // run satisfies the Command interface
-type Docker struct {
+type Server struct {
 	Params string
 }
 
 // Run
-func (d *Docker) Run() {
+func (d *Server) Run() {
 
 	// begin watching for changes to the project
 	go Watch(config.CWDir, handleFileEvent)

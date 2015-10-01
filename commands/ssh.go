@@ -55,6 +55,6 @@ func nanoSSH(ccmd *cobra.Command, args []string) {
 	// start the command; we need this to 'fire and forget' so that we can manually
 	// capture and modify the commands output
 	if err := cmd.Run(); err != nil {
-		config.Fatal(fmt.Sprintf("[commands/ssh]"), err.Error())
+		config.Fatal("[commands/ssh]", err.Error())
 	}
 }

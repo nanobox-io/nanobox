@@ -44,8 +44,8 @@ func boxInstall(ccmd *cobra.Command, args []string) {
 		util.VMDownload()
 
 		// always replace the existing box with the new box
-		if out, err := exec.Command("vagrant", "box", "add", "--force", "--name", "nanobox/boot2docker", boxfile).CombinedOutput(); err != nil {
-			config.Fatal(fmt.Sprintf("[commands/boxInstall] %s", err.Error()), string(out))
+		if err := exec.Command("vagrant", "box", "add", "--force", "--name", "nanobox/boot2docker", boxfile).Run(); err != nil {
+			config.Fatal("[commands/boxInstall]", err.Error())
 		}
 	}
 }

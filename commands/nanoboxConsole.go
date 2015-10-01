@@ -88,8 +88,8 @@ func nanoboxConsole(ccmd *cobra.Command, args []string) {
 	fmt.Println(msg)
 
 	//
-	docker := &util.Docker{Params: v.Encode()}
-	docker.Run()
+	server := &util.Server{Params: v.Encode()}
+	server.Run()
 
 	// PostRun: saveVM
 }
