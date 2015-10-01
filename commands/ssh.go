@@ -49,10 +49,12 @@ func nanoSSH(ccmd *cobra.Command, args []string) {
 	cmd := exec.Command("vagrant", "ssh")
 
 	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 
 	// start the command; we need this to 'fire and forget' so that we can manually
 	// capture and modify the commands output
-	if out, err := cmd.CombinedOutput(); err != nil {
-		config.Fatal(fmt.Sprintf("[commands/ssh] %s", err.Error()), string(out))
+	if err := cmd.Run(); err != nil {
+		config.Fatal(fmt.Sprintf("[commands/ssh]"), err.Error())
 	}
 }
