@@ -192,6 +192,7 @@ Vagrant.configure(2) do |config|
 	  nanobox.vm.synced_folder ".", "/vagrant", disabled: true
 
 	  # add nanobox shared folders
+    config.vm.synced_folder "~/.ssh", "/mnt/ssh"
 	  %s
 
 
