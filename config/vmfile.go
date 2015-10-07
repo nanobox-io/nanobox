@@ -5,11 +5,10 @@
 // at http://mozilla.org/MPL/2.0/.
 //
 
+//
 package config
 
-import (
-	"os"
-)
+import "os"
 
 // ParseVMfile
 func ParseVMfile() *VMfileConfig {

@@ -10,12 +10,11 @@ package commands
 //
 import (
 	"fmt"
-	"os/exec"
 
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox-cli/config"
-	"github.com/nanobox-io/nanobox-cli/util"
+	"github.com/nanobox-io/nanobox-cli/util/vagrant"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
@@ -27,17 +26,17 @@ var reloadCmd = &cobra.Command{
 	Short: "Reloads the nanobox",
 	Long:  ``,
 
-	PreRun: nanoInit,
-	Run:    nanoReload,
+	PreRun: initialize,
+	Run:    reload,
 }
 
-// nanoReload runs 'vagrant reload --provision'
-func nanoReload(ccmd *cobra.Command, args []string) {
+// reload runs 'vagrant reload --provision'
+func reload(ccmd *cobra.Command, args []string) {
 
-	// PreRun: nanoInit
+	// PreRun: initialize
 
 	fmt.Printf(stylish.Bullet("Reloading nanobox..."))
-	if err := util.VagrantRun(exec.Command("vagrant", "reload", "--provision")); err != nil {
-		config.Fatal("[commands/reload] util.VagrantRun() failed", err.Error())
+	if err := vagrant.Reload(); err != nil {
+		config.Fatal("[commands/reload] failed - ", err.Error())
 	}
 }

@@ -5,6 +5,7 @@
 // at http://mozilla.org/MPL/2.0/.
 //
 
+//
 package util
 
 import (

@@ -5,12 +5,12 @@
 // at http://mozilla.org/MPL/2.0/.
 //
 
+//
 package config
 
 import (
 	"fmt"
 	"io/ioutil"
-	"net"
 	"os"
 	"path/filepath"
 	"sync"
@@ -23,7 +23,7 @@ import (
 
 //
 const (
-	VERSION = "0.13.9"
+	VERSION = "0.14.0"
 
 	SERVER_PORT = ":1757"
 	MIST_PORT   = ":1445"
@@ -34,8 +34,6 @@ const (
 var (
 	err   error //
 	mutex *sync.Mutex
-
-	Lock net.Conn //
 
 	//
 	AppDir string // the path to the application (~.nanobox/apps/<app>)
@@ -53,6 +51,14 @@ var (
 	ServerURL string // nanobox-server host:port combo (IP:1757) (http)
 	MistURI   string // mist's host:port combo (IP:1445)
 	LogtapURI string // logtap's host:port combo (IP:6361)
+
+	// flags
+	Background bool   //
+	Devmode    bool   //
+	Force      bool   //
+	Verbose    bool   //
+	Silence    bool   //
+	LogLevel   string //
 )
 
 //
@@ -60,12 +66,9 @@ type (
 
 	// BoxfileConfig represents all available/expected Boxfile configurable options
 	BoxfileConfig struct {
-		Build Build //
-	}
-
-	// Build represents a possible node in the Boxfile with it's own set of options
-	Build struct {
-		Engine string `json:"engine"` //
+		Build struct {
+			Engine string `json:"engine"`
+		}
 	}
 
 	// NanofileConfig represents all available/expected .nanofile configurable options
@@ -91,6 +94,9 @@ type (
 
 //
 func init() {
+
+	// default log level
+	LogLevel = "info"
 
 	// set the current working directory first, as it's used in other steps of the
 	// configuration process

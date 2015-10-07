@@ -11,14 +11,14 @@ package commands
 import (
 	"fmt"
 	"net/url"
-	"os"
 	"strconv"
 
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox-cli/config"
-	"github.com/nanobox-io/nanobox-cli/util"
-	// "github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/nanobox-io/nanobox-cli/util/server"
+	"github.com/nanobox-io/nanobox-cli/util/server/mist"
+	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
 //
@@ -29,8 +29,9 @@ var deployCmd = &cobra.Command{
 	Short: "Deploys code to the nanobox",
 	Long:  ``,
 
-	PreRun: bootVM,
-	Run:    nanoDeploy,
+	PreRun:  boot,
+	Run:     deploy,
+	PostRun: save,
 }
 
 //
@@ -38,53 +39,36 @@ func init() {
 	deployCmd.Flags().BoolVarP(&fRun, "run", "", false, "Creates your app environment w/o webs or workers")
 }
 
-// nanoDeploy
-func nanoDeploy(ccmd *cobra.Command, args []string) {
+// deploy
+func deploy(ccmd *cobra.Command, args []string) {
 
-	// PreRun: bootVM
+	// PreRun: boot
 
-	//
+	fmt.Printf(stylish.Bullet("Deploying codebase..."))
+
+	// stream deploy output
+	go mist.Stream([]string{"log", "deploy"}, mist.PrintLogStream)
+
+	// listen for status updates
+	done := make(chan struct{})
+	go func() {
+		if err := mist.Listen([]string{"job", "deploy"}, mist.HandleDeployStream); err != nil {
+			config.Fatal("[commands/nanoBuild] failed - ", err.Error())
+		}
+		close(done)
+	}()
+
 	v := url.Values{}
-	v.Add("reset", strconv.FormatBool(fForce))
+	v.Add("reset", strconv.FormatBool(config.Force))
 	v.Add("run", strconv.FormatBool(fRun))
 
-	//
-	deploy := util.Sync{
-		Model:   "deploy",
-		Path:    fmt.Sprintf("%s/deploys?%v", config.ServerURL, v.Encode()),
-		Verbose: fVerbose,
+	// run a deploy
+	if err := server.Deploy(v.Encode()); err != nil {
+		config.Fatal("[commands/nanoDeploy] failed - ", err.Error())
 	}
 
-	//
-	deploy.Run(args)
+	// wait for a status update (blocking)
+	<-done
 
-	//
-	switch deploy.Status {
-
-	// for each successful deploy create/update the .nanobox/apps/<app>/.deployed
-	// file
-	case "complete":
-		config.VMfile.DeployedIs(true)
-		break
-
-	// if a deploy ever errors, remove the deployed file; don't need to handle
-	// an error here because it just means the file already doesn't exist
-	case "errored":
-		fmt.Println(`
-! AN ERROR PREVENTED NANOBOX FROM BUILDING YOUR ENVIRONMENT !
-- View the output above to diagnose the source of the problem
-- You can also retry with --verbose for more detailed output
-`)
-		// this could probably be better
-		if fWatch {
-			config.VMfile.Mode = "background"
-		}
-
-		// deploy failed
-		config.VMfile.DeployedIs(false)
-
-		//
-		nanoboxDown(nil, args)
-		os.Exit(1)
-	}
+	// PostRun: save
 }

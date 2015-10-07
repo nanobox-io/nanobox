@@ -10,12 +10,11 @@ package commands
 //
 import (
 	"fmt"
-	"os/exec"
 
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox-cli/config"
-	"github.com/nanobox-io/nanobox-cli/util"
+	"github.com/nanobox-io/nanobox-cli/util/vagrant"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
@@ -27,17 +26,17 @@ var resumeCmd = &cobra.Command{
 	Short: "Resumes the nanobox",
 	Long:  ``,
 
-	PreRun: nanoInit,
-	Run:    nanoResume,
+	PreRun: initialize,
+	Run:    resume,
 }
 
-// nanoResume runs 'vagrant resume'
-func nanoResume(ccmd *cobra.Command, args []string) {
+// resume runs 'vagrant resume'
+func resume(ccmd *cobra.Command, args []string) {
 
-	// PreRun: nanoInit
+	// PreRun: initialize
 
 	fmt.Printf(stylish.Bullet("Resuming nanobox..."))
-	if err := util.VagrantRun(exec.Command("vagrant", "resume")); err != nil {
-		config.Fatal("[commands/resume] util.VagrantRun() failed", err.Error())
+	if err := vagrant.Resume(); err != nil {
+		config.Fatal("[commands/resume] failed - ", err.Error())
 	}
 }

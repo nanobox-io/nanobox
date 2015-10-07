@@ -10,12 +10,11 @@ package commands
 //
 import (
 	"fmt"
-	"os"
-	"os/exec"
 
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox-cli/config"
+	"github.com/nanobox-io/nanobox-cli/util/vagrant"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
@@ -27,34 +26,17 @@ var sshCmd = &cobra.Command{
 	Short: "SSH into the nanobox",
 	Long:  ``,
 
-	PreRun: bootVM,
-	Run:    nanoSSH,
+	PreRun: boot,
+	Run:    ssh,
 }
 
-// nanoSSH
-func nanoSSH(ccmd *cobra.Command, args []string) {
+// ssh
+func ssh(ccmd *cobra.Command, args []string) {
 
-	// PreRun: bootVM
+	// PreRun: boot
 
 	fmt.Printf(stylish.Bullet("SSHing into nanobox..."))
-
-	// NOTE: this command is run manually (vs util.VagrantRun) because the output
-	// needs to be hooked up a little different to accomodate Stdin
-
-	// run the command from ~/.nanobox/apps/<this app>
-	if err := os.Chdir(config.AppDir); err != nil {
-		config.Fatal("[commands/ssh] os.Chdir() failed", err.Error())
-	}
-
-	cmd := exec.Command("vagrant", "ssh")
-
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	// start the command; we need this to 'fire and forget' so that we can manually
-	// capture and modify the commands output
-	if err := cmd.Run(); err != nil {
-		config.Fatal("[commands/ssh]", err.Error())
+	if err := vagrant.SSH(); err != nil {
+		config.Fatal("[commands/ssh] failed - ", err.Error())
 	}
 }

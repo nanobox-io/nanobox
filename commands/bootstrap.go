@@ -7,13 +7,15 @@
 
 package commands
 
+//
 import (
 	"fmt"
 
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox-cli/config"
-	"github.com/nanobox-io/nanobox-cli/util"
+	"github.com/nanobox-io/nanobox-cli/util/server"
+	"github.com/nanobox-io/nanobox-cli/util/server/mist"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
@@ -25,37 +27,37 @@ var bootstrapCmd = &cobra.Command{
 	Short: "Runs an engine's bootstrap script - downloads code & launches a nanobox",
 	Long:  ``,
 
-	PreRun: bootVM,
-	Run:    nanoBootstrap,
+	PreRun:  boot,
+	Run:     bootstrap,
+	PostRun: save,
 }
 
-//
-func nanoBootstrap(ccmd *cobra.Command, args []string) {
+// bootstrap
+func bootstrap(ccmd *cobra.Command, args []string) {
 
-	// PreRun: bootVM
+	// PreRun: boot
 
-	fmt.Printf(stylish.Bullet("Bootstrapping code..."))
+	fmt.Printf(stylish.Bullet("Bootstrapping codebase..."))
 
-	//
-	bootstrap := util.Sync{
-		Model:   "bootstrap",
-		Path:    fmt.Sprintf("%s/bootstrap", config.ServerURL),
-		Verbose: fVerbose,
+	// stream bootstrap output
+	go mist.Stream([]string{"log", "deploy"}, mist.PrintLogStream)
+
+	// listen for status updates
+	done := make(chan struct{})
+	go func() {
+		if err := mist.Listen([]string{"job", "bootstrap"}, mist.HandleBootstrapStream); err != nil {
+			config.Fatal("[commands/nanoBuild] failed - ", err.Error())
+		}
+		close(done)
+	}()
+
+	// run a bootstrap
+	if err := server.Bootstrap(""); err != nil {
+		config.Fatal("[commands/nanoBootstrap] failed - ", err.Error())
 	}
 
-	//
-	bootstrap.Run(args)
+	// wait for a status update (blocking)
+	<-done
 
-	//
-	switch bootstrap.Status {
-
-	// complete
-	case "complete":
-		fmt.Printf(stylish.Bullet("Bootstrap complete"))
-
-	// if the bootstrap fails the server should handle the message. If not, this can
-	// be re-enabled
-	case "errored":
-		// fmt.Printf(stylish.Error("Bootstrap failed", "Your app failed to bootstrap"))
-	}
+	// PostRun: save
 }

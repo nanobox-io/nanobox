@@ -5,13 +5,13 @@
 // at http://mozilla.org/MPL/2.0/.
 //
 
+//
 package main
 
 import (
 	"fmt"
 	"os/exec"
 
-	// api "github.com/nanobox-io/nanobox-api-client"
 	"github.com/nanobox-io/nanobox-cli/commands"
 )
 
@@ -36,11 +36,6 @@ func main() {
 	if !pass {
 		return
 	}
-
-	// do a quick ping to make sure we can communicate properly with the API
-	// if err := api.DoRawRequest(nil, "GET", "https://api.nanobox.io/v1/ping", nil, nil); err != nil {
-	// 	config.Fatal("[main] The CLI was unable to communicate with the API", err.Error())
-	// }
 
 	// check for updates
 	// checkUpdate()

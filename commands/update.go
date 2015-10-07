@@ -18,6 +18,7 @@ import (
 
 	"github.com/nanobox-io/nanobox-cli/config"
 	"github.com/nanobox-io/nanobox-cli/util"
+	"github.com/nanobox-io/nanobox-cli/util/file"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
@@ -27,14 +28,19 @@ var updateCmd = &cobra.Command{
 	Short: "Updates the CLI to the newest available version",
 	Long:  ``,
 
-	Run: nanoUpdate,
+	Run: update,
 }
 
-// nanoUpdate
-func nanoUpdate(ccmd *cobra.Command, args []string) {
+// update
+func update(ccmd *cobra.Command, args []string) {
 
 	// if the local md5 matches the remote md5 there is no need to update
-	if util.MD5sMatch(config.Root+"/nanobox.md5", "https://s3.amazonaws.com/tools.nanobox.io/cli/nanobox.md5") {
+	match, err := util.MD5sMatch(config.Root+"/nanobox.md5", "https://s3.amazonaws.com/tools.nanobox.io/cli/nanobox.md5")
+	if err != nil {
+		config.Fatal("[commands/update] util.MD5sMatch() failed", err.Error())
+	}
+
+	if match {
 		fmt.Printf("Nanobox is up to date (running v%s)", config.VERSION)
 		return
 	}
@@ -56,7 +62,7 @@ func nanoUpdate(ccmd *cobra.Command, args []string) {
 	defer cli.Close()
 
 	//
-	util.FileProgress(fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/nanobox", runtime.GOOS, runtime.GOARCH), cli)
+	file.Progress(fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/nanobox", runtime.GOOS, runtime.GOARCH), cli)
 
 	//
 	// download the CLI md5
@@ -67,7 +73,7 @@ func nanoUpdate(ccmd *cobra.Command, args []string) {
 	defer md5.Close()
 
 	//
-	util.FileDownload("https://s3.amazonaws.com/tools.nanobox.io/cli/nanobox.md5", md5)
+	file.Download("https://s3.amazonaws.com/tools.nanobox.io/cli/nanobox.md5", md5)
 
 	//
 	fmt.Printf(stylish.SubBullet("[√] Now running v%s", config.VERSION))
