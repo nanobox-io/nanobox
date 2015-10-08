@@ -29,6 +29,7 @@ import (
 // Service
 type Service struct {
 	CreatedAt time.Time
+	EnvVars   map[string]string
 	IP        string
 	Name      string
 	Password  string

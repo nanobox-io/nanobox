@@ -31,6 +31,7 @@ var infoCmd = &cobra.Command{
 // info runs 'vagrant status'
 func info(ccmd *cobra.Command, args []string) {
 
+	// determine status
 	status := vagrant.Status()
 
 	fmt.Printf(`
@@ -42,6 +43,7 @@ Nanobox Files  : %s
 `, config.Nanofile.Domain, config.Nanofile.Name, status, config.AppDir)
 
 	if status != "running" {
+		fmt.Println("NOTE: To view 'services' information start nanobox with 'nanobox dev' or 'nanobox run'")
 		return
 	}
 
@@ -55,30 +57,38 @@ Nanobox Files  : %s
 
 	//
 	if len(services) >= 1 {
-		info := "///////// SERVICES /////////\n\n"
+		fmt.Printf("////////// SERVICES //////////\n\n")
 
 		//
 		for _, service := range services {
-			info += fmt.Sprintf("%s :\n", service.UID)
+
+			fmt.Printf("%s :\n", service.UID)
 
 			if service.Name != "" {
-				info += fmt.Sprintf("   name : %s\n", service.Name)
+				fmt.Printf("   name : %s\n", service.Name)
 			}
 
-			info += fmt.Sprintf("   host : %s\n   ports : %v\n", config.Nanofile.Domain, service.Ports)
+			fmt.Printf("   host : %s\n", config.Nanofile.Domain)
+			fmt.Printf("   ports : %v\n", service.Ports)
 
 			//
 			if service.Username != "" {
-				info += fmt.Sprintf("   username : %s\n", service.Username)
+				fmt.Printf("   username : %s\n", service.Username)
 			}
 
 			//
 			if service.Password != "" {
-				info += fmt.Sprintf("   password : %s\n", service.Password)
+				fmt.Printf("   password : %s\n", service.Password)
+			}
+
+			// show any environment variables
+			if len(service.EnvVars) >= 1 {
+				fmt.Printf("\n   Environment variables:\n")
+
+				for k, v := range service.EnvVars {
+					fmt.Printf("      %s : %s\n", k, v)
+				}
 			}
 		}
-
-		//
-		fmt.Printf("%s\n\n", info)
 	}
 }

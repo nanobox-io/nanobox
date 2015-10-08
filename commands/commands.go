@@ -48,7 +48,7 @@ var (
 			// hijack the verbose flag (-v), and use it to display the version of the
 			// CLI
 			if fVersion || config.Verbose {
-				fmt.Printf("nanobox %s\n", config.VERSION)
+				fmt.Printf("nanobox v%s\n", config.VERSION)
 				os.Exit(0)
 			}
 
@@ -119,9 +119,6 @@ func init() {
 
 // boot
 func boot(ccmd *cobra.Command, args []string) {
-
-	// check to see if a box needs to be installed
-	box.Install(nil, args)
 
 	// ensure a Vagrantfile is available before attempting to boot the VM
 	initialize(nil, args)

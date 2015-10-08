@@ -84,5 +84,5 @@ func update(ccmd *cobra.Command, args []string) {
 	}
 
 	//
-	fmt.Printf(stylish.SubBullet("[√] Now running v%s", string(out)))
+	fmt.Printf(stylish.SubBullet("[√] Now running %s", string(out)))
 }

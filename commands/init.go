@@ -13,6 +13,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/nanobox-io/nanobox-cli/commands/box"
 	"github.com/nanobox-io/nanobox-cli/config"
 	"github.com/nanobox-io/nanobox-cli/util/vagrant"
 )
@@ -30,6 +31,9 @@ var initCmd = &cobra.Command{
 
 // initialize
 func initialize(ccmd *cobra.Command, args []string) {
+
+	// check to see if a box needs to be installed
+	box.Install(nil, args)
 
 	// creates a project folder at ~/.nanobox/apps/<name> (if it doesn't already
 	// exists) where the Vagrantfile and .vagrant dir will live for each app
