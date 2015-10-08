@@ -11,6 +11,7 @@ package commands
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"runtime"
 
 	"github.com/kardianos/osext"
@@ -75,6 +76,13 @@ func update(ccmd *cobra.Command, args []string) {
 	//
 	file.Download("https://s3.amazonaws.com/tools.nanobox.io/cli/nanobox.md5", md5)
 
+	// if the new CLI fails to execute, just print a generic message and return
+	out, err := exec.Command(path, "-v").Output()
+	if err != nil {
+		fmt.Printf(stylish.SubBullet("[√] Update successful"))
+		return
+	}
+
 	//
-	fmt.Printf(stylish.SubBullet("[√] Now running v%s", config.VERSION))
+	fmt.Printf(stylish.SubBullet("[√] Now running v%s", string(out)))
 }

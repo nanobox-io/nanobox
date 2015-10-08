@@ -33,10 +33,10 @@ func HandleDeployStream(status string) (listen bool) {
 		config.VMfile.DeployedIs(false)
 
 		fmt.Println(`
-FAIL:
-   ! AN ERROR PREVENTED NANOBOX FROM BUILDING YOUR ENVIRONMENT !
-   - View the output above to diagnose the source of the problem
-   - You can also retry with --verbose for more detailed output`)
+! AN ERROR PREVENTED NANOBOX FROM BUILDING YOUR ENVIRONMENT !
+- View the output above to diagnose the source of the problem
+- You can also retry with --verbose for more detailed output
+`)
 	}
 
 	return
@@ -64,10 +64,10 @@ func HandleBuildStream(status string) (listen bool) {
 	case "errored":
 
 		fmt.Println(`
-FAIL:
-   ! AN ERROR PREVENTED NANOBOX FROM BUILDING YOUR ENVIRONMENT !
-   - View the output above to diagnose the source of the problem
-   - You can also retry with --verbose for more detailed output`)
+! AN ERROR PREVENTED NANOBOX FROM BUILDING YOUR ENVIRONMENT !
+- View the output above to diagnose the source of the problem
+- You can also retry with --verbose for more detailed output
+`)
 	}
 
 	return

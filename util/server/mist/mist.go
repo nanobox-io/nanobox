@@ -10,6 +10,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/nanobox-io/golang-mist"
 	"github.com/nanobox-io/nanobox-cli/config"
@@ -42,6 +43,11 @@ type (
 //
 var (
 
+	// subscriptions is a list of tags that have been used to subscribe with either
+	// Listen or Stream; when creating a new Listner/Streamer if the tags have
+	// already been used, it stops double subscription
+	subscriptions = make(map[string]struct{})
+
 	// a map of each type of 'process' that we encounter to then be used when
 	// assigning a unique color to that 'process'
 	logProcesses = make(map[string]string)
@@ -67,6 +73,11 @@ var (
 // Listen connects a to mist, subscribes tags, and listens for 'model' updates
 func Listen(tags []string, handle func(string) bool) error {
 
+	// if this subscription already exists, exit; this prevents double subscriptions
+	if _, ok := subscriptions[strings.Join(tags, "")]; ok {
+		return nil
+	}
+
 	// connect
 	client, err := connect()
 	if err != nil {
@@ -79,9 +90,11 @@ func Listen(tags []string, handle func(string) bool) error {
 		fmt.Printf(stylish.ErrBullet("Failed to subscribe to %v - %s", tags, err.Error()))
 	}
 
-	model := Model{}
+	// add tags to list of subscriptions
+	subscriptions[strings.Join(tags, "")] = struct{}{}
 
 	//
+	model := Model{}
 	for msg := range client.Messages() {
 
 		// unmarshal the incoming Message
@@ -105,6 +118,11 @@ func Stream(tags []string, handle func(Log)) {
 	// add log level to tags
 	tags = append(tags, config.LogLevel)
 
+	// if this subscription already exists, exit; this prevents double subscriptions
+	if _, ok := subscriptions[strings.Join(tags, "")]; ok {
+		return
+	}
+
 	// connect
 	client, err := connect()
 	if err != nil {
@@ -116,6 +134,9 @@ func Stream(tags []string, handle func(Log)) {
 	if err := subscribe(client, tags); err != nil {
 		fmt.Printf(stylish.ErrBullet("Failed to subscribe to %v - %s", tags, err.Error()))
 	}
+
+	// add tags to list of subscriptions
+	subscriptions[strings.Join(tags, "")] = struct{}{}
 
 	//
 	for msg := range client.Messages() {

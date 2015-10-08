@@ -51,7 +51,6 @@ func create(ccmd *cobra.Command, args []string) {
 		os.Exit(0) // this exits the sudoed (child) created, not the parent proccess
 	}
 
-	//
 	// boot the vm
 	fmt.Printf(stylish.Bullet("Creating a nanobox"))
 	if err := vagrant.Up(); err != nil {

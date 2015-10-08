@@ -40,10 +40,8 @@ func updateImages(ccmd *cobra.Command, args []string) {
 	// stream update output
 	go mist.Stream([]string{"log", "deploy"}, mist.PrintLogStream)
 
-	// wait for a status update (blocking)
+	// listen for status updates
 	done := make(chan struct{})
-
-	// wait for a status update (blocking)
 	go func() {
 		if err := mist.Listen([]string{"job", "imageupdate"}, mist.HandleUpdateStream); err != nil {
 			config.Fatal("[commands/nanoBuild] failed - ", err.Error())
@@ -56,6 +54,7 @@ func updateImages(ccmd *cobra.Command, args []string) {
 		config.Fatal("[commands/imagesUpdate] failed - ", err.Error())
 	}
 
+	// wait for a status update (blocking)
 	<-done
 
 	// PostRun: save
