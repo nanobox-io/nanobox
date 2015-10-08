@@ -27,8 +27,8 @@ func Verbose(msg string) {
 	}
 }
 
-// Silent prints output unless in silent mode
-func Silent(msg string) {
+// Silence prints output unless in silent mode
+func Silence(msg string) {
 	if !config.Silent {
 		fmt.Printf(msg)
 	}
