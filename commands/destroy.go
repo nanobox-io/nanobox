@@ -15,7 +15,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox-cli/config"
-	"github.com/nanobox-io/nanobox-cli/util"
+	"github.com/nanobox-io/nanobox-cli/util/file/hosts"
 	"github.com/nanobox-io/nanobox-cli/util/vagrant"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 )
@@ -41,7 +41,7 @@ func destroy(ccmd *cobra.Command, args []string) {
 	// if the command is being run with --remove-entry, it means an entry needs
 	// to be removed from the hosts file and execution yielded back to the parent
 	if fRemoveEntry {
-		util.HostfileRemoveDomain()
+		hosts.RemoveDomain()
 		os.Exit(0) // this exits the sudoed (child) destroy, not the parent proccess
 	}
 

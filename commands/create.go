@@ -15,7 +15,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox-cli/config"
-	"github.com/nanobox-io/nanobox-cli/util"
+	"github.com/nanobox-io/nanobox-cli/util/file/hosts"
 	"github.com/nanobox-io/nanobox-cli/util/vagrant"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 )
@@ -47,7 +47,7 @@ func create(ccmd *cobra.Command, args []string) {
 	// if the command is being run with the "add" flag, it means an entry needs to
 	// be added to the hosts file and execution yielded back to the parent
 	if fAddEntry {
-		util.HostfileAddDomain()
+		hosts.AddDomain()
 		os.Exit(0) // this exits the sudoed (child) created, not the parent proccess
 	}
 
@@ -61,7 +61,7 @@ func create(ccmd *cobra.Command, args []string) {
 	updateImages(nil, args)
 
 	// add the entry if needed
-	if util.NeedsDomain() {
+	if !hosts.HasDomain() {
 		sudo("create --add-entry", fmt.Sprintf("Adding %v domain to hosts file", config.Nanofile.Domain))
 	}
 
