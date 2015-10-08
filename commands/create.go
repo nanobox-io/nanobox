@@ -48,7 +48,7 @@ func create(ccmd *cobra.Command, args []string) {
 	// be added to the hosts file and execution yielded back to the parent
 	if fAddEntry {
 		util.HostfileAddDomain()
-		os.Exit(0)
+		os.Exit(0) // this exits the sudoed (child) created, not the parent proccess
 	}
 
 	//

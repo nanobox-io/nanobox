@@ -42,7 +42,7 @@ func destroy(ccmd *cobra.Command, args []string) {
 	// to be removed from the hosts file and execution yielded back to the parent
 	if fRemoveEntry {
 		util.HostfileRemoveDomain()
-		os.Exit(0)
+		os.Exit(0) // this exits the sudoed (child) destroy, not the parent proccess
 	}
 
 	// destroy the vm; this needs to happen before cleaning up the app to ensure
