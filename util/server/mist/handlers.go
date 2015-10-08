@@ -117,11 +117,10 @@ func PrintLogStream(log Log) {
 	fmt.Printf(log.Content)
 }
 
-// ProcessLogStream processes a log before printing it
+// ProcessLogStream processes a log before printing it; if the CLI is silenced
+// don't process any logs
 func ProcessLogStream(log Log) {
-
-	// if the CLI is silenced don't process any logs
-	if !config.Silence {
+	if !config.Silent {
 		ProcessLog(log)
 	}
 }

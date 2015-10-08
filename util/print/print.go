@@ -6,7 +6,7 @@
 //
 
 //
-package util
+package print
 
 import (
 	"bufio"
@@ -20,15 +20,22 @@ import (
 	"github.com/nanobox-io/nanobox-cli/config"
 )
 
-// Printv (print verbose) only prints a message if the 'verbose' flag is passed
-func Printv(msg string, verbose bool) {
-	if verbose {
+// Verbose only prints a message if the 'verbose' flag is passed
+func Verbose(msg string) {
+	if config.Verbose {
 		fmt.Printf(msg)
 	}
 }
 
-// Printc wraps a print message in 'colorstring' and passes it to fmt.Println
-func Printc(msg string, v ...interface{}) {
+// Silent prints output unless in silent mode
+func Silent(msg string) {
+	if !config.Silent {
+		fmt.Printf(msg)
+	}
+}
+
+// Color wraps a print message in 'colorstring' and passes it to fmt.Println
+func Color(msg string, v ...interface{}) {
 	fmt.Println(colorstring.Color(fmt.Sprintf(msg, v...)))
 }
 
@@ -47,8 +54,8 @@ func Prompt(p string, v ...interface{}) string {
 	return strings.TrimSpace(input)
 }
 
-// PPrompt prompts for a password but keeps the typed response hidden
-func PPrompt(p string) string {
+// Password prompts for a password but keeps the typed response hidden
+func Password(p string) string {
 	fmt.Printf(p)
 	return string(gopass.GetPasswd())
 }

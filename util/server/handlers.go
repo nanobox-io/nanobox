@@ -24,7 +24,7 @@ func NotifyRebuild(event *fsnotify.Event) (err error) {
 	if event.Op != fsnotify.Chmod {
 
 		// pause logs
-		config.Silence = true
+		config.Silent = true
 
 		// the job thats going to be run; usually a build
 		job := "build"
@@ -83,7 +83,7 @@ func NotifyRebuild(event *fsnotify.Event) (err error) {
 `, config.Nanofile.Domain)
 
 		// resume logs
-		config.Silence = false
+		config.Silent = false
 	}
 
 	return

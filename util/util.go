@@ -14,7 +14,7 @@ import (
 	"os"
 )
 
-//
+// MD5sMatch determines if a local MD5 matches a remote MD5
 func MD5sMatch(localPath, remotePath string) (bool, error) {
 
 	// get local md5

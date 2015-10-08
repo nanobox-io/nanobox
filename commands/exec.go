@@ -14,7 +14,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox-cli/util"
+	"github.com/nanobox-io/nanobox-cli/util/print"
 	"github.com/nanobox-io/nanobox-cli/util/server"
 )
 
@@ -36,7 +36,7 @@ func execute(ccmd *cobra.Command, args []string) {
 
 	//
 	if len(args) == 0 {
-		args = append(args, util.Prompt("Please specify a command you wish to exec: "))
+		args = append(args, print.Prompt("Please specify a command you wish to exec: "))
 	}
 
 	//

@@ -16,7 +16,7 @@ import (
 
 	api "github.com/nanobox-io/nanobox-api-client"
 	"github.com/nanobox-io/nanobox-cli/config"
-	"github.com/nanobox-io/nanobox-cli/util"
+	"github.com/nanobox-io/nanobox-cli/util/print"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
@@ -80,8 +80,8 @@ func Authenticate() (string, string) {
 	if !authenticated() {
 		fmt.Println("Before continuing, please login to your account:")
 
-		Userslug := util.Prompt("Username: ")
-		password := util.PPrompt("Password: ")
+		Userslug := print.Prompt("Username: ")
+		password := print.Password("Password: ")
 
 		// authenticate
 		return authenticate(Userslug, password)
@@ -97,8 +97,8 @@ It appears the Username or API token the CLI is trying to use does not match wha
 we have on record. To continue, please login to verify your account:
   `)
 
-	Userslug := util.Prompt("Username: ")
-	password := util.PPrompt("Password: ")
+	Userslug := print.Prompt("Username: ")
+	password := print.Password("Password: ")
 
 	// authenticate
 	return authenticate(Userslug, password)
@@ -112,7 +112,7 @@ func authenticate(Userslug, password string) (string, string) {
 	// get auth_token
 	user, err := api.GetAuthToken(Userslug, password)
 	if err != nil {
-		util.Printc("[red]failure![reset]")
+		print.Color("[red]failure![reset]")
 		fmt.Println("Unable to login... please verify your username and password are correct.")
 		os.Exit(1)
 	}
@@ -123,7 +123,7 @@ func authenticate(Userslug, password string) (string, string) {
 	}
 
 	//
-	util.Printc("[green]success![reset]")
+	print.Color("[green]success![reset]")
 
 	return user.ID, user.AuthenticationToken
 }

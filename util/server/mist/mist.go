@@ -14,7 +14,7 @@ import (
 
 	"github.com/nanobox-io/golang-mist"
 	"github.com/nanobox-io/nanobox-cli/config"
-	"github.com/nanobox-io/nanobox-cli/util"
+	"github.com/nanobox-io/nanobox-cli/util/print"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
@@ -191,13 +191,13 @@ func ProcessLog(log Log) {
 			logProcesses[process] = logColors[len(logProcesses)%len(logColors)]
 		}
 
-		// util.Printc("[%v]%v - %v.%v :: %v[reset]", logProcesses[process], log.Time, service, process, content)
-		util.Printc("[%v]%v (%v) :: %v[reset]", logProcesses[process], service, process, content)
+		// print.Color("[%v]%v - %v.%v :: %v[reset]", logProcesses[process], log.Time, service, process, content)
+		print.Color("[%v]%v (%v) :: %v[reset]", logProcesses[process], service, process, content)
 
 		// if we don't have a subMatch or its length is less than 4, just print w/e
 		// is in the log
 	} else {
-		util.Printc("[light_red]%v - %v[reset]", log.Time, log.Content)
+		print.Color("[light_red]%v - %v[reset]", log.Time, log.Content)
 	}
 
 }

@@ -57,7 +57,7 @@ var (
 	Devmode    bool   //
 	Force      bool   //
 	Verbose    bool   //
-	Silence    bool   //
+	Silent     bool   //
 	LogLevel   string //
 )
 
