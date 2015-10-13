@@ -16,10 +16,18 @@ import (
 	"github.com/nanobox-io/nanobox-cli/config"
 )
 
+//
+type Machine struct {
+	Name        string `json:"name"`
+	Provider    string `json:"provider"`
+	State       string `json:"state"`
+	Vagrantfile string `json:"vagrantfile_path"`
+}
+
 // Status returns the current status of the VM; this command needs to be run
 // in a way independant of a Vagrantfile to ensure that the status will always
 // be available
-func Status() string {
+func Status() (status string) {
 
 	// attempt to get the uuid; don't really care about the error here since the
 	// value will be "" if there is no file to read
@@ -52,14 +60,15 @@ func Status() string {
 
 	// if the uuid is "" or not found in the machines, then the resulting State
 	// will be ""
-	status := machine.State
+	status = machine.State
 
-	// set the status in the .vmfile (currently not used)
-	// config.VMfile.StatusIs(status)
-
-	if machine.State == "" {
+	// if status is "" set it to "not created" to then create the VM
+	if status == "" {
 		status = "not created"
 	}
 
-	return status
+	// set the status in the .vmfile
+	config.VMfile.StatusIs(status)
+
+	return
 }

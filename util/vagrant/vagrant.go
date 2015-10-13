@@ -19,14 +19,6 @@ import (
 	"github.com/nanobox-io/nanobox-cli/util/file"
 )
 
-//
-type Machine struct {
-	Name        string `json:"name"`
-	Provider    string `json:"provider"`
-	State       string `json:"state"`
-	Vagrantfile string `json:"vagrantfile_path"`
-}
-
 // Run runs a vagrant command (no need to be in the context of a Vagrantfile)
 func Run() (err error) {
 

@@ -10,17 +10,10 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
-	"os"
-	ossignal "os/signal"
-	"runtime"
 	"time"
-
-	"github.com/docker/docker/pkg/signal"
-	"github.com/docker/docker/pkg/term"
 
 	"github.com/nanobox-io/nanobox-cli/config"
 	// "github.com/nanobox-io/nanobox-golang-stylish"
@@ -97,98 +90,4 @@ func Put(path string, body io.Reader) (*http.Response, error) {
 	}
 
 	return res, nil
-}
-
-// forwardAllSignals forwards the signals you recieve and send them to nanobox server
-func forwardAllSignals() {
-	sigc := make(chan os.Signal, 128)
-	signal.CatchAll(sigc)
-	go func() {
-		for s := range sigc {
-			// skip children and window resizes
-			if s == signal.SIGCHLD || s == signal.SIGWINCH {
-				continue
-			}
-			var sig string
-			for sigStr, sigN := range signal.SignalMap {
-				if sigN == s {
-					sig = sigStr
-					break
-				}
-			}
-
-			//
-			if sig == "" {
-				fmt.Printf("Unsupported signal: %v. Discarding.\n", s)
-			}
-
-			//
-			req, _ := http.NewRequest("POST", fmt.Sprintf("%s/killexec?signal=%s", config.ServerURL, sig), nil)
-			_, err := http.DefaultClient.Do(req)
-			fmt.Println(err)
-		}
-	}()
-	return
-}
-
-// monitorSize
-func monitorSize(outFd uintptr, params string) {
-	resizeTTY(outFd, params)
-
-	if runtime.GOOS == "windows" {
-		go func() {
-			prevH, prevW := getTTYSize(outFd)
-			for {
-				time.Sleep(time.Millisecond * 250)
-				h, w := getTTYSize(outFd)
-
-				if prevW != w || prevH != h {
-					resizeTTY(outFd, params)
-				}
-				prevH = h
-				prevW = w
-			}
-		}()
-	} else {
-		sigchan := make(chan os.Signal, 1)
-		ossignal.Notify(sigchan, signal.SIGWINCH)
-		go func() {
-			for range sigchan {
-				resizeTTY(outFd, params)
-			}
-		}()
-	}
-}
-
-// resizeTTY
-func resizeTTY(outFd uintptr, params string) error {
-	h, w := getTTYSize(outFd)
-
-	req, err := http.NewRequest("POST", fmt.Sprintf("%s/resizeexec?h=%d&w=%d&%v", config.ServerURL, h, w, params), nil)
-	if err != nil {
-		return err
-	}
-
-	//
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-
-	return nil
-}
-
-// getTTYSize
-func getTTYSize(outFd uintptr) (h, w int) {
-	ws, err := term.GetWinsize(outFd)
-	if err != nil {
-		fmt.Printf("Error getting size: %s\n", err)
-		if ws == nil {
-			return 0, 0
-		}
-	}
-	h = int(ws.Height)
-	w = int(ws.Width)
-	return
 }

@@ -13,9 +13,11 @@ import (
 	"io"
 	"net"
 	"os"
+	"runtime"
 	"time"
 
-	"github.com/docker/docker/pkg/term"
+	syscall "github.com/docker/docker/pkg/signal"
+	terminal "github.com/docker/docker/pkg/term"
 
 	"github.com/nanobox-io/nanobox-cli/config"
 	"github.com/nanobox-io/nanobox-cli/util/notify"
@@ -31,6 +33,49 @@ func Exec(kind, params string) error {
 	// begin watching for changes to the project
 	go notify.Watch(config.CWDir, NotifyServer)
 
+	// get current terminal info
+	stdIn, stdOut, _ := terminal.StdStreams()
+	stdInFD, _ := terminal.GetFdInfo(stdIn)
+	stdOutFD, _ := terminal.GetFdInfo(stdOut)
+	// stdErrFD, _ := terminal.GetFdInfo(stdErr)
+
+	// handle all incoming os signals and act accordingly; default behavior is to
+	// forward all signals to nanobox server
+	sigs := make(chan os.Signal, 1)
+	go func() {
+		select {
+
+		// received a signal
+		case sig := <-sigs:
+
+			switch sig {
+
+			// resize the raw terminal w/e the local terminal is resized
+			case syscall.SIGWINCH:
+				resizeTTY(stdOutFD, params)
+
+			// skip the following signals
+			case syscall.SIGCHLD:
+				// do nothing
+
+			// tell nanobox server about the signal; this kills the terminal
+			default:
+				res, err := Post(fmt.Sprintf("/killexec?signal=%v", sig), "text/plain", nil)
+				if err != nil {
+					fmt.Println(err)
+				}
+				defer res.Body.Close()
+			}
+		}
+	}()
+
+	// setup a raw terminal
+	oldState, err := terminal.SetRawTerminal(stdInFD)
+	if err != nil {
+		return err
+	}
+	defer terminal.RestoreTerminal(stdOutFD, oldState)
+
 	// set up a ping to detect when the server goes away to be able to disconnect
 	// any active consoles
 	disconnect := make(chan struct{})
@@ -42,10 +87,14 @@ func Exec(kind, params string) error {
 					close(disconnect)
 				}
 				time.Sleep(2 * time.Second)
+
+			// return after timeout
 			case <-time.After(5 * time.Second):
-				os.Exit(0)
+				return
+
+			// return if ping fails
 			case <-disconnect:
-				os.Exit(0)
+				return
 			}
 		}
 	}()
@@ -56,29 +105,8 @@ func Exec(kind, params string) error {
 		return err
 	}
 
-	// forward all the signals to the nanobox server
-	forwardAllSignals()
-
-	// fake a web request
+	// pseudo a web request
 	conn.Write([]byte(fmt.Sprintf("POST /exec?%v HTTP/1.1\r\n\r\n", params)))
-
-	// setup a raw terminal
-	var oldState *term.State
-	stdIn, stdOut, _ := term.StdStreams()
-	inFd, _ := term.GetFdInfo(stdIn)
-	outFd, _ := term.GetFdInfo(stdOut)
-
-	// monitor the window size and send a request whenever we resize
-	monitorSize(outFd, params)
-
-	//
-	oldState, err = term.SetRawTerminal(inFd)
-	if err != nil {
-		return err
-	}
-
-	//
-	defer term.RestoreTerminal(inFd, oldState)
 
 	// pipe data
 	go io.Copy(conn, os.Stdin)
@@ -152,4 +180,54 @@ the vm or local will be mirrored.
 `, config.Nanofile.Domain)
 		}
 	}
+}
+
+// resizeTTY
+func resizeTTY(fd uintptr, params string) error {
+
+	// get current size
+	w, h := getTTYSize(fd)
+
+	//
+	if runtime.GOOS == "windows" {
+		prevW, prevH := getTTYSize(fd)
+
+		for {
+			time.Sleep(time.Millisecond * 250)
+			w, h := getTTYSize(fd)
+
+			if prevW != w || prevH != h {
+				resizeTTY(fd, params)
+			}
+
+			prevW, prevH = w, h
+		}
+	}
+
+	res, err := Post(fmt.Sprintf("/resizeexec?w=%d&h=%d&%v", w, h, params), "text/plain", nil)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+
+	return nil
+}
+
+// getTTYSize
+func getTTYSize(fd uintptr) (w, h int) {
+
+	ws, err := terminal.GetWinsize(fd)
+	if err != nil {
+		fmt.Printf("Error getting size: %s\n", err)
+	}
+
+	//
+	if ws == nil {
+		w, h = 0, 0
+	}
+
+	//
+	w, h = int(ws.Width), int(ws.Height)
+
+	return
 }

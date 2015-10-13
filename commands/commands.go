@@ -94,6 +94,7 @@ func init() {
 	NanoboxCmd.AddCommand(initCmd)
 	NanoboxCmd.AddCommand(logCmd)
 	NanoboxCmd.AddCommand(reloadCmd)
+	NanoboxCmd.AddCommand(resetCmd)
 	NanoboxCmd.AddCommand(resumeCmd)
 	NanoboxCmd.AddCommand(sshCmd)
 	NanoboxCmd.AddCommand(watchCmd)
@@ -105,9 +106,9 @@ func init() {
 	NanoboxCmd.AddCommand(infoCmd)
 	NanoboxCmd.AddCommand(consoleCmd)
 	NanoboxCmd.AddCommand(execCmd)
-	NanoboxCmd.AddCommand(downCmd)
 	NanoboxCmd.AddCommand(destroyCmd)
 	NanoboxCmd.AddCommand(publishCmd)
+	NanoboxCmd.AddCommand(stopCmd)
 	NanoboxCmd.AddCommand(updateCmd)
 	NanoboxCmd.AddCommand(updateImagesCmd)
 

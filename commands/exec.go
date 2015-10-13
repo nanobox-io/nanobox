@@ -20,9 +20,11 @@ import (
 
 //
 var execCmd = &cobra.Command{
-	Use:   "exec",
-	Short: "Runs a command from inside your app on the nanobox",
-	Long:  ``,
+	Hidden: true,
+	
+	Use:    "exec",
+	Short:  "Runs a command from inside your app on the nanobox",
+	Long:   ``,
 
 	PreRun:  boot,
 	Run:     execute,

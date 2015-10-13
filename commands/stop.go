@@ -16,17 +16,17 @@ import (
 )
 
 //
-var downCmd = &cobra.Command{
-	Use:   "down",
+var stopCmd = &cobra.Command{
+	Use:   "stop",
 	Short: "Suspends the nanobox",
 	Long:  ``,
 
 	PreRun: initialize,
-	Run:    down,
+	Run:    stop,
 }
 
-// down runs 'vagrant suspend'
-func down(ccmd *cobra.Command, args []string) {
+// stop runs 'vagrant suspend'
+func stop(ccmd *cobra.Command, args []string) {
 
 	// PreRun: initialize
 

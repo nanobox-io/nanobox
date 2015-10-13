@@ -9,7 +9,6 @@
 package server
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -25,8 +24,7 @@ func Ping() (bool, error) {
 	//
 	res, err := client.Get(config.ServerURL + "/ping")
 	if err != nil {
-		fmt.Println("BONK???", err)
-		return false, err
+		return err == nil, err
 	}
 	defer res.Body.Close()
 

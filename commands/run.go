@@ -67,9 +67,17 @@ func run(ccmd *cobra.Command, args []string) {
 --------------------------------------------------------------------------------
 [√] APP SUCCESSFULLY BUILT   ///   DEV URL : %v
 --------------------------------------------------------------------------------
-
-++> STREAMING LOGS (ctrl-c to exit) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 `, config.Nanofile.Domain)
+
+	// if in background mode just exist w/o streaming logs or watching files
+	if config.VMfile.IsMode("background") {
+		return
+	}
+
+	// if not in background mode begin streaming logs and watching files
+	fmt.Printf(`
+++> STREAMING LOGS (ctrl-c to exit) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+`)
 
 	// stream app output
 	go mist.Stream([]string{"log", "app"}, mist.ProcessLogStream)
