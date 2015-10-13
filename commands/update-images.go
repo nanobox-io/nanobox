@@ -43,7 +43,7 @@ func updateImages(ccmd *cobra.Command, args []string) {
 	// listen for status updates
 	done := make(chan struct{})
 	go func() {
-		if err := mist.Listen([]string{"job", "imageupdate"}, mist.HandleUpdateStream); err != nil {
+		if err := mist.Listen([]string{"job", "imageupdate"}, mist.ImageUpdates); err != nil {
 			config.Fatal("[commands/nanoBuild] failed - ", err.Error())
 		}
 		close(done)

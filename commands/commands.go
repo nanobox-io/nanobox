@@ -142,7 +142,7 @@ func boot(ccmd *cobra.Command, args []string) {
 
 	// vm is in some unknown state - reload it
 	default:
-		fmt.Printf(stylish.Bullet("Nanobox is in an unknown state (reloading)."))
+		fmt.Printf(stylish.Bullet("Nanobox is in an unknown state (%s). Reloading...", status))
 		reload(nil, args)
 	}
 

@@ -73,7 +73,7 @@ var (
 // Listen connects a to mist, subscribes tags, and listens for 'model' updates
 func Listen(tags []string, handle func(string) bool) error {
 
-	// if this subscription already exists, exit; this prevents double subscriptions
+	// only subscribe if a subscription doesn't already exist
 	if _, ok := subscriptions[strings.Join(tags, "")]; ok {
 		return nil
 	}
@@ -92,6 +92,7 @@ func Listen(tags []string, handle func(string) bool) error {
 
 	// add tags to list of subscriptions
 	subscriptions[strings.Join(tags, "")] = struct{}{}
+	defer delete(subscriptions, strings.Join(tags, ""))
 
 	//
 	model := Model{}
@@ -137,6 +138,7 @@ func Stream(tags []string, handle func(Log)) {
 
 	// add tags to list of subscriptions
 	subscriptions[strings.Join(tags, "")] = struct{}{}
+	defer delete(subscriptions, strings.Join(tags, ""))
 
 	//
 	for msg := range client.Messages() {

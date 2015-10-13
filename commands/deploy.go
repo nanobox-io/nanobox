@@ -52,7 +52,7 @@ func deploy(ccmd *cobra.Command, args []string) {
 	// listen for status updates
 	done := make(chan struct{})
 	go func() {
-		if err := mist.Listen([]string{"job", "deploy"}, mist.HandleDeployStream); err != nil {
+		if err := mist.Listen([]string{"job", "deploy"}, mist.DeployUpdates); err != nil {
 			config.Fatal("[commands/nanoBuild] failed - ", err.Error())
 		}
 		close(done)

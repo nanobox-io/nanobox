@@ -5,6 +5,8 @@
 // at http://mozilla.org/MPL/2.0/.
 //
 
+// these are handlers that are passed into the util/notify/Watch command; they are
+// called each time a file event happens
 package server
 
 import (
@@ -15,50 +17,56 @@ import (
 	"github.com/go-fsnotify/fsnotify"
 
 	"github.com/nanobox-io/nanobox-cli/config"
-	"github.com/nanobox-io/nanobox-cli/util/notify"
 	"github.com/nanobox-io/nanobox-cli/util/server/mist"
 )
 
 // NotifyRebuild
 func NotifyRebuild(event *fsnotify.Event) (err error) {
-	if event.Op != fsnotify.Chmod {
+
+	//
+	switch event.Op {
+
+	// only care about create, write, remove, and rename events
+	case fsnotify.Create, fsnotify.Write, fsnotify.Remove, fsnotify.Rename:
 
 		// pause logs
 		config.Silent = true
 
-		// the job thats going to be run; usually a build
-		job := "build"
+		//
+		done := make(chan struct{})
 
 		switch filepath.Base(event.Name) {
 
 		// run a build for any file changes
 		default:
 			fmt.Printf(`
-++> BOXFILE CHANGED, CLOSING LOG STREAM FOR REBUILD ////////////////////////////
+++> SOURCE CODE CHANGED, CLOSING LOG STREAM FOR REBUILD ////////////////////////////
 `)
+
+			go func() {
+				if err := mist.Listen([]string{"job", "build"}, mist.BuildUpdates); err != nil {
+					config.Fatal("[commands/nanoBuild] failed - ", err.Error())
+				}
+				close(done)
+			}()
+
+			//
+			err = Build("")
+
 		// if the file changes is the Boxfile, deploy
 		case "Boxfile":
 			fmt.Printf(`
-++> SOURCE CODE CHANGED, CLOSING LOG STREAM FOR REBUILD ////////////////////////
+++> BOXFILE CHANGED, CLOSING LOG STREAM FOR REBUILD ////////////////////////
 `)
-			job = "deploy"
-		}
 
-		done := make(chan struct{})
+			go func() {
+				if err := mist.Listen([]string{"job", "deploy"}, mist.DeployUpdates); err != nil {
+					config.Fatal("[commands/nanoBuild] failed - ", err.Error())
+				}
+				close(done)
+			}()
 
-		// listen for status updates
-		go func() {
-			if err := mist.Listen([]string{"job", job}, mist.HandleDeployStream); err != nil {
-				config.Fatal("[commands/nanoBuild] failed - ", err.Error())
-			}
-			close(done)
-		}()
-
-		// run 'job'
-		switch job {
-		case "build":
-			err = Build("")
-		case "deploy":
+			//
 			err = Deploy("")
 		}
 
@@ -68,10 +76,12 @@ func NotifyRebuild(event *fsnotify.Event) (err error) {
 - View the output above to diagnose the source of the problem
 - You can also retry with --verbose for more detailed output
 `)
+
 			//
-			return notify.WatchError{"Watch failed"}
+			config.VMfile.SuspendableIs(false)
 		}
 
+		// block until rebuild is complete
 		<-done
 
 		fmt.Printf(`

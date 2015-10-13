@@ -31,16 +31,6 @@ var (
 )
 
 //
-type WatchError struct {
-	What string
-}
-
-//
-func (e WatchError) Error() string {
-	return fmt.Sprintf(e.What)
-}
-
-//
 func Watch(path string, handle func(e *fsnotify.Event) error) error {
 
 	var err error
@@ -102,12 +92,22 @@ increasing your max file descriptor limit to re-enable this functionality.
 		// handle any file events by calling the handler function
 		case event := <-watcher.Events:
 
+			switch event.Op {
+
 			// the watcher needs to watch itself to see if any directories are added
-			// to then add them to the list of watched files;
-			if event.Op == fsnotify.Create {
+			// to then add them to the list of watched files
+			case fsnotify.Create:
 				fi, err := os.Stat(event.Name)
 				if err := watchDir(event.Name, fi, err); err != nil {
 					fmt.Printf(stylish.ErrBullet("Unable to watch files - '%v'", err))
+				}
+
+			// the watcher needs to watch itself to see if any directories are removed
+			// to then remove them from the list of watched files (this may need to happen
+			// recursively)
+			case fsnotify.Remove:
+				if err = watcher.Remove(event.Name); err != nil {
+					return err
 				}
 			}
 

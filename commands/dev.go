@@ -58,7 +58,7 @@ func dev(ccmd *cobra.Command, args []string) {
 		// listen for status updates
 		done := make(chan struct{})
 		go func() {
-			if err := mist.Listen([]string{"job", "deploy"}, mist.HandleDeployStream); err != nil {
+			if err := mist.Listen([]string{"job", "deploy"}, mist.DeployUpdates); err != nil {
 				config.Fatal("[commands/nanoBuild] failed - ", err.Error())
 			}
 			close(done)
@@ -67,6 +67,18 @@ func dev(ccmd *cobra.Command, args []string) {
 		// wait for a status update (blocking)
 		<-done
 	}
+
+	// begin watching for file changes (non blocking)
+	// go func() {
+	// 	if err := notify.Watch(config.CWDir, server.NotifyRebuild); err != nil {
+	// 		fmt.Printf(stylish.ErrBullet("Unable to detect file changes - %v", err.Error()))
+	//
+	// 		// if the error is a notify error, indicate that the vm should not be suspended
+	// 		if _, ok := err.(notify.WatchError); ok {
+	// 			config.VMfile.SuspendableIs(false)
+	// 		}
+	// 	}
+	// }()
 
 	//
 	server.Exec("console", "")

@@ -13,6 +13,7 @@ import (
 	"io"
 	"net"
 	"os"
+	"time"
 
 	"github.com/docker/docker/pkg/term"
 
@@ -24,18 +25,30 @@ import (
 // Exec
 func Exec(kind, params string) error {
 
-	switch kind {
-	case "console":
-		consoleHeader(kind)
-	case "command":
-		commandHeader()
-	case "container":
-		consoleHeader(kind)
-
-	}
+	//
+	header(kind)
 
 	// begin watching for changes to the project
 	go notify.Watch(config.CWDir, NotifyServer)
+
+	// set up a ping to detect when the server goes away to be able to disconnect
+	// any active consoles
+	disconnect := make(chan struct{})
+	go func() {
+		for {
+			select {
+			default:
+				if ok, _ := Ping(); !ok {
+					close(disconnect)
+				}
+				time.Sleep(2 * time.Second)
+			case <-time.After(5 * time.Second):
+				os.Exit(0)
+			case <-disconnect:
+				os.Exit(0)
+			}
+		}
+	}()
 
 	//
 	conn, err := net.Dial("tcp4", config.ServerURI)
@@ -99,40 +112,44 @@ func IsContainerExec(args []string) (found bool) {
 }
 
 //
-func consoleHeader(kind string) {
-	fmt.Printf(`+> Opening a nanobox console:
+func header(kind string) {
+	switch kind {
+
+	//
+	case "command":
+		fmt.Printf(stylish.Bullet("Executing command in nanobox..."))
+
+		//
+	case "console", "container":
+		fmt.Printf(`+> Opening a nanobox console:
 
 
-                                 **
-                              ********
-                           ***************
-                        *********************
-                          *****************
-                        ::    *********    ::
-                           ::    ***    ::
-                         ++   :::   :::   ++
-                            ++   :::   ++
-                               ++   ++
-                                  +
+                                     **
+                                  ********
+                               ***************
+                            *********************
+                              *****************
+                            ::    *********    ::
+                               ::    ***    ::
+                             ++   :::   :::   ++
+                                ++   :::   ++
+                                   ++   ++
+                                      +
 
-                  _  _ ____ _  _ ____ ___  ____ _  _
-                  |\ | |__| |\ | |  | |__) |  |  \/
-                  | \| |  | | \| |__| |__) |__| _/\_
+                      _  _ ____ _  _ ____ ___  ____ _  _
+                      |\ | |__| |\ | |  | |__) |  |  \/
+                      | \| |  | | \| |__| |__) |__| _/\_
 `)
 
-	if kind == "console" {
-		fmt.Printf(`
+		if kind == "console" {
+			fmt.Printf(`
 --------------------------------------------------------------------------------
 + You are in a virtual machine (vm)
-+ Your local source code has been mounted into the vm, and changes
-in either the vm or local will be mirrored.
++ Your local source code has been mounted into the vm, and changes in either
+the vm or local will be mirrored.
 + If you run a server, access it at >> %s
 --------------------------------------------------------------------------------
 `, config.Nanofile.Domain)
+		}
 	}
-}
-
-//
-func commandHeader() {
-	fmt.Printf(stylish.Bullet("Executing command in nanobox..."))
 }

@@ -15,8 +15,8 @@ import (
 	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
-// HandleDeployStream
-func HandleDeployStream(status string) (listen bool) {
+// DeployUpdates
+func DeployUpdates(status string) (listen bool) {
 
 	switch status {
 
@@ -37,15 +37,17 @@ func HandleDeployStream(status string) (listen bool) {
 - View the output above to diagnose the source of the problem
 - You can also retry with --verbose for more detailed output
 `)
+
+		config.VMfile.SuspendableIs(false)
 	}
 
 	return
 }
 
-// HandleBuildStream receives a status update from mist.go and determines what
+// BuildUpdates receives a status update from mist.go and determines what
 // to do based on the status. By default it will return, indicating to mist to
 // stop listening.
-func HandleBuildStream(status string) (listen bool) {
+func BuildUpdates(status string) (listen bool) {
 
 	switch status {
 
@@ -68,13 +70,15 @@ func HandleBuildStream(status string) (listen bool) {
 - View the output above to diagnose the source of the problem
 - You can also retry with --verbose for more detailed output
 `)
+
+		config.VMfile.SuspendableIs(false)
 	}
 
 	return
 }
 
-// HandleBootstrapStream
-func HandleBootstrapStream(status string) (listen bool) {
+// BootstrapUpdates
+func BootstrapUpdates(status string) (listen bool) {
 
 	switch status {
 
@@ -87,13 +91,14 @@ func HandleBootstrapStream(status string) (listen bool) {
 
 	// errored (bootstrap failed)
 	case "errored":
+		config.VMfile.SuspendableIs(false)
 	}
 
 	return
 }
 
-// HandleUpdateStream
-func HandleUpdateStream(status string) (listen bool) {
+// ImageUpdates
+func ImageUpdates(status string) (listen bool) {
 
 	switch status {
 

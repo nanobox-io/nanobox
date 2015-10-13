@@ -45,7 +45,7 @@ func bootstrap(ccmd *cobra.Command, args []string) {
 	// listen for status updates
 	done := make(chan struct{})
 	go func() {
-		if err := mist.Listen([]string{"job", "bootstrap"}, mist.HandleBootstrapStream); err != nil {
+		if err := mist.Listen([]string{"job", "bootstrap"}, mist.BootstrapUpdates); err != nil {
 			config.Fatal("[commands/nanoBuild] failed - ", err.Error())
 		}
 		close(done)
