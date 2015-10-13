@@ -23,7 +23,7 @@ var resetCmd = &cobra.Command{
 	Hidden: true,
 
 	Use:   "reset",
-	Short: "Reloads the nanobox",
+	Short: "Destroys the nanobox, creates a new one, and deploys",
 	Long:  ``,
 
 	PreRun: initialize,
