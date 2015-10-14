@@ -16,6 +16,7 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
+	// "strings"
 	"syscall"
 
 	"github.com/go-fsnotify/fsnotify"
@@ -45,6 +46,9 @@ func Watch(path string, handle func(e *fsnotify.Event) error) error {
 		return err
 	}
 
+	// add source control files to be ignored (git, mercuriel, svn)
+	ignoreDirs = append(ignoreDirs, ".git", ".hg", "trunk")
+
 	// create a new file watcher
 	watcher, err = fsnotify.NewWatcher()
 	if err != nil {
@@ -66,19 +70,19 @@ increasing your max file descriptor limit to re-enable this functionality.
 		return err
 	}
 
+	// fmt.Println("IGNORE DIRS!", ignoreDirs)
+
 	switch {
 
 	// if the file is a directory, recursively add each subsequent directory to
 	// the watch list; fsnotify will watch all files in a directory
 	case fi.Mode().IsDir():
-		fmt.Println("WATCH DIR!", path)
 		if err = filepath.Walk(path, watchDir); err != nil {
 			return err
 		}
 
 	// if the file is just a file, add only it to the watch list
 	case fi.Mode().IsRegular():
-		fmt.Println("WATCH FILE!", path)
 		if err = watcher.Add(path); err != nil {
 			return err
 		}
@@ -115,14 +119,14 @@ increasing your max file descriptor limit to re-enable this functionality.
 
 					// if the create event is for a single file, watch it
 					case fi.Mode().IsRegular():
-						fmt.Println("WATCHER WATCH FILE", event.Name)
+						// fmt.Println("WATCHER WATCH FILE", event.Name)
 						if err = watcher.Add(event.Name); err != nil {
 							fmt.Printf(stylish.ErrBullet("Unable to watch file - '%v'", err))
 						}
 
 					// if the create event is for a directory, recursively add all files
 					case fi.Mode().IsDir():
-						fmt.Println("WATCHER WATCH DIR", event.Name)
+						// fmt.Println("WATCHER WATCH DIR", event.Name)
 						if err := watchDir(event.Name, fi, err); err != nil {
 							fmt.Printf(stylish.ErrBullet("Unable to watch files - '%v'", err))
 						}
@@ -163,7 +167,6 @@ func watchDir(path string, fi os.FileInfo, err error) error {
 	// recursively add watchers to directores only (fsnotify will watch all files
 	// in an added directory). Also, dont watch any files/dirs on the ignore list
 	if fi.Mode().IsDir() && !isIgnoreDir(fi.Name()) {
-		fmt.Println("WATCHDIR!", path)
 		if err = watcher.Add(path); err != nil {
 			return err
 		}
@@ -173,9 +176,9 @@ func watchDir(path string, fi os.FileInfo, err error) error {
 }
 
 // isIgnoreDir
-func isIgnoreDir(name string) bool {
+func isIgnoreDir(path string) bool {
 	for _, dir := range ignoreDirs {
-		if dir == name {
+		if dir == path {
 			return true
 		}
 	}
@@ -195,8 +198,6 @@ func getIgnoreDirs() error {
 	if err != nil {
 		return err
 	}
-
-	fmt.Println("IGNORE DIRS!", string(b))
 
 	return json.Unmarshal(b, &ignoreDirs)
 }

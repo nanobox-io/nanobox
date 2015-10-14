@@ -37,7 +37,11 @@ func Lock() error {
 // Unlock closes the suspended 'lock' connection to the server indicating that a
 // client has disconnected
 func Unlock() {
-	lock.Close()
+
+	// if the lock (conn) hasn't already been closed, close it
+	if lock != nil {
+		lock.Close()
+	}
 
 	// this sleep is important because there needs to be enough time for the guest
 	// machine to register that our connection has been broken, before we ask if
