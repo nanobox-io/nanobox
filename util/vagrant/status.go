@@ -68,7 +68,7 @@ func Status() (status string) {
 	}
 
 	// set the status in the .vmfile
-	config.VMfile.StatusIs(status)
+	// config.VMfile.StatusIs(status)
 
 	return
 }

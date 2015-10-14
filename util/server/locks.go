@@ -41,6 +41,6 @@ func Unlock() {
 
 	// this sleep is important because there needs to be enough time for the guest
 	// machine to register that our connection has been broken, before we ask if
-	// the machine can be suspended (w/o there is a race condition)
+	// the machine can be suspended (w/o this there is a race condition)
 	time.Sleep(1 * time.Second)
 }

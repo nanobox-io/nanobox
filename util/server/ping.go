@@ -24,7 +24,7 @@ func Ping() (bool, error) {
 	//
 	res, err := client.Get(config.ServerURL + "/ping")
 	if err != nil {
-		return err == nil, err
+		return false, err
 	}
 	defer res.Body.Close()
 

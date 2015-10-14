@@ -66,15 +66,19 @@ increasing your max file descriptor limit to re-enable this functionality.
 		return err
 	}
 
+	switch {
+
 	// if the file is a directory, recursively add each subsequent directory to
-	// the watch list
-	if fi.Mode().IsDir() {
+	// the watch list; fsnotify will watch all files in a directory
+	case fi.Mode().IsDir():
+		fmt.Println("WATCH DIR!", path)
 		if err = filepath.Walk(path, watchDir); err != nil {
 			return err
 		}
 
-		// else, if the file is just a file, add only it to the watch list
-	} else {
+	// if the file is just a file, add only it to the watch list
+	case fi.Mode().IsRegular():
+		fmt.Println("WATCH FILE!", path)
 		if err = watcher.Add(path); err != nil {
 			return err
 		}
@@ -94,17 +98,42 @@ increasing your max file descriptor limit to re-enable this functionality.
 
 			switch event.Op {
 
-			// the watcher needs to watch itself to see if any directories are added
-			// to then add them to the list of watched files
+			// the watcher needs to watch itself to see if any files are added to then
+			// add them to the list of watched files
 			case fsnotify.Create:
+
+				//
 				fi, err := os.Stat(event.Name)
-				if err := watchDir(event.Name, fi, err); err != nil {
-					fmt.Printf(stylish.ErrBullet("Unable to watch files - '%v'", err))
+
+				// ensure that the file still exists before trying to watch it; ran into
+				// a case with VIM where some tmp file (.swpx) was create and removed in
+				// the same instant causing the watch to panic
+				if fi != nil {
+
+					// add file/dir to watch list
+					switch {
+
+					// if the create event is for a single file, watch it
+					case fi.Mode().IsRegular():
+						fmt.Println("WATCHER WATCH FILE", event.Name)
+						if err = watcher.Add(event.Name); err != nil {
+							fmt.Printf(stylish.ErrBullet("Unable to watch file - '%v'", err))
+						}
+
+					// if the create event is for a directory, recursively add all files
+					case fi.Mode().IsDir():
+						fmt.Println("WATCHER WATCH DIR", event.Name)
+						if err := watchDir(event.Name, fi, err); err != nil {
+							fmt.Printf(stylish.ErrBullet("Unable to watch files - '%v'", err))
+						}
+
+					}
 				}
 
 			// the watcher needs to watch itself to see if any directories are removed
-			// to then remove them from the list of watched files (this may need to happen
-			// recursively)
+			// to then remove them from the list of watched files
+			//
+			// NOTE: this may need to happen recursively
 			case fsnotify.Remove:
 				if err = watcher.Remove(event.Name); err != nil {
 					return err
@@ -131,9 +160,10 @@ increasing your max file descriptor limit to re-enable this functionality.
 // watchDir gets run as a walk func, searching for directories to add watchers to
 func watchDir(path string, fi os.FileInfo, err error) error {
 
-	// since fsnotify can watch all the files in a directory, watchers only need
-	// to be added to each nested directory
+	// recursively add watchers to directores only (fsnotify will watch all files
+	// in an added directory). Also, dont watch any files/dirs on the ignore list
 	if fi.Mode().IsDir() && !isIgnoreDir(fi.Name()) {
+		fmt.Println("WATCHDIR!", path)
 		if err = watcher.Add(path); err != nil {
 			return err
 		}
@@ -165,6 +195,8 @@ func getIgnoreDirs() error {
 	if err != nil {
 		return err
 	}
+
+	fmt.Println("IGNORE DIRS!", string(b))
 
 	return json.Unmarshal(b, &ignoreDirs)
 }

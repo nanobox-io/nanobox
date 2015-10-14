@@ -57,18 +57,18 @@ Nanobox Files  : %s
 
 	//
 	if len(services) >= 1 {
-		fmt.Printf("////////// SERVICES //////////\n\n")
+		fmt.Printf("////////// SERVICES //////////\n")
 
 		//
 		for _, service := range services {
 
-			fmt.Printf("%s :\n", service.UID)
+			fmt.Printf("\n%s :\n", service.UID)
 
 			if service.Name != "" {
-				fmt.Printf("   name : %s\n", service.Name)
+				fmt.Printf("   name  : %s\n", service.Name)
 			}
 
-			fmt.Printf("   host : %s\n", config.Nanofile.Domain)
+			fmt.Printf("   host  : %s\n", config.Nanofile.Domain)
 			fmt.Printf("   ports : %v\n", service.Ports)
 
 			//
@@ -83,7 +83,7 @@ Nanobox Files  : %s
 
 			// show any environment variables
 			if len(service.EnvVars) >= 1 {
-				fmt.Printf("\n   Environment variables:\n")
+				fmt.Printf("   evars :\n")
 
 				for k, v := range service.EnvVars {
 					fmt.Printf("      %s : %s\n", k, v)
