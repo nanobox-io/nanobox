@@ -112,25 +112,9 @@ increasing your max file descriptor limit to re-enable this functionality.
 				// ensure that the file still exists before trying to watch it; ran into
 				// a case with VIM where some tmp file (.swpx) was create and removed in
 				// the same instant causing the watch to panic
-				if fi != nil {
-
-					// add file/dir to watch list
-					switch {
-
-					// if the create event is for a single file, watch it
-					case fi.Mode().IsRegular():
-						// fmt.Println("WATCHER WATCH FILE", event.Name)
-						if err = watcher.Add(event.Name); err != nil {
-							fmt.Printf(stylish.ErrBullet("Unable to watch file - '%v'", err))
-						}
-
-					// if the create event is for a directory, recursively add all files
-					case fi.Mode().IsDir():
-						// fmt.Println("WATCHER WATCH DIR", event.Name)
-						if err := watchDir(event.Name, fi, err); err != nil {
-							fmt.Printf(stylish.ErrBullet("Unable to watch files - '%v'", err))
-						}
-
+				if fi != nil && fi.Mode().IsDir() {
+					if err := watchDir(event.Name, fi, err); err != nil {
+						fmt.Printf(stylish.ErrBullet("Unable to watch files - '%v'", err))
 					}
 				}
 
@@ -164,9 +148,14 @@ increasing your max file descriptor limit to re-enable this functionality.
 // watchDir gets run as a walk func, searching for directories to add watchers to
 func watchDir(path string, fi os.FileInfo, err error) error {
 
+	// don't walk any directory that is an ignore dir
+	if isIgnoreDir(fi.Name()) {
+		return filepath.SkipDir
+	}
+
 	// recursively add watchers to directores only (fsnotify will watch all files
 	// in an added directory). Also, dont watch any files/dirs on the ignore list
-	if fi.Mode().IsDir() && !isIgnoreDir(fi.Name()) {
+	if fi.Mode().IsDir() {
 		if err = watcher.Add(path); err != nil {
 			return err
 		}
@@ -176,9 +165,9 @@ func watchDir(path string, fi os.FileInfo, err error) error {
 }
 
 // isIgnoreDir
-func isIgnoreDir(path string) bool {
+func isIgnoreDir(name string) bool {
 	for _, dir := range ignoreDirs {
-		if dir == path {
+		if dir == name {
 			return true
 		}
 	}
