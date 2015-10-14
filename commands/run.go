@@ -28,7 +28,7 @@ var runCmd = &cobra.Command{
 
 	PreRun:  boot,
 	Run:     run,
-	PostRun: save,
+	PostRun: halt,
 }
 
 //
@@ -50,10 +50,8 @@ func run(ccmd *cobra.Command, args []string) {
 	done := make(chan struct{})
 	go func() {
 		if err := mist.Listen([]string{"job", "deploy"}, mist.DeployUpdates); err != nil {
-
-			save(nil, args)
+			halt(nil, args)
 		}
-		fmt.Println("DONE??")
 		close(done)
 	}()
 
@@ -62,12 +60,8 @@ func run(ccmd *cobra.Command, args []string) {
 		config.Fatal("[commands/run] failed - ", err.Error())
 	}
 
-	fmt.Println("WAITING!")
-
 	// wait for a status update (blocking)
 	<-done
-
-	fmt.Println("DONE!")
 
 	fmt.Printf(`
 --------------------------------------------------------------------------------

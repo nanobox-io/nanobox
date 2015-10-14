@@ -28,7 +28,7 @@ var execCmd = &cobra.Command{
 
 	PreRun:  boot,
 	Run:     execute,
-	PostRun: save,
+	PostRun: halt,
 }
 
 // execute

@@ -29,7 +29,7 @@ var buildCmd = &cobra.Command{
 
 	PreRun:  boot,
 	Run:     build,
-	PostRun: save,
+	PostRun: halt,
 }
 
 // build
@@ -46,14 +46,14 @@ func build(ccmd *cobra.Command, args []string) {
 	done := make(chan struct{})
 	go func() {
 		if err := mist.Listen([]string{"job", "build"}, mist.BuildUpdates); err != nil {
-			config.Fatal("[commands/nanoBuild] failed - ", err.Error())
+			config.Fatal("[commands/build] failed - ", err.Error())
 		}
 		close(done)
 	}()
 
 	// run a build
 	if err := server.Build(""); err != nil {
-		config.Fatal("[commands/nanoBuild] failed - ", err.Error())
+		config.Fatal("[commands/build] failed - ", err.Error())
 	}
 
 	// wait for a status update (blocking)

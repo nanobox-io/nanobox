@@ -61,7 +61,7 @@ func log(ccmd *cobra.Command, args []string) {
 
 		// show mist history
 		if err := server.Logs(v.Encode()); err != nil {
-			config.Fatal("[commands/nanoLog] failed - ", err.Error())
+			config.Fatal("[commands/log] failed - ", err.Error())
 		}
 	}
 }

@@ -32,7 +32,7 @@ func stop(ccmd *cobra.Command, args []string) {
 
 	//
 	if err := vagrant.Suspend(); err != nil {
-		config.Fatal("[commands/nanoboxDown] failed - ", err.Error())
+		config.Fatal("[commands/stop] failed - ", err.Error())
 	}
 
 	// set the mode to be forground next time the machine boots

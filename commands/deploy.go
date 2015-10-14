@@ -31,7 +31,7 @@ var deployCmd = &cobra.Command{
 
 	PreRun:  boot,
 	Run:     deploy,
-	PostRun: save,
+	PostRun: halt,
 }
 
 //
@@ -53,7 +53,7 @@ func deploy(ccmd *cobra.Command, args []string) {
 	done := make(chan struct{})
 	go func() {
 		if err := mist.Listen([]string{"job", "deploy"}, mist.DeployUpdates); err != nil {
-			config.Fatal("[commands/nanoBuild] failed - ", err.Error())
+			config.Fatal("[commands/deploy] failed - ", err.Error())
 		}
 		close(done)
 	}()
@@ -64,7 +64,7 @@ func deploy(ccmd *cobra.Command, args []string) {
 
 	// run a deploy
 	if err := server.Deploy(v.Encode()); err != nil {
-		config.Fatal("[commands/nanoDeploy] failed - ", err.Error())
+		config.Fatal("[commands/deploy] failed - ", err.Error())
 	}
 
 	// wait for a status update (blocking)

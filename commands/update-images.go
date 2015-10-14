@@ -27,7 +27,7 @@ var updateImagesCmd = &cobra.Command{
 
 	PreRun:  boot,
 	Run:     updateImages,
-	PostRun: save,
+	PostRun: halt,
 }
 
 // updateImages
@@ -44,7 +44,7 @@ func updateImages(ccmd *cobra.Command, args []string) {
 	done := make(chan struct{})
 	go func() {
 		if err := mist.Listen([]string{"job", "imageupdate"}, mist.ImageUpdates); err != nil {
-			config.Fatal("[commands/nanoBuild] failed - ", err.Error())
+			config.Fatal("[commands/update-images] failed - ", err.Error())
 		}
 		close(done)
 	}()

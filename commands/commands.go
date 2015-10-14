@@ -158,20 +158,20 @@ func boot(ccmd *cobra.Command, args []string) {
 	}
 }
 
-// save
-func save(ccmd *cobra.Command, args []string) {
+// halt
+func halt(ccmd *cobra.Command, args []string) {
 
 	//
 	server.Unlock()
 
 	//
 	if err := server.Suspend(); err != nil {
-		config.Fatal("[commands/commands] failed - ", err.Error())
+		config.Fatal("[commands/halt] failed - ", err.Error())
 	}
 
 	//
 	if err := vagrant.Suspend(); err != nil {
-		config.Fatal("[commands/nanoboxDown] failed - ", err.Error())
+		config.Fatal("[commands/halt] failed - ", err.Error())
 	}
 }
 
@@ -188,6 +188,6 @@ func sudo(command, msg string) {
 
 	// run command
 	if err := cmd.Run(); err != nil {
-		config.Fatal("[utils/exec]", err.Error())
+		config.Fatal("[commands/halt]", err.Error())
 	}
 }

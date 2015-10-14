@@ -29,7 +29,7 @@ var bootstrapCmd = &cobra.Command{
 
 	PreRun:  boot,
 	Run:     bootstrap,
-	PostRun: save,
+	PostRun: halt,
 }
 
 // bootstrap
@@ -46,14 +46,14 @@ func bootstrap(ccmd *cobra.Command, args []string) {
 	done := make(chan struct{})
 	go func() {
 		if err := mist.Listen([]string{"job", "bootstrap"}, mist.BootstrapUpdates); err != nil {
-			config.Fatal("[commands/nanoBuild] failed - ", err.Error())
+			config.Fatal("[commands/bootstrap] failed - ", err.Error())
 		}
 		close(done)
 	}()
 
 	// run a bootstrap
 	if err := server.Bootstrap(""); err != nil {
-		config.Fatal("[commands/nanoBootstrap] failed - ", err.Error())
+		config.Fatal("[commands/bootstrap] failed - ", err.Error())
 	}
 
 	// wait for a status update (blocking)
