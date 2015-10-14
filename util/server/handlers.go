@@ -71,6 +71,7 @@ func NotifyRebuild(event *fsnotify.Event) (err error) {
 		}
 
 		if err != nil {
+
 			fmt.Printf(`
 ! AN ERROR PREVENTED NANOBOX FROM BUILDING YOUR ENVIRONMENT !
 - View the output above to diagnose the source of the problem
@@ -79,6 +80,7 @@ func NotifyRebuild(event *fsnotify.Event) (err error) {
 
 			//
 			config.VMfile.SuspendableIs(false)
+			return
 		}
 
 		// block until rebuild is complete

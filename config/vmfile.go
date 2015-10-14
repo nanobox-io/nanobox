@@ -10,6 +10,14 @@ package config
 
 import "os"
 
+// VMfileConfig represents all available/expected .vmfile configurable options
+type VMfileConfig struct {
+	Deployed    bool   // was the most recent deploy successufl
+	Mode        string // foreground/background
+	Status      string // the current staus of the VM
+	Suspendable bool   // is the VM able to be suspended
+}
+
 // ParseVMfile
 func ParseVMfile() *VMfileConfig {
 
@@ -22,7 +30,6 @@ func ParseVMfile() *VMfileConfig {
 
 		vmfile.Deployed = false
 		vmfile.Mode = "foreground"
-		vmfile.Status = "not created"
 		vmfile.Suspendable = true
 
 		writeVMfile()
@@ -56,15 +63,6 @@ func (c *VMfileConfig) IsMode(mode string) bool {
 }
 
 //
-func (c *VMfileConfig) IsStatus(status string) bool {
-	if err := ParseConfig(AppDir+"/.vmfile", c); err != nil {
-		Fatal("[config/vmfile] ParseConfig() failed", err.Error())
-	}
-
-	return c.Status == status
-}
-
-//
 func (c *VMfileConfig) IsSuspendable() bool {
 	if err := ParseConfig(AppDir+"/.vmfile", c); err != nil {
 		Fatal("[config/vmfile] ParseConfig() failed", err.Error())
@@ -85,20 +83,8 @@ func (c *VMfileConfig) ModeIs(mode string) {
 }
 
 //
-func (c *VMfileConfig) StatusIs(status string) {
-	c.Status = status
-	writeVMfile()
-}
-
-//
 func (c *VMfileConfig) SuspendableIs(suspendable bool) {
 	c.Suspendable = suspendable
-	writeVMfile()
-}
-
-//
-func (c *VMfileConfig) UUIDIs(uuid string) {
-	c.UUID = uuid
 	writeVMfile()
 }
 

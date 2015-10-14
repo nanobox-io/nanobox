@@ -16,6 +16,17 @@ import (
 	"path/filepath"
 )
 
+// NanofileConfig represents all available/expected .nanofile configurable options
+type NanofileConfig struct {
+	CPUCap   int    `json:"cpu_cap"`  // max %CPU usage allowed to the guest vm
+	CPUs     int    `json:"cpus"`     // number of CPUs to dedicate to the guest vm
+	Domain   string `json:"domain"`   // the domain to use in conjuntion with the ip when accesing the guest vm (defaults to <Name>.dev)
+	IP       string `json:"ip"`       // the ip added to the /etc/hosts file for accessing the guest vm
+	Name     string `json:"name"`     // the name given to the project (defaults to cwd)
+	Provider string `json:"provider"` // guest vm provider (virtual box, vmware, etc)
+	RAM      int    `json:"ram"`      // ammount of RAM to dedicate to the guest vm
+}
+
 // ParseNanofile
 func ParseNanofile() *NanofileConfig {
 

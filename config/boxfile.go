@@ -13,6 +13,13 @@ import (
 	"os"
 )
 
+// BoxfileConfig represents all available/expected Boxfile configurable options
+type BoxfileConfig struct {
+	Build struct {
+		Engine string `json:"engine"`
+	}
+}
+
 // ParseBoxfile
 func ParseBoxfile() *BoxfileConfig {
 

@@ -43,19 +43,21 @@ func Status() (status string) {
 	// get the initial data
 	machineIndex := make(map[string]json.RawMessage)
 	if err := json.Unmarshal(b, &machineIndex); err != nil {
-		config.Fatal("[util/vagrant/status] failed - ", err.Error())
+		config.Fatal("[util/vagrant/status] machineIndex failed - ", err.Error())
 	}
 
 	// read the machines from machineIndex
 	machines := make(map[string]json.RawMessage)
 	if err := json.Unmarshal(machineIndex["machines"], &machines); err != nil {
-		config.Fatal("[util/vagrant/status] failed - ", err.Error())
+		config.Fatal("[util/vagrant/status] machines failed - ", err.Error())
 	}
 
 	// attempt to pull the machine based on the uuid
 	machine := Machine{}
-	if err := json.Unmarshal(machines[uuid], &machine); err != nil {
-		config.Fatal("[util/vagrant/status] failed - ", err.Error())
+	if m, ok := machines[uuid]; ok {
+		if err := json.Unmarshal(m, &machine); err != nil {
+			config.Fatal("[util/vagrant/status] machine failed - ", err.Error())
+		}
 	}
 
 	// if the uuid is "" or not found in the machines, then the resulting State
@@ -66,9 +68,6 @@ func Status() (status string) {
 	if status == "" {
 		status = "not created"
 	}
-
-	// set the status in the .vmfile
-	// config.VMfile.StatusIs(status)
 
 	return
 }

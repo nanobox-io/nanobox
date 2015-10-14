@@ -12,17 +12,12 @@ import (
 	"fmt"
 
 	"github.com/nanobox-io/nanobox-cli/config"
-	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
 // DeployUpdates
-func DeployUpdates(status string) (listen bool) {
+func DeployUpdates(status string) (err error) {
 
 	switch status {
-
-	// continue listening until one of the following statuses is received
-	default:
-		listen = true
 
 	// complete (deploy succeeded)
 	case "complete":
@@ -31,14 +26,13 @@ func DeployUpdates(status string) (listen bool) {
 	// errored (deploy failed)
 	case "errored":
 		config.VMfile.DeployedIs(false)
+		config.VMfile.SuspendableIs(false)
 
-		fmt.Println(`
+		err = fmt.Errorf(`
 ! AN ERROR PREVENTED NANOBOX FROM BUILDING YOUR ENVIRONMENT !
 - View the output above to diagnose the source of the problem
 - You can also retry with --verbose for more detailed output
 `)
-
-		config.VMfile.SuspendableIs(false)
 	}
 
 	return
@@ -47,44 +41,35 @@ func DeployUpdates(status string) (listen bool) {
 // BuildUpdates receives a status update from mist.go and determines what
 // to do based on the status. By default it will return, indicating to mist to
 // stop listening.
-func BuildUpdates(status string) (listen bool) {
+func BuildUpdates(status string) (err error) {
 
 	switch status {
-
-	// continue listening until one of the following statuses is received
-	default:
-		listen = true
 
 	// complete (built succeeded)
 	case "complete":
 
 	// unavailable (deploy required)
 	case "unavailable":
-		fmt.Printf(stylish.ErrBullet("Before you can run a build, you must first deploy."))
+		err = fmt.Errorf("Before you can run a build, you must first deploy.")
 
 	// errored (build failed)
 	case "errored":
+		config.VMfile.SuspendableIs(false)
 
-		fmt.Println(`
+		err = fmt.Errorf(`
 ! AN ERROR PREVENTED NANOBOX FROM BUILDING YOUR ENVIRONMENT !
 - View the output above to diagnose the source of the problem
 - You can also retry with --verbose for more detailed output
 `)
-
-		config.VMfile.SuspendableIs(false)
 	}
 
 	return
 }
 
 // BootstrapUpdates
-func BootstrapUpdates(status string) (listen bool) {
+func BootstrapUpdates(status string) (err error) {
 
 	switch status {
-
-	// continue listening until one of the following statuses is received
-	default:
-		listen = true
 
 	// complete (bootstrap succeeded)
 	case "complete":
@@ -92,26 +77,27 @@ func BootstrapUpdates(status string) (listen bool) {
 	// errored (bootstrap failed)
 	case "errored":
 		config.VMfile.SuspendableIs(false)
+		err = fmt.Errorf(`
+! AN ERROR PREVENTED NANOBOX FROM BUILDING YOUR ENVIRONMENT !
+- View the output above to diagnose the source of the problem
+- You can also retry with --verbose for more detailed output
+`)
 	}
 
 	return
 }
 
 // ImageUpdates
-func ImageUpdates(status string) (listen bool) {
+func ImageUpdates(status string) (err error) {
 
 	switch status {
-
-	// continue listening until one of the following statuses is received
-	default:
-		listen = true
 
 	// compelte (image update succeeded)
 	case "complete":
 
 	// errored (image update failed)
 	case "errored":
-		fmt.Printf("Nanobox failed to update docker images")
+		err = fmt.Errorf("Nanobox failed to update docker images")
 	}
 
 	return

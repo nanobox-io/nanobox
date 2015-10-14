@@ -71,7 +71,7 @@ var (
 )
 
 // Listen connects a to mist, subscribes tags, and listens for 'model' updates
-func Listen(tags []string, handle func(string) bool) error {
+func Listen(tags []string, handle func(string) error) error {
 
 	// only subscribe if a subscription doesn't already exist
 	if _, ok := subscriptions[strings.Join(tags, "")]; ok {
@@ -81,13 +81,13 @@ func Listen(tags []string, handle func(string) bool) error {
 	// connect
 	client, err := connect()
 	if err != nil {
-		fmt.Printf(stylish.ErrBullet("Failed to create client - %s", err.Error()))
+		return err
 	}
 	defer client.Close()
 
 	// subscribe
 	if err := subscribe(client, tags); err != nil {
-		fmt.Printf(stylish.ErrBullet("Failed to subscribe to %v - %s", tags, err.Error()))
+		return err
 	}
 
 	// add tags to list of subscriptions
@@ -105,9 +105,7 @@ func Listen(tags []string, handle func(string) bool) error {
 
 		// handle the status; when the handler returns false, it's time to break the
 		// stream
-		if listen := handle(model.Document.Status); !listen {
-			return nil
-		}
+		return handle(model.Document.Status)
 	}
 
 	return nil
@@ -127,13 +125,15 @@ func Stream(tags []string, handle func(Log)) {
 	// connect
 	client, err := connect()
 	if err != nil {
-		fmt.Printf(stylish.ErrBullet("Failed to create client - %s", err.Error()))
+		fmt.Printf(stylish.ErrBullet("Failed to create client - %s\n", err.Error()))
+		return
 	}
 	defer client.Close()
 
 	// subscribe
 	if err := subscribe(client, tags); err != nil {
-		fmt.Printf(stylish.ErrBullet("Failed to subscribe to %v - %s", tags, err.Error()))
+		fmt.Printf(stylish.ErrBullet("Failed to subscribe to %v - %s\n", tags, err.Error()))
+		return
 	}
 
 	// add tags to list of subscriptions
@@ -201,5 +201,4 @@ func ProcessLog(log Log) {
 	} else {
 		print.Color("[light_red]%v - %v[reset]", log.Time, log.Content)
 	}
-
 }

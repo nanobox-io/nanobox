@@ -125,6 +125,9 @@ func boot(ccmd *cobra.Command, args []string) {
 
 	// get the status to know what needs to happen with the VM
 	status := vagrant.Status()
+
+	fmt.Println("STATUS?", status)
+
 	switch status {
 
 	// vm is running - do nothing
@@ -148,9 +151,6 @@ func boot(ccmd *cobra.Command, args []string) {
 
 	//
 	server.Lock()
-
-	// after the VM is running updated the .vmfile
-	config.VMfile.StatusIs(status)
 
 	// if the background flag is passed, set the mode to "background"
 	if config.Background {
