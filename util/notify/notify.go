@@ -132,9 +132,9 @@ increasing your max file descriptor limit to re-enable this functionality.
 				return err
 			}
 
-			// handle any errors by calling the handler function
-		case err := <-watcher.Errors:
-			fmt.Printf(stylish.ErrBullet("Unable to watch files - '%v'", err))
+		// handle any errors by calling the handler function
+		case <-watcher.Errors:
+			// do something with watch errors?
 
 			// listen for any signals and retun execution back to the CLI to finish
 			// w/e it might need to finish

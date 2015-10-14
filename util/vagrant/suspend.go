@@ -19,7 +19,7 @@ import (
 func Suspend() error {
 
 	// suspend the vm
-	fmt.Printf("\r%s", stylish.Bullet("Suspending nanobox..."))
+	fmt.Printf("\n%s", stylish.Bullet("Suspending nanobox..."))
 	if err := runInContext(exec.Command("vagrant", "suspend")); err != nil {
 		return err
 	}

@@ -70,6 +70,9 @@ func NotifyRebuild(event *fsnotify.Event) (err error) {
 			err = Deploy("")
 		}
 
+		// block until rebuild is complete
+		<-done
+
 		if err != nil {
 
 			fmt.Printf(`
@@ -82,9 +85,6 @@ func NotifyRebuild(event *fsnotify.Event) (err error) {
 			config.VMfile.SuspendableIs(false)
 			return
 		}
-
-		// block until rebuild is complete
-		<-done
 
 		fmt.Printf(`
 --------------------------------------------------------------------------------

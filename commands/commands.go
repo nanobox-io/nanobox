@@ -126,8 +126,6 @@ func boot(ccmd *cobra.Command, args []string) {
 	// get the status to know what needs to happen with the VM
 	status := vagrant.Status()
 
-	fmt.Println("STATUS?", status)
-
 	switch status {
 
 	// vm is running - do nothing
@@ -173,6 +171,9 @@ func halt(ccmd *cobra.Command, args []string) {
 	if err := vagrant.Suspend(); err != nil {
 		config.Fatal("[commands/halt] failed - ", err.Error())
 	}
+
+	//
+	// os.Exit(0)
 }
 
 // sudo runs a command as sudo

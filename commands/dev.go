@@ -56,16 +56,23 @@ func dev(ccmd *cobra.Command, args []string) {
 		go mist.Stream([]string{"log", "deploy"}, mist.PrintLogStream)
 
 		// listen for status updates
-		done := make(chan struct{})
+		errch := make(chan error)
 		go func() {
-			if err := mist.Listen([]string{"job", "deploy"}, mist.DeployUpdates); err != nil {
-				halt(nil, args)
-			}
-			close(done)
+			errch <- mist.Listen([]string{"job", "deploy"}, mist.DeployUpdates)
 		}()
 
 		// wait for a status update (blocking)
-		<-done
+		err := <-errch
+
+		switch {
+
+		//
+		case err == nil:
+
+		//
+		case err != nil:
+			fmt.Printf(err.Error())
+		}
 	}
 
 	// begin watching for file changes (non blocking)
@@ -83,5 +90,5 @@ func dev(ccmd *cobra.Command, args []string) {
 	//
 	server.Exec("console", "")
 
-	// PostRun: save
+	// PostRun: halt
 }

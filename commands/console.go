@@ -50,5 +50,5 @@ func console(ccmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	// PostRun: save
+	// PostRun: halt
 }

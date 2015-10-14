@@ -43,12 +43,9 @@ func bootstrap(ccmd *cobra.Command, args []string) {
 	go mist.Stream([]string{"log", "deploy"}, mist.PrintLogStream)
 
 	// listen for status updates
-	done := make(chan struct{})
+	errch := make(chan error)
 	go func() {
-		if err := mist.Listen([]string{"job", "bootstrap"}, mist.BootstrapUpdates); err != nil {
-			config.Fatal("[commands/bootstrap] failed - ", err.Error())
-		}
-		close(done)
+		errch <- mist.Listen([]string{"job", "bootstrap"}, mist.BootstrapUpdates)
 	}()
 
 	// run a bootstrap
@@ -57,7 +54,17 @@ func bootstrap(ccmd *cobra.Command, args []string) {
 	}
 
 	// wait for a status update (blocking)
-	<-done
+	err := <-errch
 
-	// PostRun: save
+	switch {
+
+	//
+	case err == nil:
+
+	//
+	case err != nil:
+		fmt.Printf(err.Error())
+	}
+
+	// PostRun: halt
 }

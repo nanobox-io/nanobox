@@ -55,5 +55,5 @@ func execute(ccmd *cobra.Command, args []string) {
 	//
 	server.Exec("command", v.Encode())
 
-	// PostRun: save
+	// PostRun: halt
 }
