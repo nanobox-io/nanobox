@@ -29,8 +29,14 @@ func init() {
 	// create a console logger
 	Console = lumber.NewConsoleLogger(lumber.INFO)
 
+	// try to use the logfile if the app exists, if not just use the default log
+	logfile := config.AppDir + "/vagrant.log"
+	if _, err := os.Stat(logfile); err != nil {
+		logfile = config.Home + "/nanobox.log"
+	}
+
 	// create a file logger
-	if Log, err = lumber.NewAppendLogger(config.AppDir + "/vagrant.log"); err != nil {
+	if Log, err = lumber.NewAppendLogger(logfile); err != nil {
 		config.Fatal("[util/vagrant/log] lumber.NewAppendLogger() failed", err.Error())
 	}
 }
