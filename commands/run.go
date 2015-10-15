@@ -85,7 +85,7 @@ func run(ccmd *cobra.Command, args []string) {
 
 		// begin watching for file changes (blocking)
 		if err := notify.Watch(config.CWDir, server.NotifyRebuild); err != nil {
-			fmt.Printf(stylish.ErrBullet("Unable to detect file changes - %v", err.Error()))
+			fmt.Printf(err.Error())
 		}
 
 	//

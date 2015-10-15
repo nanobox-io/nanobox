@@ -21,7 +21,10 @@ import (
 )
 
 // NotifyRebuild
-func NotifyRebuild(event *fsnotify.Event) (err error) {
+func NotifyRebuild(event *fsnotify.Event) error {
+
+	// pause logs
+	config.Silent = true
 
 	//
 	switch event.Op {
@@ -29,11 +32,8 @@ func NotifyRebuild(event *fsnotify.Event) (err error) {
 	// only care about create, write, remove, and rename events
 	case fsnotify.Create, fsnotify.Write, fsnotify.Remove, fsnotify.Rename:
 
-		// pause logs
-		config.Silent = true
-
 		//
-		done := make(chan struct{})
+		errch := make(chan error)
 
 		switch filepath.Base(event.Name) {
 
@@ -44,14 +44,13 @@ func NotifyRebuild(event *fsnotify.Event) (err error) {
 `)
 
 			go func() {
-				if err := mist.Listen([]string{"job", "build"}, mist.BuildUpdates); err != nil {
-					config.Fatal("[commands/nanoBuild] failed - ", err.Error())
-				}
-				close(done)
+				errch <- mist.Listen([]string{"job", "build"}, mist.BuildUpdates)
 			}()
 
 			//
-			err = Build("")
+			if err := Build(""); err != nil {
+				return err
+			}
 
 		// if the file changes is the Boxfile, deploy
 		case "Boxfile":
@@ -60,45 +59,41 @@ func NotifyRebuild(event *fsnotify.Event) (err error) {
 `)
 
 			go func() {
-				if err := mist.Listen([]string{"job", "deploy"}, mist.DeployUpdates); err != nil {
-					config.Fatal("[commands/nanoBuild] failed - ", err.Error())
-				}
-				close(done)
+				errch <- mist.Listen([]string{"job", "deploy"}, mist.DeployUpdates)
 			}()
 
 			//
-			err = Deploy("")
+			if err := Deploy(""); err != nil {
+				return err
+			}
 		}
 
-		// block until rebuild is complete
-		<-done
+		// wait for a status update (blocking)
+		err := <-errch
 
-		if err != nil {
+		switch {
 
+		//
+		case err == nil:
 			fmt.Printf(`
-! AN ERROR PREVENTED NANOBOX FROM BUILDING YOUR ENVIRONMENT !
-- View the output above to diagnose the source of the problem
-- You can also retry with --verbose for more detailed output
-`)
-
-			//
-			config.VMfile.SuspendableIs(false)
-			return
-		}
-
-		fmt.Printf(`
 --------------------------------------------------------------------------------
 [√] APP SUCCESSFULLY REBUILT   ///   DEV URL : %v
 --------------------------------------------------------------------------------
 
 ++> STREAMING LOGS (ctrl-c to exit) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-`, config.Nanofile.Domain)
+	`, config.Nanofile.Domain)
 
-		// resume logs
-		config.Silent = false
+		//
+		case err != nil:
+			config.VMfile.SuspendableIs(false)
+			return err
+		}
 	}
 
-	return
+	// resume logs
+	config.Silent = false
+
+	return nil
 }
 
 // NotifyServer
