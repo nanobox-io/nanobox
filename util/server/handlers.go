@@ -21,7 +21,7 @@ import (
 )
 
 // NotifyRebuild
-func NotifyRebuild(event *fsnotify.Event) error {
+func NotifyRebuild(event *fsnotify.Event) (err error) {
 
 	// pause logs
 	config.Silent = true
@@ -48,8 +48,8 @@ func NotifyRebuild(event *fsnotify.Event) error {
 			}()
 
 			//
-			if err := Build(""); err != nil {
-				return err
+			if err = Build(""); err != nil {
+				return
 			}
 
 		// if the file changes is the Boxfile, deploy
@@ -63,19 +63,20 @@ func NotifyRebuild(event *fsnotify.Event) error {
 			}()
 
 			//
-			if err := Deploy(""); err != nil {
-				return err
+			if err = Deploy(""); err != nil {
+				return
 			}
 		}
 
 		// wait for a status update (blocking)
-		err := <-errch
-
-		switch {
+		err = <-errch
 
 		//
-		case err == nil:
-			fmt.Printf(`
+		if err != nil {
+			return
+		}
+
+		fmt.Printf(`
 --------------------------------------------------------------------------------
 [√] APP SUCCESSFULLY REBUILT   ///   DEV URL : %v
 --------------------------------------------------------------------------------
@@ -83,17 +84,12 @@ func NotifyRebuild(event *fsnotify.Event) error {
 ++> STREAMING LOGS (ctrl-c to exit) >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	`, config.Nanofile.Domain)
 
-		//
-		case err != nil:
-			config.VMfile.SuspendableIs(false)
-			return err
-		}
 	}
 
 	// resume logs
 	config.Silent = false
 
-	return nil
+	return
 }
 
 // NotifyServer

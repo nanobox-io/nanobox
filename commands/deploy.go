@@ -67,14 +67,10 @@ func deploy(ccmd *cobra.Command, args []string) {
 	// wait for a status update (blocking)
 	err := <-errch
 
-	switch {
-
 	//
-	case err == nil:
-
-	//
-	case err != nil:
+	if err != nil {
 		fmt.Printf(err.Error())
+		return
 	}
 
 	// PostRun: halt
