@@ -41,7 +41,7 @@ It is _**highly recommended**_ that you use [git bash](http://git-scm.com/downlo
 
 
 ### Usage
-```go
+```
 Usage:
   nanobox [flags]
   nanobox [command]
