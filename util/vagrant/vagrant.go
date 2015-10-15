@@ -15,6 +15,8 @@ import (
 	"os/exec"
 	"time"
 
+	"github.com/jcelliott/lumber"
+
 	"github.com/nanobox-io/nanobox-cli/config"
 	"github.com/nanobox-io/nanobox-cli/util/file"
 )
@@ -47,6 +49,12 @@ func HaveImage() bool {
 
 // runInContext runs a command in the context of a Vagrantfile (from the same dir)
 func runInContext(cmd *exec.Cmd) error {
+
+	// create a file logger for all vagrant related output
+	log, err := lumber.NewAppendLogger(config.AppDir + "/vagrant.log")
+	if err != nil {
+		config.Fatal("[util/vagrant/vagrant] lumber.NewFileLogger() failed", err.Error())
+	}
 
 	// run the command from ~/.nanobox/apps/<config.App>. if the directory doesn't
 	// exist, simply return; running the command from the directory that contains
@@ -112,6 +120,9 @@ func runInContext(cmd *exec.Cmd) error {
 	go func() {
 		for stdoutScanner.Scan() {
 
+			// log each line of output to the log
+			log.Info(stdoutScanner.Text())
+
 			//
 			switch stdoutScanner.Text() {
 			case fmt.Sprintf("==> %v: VirtualBox VM is already running.", config.Nanofile.Name):
@@ -153,7 +164,7 @@ func runInContext(cmd *exec.Cmd) error {
 	stderrScanner := bufio.NewScanner(stderr)
 	go func() {
 		for stderrScanner.Scan() {
-			config.Log.Error(stderrScanner.Text())
+			log.Error(stderrScanner.Text())
 		}
 	}()
 

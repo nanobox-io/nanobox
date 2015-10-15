@@ -11,11 +11,8 @@ package config
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/jcelliott/lumber"
-
-	// api "github.com/nanobox-io/nanobox-api-client"
 )
 
 //
@@ -27,36 +24,12 @@ var (
 // init
 func init() {
 
-	// check for a ~/.nanobox/nanobox.log file and create one if it's not found
-	// NOTE: this is handled by the current logger (Lumber) however this may not
-	// always be the case, so this is left in as a fallback
-	logfile := filepath.Clean(Root + "/nanobox.log")
-	// if _, err := os.Stat(logfile); err != nil {
-	// 	fmt.Printf(stylish.Bullet("Creating %s directory", logfile))
-	// 	f, err := os.Create(logfile)
-	// 	if err != nil {
-	// 		return err
-	// 	}
-	// 	defer f.Close()
-	// }
+	// create a console logger
+	Console = lumber.NewConsoleLogger(lumber.INFO)
 
-	// set the default log level
-	loglvl := lumber.INFO
-
-	// check for debug mode and set the appropriate log level
-	// if os.Args[len(os.Args)-1] == "--debug" {
-	// 	loglvl = lumber.DEBUG
-	//
-	// 	//
-	// 	api.Debug = true
-	// }
-
-	//
-	Console = lumber.NewConsoleLogger(loglvl)
-
-	// create a logger
-	if Log, err = lumber.NewFileLogger(logfile, loglvl, lumber.ROTATE, 100, 1, 100); err != nil {
-		Fatal("[config/log] lumber.NewFileLogger() failed", err.Error())
+	// create a file logger
+	if Log, err = lumber.NewAppendLogger(Root + "/nanobox.log"); err != nil {
+		Fatal("[config/log] lumber.NewTruncateLogger() failed", err.Error())
 	}
 }
 
