@@ -21,6 +21,7 @@ import (
 var (
 	Console *lumber.ConsoleLogger
 	Log     *lumber.FileLogger
+	logfile string
 )
 
 // init
@@ -30,7 +31,7 @@ func init() {
 	Console = lumber.NewConsoleLogger(lumber.INFO)
 
 	// try to use the logfile if the app exists, if not just use the default log
-	logfile := config.AppDir + "/server.log"
+	logfile = config.AppDir + "/server.log"
 	if _, err := os.Stat(logfile); err != nil {
 		logfile = config.Root + "/nanobox.log"
 	}
@@ -55,7 +56,7 @@ func Info(msg string, debug bool) {
 
 // Fatal
 func Fatal(msg, err string) {
-	fmt.Printf("Nanobox server errored (See %s/server.log for details). Exiting...", config.AppDir)
+	fmt.Printf("Nanobox server errored (See %s for details). Exiting...", logfile)
 	Log.Fatal(fmt.Sprintf("%s - %s", msg, err))
 	Log.Close()
 	os.Exit(1)
