@@ -49,7 +49,7 @@ func dev(ccmd *cobra.Command, args []string) {
 
 		// run a deploy
 		if err := server.Deploy(""); err != nil {
-			config.Fatal("[commands/dev] failed - ", err.Error())
+			server.Fatal("[commands/dev] server.Deploy() failed - ", err.Error())
 		}
 
 		// stream log output

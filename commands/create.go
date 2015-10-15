@@ -54,7 +54,7 @@ func create(ccmd *cobra.Command, args []string) {
 	// boot the vm
 	fmt.Printf(stylish.Bullet("Creating a nanobox"))
 	if err := vagrant.Up(); err != nil {
-		config.Fatal("[commands/create] failed - ", err.Error())
+		vagrant.Fatal("[commands/create] vagrant.Up() failed - ", err.Error())
 	}
 
 	// after the machine boots, update the docker images

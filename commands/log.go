@@ -14,7 +14,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox-cli/config"
 	"github.com/nanobox-io/nanobox-cli/util/server"
 	"github.com/nanobox-io/nanobox-cli/util/server/mist"
 	"github.com/nanobox-io/nanobox-golang-stylish"
@@ -61,7 +60,7 @@ func log(ccmd *cobra.Command, args []string) {
 
 		// show mist history
 		if err := server.Logs(v.Encode()); err != nil {
-			config.Fatal("[commands/log] failed - ", err.Error())
+			server.Fatal("[commands/log] server.Logs() failed - ", err.Error())
 		}
 	}
 }

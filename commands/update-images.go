@@ -13,7 +13,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox-cli/config"
 	"github.com/nanobox-io/nanobox-cli/util/server"
 	"github.com/nanobox-io/nanobox-cli/util/server/mist"
 	"github.com/nanobox-io/nanobox-golang-stylish"
@@ -48,7 +47,7 @@ func updateImages(ccmd *cobra.Command, args []string) {
 
 	// run an image update
 	if err := server.Update(""); err != nil {
-		config.Fatal("[commands/imagesUpdate] failed - ", err.Error())
+		server.Fatal("[commands/imagesUpdate] server.Update() failed - ", err.Error())
 	}
 
 	// wait for a status update (blocking)

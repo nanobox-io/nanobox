@@ -16,7 +16,10 @@ import (
 	"time"
 
 	"github.com/nanobox-io/nanobox-cli/config"
-	// "github.com/nanobox-io/nanobox-golang-stylish"
+)
+
+var (
+	err error //
 )
 
 // Service

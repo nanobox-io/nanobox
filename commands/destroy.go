@@ -53,7 +53,7 @@ func destroy(ccmd *cobra.Command, args []string) {
 
 		// dont care if the project no longer exists... thats what we're doing anyway
 		if err != err.(*os.PathError) {
-			config.Fatal("[commands/destroy] failed - ", err.Error())
+			vagrant.Fatal("[commands/destroy] vagrant.Destroy() failed - ", err.Error())
 		}
 	}
 

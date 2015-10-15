@@ -15,30 +15,14 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/jcelliott/lumber"
-
 	"github.com/nanobox-io/nanobox-cli/config"
 	"github.com/nanobox-io/nanobox-cli/util/file"
 )
 
-// Run runs a vagrant command (no need to be in the context of a Vagrantfile)
-func Run() (err error) {
-
-	//
-	if err = setContext(config.AppDir); err != nil {
-		return
-	}
-
-	cmd := exec.Command("vagrant", "ssh")
-
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	// start the command; we need this to 'fire and forget' so that we can manually
-	// capture and modify the commands output
-	return cmd.Run()
-}
+//
+var (
+	err error //
+)
 
 // HaveImage returns based on wether the nanobox vagrant image is found on the
 // machine or not
@@ -50,19 +34,11 @@ func HaveImage() bool {
 // runInContext runs a command in the context of a Vagrantfile (from the same dir)
 func runInContext(cmd *exec.Cmd) error {
 
-	// create a file logger for all vagrant related output
-	log, err := lumber.NewAppendLogger(config.AppDir + "/vagrant.log")
-	if err != nil {
-		config.Fatal("[util/vagrant/vagrant] lumber.NewFileLogger() failed", err.Error())
-	}
-
 	// run the command from ~/.nanobox/apps/<config.App>. if the directory doesn't
 	// exist, simply return; running the command from the directory that contains
 	// the Vagratfile ensure that the command can atleast run (especially in cases
 	// like 'create' where a VM hadn't been created yet, and a UUID isn't available)
-	if err := setContext(config.AppDir); err != nil {
-		return err
-	}
+	setContext(config.AppDir)
 
 	// start a goroutine that will act as an 'outputer' allowing us to add 'dots'
 	// to the end of each line (as these lines are a reduced version of the actual
@@ -110,7 +86,13 @@ func runInContext(cmd *exec.Cmd) error {
 	// if needed a stderr pipe could also be created at some point
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		return err
+		config.Fatal("[util/vagrant/vagrant] cmd.StdoutPipe() failed - ", err.Error())
+	}
+
+	// create a stderr pipe that will write any error messages to the log
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		config.Fatal("[util/vagrant/vagrant] cmd.StderrPipe() failed - ", err.Error())
 	}
 
 	// scan the command output intercepting only 'important' lines of vagrant output'
@@ -121,7 +103,7 @@ func runInContext(cmd *exec.Cmd) error {
 		for stdoutScanner.Scan() {
 
 			// log each line of output to the log
-			log.Info(stdoutScanner.Text())
+			Log.Info(stdoutScanner.Text())
 
 			//
 			switch stdoutScanner.Text() {
@@ -154,17 +136,11 @@ func runInContext(cmd *exec.Cmd) error {
 		close(output)
 	}()
 
-	// create a stderr pipe that will write any error messages to the log
-	stderr, err := cmd.StderrPipe()
-	if err != nil {
-		return err
-	}
-
 	// log any command errors to the log
 	stderrScanner := bufio.NewScanner(stderr)
 	go func() {
 		for stderrScanner.Scan() {
-			log.Error(stderrScanner.Text())
+			Log.Error(stderrScanner.Text())
 		}
 	}()
 
@@ -181,7 +157,9 @@ func runInContext(cmd *exec.Cmd) error {
 	}
 
 	// switch back to project dir
-	return setContext(config.CWDir)
+	setContext(config.CWDir)
+
+	return nil
 }
 
 // add adds the nanobox vagrant image to the list of images (always overriding the
@@ -197,7 +175,7 @@ func download() error {
 	// download mv
 	box, err := os.Create(config.Root + "/nanobox-boot2docker.box")
 	if err != nil {
-		return err
+		config.Fatal("[util/vagrant/vagrant] os.Create() failed - ", err.Error())
 	}
 	defer box.Close()
 
@@ -210,7 +188,7 @@ func download() error {
 	// download vm md5
 	md5, err := os.Create(config.Root + "/nanobox-boot2docker.md5")
 	if err != nil {
-		return err
+		config.Fatal("[util/vagrant/vagrant] os.Create() failed - ", err.Error())
 	}
 	defer md5.Close()
 
@@ -219,6 +197,8 @@ func download() error {
 }
 
 // setContext changes the working directory to the designated context
-func setContext(context string) error {
-	return os.Chdir(context)
+func setContext(context string) {
+	if err := os.Chdir(context); err != nil {
+		config.Fatal("[util/vagrant/vagrant] os.Chdir() failed -", err.Error())
+	}
 }

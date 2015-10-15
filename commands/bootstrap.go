@@ -13,7 +13,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox-cli/config"
 	"github.com/nanobox-io/nanobox-cli/util/server"
 	"github.com/nanobox-io/nanobox-cli/util/server/mist"
 	"github.com/nanobox-io/nanobox-golang-stylish"
@@ -50,7 +49,7 @@ func bootstrap(ccmd *cobra.Command, args []string) {
 
 	// run a bootstrap
 	if err := server.Bootstrap(""); err != nil {
-		config.Fatal("[commands/bootstrap] failed - ", err.Error())
+		server.Fatal("[commands/bootstrap] server.Bootstrap() failed - ", err.Error())
 	}
 
 	// wait for a status update (blocking)

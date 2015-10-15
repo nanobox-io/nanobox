@@ -18,7 +18,7 @@ import (
 )
 
 // Init
-func Init() error {
+func Init() {
 
 	// create Vagrantfile
 	vagrantfile, err := os.Create(config.AppDir + "/Vagrantfile")
@@ -167,6 +167,4 @@ Vagrant.configure(2) do |config|
 
 	end
 end`, config.Nanofile.Name, config.Nanofile.Domain, network, synced_folders, provider, devmode)))
-
-	return nil
 }

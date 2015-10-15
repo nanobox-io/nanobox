@@ -19,9 +19,7 @@ import (
 func SSH() error {
 
 	//
-	if err := setContext(config.AppDir); err != nil {
-		return err
-	}
+	setContext(config.AppDir)
 
 	cmd := exec.Command("vagrant", "ssh")
 

@@ -24,7 +24,7 @@ import (
 
 	// "github.com/nanobox-io/nanobox-cli/auth"
 	// "github.com/nanobox-io/nanobox-cli/ui"
-	// "github.com/nanobox-io/nanobox-cli/config"
+	"github.com/nanobox-io/nanobox-cli/config"
 )
 
 var GZ *gzip.Writer
@@ -92,7 +92,7 @@ func Download(path string, w io.Writer) error {
 
 	b, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return err
+		config.Fatal("[util/file/file] ioutil.ReadAll() failed - ", err.Error())
 	}
 
 	w.Write(b)

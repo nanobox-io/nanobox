@@ -8,14 +8,12 @@ package mist
 
 import (
 	"encoding/json"
-	"fmt"
 	"regexp"
 	"strings"
 
 	"github.com/nanobox-io/golang-mist"
 	"github.com/nanobox-io/nanobox-cli/config"
 	"github.com/nanobox-io/nanobox-cli/util/print"
-	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
 //
@@ -79,20 +77,15 @@ func Listen(tags []string, handle func(string) error) error {
 	}
 
 	// connect
-	client, err := connect()
-	if err != nil {
-		return err
-	}
+	client := connect()
 	defer client.Close()
 
 	// subscribe
-	if err := subscribe(client, tags); err != nil {
-		return err
-	}
+	subscribe(client, tags)
+	defer delete(subscriptions, strings.Join(tags, ""))
 
 	// add tags to list of subscriptions
 	subscriptions[strings.Join(tags, "")] = struct{}{}
-	defer delete(subscriptions, strings.Join(tags, ""))
 
 	//
 	model := Model{}
@@ -100,7 +93,7 @@ func Listen(tags []string, handle func(string) error) error {
 
 		// unmarshal the incoming Message
 		if err := json.Unmarshal([]byte(msg.Data), &model); err != nil {
-			return err
+			config.Fatal("[util/server/mist/mist] json.Unmarshal() failed - ", err.Error())
 		}
 
 		// handle the status; when the handler returns false, it's time to break the
@@ -123,22 +116,15 @@ func Stream(tags []string, handle func(Log)) {
 	}
 
 	// connect
-	client, err := connect()
-	if err != nil {
-		fmt.Printf(stylish.ErrBullet("Failed to create client - %s\n", err.Error()))
-		return
-	}
+	client := connect()
 	defer client.Close()
 
 	// subscribe
-	if err := subscribe(client, tags); err != nil {
-		fmt.Printf(stylish.ErrBullet("Failed to subscribe to %v - %s\n", tags, err.Error()))
-		return
-	}
+	subscribe(client, tags)
+	defer delete(subscriptions, strings.Join(tags, ""))
 
 	// add tags to list of subscriptions
 	subscriptions[strings.Join(tags, "")] = struct{}{}
-	defer delete(subscriptions, strings.Join(tags, ""))
 
 	//
 	for msg := range client.Messages() {
@@ -148,7 +134,7 @@ func Stream(tags []string, handle func(Log)) {
 
 		// unmarshal the incoming Message
 		if err := json.Unmarshal([]byte(msg.Data), &log); err != nil {
-			config.Fatal("[util/server/mist] failed - ", err.Error())
+			config.Fatal("[util/server/mist/mist] json.Unmarshal() failed - ", err.Error())
 		}
 
 		//
@@ -157,13 +143,20 @@ func Stream(tags []string, handle func(Log)) {
 }
 
 // connect connects 'mist' to the server running on the guest machine
-func connect() (mist.Client, error) {
-	return mist.NewRemoteClient(config.MistURI)
+func connect() mist.Client {
+	mist, err := mist.NewRemoteClient(config.MistURI)
+	if err != nil {
+		config.Fatal("[util/server/mist/mist] mist.NewRemoteClient() failed - ", err.Error())
+	}
+
+	return mist
 }
 
 // subscribe
-func subscribe(client mist.Client, tags []string) error {
-	return client.Subscribe(tags)
+func subscribe(client mist.Client, tags []string) {
+	if err := client.Subscribe(tags); err != nil {
+		config.Fatal("[util/server/mist/mist] client.Subscribe() failed - ", err.Error())
+	}
 }
 
 // ProcessLog takes a Logvac or Stormpack log and breaks it apart into pieces that

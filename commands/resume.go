@@ -13,7 +13,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox-cli/config"
 	"github.com/nanobox-io/nanobox-cli/util/vagrant"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 )
@@ -37,6 +36,6 @@ func resume(ccmd *cobra.Command, args []string) {
 
 	fmt.Printf(stylish.Bullet("Resuming nanobox..."))
 	if err := vagrant.Resume(); err != nil {
-		config.Fatal("[commands/resume] failed - ", err.Error())
+		vagrant.Fatal("[commands/resume] vagrant.Resume() failed - ", err.Error())
 	}
 }

@@ -164,12 +164,12 @@ func halt(ccmd *cobra.Command, args []string) {
 
 	//
 	if err := server.Suspend(); err != nil {
-		config.Fatal("[commands/halt] failed - ", err.Error())
+		server.Fatal("[commands/halt] server.Suspend() failed - ", err.Error())
 	}
 
 	//
 	if err := vagrant.Suspend(); err != nil {
-		config.Fatal("[commands/halt] failed - ", err.Error())
+		vagrant.Fatal("[commands/halt] vagrant.Suspend() failed - ", err.Error())
 	}
 
 	//

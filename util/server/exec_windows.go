@@ -53,7 +53,7 @@ func Exec(kind, params string) error {
 				// tell nanobox server about the signal; this kills the terminal
 				res, err := Post(fmt.Sprintf("/killexec?signal=%v", sig), "text/plain", nil)
 				if err != nil {
-					fmt.Println(err)
+					Fatal("[util/server/exec_windows] Post() failed - ", err.Error())
 				}
 				defer res.Body.Close()
 			}
@@ -66,7 +66,7 @@ func Exec(kind, params string) error {
 	// setup a raw terminal
 	oldState, err := terminal.SetRawTerminal(stdInFD)
 	if err != nil {
-		return err
+		config.Fatal("[util/server/exec_unix] terminal.SetRawTerminal() failed - ", err.Error())
 	}
 	defer terminal.RestoreTerminal(stdOutFD, oldState)
 

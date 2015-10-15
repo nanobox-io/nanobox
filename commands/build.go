@@ -13,7 +13,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox-cli/config"
 	"github.com/nanobox-io/nanobox-cli/util/server"
 	"github.com/nanobox-io/nanobox-cli/util/server/mist"
 	"github.com/nanobox-io/nanobox-golang-stylish"
@@ -50,7 +49,7 @@ func build(ccmd *cobra.Command, args []string) {
 
 	// run a build
 	if err := server.Build(""); err != nil {
-		config.Fatal("[commands/build] failed - ", err.Error())
+		server.Fatal("[commands/build] server.Build() failed - ", err.Error())
 	}
 
 	// wait for a status update (blocking)

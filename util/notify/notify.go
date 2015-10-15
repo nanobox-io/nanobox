@@ -21,7 +21,6 @@ import (
 	"github.com/go-fsnotify/fsnotify"
 
 	"github.com/nanobox-io/nanobox-cli/config"
-	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
 //
@@ -41,9 +40,7 @@ func Watch(path string, handle func(e *fsnotify.Event) error) error {
 	// get a list of directories that should not be watched; this is done because
 	// there is a limit to how many files can be watched at a time, so folders like
 	// node_modules, bower_components, vendor, etc...
-	if err = getIgnoreDirs(); err != nil {
-		return err
-	}
+	getIgnoreDirs()
 
 	// add source control files to be ignored (git, mercuriel, svn)
 	ignoreDirs = append(ignoreDirs, ".git", ".hg", "trunk")
@@ -52,7 +49,7 @@ func Watch(path string, handle func(e *fsnotify.Event) error) error {
 	watcher, err = fsnotify.NewWatcher()
 	if err != nil {
 		if _, ok := err.(syscall.Errno); ok {
-			fmt.Printf(`
+			return fmt.Errorf(`
 ! WARNING !
 Failed to watch files, max file descriptor limit reached. Nanobox will not
 be able to propagate filesystem events to the virtual machine. Consider
@@ -60,16 +57,15 @@ increasing your max file descriptor limit to re-enable this functionality.
 `)
 		}
 
-		return err
+		config.Fatal("[util/notify/notify] watcher.NewWatcher() failed - ", err.Error())
 	}
 
-	//
+	// return this err because that means the path to the file they are trying to
+	// watch doesn't exist
 	fi, err := os.Stat(path)
 	if err != nil {
 		return err
 	}
-
-	// fmt.Println("IGNORE DIRS!", ignoreDirs)
 
 	switch {
 
@@ -112,9 +108,10 @@ increasing your max file descriptor limit to re-enable this functionality.
 				// a case with VIM where some tmp file (.swpx) was create and removed in
 				// the same instant causing the watch to panic
 				if fi != nil && fi.Mode().IsDir() {
-					if err := watchDir(event.Name, fi, err); err != nil {
-						fmt.Printf(stylish.ErrBullet("Unable to watch files - '%v'", err))
-					}
+
+					// just ignore errors here since there isn't really anything that can
+					// be done about it
+					watchDir(event.Name, fi, err)
 				}
 
 			// the watcher needs to watch itself to see if any directories are removed
@@ -123,7 +120,7 @@ increasing your max file descriptor limit to re-enable this functionality.
 			// NOTE: this may need to happen recursively
 			case fsnotify.Remove:
 				if err = watcher.Remove(event.Name); err != nil {
-					return err
+					config.Fatal("[util/notify/notify] watcher.Remove() failed - ", err.Error())
 				}
 			}
 
@@ -156,7 +153,7 @@ func watchDir(path string, fi os.FileInfo, err error) error {
 	// in an added directory). Also, dont watch any files/dirs on the ignore list
 	if fi.Mode().IsDir() {
 		if err = watcher.Add(path); err != nil {
-			return err
+			config.Fatal("[util/notify/notify] watcher.Add() failed - ", err.Error())
 		}
 	}
 
@@ -174,18 +171,20 @@ func isIgnoreDir(name string) bool {
 }
 
 // getIgnoreDirs
-func getIgnoreDirs() error {
+func getIgnoreDirs() {
 	res, err := http.Get(fmt.Sprintf("%s/libdirs", config.ServerURL))
 	if err != nil {
-		return err
+		config.Fatal("[util/notify/notify] htto.Get() failed - ", err.Error())
 	}
 	defer res.Body.Close()
 
 	//
 	b, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return err
+		config.Fatal("[util/notify/notify] ioutil.ReadAll() failed - ", err.Error())
 	}
 
-	return json.Unmarshal(b, &ignoreDirs)
+	if err := json.Unmarshal(b, &ignoreDirs); err != nil {
+		config.Fatal("[util/notify/notify] json.Unmarshal() failed - ", err.Error())
+	}
 }

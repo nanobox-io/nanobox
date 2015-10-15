@@ -23,7 +23,7 @@ func IsContainerExec(args []string) (found bool) {
 	var services []Service
 	res, err := Get("/services", &services)
 	if err != nil {
-		config.Fatal("[commands/nanoboxExec] failed - ", err.Error())
+		Fatal("[util/server/exec] Get() failed - ", err.Error())
 	}
 	defer res.Body.Close()
 
@@ -84,20 +84,18 @@ the vm or local will be mirrored.
 }
 
 // getTTYSize
-func getTTYSize(fd uintptr) (w, h int) {
+func getTTYSize(fd uintptr) (int, int) {
 
 	ws, err := terminal.GetWinsize(fd)
 	if err != nil {
-		fmt.Printf("Error getting size: %s\n", err)
+		config.Fatal("[util/server/exec] terminal.GetWinsize() failed", err.Error())
 	}
 
 	//
 	if ws == nil {
-		w, h = 0, 0
+		return 0, 0
 	}
 
 	//
-	w, h = int(ws.Width), int(ws.Height)
-
-	return
+	return int(ws.Width), int(ws.Height)
 }

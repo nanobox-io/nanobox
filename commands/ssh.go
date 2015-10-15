@@ -13,7 +13,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox-cli/config"
 	"github.com/nanobox-io/nanobox-cli/util/vagrant"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 )
@@ -37,6 +36,6 @@ func ssh(ccmd *cobra.Command, args []string) {
 
 	fmt.Printf(stylish.Bullet("SSHing into nanobox..."))
 	if err := vagrant.SSH(); err != nil {
-		config.Fatal("[commands/ssh] failed - ", err.Error())
+		vagrant.Fatal("[commands/ssh] vagrant.SSH() failed - ", err.Error())
 	}
 }

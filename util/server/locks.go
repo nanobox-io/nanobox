@@ -20,18 +20,16 @@ var lock net.Conn //
 
 // Lock opens a 'lock' with the server; this is done so that nanobox can know how
 // many clients are currenctly connected to the server
-func Lock() error {
+func Lock() {
 	conn, err := net.Dial("tcp", config.ServerURI)
 	if err != nil {
-		return err
+		config.Fatal("[util/server/locks] net.Dial() failed", err.Error())
 	}
 
 	conn.Write([]byte(fmt.Sprintf("PUT /lock? HTTP/1.1\r\n\r\n")))
 
 	//
 	lock = conn
-
-	return nil
 }
 
 // Unlock closes the suspended 'lock' connection to the server indicating that a

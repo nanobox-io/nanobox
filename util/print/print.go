@@ -48,7 +48,7 @@ func Prompt(p string, v ...interface{}) string {
 
 	input, err := reader.ReadString('\n')
 	if err != nil {
-		config.Fatal("[utils/ui] reader.ReadString() failed", err.Error())
+		config.Fatal("[util/print] reader.ReadString() failed - ", err.Error())
 	}
 
 	return strings.TrimSpace(input)
