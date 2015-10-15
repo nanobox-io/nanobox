@@ -30,7 +30,11 @@ func Exec(kind, params string) error {
 	header(kind)
 
 	// begin watching for changes to the project
-	go notify.Watch(config.CWDir, NotifyServer)
+	go func() {
+		if err := notify.Watch(config.CWDir, NotifyServer); err != nil {
+			fmt.Printf(err.Error())
+		}
+	}()
 
 	// get current terminal info
 	stdIn, stdOut, _ := terminal.StdStreams()

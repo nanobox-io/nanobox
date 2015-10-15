@@ -23,7 +23,7 @@ import (
 
 //
 const (
-	VERSION = "0.15.1"
+	VERSION = "0.15.2"
 
 	SERVER_PORT = ":1757"
 	MIST_PORT   = ":1445"
@@ -128,11 +128,7 @@ func ParseConfig(path string, v interface{}) error {
 	}
 
 	//
-	if err := yaml.Unmarshal(f, v); err != nil {
-		return err
-	}
-
-	return nil
+	return yaml.Unmarshal(f, v)
 }
 
 // writeConfig
@@ -149,7 +145,7 @@ func writeConfig(path string, v interface{}) error {
 	// marshal the config object
 	b, err := yaml.Marshal(v)
 	if err != nil {
-		return err
+		Fatal("[config/config] yaml.Marshal() failed", err.Error())
 	}
 
 	// mutex.Lock()

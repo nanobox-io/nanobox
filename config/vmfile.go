@@ -37,7 +37,7 @@ func ParseVMfile() *VMfileConfig {
 		// if a .vmfile does exists - parse it
 	} else {
 		if err := ParseConfig(vmfilePath, vmfile); err != nil {
-			Fatal("[config/vmfile] ParseConfig() failed", err.Error())
+			Fatal("[config/vmfile] ParseConfig() failed - ", err.Error())
 		}
 	}
 
@@ -47,7 +47,7 @@ func ParseVMfile() *VMfileConfig {
 //
 func (c *VMfileConfig) HasDeployed() bool {
 	if err := ParseConfig(AppDir+"/.vmfile", c); err != nil {
-		Fatal("[config/vmfile] ParseConfig() failed", err.Error())
+		Fatal("[config/vmfile] ParseConfig() failed - ", err.Error())
 	}
 
 	return c.Deployed
@@ -56,7 +56,7 @@ func (c *VMfileConfig) HasDeployed() bool {
 //
 func (c *VMfileConfig) IsMode(mode string) bool {
 	if err := ParseConfig(AppDir+"/.vmfile", c); err != nil {
-		Fatal("[config/vmfile] ParseConfig() failed", err.Error())
+		Fatal("[config/vmfile] ParseConfig() failed - ", err.Error())
 	}
 
 	return c.Mode == mode
@@ -65,7 +65,7 @@ func (c *VMfileConfig) IsMode(mode string) bool {
 //
 func (c *VMfileConfig) IsSuspendable() bool {
 	if err := ParseConfig(AppDir+"/.vmfile", c); err != nil {
-		Fatal("[config/vmfile] ParseConfig() failed", err.Error())
+		Fatal("[config/vmfile] ParseConfig() failed - ", err.Error())
 	}
 	return c.Suspendable
 }
@@ -91,6 +91,6 @@ func (c *VMfileConfig) SuspendableIs(suspendable bool) {
 // writeVMfile
 func writeVMfile() {
 	if err := writeConfig(AppDir+"/.vmfile", VMfile); err != nil {
-		Fatal("[config/vmfile] writeConfig() failed", err.Error())
+		Fatal("[config/vmfile] writeConfig() failed - ", err.Error())
 	}
 }

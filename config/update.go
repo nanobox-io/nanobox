@@ -32,7 +32,7 @@ func init() {
 	if _, err := os.Stat(updatefile); err != nil {
 		f, err := os.Create(updatefile)
 		if err != nil {
-			Fatal("[config/update] os.Create() failed", err.Error())
+			Fatal("[config/update] os.Create() failed - ", err.Error())
 		}
 		defer f.Close()
 	}
