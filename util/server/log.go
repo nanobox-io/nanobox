@@ -32,7 +32,7 @@ func init() {
 	// try to use the logfile if the app exists, if not just use the default log
 	logfile := config.AppDir + "/server.log"
 	if _, err := os.Stat(logfile); err != nil {
-		logfile = config.Home + "/nanobox.log"
+		logfile = config.Root + "/nanobox.log"
 	}
 
 	// create a file logger
