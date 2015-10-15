@@ -37,50 +37,57 @@ It is _**highly recommended**_ that you use [git bash](http://git-scm.com/downlo
 
 1. `cd` into the folder on your GOPATH where you want the project to live.
 2. `git clone git@github.com/nanobox-io/nanobox-cli`.
-3. install [gom](https://github.com/mattn/gom). This is how the CLI manages dependancies. Skipping this step requires that you `go get` **each** dependancy in order to use the CLI.
-3. `cd` into the new directory and run `gom install` or `gom build`.
-4. Type `nanobox` and follow the instructions to authenticate the CLI with Nanobox.
+3. Type `nanobox` and follow the instructions to authenticate the CLI with Nanobox.
 
 
 ### Usage
+```go
+Usage:
+  nanobox [flags]
+  nanobox [command]
 
-Typing `nanobox` will show the CLI's help text and list of available commands.
+Available Commands:
+  run           Starts a nanobox, provisions the app, & runs the app's exec
+  dev           Starts the nanobox, provisions app, & opens an interactive terminal
+  info          Displays information about the nanobox and your app
+  console       Opens an interactive terminal from inside your app on the nanobox
+  destroy       Destroys the nanobox
+  stop          Suspends the nanobox
+  update        Updates the CLI to the newest available version
+  update-images Updates the nanobox docker images
+  box           Subcommands for managing the nanobox/boot2docker.box
+  engine        Subcommands to aid in developing a custom engine
 
-Typing `nanobox -v` or nanobox `--version` will tell you what version of the CLI you are currently using, and what the latest available version is.
+Flags:
+      --background[=false]: Stops nanobox from auto-suspending.
+  -f, --force[=false]: Forces a command to run (effects vary per command).
+  -h, --help[=false]: help for nanobox
+  -v, --verbose[=false]: Increase command output from 'info' to 'debug'.
+      --version[=false]: Display the current version of this CLI
 
-All commands have a short (-) and a verbose (--) option when passing flags.
+Additional help topics:
+  nanobox production
 
-Passing `-h` to any command returns detailed information about that command.
-
-Passing `--debug` at the end of any command will show all API request/response output.
-
-
-#### Available Commands:
-
-* `nanobox list` : List all your nanobox's.
-* `nanobox info` : Display info about a nanobox.
-* `nanobox create` : Provision a nanobox.
-* `nanobox destroy` : Destroy a nanobox.
-* `nanobox rebuild` : Rebuild and redeploy a nanobox.
-* `nanobox rollback` : Roll a nanobox back one (1) deploy.
-* `nanobox log` : Display nanobox log information.
-* `nanobox open` : Open a nanobox in the default browser.
-* `nanobox run` : Run a command on a nanobox service.
-* `nanobox ssh` : Open an SSH connection to a nanobox service.
-* `nanobox tunnel` : Create a port forward tunnel to a nanobox service.
-* `nanobox evar:create` : Create an environment variable for nanobox
-* `nanobox evar:destroy` : Destroy an environment variable for nanobox
-* `nanobox evar:list` : List all environment variable for nanobox
-* `nanobox service:list` : List an nanobox's services
-* `nanobox service:info` : List info about a service
-* `nanobox service:restart` : Restart a service
-* `nanobox service:reboot` : Reboot a service
-* `nanobox service:repair` : Repair a service
-
+Use "nanobox [command] --help" for more information about a command.
+```
 
 ### Documentation
 
-Complete documentation is available on [godoc](http://godoc.org/github.com/nanobox-io/nanobox-cli).
+- Usage documentation is available at [nanobox.io](https://docs.nanobox.io/cli/).
+- Source code documentation is available on [godoc](http://godoc.org/github.com/nanobox-io/nanobox-cli).
+
+
+## Todo/Doing
+- Tests!
+- Make it work on Windows
+
+
+## Contributing
+1. Fork it
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Added some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create new Pull Request
 
 
 ### Contact

@@ -16,7 +16,7 @@ var (
 	//
 	EngineCmd = &cobra.Command{
 		Use:   "engine",
-		Short: "",
+		Short: "Subcommands to aid in developing a custom engine",
 		Long:  ``,
 	}
 

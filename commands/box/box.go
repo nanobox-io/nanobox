@@ -13,7 +13,7 @@ import "github.com/spf13/cobra"
 //
 var BoxCmd = &cobra.Command{
 	Use:   "box",
-	Short: "",
+	Short: "Subcommands for managing the nanobox/boot2docker.box",
 	Long:  ``,
 }
 
