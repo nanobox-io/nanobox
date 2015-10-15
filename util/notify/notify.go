@@ -95,14 +95,15 @@ increasing your max file descriptor limit to re-enable this functionality.
 		// handle any file events by calling the handler function
 		case event := <-watcher.Events:
 
+			// I use fileinfo here instead of error simply to avoid err collisions; the
+			// error would be just as good at indicating if the file existed or not
+			fi, _ := os.Stat(event.Name)
+
 			switch event.Op {
 
 			// the watcher needs to watch itself to see if any files are added to then
 			// add them to the list of watched files
 			case fsnotify.Create:
-
-				//
-				fi, err := os.Stat(event.Name)
 
 				// ensure that the file still exists before trying to watch it; ran into
 				// a case with VIM where some tmp file (.swpx) was create and removed in
@@ -116,11 +117,15 @@ increasing your max file descriptor limit to re-enable this functionality.
 
 			// the watcher needs to watch itself to see if any directories are removed
 			// to then remove them from the list of watched files
-			//
-			// NOTE: this may need to happen recursively
 			case fsnotify.Remove:
-				if err = watcher.Remove(event.Name); err != nil {
-					config.Fatal("[util/notify/notify] watcher.Remove() failed - ", err.Error())
+
+				// ensure thath the file is still available to be removed before attempting
+				// to remove it; the main reason for manually removing files is to help
+				// spare the ulimit
+				if fi != nil {
+					if err := watcher.Remove(event.Name); err != nil {
+						config.Fatal("[util/notify/notify] watcher.Remove() failed - ", err.Error())
+					}
 				}
 			}
 
