@@ -10,13 +10,9 @@ package commands
 //
 import (
 	"fmt"
-	"net/url"
-
-	"github.com/spf13/cobra"
-
-	"github.com/nanobox-io/nanobox/util/server"
-	"github.com/nanobox-io/nanobox/util/server/mist"
 	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/spf13/cobra"
+	"net/url"
 )
 
 var (
@@ -56,7 +52,7 @@ func log(ccmd *cobra.Command, args []string) {
 		fmt.Printf(stylish.Bullet("Opening log stream"))
 
 		// stream logs (blocking)
-		mist.Stream([]string{"log", "app"}, mist.ProcessLogStream)
+		Mist.Stream([]string{"log", "app"}, Mist.ProcessLogStream)
 
 		// ...otherwise load historical logs
 	} else {
@@ -67,9 +63,9 @@ func log(ccmd *cobra.Command, args []string) {
 		v.Add("limit", fmt.Sprintf("%v", count))
 		v.Add("offset", fmt.Sprintf("%v", offset))
 
-		// show mist history
-		if err := server.Logs(v.Encode()); err != nil {
-			server.Fatal("[commands/log] server.Logs() failed - ", err.Error())
+		// show Mist history
+		if err := Server.Logs(v.Encode()); err != nil {
+			Config.Fatal("[commands/log] server.Logs() failed - ", err.Error())
 		}
 	}
 }

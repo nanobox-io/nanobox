@@ -10,17 +10,12 @@ package commands
 //
 import (
 	"fmt"
+	"github.com/kardianos/osext"
+	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/spf13/cobra"
 	"os"
 	"os/exec"
 	"runtime"
-
-	"github.com/kardianos/osext"
-	"github.com/spf13/cobra"
-
-	"github.com/nanobox-io/nanobox/config"
-	"github.com/nanobox-io/nanobox/util"
-	"github.com/nanobox-io/nanobox/util/file"
-	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
 //
@@ -36,9 +31,9 @@ var updateCmd = &cobra.Command{
 func update(ccmd *cobra.Command, args []string) {
 
 	// if the local md5 matches the remote md5 there is no need to update
-	match, err := util.MD5sMatch(config.Root+"/nanobox.md5", "https://s3.amazonaws.com/tools.nanobox.io/cli/nanobox.md5")
+	match, err := Util.MD5sMatch(config.Root+"/nanobox.md5", "https://s3.amazonaws.com/tools.nanobox.io/cli/nanobox.md5")
 	if err != nil {
-		config.Fatal("[commands/update] util.MD5sMatch() failed", err.Error())
+		Config.Fatal("[commands/update] util.MD5sMatch() failed", err.Error())
 	}
 
 	if match {
@@ -63,18 +58,18 @@ func update(ccmd *cobra.Command, args []string) {
 	defer cli.Close()
 
 	//
-	file.Progress(fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/nanobox", runtime.GOOS, runtime.GOARCH), cli)
+	File.Progress(fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/nanobox", runtime.GOOS, runtime.GOARCH), cli)
 
 	//
 	// download the CLI md5
 	md5, err := os.Create(config.Root + "/nanobox.md5")
 	if err != nil {
-		config.Fatal("[commands/update] os.Create() failed", err.Error())
+		Config.Fatal("[commands/update] os.Create() failed", err.Error())
 	}
 	defer md5.Close()
 
 	//
-	file.Download("https://s3.amazonaws.com/tools.nanobox.io/cli/nanobox.md5", md5)
+	File.Download("https://s3.amazonaws.com/tools.nanobox.io/cli/nanobox.md5", md5)
 
 	// if the new CLI fails to execute, just print a generic message and return
 	out, err := exec.Command(path, "-v").Output()

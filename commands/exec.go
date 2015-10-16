@@ -9,22 +9,18 @@ package commands
 
 //
 import (
+	"github.com/spf13/cobra"
 	"net/url"
 	"strings"
-
-	"github.com/spf13/cobra"
-
-	"github.com/nanobox-io/nanobox/util/print"
-	"github.com/nanobox-io/nanobox/util/server"
 )
 
 //
 var execCmd = &cobra.Command{
 	Hidden: true,
-	
-	Use:    "exec",
-	Short:  "Runs a command from inside your app on the nanobox",
-	Long:   ``,
+
+	Use:   "exec",
+	Short: "Runs a command from inside your app on the nanobox",
+	Long:  ``,
 
 	PreRun:  boot,
 	Run:     execute,
@@ -38,7 +34,7 @@ func execute(ccmd *cobra.Command, args []string) {
 
 	//
 	if len(args) == 0 {
-		args = append(args, print.Prompt("Please specify a command you wish to exec: "))
+		args = append(args, Print.Prompt("Please specify a command you wish to exec: "))
 	}
 
 	//
@@ -47,13 +43,13 @@ func execute(ccmd *cobra.Command, args []string) {
 
 	// if a container is found that matches args[0] then set that as a qparam, and
 	// set the cmd equal to the remaining args
-	if server.IsContainerExec(args) {
+	if Server.IsContainerExec(args) {
 		v.Add("container", args[0])
 		v.Set("cmd", strings.Join(args[1:], " "))
 	}
 
 	//
-	server.Exec("command", v.Encode())
+	Server.Exec("command", v.Encode())
 
 	// PostRun: halt
 }

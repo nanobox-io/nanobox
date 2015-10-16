@@ -10,12 +10,8 @@ package commands
 
 import (
 	"fmt"
-
-	"github.com/spf13/cobra"
-
-	"github.com/nanobox-io/nanobox/util/server"
-	"github.com/nanobox-io/nanobox/util/server/mist"
 	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/spf13/cobra"
 )
 
 //
@@ -37,17 +33,17 @@ func updateImages(ccmd *cobra.Command, args []string) {
 	fmt.Printf(stylish.Bullet("Updating nanobox docker images..."))
 
 	// stream update output
-	go mist.Stream([]string{"log", "deploy"}, mist.PrintLogStream)
+	go Mist.Stream([]string{"log", "deploy"}, Mist.PrintLogStream)
 
 	// listen for status updates
 	errch := make(chan error)
 	go func() {
-		errch <- mist.Listen([]string{"job", "imageupdate"}, mist.ImageUpdates)
+		errch <- Mist.Listen([]string{"job", "imageupdate"}, Mist.ImageUpdates)
 	}()
 
 	// run an image update
-	if err := server.Update(""); err != nil {
-		server.Fatal("[commands/imagesUpdate] server.Update() failed - ", err.Error())
+	if err := Server.Update(""); err != nil {
+		config.Fatal("[commands/imagesUpdate] server.Update() failed - ", err.Error())
 	}
 
 	// wait for a status update (blocking)

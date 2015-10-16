@@ -10,11 +10,8 @@ package commands
 //
 import (
 	"fmt"
-
-	"github.com/spf13/cobra"
-
-	"github.com/nanobox-io/nanobox/util/vagrant"
 	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/spf13/cobra"
 )
 
 //
@@ -35,7 +32,7 @@ func reload(ccmd *cobra.Command, args []string) {
 	// PreRun: initialize
 
 	fmt.Printf(stylish.Bullet("Reloading nanobox..."))
-	if err := vagrant.Reload(); err != nil {
-		vagrant.Fatal("[commands/reload] vagrant.Reload() failed - ", err.Error())
+	if err := Vagrant.Reload(); err != nil {
+		Config.Fatal("[commands/reload] vagrant.Reload() failed - ", err.Error())
 	}
 }

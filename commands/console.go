@@ -10,10 +10,8 @@ package commands
 //
 import (
 	"fmt"
-
 	"github.com/spf13/cobra"
-
-	"github.com/nanobox-io/nanobox/util/server"
+	"os"
 )
 
 //
@@ -41,7 +39,7 @@ func console(ccmd *cobra.Command, args []string) {
 
 	// if 1 args is passed it's assumed to be a container to console into
 	case len(args) == 1:
-		server.Exec("container", "container="+args[0])
+		Server.Exec("container", "container="+args[0])
 	}
 
 	// PostRun: halt

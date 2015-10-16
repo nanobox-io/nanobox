@@ -18,8 +18,7 @@ import (
 	"github.com/spf13/cobra"
 
 	api "github.com/nanobox-io/nanobox-api-client"
-	// "github.com/nanobox-io/nanobox/auth"
-	"github.com/nanobox-io/nanobox/config"
+	// "github.com/nanobox-io/nanobox-cli/auth"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
@@ -133,7 +132,7 @@ func fetch(ccmd *cobra.Command, args []string) {
 	//
 	res, err := http.Get(path)
 	if err != nil {
-		config.Fatal("[commands/engine fetch] http.Get() failed", err.Error())
+		Config.Fatal("[commands/engine fetch] http.Get() failed", err.Error())
 	}
 	defer res.Body.Close()
 

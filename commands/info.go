@@ -10,12 +10,7 @@ package commands
 //
 import (
 	"fmt"
-
 	"github.com/spf13/cobra"
-
-	"github.com/nanobox-io/nanobox/config"
-	"github.com/nanobox-io/nanobox/util/server"
-	"github.com/nanobox-io/nanobox/util/vagrant"
 	// "github.com/nanobox-io/nanobox-golang-stylish"
 )
 
@@ -32,7 +27,7 @@ var infoCmd = &cobra.Command{
 func info(ccmd *cobra.Command, args []string) {
 
 	// determine status
-	status := vagrant.Status()
+	status := Vagrant.Status()
 
 	fmt.Printf(`
 Local Domain   : %s
@@ -49,9 +44,9 @@ Nanobox Files  : %s
 
 	//
 	var services []server.Service
-	res, err := server.Get("/services", &services)
+	res, err := Server.Get("/services", &services)
 	if err != nil {
-		config.Fatal("[commands/info] failed - ", err.Error())
+		Config.Fatal("[commands/info] failed - ", err.Error())
 	}
 	defer res.Body.Close()
 

@@ -9,13 +9,9 @@ package commands
 
 //
 import (
-	"os"
-
+	"github.com/nanobox-io/nanobox-cli/commands/box"
 	"github.com/spf13/cobra"
-
-	"github.com/nanobox-io/nanobox/commands/box"
-	"github.com/nanobox-io/nanobox/config"
-	"github.com/nanobox-io/nanobox/util/vagrant"
+	"os"
 )
 
 //
@@ -39,12 +35,12 @@ func initialize(ccmd *cobra.Command, args []string) {
 	// exists) where the Vagrantfile and .vagrant dir will live for each app
 	if _, err := os.Stat(config.AppDir); err != nil {
 		if err := os.Mkdir(config.AppDir, 0755); err != nil {
-			config.Fatal("[commands/init] os.Mkdir() failed", err.Error())
+			Config.Fatal("[commands/init] os.Mkdir() failed", err.Error())
 		}
 	}
 
 	// 'parse' the .vmfile (either creating one, or parsing it)
-	config.VMfile = config.ParseVMfile()
+	config.VMfile = Config.ParseVMfile()
 
 	//
 	// generate a Vagrantfile at ~/.nanobox/apps/<app-name>/Vagrantfile
@@ -55,5 +51,5 @@ func initialize(ccmd *cobra.Command, args []string) {
 		}
 	}
 
-	vagrant.Init()
+	Vagrant.Init()
 }

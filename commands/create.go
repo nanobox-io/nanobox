@@ -10,14 +10,9 @@ package commands
 //
 import (
 	"fmt"
-	"os"
-
-	"github.com/spf13/cobra"
-
-	"github.com/nanobox-io/nanobox/config"
-	"github.com/nanobox-io/nanobox/util/file/hosts"
-	"github.com/nanobox-io/nanobox/util/vagrant"
 	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/spf13/cobra"
+	"os"
 )
 
 var (
@@ -59,15 +54,15 @@ func create(ccmd *cobra.Command, args []string) {
 
 	// boot the vm
 	fmt.Printf(stylish.Bullet("Creating a nanobox"))
-	if err := vagrant.Up(); err != nil {
-		vagrant.Fatal("[commands/create] vagrant.Up() failed - ", err.Error())
+	if err := Vagrant.Up(); err != nil {
+		Config.Fatal("[commands/create] vagrant.Up() failed - ", err.Error())
 	}
 
 	// after the machine boots, update the docker images
 	updateImages(nil, args)
 
 	// add the entry if needed
-	if !hosts.HasDomain() {
+	if !Hosts.HasDomain() {
 		sudo("create --add-entry", fmt.Sprintf("Adding %v domain to hosts file", config.Nanofile.Domain))
 	}
 

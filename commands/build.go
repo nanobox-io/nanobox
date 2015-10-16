@@ -10,12 +10,8 @@ package commands
 //
 import (
 	"fmt"
-
-	"github.com/spf13/cobra"
-
-	"github.com/nanobox-io/nanobox/util/server"
-	"github.com/nanobox-io/nanobox/util/server/mist"
 	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/spf13/cobra"
 )
 
 //
@@ -39,17 +35,17 @@ func build(ccmd *cobra.Command, args []string) {
 	fmt.Printf(stylish.Bullet("Building codebase..."))
 
 	// stream build output
-	go mist.Stream([]string{"log", "deploy"}, mist.PrintLogStream)
+	go Mist.Stream([]string{"log", "deploy"}, Mist.PrintLogStream)
 
 	// listen for status updates
 	errch := make(chan error)
 	go func() {
-		errch <- mist.Listen([]string{"job", "build"}, mist.BuildUpdates)
+		errch <- Mist.Listen([]string{"job", "build"}, Mist.BuildUpdates)
 	}()
 
 	// run a build
-	if err := server.Build(""); err != nil {
-		server.Fatal("[commands/build] server.Build() failed - ", err.Error())
+	if err := Server.Build(""); err != nil {
+		Config.Fatal("[commands/build] server.Build() failed - ", err.Error())
 	}
 
 	// wait for a status update (blocking)

@@ -8,7 +8,12 @@
 //
 package engine
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/nanobox-io/nanobox-cli/auth"
+	"github.com/nanobox-io/nanobox-cli/config"
+	"github.com/nanobox-io/nanobox-cli/util/s3"
+	"github.com/spf13/cobra"
+)
 
 //
 var (
@@ -21,7 +26,10 @@ var (
 	}
 
 	//
-	fFile string
+	fFile  string
+	Config = config.Default
+	Auth   = auth.Default
+	S3     = s3.Default
 )
 
 //

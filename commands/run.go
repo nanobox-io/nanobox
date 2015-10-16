@@ -10,14 +10,8 @@ package commands
 //
 import (
 	"fmt"
-
-	"github.com/spf13/cobra"
-
-	"github.com/nanobox-io/nanobox/config"
-	"github.com/nanobox-io/nanobox/util/notify"
-	"github.com/nanobox-io/nanobox/util/server"
-	"github.com/nanobox-io/nanobox/util/server/mist"
 	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/spf13/cobra"
 )
 
 //
@@ -44,17 +38,17 @@ func run(ccmd *cobra.Command, args []string) {
 	fmt.Printf(stylish.Bullet("Deploying codebase..."))
 
 	// stream deploy output
-	go mist.Stream([]string{"log", "deploy"}, mist.PrintLogStream)
+	go Mist.Stream([]string{"log", "deploy"}, Mist.PrintLogStream)
 
 	// listen for status updates
 	errch := make(chan error)
 	go func() {
-		errch <- mist.Listen([]string{"job", "deploy"}, mist.DeployUpdates)
+		errch <- Mist.Listen([]string{"job", "deploy"}, Mist.DeployUpdates)
 	}()
 
 	// run a deploy
-	if err := server.Deploy("run=true"); err != nil {
-		server.Fatal("[commands/run] server.Deploy failed - ", err.Error())
+	if err := Server.Deploy("run=true"); err != nil {
+		Config.Fatal("[commands/run] server.Deploy() failed - ", err.Error())
 	}
 
 	// wait for a status update (blocking)
@@ -83,10 +77,10 @@ func run(ccmd *cobra.Command, args []string) {
 `)
 
 	// stream app output
-	go mist.Stream([]string{"log", "app"}, mist.ProcessLogStream)
+	go Mist.Stream([]string{"log", "app"}, Mist.ProcessLogStream)
 
 	// begin watching for file changes (blocking)
-	if err := notify.Watch(config.CWDir, server.NotifyRebuild); err != nil {
+	if err := Notify.Watch(config.CWDir, Server.NotifyRebuild); err != nil {
 		fmt.Printf(err.Error())
 	}
 

@@ -10,9 +10,6 @@ package commands
 //
 import (
 	"github.com/spf13/cobra"
-
-	"github.com/nanobox-io/nanobox/config"
-	"github.com/nanobox-io/nanobox/util/vagrant"
 )
 
 //
@@ -31,8 +28,8 @@ func stop(ccmd *cobra.Command, args []string) {
 	// PreRun: initialize
 
 	//
-	if err := vagrant.Suspend(); err != nil {
-		vagrant.Fatal("[commands/stop] vagrant.Suspend() failed - ", err.Error())
+	if err := Vagrant.Suspend(); err != nil {
+		Config.Fatal("[commands/stop] vagrant.Suspend() failed - ", err.Error())
 	}
 
 	// set the mode to be forground next time the machine boots

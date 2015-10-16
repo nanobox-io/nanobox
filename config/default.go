@@ -28,30 +28,30 @@ type (
 	}
 )
 
-func (_ config) ParseVMfile() *VMfileConfig {
+func (config) ParseVMfile() *VMfileConfig {
 	return ParseVMfile()
 }
 
-func (_ config) ParseNanofile() *NanofileConfig {
+func (config) ParseNanofile() *NanofileConfig {
 	return ParseNanofile()
 }
 
-func (_ config) Debug(msg string, debug bool) {
+func (config) Debug(msg string, debug bool) {
 	Debug(msg, debug)
 }
 
-func (_ config) Info(msg string, debug bool) {
+func (config) Info(msg string, debug bool) {
 	Info(msg, debug)
 
 }
-func (_ config) ParseConfig(path string, v interface{}) error {
+func (config) ParseConfig(path string, v interface{}) error {
 	return ParseConfig(path, v)
 }
 
-func (_ config) Fatal(msg, err string) {
+func (config) Fatal(msg, err string) {
 	Fatal(msg, err)
 }
 
-func (_ config) Root() string {
+func (config) Root() string {
 	return Root
 }

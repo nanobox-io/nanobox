@@ -10,14 +10,8 @@ package commands
 //
 import (
 	"fmt"
-
-	"github.com/spf13/cobra"
-
-	"github.com/nanobox-io/nanobox/config"
-	"github.com/nanobox-io/nanobox/util/server"
-	"github.com/nanobox-io/nanobox/util/server/mist"
-	"github.com/nanobox-io/nanobox/util/vagrant"
 	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/spf13/cobra"
 )
 
 var (
@@ -53,13 +47,13 @@ func dev(ccmd *cobra.Command, args []string) {
 
 		// if the vm has no been created, deployed, or the rebuild flag is passed do
 		// a deploy
-		if vagrant.Status() == "not created" || !config.VMfile.HasDeployed() || rebuild {
+		if Vagrant.Status() == "not created" || !config.VMfile.HasDeployed() || rebuild {
 
 			fmt.Printf(stylish.Bullet("Deploying codebase..."))
 
 			// run a deploy
-			if err := server.Deploy(""); err != nil {
-				server.Fatal("[commands/dev] server.Deploy() failed - ", err.Error())
+			if err := Server.Deploy(""); err != nil {
+				Server.Fatal("[commands/dev] server.Deploy() failed - ", err.Error())
 			}
 
 			// stream log output
@@ -83,7 +77,7 @@ func dev(ccmd *cobra.Command, args []string) {
 	}
 
 	//
-	server.Exec("console", "")
+	Server.Exec("console", "")
 
 	// PostRun: halt
 }
