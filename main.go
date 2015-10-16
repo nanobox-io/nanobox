@@ -10,9 +10,12 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
+	"runtime/debug"
 
 	"github.com/nanobox-io/nanobox/commands"
+	"github.com/nanobox-io/nanobox/config"
 )
 
 // main
@@ -25,7 +28,14 @@ func main() {
 		if r := recover(); r != nil {
 			// put r into your log ( it contains the panic message)
 			// Then log debug.Stack (from the runtime/debug package)
-			fmt.Println("Pretty message to the user")
+
+			stack := debug.Stack()
+
+			fmt.Println("Nanobox encountered an unexpected error. Please see ~.nanobox/nanobox.log and submit the issue to us.")
+			config.Log.Fatal(fmt.Sprintf("Cause of failure: %v", r))
+			config.Log.Fatal(fmt.Sprintf("Error output:\n%v\n", string(stack)))
+			config.Log.Close()
+			os.Exit(1)
 		}
 	}()
 
