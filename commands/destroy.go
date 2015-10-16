@@ -20,18 +20,24 @@ import (
 	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
-//
-var destroyCmd = &cobra.Command{
-	Use:   "destroy",
-	Short: "Destroys the nanobox",
-	Long:  ``,
+var (
 
-	Run: destroy,
-}
+	//
+	destroyCmd = &cobra.Command{
+		Use:   "destroy",
+		Short: "Destroys the nanobox",
+		Long:  ``,
+
+		Run: destroy,
+	}
+
+	//
+	removeEntry bool // does an entry need to be added to the /etc/hosts file
+)
 
 //
 func init() {
-	destroyCmd.Flags().BoolVarP(&fRemoveEntry, "remove-entry", "", false, "")
+	destroyCmd.Flags().BoolVarP(&removeEntry, "remove-entry", "", false, "")
 	destroyCmd.Flags().MarkHidden("remove-entry")
 }
 
@@ -40,7 +46,7 @@ func destroy(ccmd *cobra.Command, args []string) {
 
 	// if the command is being run with --remove-entry, it means an entry needs
 	// to be removed from the hosts file and execution yielded back to the parent
-	if fRemoveEntry {
+	if removeEntry {
 		hosts.RemoveDomain()
 		os.Exit(0) // this exits the sudoed (child) destroy, not the parent proccess
 	}

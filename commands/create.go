@@ -20,21 +20,27 @@ import (
 	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
-//
-var createCmd = &cobra.Command{
-	Hidden: true,
+var (
 
-	Use:   "create",
-	Short: "Creates a new nanobox",
-	Long:  ``,
+	//
+	createCmd = &cobra.Command{
+		Hidden: true,
 
-	PreRun: initialize,
-	Run:    create,
-}
+		Use:   "create",
+		Short: "Creates a new nanobox",
+		Long:  ``,
+
+		PreRun: initialize,
+		Run:    create,
+	}
+
+	//
+	addEntry bool // does an entry need to be added to the /etc/hosts file
+)
 
 //
 func init() {
-	createCmd.Flags().BoolVarP(&fAddEntry, "add-entry", "", false, "")
+	createCmd.Flags().BoolVarP(&addEntry, "add-entry", "", false, "")
 	createCmd.Flags().MarkHidden("add-entry")
 }
 
@@ -46,7 +52,7 @@ func create(ccmd *cobra.Command, args []string) {
 
 	// if the command is being run with the "add" flag, it means an entry needs to
 	// be added to the hosts file and execution yielded back to the parent
-	if fAddEntry {
+	if addEntry {
 		hosts.AddDomain()
 		os.Exit(0) // this exits the sudoed (child) created, not the parent proccess
 	}

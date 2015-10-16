@@ -47,7 +47,7 @@ var (
 
 			// hijack the verbose flag (-v), and use it to display the version of the
 			// CLI
-			if fVersion || config.Verbose {
+			if version || config.Verbose {
 				fmt.Printf("nanobox v%s\n", config.VERSION)
 				os.Exit(0)
 			}
@@ -57,19 +57,8 @@ var (
 		},
 	}
 
-	// flags
-	fAddEntry    bool   //
-	fCount       int    //
-	fLevel       string //
-	fOffset      int    //
-	fRebuild     bool   //
-	fRemove      bool   //
-	fRemoveEntry bool   //
-	fRun         bool   //
-	fStream      bool   //
-	fVersion     bool   //
-	fWatch       bool   //
-	fWrite       bool   //
+	//
+	version bool // display the version of nanobox
 )
 
 // init creates the list of available nanobox commands and sub commands
@@ -85,7 +74,7 @@ func init() {
 	NanoboxCmd.PersistentFlags().BoolVarP(&config.Verbose, "verbose", "v", false, "Increase command output from 'info' to 'debug'.")
 
 	// local flags
-	NanoboxCmd.Flags().BoolVarP(&fVersion, "version", "", false, "Display the current version of this CLI")
+	NanoboxCmd.Flags().BoolVarP(&version, "version", "", false, "Display the current version of this CLI")
 
 	// 'hidden' commands
 	NanoboxCmd.AddCommand(buildCmd)

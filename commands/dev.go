@@ -20,20 +20,28 @@ import (
 	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
-//
-var devCmd = &cobra.Command{
-	Use:   "dev",
-	Short: "Starts the nanobox, provisions app, & opens an interactive terminal",
-	Long:  ``,
+var (
 
-	PreRun:  boot,
-	Run:     dev,
-	PostRun: halt,
-}
+	//
+	devCmd = &cobra.Command{
+		Use:   "dev",
+		Short: "Starts the nanobox, provisions app, & opens an interactive terminal",
+		Long:  ``,
+
+		PreRun:  boot,
+		Run:     dev,
+		PostRun: halt,
+	}
+
+	//
+	rebuild bool // force a deploy
+	nobuild bool // force skip a deploy
+)
 
 //
 func init() {
-	devCmd.Flags().BoolVarP(&fRebuild, "rebuild", "", false, "Rebuilds")
+	devCmd.Flags().BoolVarP(&rebuild, "rebuild", "", false, "Force a rebuild")
+	devCmd.Flags().BoolVarP(&nobuild, "no-build", "", false, "Force skip a rebuild")
 }
 
 // dev
@@ -41,33 +49,36 @@ func dev(ccmd *cobra.Command, args []string) {
 
 	// PreRun: boot
 
-	// if the vm has no been created, deployed, or the rebuild flag is passed do
-	// a deploy
-	if vagrant.Status() == "not created" || !config.VMfile.HasDeployed() || fRebuild {
+	if !nobuild {
 
-		fmt.Printf(stylish.Bullet("Deploying codebase..."))
+		// if the vm has no been created, deployed, or the rebuild flag is passed do
+		// a deploy
+		if vagrant.Status() == "not created" || !config.VMfile.HasDeployed() || rebuild {
 
-		// run a deploy
-		if err := server.Deploy(""); err != nil {
-			server.Fatal("[commands/dev] server.Deploy() failed - ", err.Error())
-		}
+			fmt.Printf(stylish.Bullet("Deploying codebase..."))
 
-		// stream log output
-		go mist.Stream([]string{"log", "deploy"}, mist.PrintLogStream)
+			// run a deploy
+			if err := server.Deploy(""); err != nil {
+				server.Fatal("[commands/dev] server.Deploy() failed - ", err.Error())
+			}
 
-		// listen for status updates
-		errch := make(chan error)
-		go func() {
-			errch <- mist.Listen([]string{"job", "deploy"}, mist.DeployUpdates)
-		}()
+			// stream log output
+			go mist.Stream([]string{"log", "deploy"}, mist.PrintLogStream)
 
-		// wait for a status update (blocking)
-		err := <-errch
+			// listen for status updates
+			errch := make(chan error)
+			go func() {
+				errch <- mist.Listen([]string{"job", "deploy"}, mist.DeployUpdates)
+			}()
 
-		//
-		if err != nil {
-			fmt.Printf(err.Error())
-			return
+			// wait for a status update (blocking)
+			err := <-errch
+
+			//
+			if err != nil {
+				fmt.Printf(err.Error())
+				return
+			}
 		}
 	}
 

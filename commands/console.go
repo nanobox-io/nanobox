@@ -10,7 +10,6 @@ package commands
 //
 import (
 	"fmt"
-	"os"
 
 	"github.com/spf13/cobra"
 
@@ -36,18 +35,13 @@ func console(ccmd *cobra.Command, args []string) {
 	//
 	switch {
 
-	// if no args are passed run console as normal
+	// if no args are passed provide instruction
 	case len(args) == 0:
-		server.Exec("console", "")
+		fmt.Printf("Please provide a service to connect to.\n")
 
 	// if 1 args is passed it's assumed to be a container to console into
 	case len(args) == 1:
 		server.Exec("container", "container="+args[0])
-
-	// if more than 1 args is passed fail and exit...
-	case len(args) > 1:
-		fmt.Printf("Expecting 0 or 1 arguments. Run 'nanobox console -h' for help. Exiting...\n")
-		os.Exit(1)
 	}
 
 	// PostRun: halt

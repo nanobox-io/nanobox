@@ -21,22 +21,28 @@ import (
 	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
-//
-var deployCmd = &cobra.Command{
-	Hidden: true,
+var (
 
-	Use:   "deploy",
-	Short: "Deploys code to the nanobox",
-	Long:  ``,
+	//
+	deployCmd = &cobra.Command{
+		Hidden: true,
 
-	PreRun:  boot,
-	Run:     deploy,
-	PostRun: halt,
-}
+		Use:   "deploy",
+		Short: "Deploys code to the nanobox",
+		Long:  ``,
+
+		PreRun:  boot,
+		Run:     deploy,
+		PostRun: halt,
+	}
+
+	//
+	run bool // deploy the app in run mode
+)
 
 //
 func init() {
-	deployCmd.Flags().BoolVarP(&fRun, "run", "", false, "Creates your app environment w/o webs or workers")
+	deployCmd.Flags().BoolVarP(&run, "run", "", false, "Creates your app environment w/o webs or workers")
 }
 
 // deploy
@@ -57,7 +63,7 @@ func deploy(ccmd *cobra.Command, args []string) {
 
 	v := url.Values{}
 	v.Add("reset", strconv.FormatBool(config.Force))
-	v.Add("run", strconv.FormatBool(fRun))
+	v.Add("run", strconv.FormatBool(run))
 
 	// run a deploy
 	if err := server.Deploy(v.Encode()); err != nil {
