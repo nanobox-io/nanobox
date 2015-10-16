@@ -26,5 +26,5 @@ _testmain.go
 #
 .DS_Store
 TODO
-nanobox-cli
+nanobox
 build
