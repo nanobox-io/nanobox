@@ -30,6 +30,10 @@ const (
 	LOGTAP_PORT = ":6361"
 )
 
+type (
+	exiter func(int)
+)
+
 //
 var (
 	err   error //
@@ -59,6 +63,9 @@ var (
 	Verbose    bool   //
 	Silent     bool   //
 	LogLevel   string //
+
+	//
+	Exit exiter = os.Exit
 )
 
 //

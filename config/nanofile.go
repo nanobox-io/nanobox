@@ -46,7 +46,7 @@ func ParseNanofile() *NanofileConfig {
 	if _, err := os.Stat(nanofilePath); err == nil {
 		if err := ParseConfig(nanofilePath, nanofile); err != nil {
 			fmt.Printf("Nanobox failed to parse your .nanofile. Please ensure it is valid YAML and try again.\n")
-			os.Exit(1)
+			Exit(1)
 		}
 	}
 
@@ -57,7 +57,7 @@ func ParseNanofile() *NanofileConfig {
 	if _, err := os.Stat(nanofilePath); err == nil {
 		if err := ParseConfig(nanofilePath, nanofile); err != nil {
 			fmt.Printf("Nanobox failed to parse your .nanofile. Please ensure it is valid YAML and try again.\n")
-			os.Exit(1)
+			Exit(1)
 		}
 	}
 

@@ -14,6 +14,21 @@ import (
 	"os"
 )
 
+type (
+	util struct{}
+	Util interface {
+		MD5sMatch(string, string) (bool, error)
+	}
+)
+
+var (
+	Default Util = util{}
+)
+
+func (_ util) MD5sMatch(localPath, remotePath string) (bool, error) {
+	return MD5sMatch(localPath, remotePath)
+}
+
 // MD5sMatch determines if a local MD5 matches a remote MD5
 func MD5sMatch(localPath, remotePath string) (bool, error) {
 

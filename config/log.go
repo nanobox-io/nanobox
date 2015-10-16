@@ -10,7 +10,6 @@ package config
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/jcelliott/lumber"
 )
@@ -50,5 +49,5 @@ func Fatal(msg, err string) {
 	fmt.Println("A fatal error occurred (See ~/.nanobox/nanobox.log for details). Exiting...")
 	Log.Fatal(fmt.Sprintf("%s - %s", msg, err))
 	Log.Close()
-	os.Exit(1)
+	Exit(1)
 }
