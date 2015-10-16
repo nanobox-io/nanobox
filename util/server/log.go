@@ -37,7 +37,7 @@ func init() {
 	}
 
 	// create a file logger
-	if Log, err = lumber.NewAppendLogger(logfile); err != nil {
+	if Log, err = lumber.NewTruncateLogger(logfile); err != nil {
 		config.Fatal("[util/server/log] lumber.NewAppendLogger() failed", err.Error())
 	}
 }
