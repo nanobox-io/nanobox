@@ -15,10 +15,10 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/nanobox-io/nanobox-golang-stylish"
 	"github.com/nanobox-io/nanobox/config"
 	"github.com/nanobox-io/nanobox/util/server"
 	"github.com/nanobox-io/nanobox/util/server/mist"
-	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
 var (
@@ -37,12 +37,12 @@ var (
 	}
 
 	//
-	run bool // deploy the app in run mode
+	install bool // tells nanobox server to install services
 )
 
 //
 func init() {
-	deployCmd.Flags().BoolVarP(&run, "run", "", false, "Creates your app environment w/o webs or workers")
+	deployCmd.Flags().BoolVarP(&install, "run", "", false, "Creates your app environment w/o webs or workers")
 }
 
 // deploy
@@ -63,7 +63,7 @@ func deploy(ccmd *cobra.Command, args []string) {
 
 	v := url.Values{}
 	v.Add("reset", strconv.FormatBool(config.Force))
-	v.Add("run", strconv.FormatBool(run))
+	v.Add("run", strconv.FormatBool(install))
 
 	// run a deploy
 	if err := server.Deploy(v.Encode()); err != nil {

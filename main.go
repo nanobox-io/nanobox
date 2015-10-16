@@ -12,11 +12,22 @@ import (
 	"fmt"
 	"os/exec"
 
-	"github.com/nanobox-io/nanobox-cli/commands"
+	"github.com/nanobox-io/nanobox/commands"
 )
 
 // main
 func main() {
+
+	// global panic handler; this is done to avoid showing any panic output if
+	// something happens to fail. The output is logged and "pretty" message is
+	// shown
+	defer func() {
+		if r := recover(); r != nil {
+			// put r into your log ( it contains the panic message)
+			// Then log debug.Stack (from the runtime/debug package)
+			fmt.Println("Pretty message to the user")
+		}
+	}()
 
 	pass := true
 
