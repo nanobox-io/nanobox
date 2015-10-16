@@ -10,7 +10,10 @@ package auth
 
 type (
 	auth struct{}
-	Auth interface{}
+	Auth interface {
+		Authenticate() (string, string)
+		Reauthenticate() (string, string)
+	}
 )
 
 var (

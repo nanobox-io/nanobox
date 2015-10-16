@@ -10,6 +10,7 @@ package commands
 //
 import (
 	"github.com/nanobox-io/nanobox/commands/box"
+	"github.com/nanobox-io/nanobox/config"
 	"github.com/spf13/cobra"
 	"os"
 )

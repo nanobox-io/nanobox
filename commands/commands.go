@@ -13,6 +13,7 @@ import (
 	"github.com/nanobox-io/nanobox/commands/box"
 	"github.com/nanobox-io/nanobox/commands/engine"
 	"github.com/nanobox-io/nanobox/commands/production"
+	"github.com/nanobox-io/nanobox/config"
 	"github.com/spf13/cobra"
 	"os"
 	"os/exec"
@@ -108,7 +109,7 @@ func boot(ccmd *cobra.Command, args []string) {
 	initialize(nil, args)
 
 	// get the status to know what needs to happen with the VM
-	status := vagrant.Status()
+	status := Vagrant.Status()
 
 	switch status {
 

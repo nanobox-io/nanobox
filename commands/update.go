@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"github.com/kardianos/osext"
 	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/nanobox-io/nanobox/config"
 	"github.com/spf13/cobra"
 	"os"
 	"os/exec"

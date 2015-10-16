@@ -17,6 +17,7 @@ type (
 		Destroy() error
 		Init()
 		Reload() error
+		Resume() error
 		SSH() error
 		Status() string
 		Suspend() error
@@ -46,6 +47,10 @@ func (vagrant) SSH() error {
 
 func (vagrant) Reload() error {
 	return Reload()
+}
+
+func (vagrant) Resume() error {
+	return Resume()
 }
 
 func (vagrant) Init() {

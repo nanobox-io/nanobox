@@ -76,6 +76,16 @@ func (_mr *_MockVagrantRecorder) Reload() *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "Reload")
 }
 
+func (_m *MockVagrant) Resume() error {
+	ret := _m.ctrl.Call(_m, "Resume")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+func (_mr *_MockVagrantRecorder) Resume() *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "Resume")
+}
+
 func (_m *MockVagrant) SSH() error {
 	ret := _m.ctrl.Call(_m, "SSH")
 	ret0, _ := ret[0].(error)

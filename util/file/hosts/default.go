@@ -10,7 +10,11 @@ package hosts
 
 type (
 	host struct{}
-	Host interface{}
+	Host interface {
+		HasDomain() bool
+		AddDomain()
+		RemoveDomain()
+	}
 )
 
 var (

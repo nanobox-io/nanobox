@@ -11,6 +11,7 @@ package commands
 import (
 	"fmt"
 	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/nanobox-io/nanobox/config"
 	"github.com/spf13/cobra"
 )
 
@@ -53,16 +54,16 @@ func dev(ccmd *cobra.Command, args []string) {
 
 			// run a deploy
 			if err := Server.Deploy(""); err != nil {
-				Server.Fatal("[commands/dev] server.Deploy() failed - ", err.Error())
+				Config.Fatal("[commands/dev] server.Deploy() failed - ", err.Error())
 			}
 
 			// stream log output
-			go mist.Stream([]string{"log", "deploy"}, mist.PrintLogStream)
+			go Mist.Stream([]string{"log", "deploy"}, Mist.PrintLogStream)
 
 			// listen for status updates
 			errch := make(chan error)
 			go func() {
-				errch <- mist.Listen([]string{"job", "deploy"}, mist.DeployUpdates)
+				errch <- Mist.Listen([]string{"job", "deploy"}, Mist.DeployUpdates)
 			}()
 
 			// wait for a status update (blocking)

@@ -10,16 +10,8 @@ package commands
 //
 import (
 	"fmt"
-<<<<<<< HEAD
-
-	"github.com/spf13/cobra"
-
-	"github.com/nanobox-io/nanobox/config"
-	"github.com/nanobox-io/nanobox/util/notify"
-	"github.com/nanobox-io/nanobox/util/server"
-=======
->>>>>>> using interfaces for everything
 	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/nanobox-io/nanobox/config"
 	"github.com/spf13/cobra"
 )
 

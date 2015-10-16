@@ -11,6 +11,7 @@ package commands
 import (
 	"fmt"
 	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/nanobox-io/nanobox/config"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -48,7 +49,7 @@ func create(ccmd *cobra.Command, args []string) {
 	// if the command is being run with the "add" flag, it means an entry needs to
 	// be added to the hosts file and execution yielded back to the parent
 	if addEntry {
-		hosts.AddDomain()
+		Hosts.AddDomain()
 		os.Exit(0) // this exits the sudoed (child) created, not the parent proccess
 	}
 
