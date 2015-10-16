@@ -9,9 +9,9 @@
 package box
 
 import (
-	"github.com/nanobox-io/nanobox-cli/config"
-	"github.com/nanobox-io/nanobox-cli/util"
-	"github.com/nanobox-io/nanobox-cli/util/vagrant"
+	"github.com/nanobox-io/nanobox/config"
+	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/vagrant"
 	"github.com/spf13/cobra"
 )
 

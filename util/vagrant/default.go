@@ -15,23 +15,18 @@ type (
 		Install() error
 		Update() error
 		Destroy() error
-		Init() error
+		Init()
 		Reload() error
 		SSH() error
 		Status() string
 		Suspend() error
 		Up() error
-		Run() (err error)
 	}
 )
 
 var (
 	Default Vagrant = vagrant{}
 )
-
-func (vagrant) Run() (err error) {
-	return Run()
-}
 
 func (vagrant) Up() error {
 	return Up()
@@ -53,8 +48,8 @@ func (vagrant) Reload() error {
 	return Reload()
 }
 
-func (vagrant) Init() error {
-	return Init()
+func (vagrant) Init() {
+	Init()
 }
 
 func (vagrant) Destroy() error {

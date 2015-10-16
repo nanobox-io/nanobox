@@ -22,9 +22,9 @@ func (host) HasDomain() bool {
 }
 
 func (host) AddDomain() {
-	return AddDomain()
+	AddDomain()
 }
 
 func (host) RemoveDomain() {
-	return RemoveDomain()
+	RemoveDomain()
 }

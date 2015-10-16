@@ -8,6 +8,10 @@
 //
 package notify
 
+import (
+	"github.com/go-fsnotify/fsnotify"
+)
+
 type (
 	notify struct{}
 	Notify interface {

@@ -9,14 +9,14 @@ package commands
 
 //
 import (
-	"github.com/nanobox-io/nanobox-cli/config"
-	"github.com/nanobox-io/nanobox-cli/util/file"
-	"github.com/nanobox-io/nanobox-cli/util/file/hosts"
-	"github.com/nanobox-io/nanobox-cli/util/notify"
-	"github.com/nanobox-io/nanobox-cli/util/print"
-	"github.com/nanobox-io/nanobox-cli/util/server"
-	"github.com/nanobox-io/nanobox-cli/util/server/mist"
-	"github.com/nanobox-io/nanobox-cli/util/vagrant"
+	"github.com/nanobox-io/nanobox/config"
+	"github.com/nanobox-io/nanobox/util/file"
+	"github.com/nanobox-io/nanobox/util/file/hosts"
+	"github.com/nanobox-io/nanobox/util/notify"
+	"github.com/nanobox-io/nanobox/util/print"
+	"github.com/nanobox-io/nanobox/util/server"
+	"github.com/nanobox-io/nanobox/util/server/mist"
+	"github.com/nanobox-io/nanobox/util/vagrant"
 )
 
 var (

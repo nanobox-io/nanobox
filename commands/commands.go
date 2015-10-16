@@ -9,10 +9,10 @@ package commands
 
 import (
 	"fmt"
-	"github.com/nanobox-io/nanobox-cli/commands/box"
-	"github.com/nanobox-io/nanobox-cli/commands/engine"
-	"github.com/nanobox-io/nanobox-cli/commands/production"
 	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/nanobox-io/nanobox/commands/box"
+	"github.com/nanobox-io/nanobox/commands/engine"
+	"github.com/nanobox-io/nanobox/commands/production"
 	"github.com/spf13/cobra"
 	"os"
 	"os/exec"

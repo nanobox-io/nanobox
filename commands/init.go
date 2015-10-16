@@ -9,7 +9,7 @@ package commands
 
 //
 import (
-	"github.com/nanobox-io/nanobox-cli/commands/box"
+	"github.com/nanobox-io/nanobox/commands/box"
 	"github.com/spf13/cobra"
 	"os"
 )

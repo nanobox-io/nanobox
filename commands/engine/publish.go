@@ -25,7 +25,7 @@ import (
 	"github.com/spf13/cobra"
 
 	api "github.com/nanobox-io/nanobox-api-client"
-	// "github.com/nanobox-io/nanobox-cli/util/file"
+	// "github.com/nanobox-io/nanobox/util/file"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 

@@ -9,9 +9,9 @@
 package engine
 
 import (
-	"github.com/nanobox-io/nanobox-cli/auth"
-	"github.com/nanobox-io/nanobox-cli/config"
-	"github.com/nanobox-io/nanobox-cli/util/s3"
+	"github.com/nanobox-io/nanobox/auth"
+	"github.com/nanobox-io/nanobox/config"
+	"github.com/nanobox-io/nanobox/util/s3"
 	"github.com/spf13/cobra"
 )
 

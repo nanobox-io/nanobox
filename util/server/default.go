@@ -8,6 +8,12 @@
 //
 package server
 
+import (
+	"github.com/go-fsnotify/fsnotify"
+	"io"
+	"net/http"
+)
+
 type (
 	server struct{}
 	Server interface {
@@ -18,7 +24,7 @@ type (
 		IsContainerExec(args []string) (found bool)
 		NotifyRebuild(event *fsnotify.Event) error
 		NotifyServer(event *fsnotify.Event) error
-		Lock() error
+		Lock()
 		Unlock()
 		Logs(params string) error
 		Ping() (bool, error)
@@ -34,66 +40,66 @@ var (
 	Default Server = server{}
 )
 
-func (vagrant) Bootstrap(params string) error {
+func (server) Bootstrap(params string) error {
 	return Bootstrap(params)
 }
 
-func (vagrant) Build(params string) error {
+func (server) Build(params string) error {
 	return Build(params)
 }
 
-func (vagrant) Deploy(params string) error {
+func (server) Deploy(params string) error {
 	return Deploy(params)
 }
 
-func (vagrant) Exec(kind, params string) error {
+func (server) Exec(kind, params string) error {
 	return Exec(kind, params)
 }
 
-func (vagrant) IsContainerExec(args []string) (found bool) {
+func (server) IsContainerExec(args []string) (found bool) {
 	return IsContainerExec(args)
 }
 
-func (vagrant) NotifyRebuild(event *fsnotify.Event) error {
+func (server) NotifyRebuild(event *fsnotify.Event) error {
 	return NotifyRebuild(event)
 }
 
-func (vagrant) NotifyServer(event *fsnotify.Event) error {
+func (server) NotifyServer(event *fsnotify.Event) error {
 	return NotifyServer(event)
 }
 
-func (vagrant) Lock() error {
-	return Lock()
+func (server) Lock() {
+	Lock()
 }
 
-func (vagrant) Unlock() {
+func (server) Unlock() {
 	Unlock()
 }
 
-func (vagrant) Logs(params string) error {
+func (server) Logs(params string) error {
 	return Logs(params)
 }
 
-func (vagrant) Ping() (bool, error) {
+func (server) Ping() (bool, error) {
 	return Ping()
 }
 
-func (vagrant) Get(path string, v interface{}) (*http.Response, error) {
+func (server) Get(path string, v interface{}) (*http.Response, error) {
 	return Get(path, v)
 }
 
-func (vagrant) Post(path, contentType string, body io.Reader) (*http.Response, error) {
+func (server) Post(path, contentType string, body io.Reader) (*http.Response, error) {
 	return Post(path, contentType, body)
 }
 
-func (vagrant) Put(path string, body io.Reader) (*http.Response, error) {
+func (server) Put(path string, body io.Reader) (*http.Response, error) {
 	return Put(path, body)
 }
 
-func (vagrant) Suspend() error {
+func (server) Suspend() error {
 	return Suspend()
 }
 
-func (vagrant) Update(params string) error {
+func (server) Update(params string) error {
 	return Update(params)
 }

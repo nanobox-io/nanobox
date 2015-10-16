@@ -8,6 +8,10 @@
 //
 package file
 
+import (
+	"io"
+)
+
 type (
 	file struct{}
 	File interface {

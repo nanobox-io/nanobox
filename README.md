@@ -36,7 +36,7 @@ It is _**highly recommended**_ that you use [git bash](http://git-scm.com/downlo
 #### From source:
 
 1. `cd` into the folder on your GOPATH where you want the project to live.
-2. `git clone git@github.com/nanobox-io/nanobox-cli`.
+2. `git clone git@github.com/nanobox-io/nanobox`.
 3. Type `nanobox` and follow the instructions to authenticate the CLI with Nanobox.
 
 
@@ -74,7 +74,7 @@ Use "nanobox [command] --help" for more information about a command.
 ### Documentation
 
 - Usage documentation is available at [nanobox.io](https://docs.nanobox.io/cli/).
-- Source code documentation is available on [godoc](http://godoc.org/github.com/nanobox-io/nanobox-cli).
+- Source code documentation is available on [godoc](http://godoc.org/github.com/nanobox-io/nanobox).
 
 
 ## Todo/Doing

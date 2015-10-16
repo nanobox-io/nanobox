@@ -8,6 +8,11 @@
 //
 package s3
 
+import (
+	"io"
+	"net/http"
+)
+
 type (
 	s3 struct{}
 	S3 interface {
