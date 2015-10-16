@@ -123,7 +123,7 @@ func TestUpdateFailed(test *testing.T) {
 
 	testConfig.EXPECT().Root().Return("")
 	testUtil.EXPECT().MD5sMatch(gomock.Any(), gomock.Any()).Return(false, nil)
-	err := errors.New("somethign went wrong")
+	err := errors.New("something went wrong")
 	testVagrant.EXPECT().Update().Return(err)
 
 	testConfig.EXPECT().Fatal(gomock.Any(), err.Error())
