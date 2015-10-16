@@ -12,7 +12,7 @@ package config
 // 	"fmt"
 // 	"os"
 //
-// 	"github.com/nanobox-io/nanobox-cli/util"
+// 	"github.com/nanobox-io/nanobox/util"
 // )
 //
 // //

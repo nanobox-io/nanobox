@@ -14,7 +14,7 @@ import (
 
 	"github.com/jcelliott/lumber"
 
-	"github.com/nanobox-io/nanobox-cli/config"
+	"github.com/nanobox-io/nanobox/config"
 )
 
 //

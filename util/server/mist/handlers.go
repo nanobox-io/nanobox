@@ -11,7 +11,7 @@ package mist
 import (
 	"fmt"
 
-	"github.com/nanobox-io/nanobox-cli/config"
+	"github.com/nanobox-io/nanobox/config"
 )
 
 // DeployUpdates

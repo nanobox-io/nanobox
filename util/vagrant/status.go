@@ -13,7 +13,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/nanobox-io/nanobox-cli/config"
+	"github.com/nanobox-io/nanobox/config"
 )
 
 //

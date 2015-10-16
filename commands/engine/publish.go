@@ -25,10 +25,10 @@ import (
 	"github.com/spf13/cobra"
 
 	api "github.com/nanobox-io/nanobox-api-client"
-	"github.com/nanobox-io/nanobox-cli/auth"
-	"github.com/nanobox-io/nanobox-cli/config"
-	// "github.com/nanobox-io/nanobox-cli/util/file"
-	"github.com/nanobox-io/nanobox-cli/util/s3"
+	"github.com/nanobox-io/nanobox/auth"
+	"github.com/nanobox-io/nanobox/config"
+	// "github.com/nanobox-io/nanobox/util/file"
+	"github.com/nanobox-io/nanobox/util/s3"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 

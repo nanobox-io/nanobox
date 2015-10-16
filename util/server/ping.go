@@ -12,7 +12,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/nanobox-io/nanobox-cli/config"
+	"github.com/nanobox-io/nanobox/config"
 )
 
 // Ping issues a ping to nanobox server

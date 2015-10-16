@@ -19,8 +19,8 @@ import (
 	syscall "github.com/docker/docker/pkg/signal"
 	terminal "github.com/docker/docker/pkg/term"
 
-	"github.com/nanobox-io/nanobox-cli/config"
-	"github.com/nanobox-io/nanobox-cli/util/notify"
+	"github.com/nanobox-io/nanobox/config"
+	"github.com/nanobox-io/nanobox/util/notify"
 )
 
 // Exec

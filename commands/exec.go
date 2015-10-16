@@ -14,8 +14,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox-cli/util/print"
-	"github.com/nanobox-io/nanobox-cli/util/server"
+	"github.com/nanobox-io/nanobox/util/print"
+	"github.com/nanobox-io/nanobox/util/server"
 )
 
 //

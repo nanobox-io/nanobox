@@ -15,8 +15,8 @@ import (
 	"os/exec"
 	"time"
 
-	"github.com/nanobox-io/nanobox-cli/config"
-	"github.com/nanobox-io/nanobox-cli/util/file"
+	"github.com/nanobox-io/nanobox/config"
+	"github.com/nanobox-io/nanobox/util/file"
 )
 
 //

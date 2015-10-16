@@ -15,8 +15,8 @@ import (
 	"path/filepath"
 
 	api "github.com/nanobox-io/nanobox-api-client"
-	"github.com/nanobox-io/nanobox-cli/config"
-	"github.com/nanobox-io/nanobox-cli/util/print"
+	"github.com/nanobox-io/nanobox/config"
+	"github.com/nanobox-io/nanobox/util/print"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 

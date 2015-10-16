@@ -12,7 +12,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/nanobox-io/nanobox-cli/config"
+	"github.com/nanobox-io/nanobox/config"
 )
 
 // Suspend

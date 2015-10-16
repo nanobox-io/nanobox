@@ -22,9 +22,9 @@ import (
 	"math"
 	"strings"
 
-	// "github.com/nanobox-io/nanobox-cli/auth"
-	// "github.com/nanobox-io/nanobox-cli/ui"
-	"github.com/nanobox-io/nanobox-cli/config"
+	// "github.com/nanobox-io/nanobox/auth"
+	// "github.com/nanobox-io/nanobox/ui"
+	"github.com/nanobox-io/nanobox/config"
 )
 
 var GZ *gzip.Writer

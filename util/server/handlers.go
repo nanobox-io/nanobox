@@ -16,8 +16,8 @@ import (
 
 	"github.com/go-fsnotify/fsnotify"
 
-	"github.com/nanobox-io/nanobox-cli/config"
-	"github.com/nanobox-io/nanobox-cli/util/server/mist"
+	"github.com/nanobox-io/nanobox/config"
+	"github.com/nanobox-io/nanobox/util/server/mist"
 )
 
 // NotifyRebuild

@@ -11,7 +11,7 @@ package server
 import (
 	"fmt"
 
-	"github.com/nanobox-io/nanobox-cli/util/server/mist"
+	"github.com/nanobox-io/nanobox/util/server/mist"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 

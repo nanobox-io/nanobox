@@ -12,8 +12,8 @@ import (
 	"strings"
 
 	"github.com/nanobox-io/golang-mist"
-	"github.com/nanobox-io/nanobox-cli/config"
-	"github.com/nanobox-io/nanobox-cli/util/print"
+	"github.com/nanobox-io/nanobox/config"
+	"github.com/nanobox-io/nanobox/util/print"
 )
 
 //

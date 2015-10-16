@@ -17,9 +17,9 @@ import (
 	"github.com/kardianos/osext"
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox-cli/config"
-	"github.com/nanobox-io/nanobox-cli/util"
-	"github.com/nanobox-io/nanobox-cli/util/file"
+	"github.com/nanobox-io/nanobox/config"
+	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/file"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 

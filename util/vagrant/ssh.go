@@ -12,7 +12,7 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/nanobox-io/nanobox-cli/config"
+	"github.com/nanobox-io/nanobox/config"
 )
 
 // SSH is run manually (vs Run) because the output needs to be hooked up differntly
