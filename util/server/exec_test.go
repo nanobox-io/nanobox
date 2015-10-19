@@ -50,7 +50,6 @@ func startServer(test *testing.T, handler http.Handler) io.Closer {
 func TestExec(test *testing.T) {
 	config.ServerURI = "127.0.0.1:1234"
 	child := run("TestExec", func() {
-		test.Log("doing stuff")
 		in := bytes.NewReader([]byte("nothing"))
 		out := bytes.NewBuffer([]byte{})
 		err := execInternal("command", "cmd=ls", in, out)
@@ -59,11 +58,9 @@ func TestExec(test *testing.T) {
 
 	mux := pat.New()
 	mux.Get("/ping", func(res http.ResponseWriter, req *http.Request) {
-		test.Log("got ping")
 		res.Write([]byte("pong"))
 	})
 	mux.Post("/exec", func(res http.ResponseWriter, req *http.Request) {
-		test.Log("got exec")
 		conn, _, err := res.(http.Hijacker).Hijack()
 		if err != nil {
 			res.WriteHeader(http.StatusInternalServerError)
@@ -81,14 +78,11 @@ func TestExec(test *testing.T) {
 		cmd.Stdout = io.MultiWriter(conn, os.Stdout)
 		cmd.Stdin = conn
 		cmd.Stderr = io.MultiWriter(conn, os.Stderr)
-		test.Log("running command", cmd)
 		err = cmd.Run()
-		test.Log("results", err)
 		conn.Close()
 	})
 	listen := startServer(test, mux)
 	defer listen.Close()
-	test.Log("starting exec")
 	errChan := make(chan error)
 	go func() {
 		output, err := child.CombinedOutput()
