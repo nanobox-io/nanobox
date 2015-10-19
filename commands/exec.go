@@ -39,14 +39,14 @@ func execute(ccmd *cobra.Command, args []string) {
 
 	//
 	v := url.Values{}
-	v.Add("cmd", strings.Join(args[0:], " "))
 
 	// if a container is found that matches args[0] then set that as a qparam, and
-	// set the cmd equal to the remaining args
+	// remove it from the argument list
 	if Server.IsContainerExec(args) {
 		v.Add("container", args[0])
-		v.Set("cmd", strings.Join(args[1:], " "))
+		args = append([]string{"place holder"}, args[1:]...)
 	}
+	v.Add("cmd", strings.Join(args[0:], " "))
 
 	//
 	Server.Exec("command", v.Encode())
