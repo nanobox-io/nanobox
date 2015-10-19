@@ -11,6 +11,7 @@ package server
 
 import (
 	syscall "github.com/docker/docker/pkg/signal"
+	"github.com/nanobox-io/nanobox/util/server/terminal"
 	"os"
 	"time"
 )
@@ -38,11 +39,11 @@ func monitorAndResizeTTY(fd uintptr, params string) {
 	tick := time.Tick(time.Millisecond * 250)
 
 	//
-	prevW, prevH := getTTYSize(fd)
+	prevW, prevH := terminal.GetTTYSize(fd)
 	for {
 		select {
 		case <-tick:
-			w, h := getTTYSize(fd)
+			w, h := terminal.GetTTYSize(fd)
 
 			if prevW != w || prevH != h {
 				resizeTTY(fd, params, w, h)

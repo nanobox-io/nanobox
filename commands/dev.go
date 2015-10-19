@@ -10,9 +10,11 @@ package commands
 //
 import (
 	"fmt"
+
+	"github.com/spf13/cobra"
+
 	"github.com/nanobox-io/nanobox-golang-stylish"
 	"github.com/nanobox-io/nanobox/config"
-	"github.com/spf13/cobra"
 )
 
 var (
@@ -78,7 +80,7 @@ func dev(ccmd *cobra.Command, args []string) {
 	}
 
 	//
-	Server.Exec("console", "")
+	Server.Exec("develop", "console", "")
 
 	// PostRun: halt
 }

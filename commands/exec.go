@@ -49,7 +49,7 @@ func execute(ccmd *cobra.Command, args []string) {
 	v.Add("cmd", strings.Join(args[0:], " "))
 
 	//
-	Server.Exec("command", v.Encode())
+	Server.Exec("exec", "command", v.Encode())
 
 	// PostRun: halt
 }

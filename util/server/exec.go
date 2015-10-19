@@ -8,16 +8,16 @@
 package server
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
-	terminal "github.com/docker/docker/pkg/term"
-	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/docker/docker/pkg/term"
 	"github.com/nanobox-io/nanobox/config"
 	"github.com/nanobox-io/nanobox/util/notify"
+	"github.com/nanobox-io/nanobox/util/server/terminal"
 	"io"
 	"net"
 	"os"
-	"time"
 )
 
 var (
@@ -25,12 +25,12 @@ var (
 )
 
 // Exec
-func Exec(kind, params string) error {
-	stdIn, stdOut, _ := terminal.StdStreams()
-	return execInternal(kind, params, stdIn, stdOut)
+func Exec(where, kind, params string) error {
+	stdIn, stdOut, _ := term.StdStreams()
+	return execInternal(where, kind, params, stdIn, stdOut)
 }
 
-func execInternal(kind, params string, in io.Reader, out io.Writer) error {
+func execInternal(where, kind, params string, in io.Reader, out io.Writer) error {
 
 	// if we can't connect to the server, lets bail out early
 	conn, err := net.Dial("tcp4", config.ServerURI)
@@ -39,7 +39,7 @@ func execInternal(kind, params string, in io.Reader, out io.Writer) error {
 	}
 	defer conn.Close()
 
-	printNanoboxHeader(kind)
+	terminal.PrintNanoboxHeader(kind)
 
 	// begin watching for changes to the project
 	go func() {
@@ -48,38 +48,29 @@ func execInternal(kind, params string, in io.Reader, out io.Writer) error {
 		}
 	}()
 
-	// get current terminal info
-	stdInFD, isTerminal := terminal.GetFdInfo(in)
-	stdOutFD, _ := terminal.GetFdInfo(out)
+	// get current term info
+	stdInFD, isTerminal := term.GetFdInfo(in)
+	stdOutFD, _ := term.GetFdInfo(out)
 
 	// handle all incoming os signals and act accordingly; default behavior is to
 	// forward all signals to nanobox server
 	go handleSignals(stdOutFD, params)
 
-	// if we are using a terminal, lets upgrade it to RawMode
+	// if we are using a term, lets upgrade it to RawMode
 	if isTerminal {
-		oldState, err := terminal.SetRawTerminal(stdInFD)
+		oldState, err := term.SetRawTerminal(stdInFD)
 		if err != nil {
-			config.Fatal("[util/server/exec_unix] terminal.SetRawTerminal() failed - ", err.Error())
+			config.Fatal("[util/server/exec_unix] term.SetRawTerminal() failed - ", err.Error())
 		}
-		defer terminal.RestoreTerminal(stdInFD, oldState)
+		defer term.RestoreTerminal(stdInFD, oldState)
 	}
-
-	// set up notification channels so that when a ping check fails, we can disconnect the active console
-	disconnect := make(chan error)
-	done := make(chan interface{})
-	go monitorServer(done, disconnect, 5*time.Second)
-
-	// create a web request that will be upgrated to a raw socket on the server
-	conn.Write([]byte(fmt.Sprintf("POST /exec?%v HTTP/1.1\r\n\r\n", params)))
-
-	// pipe data from the server to out, and from in to the server
-	go func() {
-		go io.Copy(os.Stdout, conn)
-		io.Copy(conn, os.Stdin)
-		close(done)
-	}()
-	return <-disconnect
+	switch where {
+	case "develop":
+		in = io.MultiReader(bytes.NewReader([]byte(fmt.Sprintf("POST /develop?%v HTTP/1.1\r\n\r\n", params))), in)
+	default:
+		in = io.MultiReader(bytes.NewReader([]byte(fmt.Sprintf("POST /exec?%v HTTP/1.1\r\n\r\n", params))), in)
+	}
+	return pipeToConnection(conn, in, out)
 }
 
 // IsContainerExec
@@ -107,83 +98,12 @@ func IsContainerExec(args []string) bool {
 	return false
 }
 
-//
-func printNanoboxHeader(kind string) {
-	switch kind {
-
-	//
-	case "command":
-		fmt.Printf(stylish.Bullet("Executing command in nanobox..."))
-
-		//
-	case "console", "container":
-		fmt.Printf(`+> Opening a nanobox console:
-
-
-                                     **
-                                  ********
-                               ***************
-                            *********************
-                              *****************
-                            ::    *********    ::
-                               ::    ***    ::
-                             ++   :::   :::   ++
-                                ++   :::   ++
-                                   ++   ++
-                                      +
-
-                      _  _ ____ _  _ ____ ___  ____ _  _
-                      |\ | |__| |\ | |  | |__) |  |  \/
-                      | \| |  | | \| |__| |__) |__| _/\_
-`)
-
-		if kind == "console" {
-			fmt.Printf(`
---------------------------------------------------------------------------------
-+ You are in a virtual machine (vm)
-+ Your local source code has been mounted into the vm, and changes in either
-the vm or local will be mirrored.
-+ If you run a server, access it at >> %s
---------------------------------------------------------------------------------
-`, config.Nanofile.Domain)
-		}
-	}
-}
-
-// monitor the server for disconnects
-func monitorServer(done chan interface{}, disconnect chan<- error, after time.Duration) {
-	defer close(disconnect)
-	ping := make(chan interface{}, 1)
-	for {
-		// ping the server
-		go func() {
-			if ok, _ := Ping(); ok {
-				ping <- true
-			} else {
-				close(ping)
-			}
-		}()
-		select {
-		case <-ping:
-		case <-time.After(after):
-			disconnect <- DisconnectedFromServer
-			return
-		case <-done:
-			return
-		}
-	}
-}
-
-// getTTYSize
-func getTTYSize(fd uintptr) (int, int) {
-
-	ws, err := terminal.GetWinsize(fd)
+func sendSignal(sig os.Signal) {
+	res, err := Post(fmt.Sprintf("/killexec?signal=%v", sig), "text/plain", nil)
 	if err != nil {
-		config.Fatal("[util/server/exec] terminal.GetWinsize() failed", err.Error())
+		Fatal("[util/server/exec_unix] Post() failed - ", err.Error())
 	}
-
-	//
-	return int(ws.Width), int(ws.Height)
+	res.Body.Close()
 }
 
 // resizeTTY
@@ -193,14 +113,6 @@ func resizeTTY(fd uintptr, params string, w, h int) {
 	res, err := Post(fmt.Sprintf("/resizeexec?w=%d&h=%d&%v", w, h, params), "text/plain", nil)
 	if err != nil {
 		fmt.Printf("Error issuing resize: %s\n", err)
-	}
-	res.Body.Close()
-}
-
-func sendSignal(sig os.Signal) {
-	res, err := Post(fmt.Sprintf("/killexec?signal=%v", sig), "text/plain", nil)
-	if err != nil {
-		Fatal("[util/server/exec_unix] Post() failed - ", err.Error())
 	}
 	res.Body.Close()
 }

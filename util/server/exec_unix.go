@@ -11,6 +11,7 @@ package server
 
 import (
 	syscall "github.com/docker/docker/pkg/signal"
+	"github.com/nanobox-io/nanobox/util/server/terminal"
 	"os"
 )
 
@@ -23,7 +24,7 @@ func handleSignals(stdOutFD uintptr, params string) {
 		switch sig {
 		case syscall.SIGCHLD: // ignore this one
 		case syscall.SIGWINCH:
-			w, h := getTTYSize(stdOutFD)
+			w, h := terminal.GetTTYSize(stdOutFD)
 			resizeTTY(stdOutFD, params, w, h)
 		// tell nanobox server about the signal
 		default:

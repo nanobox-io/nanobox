@@ -12,6 +12,7 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"time"
 
@@ -93,4 +94,45 @@ func Put(path string, body io.Reader) (*http.Response, error) {
 	}
 
 	return res, nil
+}
+
+// WriteTCP
+func pipeToConnection(conn net.Conn, in io.Reader, out io.Writer) error {
+
+	// set up notification channels so that when a ping check fails, we can disconnect the active console
+	disconnect := make(chan error)
+	done := make(chan interface{})
+	go monitorServer(done, disconnect, 5*time.Second)
+
+	// pipe data from the server to out, and from in to the server
+	go func() {
+		go io.Copy(out, conn)
+		io.Copy(conn, in)
+		close(done)
+	}()
+	return <-disconnect
+}
+
+// monitor the server for disconnects
+func monitorServer(done chan interface{}, disconnect chan<- error, after time.Duration) {
+	defer close(disconnect)
+	ping := make(chan interface{}, 1)
+	for {
+		// ping the server
+		go func() {
+			if ok, _ := Ping(); ok {
+				ping <- true
+			} else {
+				close(ping)
+			}
+		}()
+		select {
+		case <-ping:
+		case <-time.After(after):
+			disconnect <- DisconnectedFromServer
+			return
+		case <-done:
+			return
+		}
+	}
 }

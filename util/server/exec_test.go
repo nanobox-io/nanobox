@@ -52,7 +52,7 @@ func TestExec(test *testing.T) {
 	child := run("TestExec", func() {
 		in := bytes.NewReader([]byte("nothing"))
 		out := bytes.NewBuffer([]byte{})
-		err := execInternal("command", "cmd=ls", in, out)
+		err := execInternal("exec", "command", "cmd=ls", in, out)
 		test.Log(err)
 	})
 
