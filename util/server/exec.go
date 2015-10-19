@@ -73,7 +73,7 @@ func execInternal(kind, params string, in io.Reader, out io.Writer) error {
 	// create a web request that will be upgrated to a raw socket on the server
 	conn.Write([]byte(fmt.Sprintf("POST /exec?%v HTTP/1.1\r\n\r\n", params)))
 
-	// pipe data from the server to stdout, and from stdin to the server
+	// pipe data from the server to out, and from in to the server
 	go func() {
 		go io.Copy(os.Stdout, conn)
 		io.Copy(conn, os.Stdin)
