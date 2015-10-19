@@ -21,10 +21,10 @@ import (
 //
 var execCmd = &cobra.Command{
 	Hidden: true,
-	
-	Use:    "exec",
-	Short:  "Runs a command from inside your app on the nanobox",
-	Long:   ``,
+
+	Use:   "exec",
+	Short: "Runs a command from inside your app on the nanobox",
+	Long:  ``,
 
 	PreRun:  boot,
 	Run:     execute,
@@ -53,7 +53,7 @@ func execute(ccmd *cobra.Command, args []string) {
 	}
 
 	//
-	server.Exec("command", v.Encode())
+	server.Exec("exec", "command", v.Encode())
 
 	// PostRun: halt
 }

@@ -13,13 +13,14 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/nanobox-io/nanobox-golang-stylish"
 	"github.com/nanobox-io/nanobox/util/server"
 )
 
 //
 var consoleCmd = &cobra.Command{
 	Use:   "console",
-	Short: "Opens an interactive terminal from inside your app on the nanobox",
+	Short: "Opens an interactive terminal from inside your app on nanobox",
 	Long:  ``,
 
 	PreRun:  boot,
@@ -37,11 +38,11 @@ func console(ccmd *cobra.Command, args []string) {
 
 	// if no args are passed provide instruction
 	case len(args) == 0:
-		fmt.Printf("Please provide a service to connect to.\n")
+		fmt.Printf(stylish.ErrBullet("Unable to console. Please provide a service to connect to.\n"))
 
 	// if 1 args is passed it's assumed to be a container to console into
 	case len(args) == 1:
-		server.Exec("container", "container="+args[0])
+		server.Exec("console", "container", "container="+args[0])
 	}
 
 	// PostRun: halt

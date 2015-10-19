@@ -12,7 +12,9 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
+	"net"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/nanobox-io/nanobox/config"
@@ -93,4 +95,46 @@ func Put(path string, body io.Reader) (*http.Response, error) {
 	}
 
 	return res, nil
+}
+
+// WriteTCP
+func WriteTCP(path string) error {
+
+	// set up a ping to detect when the server goes away to be able to disconnect
+	// any active consoles
+	disconnect := make(chan struct{})
+	go func() {
+		for {
+			select {
+			default:
+				if ok, _ := Ping(); !ok {
+					close(disconnect)
+				}
+				time.Sleep(2 * time.Second)
+
+			// return after timeout
+			case <-time.After(5 * time.Second):
+				return
+
+			// return if ping fails
+			case <-disconnect:
+				return
+			}
+		}
+	}()
+
+	//
+	conn, err := net.Dial("tcp4", config.ServerURI)
+	if err != nil {
+		return err
+	}
+
+	// pseudo a web request
+	conn.Write([]byte(path))
+
+	// pipe data
+	go io.Copy(conn, os.Stdin)
+	io.Copy(os.Stdout, conn)
+
+	return nil
 }

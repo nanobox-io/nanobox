@@ -7,14 +7,7 @@
 //
 package server
 
-import (
-	"fmt"
-
-	terminal "github.com/docker/docker/pkg/term"
-
-	"github.com/nanobox-io/nanobox/config"
-	"github.com/nanobox-io/nanobox-golang-stylish"
-)
+import ()
 
 // IsContainerExec
 func IsContainerExec(args []string) (found bool) {
@@ -38,64 +31,4 @@ func IsContainerExec(args []string) (found bool) {
 	}
 
 	return
-}
-
-//
-func header(kind string) {
-	switch kind {
-
-	//
-	case "command":
-		fmt.Printf(stylish.Bullet("Executing command in nanobox..."))
-
-		//
-	case "console", "container":
-		fmt.Printf(`+> Opening a nanobox console:
-
-
-                                     **
-                                  ********
-                               ***************
-                            *********************
-                              *****************
-                            ::    *********    ::
-                               ::    ***    ::
-                             ++   :::   :::   ++
-                                ++   :::   ++
-                                   ++   ++
-                                      +
-
-                      _  _ ____ _  _ ____ ___  ____ _  _
-                      |\ | |__| |\ | |  | |__) |  |  \/
-                      | \| |  | | \| |__| |__) |__| _/\_
-`)
-
-		if kind == "console" {
-			fmt.Printf(`
---------------------------------------------------------------------------------
-+ You are in a virtual machine (vm)
-+ Your local source code has been mounted into the vm, and changes in either
-the vm or local will be mirrored.
-+ If you run a server, access it at >> %s
---------------------------------------------------------------------------------
-`, config.Nanofile.Domain)
-		}
-	}
-}
-
-// getTTYSize
-func getTTYSize(fd uintptr) (int, int) {
-
-	ws, err := terminal.GetWinsize(fd)
-	if err != nil {
-		config.Fatal("[util/server/exec] terminal.GetWinsize() failed", err.Error())
-	}
-
-	//
-	if ws == nil {
-		return 0, 0
-	}
-
-	//
-	return int(ws.Width), int(ws.Height)
 }

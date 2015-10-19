@@ -13,11 +13,11 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/nanobox-io/nanobox-golang-stylish"
 	"github.com/nanobox-io/nanobox/config"
 	"github.com/nanobox-io/nanobox/util/server"
 	"github.com/nanobox-io/nanobox/util/server/mist"
 	"github.com/nanobox-io/nanobox/util/vagrant"
-	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
 var (
@@ -83,7 +83,7 @@ func dev(ccmd *cobra.Command, args []string) {
 	}
 
 	//
-	server.Exec("console", "")
+	server.Exec("develop", "console", "")
 
 	// PostRun: halt
 }
