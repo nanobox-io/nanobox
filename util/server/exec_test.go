@@ -78,7 +78,6 @@ func TestExec(test *testing.T) {
 
 	errChan := make(chan error)
 	go func() {
-		// need to use a pipe so that no EOF is returned. this was causing test to fail very quickly
 		in := bytes.NewBuffer([]byte("this is a test"))
 		out := &bytes.Buffer{}
 		err := execInternal("exec", "command", "cmd=cat", in, out)

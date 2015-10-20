@@ -11,7 +11,6 @@ package server
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/nanobox-io/nanobox/config"
 	"io"
 	"io/ioutil"
@@ -101,21 +100,20 @@ func Put(path string, body io.Reader) (*http.Response, error) {
 func pipeToConnection(conn net.Conn, in io.Reader, out io.Writer) error {
 
 	// set up notification channels so that when a ping check fails, we can disconnect the active console
-	pingService := make(chan interface{})
+	// pingService := make(chan interface{})
 
 	// pipe data from the server to out, and from in to the server
-	go func() {
-		io.Copy(out, conn)
-		close(pingService)
-	}()
 
 	go func() {
-		n, err := io.Copy(conn, in)
-		fmt.Println(n, err)
+		io.Copy(conn, in)
 		conn.(*net.TCPConn).CloseWrite()
 	}()
 
-	return monitorServer(pingService, 5*time.Second)
+	io.Copy(out, conn)
+	// close(pingService)
+
+	// return monitorServer(pingService, 5*time.Second)
+	return nil
 }
 
 // monitor the server for disconnects
