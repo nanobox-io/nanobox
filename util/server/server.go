@@ -11,14 +11,13 @@ package server
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"github.com/nanobox-io/nanobox/config"
 	"io"
 	"io/ioutil"
 	"net"
 	"net/http"
-	"sync"
 	"time"
-
-	"github.com/nanobox-io/nanobox/config"
 )
 
 var (
@@ -108,16 +107,13 @@ func pipeToConnection(conn net.Conn, in io.Reader, out io.Writer) error {
 
 	// pipe data from the server to out, and from in to the server
 	go func() {
-		wg := sync.WaitGroup{}
-		wg.Add(1)
 		go func() {
 			io.Copy(out, conn)
-			wg.Done()
+			close(pingService)
 		}()
-		io.Copy(conn, in)
+		n, err := io.Copy(conn, in)
+		fmt.Println(n, err)
 		conn.(*net.TCPConn).CloseWrite()
-		wg.Wait()
-		close(pingService)
 	}()
 	return <-disconnect
 }

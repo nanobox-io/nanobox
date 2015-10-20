@@ -15,6 +15,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"os"
 	"os/exec"
 	"testing"
 	"time"
@@ -40,7 +41,7 @@ func normalPing(mux *pat.Router) {
 func normalExec(test *testing.T, mux *pat.Router) {
 	mux.Post("/exec", func(res http.ResponseWriter, req *http.Request) {
 		test.Log("got exec")
-		conn, _, err := res.(http.Hijacker).Hijack()
+		conn, rw, err := res.(http.Hijacker).Hijack()
 		if err != nil {
 			res.WriteHeader(http.StatusInternalServerError)
 			res.Write([]byte(err.Error()))
@@ -54,10 +55,11 @@ func normalExec(test *testing.T, mux *pat.Router) {
 		}
 		test.Log("executing", script)
 		cmd := exec.Command("/bin/bash", "-c", script)
-		cmd.Stdout = conn
-		cmd.Stdin = conn
-		cmd.Stderr = conn
+		cmd.Stdout = io.MultiWriter(conn, os.Stdout)
+		cmd.Stdin = io.TeeReader(rw, os.Stdout)
+		cmd.Stderr = rw
 		err = cmd.Run()
+		test.Log("finished running")
 	})
 }
 
