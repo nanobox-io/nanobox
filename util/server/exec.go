@@ -57,10 +57,10 @@ func execInternal(where, kind, params string, in io.Reader, out io.Writer) error
 	// if we are using a term, lets upgrade it to RawMode
 	if isTerminal {
 		oldState, err := term.SetRawTerminal(stdInFD)
-		if err != nil {
-			config.Fatal("[util/server/exec_unix] term.SetRawTerminal() failed - ", err.Error())
+		// we only use raw mode if it is available.
+		if err == nil {
+			defer term.RestoreTerminal(stdInFD, oldState)
 		}
-		defer term.RestoreTerminal(stdInFD, oldState)
 	}
 
 	// make a http request

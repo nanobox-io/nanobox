@@ -11,11 +11,13 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/gorilla/pat"
+	"github.com/kr/pty"
 	"github.com/nanobox-io/nanobox/config"
 	"io"
 	"net"
 	"net/http"
 	"os/exec"
+	"regexp"
 	"testing"
 	"time"
 )
@@ -67,6 +69,35 @@ func normalExec(test *testing.T, mux *pat.Router) {
 	})
 }
 
+func ptyExec(test *testing.T, mux *pat.Router) {
+	mux.Post("/exec", func(res http.ResponseWriter, req *http.Request) {
+		test.Log("got exec")
+		conn, rw, err := res.(http.Hijacker).Hijack()
+		if err != nil {
+			res.WriteHeader(http.StatusInternalServerError)
+			res.Write([]byte(err.Error()))
+			return
+		}
+		defer conn.Close()
+		script := req.FormValue("cmd")
+		if script == "" {
+			test.Log("missing script")
+			test.FailNow()
+		}
+		test.Log("executing", script)
+		cmd := exec.Command("/bin/bash", "-c", script)
+		file, err := pty.Start(cmd)
+		if err != nil {
+			test.Log(err)
+			test.FailNow()
+		}
+		test.Log("copying from pty")
+		go io.Copy(file, rw)
+		io.Copy(conn, file)
+		test.Log("finished running")
+	})
+}
+
 func TestExec(test *testing.T) {
 	config.ServerURI = "127.0.0.1:1234"
 
@@ -88,6 +119,45 @@ func TestExec(test *testing.T) {
 		if out.String() != "this is a test" {
 			test.Log("output:", out.Len())
 			errChan <- fmt.Errorf("unexpected output: '%v'", out.String())
+		}
+		close(errChan)
+	}()
+	select {
+	case <-time.After(time.Second * 4):
+		test.Log("timed out...")
+		test.FailNow()
+	case err := <-errChan:
+		if err == nil {
+			return
+		}
+		test.Log(err)
+		test.FailNow()
+	}
+}
+
+func TestPTYExec(test *testing.T) {
+	config.ServerURI = "127.0.0.1:1234"
+
+	mux := pat.New()
+	normalPing(mux)
+	ptyExec(test, mux)
+	listen := startServer(test, mux)
+	defer listen.Close()
+
+	errChan := make(chan error)
+	go func() {
+		in := bytes.NewBuffer([]byte("this is a test\n"))
+		in.Write([]byte{4}) // EOT
+		out := &bytes.Buffer{}
+		err := execInternal("exec", "command", "cmd=cat", in, out)
+		if err != nil {
+			errChan <- err
+			return
+		}
+		// a tty does local echo, and has some extra stuff
+		if regexp.MustCompile("this is a test.+this is a test.+").Match(out.Bytes()) {
+			test.Log("output:", out.Len())
+			errChan <- fmt.Errorf("unexpected output: '%v'", out)
 		}
 		close(errChan)
 	}()
