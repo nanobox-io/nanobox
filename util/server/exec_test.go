@@ -15,7 +15,6 @@ import (
 	"io"
 	"net"
 	"net/http"
-	"os"
 	"os/exec"
 	"testing"
 	"time"
@@ -55,10 +54,15 @@ func normalExec(test *testing.T, mux *pat.Router) {
 		}
 		test.Log("executing", script)
 		cmd := exec.Command("/bin/bash", "-c", script)
-		cmd.Stdout = io.MultiWriter(conn, os.Stdout)
-		cmd.Stdin = io.TeeReader(rw, os.Stdout)
-		cmd.Stderr = rw
-		err = cmd.Run()
+		cmd.Stdin = rw
+		cmd.Stderr = conn
+		// cmd.Stdout = conn
+		// cmd.Run()
+		reader, err := cmd.StdoutPipe()
+		cmd.Start()
+		io.Copy(conn, reader)
+		conn.(*net.TCPConn).CloseWrite()
+		err = cmd.Wait()
 		test.Log("finished running")
 	})
 }
@@ -85,6 +89,41 @@ func TestExec(test *testing.T) {
 		if out.String() != "this is a test" {
 			test.Log("output:", out.Len())
 			errChan <- fmt.Errorf("unexpected output: '%v'", out.String())
+		}
+		close(errChan)
+	}()
+	select {
+	case <-time.After(time.Second * 4):
+		test.Log("timed out...")
+		test.FailNow()
+	case err := <-errChan:
+		if err == nil {
+			return
+		}
+		test.Log(err)
+		test.FailNow()
+	}
+}
+
+func TestExecEarlyExit(test *testing.T) {
+	config.ServerURI = "127.0.0.1:1235"
+
+	mux := pat.New()
+	normalPing(mux)
+	normalExec(test, mux)
+	listen := startServer(test, mux)
+	defer listen.Close()
+
+	errChan := make(chan error)
+	go func() {
+		// need to use a pipe so that no EOF is returned. this was causing test to fail very quickly
+		r, _ := io.Pipe()
+		out := &bytes.Buffer{}
+		err := execInternal("exec", "command", "cmd=exit", r, out)
+		test.Log("exited", err)
+		if err != nil {
+			errChan <- err
+			return
 		}
 		close(errChan)
 	}()

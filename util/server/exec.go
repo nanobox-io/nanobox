@@ -52,7 +52,7 @@ func execInternal(where, kind, params string, in io.Reader, out io.Writer) error
 
 	// handle all incoming os signals and act accordingly; default behavior is to
 	// forward all signals to nanobox server
-	go handleSignals(stdOutFD, params)
+	go monitorTerminal(stdOutFD, params)
 
 	// if we are using a term, lets upgrade it to RawMode
 	if isTerminal {

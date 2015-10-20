@@ -16,7 +16,7 @@ import (
 	"os/signal"
 )
 
-func handleSignals(stdOutFD uintptr, params string) {
+func monitorTerminal(stdOutFD uintptr, params string) {
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGWINCH)
 	defer signal.Stop(sigs)
