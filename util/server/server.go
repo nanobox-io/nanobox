@@ -101,26 +101,25 @@ func Put(path string, body io.Reader) (*http.Response, error) {
 func pipeToConnection(conn net.Conn, in io.Reader, out io.Writer) error {
 
 	// set up notification channels so that when a ping check fails, we can disconnect the active console
-	disconnect := make(chan error)
 	pingService := make(chan interface{})
-	go monitorServer(pingService, disconnect, 5*time.Second)
 
 	// pipe data from the server to out, and from in to the server
 	go func() {
-		go func() {
-			io.Copy(out, conn)
-			close(pingService)
-		}()
+		io.Copy(out, conn)
+		close(pingService)
+	}()
+
+	go func() {
 		n, err := io.Copy(conn, in)
 		fmt.Println(n, err)
 		conn.(*net.TCPConn).CloseWrite()
 	}()
-	return <-disconnect
+
+	return monitorServer(pingService, 5*time.Second)
 }
 
 // monitor the server for disconnects
-func monitorServer(done chan interface{}, disconnect chan<- error, after time.Duration) {
-	defer close(disconnect)
+func monitorServer(done chan interface{}, after time.Duration) error {
 	ping := make(chan interface{}, 1)
 	for {
 		// ping the server
@@ -134,14 +133,12 @@ func monitorServer(done chan interface{}, disconnect chan<- error, after time.Du
 		select {
 		case _, ok := <-ping:
 			if !ok {
-				disconnect <- DisconnectedFromServer
-				return
+				return DisconnectedFromServer
 			}
 		case <-time.After(after):
-			disconnect <- DisconnectedFromServer
-			return
+			return DisconnectedFromServer
 		case <-done:
-			return
+			return nil
 		}
 	}
 }
