@@ -10,17 +10,19 @@ package server
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"io/ioutil"
 	"net"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/nanobox-io/nanobox/config"
 )
 
 var (
-	err error //
+	DisconnectedFromServer = errors.New("the server went away")
 )
 
 // Service
@@ -101,14 +103,21 @@ func pipeToConnection(conn net.Conn, in io.Reader, out io.Writer) error {
 
 	// set up notification channels so that when a ping check fails, we can disconnect the active console
 	disconnect := make(chan error)
-	done := make(chan interface{})
-	go monitorServer(done, disconnect, 5*time.Second)
+	pingService := make(chan interface{})
+	go monitorServer(pingService, disconnect, 5*time.Second)
 
 	// pipe data from the server to out, and from in to the server
 	go func() {
-		go io.Copy(out, conn)
+		wg := sync.WaitGroup{}
+		wg.Add(1)
+		go func() {
+			io.Copy(out, conn)
+			wg.Done()
+		}()
 		io.Copy(conn, in)
-		close(done)
+		conn.(*net.TCPConn).CloseWrite()
+		wg.Wait()
+		close(pingService)
 	}()
 	return <-disconnect
 }
@@ -127,7 +136,11 @@ func monitorServer(done chan interface{}, disconnect chan<- error, after time.Du
 			}
 		}()
 		select {
-		case <-ping:
+		case _, ok := <-ping:
+			if !ok {
+				disconnect <- DisconnectedFromServer
+				return
+			}
 		case <-time.After(after):
 			disconnect <- DisconnectedFromServer
 			return

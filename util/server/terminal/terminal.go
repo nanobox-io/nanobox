@@ -9,6 +9,7 @@ package terminal
 
 import (
 	"fmt"
+	"io"
 
 	"github.com/docker/docker/pkg/term"
 
@@ -17,16 +18,16 @@ import (
 )
 
 //
-func PrintNanoboxHeader(kind string) {
+func PrintNanoboxHeader(kind string, out io.Writer) {
 	switch kind {
 
 	//
 	case "command":
-		fmt.Printf(stylish.Bullet("Executing command in nanobox..."))
+		fmt.Fprintf(out, stylish.Bullet("Executing command in nanobox..."))
 
 		//
 	case "develop", "container":
-		fmt.Printf(`+> Opening a nanobox console:
+		fmt.Fprintf(out, `+> Opening a nanobox console:
 
 
                                      **
@@ -47,7 +48,7 @@ func PrintNanoboxHeader(kind string) {
 `)
 
 		if kind == "develop" {
-			fmt.Printf(`
+			fmt.Fprintf(out, `
 --------------------------------------------------------------------------------
 + You are in a virtual machine (vm)
 + Your local source code has been mounted into the vm, and changes in either

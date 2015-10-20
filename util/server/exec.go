@@ -8,8 +8,6 @@
 package server
 
 import (
-	"bytes"
-	"errors"
 	"fmt"
 	"github.com/docker/docker/pkg/term"
 	"github.com/nanobox-io/nanobox/config"
@@ -18,10 +16,6 @@ import (
 	"io"
 	"net"
 	"os"
-)
-
-var (
-	DisconnectedFromServer = errors.New("the server went away")
 )
 
 // Exec
@@ -39,7 +33,15 @@ func execInternal(where, kind, params string, in io.Reader, out io.Writer) error
 	}
 	defer conn.Close()
 
-	terminal.PrintNanoboxHeader(kind)
+	// get current term info
+	stdInFD, isTerminal := term.GetFdInfo(in)
+	stdOutFD, _ := term.GetFdInfo(out)
+
+	// if it is not a terminal, then we don't print a header. this allows piping
+	// to and from the nanobox command
+	if isTerminal {
+		terminal.PrintNanoboxHeader(kind, out)
+	}
 
 	// begin watching for changes to the project
 	go func() {
@@ -47,10 +49,6 @@ func execInternal(where, kind, params string, in io.Reader, out io.Writer) error
 			fmt.Printf(err.Error())
 		}
 	}()
-
-	// get current term info
-	stdInFD, isTerminal := term.GetFdInfo(in)
-	stdOutFD, _ := term.GetFdInfo(out)
 
 	// handle all incoming os signals and act accordingly; default behavior is to
 	// forward all signals to nanobox server
@@ -64,12 +62,25 @@ func execInternal(where, kind, params string, in io.Reader, out io.Writer) error
 		}
 		defer term.RestoreTerminal(stdInFD, oldState)
 	}
+
+	// make a http request
 	switch where {
 	case "develop":
-		in = io.MultiReader(bytes.NewReader([]byte(fmt.Sprintf("POST /develop?%v HTTP/1.1\r\n\r\n", params))), in)
+		fmt.Println("got a develop")
+		_, err := fmt.Fprintf(conn, "POST /develop?%v HTTP/1.1\r\n\r\n", params)
+		if err != nil {
+			return err
+		}
 	default:
-		in = io.MultiReader(bytes.NewReader([]byte(fmt.Sprintf("POST /exec?%v HTTP/1.1\r\n\r\n", params))), in)
+		fmt.Println("got an exec")
+		_, err := fmt.Fprintf(conn, "POST /exec?%v HTTP/1.1\r\n\r\n", params)
+		if err != nil {
+			return err
+		}
 	}
+
+	fmt.Println("starting to pipe")
+
 	return pipeToConnection(conn, in, out)
 }
 
