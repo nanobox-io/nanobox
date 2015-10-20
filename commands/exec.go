@@ -44,9 +44,9 @@ func execute(ccmd *cobra.Command, args []string) {
 	// remove it from the argument list
 	if Server.IsContainerExec(args) {
 		v.Add("container", args[0])
-		args = append([]string{"place holder"}, args[1:]...)
+		args = args[1:]
 	}
-	v.Add("cmd", strings.Join(args[0:], " "))
+	v.Add("cmd", strings.Join(args, " "))
 
 	//
 	Server.Exec("exec", "command", v.Encode())

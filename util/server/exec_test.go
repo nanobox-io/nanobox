@@ -15,7 +15,6 @@ import (
 	"io"
 	"net"
 	"net/http"
-	"os"
 	"os/exec"
 	"testing"
 	"time"
