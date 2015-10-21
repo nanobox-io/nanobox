@@ -11,7 +11,6 @@ package server
 
 import (
 	"github.com/nanobox-io/nanobox/util/server/terminal"
-	"os"
 	"time"
 )
 
