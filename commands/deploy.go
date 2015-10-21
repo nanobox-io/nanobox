@@ -10,15 +10,11 @@ package commands
 //
 import (
 	"fmt"
-	"net/url"
-	"strconv"
-
-	"github.com/spf13/cobra"
-
 	"github.com/nanobox-io/nanobox-golang-stylish"
 	"github.com/nanobox-io/nanobox/config"
-	"github.com/nanobox-io/nanobox/util/server"
-	"github.com/nanobox-io/nanobox/util/server/mist"
+	"github.com/spf13/cobra"
+	"net/url"
+	"strconv"
 )
 
 var (
@@ -53,12 +49,12 @@ func deploy(ccmd *cobra.Command, args []string) {
 	fmt.Printf(stylish.Bullet("Deploying codebase..."))
 
 	// stream deploy output
-	go mist.Stream([]string{"log", "deploy"}, mist.PrintLogStream)
+	go Mist.Stream([]string{"log", "deploy"}, Mist.PrintLogStream)
 
 	// listen for status updates
 	errch := make(chan error)
 	go func() {
-		errch <- mist.Listen([]string{"job", "deploy"}, mist.DeployUpdates)
+		errch <- Mist.Listen([]string{"job", "deploy"}, Mist.DeployUpdates)
 	}()
 
 	v := url.Values{}
@@ -66,8 +62,8 @@ func deploy(ccmd *cobra.Command, args []string) {
 	v.Add("run", strconv.FormatBool(install))
 
 	// run a deploy
-	if err := server.Deploy(v.Encode()); err != nil {
-		server.Fatal("[commands/deploy] server.Deploy() failed - ", err.Error())
+	if err := Server.Deploy(v.Encode()); err != nil {
+		Config.Fatal("[commands/deploy] server.Deploy() failed - ", err.Error())
 	}
 
 	// wait for a status update (blocking)

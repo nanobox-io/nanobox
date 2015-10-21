@@ -9,13 +9,9 @@ package commands
 
 //
 import (
+	"github.com/spf13/cobra"
 	"net/url"
 	"strings"
-
-	"github.com/spf13/cobra"
-
-	"github.com/nanobox-io/nanobox/util/print"
-	"github.com/nanobox-io/nanobox/util/server"
 )
 
 //
@@ -38,22 +34,22 @@ func execute(ccmd *cobra.Command, args []string) {
 
 	//
 	if len(args) == 0 {
-		args = append(args, print.Prompt("Please specify a command you wish to exec: "))
+		args = append(args, Print.Prompt("Please specify a command you wish to exec: "))
 	}
 
 	//
 	v := url.Values{}
-	v.Add("cmd", strings.Join(args[0:], " "))
 
 	// if a container is found that matches args[0] then set that as a qparam, and
-	// set the cmd equal to the remaining args
-	if server.IsContainerExec(args) {
+	// remove it from the argument list
+	if Server.IsContainerExec(args) {
 		v.Add("container", args[0])
-		v.Set("cmd", strings.Join(args[1:], " "))
+		args = args[1:]
 	}
+	v.Add("cmd", strings.Join(args, " "))
 
 	//
-	server.Exec("exec", "command", v.Encode())
+	Server.Exec("exec", "command", v.Encode())
 
 	// PostRun: halt
 }

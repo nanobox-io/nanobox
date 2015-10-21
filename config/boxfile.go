@@ -34,7 +34,7 @@ func ParseBoxfile() *BoxfileConfig {
 	//
 	if err := ParseConfig(boxfilePath, boxfile); err != nil {
 		fmt.Printf("Nanobox failed to parse Boxfile. Please ensure it is valid YAML and try again.\n")
-		os.Exit(1)
+		Exit(1)
 	}
 
 	//

@@ -11,7 +11,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/nanobox-io/golang-mist"
+	mistClient "github.com/nanobox-io/golang-mist"
 	"github.com/nanobox-io/nanobox/config"
 	"github.com/nanobox-io/nanobox/util/print"
 )
@@ -143,17 +143,17 @@ func Stream(tags []string, handle func(Log)) {
 }
 
 // connect connects 'mist' to the server running on the guest machine
-func connect() mist.Client {
-	mist, err := mist.NewRemoteClient(config.MistURI)
+func connect() mistClient.Client {
+	mistClient, err := mistClient.NewRemoteClient(config.MistURI)
 	if err != nil {
 		config.Fatal("[util/server/mist/mist] mist.NewRemoteClient() failed - ", err.Error())
 	}
 
-	return mist
+	return mistClient
 }
 
 // subscribe
-func subscribe(client mist.Client, tags []string) {
+func subscribe(client mistClient.Client, tags []string) {
 	if err := client.Subscribe(tags); err != nil {
 		config.Fatal("[util/server/mist/mist] client.Subscribe() failed - ", err.Error())
 	}

@@ -23,7 +23,7 @@ _testmain.go
 *.test
 *.prof
 
-#
+# Project specific files
 .DS_Store
 TODO
 nanobox

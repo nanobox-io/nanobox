@@ -25,7 +25,7 @@ package config
 //
 // 		if response != "y" {
 // 			fmt.Printf("'%v' - Pagoda Box CLI will not be uninstalled. Exiting...\n", response)
-// 			os.Exit(0)
+// 			Exit(0)
 // 		}
 // 	}
 //

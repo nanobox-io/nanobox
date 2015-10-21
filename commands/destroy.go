@@ -10,14 +10,10 @@ package commands
 //
 import (
 	"fmt"
-	"os"
-
-	"github.com/spf13/cobra"
-
-	"github.com/nanobox-io/nanobox/config"
-	"github.com/nanobox-io/nanobox/util/file/hosts"
-	"github.com/nanobox-io/nanobox/util/vagrant"
 	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/nanobox-io/nanobox/config"
+	"github.com/spf13/cobra"
+	"os"
 )
 
 var (
@@ -47,7 +43,7 @@ func destroy(ccmd *cobra.Command, args []string) {
 	// if the command is being run with --remove-entry, it means an entry needs
 	// to be removed from the hosts file and execution yielded back to the parent
 	if removeEntry {
-		hosts.RemoveDomain()
+		Hosts.RemoveDomain()
 		os.Exit(0) // this exits the sudoed (child) destroy, not the parent proccess
 	}
 
@@ -55,11 +51,11 @@ func destroy(ccmd *cobra.Command, args []string) {
 	// there is a Vagrantfile to run the command with (otherwise it will just get
 	// re-created)
 	fmt.Printf(stylish.Bullet("Destroying nanobox..."))
-	if err := vagrant.Destroy(); err != nil {
+	if err := Vagrant.Destroy(); err != nil {
 
 		// dont care if the project no longer exists... thats what we're doing anyway
 		if err != err.(*os.PathError) {
-			vagrant.Fatal("[commands/destroy] vagrant.Destroy() failed - ", err.Error())
+			Config.Fatal("[commands/destroy] vagrant.Destroy() failed - ", err.Error())
 		}
 	}
 
@@ -67,7 +63,7 @@ func destroy(ccmd *cobra.Command, args []string) {
 	// isn't just created again upon running the vagrant command
 	fmt.Printf(stylish.Bullet("Deleting nanobox files (%s)", config.AppDir))
 	if err := os.RemoveAll(config.AppDir); err != nil {
-		config.Fatal("[commands/destroy] os.RemoveAll() failed", err.Error())
+		Config.Fatal("[commands/destroy] os.RemoveAll() failed", err.Error())
 	}
 
 	// attempt to remove the entry regardless of whether its there or not

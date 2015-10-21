@@ -9,18 +9,14 @@ package commands
 
 import (
 	"fmt"
-	"os"
-	"os/exec"
-
-	"github.com/spf13/cobra"
-
+	"github.com/nanobox-io/nanobox-golang-stylish"
 	"github.com/nanobox-io/nanobox/commands/box"
 	"github.com/nanobox-io/nanobox/commands/engine"
 	"github.com/nanobox-io/nanobox/commands/production"
 	"github.com/nanobox-io/nanobox/config"
-	"github.com/nanobox-io/nanobox/util/server"
-	"github.com/nanobox-io/nanobox/util/vagrant"
-	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/spf13/cobra"
+	"os"
+	"os/exec"
 )
 
 //
@@ -113,7 +109,7 @@ func boot(ccmd *cobra.Command, args []string) {
 	initialize(nil, args)
 
 	// get the status to know what needs to happen with the VM
-	status := vagrant.Status()
+	status := Vagrant.Status()
 
 	switch status {
 
@@ -137,7 +133,7 @@ func boot(ccmd *cobra.Command, args []string) {
 	}
 
 	//
-	server.Lock()
+	Server.Lock()
 
 	// if the background flag is passed, set the mode to "background"
 	if config.Background {
@@ -149,16 +145,17 @@ func boot(ccmd *cobra.Command, args []string) {
 func halt(ccmd *cobra.Command, args []string) {
 
 	//
-	server.Unlock()
+	Server.Unlock()
 
 	//
-	if err := server.Suspend(); err != nil {
-		server.Fatal("[commands/halt] server.Suspend() failed - ", err.Error())
+
+	if err := Server.Suspend(); err != nil {
+		Config.Fatal("[commands/halt] server.Suspend() failed - ", err.Error())
 	}
 
 	//
-	if err := vagrant.Suspend(); err != nil {
-		vagrant.Fatal("[commands/halt] vagrant.Suspend() failed - ", err.Error())
+	if err := Vagrant.Suspend(); err != nil {
+		Config.Fatal("[commands/halt] vagrant.Suspend() failed - ", err.Error())
 	}
 
 	//
@@ -178,6 +175,6 @@ func sudo(command, msg string) {
 
 	// run command
 	if err := cmd.Run(); err != nil {
-		config.Fatal("[commands/halt]", err.Error())
+		Config.Fatal("[commands/halt]", err.Error())
 	}
 }

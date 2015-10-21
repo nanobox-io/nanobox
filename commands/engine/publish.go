@@ -25,10 +25,7 @@ import (
 	"github.com/spf13/cobra"
 
 	api "github.com/nanobox-io/nanobox-api-client"
-	"github.com/nanobox-io/nanobox/auth"
-	"github.com/nanobox-io/nanobox/config"
 	// "github.com/nanobox-io/nanobox/util/file"
-	"github.com/nanobox-io/nanobox/util/s3"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
@@ -49,7 +46,7 @@ func publish(ccmd *cobra.Command, args []string) {
 	stylish.Header("publishing engine")
 
 	//
-	api.UserSlug, api.AuthToken = auth.Authenticate()
+	api.UserSlug, api.AuthToken = Auth.Authenticate()
 
 	// create a new release
 	fmt.Printf(stylish.Bullet("Creating release..."))
@@ -61,7 +58,7 @@ func publish(ccmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	if err := config.ParseConfig("./Enginefile", release); err != nil {
+	if err := Config.ParseConfig("./Enginefile", release); err != nil {
 		fmt.Printf("Nanobox failed to parse your Enginefile. Please ensure it is valid YAML and try again.\n")
 		os.Exit(1)
 	}
@@ -137,7 +134,7 @@ Please ensure all required fields are provided and try again.`))
 
 				p, err := api.GetEngine(api.UserSlug, release.Name)
 				if err != nil {
-					config.Fatal("[commands/publish] api.GetEngine failed", err.Error())
+					Config.Fatal("[commands/publish] api.GetEngine failed", err.Error())
 				}
 
 				// once the engine is "active", break
@@ -151,7 +148,7 @@ Please ensure all required fields are provided and try again.`))
 
 			// generically handle any other errors
 		} else {
-			config.Fatal("[commands/publish] api.GetEngine failed", err.Error())
+			Config.Fatal("[commands/publish] api.GetEngine failed", err.Error())
 		}
 
 		stylish.Success()
@@ -160,7 +157,7 @@ Please ensure all required fields are provided and try again.`))
 	// create a meta.json file where we can add any extra data we might need
 	meta, err := os.Create("./meta.json")
 	if err != nil {
-		config.Fatal("[commands/publish] os.Create() failed", err.Error())
+		Config.Fatal("[commands/publish] os.Create() failed", err.Error())
 	}
 	defer meta.Close()
 	defer os.Remove(meta.Name())
@@ -196,7 +193,7 @@ Please ensure all required fields are provided and try again.`))
 	// write the archive to a local file
 	// archive, err := os.Create(fmt.Sprintf("%v-%v.release.tgz", release.Name, release.Version))
 	// if err != nil {
-	// 	config.Fatal("[commands/publish] os.Create() failed", err.Error())
+	// 	Config.Fatal("[commands/publish] os.Create() failed", err.Error())
 	// }
 	// defer archive.Close()
 
@@ -240,7 +237,7 @@ Please ensure all required fields are provided and try again.`))
 
 				// tarball any remaining files/folders that are found
 				if err := filepath.Walk(f, tarFile); err != nil {
-					config.Fatal("[commands/publish] filepath.Walk() failed", err.Error())
+					Config.Fatal("[commands/publish] filepath.Walk() failed", err.Error())
 				}
 			}
 		}
@@ -265,14 +262,14 @@ Please ensure all required fields are provided and try again.`))
 	v.Add("version", release.Version)
 
 	//
-	s3url, err := s3.RequestURL(fmt.Sprintf("http://api.nanobox.io/v1/engines/%v/request_upload?%v", release.Name, v.Encode()))
+	s3url, err := S3.RequestURL(fmt.Sprintf("http://api.nanobox.io/v1/engines/%v/request_upload?%v", release.Name, v.Encode()))
 	if err != nil {
-		config.Fatal("[commands/publish] s3.RequestURL() failed", err.Error())
+		Config.Fatal("[commands/publish] s3.RequestURL() failed", err.Error())
 	}
 
 	//
-	if err := s3.Upload(s3url, archive); err != nil {
-		config.Fatal("[commands/publish] s3.Upload() failed", err.Error())
+	if err := S3.Upload(s3url, archive); err != nil {
+		Config.Fatal("[commands/publish] s3.Upload() failed", err.Error())
 	}
 
 	//

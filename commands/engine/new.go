@@ -10,13 +10,10 @@ package engine
 
 import (
 	"fmt"
+	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/spf13/cobra"
 	"io/ioutil"
 	"os"
-
-	"github.com/spf13/cobra"
-
-	"github.com/nanobox-io/nanobox/config"
-	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
 //
@@ -53,7 +50,7 @@ please see the documentation provided here: https://docs.nanobox.io/engines/`)
 		stylish.Bullet("Creating engine at")
 
 		if err := os.Mkdir(name, 0755); err != nil {
-			config.Fatal("[commands/new] os.Mkdir() failed", err.Error())
+			Config.Fatal("[commands/new] os.Mkdir() failed", err.Error())
 		}
 
 		entry := fmt.Sprintf(`
@@ -75,13 +72,13 @@ authors:
 
 		f, err := os.Create(enginefilePath)
 		if err != nil {
-			config.Fatal("[commands/new] os.Create() failed", err.Error())
+			Config.Fatal("[commands/new] os.Create() failed", err.Error())
 		}
 		defer f.Close()
 
 		// write the Enginefile
 		if err := ioutil.WriteFile(enginefilePath, []byte(entry), 0644); err != nil {
-			config.Fatal("[commands/new] ioutil.WriteFile() failed", err.Error())
+			Config.Fatal("[commands/new] ioutil.WriteFile() failed", err.Error())
 		}
 
 	} else {

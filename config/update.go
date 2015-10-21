@@ -59,7 +59,7 @@ func init() {
 //
 // 	cmd := commands.Commands["update"]
 // 	cmd.Run("", nil)
-// 	os.Exit(0)
+// 	Exit(0)
 // }
 //
 // // update
@@ -162,7 +162,7 @@ func init() {
 // 		// otherwise exit
 // 	default:
 // 		util.Printc("You can manually update at any time with [green]'pagoda update'[reset].")
-// 		os.Exit(0)
+// 		Exit(0)
 // 	}
 //
 // 	// ...run the update
@@ -176,7 +176,7 @@ func init() {
 // 		config.Fatal("[commands.update] os.Chtimes() failed", err.Error())
 // 	}
 //
-// 	os.Exit(0)
+// 	Exit(0)
 // }
 //
 // //

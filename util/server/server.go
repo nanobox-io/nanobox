@@ -10,18 +10,17 @@ package server
 
 import (
 	"encoding/json"
+	"errors"
+	"github.com/nanobox-io/nanobox/config"
 	"io"
 	"io/ioutil"
 	"net"
 	"net/http"
-	"os"
 	"time"
-
-	"github.com/nanobox-io/nanobox/config"
 )
 
 var (
-	err error //
+	DisconnectedFromServer = errors.New("the server went away")
 )
 
 // Service
@@ -98,43 +97,46 @@ func Put(path string, body io.Reader) (*http.Response, error) {
 }
 
 // WriteTCP
-func WriteTCP(path string) error {
+func pipeToConnection(conn net.Conn, in io.Reader, out io.Writer) error {
 
-	// set up a ping to detect when the server goes away to be able to disconnect
-	// any active consoles
-	disconnect := make(chan struct{})
+	// set up notification channels so that when a ping check fails, we can disconnect the active console
+	pingService := make(chan interface{})
+
+	// pipe data from the server to out, and from in to the server
 	go func() {
-		for {
-			select {
-			default:
-				if ok, _ := Ping(); !ok {
-					close(disconnect)
-				}
-				time.Sleep(2 * time.Second)
-
-			// return after timeout
-			case <-time.After(5 * time.Second):
-				return
-
-			// return if ping fails
-			case <-disconnect:
-				return
-			}
-		}
+		io.Copy(conn, in)
+		conn.(*net.TCPConn).CloseWrite()
 	}()
 
-	//
-	conn, err := net.Dial("tcp4", config.ServerURI)
-	if err != nil {
-		return err
+	go func() {
+		io.Copy(out, conn)
+		close(pingService)
+	}()
+
+	return monitorServer(pingService, 5*time.Second)
+}
+
+// monitor the server for disconnects
+func monitorServer(done chan interface{}, after time.Duration) error {
+	ping := make(chan interface{}, 1)
+	for {
+		// ping the server
+		go func() {
+			if ok, _ := Ping(); ok {
+				ping <- true
+			} else {
+				close(ping)
+			}
+		}()
+		select {
+		case _, ok := <-ping:
+			if !ok {
+				return DisconnectedFromServer
+			}
+		case <-time.After(after):
+			return DisconnectedFromServer
+		case <-done:
+			return nil
+		}
 	}
-
-	// pseudo a web request
-	conn.Write([]byte(path))
-
-	// pipe data
-	go io.Copy(conn, os.Stdin)
-	io.Copy(os.Stdout, conn)
-
-	return nil
 }

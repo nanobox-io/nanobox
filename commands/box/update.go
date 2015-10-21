@@ -10,16 +10,10 @@ package box
 
 import (
 	"fmt"
-
-	"github.com/spf13/cobra"
-
-	"github.com/nanobox-io/nanobox/config"
-	"github.com/nanobox-io/nanobox/util"
-	"github.com/nanobox-io/nanobox/util/vagrant"
 	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/spf13/cobra"
 )
 
-//
 var updateCmd = &cobra.Command{
 	Use:   "update",
 	Short: "",
@@ -31,20 +25,14 @@ var updateCmd = &cobra.Command{
 // Update
 func Update(ccmd *cobra.Command, args []string) {
 
-	// install the nanobox vagrant image only if it isn't already available
-	if !vagrant.HaveImage() {
-		fmt.Printf(stylish.Bullet("Installing nanobox image..."))
-
-		// install the nanobox vagrant image
-		if err := vagrant.Install(); err != nil {
-			config.Fatal("[commands/boxInstall] failed - ", err.Error())
-		}
+	if err := checkInstall(); err != nil {
+		Config.Fatal("[commands/boxInstall] failed - ", err.Error())
 	}
 
 	//
-	match, err := util.MD5sMatch(config.Root+"/nanobox-boot2docker.md5", "https://s3.amazonaws.com/tools.nanobox.io/boxes/vagrant/nanobox-boot2docker.md5")
+	match, err := Util.MD5sMatch(Config.Root()+"/nanobox-boot2docker.md5", "https://s3.amazonaws.com/tools.nanobox.io/boxes/vagrant/nanobox-boot2docker.md5")
 	if err != nil {
-		config.Fatal("[commands/boxUpdate] failed - ", err.Error())
+		Config.Fatal("[commands/boxUpdate] failed - ", err.Error())
 	}
 
 	// if the local md5 does not match the remote md5 download the newest nanobox
@@ -53,8 +41,8 @@ func Update(ccmd *cobra.Command, args []string) {
 		fmt.Printf(stylish.Bullet("Updating nanobox image..."))
 
 		// update the nanobox vagrant image
-		if err := vagrant.Update(); err != nil {
-			config.Fatal("[commands/boxUpdate] failed - ", err.Error())
+		if err := Vagrant.Update(); err != nil {
+			Config.Fatal("[commands/boxUpdate] failed - ", err.Error())
 		}
 	}
 }
