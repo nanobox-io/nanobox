@@ -80,7 +80,7 @@ func dev(ccmd *cobra.Command, args []string) {
 	}
 
 	//
-	Server.Exec("develop", "console", "")
+	Server.Exec("develop", "")
 
 	// PostRun: halt
 }

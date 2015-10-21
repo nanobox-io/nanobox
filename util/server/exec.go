@@ -19,12 +19,12 @@ import (
 )
 
 // Exec
-func Exec(where, kind, params string) error {
+func Exec(where, params string) error {
 	stdIn, stdOut, _ := term.StdStreams()
-	return execInternal(where, kind, params, stdIn, stdOut)
+	return execInternal(where, params, stdIn, stdOut)
 }
 
-func execInternal(where, kind, params string, in io.Reader, out io.Writer) error {
+func execInternal(where, params string, in io.Reader, out io.Writer) error {
 
 	// if we can't connect to the server, lets bail out early
 	conn, err := net.Dial("tcp4", config.ServerURI)
@@ -37,11 +37,8 @@ func execInternal(where, kind, params string, in io.Reader, out io.Writer) error
 	stdInFD, isTerminal := term.GetFdInfo(in)
 	stdOutFD, _ := term.GetFdInfo(out)
 
-	// if it is not a terminal, then we don't print a header. this allows piping
-	// to and from the nanobox command
-	if isTerminal {
-		terminal.PrintNanoboxHeader(kind, out)
-	}
+	//
+	terminal.PrintNanoboxHeader(where)
 
 	// begin watching for changes to the project
 	go func() {

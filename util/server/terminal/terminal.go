@@ -9,25 +9,23 @@ package terminal
 
 import (
 	"fmt"
-	"io"
-
 	"github.com/docker/docker/pkg/term"
-
 	"github.com/nanobox-io/nanobox-golang-stylish"
 	"github.com/nanobox-io/nanobox/config"
+	"os"
 )
 
 //
-func PrintNanoboxHeader(kind string, out io.Writer) {
+func PrintNanoboxHeader(kind string) {
 	switch kind {
 
 	//
-	case "command":
-		fmt.Fprintf(out, stylish.Bullet("Executing command in nanobox..."))
+	case "exec":
+		os.Stderr.WriteString(stylish.Bullet("Executing command in nanobox..."))
 
 		//
-	case "develop", "container":
-		fmt.Fprintf(out, `+> Opening a nanobox console:
+	case "develop", "console":
+		os.Stderr.WriteString(`+> Opening a nanobox console:
 
 
                                      **
@@ -48,14 +46,14 @@ func PrintNanoboxHeader(kind string, out io.Writer) {
 `)
 
 		if kind == "develop" {
-			fmt.Fprintf(out, `
+			os.Stderr.WriteString(fmt.Sprintf(`
 --------------------------------------------------------------------------------
 + You are in a virtual machine (vm)
 + Your local source code has been mounted into the vm, and changes in either
 the vm or local will be mirrored.
 + If you run a server, access it at >> %s
 --------------------------------------------------------------------------------
-`, config.Nanofile.Domain)
+`, config.Nanofile.Domain))
 		}
 	}
 }
