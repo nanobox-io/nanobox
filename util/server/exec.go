@@ -66,20 +66,16 @@ func execInternal(where, kind, params string, in io.Reader, out io.Writer) error
 	// make a http request
 	switch where {
 	case "develop":
-		fmt.Println("got a develop")
 		_, err := fmt.Fprintf(conn, "POST /develop?%v HTTP/1.1\r\n\r\n", params)
 		if err != nil {
 			return err
 		}
 	default:
-		fmt.Println("got an exec")
 		_, err := fmt.Fprintf(conn, "POST /exec?%v HTTP/1.1\r\n\r\n", params)
 		if err != nil {
 			return err
 		}
 	}
-
-	fmt.Println("starting to pipe")
 
 	return pipeToConnection(conn, in, out)
 }
