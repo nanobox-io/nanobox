@@ -133,6 +133,7 @@ func monitorServer(done chan interface{}, after time.Duration) error {
 			if !ok {
 				return DisconnectedFromServer
 			}
+			<-time.After(time.Second)
 		case <-time.After(after):
 			return DisconnectedFromServer
 		case <-done:
