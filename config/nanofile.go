@@ -9,9 +9,8 @@
 package config
 
 import (
-	"encoding/binary"
 	"fmt"
-	"net"
+	"github.com/nanobox-io/nanobox/util"
 	"os"
 	"path/filepath"
 )
@@ -63,26 +62,11 @@ func ParseNanofile() *NanofileConfig {
 
 	// set name specific options after potential .nanofiles have been parsed
 	nanofile.Domain = fmt.Sprintf("%s.dev", nanofile.Name)
-	nanofile.IP = appNameToIP(nanofile.Name)
 
-	return nanofile
-}
-
-// appNameToIP generates an IPv4 address based off the app name for use as a
-// vagrant private_network IP.
-func appNameToIP(name string) string {
-
-	var sum uint32 = 0
-	var network uint32 = 2886729728 // 172.16.0.0 network
-
-	for _, value := range []byte(name) {
-		sum += uint32(value)
+	// assign a default IP if none is specified
+	if nanofile.IP == "" {
+		nanofile.IP = util.StringToIP(nanofile.Name)
 	}
 
-	ip := make(net.IP, 4)
-
-	// convert app name into a private network IP
-	binary.BigEndian.PutUint32(ip, (network + sum))
-
-	return ip.String()
+	return nanofile
 }
