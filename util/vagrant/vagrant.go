@@ -162,17 +162,11 @@ func runInContext(cmd *exec.Cmd) error {
 	return nil
 }
 
-// add adds the nanobox vagrant image to the list of images (always overriding the
-// currently installed image)
-func add() error {
-	return exec.Command("vagrant", "box", "add", "--force", "--name", "nanobox/boot2docker", config.Root+"/nanobox-boot2docker.box").Run()
-}
-
 // download downloads the newest nanobox vagrant image and the corresponding md5
 // hash
 func download() error {
 
-	// download mv
+	// download vm
 	box, err := os.Create(config.Root + "/nanobox-boot2docker.box")
 	if err != nil {
 		config.Fatal("[util/vagrant/vagrant] os.Create() failed - ", err.Error())
@@ -194,6 +188,16 @@ func download() error {
 
 	//
 	return file.Download("https://s3.amazonaws.com/tools.nanobox.io/boxes/vagrant/nanobox-boot2docker.md5", md5)
+}
+
+// add adds the nanobox vagrant image to the list of images (always overriding the
+// currently installed image)
+func add() error {
+	if b, err := exec.Command("vagrant", "box", "add", "--force", "--name", "nanobox/boot2docker", config.Root+"/nanobox-boot2docker.box").CombinedOutput(); err != nil {
+		return fmt.Errorf("[util/vagrant/vagrant] add() failed - %v: %v", err.Error(), string(b))
+	}
+
+	return nil
 }
 
 // setContext changes the working directory to the designated context

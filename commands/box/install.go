@@ -25,7 +25,7 @@ var installCmd = &cobra.Command{
 // Install
 func Install(ccmd *cobra.Command, args []string) {
 	if err := checkInstall(); err != nil {
-		Config.Fatal("[commands/boxInstall] failed - ", err.Error())
+		Config.Fatal("[commands/box/install] checkInstall() failed - ", err.Error())
 	}
 }
 
