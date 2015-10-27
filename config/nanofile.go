@@ -9,8 +9,10 @@
 package config
 
 import (
+	"crypto/md5"
 	"encoding/binary"
 	"fmt"
+	"io"
 	"net"
 	"os"
 	"path/filepath"
@@ -63,7 +65,11 @@ func ParseNanofile() *NanofileConfig {
 
 	// set name specific options after potential .nanofiles have been parsed
 	nanofile.Domain = fmt.Sprintf("%s.dev", nanofile.Name)
-	nanofile.IP = appNameToIP(nanofile.Name)
+
+	// assign a default IP if none is specified
+	if nanofile.IP == "" {
+		nanofile.IP = appNameToIP(nanofile.Name)
+	}
 
 	return nanofile
 }
@@ -72,16 +78,22 @@ func ParseNanofile() *NanofileConfig {
 // vagrant private_network IP.
 func appNameToIP(name string) string {
 
-	var sum uint32 = 0
 	var network uint32 = 2886729728 // 172.16.0.0 network
+	var sum uint32 = 0              // the last two octets of the assigned network
 
-	for _, value := range []byte(name) {
-		sum += uint32(value)
+	// create an md5 of the app name to ensure a uniqe IP is generated each time
+	h := md5.New()
+	io.WriteString(h, name)
+
+	// iterate through each byte in the md5 hash summing along the way
+	for _, v := range []byte(h.Sum(nil)) {
+		sum += uint32(v)
 	}
 
 	ip := make(net.IP, 4)
 
-	// convert app name into a private network IP
+	// convert app name into a private network IP by adding the first portion of
+	// the network with the generated portion
 	binary.BigEndian.PutUint32(ip, (network + sum))
 
 	return ip.String()
