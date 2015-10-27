@@ -10,11 +10,11 @@ package vagrant
 
 import (
 	"fmt"
+	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/nanobox-io/nanobox/config"
+	"github.com/nanobox-io/nanobox/util"
 	"os"
 	"path/filepath"
-
-	"github.com/nanobox-io/nanobox/config"
-	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
 // Init
@@ -28,7 +28,7 @@ func Init() {
 	defer vagrantfile.Close()
 
 	// create synced folders
-	synced_folders := fmt.Sprintf("nanobox.vm.synced_folder \"%v\", \"/vagrant/code/%v\"", config.CWDir, config.Nanofile.Name)
+	synced_folders := fmt.Sprintf("nanobox.vm.synced_folder \"%s\", \"/vagrant/code/%s\"", config.CWDir, config.Nanofile.Name)
 
 	// attempt to parse the boxfile first; we don't want to create an app folder
 	// if the app isn't able to be created
@@ -46,25 +46,26 @@ func Init() {
 
 			base := filepath.Base(fp)
 
-			synced_folders += fmt.Sprintf("\n    nanobox.vm.synced_folder \"%v\", \"/vagrant/engines/%v\"", fp, base)
+			synced_folders += fmt.Sprintf("\n    nanobox.vm.synced_folder \"%s\", \"/vagrant/engines/%s\"", fp, base)
 		}
 	}
 
 	//
 	// nanofile config
 	//
-	// create nanobox private network
-	network := fmt.Sprintf("nanobox.vm.network \"private_network\", ip: \"%v\"", config.Nanofile.IP)
+	// create nanobox private network and unique forward port
+	network := fmt.Sprintf("nanobox.vm.network \"private_network\", ip: %s", config.Nanofile.IP)
+	sshport := fmt.Sprintf("nanobox.vm.network :forwarded_port, guest: 22, host: %v", util.StringToPort(config.Nanofile.Name))
 
 	//
 	provider := fmt.Sprintf(`# VirtualBox
-  nanobox.vm.provider "virtualbox" do |p|
-    p.name = "%v"
+    nanobox.vm.provider "virtualbox" do |p|
+      p.name = "%v"
 
-    p.customize ["modifyvm", :id, "--cpuexecutioncap", "%v"]
-    p.cpus = %v
-    p.memory = %v
-  end`, config.Nanofile.Name, config.Nanofile.CPUCap, config.Nanofile.CPUs, config.Nanofile.RAM)
+      p.customize ["modifyvm", :id, "--cpuexecutioncap", "%v"]
+      p.cpus = %v
+      p.memory = %v
+    end`, config.Nanofile.Name, config.Nanofile.CPUCap, config.Nanofile.CPUs, config.Nanofile.RAM)
 
 	//
 	// insert a provision script that will indicate to nanobox-server to boot into
@@ -116,55 +117,56 @@ func Init() {
 #
 Vagrant.configure(2) do |config|
 
-	# add the boot2docker user credentials to allow nanobox to freely ssh into the vm
-	# w/o requiring a password
-	config.ssh.shell = "bash"
-	config.ssh.username = "docker"
-	config.ssh.password = "tcuser"
+  # add the boot2docker user credentials to allow nanobox to freely ssh into the vm
+  # w/o requiring a password
+  config.ssh.shell = "bash"
+  config.ssh.username = "docker"
+  config.ssh.password = "tcuser"
 
-	config.vm.define :'%v' do |nanobox|
+  config.vm.define :'%s' do |nanobox|
 
-		## Set the hostname of the vm to the app domain
-		nanobox.vm.provision "shell", inline: <<-SCRIPT
-			sudo hostname %v
-		SCRIPT
+    ## Set the hostname of the vm to the app domain
+    nanobox.vm.provision "shell", inline: <<-SCRIPT
+      sudo hostname %s
+    SCRIPT
 
-	  ## Wait for nanobox-server to be ready before vagrant exits
-	  nanobox.vm.provision "shell", inline: <<-WAIT
+    ## Wait for nanobox-server to be ready before vagrant exits
+    nanobox.vm.provision "shell", inline: <<-WAIT
       echo "Waiting for nanobox server..."
       while ! nc -z 127.0.0.1 1757; do sleep 1; done;
     WAIT
 
-	  ## box
-	  nanobox.vm.box     = "nanobox/boot2docker"
+    ## box
+    nanobox.vm.box     = "nanobox/boot2docker"
 
 
-	  ## network
-	  %s
+    ## network
+    %s
+    %s
 
 
-	  ## shared folders
+    ## shared folders
 
-	  # disable default /vagrant share (overridden below)
-	  nanobox.vm.synced_folder ".", "/vagrant", disabled: true
+    # disable default /vagrant share (overridden below)
+    nanobox.vm.synced_folder ".", "/vagrant", disabled: true
 
-	  # add nanobox shared folders
-    config.vm.synced_folder "~/.ssh", "/mnt/ssh"
-	  %s
+    # add nanobox shared folders
+    nanobox.vm.synced_folder "~/.ssh", "/mnt/ssh"
+    %s
 
 
-	  ## provider configs
-	  %s
+    ## provider configs
+    %s
 
-	  # kill the eth1 dhcp server so that it doesn't override the assigned ip when
-	  # the lease is up
-	  nanobox.vm.provision "shell", inline: <<-KILL
+    # kill the eth1 dhcp server so that it doesn't override the assigned ip when
+    # the lease is up
+    nanobox.vm.provision "shell", inline: <<-KILL
       echo "Killing eth1 dhcp..."
       kill -9 $(cat /var/run/udhcpc.eth1.pid)
     KILL
 
-		%s
+    %s
 
-	end
-end`, config.Nanofile.Name, config.Nanofile.Domain, network, synced_folders, provider, devmode)))
+  end
+end`, config.Nanofile.Name, config.Nanofile.Domain, network, sshport, synced_folders, provider, devmode)))
 }
