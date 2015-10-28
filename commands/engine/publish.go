@@ -58,6 +58,7 @@ func publish(ccmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
+	// parse the ./Enginefile into the new release
 	if err := Config.ParseConfig("./Enginefile", release); err != nil {
 		fmt.Printf("Nanobox failed to parse your Enginefile. Please ensure it is valid YAML and try again.\n")
 		os.Exit(1)
@@ -172,11 +173,9 @@ Please ensure all required fields are provided and try again.`))
 		"optional": []string{"./lib", "./templates", "./files"},
 	}
 
-	//
+	// check to ensure no required files are missing
 	for k, v := range files {
 		if k == "required" {
-
-			// check to ensure no required files are missing
 			for _, f := range v {
 				if _, err := os.Stat(f); err != nil {
 					fmt.Printf(stylish.Error("required files missing", "Your Engine is missing one or more required files for publishing. Please read the following documentation to ensure all required files are included and try again.:\n\ndocs.nanobox.io/engines/project-creation/#example-engine-file-structure\n"))
