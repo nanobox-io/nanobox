@@ -57,8 +57,8 @@ func main() {
 		return
 	}
 
-	// check to see if the CLI needs to be updated
-	commands.ShouldUpdate()
+	// check to see if nanobox needs to be updated
+	commands.Update()
 
 	//
 	commands.NanoboxCmd.Execute()
