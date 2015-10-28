@@ -10,12 +10,11 @@ package main
 
 import (
 	"fmt"
+	"github.com/nanobox-io/nanobox/commands"
+	"github.com/nanobox-io/nanobox/config"
 	"os"
 	"os/exec"
 	"runtime/debug"
-
-	"github.com/nanobox-io/nanobox/commands"
-	"github.com/nanobox-io/nanobox/config"
 )
 
 // main
@@ -58,8 +57,8 @@ func main() {
 		return
 	}
 
-	// check for updates
-	// checkUpdate()
+	// check to see if the CLI needs to be updated
+	commands.ShouldUpdate()
 
 	//
 	commands.NanoboxCmd.Execute()

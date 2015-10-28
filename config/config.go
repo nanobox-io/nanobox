@@ -40,11 +40,12 @@ var (
 	mutex *sync.Mutex
 
 	//
-	AppDir string // the path to the application (~.nanobox/apps/<app>)
-	CWDir  string // the current working directory
-	Home   string // the users home directory (~)
-	IP     string // the guest vm's private network ip (generated from app name)
-	Root   string // nanobox's root directory path (~.nanobox)
+	AppDir     string // the path to the application (~.nanobox/apps/<app>)
+	CWDir      string // the current working directory
+	Home       string // the users home directory (~)
+	IP         string // the guest vm's private network ip (generated from app name)
+	Root       string // nanobox's root directory path (~.nanobox)
+	UpdateFile string // the path to the .update file (~.nanobox/.update)
 
 	//
 	Nanofile *NanofileConfig // parsed nanofile options
@@ -102,6 +103,16 @@ func init() {
 		if err := os.Mkdir(apps, 0755); err != nil {
 			Log.Fatal("[config/config] os.Mkdir() failed", err.Error())
 		}
+	}
+
+	// check for a ~/.nanobox/.update file and create one if it's not found
+	UpdateFile = filepath.Clean(Root + "/.update")
+	if _, err := os.Stat(UpdateFile); err != nil {
+		f, err := os.Create(UpdateFile)
+		if err != nil {
+			Log.Fatal("[config/config] os.Create() failed - ", err.Error())
+		}
+		defer f.Close()
 	}
 
 	// the .nanofile needs to be parsed right away so that its config options are
