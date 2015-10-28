@@ -155,7 +155,9 @@ Please ensure all required fields are provided and try again.`))
 		stylish.Success()
 	}
 
-	// create a meta.json file where we can add any extra data we might need
+	// create a meta.json file where we can add any extra data we might need; since
+	// this is only used for internal purposes the file is removed once we're done
+	// with it
 	meta, err := os.Create("./meta.json")
 	if err != nil {
 		Config.Fatal("[commands/publish] os.Create() failed", err.Error())
@@ -163,7 +165,7 @@ Please ensure all required fields are provided and try again.`))
 	defer meta.Close()
 	defer os.Remove(meta.Name())
 
-	//
+	// add any custom info to the metafile
 	meta.WriteString(fmt.Sprintf(`{"engine_id": "%s"}`, engine.ID))
 
 	// this is our predefined list of everything that gets archived as part of the
@@ -183,6 +185,19 @@ Please ensure all required fields are provided and try again.`))
 				}
 			}
 		}
+	}
+
+	// create a tmp engine folder for tarballing this engine
+	builddir, err := os.Create(config.EnginesDir + "/" + engine.Name)
+	if err != nil {
+		Config.Fatal("[commands/publish] os.Create() failed", err.Error())
+	}
+	defer builddir.Close()
+
+	// iterate through each overlay fetching it and adding it to the list of 'files'
+	// to be tarballed
+	for _, overlay := range release.Overlays {
+
 	}
 
 	// once the whole thing is working again, try swaping the go routine to be on

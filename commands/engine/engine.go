@@ -26,10 +26,12 @@ var (
 	}
 
 	//
-	fFile  string
 	Config = config.Default
 	Auth   = auth.Default
 	S3     = s3.Default
+
+	//
+	fFile string // destination file when fetching an engine
 )
 
 //
