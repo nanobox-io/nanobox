@@ -41,7 +41,9 @@ var (
 
 	//
 	AppDir     string // the path to the application (~.nanobox/apps/<app>)
+	AppsDir    string // ~.nanobox/apps
 	CWDir      string // the current working directory
+	EnginesDir string // ~.nanobox/engines
 	Home       string // the users home directory (~)
 	IP         string // the guest vm's private network ip (generated from app name)
 	Root       string // nanobox's root directory path (~.nanobox)
@@ -87,7 +89,7 @@ func init() {
 	}
 
 	// set nanobox's root directory;
-	Root = filepath.Clean(Home + "/.nanobox")
+	Root = filepath.Join(Home, ".nanobox")
 
 	// check for a ~/.nanobox dir and create one if it's not found
 	if _, err := os.Stat(Root); err != nil {
@@ -98,15 +100,23 @@ func init() {
 	}
 
 	// check for a ~/.nanobox/apps dir and create one if it's not found
-	apps := filepath.Clean(Root + "/apps")
-	if _, err := os.Stat(apps); err != nil {
-		if err := os.Mkdir(apps, 0755); err != nil {
+	AppsDir = filepath.Join(Root, "apps")
+	if _, err := os.Stat(AppsDir); err != nil {
+		if err := os.Mkdir(AppsDir, 0755); err != nil {
+			Log.Fatal("[config/config] os.Mkdir() failed", err.Error())
+		}
+	}
+
+	// check for a ~/.nanobox/engines dir and create one if it's not found
+	EnginesDir = filepath.Join(Root, "engines")
+	if _, err := os.Stat(EnginesDir); err != nil {
+		if err := os.Mkdir(EnginesDir, 0755); err != nil {
 			Log.Fatal("[config/config] os.Mkdir() failed", err.Error())
 		}
 	}
 
 	// check for a ~/.nanobox/.update file and create one if it's not found
-	UpdateFile = filepath.Clean(Root + "/.update")
+	UpdateFile = filepath.Join(Root, ".update")
 	if _, err := os.Stat(UpdateFile); err != nil {
 		f, err := os.Create(UpdateFile)
 		if err != nil {
@@ -127,7 +137,7 @@ func init() {
 
 	// set the 'App' first so it can be used in subsequent configurations; the 'App'
 	// is set to the name of the cwd; this can be overriden from a .nanofile
-	AppDir = apps + "/" + Nanofile.Name
+	AppDir = filepath.Join(AppsDir, Nanofile.Name)
 }
 
 // ParseConfig
