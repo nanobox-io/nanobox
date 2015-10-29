@@ -42,7 +42,7 @@ func console(ccmd *cobra.Command, args []string) {
 	// if 1 args is passed it's assumed to be a container to console into
 	case len(args) == 1:
 		if err := server.Exec("console", "container="+args[0]); err != nil {
-			config.Error(fmt.Sprintf("[commands/console] Server.Exec failed - ", err.Error()))
+			config.Error("[commands/console] Server.Exec failed", err.Error())
 		}
 	}
 

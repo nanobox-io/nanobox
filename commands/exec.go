@@ -52,7 +52,7 @@ func execute(ccmd *cobra.Command, args []string) {
 
 	//
 	if err := Server.Exec("exec", v.Encode()); err != nil {
-		config.Error(fmt.Sprintf("[commands/exec] Server.Exec failed - ", err.Error()))
+		config.Error("[commands/exec] Server.Exec failed", err.Error())
 	}
 
 	// PostRun: halt

@@ -81,7 +81,7 @@ func dev(ccmd *cobra.Command, args []string) {
 
 	//
 	if err := Server.Exec("develop", ""); err != nil {
-		config.Error(fmt.Sprintf("[commands/dev] Server.Exec failed - %v", err.Error()))
+		config.Error("[commands/dev] Server.Exec failed", err.Error())
 	}
 
 	// PostRun: halt
