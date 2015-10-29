@@ -214,13 +214,70 @@ Please ensure all required fields are provided and try again.`))
 		}
 
 		// determine the destination where the release will end up (file or stdout)
-		dest := setDestination(config.EnginesDir + "/" + release.Name)
-		defer dest.Close()
+		// dest := setDestination(config.EnginesDir + "/" + release.Name)
+		// defer dest.Close()
+
+		f, err := os.OpenFile(config.EnginesDir+"/"+release.Name, os.O_RDONLY, 0444)
+		if err != nil {
+			panic(err)
+		}
+		defer f.Close()
+
+		//
+		gzr, err := gzip.NewReader(f)
+		defer gzr.Close()
+		if err != nil {
+			panic(err)
+		}
+
+		tr := tar.NewReader(gzr)
+
+		for {
+			hdr, err := tr.Next()
+
+			// end of tar archive
+			if err == io.EOF {
+				break
+			}
+
+			//
+			if err != nil {
+				panic(err)
+			}
+
+			path := hdr.Name
+
+			switch hdr.Typeflag {
+
+			// if its a dir, make it
+			case tar.TypeDir:
+				if err := os.MkdirAll(path, os.FileMode(hdr.Mode)); err != nil {
+					panic(err)
+				}
+
+			// if its a file, add it to the dir
+			case tar.TypeReg:
+				f, err = os.Create(config.EnginesDir + "/" + release.Name)
+				if err != nil {
+					panic(err)
+				}
+				defer f.Close()
+
+				//
+				if _, err := io.Copy(f, tr); err != nil {
+					panic(err)
+				}
+
+			//
+			default:
+				fmt.Printf("Can't: %c, %s\n", hdr.Typeflag, path)
+			}
+		}
 
 		// write the file
-		if _, err := io.Copy(dest, res.Body); err != nil {
-			os.Stderr.WriteString(fmt.Sprintf("[commands.fetch] io.Copy() failed - %s", err.Error()))
-		}
+		// if _, err := io.Copy(dest, res.Body); err != nil {
+		// 	os.Stderr.WriteString(fmt.Sprintf("[commands.fetch] io.Copy() failed - %s", err.Error()))
+		// }
 
 		// load the overlays into the list of files to be tarballed
 		files["overlays"][i] = overlay
