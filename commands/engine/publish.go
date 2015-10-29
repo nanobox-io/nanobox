@@ -14,6 +14,11 @@ import (
 	"compress/gzip"
 	"crypto/md5"
 	"fmt"
+	api "github.com/nanobox-io/nanobox-api-client"
+	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/nanobox-io/nanobox/config"
+	// "github.com/nanobox-io/nanobox/util/file"
+	"github.com/spf13/cobra"
 	"io"
 	"io/ioutil"
 	"net/url"
@@ -21,12 +26,6 @@ import (
 	"path/filepath"
 	"sync"
 	"time"
-
-	"github.com/spf13/cobra"
-
-	api "github.com/nanobox-io/nanobox-api-client"
-	// "github.com/nanobox-io/nanobox/util/file"
-	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
 var tw *tar.Writer
@@ -173,6 +172,7 @@ Please ensure all required fields are provided and try again.`))
 	files := map[string][]string{
 		"required": []string{"./bin", "./Enginefile", "./meta.json"},
 		"optional": []string{"./lib", "./templates", "./files"},
+		"overlays": []string{},
 	}
 
 	// check to ensure no required files are missing
@@ -187,17 +187,43 @@ Please ensure all required fields are provided and try again.`))
 		}
 	}
 
-	// create a tmp engine folder for tarballing this engine
-	builddir, err := os.Create(config.EnginesDir + "/" + engine.Name)
-	if err != nil {
-		Config.Fatal("[commands/publish] os.Create() failed", err.Error())
-	}
-	defer builddir.Close()
-
 	// iterate through each overlay fetching it and adding it to the list of 'files'
 	// to be tarballed
-	for _, overlay := range release.Overlays {
+	for i, overlay := range release.Overlays {
 
+		// extract a user and archive (desired engine) from args[0]
+		user, archive := extractArchive(overlay)
+
+		// extract an engine and version from the archive
+		e, version := extractEngine(archive)
+
+		//
+		res, err := getEngine(user, e, version)
+		if err != nil {
+			Config.Fatal("[commands/engine/fetch] http.Get() failed", err.Error())
+		}
+		defer res.Body.Close()
+
+		//
+		switch res.StatusCode / 100 {
+		case 2, 3:
+			break
+		case 4, 5:
+			os.Stderr.WriteString(stylish.ErrBullet("Unable to fetch '%v' overlay, exiting...", e))
+			os.Exit(1)
+		}
+
+		// determine the destination where the release will end up (file or stdout)
+		dest := setDestination(config.EnginesDir + "/" + release.Name)
+		defer dest.Close()
+
+		// write the file
+		if _, err := io.Copy(dest, res.Body); err != nil {
+			os.Stderr.WriteString(fmt.Sprintf("[commands.fetch] io.Copy() failed - %s", err.Error()))
+		}
+
+		// load the overlays into the list of files to be tarballed
+		files["overlays"][i] = overlay
 	}
 
 	// once the whole thing is working again, try swaping the go routine to be on
