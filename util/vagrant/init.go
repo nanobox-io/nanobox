@@ -160,7 +160,9 @@ Vagrant.configure(2) do |config|
 
 		## wait for the dhcp service to come online
 		nanobox.vm.provision "shell", inline: <<-WAIT
-			while [ ! -f /var/run/udhcpc.eth1.pid ]; do
+			attempts=0
+			while [ ! -f /var/run/udhcpc.eth1.pid && $attempts -lt 10 ]; do
+				let attempts++
 				sleep 1
 			done
 		WAIT
