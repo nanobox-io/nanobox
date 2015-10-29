@@ -54,7 +54,7 @@ func Init() {
 	// nanofile config
 	//
 	// create nanobox private network and unique forward port
-	network := fmt.Sprintf("nanobox.vm.network \"private_network\", ip: %s", config.Nanofile.IP)
+	network := fmt.Sprintf("nanobox.vm.network \"private_network\", ip: \"%s\"", config.Nanofile.IP)
 	sshport := fmt.Sprintf("nanobox.vm.network :forwarded_port, guest: 22, host: %v", util.StringToPort(config.Nanofile.Name))
 
 	//
