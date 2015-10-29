@@ -158,6 +158,13 @@ Vagrant.configure(2) do |config|
     ## provider configs
     %s
 
+		## wait for the dhcp service to come online
+		nanobox.vm.provision "shell", inline: <<-WAIT
+			while [ ! -f /var/run/udhcpc.eth1.pid ]; do
+				sleep 1
+			done
+		WAIT
+
     # kill the eth1 dhcp server so that it doesn't override the assigned ip when
     # the lease is up
     nanobox.vm.provision "shell", inline: <<-KILL
