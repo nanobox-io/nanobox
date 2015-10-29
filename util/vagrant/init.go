@@ -170,8 +170,10 @@ Vagrant.configure(2) do |config|
     # kill the eth1 dhcp server so that it doesn't override the assigned ip when
     # the lease is up
     nanobox.vm.provision "shell", inline: <<-KILL
-      echo "Killing eth1 dhcp..."
-      kill -9 $(cat /var/run/udhcpc.eth1.pid)
+			if [ -f /var/run/udhcpc.eth1.pid ]; then
+	      echo "Killing eth1 dhcp..."
+	      kill -9 $(cat /var/run/udhcpc.eth1.pid)
+			fi
     KILL
 
     %s
