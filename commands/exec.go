@@ -9,7 +9,6 @@ package commands
 
 //
 import (
-	"fmt"
 	"github.com/nanobox-io/nanobox/config"
 	"github.com/spf13/cobra"
 	"net/url"
