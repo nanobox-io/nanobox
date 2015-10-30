@@ -108,18 +108,24 @@ func pipeToConnection(conn net.Conn, in io.Reader, out io.Writer) error {
 		conn.(*net.TCPConn).CloseWrite()
 	}()
 
+	//
 	go func() {
 		io.Copy(out, conn)
 		close(pingService)
 	}()
 
+	//
 	return monitorServer(pingService, 5*time.Second)
 }
 
 // monitor the server for disconnects
-func monitorServer(done chan interface{}, after time.Duration) error {
+func monitorServer(done chan interface{}, wait time.Duration) error {
+
 	ping := make(chan interface{}, 1)
+
+	//
 	for {
+
 		// ping the server
 		go func() {
 			if ok, _ := Ping(); ok {
@@ -128,14 +134,25 @@ func monitorServer(done chan interface{}, after time.Duration) error {
 				close(ping)
 			}
 		}()
+
 		select {
+
+		//
 		case _, ok := <-ping:
+
+			//
 			if !ok {
 				return DisconnectedFromServer
 			}
-			<-time.After(time.Second)
-		case <-time.After(after):
+
+			//
+			time.Sleep(time.Second)
+
+			//
+		case <-time.After(wait):
 			return DisconnectedFromServer
+
+		//
 		case <-done:
 			return nil
 		}
