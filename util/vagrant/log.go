@@ -21,25 +21,23 @@ import (
 var (
 	Console *lumber.ConsoleLogger
 	Log     *lumber.FileLogger
-	logfile string
 )
 
-// init
-func init() {
+// NewLogger
+func NewLogger(path string) {
 
 	// create a console logger
 	Console = lumber.NewConsoleLogger(lumber.INFO)
 
-	// try to use the logfile if the app exists, if not just use the default log
-	logfile = config.AppDir + "/vagrant.log"
-	if _, err := os.Stat(logfile); err != nil {
-		logfile = config.Root + "/nanobox.log"
-	}
-
 	// create a file logger
-	if Log, err = lumber.NewAppendLogger(logfile); err != nil {
-		config.Fatal("[util/vagrant/log] lumber.NewAppendLogger() failed", err.Error())
+	if Log, err = lumber.NewAppendLogger(path); err != nil {
+		config.Error("Failed to create a Vagrant logger", err.Error())
 	}
+}
+
+// Info
+func Info(msg string, debug bool) {
+	Log.Info(msg)
 }
 
 // Debug
@@ -49,14 +47,9 @@ func Debug(msg string, debug bool) {
 	}
 }
 
-// Info
-func Info(msg string, debug bool) {
-	Log.Info(msg)
-}
-
 // Fatal
 func Fatal(msg, err string) {
-	fmt.Printf("A Vagrant error occurred (See %s for details). Exiting...", logfile)
+	fmt.Printf("A Vagrant error occurred (See %s for details). Exiting...", config.AppDir+"/vagrant.log")
 	Log.Fatal(fmt.Sprintf("%s - %s", msg, err))
 	Log.Close()
 	os.Exit(1)

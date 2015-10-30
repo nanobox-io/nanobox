@@ -34,10 +34,10 @@ func HaveImage() bool {
 // runInContext runs a command in the context of a Vagrantfile (from the same dir)
 func runInContext(cmd *exec.Cmd) error {
 
-	// run the command from ~/.nanobox/apps/<config.App>. if the directory doesn't
-	// exist, simply return; running the command from the directory that contains
-	// the Vagratfile ensure that the command can atleast run (especially in cases
-	// like 'create' where a VM hadn't been created yet, and a UUID isn't available)
+	// run the command from ~/.nanobox/apps/<config.App>. Running the command from
+	// the directory that contains the Vagratfile ensure that the command can
+	// atleast run (especially in cases like 'create' where a VM hadn't been created
+	// yet, and a UUID isn't available)
 	setContext(config.AppDir)
 
 	// start a goroutine that will act as an 'outputer' allowing us to add 'dots'
