@@ -203,6 +203,7 @@ func add() error {
 // setContext changes the working directory to the designated context
 func setContext(context string) {
 	if err := os.Chdir(context); err != nil {
-		config.Fatal("[util/vagrant/vagrant] os.Chdir() failed -", err.Error())
+		fmt.Printf("No app found at %s, exiting...\n", config.AppDir)
+		os.Exit(1)
 	}
 }
