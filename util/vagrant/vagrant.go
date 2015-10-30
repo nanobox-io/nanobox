@@ -11,12 +11,11 @@ package vagrant
 import (
 	"bufio"
 	"fmt"
+	"github.com/nanobox-io/nanobox/config"
+	"github.com/nanobox-io/nanobox/util/file"
 	"os"
 	"os/exec"
 	"time"
-
-	"github.com/nanobox-io/nanobox/config"
-	"github.com/nanobox-io/nanobox/util/file"
 )
 
 //

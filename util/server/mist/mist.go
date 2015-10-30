@@ -8,12 +8,11 @@ package mist
 
 import (
 	"encoding/json"
-	"regexp"
-	"strings"
-
 	mistClient "github.com/nanobox-io/golang-mist"
 	"github.com/nanobox-io/nanobox/config"
 	"github.com/nanobox-io/nanobox/util/print"
+	"regexp"
+	"strings"
 )
 
 //

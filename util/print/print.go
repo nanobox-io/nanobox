@@ -11,13 +11,11 @@ package print
 import (
 	"bufio"
 	"fmt"
-	"os"
-	"strings"
-
 	"github.com/howeyc/gopass"
 	"github.com/mitchellh/colorstring"
-
 	"github.com/nanobox-io/nanobox/config"
+	"os"
+	"strings"
 )
 
 // Verbose only prints a message if the 'verbose' flag is passed

@@ -13,18 +13,17 @@ import (
 	// "bytes"
 	"compress/gzip"
 	"fmt"
+	// "github.com/nanobox-io/nanobox/auth"
+	"github.com/nanobox-io/nanobox/config"
+	// "github.com/nanobox-io/nanobox/ui"
 	"io"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"os"
 	// "path/filepath"
-	// "sync"
-	"math"
 	"strings"
-
-	// "github.com/nanobox-io/nanobox/auth"
-	// "github.com/nanobox-io/nanobox/ui"
-	"github.com/nanobox-io/nanobox/config"
+	// "sync"
 )
 
 var GZ *gzip.Writer

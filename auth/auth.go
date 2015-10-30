@@ -10,14 +10,13 @@ package auth
 
 import (
 	"fmt"
+	api "github.com/nanobox-io/nanobox-api-client"
+	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/nanobox-io/nanobox/config"
+	"github.com/nanobox-io/nanobox/util/print"
 	"io/ioutil"
 	"os"
 	"path/filepath"
-
-	api "github.com/nanobox-io/nanobox-api-client"
-	"github.com/nanobox-io/nanobox/config"
-	"github.com/nanobox-io/nanobox/util/print"
-	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
 //

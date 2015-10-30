@@ -14,6 +14,10 @@ import (
 	"compress/gzip"
 	"crypto/md5"
 	"fmt"
+	api "github.com/nanobox-io/nanobox-api-client"
+	"github.com/nanobox-io/nanobox-golang-stylish"
+	// "github.com/nanobox-io/nanobox/util/file"
+	"github.com/spf13/cobra"
 	"io"
 	"io/ioutil"
 	"net/url"
@@ -21,12 +25,6 @@ import (
 	"path/filepath"
 	"sync"
 	"time"
-
-	"github.com/spf13/cobra"
-
-	api "github.com/nanobox-io/nanobox-api-client"
-	// "github.com/nanobox-io/nanobox/util/file"
-	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
 var tw *tar.Writer

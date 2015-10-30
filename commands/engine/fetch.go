@@ -10,16 +10,14 @@ package engine
 
 import (
 	"fmt"
+	api "github.com/nanobox-io/nanobox-api-client"
+	"github.com/nanobox-io/nanobox-golang-stylish"
+	// "github.com/nanobox-io/nanobox/auth"
+	"github.com/spf13/cobra"
 	"io"
 	"net/http"
 	"os"
 	"strings"
-
-	"github.com/spf13/cobra"
-
-	api "github.com/nanobox-io/nanobox-api-client"
-	// "github.com/nanobox-io/nanobox/auth"
-	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
 //

@@ -11,16 +11,14 @@ package notify
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/go-fsnotify/fsnotify"
+	"github.com/nanobox-io/nanobox/config"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"os/signal"
 	"path/filepath"
 	"syscall"
-
-	"github.com/go-fsnotify/fsnotify"
-
-	"github.com/nanobox-io/nanobox/config"
 )
 
 //

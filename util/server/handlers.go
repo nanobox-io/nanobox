@@ -11,13 +11,11 @@ package server
 
 import (
 	"fmt"
-	"path/filepath"
-	"strings"
-
 	"github.com/go-fsnotify/fsnotify"
-
 	"github.com/nanobox-io/nanobox/config"
 	"github.com/nanobox-io/nanobox/util/server/mist"
+	"path/filepath"
+	"strings"
 )
 
 // NotifyRebuild
