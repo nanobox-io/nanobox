@@ -23,11 +23,20 @@ var (
 	Log     *lumber.FileLogger
 )
 
-// NewLogger
+// create a console and default file logger
+func init() {
+
+	// create a default console logger
+	Console = config.Console
+
+	// create a default file logger
+	Log = config.Log
+}
+
+// NewLogger sets the vagrant logger to the given path
 func NewLogger(path string) {
 
-	// create a console logger
-	Console = lumber.NewConsoleLogger(lumber.INFO)
+	var err error
 
 	// create a file logger
 	if Log, err = lumber.NewAppendLogger(path); err != nil {

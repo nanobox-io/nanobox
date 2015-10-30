@@ -40,10 +40,10 @@ func initialize(ccmd *cobra.Command, args []string) {
 		}
 	}
 
-	// set up a vagrant logger
+	// set up a dedicated vagrant logger
 	Vagrant.NewLogger(config.AppDir + "/vagrant.log")
 
-	// set up a server logger
+	// set up a dedicated server logger
 	Server.NewLogger(config.AppDir + "/server.log")
 
 	// 'parse' the .vmfile (either creating one, or parsing it)
