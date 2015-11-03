@@ -11,20 +11,17 @@ package engine
 import (
 	"archive/tar"
 	"bytes"
-	"compress/gzip"
 	"crypto/md5"
 	"fmt"
 	api "github.com/nanobox-io/nanobox-api-client"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 	"github.com/nanobox-io/nanobox/config"
-	// "github.com/nanobox-io/nanobox/util/file"
+	"github.com/nanobox-io/nanobox/util/file"
 	"github.com/spf13/cobra"
 	"io"
 	"io/ioutil"
 	"net/url"
 	"os"
-	"path/filepath"
-	"sync"
 	"time"
 )
 
@@ -172,7 +169,6 @@ Please ensure all required fields are provided and try again.`))
 	files := map[string][]string{
 		"required": []string{"./bin", "./Enginefile", "./meta.json"},
 		"optional": []string{"./lib", "./templates", "./files"},
-		"overlays": []string{},
 	}
 
 	// check to ensure no required files are missing
@@ -187,9 +183,18 @@ Please ensure all required fields are provided and try again.`))
 		}
 	}
 
+	// create the temp engines folder for building the tarball
+	tarPath := config.EnginesDir + "/" + release.Name
+	tarDir, err := os.Create(tarPath)
+	if err != nil {
+		Config.Fatal("[commands/engine/fetch] os.Create() failed", err.Error())
+	}
+	defer tarDir.Close()
+	// os delete
+
 	// iterate through each overlay fetching it and adding it to the list of 'files'
 	// to be tarballed
-	for i, overlay := range release.Overlays {
+	for _, overlay := range release.Overlays {
 
 		// extract a user and archive (desired engine) from args[0]
 		user, archive := extractArchive(overlay)
@@ -213,79 +218,9 @@ Please ensure all required fields are provided and try again.`))
 			os.Exit(1)
 		}
 
-		// determine the destination where the release will end up (file or stdout)
-		// dest := setDestination(config.EnginesDir + "/" + release.Name)
-		// defer dest.Close()
-
-		f, err := os.OpenFile(config.EnginesDir+"/"+release.Name, os.O_RDONLY, 0444)
-		if err != nil {
-			panic(err)
-		}
-		defer f.Close()
-
 		//
-		gzr, err := gzip.NewReader(f)
-		defer gzr.Close()
-		if err != nil {
-			panic(err)
-		}
-
-		tr := tar.NewReader(gzr)
-
-		for {
-			hdr, err := tr.Next()
-
-			// end of tar archive
-			if err == io.EOF {
-				break
-			}
-
-			//
-			if err != nil {
-				panic(err)
-			}
-
-			path := hdr.Name
-
-			switch hdr.Typeflag {
-
-			// if its a dir, make it
-			case tar.TypeDir:
-				if err := os.MkdirAll(path, os.FileMode(hdr.Mode)); err != nil {
-					panic(err)
-				}
-
-			// if its a file, add it to the dir
-			case tar.TypeReg:
-				f, err = os.Create(config.EnginesDir + "/" + release.Name)
-				if err != nil {
-					panic(err)
-				}
-				defer f.Close()
-
-				//
-				if _, err := io.Copy(f, tr); err != nil {
-					panic(err)
-				}
-
-			//
-			default:
-				fmt.Printf("Can't: %c, %s\n", hdr.Typeflag, path)
-			}
-		}
-
-		// write the file
-		// if _, err := io.Copy(dest, res.Body); err != nil {
-		// 	os.Stderr.WriteString(fmt.Sprintf("[commands.fetch] io.Copy() failed - %s", err.Error()))
-		// }
-
-		// load the overlays into the list of files to be tarballed
-		files["overlays"][i] = overlay
+		file.Untar(tarPath, res.Body)
 	}
-
-	// once the whole thing is working again, try swaping the go routine to be on
-	// readers instead of the writer. the writer will block until readers are done
-	// reading, so there may not be a need for the wait groups.
 
 	// write the archive to a local file
 	// archive, err := os.Create(fmt.Sprintf("%v-%v.release.tgz", release.Name, release.Version))
@@ -301,48 +236,27 @@ Please ensure all required fields are provided and try again.`))
 	//
 	h := md5.New()
 
-	//
-	mw := io.MultiWriter(h, archive)
+	// range over each file from each file type, building the final list of files
+	// to be tarballed
+	for _, v := range files {
+		for _, file := range v {
 
-	//
-	gzw := gzip.NewWriter(mw)
+			// open the file for transfer...
+			f, err := os.Open(file)
+			if err != nil {
+				os.Stderr.WriteString(fmt.Sprintf("[commands.fetch] os.Open() failed - %s", err.Error()))
+			}
+			defer f.Close()
 
-	//
-	tw = tar.NewWriter(gzw)
-
-	//
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
-
-	//
-	go func() {
-
-		defer gzw.Close()
-		defer tw.Close()
-
-		// range over each file type...
-		for _, v := range files {
-
-			// range over each file of each type...
-			for _, f := range v {
-
-				// required files have alrady been checked, so skip any remaining (optional)
-				// files/folders that arent here
-				if _, err := os.Stat(f); err != nil {
-					continue
-				}
-
-				// tarball any remaining files/folders that are found
-				if err := filepath.Walk(f, tarFile); err != nil {
-					Config.Fatal("[commands/publish] filepath.Walk() failed", err.Error())
-				}
+			// transfer (copy) the files into the tmp dir for taring
+			if _, err := io.Copy(tarDir, f); err != nil {
+				os.Stderr.WriteString(fmt.Sprintf("[commands.fetch] io.Copy() failed - %s", err.Error()))
 			}
 		}
+	}
 
-		wg.Done()
-	}()
-
-	wg.Wait()
+	//
+	file.Tar(tarPath, h, archive)
 
 	// add the checksum for the new release once its finished being archived
 	release.Checksum = fmt.Sprintf("%x", h.Sum(nil))
@@ -376,41 +290,4 @@ Please ensure all required fields are provided and try again.`))
 		fmt.Printf(stylish.ErrBullet("Unable to publish release (%v).", err))
 		os.Exit(1)
 	}
-}
-
-// tarFile
-func tarFile(path string, fi os.FileInfo, err error) error {
-
-	// only want to tar files...
-	if !fi.Mode().IsDir() {
-
-		// fmt.Println("TARING!", path)
-
-		// create header for this file
-		header := &tar.Header{
-			Name:    path,
-			Size:    fi.Size(),
-			Mode:    int64(fi.Mode()),
-			ModTime: fi.ModTime(),
-		}
-
-		// write the header to the tarball archive
-		if err := tw.WriteHeader(header); err != nil {
-			return err
-		}
-
-		// open the file for taring...
-		f, err := os.Open(path)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-
-		// copy the file data to the tarball
-		if _, err := io.Copy(tw, f); err != nil {
-			return err
-		}
-	}
-
-	return nil
 }

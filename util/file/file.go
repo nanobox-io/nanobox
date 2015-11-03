@@ -10,76 +10,129 @@ package file
 
 import (
 	"archive/tar"
-	// "bytes"
 	"compress/gzip"
 	"fmt"
+	"github.com/nanobox-io/nanobox/config"
 	"io"
 	"io/ioutil"
+	"math"
 	"net/http"
 	"os"
-	// "path/filepath"
-	// "sync"
-	"math"
+	"path/filepath"
 	"strings"
-
-	// "github.com/nanobox-io/nanobox/auth"
-	// "github.com/nanobox-io/nanobox/ui"
-	"github.com/nanobox-io/nanobox/config"
 )
 
-var GZ *gzip.Writer
-var TW *tar.Writer
-
 //
-func Gzip() {
+func Tar(path string, writers ...io.Writer) error {
 
-}
+	//
+	mw := io.MultiWriter(writers...)
 
-//
-func Tar() {
+	//
+	gzw := gzip.NewWriter(mw)
+	defer gzw.Close()
 
-}
+	//
+	tw := tar.NewWriter(gzw)
+	defer tw.Close()
 
-//
-func TarBall() {
+	//
+	return filepath.Walk(path, func(file string, fi os.FileInfo, err error) error {
 
-}
+		//
+		if err != nil {
+			return err
+		}
 
-// tarFile
-func tarFile(path string, fi os.FileInfo, err error) error {
-
-	// only want to tar files...
-	if !fi.Mode().IsDir() {
-
-		// fmt.Println("TARING!", path)
+		// skip any hidden files
+		if strings.HasPrefix(fi.Name(), ".") {
+			return nil
+		}
 
 		// create header for this file
 		header := &tar.Header{
-			Name:    path,
+			Name:    file,
 			Size:    fi.Size(),
 			Mode:    int64(fi.Mode()),
 			ModTime: fi.ModTime(),
 		}
 
 		// write the header to the tarball archive
-		if err := TW.WriteHeader(header); err != nil {
+		if err := tw.WriteHeader(header); err != nil {
 			return err
 		}
 
 		// open the file for taring...
-		f, err := os.Open(path)
+		f, err := os.Open(file)
 		if err != nil {
 			return err
 		}
 		defer f.Close()
 
-		// copy the file data to the tarball
-		if _, err := io.Copy(TW, f); err != nil {
+		// copy from file data into tar writer
+		if _, err := io.Copy(tw, f); err != nil {
 			return err
+		}
+
+		return nil
+	})
+}
+
+//
+func Untar(dest string, r io.Reader) {
+
+	//
+	gzr, err := gzip.NewReader(r)
+	if err != nil {
+		panic(err)
+	}
+	defer gzr.Close()
+
+	//
+	tr := tar.NewReader(gzr)
+
+	//
+	for {
+		header, err := tr.Next()
+
+		//
+		switch {
+		case err == io.EOF:
+			break
+		case err != nil:
+			panic(err)
+		}
+
+		//
+		path := filepath.Join(dest, header.Name)
+
+		switch header.Typeflag {
+
+		// if its a dir, make it
+		case tar.TypeDir:
+			if err := os.MkdirAll(path, os.FileMode(header.Mode)); err != nil {
+				panic(err)
+			}
+
+		// if its a file, add it to the dir
+		case tar.TypeReg:
+			f, err := os.Create(path)
+			if err != nil {
+				panic(err)
+			}
+			defer f.Close()
+
+			// copy from tar reader into file
+			if _, err := io.Copy(f, tr); err != nil {
+				panic(err)
+			}
+
+		//
+		default:
+			fmt.Printf("Can't: %c, %s\n", header.Typeflag, path)
 		}
 	}
 
-	return nil
 }
 
 // Download
