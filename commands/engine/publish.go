@@ -190,7 +190,11 @@ Please ensure all required fields are provided and try again.`))
 		Config.Fatal("[commands/engine/fetch] os.Create() failed", err.Error())
 	}
 	defer tarDir.Close()
-	// os delete
+	defer func() {
+		if err := os.RemoveAll(tarPath); err != nil {
+			os.Stderr.WriteString(stylish.ErrBullet("Faild to remove '%v'...", tarPath))
+		}
+	}()
 
 	// iterate through each overlay fetching it and adding it to the list of 'files'
 	// to be tarballed
@@ -222,20 +226,6 @@ Please ensure all required fields are provided and try again.`))
 		file.Untar(tarPath, res.Body)
 	}
 
-	// write the archive to a local file
-	// archive, err := os.Create(fmt.Sprintf("%v-%v.release.tgz", release.Name, release.Version))
-	// if err != nil {
-	// 	Config.Fatal("[commands/publish] os.Create() failed", err.Error())
-	// }
-	// defer archive.Close()
-
-	// create an empty buffer for writing the file contents to for the subsequent
-	// upload
-	archive := bytes.NewBuffer(nil)
-
-	//
-	h := md5.New()
-
 	// range over each file from each file type, building the final list of files
 	// to be tarballed
 	for _, v := range files {
@@ -255,6 +245,13 @@ Please ensure all required fields are provided and try again.`))
 		}
 	}
 
+	// create an empty buffer for writing the file contents to for the subsequent
+	// upload
+	archive := bytes.NewBuffer(nil)
+
+	//
+	h := md5.New()
+
 	//
 	file.Tar(tarPath, h, archive)
 
@@ -263,8 +260,6 @@ Please ensure all required fields are provided and try again.`))
 
 	//
 	// attempt to upload the release to S3
-
-	//
 	fmt.Printf(stylish.Bullet("Uploading release to s3..."))
 
 	v := url.Values{}
