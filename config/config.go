@@ -10,20 +10,18 @@ package config
 
 import (
 	"fmt"
+	"github.com/ghodss/yaml"
+	"github.com/mitchellh/go-homedir"
+	"github.com/nanobox-io/nanobox-golang-stylish"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sync"
-
-	"github.com/ghodss/yaml"
-	"github.com/mitchellh/go-homedir"
-
-	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
 //
 const (
-	VERSION = "0.15.7"
+	VERSION = "0.15.9"
 
 	SERVER_PORT = ":1757"
 	MIST_PORT   = ":1445"

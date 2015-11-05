@@ -112,7 +112,7 @@ func Init() {
 	// nanofile config
 	//
 	// create nanobox private network and unique forward port
-	network := fmt.Sprintf("nanobox.vm.network \"private_network\", ip: %s", config.Nanofile.IP)
+	network := fmt.Sprintf("nanobox.vm.network \"private_network\", ip: \"%s\"", config.Nanofile.IP)
 	sshport := fmt.Sprintf("nanobox.vm.network :forwarded_port, guest: 22, host: %v", util.StringToPort(config.Nanofile.Name))
 
 	//
@@ -216,11 +216,22 @@ Vagrant.configure(2) do |config|
     ## provider configs
     %s
 
+    ## wait for the dhcp service to come online
+    nanobox.vm.provision "shell", inline: <<-WAIT
+      attempts=0
+      while [ ! -f /var/run/udhcpc.eth1.pid && $attempts -lt 30 ]; do
+        let attempts++
+        sleep 1
+      done
+    WAIT
+
     # kill the eth1 dhcp server so that it doesn't override the assigned ip when
     # the lease is up
     nanobox.vm.provision "shell", inline: <<-KILL
-      echo "Killing eth1 dhcp..."
-      kill -9 $(cat /var/run/udhcpc.eth1.pid)
+      if [ -f /var/run/udhcpc.eth1.pid ]; then
+        echo "Killing eth1 dhcp..."
+        kill -9 $(cat /var/run/udhcpc.eth1.pid)
+      fi
     KILL
 
     %s

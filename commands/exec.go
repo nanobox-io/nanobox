@@ -9,6 +9,7 @@ package commands
 
 //
 import (
+	"github.com/nanobox-io/nanobox/config"
 	"github.com/spf13/cobra"
 	"net/url"
 	"strings"
@@ -49,7 +50,9 @@ func execute(ccmd *cobra.Command, args []string) {
 	v.Add("cmd", strings.Join(args, " "))
 
 	//
-	Server.Exec("exec", v.Encode())
+	if err := Server.Exec("exec", v.Encode()); err != nil {
+		config.Error("[commands/exec] Server.Exec failed", err.Error())
+	}
 
 	// PostRun: halt
 }

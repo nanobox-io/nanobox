@@ -26,6 +26,7 @@ type (
 		NotifyServer(event *fsnotify.Event) error
 		Lock()
 		Unlock()
+		NewLogger(path string)
 		Logs(params string) error
 		Ping() (bool, error)
 		Get(path string, v interface{}) (*http.Response, error)
@@ -74,6 +75,10 @@ func (server) Lock() {
 
 func (server) Unlock() {
 	Unlock()
+}
+
+func (server) NewLogger(path string) {
+	NewLogger(path)
 }
 
 func (server) Logs(params string) error {

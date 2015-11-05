@@ -8,9 +8,7 @@
 //
 package file
 
-import (
-	"io"
-)
+import "io"
 
 type (
 	file struct{}

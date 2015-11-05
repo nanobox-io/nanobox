@@ -11,9 +11,8 @@ package vagrant
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-
 	"github.com/nanobox-io/nanobox/config"
+	"io/ioutil"
 )
 
 //

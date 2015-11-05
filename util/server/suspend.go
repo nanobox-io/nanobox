@@ -10,9 +10,8 @@ package server
 
 import (
 	"fmt"
-	"os"
-
 	"github.com/nanobox-io/nanobox/config"
+	"os"
 )
 
 // Suspend

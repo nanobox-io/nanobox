@@ -10,10 +10,9 @@ package server
 
 import (
 	"fmt"
+	"github.com/nanobox-io/nanobox/config"
 	"net"
 	"time"
-
-	"github.com/nanobox-io/nanobox/config"
 )
 
 var lock net.Conn //

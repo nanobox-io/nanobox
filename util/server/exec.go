@@ -20,7 +20,11 @@ import (
 
 // Exec
 func Exec(where, params string) error {
+
+	//
 	stdIn, stdOut, _ := term.StdStreams()
+
+	//
 	return execInternal(where, params, stdIn, stdOut)
 }
 
@@ -63,13 +67,11 @@ func execInternal(where, params string, in io.Reader, out io.Writer) error {
 	// make a http request
 	switch where {
 	case "develop":
-		_, err := fmt.Fprintf(conn, "POST /develop?%v HTTP/1.1\r\n\r\n", params)
-		if err != nil {
+		if _, err := fmt.Fprintf(conn, "POST /develop?%v HTTP/1.1\r\n\r\n", params); err != nil {
 			return err
 		}
 	default:
-		_, err := fmt.Fprintf(conn, "POST /exec?%v HTTP/1.1\r\n\r\n", params)
-		if err != nil {
+		if _, err := fmt.Fprintf(conn, "POST /exec?%v HTTP/1.1\r\n\r\n", params); err != nil {
 			return err
 		}
 	}

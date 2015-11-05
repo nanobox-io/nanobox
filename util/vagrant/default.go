@@ -16,6 +16,7 @@ type (
 		Update() error
 		Destroy() error
 		Init()
+		NewLogger(path string)
 		Reload() error
 		Resume() error
 		SSH() error
@@ -43,6 +44,10 @@ func (vagrant) Status() (status string) {
 
 func (vagrant) SSH() error {
 	return SSH()
+}
+
+func (vagrant) NewLogger(path string) {
+	NewLogger(path)
 }
 
 func (vagrant) Reload() error {

@@ -10,7 +10,6 @@ package config
 
 import (
 	"fmt"
-
 	"github.com/jcelliott/lumber"
 )
 
@@ -42,6 +41,12 @@ func Debug(msg string, debug bool) {
 // Info
 func Info(msg string) {
 	Log.Info(msg)
+}
+
+// Error
+func Error(msg, err string) {
+	fmt.Println("An error occurred (See ~/.nanobox/nanobox.log for details).")
+	Log.Error(fmt.Sprintf("%s - %s", msg, err))
 }
 
 // Fatal

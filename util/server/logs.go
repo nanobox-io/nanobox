@@ -10,9 +10,8 @@ package server
 
 import (
 	"fmt"
-
-	"github.com/nanobox-io/nanobox/util/server/mist"
 	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/nanobox-io/nanobox/util/server/mist"
 )
 
 // Logs diplayes historical logs from the server
