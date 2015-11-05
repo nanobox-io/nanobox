@@ -19,7 +19,7 @@ type (
 		Root() string
 		ParseConfig(path string, v interface{}) error
 		Debug(msg string, debug bool)
-		Info(msg string, debug bool)
+		Info(msg string)
 		ParseNanofile() *NanofileConfig
 		ParseVMfile() *VMfileConfig
 	}
@@ -40,8 +40,8 @@ func (config) Debug(msg string, debug bool) {
 	Debug(msg, debug)
 }
 
-func (config) Info(msg string, debug bool) {
-	Info(msg, debug)
+func (config) Info(msg string) {
+	Info(msg)
 
 }
 func (config) ParseConfig(path string, v interface{}) error {

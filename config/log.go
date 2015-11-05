@@ -40,7 +40,7 @@ func Debug(msg string, debug bool) {
 }
 
 // Info
-func Info(msg string, debug bool) {
+func Info(msg string) {
 	Log.Info(msg)
 }
 

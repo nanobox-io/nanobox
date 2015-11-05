@@ -52,7 +52,7 @@ func Init() {
 			}
 
 			//
-			whatever := struct {
+			whatever := &struct {
 				Overlays []string
 			}{}
 
@@ -67,7 +67,8 @@ func Init() {
 
 			// parse the ./Enginefile into the new release
 			if err := config.ParseConfig(enginefile, whatever); err != nil {
-				fmt.Printf("Nanobox failed to parse your Enginefile. Please ensure it is valid YAML and try again.\n")
+				fmt.Printf("Nanobox failed to parse your Enginefile. Please ensure it is valid YAML and try again.\n", err.Error())
+				config.Log.Error("[commands/engine/publish] http.Get() failed", err.Error())
 				os.Exit(1)
 			}
 
