@@ -18,10 +18,10 @@ import (
 	"github.com/nanobox-io/nanobox/config"
 	"github.com/nanobox-io/nanobox/util/file"
 	"github.com/spf13/cobra"
-	"io"
 	"io/ioutil"
 	"net/url"
 	"os"
+	"path/filepath"
 	"time"
 )
 
@@ -38,7 +38,6 @@ var publishCmd = &cobra.Command{
 
 // publish
 func publish(ccmd *cobra.Command, args []string) {
-	//
 	stylish.Header("publishing engine")
 
 	//
@@ -162,7 +161,8 @@ Please ensure all required fields are provided and try again.`))
 	defer os.Remove(meta.Name())
 
 	// add any custom info to the metafile
-	meta.WriteString(fmt.Sprintf(`{"engine_id": "%s"}`, engine.ID))
+	// meta.WriteString(fmt.Sprintf(`{"engine_id": "%s"}`, engine.ID))
+	meta.WriteString(fmt.Sprintf(`{"engine_id": "%s"}`, "whatever"))
 
 	// this is our predefined list of everything that gets archived as part of the
 	// engine being published
@@ -184,12 +184,12 @@ Please ensure all required fields are provided and try again.`))
 	}
 
 	// create the temp engines folder for building the tarball
-	tarPath := config.EnginesDir + "/" + release.Name
-	tarDir, err := os.Create(tarPath)
-	if err != nil {
-		Config.Fatal("[commands/engine/fetch] os.Create() failed", err.Error())
+	tarPath := filepath.Join(config.EnginesDir, release.Name)
+	if err := os.Mkdir(tarPath, 0755); err != nil {
+		Config.Fatal("[commands/engine/publish] os.Create() failed", err.Error())
 	}
-	defer tarDir.Close()
+
+	// remove tarDir once published
 	defer func() {
 		if err := os.RemoveAll(tarPath); err != nil {
 			os.Stderr.WriteString(stylish.ErrBullet("Faild to remove '%v'...", tarPath))
@@ -209,7 +209,7 @@ Please ensure all required fields are provided and try again.`))
 		//
 		res, err := getEngine(user, e, version)
 		if err != nil {
-			Config.Fatal("[commands/engine/fetch] http.Get() failed", err.Error())
+			Config.Fatal("[commands/engine/publish] http.Get() failed", err.Error())
 		}
 		defer res.Body.Close()
 
@@ -223,25 +223,19 @@ Please ensure all required fields are provided and try again.`))
 		}
 
 		//
-		file.Untar(tarPath, res.Body)
+		if err := file.Untar(tarPath, res.Body); err != nil {
+			Config.Fatal("[commands/engine/publish] file.Untar() failed", err.Error())
+		}
 	}
 
 	// range over each file from each file type, building the final list of files
 	// to be tarballed
 	for _, v := range files {
-		for _, file := range v {
+		for _, f := range v {
 
-			// open the file for transfer...
-			f, err := os.Open(file)
-			if err != nil {
-				os.Stderr.WriteString(fmt.Sprintf("[commands.fetch] os.Open() failed - %s", err.Error()))
-			}
-			defer f.Close()
-
-			// transfer (copy) the files into the tmp dir for taring
-			if _, err := io.Copy(tarDir, f); err != nil {
-				os.Stderr.WriteString(fmt.Sprintf("[commands.fetch] io.Copy() failed - %s", err.Error()))
-			}
+			// not handling error here because an error simply means the file doesn't
+			// exist and therefor wont be copied
+			file.Copy(tarPath, f)
 		}
 	}
 
@@ -253,7 +247,9 @@ Please ensure all required fields are provided and try again.`))
 	h := md5.New()
 
 	//
-	file.Tar(tarPath, h, archive)
+	if err := file.Tar(tarPath, archive, h); err != nil {
+		Config.Fatal("[commands/engine/publish] file.Tar() failed", err.Error())
+	}
 
 	// add the checksum for the new release once its finished being archived
 	release.Checksum = fmt.Sprintf("%x", h.Sum(nil))

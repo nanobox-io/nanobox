@@ -22,7 +22,25 @@ import (
 	"strings"
 )
 
-//
+// Copy
+func Copy(dst, src string) error {
+
+	// ensure src exists
+	sfi, err := os.Stat(src)
+	if err != nil {
+		return err
+	}
+
+	// create dest dir
+	if err = os.MkdirAll(dst, sfi.Mode()); err != nil {
+		return err
+	}
+
+	//
+	return copyDir(src, dst)
+}
+
+// Tar
 func Tar(path string, writers ...io.Writer) error {
 
 	//
@@ -44,49 +62,49 @@ func Tar(path string, writers ...io.Writer) error {
 			return err
 		}
 
-		// skip any hidden files
-		if strings.HasPrefix(fi.Name(), ".") {
-			return nil
-		}
+		// only tar files (not dirs)
+		if fi.Mode().IsRegular() {
 
-		// create header for this file
-		header := &tar.Header{
-			Name:    file,
-			Size:    fi.Size(),
-			Mode:    int64(fi.Mode()),
-			ModTime: fi.ModTime(),
-		}
+			// create header for this file
+			header := &tar.Header{
+				Name: file,
+				Mode: int64(fi.Mode()),
+				Size: fi.Size(),
+				// ModTime:  fi.ModTime(),
+				Typeflag: tar.TypeReg,
+			}
 
-		// write the header to the tarball archive
-		if err := tw.WriteHeader(header); err != nil {
-			return err
-		}
+			// write the header to the tarball archive
+			if err := tw.WriteHeader(header); err != nil {
+				return err
+			}
 
-		// open the file for taring...
-		f, err := os.Open(file)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
+			// open the file for taring...
+			f, err := os.Open(file)
+			defer f.Close()
+			if err != nil {
+				return err
+			}
 
-		// copy from file data into tar writer
-		if _, err := io.Copy(tw, f); err != nil {
-			return err
+			// copy from file data into tar writer
+			if _, err := io.Copy(tw, f); err != nil {
+				return err
+			}
 		}
 
 		return nil
 	})
 }
 
-//
-func Untar(dest string, r io.Reader) {
+// Untar
+func Untar(dst string, r io.Reader) error {
 
 	//
 	gzr, err := gzip.NewReader(r)
-	if err != nil {
-		panic(err)
-	}
 	defer gzr.Close()
+	if err != nil {
+		return err
+	}
 
 	//
 	tr := tar.NewReader(gzr)
@@ -98,38 +116,36 @@ func Untar(dest string, r io.Reader) {
 		//
 		switch {
 		case err == io.EOF:
-			break
+			return nil
 		case err != nil:
-			panic(err)
+			return err
 		}
 
 		//
-		path := filepath.Join(dest, header.Name)
-
 		switch header.Typeflag {
 
 		// if its a dir, make it
 		case tar.TypeDir:
-			if err := os.MkdirAll(path, os.FileMode(header.Mode)); err != nil {
-				panic(err)
+			if err := os.MkdirAll(header.Name, os.FileMode(header.Mode)); err != nil {
+				return err
 			}
 
 		// if its a file, add it to the dir
 		case tar.TypeReg:
-			f, err := os.Create(path)
-			if err != nil {
-				panic(err)
-			}
+			f, err := os.Create(header.Name)
 			defer f.Close()
+			if err != nil {
+				return err
+			}
 
 			// copy from tar reader into file
 			if _, err := io.Copy(f, tr); err != nil {
-				panic(err)
+				return err
 			}
 
 		//
 		default:
-			fmt.Printf("Can't: %c, %s\n", header.Typeflag, path)
+			return fmt.Errorf("Unhandled type (%v) for %v", header.Typeflag, header.Name)
 		}
 	}
 
@@ -138,10 +154,10 @@ func Untar(dest string, r io.Reader) {
 // Download
 func Download(path string, w io.Writer) error {
 	res, err := http.Get(path)
+	defer res.Body.Close()
 	if err != nil {
 		return err
 	}
-	defer res.Body.Close()
 
 	b, err := ioutil.ReadAll(res.Body)
 	if err != nil {
@@ -158,10 +174,10 @@ func Progress(path string, w io.Writer) error {
 
 	//
 	download, err := http.Get(path)
+	defer download.Body.Close()
 	if err != nil {
 		return err
 	}
-	defer download.Body.Close()
 
 	var percent float64
 	var down int
@@ -196,6 +212,84 @@ func Progress(path string, w io.Writer) error {
 				fmt.Println("")
 				break
 			} else {
+				return err
+			}
+		}
+	}
+
+	return nil
+}
+
+// copyFile
+func copyFile(src, dst string) error {
+
+	sf, err := os.Open(src)
+	defer sf.Close()
+	if err != nil {
+		return err
+	}
+
+	df, err := os.Create(dst)
+	defer df.Close()
+	if err != nil {
+		return err
+	}
+
+	if _, err := io.Copy(df, sf); err != nil {
+		return err
+	}
+
+	fi, err := os.Stat(src)
+	if err != nil {
+		return err
+	}
+
+	return os.Chmod(dst, fi.Mode())
+}
+
+// copyDir
+func copyDir(src, dst string) error {
+
+	// get properties of source dir
+	fi, err := os.Stat(src)
+	if err != nil {
+		return err
+	}
+
+	// create dest dir
+	err = os.MkdirAll(dst, fi.Mode())
+	if err != nil {
+		return err
+	}
+
+	//
+	dir, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+
+	//
+	fis, err := dir.Readdir(-1)
+	if err != nil {
+		return err
+	}
+
+	for _, fi := range fis {
+
+		srcPath := filepath.Join(src, fi.Name())
+		dstPath := filepath.Join(dst, fi.Name())
+
+		switch {
+
+		// create sub-directories - recursively
+		case fi.Mode().IsDir():
+			if err := copyDir(srcPath, dstPath); err != nil {
+				return err
+			}
+
+		// perform copy
+		case fi.Mode().IsRegular():
+			if err := copyFile(srcPath, dstPath); err != nil {
 				return err
 			}
 		}
