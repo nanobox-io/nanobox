@@ -34,7 +34,7 @@ var updateCmd = &cobra.Command{
 // update
 func update(ccmd *cobra.Command, args []string) {
 	Update()
-	fmt.Printf("Nanobox is now up to date (running v%s)", config.VERSION)
+	fmt.Printf("Nanobox is now up to date (running v%s)\n", config.VERSION)
 }
 
 // Update
