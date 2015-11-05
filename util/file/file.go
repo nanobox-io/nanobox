@@ -53,7 +53,7 @@ func Tar(path string, writers ...io.Writer) error {
 				Mode: int64(fi.Mode()),
 				Size: fi.Size(),
 				// ModTime:  fi.ModTime(),
-				Typeflag: tar.TypeReg,
+				// Typeflag: tar.TypeReg,
 			}
 
 			// write the header to the tarball archive
@@ -103,34 +103,29 @@ func Untar(dst string, r io.Reader) error {
 			return err
 		}
 
-		//
-		switch header.Typeflag {
+		dir := filepath.Dir(header.Name)
+		base := filepath.Base(header.Name)
+		dirPath := filepath.Join(dst, dir)
 
-		// if its a dir, make it
-		case tar.TypeDir:
-			if err := os.MkdirAll(header.Name, os.FileMode(header.Mode)); err != nil {
+		// if the dir doesn't exist it needs to be created
+		if _, err := os.Stat(dirPath); err != nil {
+			if err := os.MkdirAll(dirPath, 0755); err != nil {
 				return err
 			}
+		}
 
-		// if its a file, add it to the dir
-		case tar.TypeReg:
-			f, err := os.Create(header.Name)
-			defer f.Close()
-			if err != nil {
-				return err
-			}
+		// create the file
+		f, err := os.OpenFile(filepath.Join(dirPath, base), os.O_CREATE|os.O_RDWR, os.FileMode(header.Mode))
+		if err != nil {
+			return err
+		}
+		defer f.Close()
 
-			// copy from tar reader into file
-			if _, err := io.Copy(f, tr); err != nil {
-				return err
-			}
-
-		//
-		default:
-			return fmt.Errorf("Unhandled type (%v) for %v", header.Typeflag, header.Name)
+		// copy over contents
+		if _, err := io.Copy(f, tr); err != nil {
+			return err
 		}
 	}
-
 }
 
 // Download

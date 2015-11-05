@@ -13,8 +13,8 @@ import (
 	"github.com/nanobox-io/nanobox-golang-stylish"
 	"github.com/nanobox-io/nanobox/config"
 	"github.com/nanobox-io/nanobox/util"
-	"github.com/nanobox-io/nanobox/util/engine"
-	"github.com/nanobox-io/nanobox/util/file"
+	engineutil "github.com/nanobox-io/nanobox/util/engine"
+	fileutil "github.com/nanobox-io/nanobox/util/file"
 	"os"
 	"path/filepath"
 )
@@ -53,7 +53,7 @@ func Init() {
 
 			//
 			whatever := &struct {
-				Overlays []string
+				Overlays []string `json:"overlays"`
 			}{}
 
 			//
@@ -72,18 +72,22 @@ func Init() {
 				os.Exit(1)
 			}
 
+			fmt.Printf("WHATEVER! %#v\n", whatever)
+
 			// iterate through each overlay fetching it and adding it to the list of 'files'
 			// to be tarballed
 			for _, overlay := range whatever.Overlays {
 
+				fmt.Println("OVERLAY!", overlay)
+
 				// extract a user and archive (desired engine) from args[0]
-				user, archive := engine.ExtractArchive(overlay)
+				user, archive := engineutil.ExtractArchive(overlay)
 
 				// extract an engine and version from the archive
-				e, version := engine.ExtractEngine(archive)
+				e, version := engineutil.ExtractEngine(archive)
 
 				//
-				res, err := engine.GetEngine(user, e, version)
+				res, err := engineutil.GetEngine(user, e, version)
 				if err != nil {
 					config.Fatal("[commands/engine/publish] http.Get() failed", err.Error())
 				}
@@ -99,8 +103,32 @@ func Init() {
 				}
 
 				//
-				if err := file.Untar(appEngineDir, res.Body); err != nil {
+				if err := fileutil.Untar(appEngineDir, res.Body); err != nil {
 					config.Fatal("[commands/engine/publish] file.Untar() failed", err.Error())
+				}
+			}
+
+			abs, err := filepath.Abs(enginePath)
+			if err != nil {
+				fmt.Println("BONK!", err)
+			}
+
+			fmt.Println("ABS!", abs)
+
+			// pull the remainin engine files over
+			for _, f := range []string{"bin", "Enginefile", "lib", "templates", "files"} {
+
+				path := filepath.Join(abs, f)
+
+				//
+				if _, err := os.Stat(path); err != nil {
+					continue
+				}
+
+				// not handling error here because an error simply means the file doesn't
+				// exist and therefor wont be copied
+				if err := fileutil.Copy(path, appEngineDir); err != nil {
+					config.Fatal("[commands/engine/publish] file.Copy() failed", err.Error())
 				}
 			}
 

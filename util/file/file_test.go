@@ -9,6 +9,7 @@
 package file
 
 import (
+	// "fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -21,8 +22,11 @@ import (
 func TestCopy(t *testing.T) {
 
 	// create tmp dirs
-	src, dst, file, paths := setup()
+	src, dst, file, paths, err := setup()
 	defer cleanup(src, dst)
+	if err != nil {
+		t.Error("Unexpected error - ", err.Error())
+	}
 
 	// copy file from src to dst
 	Copy(src, dst)
@@ -41,19 +45,22 @@ func TestCopy(t *testing.T) {
 func TestTarUntar(t *testing.T) {
 
 	// create tmp dirs
-	src, dst, file, paths := setup()
+	src, dst, file, paths, err := setup()
 	defer cleanup(src, dst)
+	if err != nil {
+		t.Error("Unexpected error - ", err.Error())
+	}
 
 	//
 	tarball, err := os.Create(filepath.Join(dst, "file.tar.gz"))
 	defer tarball.Close()
 	if err != nil {
-		panic(err)
+		t.Error("Unexpected error - ", err.Error())
 	}
 
 	// create a tarball from src
 	if err := Tar(src, tarball); err != nil {
-		panic(err)
+		t.Error("Unexpected error - ", err.Error())
 	}
 
 	// varify that tarball was create at dst
@@ -65,18 +72,18 @@ func TestTarUntar(t *testing.T) {
 	archive, err := os.Open(filepath.Join(dst, "file.tar.gz"))
 	defer archive.Close()
 	if err != nil {
-		panic(err)
+		t.Error("Unexpected error - ", err.Error())
 	}
 
 	// untar tarball
 	if err := Untar(dst, archive); err != nil {
-		panic(err)
+		t.Error("Unexpected error - ", err.Error())
 	}
 
 	// iterate through each path checking to see if file.txt was untared correctly;
 	// the contents of the tarball should be the src directory (inside the dst dir)
 	for _, path := range paths {
-		if _, err := os.Stat(filepath.Join(src, path, file)); err != nil {
+		if _, err := os.Stat(filepath.Join(dst, src, path, file)); err != nil {
 			t.Error("Expected file, got nothing - ", err.Error())
 		}
 	}
@@ -84,19 +91,7 @@ func TestTarUntar(t *testing.T) {
 
 // setup creates a source and destination directory and fills the source with some
 // files/folders
-func setup() (src, dst, file string, paths []string) {
-
-	var err error
-
-	//
-	if src, err = ioutil.TempDir("", "src"); err != nil {
-		panic(err)
-	}
-
-	//
-	if dst, err = ioutil.TempDir("", "dst"); err != nil {
-		panic(err)
-	}
+func setup() (src, dst, file string, paths []string, err error) {
 
 	file = "file.txt"
 	paths = []string{
@@ -107,13 +102,23 @@ func setup() (src, dst, file string, paths []string) {
 	}
 
 	//
+	if src, err = ioutil.TempDir("", "src"); err != nil {
+		return src, dst, file, paths, err
+	}
+
+	//
+	if dst, err = ioutil.TempDir("", "dst"); err != nil {
+		return src, dst, file, paths, err
+	}
+
+	//
 	for _, path := range paths {
 		if err := os.MkdirAll(filepath.Join(src, path), 0755); err != nil {
-			panic(err)
+			return src, dst, file, paths, err
 		}
 
 		if err := ioutil.WriteFile(filepath.Join(src, path, file), []byte("contents"), 0644); err != nil {
-			panic(err)
+			return src, dst, file, paths, err
 		}
 	}
 
@@ -121,10 +126,12 @@ func setup() (src, dst, file string, paths []string) {
 }
 
 // cleanup removes the src and dst dirs
-func cleanup(files ...string) {
+func cleanup(files ...string) (err error) {
 	for _, file := range files {
-		if err := os.RemoveAll(file); err != nil {
-			panic(err)
+		if err = os.RemoveAll(file); err != nil {
+			return err
 		}
 	}
+
+	return
 }
