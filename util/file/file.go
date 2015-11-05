@@ -22,24 +22,6 @@ import (
 	"strings"
 )
 
-// Copy
-func Copy(dst, src string) error {
-
-	// ensure src exists
-	sfi, err := os.Stat(src)
-	if err != nil {
-		return err
-	}
-
-	// create dest dir
-	if err = os.MkdirAll(dst, sfi.Mode()); err != nil {
-		return err
-	}
-
-	//
-	return copyDir(src, dst)
-}
-
 // Tar
 func Tar(path string, writers ...io.Writer) error {
 
@@ -212,84 +194,6 @@ func Progress(path string, w io.Writer) error {
 				fmt.Println("")
 				break
 			} else {
-				return err
-			}
-		}
-	}
-
-	return nil
-}
-
-// copyFile
-func copyFile(src, dst string) error {
-
-	sf, err := os.Open(src)
-	defer sf.Close()
-	if err != nil {
-		return err
-	}
-
-	df, err := os.Create(dst)
-	defer df.Close()
-	if err != nil {
-		return err
-	}
-
-	if _, err := io.Copy(df, sf); err != nil {
-		return err
-	}
-
-	fi, err := os.Stat(src)
-	if err != nil {
-		return err
-	}
-
-	return os.Chmod(dst, fi.Mode())
-}
-
-// copyDir
-func copyDir(src, dst string) error {
-
-	// get properties of source dir
-	fi, err := os.Stat(src)
-	if err != nil {
-		return err
-	}
-
-	// create dest dir
-	err = os.MkdirAll(dst, fi.Mode())
-	if err != nil {
-		return err
-	}
-
-	//
-	dir, err := os.Open(src)
-	if err != nil {
-		return err
-	}
-
-	//
-	fis, err := dir.Readdir(-1)
-	if err != nil {
-		return err
-	}
-
-	for _, fi := range fis {
-
-		srcPath := filepath.Join(src, fi.Name())
-		dstPath := filepath.Join(dst, fi.Name())
-
-		switch {
-
-		// create sub-directories - recursively
-		case fi.Mode().IsDir():
-			if err := copyDir(srcPath, dstPath); err != nil {
-				return err
-			}
-
-		// perform copy
-		case fi.Mode().IsRegular():
-			if err := copyFile(srcPath, dstPath); err != nil {
 				return err
 			}
 		}

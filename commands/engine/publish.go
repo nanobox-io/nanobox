@@ -235,7 +235,9 @@ Please ensure all required fields are provided and try again.`))
 
 			// not handling error here because an error simply means the file doesn't
 			// exist and therefor wont be copied
-			file.Copy(tarPath, f)
+			if err := file.Copy(f, tarPath); err != nil {
+				Config.Fatal("[commands/engine/publish] file.Copy() failed", err.Error())
+			}
 		}
 	}
 
