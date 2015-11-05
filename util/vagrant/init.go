@@ -51,6 +51,8 @@ func Init() {
 				}
 			}
 
+			synced_folders += fmt.Sprintf("\n    nanobox.vm.synced_folder \"%s\", \"/vagrant/engines/%s\"", appEngineDir, base)
+
 			//
 			whatever := &struct {
 				Overlays []string `json:"overlays"`
@@ -131,8 +133,6 @@ func Init() {
 					config.Fatal("[commands/engine/publish] file.Copy() failed", err.Error())
 				}
 			}
-
-			synced_folders += fmt.Sprintf("\n    nanobox.vm.synced_folder \"%s\", \"/vagrant/engines/%s\"", appEngineDir, base)
 		}
 	}
 

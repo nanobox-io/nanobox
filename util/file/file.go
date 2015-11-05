@@ -49,7 +49,7 @@ func Tar(path string, writers ...io.Writer) error {
 
 			// create header for this file
 			header := &tar.Header{
-				Name: file,
+				Name: strings.TrimPrefix(strings.Replace(file, path, "", -1), string(filepath.Separator)),
 				Mode: int64(fi.Mode()),
 				Size: fi.Size(),
 				// ModTime:  fi.ModTime(),
