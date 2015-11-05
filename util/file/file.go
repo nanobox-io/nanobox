@@ -52,8 +52,6 @@ func Tar(path string, writers ...io.Writer) error {
 				Name: strings.TrimPrefix(strings.Replace(file, path, "", -1), string(filepath.Separator)),
 				Mode: int64(fi.Mode()),
 				Size: fi.Size(),
-				// ModTime:  fi.ModTime(),
-				// Typeflag: tar.TypeReg,
 			}
 
 			// write the header to the tarball archive

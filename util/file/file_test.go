@@ -29,7 +29,7 @@ func TestCopy(t *testing.T) {
 	}
 
 	// copy file from src to dst
-	Copy(src, dst)
+	Copy(src+"/", dst)
 
 	// iterate through each path checking to see if file.txt was copied
 	for _, path := range paths {
@@ -83,7 +83,7 @@ func TestTarUntar(t *testing.T) {
 	// iterate through each path checking to see if file.txt was untared correctly;
 	// the contents of the tarball should be the src directory (inside the dst dir)
 	for _, path := range paths {
-		if _, err := os.Stat(filepath.Join(dst, src, path, file)); err != nil {
+		if _, err := os.Stat(filepath.Join(dst, path, file)); err != nil {
 			t.Error("Expected file, got nothing - ", err.Error())
 		}
 	}
