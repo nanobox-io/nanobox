@@ -16,6 +16,7 @@ import (
 	api "github.com/nanobox-io/nanobox-api-client"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 	"github.com/nanobox-io/nanobox/config"
+	engineutil "github.com/nanobox-io/nanobox/util/engine"
 	"github.com/nanobox-io/nanobox/util/file"
 	"github.com/spf13/cobra"
 	"io/ioutil"
@@ -201,13 +202,13 @@ Please ensure all required fields are provided and try again.`))
 	for _, overlay := range release.Overlays {
 
 		// extract a user and archive (desired engine) from args[0]
-		user, archive := extractArchive(overlay)
+		user, archive := engineutil.ExtractArchive(overlay)
 
 		// extract an engine and version from the archive
-		e, version := extractEngine(archive)
+		e, version := engineutil.ExtractEngine(archive)
 
 		//
-		res, err := getEngine(user, e, version)
+		res, err := engineutil.GetEngine(user, e, version)
 		if err != nil {
 			Config.Fatal("[commands/engine/publish] http.Get() failed", err.Error())
 		}

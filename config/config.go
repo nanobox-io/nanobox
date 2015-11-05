@@ -99,12 +99,14 @@ func init() {
 		}
 	}
 
-	// check for a ~/.nanobox/apps dir and create one if it's not found
-	AppsDir = filepath.Join(Root, "apps")
-	if _, err := os.Stat(AppsDir); err != nil {
-		if err := os.Mkdir(AppsDir, 0755); err != nil {
-			Log.Fatal("[config/config] os.Mkdir() failed", err.Error())
+	// check for a ~/.nanobox/.update file and create one if it's not found
+	UpdateFile = filepath.Join(Root, ".update")
+	if _, err := os.Stat(UpdateFile); err != nil {
+		f, err := os.Create(UpdateFile)
+		if err != nil {
+			Log.Fatal("[config/config] os.Create() failed - ", err.Error())
 		}
+		defer f.Close()
 	}
 
 	// check for a ~/.nanobox/engines dir and create one if it's not found
@@ -115,14 +117,12 @@ func init() {
 		}
 	}
 
-	// check for a ~/.nanobox/.update file and create one if it's not found
-	UpdateFile = filepath.Join(Root, ".update")
-	if _, err := os.Stat(UpdateFile); err != nil {
-		f, err := os.Create(UpdateFile)
-		if err != nil {
-			Log.Fatal("[config/config] os.Create() failed - ", err.Error())
+	// check for a ~/.nanobox/apps dir and create one if it's not found
+	AppsDir = filepath.Join(Root, "apps")
+	if _, err := os.Stat(AppsDir); err != nil {
+		if err := os.Mkdir(AppsDir, 0755); err != nil {
+			Log.Fatal("[config/config] os.Mkdir() failed", err.Error())
 		}
-		defer f.Close()
 	}
 
 	// the .nanofile needs to be parsed right away so that its config options are

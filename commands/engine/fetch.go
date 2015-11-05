@@ -10,14 +10,12 @@ package engine
 
 import (
 	"fmt"
-	api "github.com/nanobox-io/nanobox-api-client"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 	// "github.com/nanobox-io/nanobox/auth"
+	engineutil "github.com/nanobox-io/nanobox/util/engine"
 	"github.com/spf13/cobra"
 	"io"
-	"net/http"
 	"os"
-	"strings"
 )
 
 //
@@ -30,7 +28,7 @@ Description:
 
   Allowed formats when fetching an engine
   - engine-name
-	- engine-name=0.0.1
+  - engine-name=0.0.1
   - user/engine-name
   - user/engine-name=0.0.1
 	`,
@@ -60,13 +58,13 @@ func fetch(ccmd *cobra.Command, args []string) {
 	os.Stderr.WriteString(stylish.Bullet("Attempting to fetch '%v'", args[0]))
 
 	// extract a user and archive (desired engine) from args[0]
-	user, archive := extractArchive(args[0])
+	user, archive := engineutil.ExtractArchive(args[0])
 
 	// extract an engine and version from the archive
-	engine, version := extractEngine(archive)
+	engine, version := engineutil.ExtractEngine(archive)
 
-	//
-	res, err := getEngine(user, engine, version)
+	// pull the engine from nanobox.io
+	res, err := engineutil.GetEngine(user, engine, version)
 	if err != nil {
 		Config.Fatal("[commands/engine/fetch] http.Get() failed", err.Error())
 	}
@@ -92,87 +90,6 @@ func fetch(ccmd *cobra.Command, args []string) {
 	if _, err := io.Copy(dest, res.Body); err != nil {
 		os.Stderr.WriteString(fmt.Sprintf("[commands.fetch] io.Copy() failed - %s", err.Error()))
 	}
-}
-
-// extractArchive splits args on "/" looking for a user and archive:
-// - user/engine-name
-// - user/engine-name=0.0.1
-func extractArchive(s string) (user, archive string) {
-
-	split := strings.Split(s, "/")
-
-	// switch on the length to determine if the split resulted in a user and a engine
-	// or just an engine
-	switch len(split) {
-
-	// if len is 1 then only a download was found (no user specified)
-	case 1:
-		archive = split[0]
-
-		// if len is 2 then a user was found (from which to pull the download)
-	case 2:
-		user = split[0]
-		archive = split[1]
-
-	// any other number or args
-	default:
-		// fmt.Printf("%v is not a valid format when fetching an engine (see help).\n", args[0])
-		os.Exit(1)
-	}
-
-	return
-}
-
-// extractEngine splits on the archive to find the engine and the release (version)
-func extractEngine(archive string) (engine, version string) {
-
-	// split on '=' looking for a version
-	split := strings.Split(archive, "=")
-
-	// switch on the length to determine if the split resulted in a engine and version
-	// or just an engine
-	switch len(split) {
-
-	// if len is 1 then just an engine was found (no version specified)
-	case 1:
-		engine = split[0]
-
-	// if len is 2 then an engine and version were found
-	case 2:
-		engine = split[0]
-		version = split[1]
-	}
-
-	return
-}
-
-//
-func getEngine(user, archive, version string) (*http.Response, error) {
-
-	//
-	engine, err := api.GetEngine(user, archive)
-	if err != nil {
-		os.Stderr.WriteString(stylish.ErrBullet("No official engine, or engine for that user found."))
-		return nil, err
-	}
-
-	// if no version is provided, fetch the latest release
-	if version == "" {
-		version = engine.ActiveReleaseID
-	}
-
-	//
-	path := fmt.Sprintf("http://api.nanobox.io/v1/engines/%v/releases/%v/download", archive, version)
-
-	// if a user is found, pull the engine from their engines
-	if user != "" {
-		path = fmt.Sprintf("http://api.nanobox.io/v1/engines/%v/%v/releases/%v/download", user, archive, version)
-	}
-
-	os.Stderr.WriteString(stylish.Bullet("Fetching engine at '%s'", path))
-
-	//
-	return http.Get(path)
 }
 
 // setDestination determines if the file is to be streamed to stdout or to a file
