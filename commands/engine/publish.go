@@ -49,7 +49,15 @@ func publish(ccmd *cobra.Command, args []string) {
 	fmt.Printf(stylish.Bullet("Creating release..."))
 	release := &api.EngineRelease{}
 
-	//
+	// create an annonymous struct to hold data that doesn't relate to a release but
+	// is needed as part of the publish process
+	opts := &struct {
+		Generic  bool     `json:"generic"`
+		Language string   `json:"language"`
+		Overlays []string `json:"overlays"`
+	}{}
+
+	// ensure there is an Enginefile
 	if _, err := os.Stat("./Enginefile"); err != nil {
 		fmt.Println("Enginefile not found. Be sure to publish from a project directory. Exiting... ")
 		os.Exit(1)
@@ -57,6 +65,12 @@ func publish(ccmd *cobra.Command, args []string) {
 
 	// parse the ./Enginefile into the new release
 	if err := Config.ParseConfig("./Enginefile", release); err != nil {
+		fmt.Printf("Nanobox failed to parse your Enginefile. Please ensure it is valid YAML and try again.\n")
+		os.Exit(1)
+	}
+
+	// parse the ./Enginefile again to get the remaining fields
+	if err := Config.ParseConfig("./Enginefile", opts); err != nil {
 		fmt.Printf("Nanobox failed to parse your Enginefile. Please ensure it is valid YAML and try again.\n")
 		os.Exit(1)
 	}
@@ -69,7 +83,7 @@ func publish(ccmd *cobra.Command, args []string) {
 	// enough that all cases will return the same message, and this looks better than
 	// a single giant case (var == "" || var == "" || ...)
 	switch {
-	case release.Language == "":
+	case opts.Language == "":
 		fallthrough
 	case release.Name == "":
 		fallthrough
@@ -115,8 +129,8 @@ Please ensure all required fields are provided and try again.`))
 
 			//
 			engine = &api.Engine{
-				Generic:      release.Generic,
-				LanguageName: release.Language,
+				Generic:      opts.Generic,
+				LanguageName: opts.Language,
 				Name:         release.Name,
 			}
 
@@ -197,19 +211,14 @@ Please ensure all required fields are provided and try again.`))
 		}
 	}()
 
-	// for lack of a better word... this is an anonymous struct
-	anon := &struct {
-		Overlays []string `json:"overlays"`
-	}{}
-
-	// parse the ./Enginefile to get the overlays
-	if err := Config.ParseConfig("./Enginefile", anon); err != nil {
+	// parse the ./Enginefile again to get the overlays
+	if err := Config.ParseConfig("./Enginefile", opts); err != nil {
 		fmt.Printf("Nanobox failed to parse your Enginefile. Please ensure it is valid YAML and try again.\n")
 		os.Exit(1)
 	}
 
 	// iterate through each overlay fetching it and untaring to the tar path
-	for _, overlay := range anon.Overlays {
+	for _, overlay := range opts.Overlays {
 		engineutil.GetOverlay(overlay, tarPath)
 	}
 
