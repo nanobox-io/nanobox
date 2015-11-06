@@ -16,30 +16,6 @@ import (
 	"testing"
 )
 
-// tests if Copy works as intended; a deep file is tested with the assumption that
-// if it can be successfully copied over, than anything else along the way would
-// have also
-func TestCopy(t *testing.T) {
-
-	// create tmp dirs
-	src, dst, file, paths, err := setup()
-	defer cleanup(src, dst)
-	if err != nil {
-		t.Error("Unexpected error - ", err.Error())
-	}
-
-	// copy file from src to dst
-	Copy(src+"/", dst)
-
-	// iterate through each path checking to see if file.txt was copied
-	for _, path := range paths {
-		if _, err := os.Stat(filepath.Join(dst, path, file)); err != nil {
-			t.Error("Expected file, got nothing - ", err.Error())
-		}
-	}
-
-}
-
 // tests if Tar and Untar are working as intended; can't really test taring w/o
 // also testing untaring
 func TestTarUntar(t *testing.T) {
