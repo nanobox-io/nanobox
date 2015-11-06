@@ -84,7 +84,7 @@ func publish(ccmd *cobra.Command, args []string) {
 
 Please ensure all required fields are provided and try again.`))
 
-		return
+		os.Exit(1)
 	}
 
 	// attempt to read a README.md file and add it to the release...

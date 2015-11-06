@@ -101,98 +101,95 @@ func GetEngine(user, archive, version string) (*http.Response, error) {
 	return http.Get(path)
 }
 
-//
-func MountLocal() {
+// MountLocal
+func MountLocal(loc string) (mountDir string) {
 
-	//
-	boxfile := config.ParseBoxfile()
+	// if the mount location exists proceed
+	if _, err := os.Stat(loc); err == nil {
 
-	// if an custom engine path is provided, add it to the synced_folders
-	if engine := boxfile.Build.Engine; engine != "" {
-		if _, err := os.Stat(engine); err == nil {
+		//
+		mountDir = filepath.Join(config.AppDir, filepath.Base(loc))
+		if _, err := os.Stat(mountDir); err != nil {
+			if err := os.Mkdir(mountDir, 0755); err != nil {
+				config.Fatal("[commands/init] os.Mkdir() failed", err.Error())
+			}
+		}
+
+		//
+		enginefile := filepath.Join(loc, "./Enginefile")
+
+		// if no engine file is found just return
+		if _, err := os.Stat(enginefile); err != nil {
+			fmt.Printf("No enginefile found at '%v', Exiting...\n", loc)
+			os.Exit(1)
+		}
+
+		//
+		mount := &struct {
+			Overlays []string `json:"overlays"`
+		}{}
+
+		// parse the ./Enginefile into the new mount
+		if err := config.ParseConfig(enginefile, mount); err != nil {
+			fmt.Printf("Nanobox failed to parse your Enginefile. Please ensure it is valid YAML and try again.\n")
+			os.Exit(1)
+		}
+
+		// iterate through each overlay fetching it and adding it to the list of 'files'
+		// to be tarballed
+		for _, overlay := range mount.Overlays {
+
+			// extract a user and archive (desired engine) from args[0]
+			user, archive := ExtractArchive(overlay)
+
+			// extract an engine and version from the archive
+			e, version := ExtractEngine(archive)
 
 			//
-			mountDir := filepath.Join(config.AppDir, filepath.Base(engine))
-			if _, err := os.Stat(mountDir); err != nil {
-				if err := os.Mkdir(mountDir, 0755); err != nil {
-					config.Fatal("[commands/init] os.Mkdir() failed", err.Error())
-				}
-			}
-
-			//
-			enginefile := filepath.Join(engine, "./Enginefile")
-
-			// if no engine file is found just return
-			if _, err := os.Stat(enginefile); err != nil {
-				fmt.Printf("No enginefile found at '%v', Exiting...\n", engine)
-				os.Exit(1)
-			}
-
-			//
-			mount := &struct {
-				Overlays []string `json:"overlays"`
-			}{}
-
-			// parse the ./Enginefile into the new mount
-			if err := config.ParseConfig(enginefile, mount); err != nil {
-				fmt.Printf("Nanobox failed to parse your Enginefile. Please ensure it is valid YAML and try again.\n")
-				os.Exit(1)
-			}
-
-			// iterate through each overlay fetching it and adding it to the list of 'files'
-			// to be tarballed
-			for _, overlay := range mount.Overlays {
-
-				// extract a user and archive (desired engine) from args[0]
-				user, archive := ExtractArchive(overlay)
-
-				// extract an engine and version from the archive
-				e, version := ExtractEngine(archive)
-
-				//
-				res, err := GetEngine(user, e, version)
-				if err != nil {
-					config.Fatal("[util/engine/engine] http.Get() failed", err.Error())
-				}
-				defer res.Body.Close()
-
-				//
-				switch res.StatusCode / 100 {
-				case 2, 3:
-					break
-				case 4, 5:
-					os.Stderr.WriteString(stylish.ErrBullet("Unable to fetch '%v' overlay, exiting...", e))
-					os.Exit(1)
-				}
-
-				//
-				if err := fileutil.Untar(mountDir, res.Body); err != nil {
-					config.Fatal("[util/engine/engine] file.Untar() failed", err.Error())
-				}
-			}
-
-			abs, err := filepath.Abs(engine)
+			res, err := GetEngine(user, e, version)
 			if err != nil {
-				config.Fatal("[util/engine/engine] filepath.Abs() failed", err.Error())
+				config.Fatal("[util/engine/engine] http.Get() failed", err.Error())
+			}
+			defer res.Body.Close()
+
+			//
+			switch res.StatusCode / 100 {
+			case 2, 3:
+				break
+			case 4, 5:
+				os.Stderr.WriteString(stylish.ErrBullet("Unable to fetch '%v' overlay, exiting...", e))
+				os.Exit(1)
 			}
 
-			// pull the remainin engine files over
-			for _, f := range []string{"bin", "Enginefile", "lib", "templates", "files"} {
+			//
+			if err := fileutil.Untar(mountDir, res.Body); err != nil {
+				config.Fatal("[util/engine/engine] file.Untar() failed", err.Error())
+			}
+		}
 
-				path := filepath.Join(abs, f)
+		abs, err := filepath.Abs(loc)
+		if err != nil {
+			config.Fatal("[util/engine/engine] filepath.Abs() failed", err.Error())
+		}
 
-				// just skip any files that aren't found; any required files will be
-				// caught before publishing, here it doesn't matter
-				if _, err := os.Stat(path); err != nil {
-					continue
-				}
+		// pull the remainin engine files over
+		for _, f := range []string{"bin", "Enginefile", "lib", "templates", "files"} {
 
-				// not handling error here because an error simply means the file doesn't
-				// exist and therefor wont be copied
-				if err := fileutil.Copy(path, mountDir); err != nil {
-					config.Fatal("[util/engine/engine] file.Copy() failed", err.Error())
-				}
+			path := filepath.Join(abs, f)
+
+			// just skip any files that aren't found; any required files will be
+			// caught before publishing, here it doesn't matter
+			if _, err := os.Stat(path); err != nil {
+				continue
+			}
+
+			// not handling error here because an error simply means the file doesn't
+			// exist and therefor wont be copied
+			if err := fileutil.Copy(path, mountDir); err != nil {
+				config.Fatal("[util/engine/engine] file.Copy() failed", err.Error())
 			}
 		}
 	}
+
+	return
 }

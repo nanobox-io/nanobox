@@ -14,7 +14,6 @@ import (
 	"github.com/nanobox-io/nanobox/config"
 	"github.com/nanobox-io/nanobox/util"
 	engineutil "github.com/nanobox-io/nanobox/util/engine"
-	fileutil "github.com/nanobox-io/nanobox/util/file"
 	"os"
 	"path/filepath"
 )
