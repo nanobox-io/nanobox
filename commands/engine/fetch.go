@@ -82,37 +82,27 @@ func fetch(ccmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	// determine the destination where the release will end up (file or stdout)
-	dest := setDestination(fFile)
+	// determine if destination will be a file or stdout (stdout by default)
+	dest := os.Stdout
 	defer dest.Close()
+
+	// write the download to the local file system
+	if fFile != "" {
+
+		//
+		f, err := os.Create(fFile)
+		if err != nil {
+			os.Stderr.WriteString(stylish.ErrBullet("Unable to save file, exiting... %v", err.Error()))
+			return
+		}
+
+		// if the file was created successfully then set it as the destination
+		os.Stderr.WriteString(stylish.Bullet("Saving engine as '%s'", fFile))
+		dest = f
+	}
 
 	// write the file
 	if _, err := io.Copy(dest, res.Body); err != nil {
 		os.Stderr.WriteString(fmt.Sprintf("[commands.fetch] io.Copy() failed - %s", err.Error()))
 	}
-}
-
-// setDestination determines if the file is to be streamed to stdout or to a file
-func setDestination(path string) (dest io.WriteCloser) {
-
-	switch {
-
-	// pipe the ouput to os.Stdout
-	default:
-		dest = os.Stdout
-
-		// write the download to the local file system
-	case path != "":
-		os.Stderr.WriteString(stylish.Bullet("Saving engine as '%s'", path))
-
-		var err error
-
-		//
-		if dest, err = os.Create(path); err != nil {
-			os.Stderr.WriteString(stylish.ErrBullet(err.Error()))
-			os.Exit(1)
-		}
-	}
-
-	return
 }

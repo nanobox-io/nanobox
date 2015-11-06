@@ -32,107 +32,18 @@ func Init() {
 	// create synced folders
 	synced_folders := fmt.Sprintf("nanobox.vm.synced_folder \"%s\", \"/vagrant/code/%s\"", config.CWDir, config.Nanofile.Name)
 
-	// attempt to parse the boxfile first; we don't want to create an app folder
-	// if the app isn't able to be created
+	//
 	boxfile := config.ParseBoxfile()
 
 	// if an custom engine path is provided, add it to the synced_folders
-	if enginePath := boxfile.Build.Engine; enginePath != "" {
-		if _, err := os.Stat(enginePath); err == nil {
+	if engine := boxfile.Build.Engine; engine != "" {
+		if _, err := os.Stat(engine); err == nil {
 
-			//
-			base := filepath.Base(enginePath)
+			// "mount" the engine file at ~/.nanobox/apps/<app>/<engine>
+			mount := engineutil.MountLocal(engine)
 
-			//
-			appEngineDir := filepath.Join(config.AppDir, base)
-			if _, err := os.Stat(appEngineDir); err != nil {
-				if err := os.Mkdir(appEngineDir, 0755); err != nil {
-					config.Fatal("[commands/init] os.Mkdir() failed", err.Error())
-				}
-			}
-
-			synced_folders += fmt.Sprintf("\n    nanobox.vm.synced_folder \"%s\", \"/vagrant/engines/%s\"", appEngineDir, base)
-
-			//
-			whatever := &struct {
-				Overlays []string `json:"overlays"`
-			}{}
-
-			//
-			enginefile := filepath.Join(enginePath, "./Enginefile")
-
-			// if no engine file is found just return
-			if _, err := os.Stat(enginefile); err != nil {
-				fmt.Println("Enginefile not found, Exiting... ")
-				os.Exit(1)
-			}
-
-			// parse the ./Enginefile into the new release
-			if err := config.ParseConfig(enginefile, whatever); err != nil {
-				fmt.Printf("Nanobox failed to parse your Enginefile. Please ensure it is valid YAML and try again.\n", err.Error())
-				config.Log.Error("[commands/engine/publish] http.Get() failed", err.Error())
-				os.Exit(1)
-			}
-
-			fmt.Printf("WHATEVER! %#v\n", whatever)
-
-			// iterate through each overlay fetching it and adding it to the list of 'files'
-			// to be tarballed
-			for _, overlay := range whatever.Overlays {
-
-				fmt.Println("OVERLAY!", overlay)
-
-				// extract a user and archive (desired engine) from args[0]
-				user, archive := engineutil.ExtractArchive(overlay)
-
-				// extract an engine and version from the archive
-				e, version := engineutil.ExtractEngine(archive)
-
-				//
-				res, err := engineutil.GetEngine(user, e, version)
-				if err != nil {
-					config.Fatal("[commands/engine/publish] http.Get() failed", err.Error())
-				}
-				defer res.Body.Close()
-
-				//
-				switch res.StatusCode / 100 {
-				case 2, 3:
-					break
-				case 4, 5:
-					os.Stderr.WriteString(stylish.ErrBullet("Unable to fetch '%v' overlay, exiting...", e))
-					os.Exit(1)
-				}
-
-				//
-				if err := fileutil.Untar(appEngineDir, res.Body); err != nil {
-					config.Fatal("[commands/engine/publish] file.Untar() failed", err.Error())
-				}
-			}
-
-			abs, err := filepath.Abs(enginePath)
-			if err != nil {
-				fmt.Println("BONK!", err)
-			}
-
-			fmt.Println("ABS!", abs)
-
-			// pull the remainin engine files over
-			for _, f := range []string{"bin", "Enginefile", "lib", "templates", "files"} {
-
-				path := filepath.Join(abs, f)
-
-				//
-				if _, err := os.Stat(path); err != nil {
-					continue
-				}
-
-				// not handling error here because an error simply means the file doesn't
-				// exist and therefor wont be copied
-				if err := fileutil.Copy(path, appEngineDir); err != nil {
-					config.Fatal("[commands/engine/publish] file.Copy() failed", err.Error())
-				}
-			}
+			// "mount" the engine into the VM
+			synced_folders += fmt.Sprintf("\n    nanobox.vm.synced_folder \"%s\", \"/vagrant/engines/%s\"", mount, filepath.Base(engine))
 		}
 	}
 

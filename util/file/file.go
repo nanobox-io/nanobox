@@ -22,24 +22,22 @@ import (
 	"strings"
 )
 
-// Tar
-func Tar(path string, writers ...io.Writer) error {
+// Tar takes a source and variable writers and walks 'source' writing each file
+// found to the tar writer; the purpose for accepting multiple writers is to allow
+// for multiple outputs (for example a file, or md5 hash)
+func Tar(src string, writers ...io.Writer) error {
 
-	//
 	mw := io.MultiWriter(writers...)
 
-	//
 	gzw := gzip.NewWriter(mw)
 	defer gzw.Close()
 
-	//
 	tw := tar.NewWriter(gzw)
 	defer tw.Close()
 
-	//
-	return filepath.Walk(path, func(file string, fi os.FileInfo, err error) error {
+	// walk path
+	return filepath.Walk(src, func(file string, fi os.FileInfo, err error) error {
 
-		//
 		if err != nil {
 			return err
 		}
@@ -47,9 +45,8 @@ func Tar(path string, writers ...io.Writer) error {
 		// only tar files (not dirs)
 		if fi.Mode().IsRegular() {
 
-			// create header for this file
 			header := &tar.Header{
-				Name: strings.TrimPrefix(strings.Replace(file, path, "", -1), string(filepath.Separator)),
+				Name: strings.TrimPrefix(strings.Replace(file, src, "", -1), string(filepath.Separator)),
 				Mode: int64(fi.Mode()),
 				Size: fi.Size(),
 			}
@@ -76,44 +73,45 @@ func Tar(path string, writers ...io.Writer) error {
 	})
 }
 
-// Untar
+// Untar takes a destination path and a reader; a tar reader loops over the tarfile
+// creating the file structure at 'dst' along the way, and writing any files
 func Untar(dst string, r io.Reader) error {
 
-	//
 	gzr, err := gzip.NewReader(r)
 	defer gzr.Close()
 	if err != nil {
 		return err
 	}
 
-	//
 	tr := tar.NewReader(gzr)
 
-	//
 	for {
 		header, err := tr.Next()
 
-		//
 		switch {
+
+		// if no more files are found return
 		case err == io.EOF:
 			return nil
+
+		// return any other error
 		case err != nil:
 			return err
 		}
 
 		dir := filepath.Dir(header.Name)
 		base := filepath.Base(header.Name)
-		dirPath := filepath.Join(dst, dir)
+		path := filepath.Join(dst, dir)
 
 		// if the dir doesn't exist it needs to be created
-		if _, err := os.Stat(dirPath); err != nil {
-			if err := os.MkdirAll(dirPath, 0755); err != nil {
+		if _, err := os.Stat(path); err != nil {
+			if err := os.MkdirAll(path, 0755); err != nil {
 				return err
 			}
 		}
 
 		// create the file
-		f, err := os.OpenFile(filepath.Join(dirPath, base), os.O_CREATE|os.O_RDWR, os.FileMode(header.Mode))
+		f, err := os.OpenFile(filepath.Join(path, base), os.O_CREATE|os.O_RDWR, os.FileMode(header.Mode))
 		if err != nil {
 			return err
 		}
@@ -126,7 +124,7 @@ func Untar(dst string, r io.Reader) error {
 	}
 }
 
-// Download
+// Download downloads a file
 func Download(path string, w io.Writer) error {
 	res, err := http.Get(path)
 	defer res.Body.Close()
@@ -144,7 +142,7 @@ func Download(path string, w io.Writer) error {
 	return nil
 }
 
-// Progress
+// Progress downloads a file with a fancy progress bar
 func Progress(path string, w io.Writer) error {
 
 	//
