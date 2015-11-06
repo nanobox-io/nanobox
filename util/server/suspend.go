@@ -19,7 +19,7 @@ func Suspend() error {
 
 	// if the CLI is running in background mode dont suspend the VM
 	if config.VMfile.IsMode("background") {
-		fmt.Printf("\n   Note: nanobox is running in background mode. To suspend it run 'nanobox down'\n\n")
+		fmt.Printf("\n   Note: nanobox is running in background mode. To suspend it run 'nanobox stop'\n\n")
 		os.Exit(0)
 	}
 

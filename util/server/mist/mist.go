@@ -10,7 +10,7 @@ import (
 	"encoding/json"
 	mistClient "github.com/nanobox-io/golang-mist"
 	"github.com/nanobox-io/nanobox/config"
-	"github.com/nanobox-io/nanobox/util/print"
+	printutil "github.com/nanobox-io/nanobox/util/print"
 	"regexp"
 	"strings"
 )
@@ -186,11 +186,11 @@ func ProcessLog(log Log) {
 		}
 
 		// print.Color("[%v]%v - %v.%v :: %v[reset]", logProcesses[process], log.Time, service, process, content)
-		print.Color("[%v]%v (%v) :: %v[reset]", logProcesses[process], service, process, content)
+		printutil.Color("[%v]%v (%v) :: %v[reset]", logProcesses[process], service, process, content)
 
 		// if we don't have a subMatch or its length is less than 4, just print w/e
 		// is in the log
 	} else {
-		print.Color("[light_red]%v - %v[reset]", log.Time, log.Content)
+		printutil.Color("[light_red]%v - %v[reset]", log.Time, log.Content)
 	}
 }

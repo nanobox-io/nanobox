@@ -10,14 +10,12 @@ package engine
 
 import (
 	"fmt"
-	api "github.com/nanobox-io/nanobox-api-client"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 	// "github.com/nanobox-io/nanobox/auth"
+	engineutil "github.com/nanobox-io/nanobox/util/engine"
 	"github.com/spf13/cobra"
 	"io"
-	"net/http"
 	"os"
-	"strings"
 )
 
 //
@@ -30,7 +28,7 @@ Description:
 
   Allowed formats when fetching an engine
   - engine-name
-	- engine-name=0.0.1
+  - engine-name=0.0.1
   - user/engine-name
   - user/engine-name=0.0.1
 	`,
@@ -59,78 +57,16 @@ func fetch(ccmd *cobra.Command, args []string) {
 
 	os.Stderr.WriteString(stylish.Bullet("Attempting to fetch '%v'", args[0]))
 
-	//
-	var archive, engine, user, version string // various string values used to store pieces of the engine
-	var split []string                        // used in strings.Split()
-	var dest io.Writer                        // the destination used in io.Copy()
+	// extract a user and archive (desired engine) from args[0]
+	user, archive := engineutil.ExtractArchive(args[0])
 
-	// split args on "/" looking for a user:
-	// user/engine-name
-	// user/engine-name=0.0.1
-	split = strings.Split(args[0], "/")
+	// extract an engine and version from the archive
+	engine, version := engineutil.ExtractEngine(archive)
 
-	// switch on the length to determine if the split resulted in a user and a engine
-	// or just an engine
-	switch len(split) {
-
-	// if len is 1 then only a download was found (no user specified)
-	case 1:
-		archive = split[0]
-
-		// if len is 2 then a user was found (from which to pull the download)
-	case 2:
-		user = split[0]
-		archive = split[1]
-
-	// any other number or args
-	default:
-		// fmt.Printf("%v is not a valid format when fetching an engine (see help).\n", args[0])
-		os.Exit(1)
-	}
-
-	// split on the archive to find the engine and the release
-	split = strings.Split(archive, "=")
-
-	// switch on the length to determine if the split resulted in a engine and version
-	// or just an engine
-	switch len(split) {
-
-	// if len is 1 then just an engine was found (no version specified)
-	case 1:
-		engine = split[0]
-
-		// if len is 2 then an engine and version were found
-	case 2:
-		engine = split[0]
-		version = split[1]
-	}
-
-	//
-	e, err := api.GetEngine(user, engine)
+	// pull the engine from nanobox.io
+	res, err := engineutil.GetEngine(user, engine, version)
 	if err != nil {
-		os.Stderr.WriteString(stylish.ErrBullet("No official engine, or engine for that user found."))
-		os.Exit(1)
-	}
-
-	// if no version is provided, fetch the latest release
-	if version == "" {
-		version = e.ActiveReleaseID
-	}
-
-	//
-	path := fmt.Sprintf("http://api.nanobox.io/v1/engines/%v/releases/%v/download", engine, version)
-
-	// if a user is found, pull the engine from their engines
-	if user != "" {
-		path = fmt.Sprintf("http://api.nanobox.io/v1/engines/%v/%v/releases/%v/download", user, engine, version)
-	}
-
-	os.Stderr.WriteString(stylish.Bullet("Fetching engine at '%s'", path))
-
-	//
-	res, err := http.Get(path)
-	if err != nil {
-		Config.Fatal("[commands/engine fetch] http.Get() failed", err.Error())
+		Config.Fatal("[commands/engine/fetch] http.Get() failed", err.Error())
 	}
 	defer res.Body.Close()
 
@@ -146,31 +82,27 @@ func fetch(ccmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	// determine if the file is to be streamed to stdout or to a file
-	switch {
-
-	// pipe the ouput to os.Stdout
-	default:
-		dest = os.Stdout
+	// determine if destination will be a file or stdout (stdout by default)
+	dest := os.Stdout
+	defer dest.Close()
 
 	// write the download to the local file system
-	case fFile != "":
-		os.Stderr.WriteString(stylish.Bullet("Saving engine as '%s'", fFile))
+	if fFile != "" {
 
 		//
-		release, err := os.Create(fFile)
+		f, err := os.Create(fFile)
 		if err != nil {
-			os.Stderr.WriteString(stylish.ErrBullet(err.Error()))
-			os.Exit(1)
+			os.Stderr.WriteString(stylish.ErrBullet("Unable to save file, exiting... %v", err.Error()))
+			return
 		}
-		defer release.Close()
 
-		//
-		dest = release
+		// if the file was created successfully then set it as the destination
+		os.Stderr.WriteString(stylish.Bullet("Saving engine as '%s'", fFile))
+		dest = f
 	}
 
 	// write the file
 	if _, err := io.Copy(dest, res.Body); err != nil {
-		os.Stderr.WriteString(fmt.Sprintf("[commands.fetch] io.Copy() failed", err.Error()))
+		os.Stderr.WriteString(fmt.Sprintf("[commands.fetch] io.Copy() failed - %s", err.Error()))
 	}
 }

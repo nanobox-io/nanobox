@@ -45,8 +45,8 @@ func Info(msg string) {
 
 // Error
 func Error(msg, err string) {
-	fmt.Println("An error occurred (See ~/.nanobox/nanobox.log for details).")
-	Log.Error(fmt.Sprintf("%s - %s", msg, err))
+	fmt.Printf("%s (See ~/.nanobox/nanobox.log for details)\n", msg)
+	Log.Error(err)
 }
 
 // Fatal

@@ -12,7 +12,7 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/nanobox-io/nanobox/config"
-	"github.com/nanobox-io/nanobox/util/file"
+	fileutil "github.com/nanobox-io/nanobox/util/file"
 	"os"
 	"os/exec"
 	"time"
@@ -173,7 +173,7 @@ func download() error {
 	defer box.Close()
 
 	//
-	if err := file.Progress(fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/boxes/vagrant/nanobox-boot2docker.box"), box); err != nil {
+	if err := fileutil.Progress(fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/boxes/vagrant/nanobox-boot2docker.box"), box); err != nil {
 		return err
 	}
 
@@ -186,7 +186,7 @@ func download() error {
 	defer md5.Close()
 
 	//
-	return file.Download("https://s3.amazonaws.com/tools.nanobox.io/boxes/vagrant/nanobox-boot2docker.md5", md5)
+	return fileutil.Download("https://s3.amazonaws.com/tools.nanobox.io/boxes/vagrant/nanobox-boot2docker.md5", md5)
 }
 
 // add adds the nanobox vagrant image to the list of images (always overriding the

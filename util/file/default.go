@@ -13,9 +13,8 @@ import "io"
 type (
 	file struct{}
 	File interface {
-		Gzip()
-		Tar()
-		TarBall()
+		Tar(path string, writers ...io.Writer) error
+		Untar(path string, r io.Reader)
 		Download(path string, w io.Writer) error
 		Progress(path string, w io.Writer) error
 	}
@@ -25,16 +24,12 @@ var (
 	Default File = file{}
 )
 
-func (file) Gzip() {
-	Gzip()
+func (file) Tar(path string, writers ...io.Writer) error {
+	return Tar(path, writers...)
 }
 
-func (file) Tar() {
-	Tar()
-}
-
-func (file) TarBall() {
-	TarBall()
+func (file) Untar(path string, r io.Reader) {
+	Untar(path, r)
 }
 
 func (file) Download(path string, w io.Writer) error {

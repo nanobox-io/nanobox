@@ -11,19 +11,19 @@ package engine
 import (
 	"archive/tar"
 	"bytes"
-	"compress/gzip"
 	"crypto/md5"
 	"fmt"
 	api "github.com/nanobox-io/nanobox-api-client"
 	"github.com/nanobox-io/nanobox-golang-stylish"
-	// "github.com/nanobox-io/nanobox/util/file"
+	"github.com/nanobox-io/nanobox/config"
+	engineutil "github.com/nanobox-io/nanobox/util/engine"
+	fileutil "github.com/nanobox-io/nanobox/util/file"
+	s3util "github.com/nanobox-io/nanobox/util/s3"
 	"github.com/spf13/cobra"
-	"io"
 	"io/ioutil"
 	"net/url"
 	"os"
 	"path/filepath"
-	"sync"
 	"time"
 )
 
@@ -40,7 +40,6 @@ var publishCmd = &cobra.Command{
 
 // publish
 func publish(ccmd *cobra.Command, args []string) {
-	//
 	stylish.Header("publishing engine")
 
 	//
@@ -50,13 +49,28 @@ func publish(ccmd *cobra.Command, args []string) {
 	fmt.Printf(stylish.Bullet("Creating release..."))
 	release := &api.EngineRelease{}
 
-	//
+	// create an annonymous struct to hold data that doesn't relate to a release but
+	// is needed as part of the publish process
+	opts := &struct {
+		Generic  bool     `json:"generic"`
+		Language string   `json:"language"`
+		Overlays []string `json:"overlays"`
+	}{}
+
+	// ensure there is an Enginefile
 	if _, err := os.Stat("./Enginefile"); err != nil {
 		fmt.Println("Enginefile not found. Be sure to publish from a project directory. Exiting... ")
 		os.Exit(1)
 	}
 
+	// parse the ./Enginefile into the new release
 	if err := Config.ParseConfig("./Enginefile", release); err != nil {
+		fmt.Printf("Nanobox failed to parse your Enginefile. Please ensure it is valid YAML and try again.\n")
+		os.Exit(1)
+	}
+
+	// parse the ./Enginefile again to get the remaining fields
+	if err := Config.ParseConfig("./Enginefile", opts); err != nil {
 		fmt.Printf("Nanobox failed to parse your Enginefile. Please ensure it is valid YAML and try again.\n")
 		os.Exit(1)
 	}
@@ -69,7 +83,7 @@ func publish(ccmd *cobra.Command, args []string) {
 	// enough that all cases will return the same message, and this looks better than
 	// a single giant case (var == "" || var == "" || ...)
 	switch {
-	case release.Language == "":
+	case opts.Language == "":
 		fallthrough
 	case release.Name == "":
 		fallthrough
@@ -115,8 +129,8 @@ Please ensure all required fields are provided and try again.`))
 
 			//
 			engine = &api.Engine{
-				Generic:      release.Generic,
-				LanguageName: release.Language,
+				Generic:      opts.Generic,
+				LanguageName: opts.Language,
 				Name:         release.Name,
 			}
 
@@ -152,7 +166,9 @@ Please ensure all required fields are provided and try again.`))
 		stylish.Success()
 	}
 
-	// create a meta.json file where we can add any extra data we might need
+	// create a meta.json file where we can add any extra data we might need; since
+	// this is only used for internal purposes the file is removed once we're done
+	// with it
 	meta, err := os.Create("./meta.json")
 	if err != nil {
 		Config.Fatal("[commands/publish] os.Create() failed", err.Error())
@@ -160,7 +176,7 @@ Please ensure all required fields are provided and try again.`))
 	defer meta.Close()
 	defer os.Remove(meta.Name())
 
-	//
+	// add any custom info to the metafile
 	meta.WriteString(fmt.Sprintf(`{"engine_id": "%s"}`, engine.ID))
 
 	// this is our predefined list of everything that gets archived as part of the
@@ -170,11 +186,9 @@ Please ensure all required fields are provided and try again.`))
 		"optional": []string{"./lib", "./templates", "./files"},
 	}
 
-	//
+	// check to ensure no required files are missing
 	for k, v := range files {
 		if k == "required" {
-
-			// check to ensure no required files are missing
 			for _, f := range v {
 				if _, err := os.Stat(f); err != nil {
 					fmt.Printf(stylish.Error("required files missing", "Your Engine is missing one or more required files for publishing. Please read the following documentation to ensure all required files are included and try again.:\n\ndocs.nanobox.io/engines/project-creation/#example-engine-file-structure\n"))
@@ -184,16 +198,42 @@ Please ensure all required fields are provided and try again.`))
 		}
 	}
 
-	// once the whole thing is working again, try swaping the go routine to be on
-	// readers instead of the writer. the writer will block until readers are done
-	// reading, so there may not be a need for the wait groups.
+	// create the temp engines folder for building the tarball
+	tarPath := filepath.Join(config.EnginesDir, release.Name)
+	if err := os.Mkdir(tarPath, 0755); err != nil {
+		Config.Fatal("[commands/engine/publish] os.Create() failed", err.Error())
+	}
 
-	// write the archive to a local file
-	// archive, err := os.Create(fmt.Sprintf("%v-%v.release.tgz", release.Name, release.Version))
-	// if err != nil {
-	// 	Config.Fatal("[commands/publish] os.Create() failed", err.Error())
-	// }
-	// defer archive.Close()
+	// remove tarDir once published
+	defer func() {
+		if err := os.RemoveAll(tarPath); err != nil {
+			os.Stderr.WriteString(stylish.ErrBullet("Faild to remove '%v'...", tarPath))
+		}
+	}()
+
+	// parse the ./Enginefile again to get the overlays
+	if err := Config.ParseConfig("./Enginefile", opts); err != nil {
+		fmt.Printf("Nanobox failed to parse your Enginefile. Please ensure it is valid YAML and try again.\n")
+		os.Exit(1)
+	}
+
+	// iterate through each overlay fetching it and untaring to the tar path
+	for _, overlay := range opts.Overlays {
+		engineutil.GetOverlay(overlay, tarPath)
+	}
+
+	// range over each file from each file type, building the final list of files
+	// to be tarballed
+	for _, v := range files {
+		for _, f := range v {
+
+			// not handling error here because an error simply means the file doesn't
+			// exist and therefor wont be copied
+			if err := fileutil.Copy(f, tarPath); err != nil {
+				Config.Fatal("[commands/engine/publish] file.Copy() failed", err.Error())
+			}
+		}
+	}
 
 	// create an empty buffer for writing the file contents to for the subsequent
 	// upload
@@ -203,55 +243,15 @@ Please ensure all required fields are provided and try again.`))
 	h := md5.New()
 
 	//
-	mw := io.MultiWriter(h, archive)
-
-	//
-	gzw := gzip.NewWriter(mw)
-
-	//
-	tw = tar.NewWriter(gzw)
-
-	//
-	wg := &sync.WaitGroup{}
-	wg.Add(1)
-
-	//
-	go func() {
-
-		defer gzw.Close()
-		defer tw.Close()
-
-		// range over each file type...
-		for _, v := range files {
-
-			// range over each file of each type...
-			for _, f := range v {
-
-				// required files have alrady been checked, so skip any remaining (optional)
-				// files/folders that arent here
-				if _, err := os.Stat(f); err != nil {
-					continue
-				}
-
-				// tarball any remaining files/folders that are found
-				if err := filepath.Walk(f, tarFile); err != nil {
-					Config.Fatal("[commands/publish] filepath.Walk() failed", err.Error())
-				}
-			}
-		}
-
-		wg.Done()
-	}()
-
-	wg.Wait()
+	if err := fileutil.Tar(tarPath, archive, h); err != nil {
+		Config.Fatal("[commands/engine/publish] file.Tar() failed", err.Error())
+	}
 
 	// add the checksum for the new release once its finished being archived
 	release.Checksum = fmt.Sprintf("%x", h.Sum(nil))
 
 	//
 	// attempt to upload the release to S3
-
-	//
 	fmt.Printf(stylish.Bullet("Uploading release to s3..."))
 
 	v := url.Values{}
@@ -260,13 +260,13 @@ Please ensure all required fields are provided and try again.`))
 	v.Add("version", release.Version)
 
 	//
-	s3url, err := S3.RequestURL(fmt.Sprintf("http://api.nanobox.io/v1/engines/%v/request_upload?%v", release.Name, v.Encode()))
+	s3url, err := s3util.RequestURL(fmt.Sprintf("http://api.nanobox.io/v1/engines/%v/request_upload?%v", release.Name, v.Encode()))
 	if err != nil {
 		Config.Fatal("[commands/publish] s3.RequestURL() failed", err.Error())
 	}
 
 	//
-	if err := S3.Upload(s3url, archive); err != nil {
+	if err := s3util.Upload(s3url, archive); err != nil {
 		Config.Fatal("[commands/publish] s3.Upload() failed", err.Error())
 	}
 
@@ -277,41 +277,4 @@ Please ensure all required fields are provided and try again.`))
 		fmt.Printf(stylish.ErrBullet("Unable to publish release (%v).", err))
 		os.Exit(1)
 	}
-}
-
-// tarFile
-func tarFile(path string, fi os.FileInfo, err error) error {
-
-	// only want to tar files...
-	if !fi.Mode().IsDir() {
-
-		// fmt.Println("TARING!", path)
-
-		// create header for this file
-		header := &tar.Header{
-			Name:    path,
-			Size:    fi.Size(),
-			Mode:    int64(fi.Mode()),
-			ModTime: fi.ModTime(),
-		}
-
-		// write the header to the tarball archive
-		if err := tw.WriteHeader(header); err != nil {
-			return err
-		}
-
-		// open the file for taring...
-		f, err := os.Open(path)
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-
-		// copy the file data to the tarball
-		if _, err := io.Copy(tw, f); err != nil {
-			return err
-		}
-	}
-
-	return nil
 }

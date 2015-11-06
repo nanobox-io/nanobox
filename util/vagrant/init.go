@@ -13,8 +13,8 @@ import (
 	"github.com/nanobox-io/nanobox-golang-stylish"
 	"github.com/nanobox-io/nanobox/config"
 	"github.com/nanobox-io/nanobox/util"
+	engineutil "github.com/nanobox-io/nanobox/util/engine"
 	"os"
-	"path/filepath"
 )
 
 // Init
@@ -23,31 +23,22 @@ func Init() {
 	// create Vagrantfile
 	vagrantfile, err := os.Create(config.AppDir + "/Vagrantfile")
 	if err != nil {
-		config.Fatal("[commands/init] ioutil.WriteFile() failed", err.Error())
+		config.Fatal("[util/vagrant/init] ioutil.WriteFile() failed", err.Error())
 	}
 	defer vagrantfile.Close()
 
 	// create synced folders
 	synced_folders := fmt.Sprintf("nanobox.vm.synced_folder \"%s\", \"/vagrant/code/%s\"", config.CWDir, config.Nanofile.Name)
 
-	// attempt to parse the boxfile first; we don't want to create an app folder
-	// if the app isn't able to be created
-	boxfile := config.ParseBoxfile()
+	// "mount" the engine file localy at ~/.nanobox/apps/<app>/<engine>
+	name, path, err := engineutil.MountLocal()
+	if err != nil {
+		config.Error("Engine failed to mount and will not work!", err.Error())
+	}
 
-	// if an engine path is provided, add it to the synced_folders
-	if engine := boxfile.Build.Engine; engine != "" {
-		if _, err := os.Stat(engine); err == nil {
-
-			//
-			fp, err := filepath.Abs(engine)
-			if err != nil {
-				config.Fatal("[commands/init] filepath.Abs() failed", err.Error())
-			}
-
-			base := filepath.Base(fp)
-
-			synced_folders += fmt.Sprintf("\n    nanobox.vm.synced_folder \"%s\", \"/vagrant/engines/%s\"", fp, base)
-		}
+	// "mount" the engine into the VM (if there is one)
+	if name != "" && path != "" {
+		synced_folders += fmt.Sprintf("\n    nanobox.vm.synced_folder \"%s\", \"/vagrant/engines/%s\"", path, name)
 	}
 
 	//

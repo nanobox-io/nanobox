@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 	"github.com/nanobox-io/nanobox/config"
+	engineutil "github.com/nanobox-io/nanobox/util/engine"
 	"github.com/spf13/cobra"
 )
 
@@ -51,6 +52,12 @@ func dev(ccmd *cobra.Command, args []string) {
 		if Vagrant.Status() == "not created" || !config.VMfile.HasDeployed() || rebuild {
 
 			fmt.Printf(stylish.Bullet("Deploying codebase..."))
+
+			// remount the engine file at ~/.nanobox/apps/<app>/<engine> so any new scripts
+			// will be used during the deploy
+			if err := engineutil.RemountLocal(); err != nil {
+				config.Error("[util/vagrant/init] engineutil.RemountLocal() failed", err.Error())
+			}
 
 			// run a deploy
 			if err := Server.Deploy(""); err != nil {

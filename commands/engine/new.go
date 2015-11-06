@@ -63,6 +63,10 @@ generic: false               # is the engine generic enough to encompass multipl
                              # within the given language
 license: MIT                 # the license to be applied to this software
 
+# engine overlays - any overlays that your engine requires to run
+overlays:
+ - 
+
 # a list of authors/contributors
 authors:
   -

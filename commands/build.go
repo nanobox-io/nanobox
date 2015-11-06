@@ -11,6 +11,8 @@ package commands
 import (
 	"fmt"
 	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/nanobox-io/nanobox/config"
+	engineutil "github.com/nanobox-io/nanobox/util/engine"
 	"github.com/spf13/cobra"
 )
 
@@ -42,6 +44,12 @@ func build(ccmd *cobra.Command, args []string) {
 	go func() {
 		errch <- Mist.Listen([]string{"job", "build"}, Mist.BuildUpdates)
 	}()
+
+	// remount the engine file at ~/.nanobox/apps/<app>/<engine> so any new scripts
+	// are used during the build
+	if err := engineutil.RemountLocal(); err != nil {
+		config.Error("[util/vagrant/init] engineutil.RemountLocal() failed", err.Error())
+	}
 
 	// run a build
 	if err := Server.Build(""); err != nil {

@@ -12,7 +12,7 @@ package commands
 import (
 	"fmt"
 	"github.com/nanobox-io/nanobox/config"
-	"github.com/nanobox-io/nanobox/util/print"
+	printutil "github.com/nanobox-io/nanobox/util/print"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -30,7 +30,7 @@ var uninstallCmd = &cobra.Command{
 func uninstall(ccmd *cobra.Command, args []string) {
 
 	//
-	switch print.Prompt("Are you sure you want to uninstall nanobox (y/N)? ") {
+	switch printutil.Prompt("Are you sure you want to uninstall nanobox (y/N)? ") {
 
 	// don't update by default
 	default:
