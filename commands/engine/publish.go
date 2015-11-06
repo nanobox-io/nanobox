@@ -163,8 +163,7 @@ Please ensure all required fields are provided and try again.`))
 	defer os.Remove(meta.Name())
 
 	// add any custom info to the metafile
-	// meta.WriteString(fmt.Sprintf(`{"engine_id": "%s"}`, engine.ID))
-	meta.WriteString(fmt.Sprintf(`{"engine_id": "%s"}`, "whatever"))
+	meta.WriteString(fmt.Sprintf(`{"engine_id": "%s"}`, engine.ID))
 
 	// this is our predefined list of everything that gets archived as part of the
 	// engine being published
