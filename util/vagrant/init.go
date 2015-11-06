@@ -15,7 +15,6 @@ import (
 	"github.com/nanobox-io/nanobox/util"
 	engineutil "github.com/nanobox-io/nanobox/util/engine"
 	"os"
-	"path/filepath"
 )
 
 // Init
@@ -24,26 +23,22 @@ func Init() {
 	// create Vagrantfile
 	vagrantfile, err := os.Create(config.AppDir + "/Vagrantfile")
 	if err != nil {
-		config.Fatal("[commands/init] ioutil.WriteFile() failed", err.Error())
+		config.Fatal("[util/vagrant/init] ioutil.WriteFile() failed", err.Error())
 	}
 	defer vagrantfile.Close()
 
 	// create synced folders
 	synced_folders := fmt.Sprintf("nanobox.vm.synced_folder \"%s\", \"/vagrant/code/%s\"", config.CWDir, config.Nanofile.Name)
 
-	//
-	boxfile := config.ParseBoxfile()
+	// "mount" the engine file localy at ~/.nanobox/apps/<app>/<engine>
+	name, path, err := engineutil.MountLocal()
+	if err != nil {
+		config.Error("Engine failed to mount and will not work!", err.Error())
+	}
 
-	// if an custom engine path is provided, add it to the synced_folders
-	if engine := boxfile.Build.Engine; engine != "" {
-		if _, err := os.Stat(engine); err == nil {
-
-			// "mount" the engine file at ~/.nanobox/apps/<app>/<engine>
-			mount := engineutil.MountLocal(engine)
-
-			// "mount" the engine into the VM
-			synced_folders += fmt.Sprintf("\n    nanobox.vm.synced_folder \"%s\", \"/vagrant/engines/%s\"", mount, filepath.Base(engine))
-		}
+	// "mount" the engine into the VM (if there is one)
+	if name != "" && path != "" {
+		synced_folders += fmt.Sprintf("\n    nanobox.vm.synced_folder \"%s\", \"/vagrant/engines/%s\"", path, name)
 	}
 
 	//

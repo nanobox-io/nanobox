@@ -198,36 +198,9 @@ Please ensure all required fields are provided and try again.`))
 		}
 	}()
 
-	// iterate through each overlay fetching it and adding it to the list of 'files'
-	// to be tarballed
+	// iterate through each overlay fetching it and untaring to the tar path
 	for _, overlay := range release.Overlays {
-
-		// extract a user and archive (desired engine) from args[0]
-		user, archive := engineutil.ExtractArchive(overlay)
-
-		// extract an engine and version from the archive
-		e, version := engineutil.ExtractEngine(archive)
-
-		//
-		res, err := engineutil.GetEngine(user, e, version)
-		if err != nil {
-			Config.Fatal("[commands/engine/publish] http.Get() failed", err.Error())
-		}
-		defer res.Body.Close()
-
-		//
-		switch res.StatusCode / 100 {
-		case 2, 3:
-			break
-		case 4, 5:
-			os.Stderr.WriteString(stylish.ErrBullet("Unable to fetch '%v' overlay, exiting...", e))
-			os.Exit(1)
-		}
-
-		//
-		if err := fileutil.Untar(tarPath, res.Body); err != nil {
-			Config.Fatal("[commands/engine/publish] file.Untar() failed", err.Error())
-		}
+		engineutil.GetOverlay(overlay, tarPath)
 	}
 
 	// range over each file from each file type, building the final list of files

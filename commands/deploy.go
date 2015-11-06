@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 	"github.com/nanobox-io/nanobox/config"
+	engineutil "github.com/nanobox-io/nanobox/util/engine"
 	"github.com/spf13/cobra"
 	"net/url"
 	"strconv"
@@ -60,6 +61,12 @@ func deploy(ccmd *cobra.Command, args []string) {
 	v := url.Values{}
 	v.Add("reset", strconv.FormatBool(config.Force))
 	v.Add("run", strconv.FormatBool(install))
+
+	// remount the engine file at ~/.nanobox/apps/<app>/<engine> so any new scripts
+	// will be used during the deploy
+	if err := engineutil.RemountLocal(); err != nil {
+		config.Error("[util/vagrant/init] engineutil.RemountLocal() failed", err.Error())
+	}
 
 	// run a deploy
 	if err := Server.Deploy(v.Encode()); err != nil {
