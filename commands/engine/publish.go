@@ -197,8 +197,19 @@ Please ensure all required fields are provided and try again.`))
 		}
 	}()
 
+	// for lack of a better word... this is an anonymous struct
+	anon := &struct {
+		Overlays []string `json:"overlays"`
+	}{}
+
+	// parse the ./Enginefile to get the overlays
+	if err := Config.ParseConfig("./Enginefile", anon); err != nil {
+		fmt.Printf("Nanobox failed to parse your Enginefile. Please ensure it is valid YAML and try again.\n")
+		os.Exit(1)
+	}
+
 	// iterate through each overlay fetching it and untaring to the tar path
-	for _, overlay := range release.Overlays {
+	for _, overlay := range anon.Overlays {
 		engineutil.GetOverlay(overlay, tarPath)
 	}
 
