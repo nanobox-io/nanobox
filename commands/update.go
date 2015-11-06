@@ -13,8 +13,8 @@ import (
 	"github.com/kardianos/osext"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 	"github.com/nanobox-io/nanobox/config"
-	// "github.com/nanobox-io/nanobox/util/file"
-	"github.com/nanobox-io/nanobox/util/print"
+	fileutil "github.com/nanobox-io/nanobox/util/file"
+	printutil "github.com/nanobox-io/nanobox/util/print"
 	"github.com/spf13/cobra"
 	"os"
 	"os/exec"
@@ -63,7 +63,7 @@ func Update() {
 	if time.Since(fi.ModTime()).Hours() >= 336.0 && !match {
 
 		//
-		switch print.Prompt("Nanobox is out of date, would you like to update it now (y/N)? ") {
+		switch printutil.Prompt("Nanobox is out of date, would you like to update it now (y/N)? ") {
 
 		// don't update by default
 		default:
@@ -96,7 +96,7 @@ func runUpdate() {
 	defer cli.Close()
 
 	//
-	File.Progress(fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/nanobox", runtime.GOOS, runtime.GOARCH), cli)
+	fileutil.Progress(fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/nanobox", runtime.GOOS, runtime.GOARCH), cli)
 
 	//
 	// download the CLI md5
@@ -107,7 +107,7 @@ func runUpdate() {
 	defer md5.Close()
 
 	//
-	File.Download("https://s3.amazonaws.com/tools.nanobox.io/cli/nanobox.md5", md5)
+	fileutil.Download("https://s3.amazonaws.com/tools.nanobox.io/cli/nanobox.md5", md5)
 
 	// if the new CLI fails to execute, just print a generic message and return
 	out, err := exec.Command(path, "-v").Output()

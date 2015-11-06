@@ -17,7 +17,8 @@ import (
 	"github.com/nanobox-io/nanobox-golang-stylish"
 	"github.com/nanobox-io/nanobox/config"
 	engineutil "github.com/nanobox-io/nanobox/util/engine"
-	"github.com/nanobox-io/nanobox/util/file"
+	fileutil "github.com/nanobox-io/nanobox/util/file"
+	s3util "github.com/nanobox-io/nanobox/util/s3"
 	"github.com/spf13/cobra"
 	"io/ioutil"
 	"net/url"
@@ -224,7 +225,7 @@ Please ensure all required fields are provided and try again.`))
 		}
 
 		//
-		if err := file.Untar(tarPath, res.Body); err != nil {
+		if err := fileutil.Untar(tarPath, res.Body); err != nil {
 			Config.Fatal("[commands/engine/publish] file.Untar() failed", err.Error())
 		}
 	}
@@ -236,7 +237,7 @@ Please ensure all required fields are provided and try again.`))
 
 			// not handling error here because an error simply means the file doesn't
 			// exist and therefor wont be copied
-			if err := file.Copy(f, tarPath); err != nil {
+			if err := fileutil.Copy(f, tarPath); err != nil {
 				Config.Fatal("[commands/engine/publish] file.Copy() failed", err.Error())
 			}
 		}
@@ -250,7 +251,7 @@ Please ensure all required fields are provided and try again.`))
 	h := md5.New()
 
 	//
-	if err := file.Tar(tarPath, archive, h); err != nil {
+	if err := fileutil.Tar(tarPath, archive, h); err != nil {
 		Config.Fatal("[commands/engine/publish] file.Tar() failed", err.Error())
 	}
 
@@ -267,13 +268,13 @@ Please ensure all required fields are provided and try again.`))
 	v.Add("version", release.Version)
 
 	//
-	s3url, err := S3.RequestURL(fmt.Sprintf("http://api.nanobox.io/v1/engines/%v/request_upload?%v", release.Name, v.Encode()))
+	s3url, err := s3util.RequestURL(fmt.Sprintf("http://api.nanobox.io/v1/engines/%v/request_upload?%v", release.Name, v.Encode()))
 	if err != nil {
 		Config.Fatal("[commands/publish] s3.RequestURL() failed", err.Error())
 	}
 
 	//
-	if err := S3.Upload(s3url, archive); err != nil {
+	if err := s3util.Upload(s3url, archive); err != nil {
 		Config.Fatal("[commands/publish] s3.Upload() failed", err.Error())
 	}
 

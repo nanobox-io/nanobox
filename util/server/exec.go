@@ -11,7 +11,7 @@ import (
 	"fmt"
 	"github.com/docker/docker/pkg/term"
 	"github.com/nanobox-io/nanobox/config"
-	"github.com/nanobox-io/nanobox/util/notify"
+	notifyutil "github.com/nanobox-io/nanobox/util/notify"
 	"github.com/nanobox-io/nanobox/util/server/terminal"
 	"io"
 	"net"
@@ -46,7 +46,7 @@ func execInternal(where, params string, in io.Reader, out io.Writer) error {
 
 	// begin watching for changes to the project
 	go func() {
-		if err := notify.Watch(config.CWDir, NotifyServer); err != nil {
+		if err := notifyutil.Watch(config.CWDir, NotifyServer); err != nil {
 			fmt.Printf(err.Error())
 		}
 	}()

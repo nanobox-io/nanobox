@@ -11,7 +11,7 @@ package commands
 import (
 	"github.com/nanobox-io/nanobox/config"
 	"github.com/nanobox-io/nanobox/util"
-	"github.com/nanobox-io/nanobox/util/file"
+	// "github.com/nanobox-io/nanobox/util/file"
 	"github.com/nanobox-io/nanobox/util/file/hosts"
 	"github.com/nanobox-io/nanobox/util/notify"
 	"github.com/nanobox-io/nanobox/util/print"
@@ -28,7 +28,7 @@ var (
 	Mist    = mist.Default
 	Vagrant = vagrant.Default
 	Hosts   = hosts.Default
-	File    = file.Default
-	Print   = print.Default
-	Notify  = notify.Default
+	// File    = file.Default
+	Print  = print.Default
+	Notify = notify.Default
 )
