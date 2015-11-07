@@ -97,29 +97,39 @@ func Untar(dst string, r io.Reader) error {
 		// return any other error
 		case err != nil:
 			return err
+
+		// if the header is nil, just skip it
+		case header == nil:
+			continue
 		}
 
 		dir := filepath.Dir(header.Name)
 		base := filepath.Base(header.Name)
 		path := filepath.Join(dst, dir)
 
-		// if the dir doesn't exist it needs to be created
-		if _, err := os.Stat(path); err != nil {
-			if err := os.MkdirAll(path, 0755); err != nil {
+		// check the file type
+		switch header.Typeflag {
+
+		// if its a dir and it doesn't exist create it
+		case tar.TypeDir:
+			if _, err := os.Stat(path); err != nil {
+				if err := os.MkdirAll(path, 0755); err != nil {
+					return err
+				}
+			}
+
+		// if it's a file create it
+		case tar.TypeReg:
+			f, err := os.OpenFile(filepath.Join(path, base), os.O_CREATE|os.O_RDWR, os.FileMode(header.Mode))
+			if err != nil {
 				return err
 			}
-		}
+			defer f.Close()
 
-		// create the file
-		f, err := os.OpenFile(filepath.Join(path, base), os.O_CREATE|os.O_RDWR, os.FileMode(header.Mode))
-		if err != nil {
-			return err
-		}
-		defer f.Close()
-
-		// copy over contents
-		if _, err := io.Copy(f, tr); err != nil {
-			return err
+			// copy over contents
+			if _, err := io.Copy(f, tr); err != nil {
+				return err
+			}
 		}
 	}
 }
