@@ -18,6 +18,7 @@ import (
 	"github.com/spf13/cobra"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"runtime"
 	"time"
 )
@@ -90,27 +91,41 @@ func Update() {
 }
 
 // runUpdate
-func runUpdate(path string, devv bool) {
+func runUpdate(oldPath string, devv bool) {
 
 	fmt.Printf(stylish.Bullet("Updating nanobox..."))
 
-	// create a new CLI at the location of the old one
-	cli, err := os.Create(path)
+	//
+	tmpPath := filepath.Join("tmp-", oldPath)
+
+	//
+	dwnPath := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/nanobox", runtime.GOOS, runtime.GOARCH)
+	if devv {
+		dwnPath += "-dev"
+	}
+
+	// create a tmp CLI at the location of the old one
+	cli, err := os.Create(tmpPath)
 	if err != nil {
 		Config.Fatal("[commands/update] os.Create() failed", err.Error())
 	}
 	defer cli.Close()
 
-	download := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/nanobox", runtime.GOOS, runtime.GOARCH)
-	if devv {
-		download += "-dev"
+	// download the new cli
+	fileutil.Progress(dwnPath, cli)
+
+	// make new CLI executable
+	if err := os.Chmod(tmpPath, 0755); err != nil {
+		Config.Fatal("[commands/update] os.Chmod() failed", err.Error())
 	}
 
-	// download the new cli
-	fileutil.Progress(download, cli)
+	// move new executable over current CLI's location
+	if err = os.Rename(tmpPath, oldPath); err != nil {
+		Config.Fatal("[commands/update] os.Rename() failed", err.Error())
+	}
 
 	// ensure the newly downloaded cli matches the remote
-	match, err := Util.MD5sMatch(path, fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/nanobox.md5", runtime.GOOS, runtime.GOARCH))
+	match, err := Util.MD5sMatch(tmpPath, fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/nanobox.md5", runtime.GOOS, runtime.GOARCH))
 	if err != nil {
 		Config.Fatal("[commands/update] util.MD5sMatch() failed", err.Error())
 	}
@@ -122,7 +137,7 @@ func runUpdate(path string, devv bool) {
 	}
 
 	// if the new CLI fails to execute, just print a generic message and return
-	out, err := exec.Command(path, "-v").Output()
+	out, err := exec.Command(tmpPath, "-v").Output()
 	if err != nil {
 		fmt.Printf(stylish.SubBullet("[√] Update successful"))
 		return
