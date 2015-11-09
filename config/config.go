@@ -21,7 +21,7 @@ import (
 
 //
 const (
-	VERSION = "0.16.0"
+	VERSION = "0.16.1"
 
 	SERVER_PORT = ":1757"
 	MIST_PORT   = ":1445"

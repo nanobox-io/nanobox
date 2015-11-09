@@ -23,12 +23,21 @@ import (
 )
 
 //
-var updateCmd = &cobra.Command{
-	Use:   "update",
-	Short: "Updates the CLI to the newest available version",
-	Long:  ``,
+var (
+	updateCmd = &cobra.Command{
+		Use:   "update",
+		Short: "Updates the CLI to the newest available version",
+		Long:  ``,
 
-	Run: update,
+		Run: update,
+	}
+
+	devv bool // update the dev version of the CLI
+)
+
+//
+func init() {
+	updateCmd.Flags().BoolVarP(&devv, "dev", "d", false, "Update dev CLI")
 }
 
 // update
@@ -42,7 +51,7 @@ func update(ccmd *cobra.Command, args []string) {
 	// if the md5s don't match or it's been forced, update
 	switch {
 	case config.Force, !match:
-		runUpdate(cli)
+		runUpdate(cli, devv)
 	default:
 		fmt.Printf(stylish.SubBullet("[√] Nanobox is up-to-date"))
 	}
@@ -75,13 +84,13 @@ func Update() {
 
 		// if yes continue to update
 		case "Yes", "yes", "Y", "y":
-			runUpdate(cli)
+			runUpdate(cli, false)
 		}
 	}
 }
 
 // runUpdate
-func runUpdate(path string) {
+func runUpdate(path string, devv bool) {
 
 	fmt.Printf(stylish.Bullet("Updating nanobox..."))
 
@@ -92,11 +101,16 @@ func runUpdate(path string) {
 	}
 	defer cli.Close()
 
+	download := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/nanobox", runtime.GOOS, runtime.GOARCH)
+	if devv {
+		download += "-dev"
+	}
+
 	// download the new cli
-	fileutil.Progress(fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/nanobox", runtime.GOOS, runtime.GOARCH), cli)
+	fileutil.Progress(download, cli)
 
 	// ensure the newly downloaded cli matches the remote
-	match, err := Util.MD5sMatch(path, "https://s3.amazonaws.com/tools.nanobox.io/cli/nanobox.md5")
+	match, err := Util.MD5sMatch(path, fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/nanobox.md5", runtime.GOOS, runtime.GOARCH))
 	if err != nil {
 		Config.Fatal("[commands/update] util.MD5sMatch() failed", err.Error())
 	}
