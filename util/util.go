@@ -16,7 +16,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
-	// "os"
+	"strings"
 )
 
 // MD5sMatch determines if a local MD5 matches a remote MD5
@@ -45,7 +45,7 @@ func MD5sMatch(localFile, remotePath string) (bool, error) {
 	}
 
 	// compare checksum's
-	return localMD5 == string(remoteMD5), nil
+	return strings.TrimSpace(localMD5) == strings.TrimSpace(string(remoteMD5)), nil
 }
 
 // StringToIP generates an IPv4 address based off the app name for use as a

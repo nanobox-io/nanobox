@@ -34,7 +34,7 @@ func Update(ccmd *cobra.Command, args []string) {
 	}
 
 	// ensure the local nanobox-boot2docker.box matches the remote one
-	if match, err = Util.MD5sMatch(Config.Root()+"/nanobox-boot2docker.box", "https://s3.amazonaws.com/tools.nanobox.io/boxes/vagrant/nanobox-boot2docker.md5"); err != nil {
+	if match, err = Util.MD5sMatch(Config.Root()+"/nanobox-boot2docker.box", "https://s3.amazonaws.com/tools.nanobox.io/boxes/virtualbox/nanobox-boot2docker.md5"); err != nil {
 		Config.Fatal("[commands/box/update] Util.MD5sMatch() failed - ", err.Error())
 	}
 
@@ -43,14 +43,14 @@ func Update(ccmd *cobra.Command, args []string) {
 	if !match {
 		fmt.Printf(stylish.Bullet("Updating nanobox image..."))
 
-		// update the nanobox vagrant image
+		// update nanobox-boot2docker
 		if err := Vagrant.Update(); err != nil {
 			Config.Fatal("[commands/box/update] Vagrant.Update() failed - ", err.Error())
 		}
 	}
 
 	// ensure the newly downloaded nanobox-boot2docker.box matches the remote one
-	if match, err = Util.MD5sMatch(Config.Root()+"/nanobox-boot2docker.box", "https://s3.amazonaws.com/tools.nanobox.io/boxes/vagrant/nanobox-boot2docker.md5"); err != nil {
+	if match, err = Util.MD5sMatch(Config.Root()+"/nanobox-boot2docker.box", "https://s3.amazonaws.com/tools.nanobox.io/boxes/virtualbox/nanobox-boot2docker.md5"); err != nil {
 		Config.Fatal("[commands/box/update] Util.MD5sMatch() failed - ", err.Error())
 	}
 

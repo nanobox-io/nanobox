@@ -24,21 +24,12 @@ import (
 )
 
 //
-var (
-	updateCmd = &cobra.Command{
-		Use:   "update",
-		Short: "Updates the CLI to the newest available version",
-		Long:  ``,
+var updateCmd = &cobra.Command{
+	Use:   "update",
+	Short: "Updates the CLI to the newest available version",
+	Long:  ``,
 
-		Run: update,
-	}
-
-	devv bool // update the dev version of the CLI
-)
-
-//
-func init() {
-	updateCmd.Flags().BoolVarP(&devv, "dev", "d", false, "Update dev CLI")
+	Run: update,
 }
 
 // update
@@ -52,7 +43,7 @@ func update(ccmd *cobra.Command, args []string) {
 	// if the md5s don't match or it's been forced, update
 	switch {
 	case config.Force, !match:
-		runUpdate(cli, devv)
+		runUpdate(cli)
 	default:
 		fmt.Printf(stylish.SubBullet("[√] Nanobox is up-to-date"))
 	}
@@ -81,28 +72,30 @@ func Update() {
 		// don't update by default
 		default:
 			fmt.Println("You can manually update at any time with 'nanobox update'.")
+
+			// if they don't update, assume then that they'll either do it manually or just
+			// wait 14 more days
+			touchUpdate()
+
 			return
 
 		// if yes continue to update
 		case "Yes", "yes", "Y", "y":
-			runUpdate(cli, false)
+			runUpdate(cli)
 		}
 	}
 }
 
 // runUpdate
-func runUpdate(oldPath string, devv bool) {
+func runUpdate(oldPath string) {
 
 	fmt.Printf(stylish.Bullet("Updating nanobox..."))
 
 	//
-	tmpPath := filepath.Join("tmp-", oldPath)
+	dwnPath := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/%v", runtime.GOOS, runtime.GOARCH, filepath.Base(os.Args[0]))
 
 	//
-	dwnPath := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/nanobox", runtime.GOOS, runtime.GOARCH)
-	if devv {
-		dwnPath += "-dev"
-	}
+	tmpPath := oldPath + "-tmp"
 
 	// create a tmp CLI at the location of the old one
 	cli, err := os.Create(tmpPath)
@@ -124,8 +117,11 @@ func runUpdate(oldPath string, devv bool) {
 		Config.Fatal("[commands/update] os.Rename() failed", err.Error())
 	}
 
+	//
+	md5Path := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/%v.md5", runtime.GOOS, runtime.GOARCH, filepath.Base(os.Args[0]))
+
 	// ensure the newly downloaded cli matches the remote
-	match, err := Util.MD5sMatch(tmpPath, fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/nanobox.md5", runtime.GOOS, runtime.GOARCH))
+	match, err := Util.MD5sMatch(oldPath, md5Path)
 	if err != nil {
 		Config.Fatal("[commands/update] util.MD5sMatch() failed", err.Error())
 	}
@@ -137,7 +133,7 @@ func runUpdate(oldPath string, devv bool) {
 	}
 
 	// if the new CLI fails to execute, just print a generic message and return
-	out, err := exec.Command(tmpPath, "-v").Output()
+	out, err := exec.Command(oldPath, "-v").Output()
 	if err != nil {
 		fmt.Printf(stylish.SubBullet("[√] Update successful"))
 		return
@@ -145,6 +141,12 @@ func runUpdate(oldPath string, devv bool) {
 
 	fmt.Printf(stylish.SubBullet("[√] Now running %s", string(out)))
 
+	// update the .update file
+	touchUpdate()
+}
+
+// touchUpdate updates the mod time on the ~.nanobox/.update file
+func touchUpdate() {
 	// update the modification time of the .update file
 	if err := os.Chtimes(config.UpdateFile, time.Now(), time.Now()); err != nil {
 		Config.Fatal("[commands.update] os.Chtimes() failed", err.Error())
@@ -159,8 +161,11 @@ func getUpdateStuff() (cli string, match bool, err error) {
 		return
 	}
 
-	// check the current cli md5 against the remote md5
-	if match, err = Util.MD5sMatch(cli, "https://s3.amazonaws.com/tools.nanobox.io/cli/nanobox.md5"); err != nil {
+	// check the current cli md5 against the remote md5; os.Args[0] is used as the
+	// final interpolation to determine standard/dev versions
+	md5Path := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/%v.md5", runtime.GOOS, runtime.GOARCH, filepath.Base(os.Args[0]))
+
+	if match, err = Util.MD5sMatch(cli, md5Path); err != nil {
 		return
 	}
 
