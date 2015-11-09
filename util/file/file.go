@@ -27,6 +27,11 @@ import (
 // for multiple outputs (for example a file, or md5 hash)
 func Tar(src string, writers ...io.Writer) error {
 
+	// ensure the src actually exists before trying to tar it
+	if _, err := os.Stat(src); err != nil {
+		return fmt.Errorf("Unable to tar files - %v", err.Error())
+	}
+
 	mw := io.MultiWriter(writers...)
 
 	gzw := gzip.NewWriter(mw)
@@ -38,35 +43,40 @@ func Tar(src string, writers ...io.Writer) error {
 	// walk path
 	return filepath.Walk(src, func(file string, fi os.FileInfo, err error) error {
 
+		// return on any error
 		if err != nil {
 			return err
 		}
 
-		// only tar files (not dirs)
-		if fi.Mode().IsRegular() {
+		// create a new dir/file header
+		header, err := tar.FileInfoHeader(fi, fi.Name())
+		if err != nil {
+			return err
+		}
 
-			header := &tar.Header{
-				Name: strings.TrimPrefix(strings.Replace(file, src, "", -1), string(filepath.Separator)),
-				Mode: int64(fi.Mode()),
-				Size: fi.Size(),
-			}
+		// update the name to correctly reflect the desired destination when untaring
+		header.Name = strings.TrimPrefix(strings.Replace(file, src, "", -1), string(filepath.Separator))
 
-			// write the header to the tarball archive
-			if err := tw.WriteHeader(header); err != nil {
-				return err
-			}
+		// write the header
+		if err := tw.WriteHeader(header); err != nil {
+			return err
+		}
 
-			// open the file for taring...
-			f, err := os.Open(file)
-			defer f.Close()
-			if err != nil {
-				return err
-			}
+		// return on directories since there will be no content to tar
+		if fi.Mode().IsDir() {
+			return nil
+		}
 
-			// copy from file data into tar writer
-			if _, err := io.Copy(tw, f); err != nil {
-				return err
-			}
+		// open files for taring
+		f, err := os.Open(file)
+		defer f.Close()
+		if err != nil {
+			return err
+		}
+
+		// copy file data into tar writer
+		if _, err := io.Copy(tw, f); err != nil {
+			return err
 		}
 
 		return nil
@@ -98,29 +108,32 @@ func Untar(dst string, r io.Reader) error {
 		case err != nil:
 			return err
 
-		// if the header is nil, just skip it
+		// if the header is nil, just skip it (not sure how this happens)
 		case header == nil:
 			continue
 		}
 
-		dir := filepath.Dir(header.Name)
-		base := filepath.Base(header.Name)
-		path := filepath.Join(dst, dir)
+		// the target location where the dir/file should be created
+		target := filepath.Join(dst, header.Name)
+
+		// the following switch could also be done using fi.Mode(), not sure if there
+		// a benefit of using one vs. the other.
+		// fi := header.FileInfo()
 
 		// check the file type
 		switch header.Typeflag {
 
 		// if its a dir and it doesn't exist create it
 		case tar.TypeDir:
-			if _, err := os.Stat(path); err != nil {
-				if err := os.MkdirAll(path, 0755); err != nil {
+			if _, err := os.Stat(target); err != nil {
+				if err := os.MkdirAll(target, 0755); err != nil {
 					return err
 				}
 			}
 
 		// if it's a file create it
 		case tar.TypeReg:
-			f, err := os.OpenFile(filepath.Join(path, base), os.O_CREATE|os.O_RDWR, os.FileMode(header.Mode))
+			f, err := os.OpenFile(target, os.O_CREATE|os.O_RDWR, os.FileMode(header.Mode))
 			if err != nil {
 				return err
 			}
