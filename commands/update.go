@@ -145,7 +145,7 @@ func runUpdate(oldPath string) {
 	touchUpdate()
 }
 
-// touchUpdate updates the mod time on the ~.nanobox/.update file
+// touchUpdate updates the mod time on the ~/.nanobox/.update file
 func touchUpdate() {
 	// update the modification time of the .update file
 	if err := os.Chtimes(config.UpdateFile, time.Now(), time.Now()); err != nil {
