@@ -125,6 +125,11 @@ Vagrant.configure(2) do |config|
 
 
     ## network
+
+		# disable default vagrant ssh port forward
+    nanobox.vm.network :forwarded_port, guest: 22, host: 2222, disabled: true
+
+    # add custom private network and ip and custom ssh port forward
     %s
     %s
 
