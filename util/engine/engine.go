@@ -86,7 +86,7 @@ func MountLocal() (mountName, mountDir string, err error) {
 
 		// just skip any files that aren't found; any required files will be
 		// caught before publishing, here it doesn't matter
-		if _, err = os.Stat(path); err != nil {
+		if _, _ = os.Stat(path); err != nil {
 			continue
 		}
 
