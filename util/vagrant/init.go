@@ -46,6 +46,8 @@ func Init() {
     nanobox.vm.provider "virtualbox" do |p|
       p.name = "%v"
 
+			p.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+
       p.customize ["modifyvm", :id, "--cpuexecutioncap", "%v"]
       p.cpus = %v
       p.memory = %v
