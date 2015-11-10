@@ -1,10 +1,4 @@
-// Copyright (c) 2015 Pagoda Box Inc
 //
-// This Source Code Form is subject to the terms of the Mozilla Public License, v.
-// 2.0. If a copy of the MPL was not distributed with this file, You can obtain one
-// at http://mozilla.org/MPL/2.0/.
-//
-
 package box
 
 import (
@@ -17,24 +11,28 @@ import (
 	"testing"
 )
 
+//
 func newUtil(mockCtrl *gomock.Controller) *mock_util.MockUtil {
 	testUtil := mock_util.NewMockUtil(mockCtrl)
 	Util = testUtil
 	return testUtil
 }
 
+//
 func newConfig(mockCtrl *gomock.Controller) *mock_config.MockConfig {
 	testConfig := mock_config.NewMockConfig(mockCtrl)
 	Config = testConfig
 	return testConfig
 }
 
+//
 func newVagrant(mockCtrl *gomock.Controller) *mock_vagrant.MockVagrant {
 	testVagrant := mock_vagrant.NewMockVagrant(mockCtrl)
 	Vagrant = testVagrant
 	return testVagrant
 }
 
+//
 func TestInstallWithImage(test *testing.T) {
 	mockCtrl := gomock.NewController(test)
 	defer mockCtrl.Finish()
@@ -46,6 +44,7 @@ func TestInstallWithImage(test *testing.T) {
 	Install(&cobra.Command{}, []string{})
 }
 
+//
 func TestInstallWithoutImage(test *testing.T) {
 	mockCtrl := gomock.NewController(test)
 	defer mockCtrl.Finish()
@@ -58,6 +57,7 @@ func TestInstallWithoutImage(test *testing.T) {
 	Install(&cobra.Command{}, []string{})
 }
 
+//
 func TestInstallFail(test *testing.T) {
 	mockCtrl := gomock.NewController(test)
 	defer mockCtrl.Finish()
@@ -74,6 +74,7 @@ func TestInstallFail(test *testing.T) {
 	Install(&cobra.Command{}, []string{})
 }
 
+//
 func TestUpdateNotNeeded(test *testing.T) {
 	mockCtrl := gomock.NewController(test)
 	defer mockCtrl.Finish()
@@ -91,6 +92,7 @@ func TestUpdateNotNeeded(test *testing.T) {
 	Update(&cobra.Command{}, []string{})
 }
 
+//
 func TestUpdateNeeded(test *testing.T) {
 	mockCtrl := gomock.NewController(test)
 	defer mockCtrl.Finish()
@@ -110,6 +112,7 @@ func TestUpdateNeeded(test *testing.T) {
 	Update(&cobra.Command{}, []string{})
 }
 
+//
 func TestUpdateFailed(test *testing.T) {
 	mockCtrl := gomock.NewController(test)
 	defer mockCtrl.Finish()

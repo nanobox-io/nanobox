@@ -1,10 +1,3 @@
-// Copyright (c) 2015 Pagoda Box Inc
-//
-// This Source Code Form is subject to the terms of the Mozilla Public License, v.
-// 2.0. If a copy of the MPL was not distributed with this file, You can obtain one
-// at http://mozilla.org/MPL/2.0/.
-//
-
 //
 package box
 
@@ -29,6 +22,7 @@ func Install(ccmd *cobra.Command, args []string) {
 	}
 }
 
+// checkInstall
 func checkInstall() (err error) {
 	// install the nanobox vagrant image only if it isn't already available
 	if !Vagrant.HaveImage() {
