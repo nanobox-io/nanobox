@@ -31,7 +31,7 @@ func NewLogger(path string) {
 
 	// create a file logger
 	if Log, err = lumber.NewAppendLogger(path); err != nil {
-		config.Error("Failed to create a Vagrant logger", err.Error())
+		config.Fatal("[util/vagrant/log] lumber.NewAppendLogger() failed", err.Error())
 	}
 }
 

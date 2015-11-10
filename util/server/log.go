@@ -30,8 +30,8 @@ func NewLogger(path string) {
 	var err error
 
 	// create a file logger
-	if Log, err = lumber.NewTruncateLogger(path); err != nil {
-		config.Error("Failed to create a Server logger", err.Error())
+	if Log, err = lumber.NewAppendLogger(path); err != nil {
+		config.Fatal("[util/server/log] lumber.NewAppendLogger() failed", err.Error())
 	}
 }
 
