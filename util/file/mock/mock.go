@@ -39,14 +39,6 @@ func (_mr *_MockFileRecorder) Download(arg0, arg1 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "Download", arg0, arg1)
 }
 
-func (_m *MockFile) Gzip() {
-	_m.ctrl.Call(_m, "Gzip")
-}
-
-func (_mr *_MockFileRecorder) Gzip() *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "Gzip")
-}
-
 func (_m *MockFile) Progress(_param0 string, _param1 io.Writer) error {
 	ret := _m.ctrl.Call(_m, "Progress", _param0, _param1)
 	ret0, _ := ret[0].(error)
@@ -57,18 +49,25 @@ func (_mr *_MockFileRecorder) Progress(arg0, arg1 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "Progress", arg0, arg1)
 }
 
-func (_m *MockFile) Tar() {
-	_m.ctrl.Call(_m, "Tar")
+func (_m *MockFile) Tar(_param0 string, _param1 ...io.Writer) error {
+	_s := []interface{}{_param0}
+	for _, _x := range _param1 {
+		_s = append(_s, _x)
+	}
+	ret := _m.ctrl.Call(_m, "Tar", _s...)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
-func (_mr *_MockFileRecorder) Tar() *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "Tar")
+func (_mr *_MockFileRecorder) Tar(arg0 interface{}, arg1 ...interface{}) *gomock.Call {
+	_s := append([]interface{}{arg0}, arg1...)
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "Tar", _s...)
 }
 
-func (_m *MockFile) TarBall() {
-	_m.ctrl.Call(_m, "TarBall")
+func (_m *MockFile) Untar(_param0 string, _param1 io.Reader) {
+	_m.ctrl.Call(_m, "Untar", _param0, _param1)
 }
 
-func (_mr *_MockFileRecorder) TarBall() *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "TarBall")
+func (_mr *_MockFileRecorder) Untar(arg0, arg1 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "Untar", arg0, arg1)
 }

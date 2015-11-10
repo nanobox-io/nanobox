@@ -66,6 +66,14 @@ func (_mr *_MockVagrantRecorder) Install() *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "Install")
 }
 
+func (_m *MockVagrant) NewLogger(_param0 string) {
+	_m.ctrl.Call(_m, "NewLogger", _param0)
+}
+
+func (_mr *_MockVagrantRecorder) NewLogger(arg0 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "NewLogger", arg0)
+}
+
 func (_m *MockVagrant) Reload() error {
 	ret := _m.ctrl.Call(_m, "Reload")
 	ret0, _ := ret[0].(error)

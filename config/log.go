@@ -18,7 +18,7 @@ func init() {
 	Console = lumber.NewConsoleLogger(lumber.INFO)
 
 	// create a file logger
-	if Log, err = lumber.NewTruncateLogger(Root + "/nanobox.log"); err != nil {
+	if Log, err = lumber.NewAppendLogger(Root + "/nanobox.log"); err != nil {
 		Fatal("[config/log] lumber.NewAppendLogger() failed", err.Error())
 	}
 }

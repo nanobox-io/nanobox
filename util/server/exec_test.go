@@ -105,7 +105,7 @@ func TestExec(test *testing.T) {
 	go func() {
 		in := bytes.NewBuffer([]byte("this is a test"))
 		out := &bytes.Buffer{}
-		err := execInternal("exec", "command", "cmd=cat", in, out)
+		err := execInternal("exec", "cmd=cat", in, out)
 		if err != nil {
 			errChan <- err
 			return
@@ -143,7 +143,7 @@ func TestPTYExec(test *testing.T) {
 		in := bytes.NewBuffer([]byte("this is a test\n"))
 		in.Write([]byte{4}) // EOT
 		out := &bytes.Buffer{}
-		err := execInternal("exec", "command", "cmd=cat", in, out)
+		err := execInternal("exec", "cmd=cat", in, out)
 		if err != nil {
 			errChan <- err
 			return
@@ -182,7 +182,7 @@ func TestExecEarlyExit(test *testing.T) {
 		// need to use a pipe so that no EOF is returned. this was causing test to fail very quickly
 		r, _ := io.Pipe()
 		out := &bytes.Buffer{}
-		err := execInternal("exec", "command", "cmd=exit", r, out)
+		err := execInternal("exec", "cmd=exit", r, out)
 		test.Log("exited", err)
 		if err != nil {
 			errChan <- err
