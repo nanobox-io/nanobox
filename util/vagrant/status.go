@@ -18,7 +18,7 @@ func Status() (status string) {
 
 	// attempt to get the uuid; don't handle the error here because there are some
 	// other conditions we want lumped together
-	b, err := ioutil.ReadFile(fmt.Sprintf("%v/.vagrant/machines/%v/%v/index_uuid", config.AppDir, config.Nanofile.Name, config.Nanofile.Provider))
+	b, _ := ioutil.ReadFile(fmt.Sprintf("%v/.vagrant/machines/%v/%v/index_uuid", config.AppDir, config.Nanofile.Name, config.Nanofile.Provider))
 
 	// set uuid (this will be "" if the above returned an error)
 	uuid := string(b)
@@ -27,9 +27,9 @@ func Status() (status string) {
 	b, err = ioutil.ReadFile(config.Home + "/.vagrant.d/data/machine-index/index")
 
 	// an error here (os.PathError) means that the files was not found, causing
-	// b == nil, meaning no VMs have been created, meaning uuid == "". Returning
-	// here will indicate a VM needs to be created due to the default status above
-	if err != nil || b == nil || uuid == "" {
+	// meaning no VMs have been created. Returning here will indicate a VM needs
+	// to be created due to the default status above
+	if uuid == "" || err != nil {
 		return
 	}
 
