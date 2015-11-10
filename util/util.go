@@ -9,39 +9,36 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
-	"os"
+	"strings"
 )
 
 // MD5sMatch determines if a local MD5 matches a remote MD5
-func MD5sMatch(localPath, remotePath string) (bool, error) {
+func MD5sMatch(localFile, remotePath string) (bool, error) {
 
-	// get local md5
-	f, err := os.Open(localPath)
-
-	// if there is no local md5 return false
-	if err != nil {
-		return false, nil
-	}
-	defer f.Close()
-
-	localMD5, err := ioutil.ReadAll(f)
+	// read the local file; will return os.PathError if doesn't exist
+	b, err := ioutil.ReadFile(localFile)
 	if err != nil {
 		return false, err
 	}
 
-	// get remote md5
+	// get local md5 checksum (as a string)
+	localMD5 := fmt.Sprintf("%x", md5.Sum(b))
+
+	// GET remote md5
 	res, err := http.Get(remotePath)
 	if err != nil {
 		return false, err
 	}
 	defer res.Body.Close()
 
+	// read the remote md5 checksum
 	remoteMD5, err := ioutil.ReadAll(res.Body)
 	if err != nil {
 		return false, err
 	}
 
-	return string(localMD5) == string(remoteMD5), nil
+	// compare checksum's
+	return strings.TrimSpace(localMD5) == strings.TrimSpace(string(remoteMD5)), nil
 }
 
 // StringToIP generates an IPv4 address based off the app name for use as a

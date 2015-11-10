@@ -13,7 +13,7 @@ import (
 )
 
 const (
-	VERSION = "0.16.0"
+	VERSION = "0.16.1"
 
 	SERVER_PORT = ":1757"
 	MIST_PORT   = ":1445"
@@ -29,14 +29,14 @@ var (
 	mutex *sync.Mutex
 
 	//
-	AppDir     string // the path to the application (~.nanobox/apps/<app>)
-	AppsDir    string // ~.nanobox/apps
+	AppDir     string // the path to the application (~/.nanobox/apps/<app>)
+	AppsDir    string // ~/.nanobox/apps
 	CWDir      string // the current working directory
-	EnginesDir string // ~.nanobox/engines
+	EnginesDir string // ~/.nanobox/engines
 	Home       string // the users home directory (~)
 	IP         string // the guest vm's private network ip (generated from app name)
-	Root       string // nanobox's root directory path (~.nanobox)
-	UpdateFile string // the path to the .update file (~.nanobox/.update)
+	Root       string // nanobox's root directory path (~/.nanobox)
+	UpdateFile string // the path to the .update file (~/.nanobox/.update)
 
 	//
 	Nanofile *NanofileConfig // parsed nanofile options

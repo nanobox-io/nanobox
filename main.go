@@ -23,7 +23,7 @@ func main() {
 
 			stack := debug.Stack()
 
-			fmt.Println("Nanobox encountered an unexpected error. Please see ~.nanobox/nanobox.log and submit the issue to us.")
+			fmt.Println("Nanobox encountered an unexpected error. Please see ~/.nanobox/nanobox.log and submit the issue to us.")
 			config.Log.Fatal(fmt.Sprintf("Cause of failure: %v", r))
 			config.Log.Fatal(fmt.Sprintf("Error output:\n%v\n", string(stack)))
 			config.Log.Close()

@@ -18,24 +18,37 @@ var updateCmd = &cobra.Command{
 // Update
 func Update(ccmd *cobra.Command, args []string) {
 
-	if err := checkInstall(); err != nil {
+	var err error
+	var match bool
+
+	// if the nanobox-boot2docker.box is not installed, download and install it
+	if err = checkInstall(); err != nil {
 		Config.Fatal("[commands/box/update] checkInstall() failed - ", err.Error())
 	}
 
-	//
-	match, err := Util.MD5sMatch(Config.Root()+"/nanobox-boot2docker.md5", "https://s3.amazonaws.com/tools.nanobox.io/boxes/vagrant/nanobox-boot2docker.md5")
-	if err != nil {
+	// ensure the local nanobox-boot2docker.box matches the remote one
+	if match, err = Util.MD5sMatch(Config.Root()+"/nanobox-boot2docker.box", "https://s3.amazonaws.com/tools.nanobox.io/boxes/virtualbox/nanobox-boot2docker.md5"); err != nil {
 		Config.Fatal("[commands/box/update] Util.MD5sMatch() failed - ", err.Error())
 	}
 
-	// if the local md5 does not match the remote md5 download the newest nanobox
-	// image
+	// if the local md5 does not match the remote md5 it's either wrong or old;
+	// either way download the newest nanobox-boot2docker
 	if !match {
 		fmt.Printf(stylish.Bullet("Updating nanobox image..."))
 
-		// update the nanobox vagrant image
+		// update nanobox-boot2docker
 		if err := Vagrant.Update(); err != nil {
 			Config.Fatal("[commands/box/update] Vagrant.Update() failed - ", err.Error())
 		}
+	}
+
+	// ensure the newly downloaded nanobox-boot2docker.box matches the remote one
+	if match, err = Util.MD5sMatch(Config.Root()+"/nanobox-boot2docker.box", "https://s3.amazonaws.com/tools.nanobox.io/boxes/virtualbox/nanobox-boot2docker.md5"); err != nil {
+		Config.Fatal("[commands/box/update] Util.MD5sMatch() failed - ", err.Error())
+	}
+
+	// if it doesn't match this time it's the wrong one
+	if !match {
+		fmt.Println("MD5 checksum failed! Your nanobox-boot2docker is not ours!")
 	}
 }
