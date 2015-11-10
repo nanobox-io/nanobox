@@ -39,7 +39,7 @@ func Init() {
 	//
 	// create nanobox private network and unique forward port
 	network := fmt.Sprintf("nanobox.vm.network \"private_network\", ip: \"%s\"", config.Nanofile.IP)
-	sshport := fmt.Sprintf("nanobox.vm.network :forwarded_port, guest: 22, host: %v", util.StringToPort(config.Nanofile.Name))
+	sshport := fmt.Sprintf("nanobox.vm.network :forwarded_port, guest: 22, host: %v, id: 'ssh'", util.StringToPort(config.Nanofile.Name))
 
 	//
 	provider := fmt.Sprintf(`# VirtualBox
@@ -125,9 +125,6 @@ Vagrant.configure(2) do |config|
 
 
     ## network
-
-		# disable default vagrant ssh port forward
-    nanobox.vm.network :forwarded_port, guest: 22, host: 2222, disabled: true
 
     # add custom private network and ip and custom ssh port forward
     %s
