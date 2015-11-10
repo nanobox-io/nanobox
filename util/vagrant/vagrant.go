@@ -166,20 +166,7 @@ func download() error {
 	defer box.Close()
 
 	//
-	if err := fileutil.Progress(fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/boxes/vagrant/nanobox-boot2docker.box"), box); err != nil {
-		return err
-	}
-
-	//
-	// download vm md5
-	md5, err := os.Create(config.Root + "/nanobox-boot2docker.md5")
-	if err != nil {
-		config.Fatal("[util/vagrant/vagrant] os.Create() failed - ", err.Error())
-	}
-	defer md5.Close()
-
-	//
-	return fileutil.Download("https://s3.amazonaws.com/tools.nanobox.io/boxes/vagrant/nanobox-boot2docker.md5", md5)
+	return fileutil.Progress(fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/boxes/vagrant/nanobox-boot2docker.box"), box)
 }
 
 // add adds the nanobox vagrant image to the list of images (always overriding the
