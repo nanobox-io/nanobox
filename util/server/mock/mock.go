@@ -61,14 +61,14 @@ func (_mr *_MockServerRecorder) Deploy(arg0 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "Deploy", arg0)
 }
 
-func (_m *MockServer) Exec(_param0 string, _param1 string, _param2 string) error {
-	ret := _m.ctrl.Call(_m, "Exec", _param0, _param1, _param2)
+func (_m *MockServer) Exec(_param0 string, _param1 string) error {
+	ret := _m.ctrl.Call(_m, "Exec", _param0, _param1)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-func (_mr *_MockServerRecorder) Exec(arg0, arg1, arg2 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "Exec", arg0, arg1, arg2)
+func (_mr *_MockServerRecorder) Exec(arg0, arg1 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "Exec", arg0, arg1)
 }
 
 func (_m *MockServer) Get(_param0 string, _param1 interface{}) (*http.Response, error) {
@@ -108,6 +108,14 @@ func (_m *MockServer) Logs(_param0 string) error {
 
 func (_mr *_MockServerRecorder) Logs(arg0 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "Logs", arg0)
+}
+
+func (_m *MockServer) NewLogger(_param0 string) {
+	_m.ctrl.Call(_m, "NewLogger", _param0)
+}
+
+func (_mr *_MockServerRecorder) NewLogger(arg0 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "NewLogger", arg0)
 }
 
 func (_m *MockServer) NotifyRebuild(_param0 *fsnotify.Event) error {
