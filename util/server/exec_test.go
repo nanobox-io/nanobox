@@ -130,7 +130,7 @@ func TestExec(test *testing.T) {
 }
 
 func TestPTYExec(test *testing.T) {
-	config.ServerURI = "127.0.0.1:1234"
+	config.ServerURI = "127.0.0.1:1235"
 
 	mux := pat.New()
 	normalPing(mux)
@@ -169,7 +169,7 @@ func TestPTYExec(test *testing.T) {
 }
 
 func TestExecEarlyExit(test *testing.T) {
-	config.ServerURI = "127.0.0.1:1235"
+	config.ServerURI = "127.0.0.1:1236"
 
 	mux := pat.New()
 	normalPing(mux)
