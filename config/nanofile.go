@@ -21,10 +21,10 @@ type NanofileConfig struct {
 }
 
 // ParseNanofile
-func ParseNanofile() *NanofileConfig {
+func ParseNanofile() NanofileConfig {
 
 	//
-	nanofile := &NanofileConfig{
+	nanofile := NanofileConfig{
 		CPUCap:   50,
 		CPUs:     2,
 		MountNFS: true,
@@ -38,7 +38,7 @@ func ParseNanofile() *NanofileConfig {
 	// look for a global .nanofile first in the ~/.nanobox directory, and override
 	// any default options found.
 	if _, err := os.Stat(nanofilePath); err == nil {
-		if err := ParseConfig(nanofilePath, nanofile); err != nil {
+		if err := ParseConfig(nanofilePath, &nanofile); err != nil {
 			fmt.Printf("Nanobox failed to parse your .nanofile. Please ensure it is valid YAML and try again.\n")
 			Exit(1)
 		}
@@ -49,7 +49,7 @@ func ParseNanofile() *NanofileConfig {
 	// then look for a local .nanofile and override any global, or remaining default
 	// options found
 	if _, err := os.Stat(nanofilePath); err == nil {
-		if err := ParseConfig(nanofilePath, nanofile); err != nil {
+		if err := ParseConfig(nanofilePath, &nanofile); err != nil {
 			fmt.Printf("Nanobox failed to parse your .nanofile. Please ensure it is valid YAML and try again.\n")
 			Exit(1)
 		}

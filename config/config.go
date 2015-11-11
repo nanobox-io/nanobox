@@ -41,8 +41,8 @@ var (
 	UpdateFile string // the path to the .update file (~/.nanobox/.update)
 
 	//
-	Nanofile *NanofileConfig // parsed nanofile options
-	VMfile   *VMfileConfig   // parsed nanofile options
+	Nanofile NanofileConfig // parsed nanofile options
+	VMfile   VMfileConfig   // parsed nanofile options
 
 	//
 	ServerURI string // nanobox-server host:port combo (IP:1757)

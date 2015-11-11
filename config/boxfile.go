@@ -14,7 +14,7 @@ type BoxfileConfig struct {
 }
 
 // ParseBoxfile
-func ParseBoxfile() (boxfile *BoxfileConfig) {
+func ParseBoxfile() (boxfile BoxfileConfig) {
 
 	boxfilePath := "./Boxfile"
 
@@ -25,7 +25,7 @@ func ParseBoxfile() (boxfile *BoxfileConfig) {
 	}
 
 	//
-	if err := ParseConfig(boxfilePath, boxfile); err != nil {
+	if err := ParseConfig(boxfilePath, &boxfile); err != nil {
 		fmt.Printf("Nanobox failed to parse Boxfile. Please ensure it is valid YAML and try again.\n")
 		Exit(1)
 	}

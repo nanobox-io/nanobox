@@ -44,14 +44,14 @@ func Init() {
 	if name != "" && path != "" {
 		synced_folders += fmt.Sprintf(`
     nanobox.vm.synced_folder "%s", "/vagrant/engines/%s"`, path, name)
-	}
 
-	// mount engine directory as NFS unless configured otherwise; if not mounted in
-	// this way Vagrant will just decide what it thinks is best
-	if config.Nanofile.MountNFS {
-		synced_folders += `,
+		// mount engine directory as NFS unless configured otherwise; if not mounted in
+		// this way Vagrant will just decide what it thinks is best
+		if config.Nanofile.MountNFS {
+			synced_folders += `,
       type: "nfs",
       mount_options: ["nfsvers=3", "proto=tcp"]`
+		}
 	}
 
 	//

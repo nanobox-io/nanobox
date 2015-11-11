@@ -13,19 +13,19 @@ type (
 		Debug(msg string, debug bool)
 		Info(msg string)
 		Error(msg, err string)
-		ParseNanofile() *NanofileConfig
-		ParseVMfile() *VMfileConfig
+		ParseNanofile() NanofileConfig
+		ParseVMfile() VMfileConfig
 	}
 
 	config struct {
 	}
 )
 
-func (config) ParseVMfile() *VMfileConfig {
+func (config) ParseVMfile() VMfileConfig {
 	return ParseVMfile()
 }
 
-func (config) ParseNanofile() *NanofileConfig {
+func (config) ParseNanofile() NanofileConfig {
 	return ParseNanofile()
 }
 

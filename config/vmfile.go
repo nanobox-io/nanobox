@@ -12,7 +12,7 @@ type VMfileConfig struct {
 }
 
 // ParseVMfile
-func ParseVMfile() (vmfile *VMfileConfig) {
+func ParseVMfile() (vmfile VMfileConfig) {
 
 	//
 	vmfilePath := AppDir + "/.vmfile"
@@ -30,7 +30,7 @@ func ParseVMfile() (vmfile *VMfileConfig) {
 	}
 
 	// if a .vmfile does exists - parse it
-	if err := ParseConfig(vmfilePath, vmfile); err != nil {
+	if err := ParseConfig(vmfilePath, &vmfile); err != nil {
 		Fatal("[config/vmfile] ParseConfig() failed - ", err.Error())
 	}
 
