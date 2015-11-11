@@ -221,10 +221,8 @@ Please ensure all required fields are provided and try again.`))
 		for _, f := range v {
 
 			// not handling error here because an error simply means the file doesn't
-			// exist and therefor wont be copied
-			if err := fileutil.Copy(f, tarPath); err != nil {
-				Config.Fatal("[commands/engine/publish] file.Copy() failed", err.Error())
-			}
+			// exist and therefor wont be copied to the final tarball
+			fileutil.Copy(f, tarPath)
 		}
 	}
 
