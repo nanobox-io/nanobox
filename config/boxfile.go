@@ -14,14 +14,14 @@ type BoxfileConfig struct {
 }
 
 // ParseBoxfile
-func ParseBoxfile() *BoxfileConfig {
+func ParseBoxfile() (boxfile *BoxfileConfig) {
 
-	boxfile := &BoxfileConfig{}
 	boxfilePath := "./Boxfile"
 
-	//
+	// return early here with an empty boxfile; the error doesn't really matter because
+	// that will be represented by the empty boxfile
 	if _, err := os.Stat(boxfilePath); err != nil {
-		return boxfile
+		return
 	}
 
 	//
@@ -31,5 +31,5 @@ func ParseBoxfile() *BoxfileConfig {
 	}
 
 	//
-	return boxfile
+	return
 }

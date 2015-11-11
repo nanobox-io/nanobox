@@ -26,6 +26,6 @@ func stop(ccmd *cobra.Command, args []string) {
 		Config.Fatal("[commands/stop] vagrant.Suspend() failed - ", err.Error())
 	}
 
-	// set the mode to be forground next time the machine boots
-	config.VMfile.ModeIs("foreground")
+	// boot the machine normally (not backgrounded) on next command
+	config.VMfile.BackgroundIs(false)
 }

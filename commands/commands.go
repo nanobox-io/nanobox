@@ -131,7 +131,7 @@ func boot(ccmd *cobra.Command, args []string) {
 
 	// if the background flag is passed, set the mode to "background"
 	if config.Background {
-		config.VMfile.ModeIs("background")
+		config.VMfile.BackgroundIs(true)
 	}
 }
 

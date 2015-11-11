@@ -5,62 +5,62 @@ import "os"
 
 // VMfileConfig represents all available/expected .vmfile configurable options
 type VMfileConfig struct {
-	Deployed    bool   // was the most recent deploy successufl
-	Mode        string // foreground/background
-	Status      string // the current staus of the VM
-	Suspendable bool   // is the VM able to be suspended
+	Background  bool // is the CLI running in "background" mode
+	Deployed    bool // was the most recent deploy successufl
+	Reloaded    bool // did the previous CLI command cause a 'reload'
+	Suspendable bool // is the VM able to be suspended
 }
 
 // ParseVMfile
-func ParseVMfile() *VMfileConfig {
+func ParseVMfile() (vmfile *VMfileConfig) {
 
 	//
-	vmfile := &VMfileConfig{}
 	vmfilePath := AppDir + "/.vmfile"
 
 	// if a .vmfile doesn't exist - create it
 	if _, err := os.Stat(vmfilePath); err != nil {
 
+		vmfile.Background = false
 		vmfile.Deployed = false
-		vmfile.Mode = "foreground"
+		vmfile.Reloaded = false
 		vmfile.Suspendable = true
 
 		writeVMfile()
-
-		// if a .vmfile does exists - parse it
-	} else {
-		if err := ParseConfig(vmfilePath, vmfile); err != nil {
-			Fatal("[config/vmfile] ParseConfig() failed - ", err.Error())
-		}
+		return
 	}
 
-	return vmfile
+	// if a .vmfile does exists - parse it
+	if err := ParseConfig(vmfilePath, vmfile); err != nil {
+		Fatal("[config/vmfile] ParseConfig() failed - ", err.Error())
+	}
+
+	return
 }
 
 //
 func (c *VMfileConfig) HasDeployed() bool {
-	if err := ParseConfig(AppDir+"/.vmfile", c); err != nil {
-		Fatal("[config/vmfile] ParseConfig() failed - ", err.Error())
-	}
-
-	return c.Deployed
+	return c.parseVMfile(c.Deployed)
 }
 
 //
-func (c *VMfileConfig) IsMode(mode string) bool {
-	if err := ParseConfig(AppDir+"/.vmfile", c); err != nil {
-		Fatal("[config/vmfile] ParseConfig() failed - ", err.Error())
-	}
+func (c *VMfileConfig) IsBackground() bool {
+	return c.parseVMfile(c.Background)
+}
 
-	return c.Mode == mode
+//
+func (c *VMfileConfig) HasReloaded() bool {
+	return c.parseVMfile(c.Reloaded)
 }
 
 //
 func (c *VMfileConfig) IsSuspendable() bool {
-	if err := ParseConfig(AppDir+"/.vmfile", c); err != nil {
-		Fatal("[config/vmfile] ParseConfig() failed - ", err.Error())
-	}
-	return c.Suspendable
+	return c.parseVMfile(c.Suspendable)
+}
+
+//
+func (c *VMfileConfig) BackgroundIs(background bool) {
+	c.Background = background
+	writeVMfile()
 }
 
 //
@@ -70,8 +70,8 @@ func (c *VMfileConfig) DeployedIs(deployed bool) {
 }
 
 //
-func (c *VMfileConfig) ModeIs(mode string) {
-	c.Mode = mode
+func (c *VMfileConfig) ReloadedIs(reloaded bool) {
+	c.Reloaded = reloaded
 	writeVMfile()
 }
 
@@ -81,7 +81,17 @@ func (c *VMfileConfig) SuspendableIs(suspendable bool) {
 	writeVMfile()
 }
 
-// writeVMfile
+// parseVMfile is a wrapper that simply handles the error once rather than in
+// each individual call
+func (c *VMfileConfig) parseVMfile(field bool) bool {
+	if err := ParseConfig(AppDir+"/.vmfile", c); err != nil {
+		Fatal("[config/vmfile] ParseConfig() failed - ", err.Error())
+	}
+
+	return field
+}
+
+// writeVMfile writes to the vmfile with each field update
 func writeVMfile() {
 	if err := writeConfig(AppDir+"/.vmfile", VMfile); err != nil {
 		Fatal("[config/vmfile] writeConfig() failed - ", err.Error())
