@@ -20,8 +20,19 @@ func Init() {
 	}
 	defer vagrantfile.Close()
 
+	//
 	// create synced folders
-	synced_folders := fmt.Sprintf("nanobox.vm.synced_folder \"%s\", \"/vagrant/code/%s\"", config.CWDir, config.Nanofile.Name)
+
+	// mount code directory (mounted as nfs by default)
+	synced_folders := fmt.Sprintf(`nanobox.vm.synced_folder "%s", "/vagrant/code/%s"`, config.CWDir, config.Nanofile.Name)
+
+	// mount code directory as NFS unless configured otherwise; if not mounted in
+	// this way Vagrant will just decide what it thinks is best
+	if config.Nanofile.MountNFS {
+		synced_folders += `,
+      type: "nfs",
+      mount_options: ["nfsvers=3", "proto=tcp"]`
+	}
 
 	// "mount" the engine file localy at ~/.nanobox/apps/<app>/<engine>
 	name, path, err := engineutil.MountLocal()
@@ -31,12 +42,21 @@ func Init() {
 
 	// "mount" the engine into the VM (if there is one)
 	if name != "" && path != "" {
-		synced_folders += fmt.Sprintf("\n    nanobox.vm.synced_folder \"%s\", \"/vagrant/engines/%s\"", path, name)
+		synced_folders += fmt.Sprintf(`
+    nanobox.vm.synced_folder "%s", "/vagrant/engines/%s"`, path, name)
+	}
+
+	// mount engine directory as NFS unless configured otherwise; if not mounted in
+	// this way Vagrant will just decide what it thinks is best
+	if config.Nanofile.MountNFS {
+		synced_folders += `,
+      type: "nfs",
+      mount_options: ["nfsvers=3", "proto=tcp"]`
 	}
 
 	//
 	// nanofile config
-	//
+
 	// create nanobox private network and unique forward port
 	network := fmt.Sprintf("nanobox.vm.network \"private_network\", ip: \"%s\"", config.Nanofile.IP)
 	sshport := fmt.Sprintf("nanobox.vm.network :forwarded_port, guest: 22, host: %v, id: 'ssh'", util.StringToPort(config.Nanofile.Name))
