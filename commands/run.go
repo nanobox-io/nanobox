@@ -68,7 +68,11 @@ func run(ccmd *cobra.Command, args []string) {
 `, config.Nanofile.Domain)
 
 	// if in background mode just exist w/o streaming logs or watching files
-	if config.VMfile.IsMode("background") {
+	if config.VMfile.IsBackground() {
+		fmt.Println(`
+To stream logs and watch files while in 'background mode' you can use
+'nanobox log' and 'nanobox watch'
+`)
 		return
 	}
 

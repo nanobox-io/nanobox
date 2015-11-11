@@ -71,9 +71,9 @@ func (_mr *_MockConfigRecorder) ParseConfig(arg0, arg1 interface{}) *gomock.Call
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "ParseConfig", arg0, arg1)
 }
 
-func (_m *MockConfig) ParseNanofile() *config.NanofileConfig {
+func (_m *MockConfig) ParseNanofile() config.NanofileConfig {
 	ret := _m.ctrl.Call(_m, "ParseNanofile")
-	ret0, _ := ret[0].(*config.NanofileConfig)
+	ret0, _ := ret[0].(config.NanofileConfig)
 	return ret0
 }
 
@@ -81,9 +81,9 @@ func (_mr *_MockConfigRecorder) ParseNanofile() *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "ParseNanofile")
 }
 
-func (_m *MockConfig) ParseVMfile() *config.VMfileConfig {
+func (_m *MockConfig) ParseVMfile() config.VMfileConfig {
 	ret := _m.ctrl.Call(_m, "ParseVMfile")
-	ret0, _ := ret[0].(*config.VMfileConfig)
+	ret0, _ := ret[0].(config.VMfileConfig)
 	return ret0
 }
 

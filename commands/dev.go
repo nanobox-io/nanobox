@@ -38,11 +38,12 @@ func dev(ccmd *cobra.Command, args []string) {
 
 	// PreRun: boot
 
+	// don't rebuild
 	if !nobuild {
 
-		// if the vm has no been created, deployed, or the rebuild flag is passed do
-		// a deploy
-		if Vagrant.Status() == "not created" || !config.VMfile.HasDeployed() || rebuild {
+		// if the vm has no been created or deployed, the rebuild flag, or the VM has
+		// recently been reloaded do a deploy
+		if Vagrant.Status() == "not created" || !config.VMfile.HasDeployed() || rebuild || config.VMfile.HasReloaded() {
 
 			fmt.Printf(stylish.Bullet("Deploying codebase..."))
 
