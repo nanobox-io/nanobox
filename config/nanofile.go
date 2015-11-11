@@ -64,7 +64,7 @@ func ParseNanofile() *NanofileConfig {
 	}
 
 	// if the OS is Windows folders CANNOT be mounted as NFS
-	if config.OS == "windows" {
+	if OS == "windows" {
 		nanofile.MountNFS = false
 	}
 
