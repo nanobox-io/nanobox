@@ -63,5 +63,10 @@ func ParseNanofile() *NanofileConfig {
 		nanofile.IP = util.StringToIP(nanofile.Name)
 	}
 
+	// if the OS is Windows folders CANNOT be mounted as NFS
+	if config.OS == "windows" {
+		nanofile.MountNFS = false
+	}
+
 	return nanofile
 }

@@ -9,15 +9,17 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
 	"sync"
 )
 
 const (
-	VERSION = "0.16.4"
-
-	SERVER_PORT = ":1757"
-	MIST_PORT   = ":1445"
+	OS          = runtime.GOOS
+	ARCH        = runtime.GOARCH
 	LOGTAP_PORT = ":6361"
+	MIST_PORT   = ":1445"
+	SERVER_PORT = ":1757"
+	VERSION     = "0.16.4"
 )
 
 type (
