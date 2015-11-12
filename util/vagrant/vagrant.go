@@ -17,6 +17,14 @@ import (
 //
 var err error
 
+// Exists ensure vagrant is installed
+func Exists() (exists bool) {
+	if err := exec.Command("vagrant", "-v").Run(); err == nil {
+		exists = true
+	}
+	return
+}
+
 // run runs a vagrant command
 func run(cmd *exec.Cmd) error {
 

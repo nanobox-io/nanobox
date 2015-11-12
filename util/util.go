@@ -9,8 +9,19 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"os/exec"
 	"strings"
 )
+
+// VboxEists ensure virtualbox is installed; if ever there is a virtualbox package
+// this can be moved there
+func VboxExists() (exists bool) {
+	if err := exec.Command("vboxmanage", "-v").Run(); err == nil {
+		exists = true
+	}
+
+	return
+}
 
 // MD5sMatch determines if a local MD5 matches a remote MD5
 func MD5sMatch(localFile, remotePath string) (bool, error) {

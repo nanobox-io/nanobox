@@ -4,6 +4,7 @@ package vagrant
 type (
 	vagrant struct{}
 	Vagrant interface {
+		Exists() bool
 		Install() error
 		Update() error
 		Destroy() error
@@ -21,6 +22,10 @@ type (
 var (
 	Default Vagrant = vagrant{}
 )
+
+func (vagrant) Exists() bool {
+	return Exists()
+}
 
 func (vagrant) Up() error {
 	return Up()
