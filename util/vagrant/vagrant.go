@@ -3,10 +3,14 @@ package vagrant
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"github.com/nanobox-io/nanobox/config"
 	"os"
 	"os/exec"
+	"regexp"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -70,6 +74,39 @@ func setContext(context string) {
 		fmt.Printf("No app found at %s, exiting...\n", config.AppDir)
 		os.Exit(1)
 	}
+}
+
+func customScanner(data []byte, atEOF bool) (advance int, token []byte, err error) {
+
+	//
+	if atEOF && len(data) == 0 {
+		return 0, nil, nil
+	}
+
+	if i := bytes.IndexByte(data, '\n'); i >= 0 {
+		// We have a full newline-terminated line.
+		return i + 1, dropCR(data[0:i]), nil
+	}
+
+	if i := bytes.IndexByte(data, '\r'); i >= 0 {
+		return i + 1, dropCR(data[0:i]), nil
+	}
+
+	// If we're at EOF, we have a final, non-terminated line. Return it.
+	if atEOF {
+		return len(data), dropCR(data), nil
+	}
+
+	// Request more data.
+	return 0, nil, nil
+}
+
+// dropCR drops a terminal \r from the data.
+func dropCR(data []byte) []byte {
+	if len(data) > 0 && data[len(data)-1] == '\r' {
+		return data[0 : len(data)-1]
+	}
+	return data
 }
 
 // handleCMDout
@@ -142,44 +179,63 @@ func handleCMDout(cmd *exec.Cmd) {
 	// and tailoring their message so as to not flood the output.
 	// styled according to: http://nanodocs.gopagoda.io/engines/style-guide
 	stdoutScanner := bufio.NewScanner(stdout)
-	stdoutScanner.Split(bufio.ScanRunes)
+	stdoutScanner.Split(customScanner)
 	go func() {
 		for stdoutScanner.Scan() {
 
-			// log each line of output to the log
-			Log.Info(stdoutScanner.Text())
+			txt := strings.TrimSpace(stdoutScanner.Text())
+			app := config.Nanofile.Name
 
-			switch stdoutScanner.Text() {
-			case "\n", "\r":
-				fmt.Printf("%s   ", stdoutScanner.Text())
-			default:
-				fmt.Print(stdoutScanner.Text())
+			// handle generic cases
+			switch {
+
+			// show the progress bar when trying to download nanobox/boot2docker
+			case strings.Contains(txt, "box: Progress:"):
+				subMatch := regexp.MustCompile(`box: Progress: (\d{1,3})% \(Rate: (.*), Estimated time remaining: (\d*:\d*:\d*)`).FindStringSubmatch(txt)
+
+				// ensure we have all the submatches needed before using them
+				if len(subMatch) >= 4 {
+					i, err := strconv.Atoi(subMatch[1])
+					if err != nil {
+
+					}
+
+					// show download progress: [*** progress *** 0.0%] 00:00:00 remaining
+					fmt.Printf("\r   [%-41s %s%%] %s (%s remaining)", strings.Repeat("*", int(float64(i)/2.5)), subMatch[1], subMatch[2], subMatch[3])
+				}
 			}
 
-			//
-			switch stdoutScanner.Text() {
-			case fmt.Sprintf("==> %v: VirtualBox VM is already running.", config.Nanofile.Name):
+			// handle specific cases
+			switch txt {
+
+			// nanobox vm has not yet been created
+			case fmt.Sprintf("==> %v: VM not created. Moving on...", app):
+				output <- "Nanobox not yet created, use 'nanobox dev' or 'nanobox run' to create it."
+
+			// nanobox is already running
+			case fmt.Sprintf("==> %v: VirtualBox VM is already running.", app):
 				continue
-			case fmt.Sprintf("==> %v: Importing base box 'nanobox/boot2docker'...", config.Nanofile.Name):
+
+			case fmt.Sprintf("==> %v: Importing base box 'nanobox/boot2docker'...", app):
 				output <- "Importing nanobox base image"
-			case fmt.Sprintf("==> %v: Booting VM...", config.Nanofile.Name):
+			case fmt.Sprintf("==> %v: Booting VM...", app):
 				output <- "Booting virtual machine"
-			case fmt.Sprintf("==> %v: Configuring and enabling network interfaces...", config.Nanofile.Name):
+			case fmt.Sprintf("==> %v: Configuring and enabling network interfaces...", app):
 				output <- "Configuring virtual network"
-			case fmt.Sprintf("==> %v: Mounting shared folders...", config.Nanofile.Name):
+			case fmt.Sprintf("==> %v: Mounting shared folders...", app):
 				output <- fmt.Sprintf("Mounting source code (%s)", config.CWDir)
-			case fmt.Sprintf("==> %v: Waiting for nanobox server...", config.Nanofile.Name):
+			case fmt.Sprintf("==> %v: Waiting for nanobox server...", app):
 				output <- "Starting nanobox server"
-			case fmt.Sprintf("==> %v: Attempting graceful shutdown of VM...", config.Nanofile.Name):
+			case fmt.Sprintf("==> %v: Attempting graceful shutdown of VM...", app):
 				output <- "Shutting down virtual machine"
-			// case fmt.Sprintf("==> %v: Destroying VM and associated drives...", config.Nanofile.Name):
-			// 	output <- "Destroying virtual machine"
-			case fmt.Sprintf("==> %v: Forcing shutdown of VM...", config.Nanofile.Name):
+			case fmt.Sprintf("==> %v: Destroying VM and associated drives...", app):
+				// output <- "Destroying virtual machine"
+			case fmt.Sprintf("==> %v: Forcing shutdown of VM...", app):
 				output <- "Shutting down virtual machine"
-			case fmt.Sprintf("==> %v: Saving VM state and suspending execution...", config.Nanofile.Name):
+			case fmt.Sprintf("==> %v: Saving VM state and suspending execution...", app):
 				output <- "Saving virtual machine"
-				// case fmt.Sprintf("==> %v: Resuming suspended VM...", config.Nanofile.Name):
-				// 	output <- "Resuming virtual machine"
+			case fmt.Sprintf("==> %v: Resuming suspended VM...", app):
+				// output <- "Resuming virtual machine"
 			}
 		}
 
