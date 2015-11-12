@@ -33,46 +33,46 @@ func newVagrant(mockCtrl *gomock.Controller) *mock_vagrant.MockVagrant {
 }
 
 //
-func TestInstallWithImage(test *testing.T) {
-	mockCtrl := gomock.NewController(test)
-	defer mockCtrl.Finish()
-
-	testVagrant := newVagrant(mockCtrl)
-
-	testVagrant.EXPECT().HaveImage().Return(true)
-
-	Install(&cobra.Command{}, []string{})
-}
+// func TestInstallWithImage(test *testing.T) {
+// 	mockCtrl := gomock.NewController(test)
+// 	defer mockCtrl.Finish()
+//
+// 	testVagrant := newVagrant(mockCtrl)
+//
+// 	testVagrant.EXPECT().HaveImage().Return(true)
+//
+// 	Install(&cobra.Command{}, []string{})
+// }
 
 //
-func TestInstallWithoutImage(test *testing.T) {
-	mockCtrl := gomock.NewController(test)
-	defer mockCtrl.Finish()
-
-	testVagrant := newVagrant(mockCtrl)
-
-	testVagrant.EXPECT().HaveImage().Return(false)
-	testVagrant.EXPECT().Install()
-
-	Install(&cobra.Command{}, []string{})
-}
+// func TestInstallWithoutImage(test *testing.T) {
+// 	mockCtrl := gomock.NewController(test)
+// 	defer mockCtrl.Finish()
+//
+// 	testVagrant := newVagrant(mockCtrl)
+//
+// 	testVagrant.EXPECT().HaveImage().Return(false)
+// 	testVagrant.EXPECT().Install()
+//
+// 	Install(&cobra.Command{}, []string{})
+// }
 
 //
-func TestInstallFail(test *testing.T) {
-	mockCtrl := gomock.NewController(test)
-	defer mockCtrl.Finish()
-
-	testVagrant := newVagrant(mockCtrl)
-	testConfig := newConfig(mockCtrl)
-	err := errors.New("something went wrong")
-
-	testVagrant.EXPECT().HaveImage().Return(false)
-	testVagrant.EXPECT().Install().Return(err)
-
-	testConfig.EXPECT().Fatal(gomock.Any(), err.Error())
-
-	Install(&cobra.Command{}, []string{})
-}
+// func TestInstallFail(test *testing.T) {
+// 	mockCtrl := gomock.NewController(test)
+// 	defer mockCtrl.Finish()
+//
+// 	testVagrant := newVagrant(mockCtrl)
+// 	testConfig := newConfig(mockCtrl)
+// 	err := errors.New("something went wrong")
+//
+// 	testVagrant.EXPECT().HaveImage().Return(false)
+// 	testVagrant.EXPECT().Install().Return(err)
+//
+// 	testConfig.EXPECT().Fatal(gomock.Any(), err.Error())
+//
+// 	Install(&cobra.Command{}, []string{})
+// }
 
 //
 // func TestUpdateNotNeeded(test *testing.T) {
