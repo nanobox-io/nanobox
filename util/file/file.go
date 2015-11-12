@@ -192,7 +192,7 @@ func Progress(path string, w io.Writer) error {
 		// update the percent downloaded
 		percent = (float64(down) / float64(download.ContentLength)) * 100
 
-		// show download progress: down/totalMB [*** progress *** %]
+		// show download progress: 0.0/0.0MB [*** progress *** 0.0%]
 		fmt.Printf("\r   %.2f/%.2fMB [%-41s %.2f%%]", float64(down)/math.Pow(1024, 2), total, strings.Repeat("*", int(percent/2.5)), percent)
 
 		// detect EOF and break the 'stream'

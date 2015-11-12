@@ -6,7 +6,6 @@ import (
 	"github.com/nanobox-io/nanobox/commands"
 	"github.com/nanobox-io/nanobox/config"
 	"os"
-	"os/exec"
 	"runtime/debug"
 )
 
@@ -30,25 +29,6 @@ func main() {
 			os.Exit(1)
 		}
 	}()
-
-	pass := true
-
-	// ensure vagrant is installed
-	if err := exec.Command("vagrant", "-v").Run(); err != nil {
-		fmt.Println("Missing dependency 'Vagrant'. Please download and install it to continue (https://www.vagrantup.com/).")
-		pass = false
-	}
-
-	// ensure virtualbox is installed
-	if err := exec.Command("vboxmanage", "-v").Run(); err != nil {
-		fmt.Println("Missing dependency 'Virtualbox'. Please download and install it to continue (https://www.virtualbox.org/wiki/Downloads).")
-		pass = false
-	}
-
-	// if a dependency check fails, exit
-	if !pass {
-		return
-	}
 
 	// check to see if nanobox needs to be updated
 	commands.Update()

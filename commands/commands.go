@@ -8,6 +8,7 @@ import (
 	"github.com/nanobox-io/nanobox/commands/engine"
 	"github.com/nanobox-io/nanobox/commands/production"
 	"github.com/nanobox-io/nanobox/config"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/spf13/cobra"
 	"os"
 	"os/exec"
@@ -24,6 +25,9 @@ var (
 
 		//
 		PersistentPreRun: func(ccmd *cobra.Command, args []string) {
+
+			// ensures all dependencies are satisfied before running nanobox commands
+			runnable(ccmd, args)
 
 			// if the verbose flag is used, up the log level (this will cascade into
 			// all subcommands since this is the root command)
@@ -96,8 +100,36 @@ func init() {
 	NanoboxCmd.AddCommand(production.ProductionCmd)
 }
 
+// runnable ensures all dependencies are satisfied before running box commands
+func runnable(ccmd *cobra.Command, args []string) {
+
+	// ensure vagrant exists
+	if exists := Vagrant.Exists(); !exists {
+		fmt.Println("Missing dependency 'Vagrant'. Please download and install it to continue (https://www.vagrantup.com/).")
+		os.Exit(1)
+	}
+
+	// ensure virtualbox exists
+	if exists := util.VboxExists(); !exists {
+		fmt.Println("Missing dependency 'Virtualbox'. Please download and install it to continue (https://www.virtualbox.org/wiki/Downloads).")
+		os.Exit(1)
+	}
+}
+
 // boot
 func boot(ccmd *cobra.Command, args []string) {
+
+	// ensure vagrant exists before trying to run any nanobox command
+	if exists := Vagrant.Exists(); !exists {
+		fmt.Println("Missing dependency 'Vagrant'. Please download and install it to continue (https://www.vagrantup.com/).")
+		os.Exit(1)
+	}
+
+	// ensure virtualbox exists before trying to run any nanobox command
+	if exists := util.VboxExists(); !exists {
+		fmt.Println("Missing dependency 'Virtualbox'. Please download and install it to continue (https://www.virtualbox.org/wiki/Downloads).")
+		os.Exit(1)
+	}
 
 	// ensure a Vagrantfile is available before attempting to boot the VM
 	initialize(nil, args)
