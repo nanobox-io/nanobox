@@ -27,15 +27,17 @@ var updateCmd = &cobra.Command{
 // update
 func update(ccmd *cobra.Command, args []string) {
 
-	cli, match, err := getUpdateStuff()
+	update, err := updateAvailable()
 	if err != nil {
-		Config.Fatal("[commands/update] getUpdateStuff() failed", err.Error())
+		fmt.Println("Unable to determing if updates are available (see log for details).")
+		Config.Error("[commands/update] updateAvailable() failed", err.Error())
+		return
 	}
 
 	// if the md5s don't match or it's been forced, update
 	switch {
-	case config.Force, !match:
-		runUpdate(cli)
+	case update, config.Force:
+		runUpdate()
 	default:
 		fmt.Printf(stylish.SubBullet("[√] Nanobox is up-to-date"))
 	}
@@ -44,9 +46,11 @@ func update(ccmd *cobra.Command, args []string) {
 // Update
 func Update() {
 
-	cli, match, err := getUpdateStuff()
+	update, err := updateAvailable()
 	if err != nil {
-		Config.Fatal("[commands/update] getUpdateStuff() failed", err.Error())
+		fmt.Println("Unable to determing if updates are available (see log for details).")
+		Config.Error("[commands/update] updateAvailable() failed", err.Error())
+		return
 	}
 
 	// stat the update file to get ModTime(); an error here means the file doesn't
@@ -56,7 +60,7 @@ func Update() {
 
 	// if the md5s don't match and it's 'time' for an update (14 days), OR a force
 	// update is issued, update
-	if !match && time.Since(fi.ModTime()).Hours() >= 336.0 {
+	if update && time.Since(fi.ModTime()).Hours() >= 336.0 {
 
 		//
 		switch printutil.Prompt("Nanobox is out of date, would you like to update it now (y/N)? ") {
@@ -67,99 +71,90 @@ func Update() {
 
 			// if they don't update, assume then that they'll either do it manually or just
 			// wait 14 more days
-			touchUpdate()
+			if err := touchUpdate(); err != nil {
+				fmt.Println("Failed to touch update")
+				Config.Error("[commands/update] updateAvailable() failed", err.Error())
+			}
 
 			return
 
 		// if yes continue to update
 		case "Yes", "yes", "Y", "y":
-			runUpdate(cli)
+			runUpdate()
 		}
 	}
 }
 
-// runUpdate
-func runUpdate(oldPath string) {
-
-	fmt.Printf(stylish.Bullet("Updating nanobox..."))
-
-	//
-	dwnPath := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/%v", runtime.GOOS, runtime.GOARCH, filepath.Base(os.Args[0]))
-
-	//
-	tmpPath := oldPath + "-tmp"
-
-	// create a tmp CLI at the location of the old one
-	cli, err := os.Create(tmpPath)
-	if err != nil {
-		Config.Fatal("[commands/update] os.Create() failed", err.Error())
-	}
-	defer cli.Close()
-
-	// download the new cli
-	fileutil.Progress(dwnPath, cli)
-
-	// make new CLI executable
-	if err := os.Chmod(tmpPath, 0755); err != nil {
-		Config.Fatal("[commands/update] os.Chmod() failed", err.Error())
-	}
-
-	// move new executable over current CLI's location
-	if err = os.Rename(tmpPath, oldPath); err != nil {
-		Config.Fatal("[commands/update] os.Rename() failed", err.Error())
-	}
-
-	//
-	md5Path := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/%v.md5", runtime.GOOS, runtime.GOARCH, filepath.Base(os.Args[0]))
-
-	// ensure the newly downloaded cli matches the remote
-	match, err := Util.MD5sMatch(oldPath, md5Path)
-	if err != nil {
-		Config.Fatal("[commands/update] util.MD5sMatch() failed", err.Error())
-	}
-
-	// if they don't match it's the wrong CLI
-	if !match {
-		fmt.Println("MD5 checksum failed! Your nanobox-desktop (CLI) is not ours!")
-		return
-	}
-
-	// if the new CLI fails to execute, just print a generic message and return
-	out, err := exec.Command(oldPath, "-v").Output()
-	if err != nil {
-		fmt.Printf(stylish.SubBullet("[√] Update successful"))
-		return
-	}
-
-	fmt.Printf(stylish.SubBullet("[√] Now running %s", string(out)))
-
-	// update the .update file
-	touchUpdate()
-}
-
-// touchUpdate updates the mod time on the ~/.nanobox/.update file
-func touchUpdate() {
-	// update the modification time of the .update file
-	if err := os.Chtimes(config.UpdateFile, time.Now(), time.Now()); err != nil {
-		Config.Fatal("[commands.update] os.Chtimes() failed", err.Error())
-	}
-}
-
-// getUpdateStuff
-func getUpdateStuff() (cli string, match bool, err error) {
+// updateAvailable
+func updateAvailable() (match bool, err error) {
 
 	// get the path of the current executing CLI
-	if cli, err = osext.Executable(); err != nil {
+	exe, err := osext.Executable()
+	if err != nil {
 		return
 	}
 
 	// check the current cli md5 against the remote md5; os.Args[0] is used as the
 	// final interpolation to determine standard/dev versions
-	md5Path := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/%v.md5", runtime.GOOS, runtime.GOARCH, filepath.Base(os.Args[0]))
+	md5 := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/%v.md5", runtime.GOOS, runtime.GOARCH, filepath.Base(os.Args[0]))
+	return Util.MD5sMatch(exe, md5)
+}
 
-	if match, err = Util.MD5sMatch(cli, md5Path); err != nil {
-		return
+// runUpdate
+func runUpdate() error {
+
+	fmt.Printf(stylish.Bullet("Updating nanobox..."))
+
+	// get the path of the current executing CLI
+	exe, err := osext.Executable()
+	if err != nil {
+		return err
 	}
 
-	return
+	prog := filepath.Base(os.Args[0])
+	tmpDir := config.Root + "/tmp"
+	tmpFile := tmpDir + "/" + prog
+
+	// create a tmp dir to download the new cli to
+	if err := os.Mkdir(tmpDir, 0755); err != nil {
+		return err
+	}
+
+	// create a tmp cli in tmp dir
+	cli, err := os.Create(tmpFile)
+	if err != nil {
+		return err
+	}
+	defer cli.Close()
+
+	// download the new cli
+	dl := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/%v", runtime.GOOS, runtime.GOARCH, prog)
+	fileutil.Progress(dl, cli)
+
+	// make new CLI executable
+	if err := os.Chmod(tmpFile, 0755); err != nil {
+		return err
+	}
+
+	// move new executable over current CLI's location
+	if err = os.Rename(tmpFile, exe); err != nil {
+		return err
+	}
+
+	// if the new CLI fails to execute, just print a generic message and return
+	out, err := exec.Command(exe, "-v").Output()
+	if err != nil {
+		fmt.Printf(stylish.SubBullet("[√] Update successful"))
+		return nil
+	}
+
+	fmt.Printf(stylish.SubBullet("[√] Now running %s", string(out)))
+
+	// update the .update file
+	return touchUpdate()
+}
+
+// touchUpdate updates the mod time on the ~/.nanobox/.update file
+func touchUpdate() error {
+	return os.Chtimes(config.UpdateFile, time.Now(), time.Now())
 }

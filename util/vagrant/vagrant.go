@@ -5,22 +5,33 @@ import (
 	"bufio"
 	"fmt"
 	"github.com/nanobox-io/nanobox/config"
-	fileutil "github.com/nanobox-io/nanobox/util/file"
 	"os"
 	"os/exec"
 	"time"
 )
 
 //
-var (
-	err error //
-)
+var err error
 
-// HaveImage returns based on wether the nanobox vagrant image is found on the
-// machine or not
-func HaveImage() bool {
-	_, err := os.Stat(config.Root + "/nanobox-boot2docker.box")
-	return err == nil
+// run runs a vagrant command
+func run(cmd *exec.Cmd) error {
+
+	//
+	handleCMDout(cmd)
+
+	// start the command; we need this to 'fire and forget' so that we can manually
+	// capture and modify the commands output above
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+
+	// wait for the command to complete/fail and exit, giving us a chance to scan
+	// the output
+	if err := cmd.Wait(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // runInContext runs a command in the context of a Vagrantfile (from the same dir)
@@ -31,6 +42,38 @@ func runInContext(cmd *exec.Cmd) error {
 	// atleast run (especially in cases like 'create' where a VM hadn't been created
 	// yet, and a UUID isn't available)
 	setContext(config.AppDir)
+
+	//
+	handleCMDout(cmd)
+
+	// start the command; we need this to 'fire and forget' so that we can manually
+	// capture and modify the commands output above
+	if err := cmd.Start(); err != nil {
+		return err
+	}
+
+	// wait for the command to complete/fail and exit, giving us a chance to scan
+	// the output
+	if err := cmd.Wait(); err != nil {
+		return err
+	}
+
+	// switch back to project dir
+	setContext(config.CWDir)
+
+	return nil
+}
+
+// setContext changes the working directory to the designated context
+func setContext(context string) {
+	if err := os.Chdir(context); err != nil {
+		fmt.Printf("No app found at %s, exiting...\n", config.AppDir)
+		os.Exit(1)
+	}
+}
+
+// handleCMDout
+func handleCMDout(cmd *exec.Cmd) {
 
 	// start a goroutine that will act as an 'outputer' allowing us to add 'dots'
 	// to the end of each line (as these lines are a reduced version of the actual
@@ -74,6 +117,20 @@ func runInContext(cmd *exec.Cmd) error {
 		}
 	}()
 
+	// create a stderr pipe that will write any error messages to the log
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		config.Fatal("[util/vagrant/vagrant] cmd.StderrPipe() failed - ", err.Error())
+	}
+
+	// log any command errors to the log
+	stderrScanner := bufio.NewScanner(stderr)
+	go func() {
+		for stderrScanner.Scan() {
+			Log.Error(stderrScanner.Text())
+		}
+	}()
+
 	// create a stdout pipe that will allow for scanning the output line-by-line;
 	// if needed a stderr pipe could also be created at some point
 	stdout, err := cmd.StdoutPipe()
@@ -81,21 +138,23 @@ func runInContext(cmd *exec.Cmd) error {
 		config.Fatal("[util/vagrant/vagrant] cmd.StdoutPipe() failed - ", err.Error())
 	}
 
-	// create a stderr pipe that will write any error messages to the log
-	stderr, err := cmd.StderrPipe()
-	if err != nil {
-		config.Fatal("[util/vagrant/vagrant] cmd.StderrPipe() failed - ", err.Error())
-	}
-
 	// scan the command output intercepting only 'important' lines of vagrant output'
 	// and tailoring their message so as to not flood the output.
 	// styled according to: http://nanodocs.gopagoda.io/engines/style-guide
 	stdoutScanner := bufio.NewScanner(stdout)
+	stdoutScanner.Split(bufio.ScanRunes)
 	go func() {
 		for stdoutScanner.Scan() {
 
 			// log each line of output to the log
 			Log.Info(stdoutScanner.Text())
+
+			switch stdoutScanner.Text() {
+			case "\n", "\r":
+				fmt.Printf("%s   ", stdoutScanner.Text())
+			default:
+				fmt.Print(stdoutScanner.Text())
+			}
 
 			//
 			switch stdoutScanner.Text() {
@@ -127,62 +186,4 @@ func runInContext(cmd *exec.Cmd) error {
 		// close the output channel once all lines of command output have been read
 		close(output)
 	}()
-
-	// log any command errors to the log
-	stderrScanner := bufio.NewScanner(stderr)
-	go func() {
-		for stderrScanner.Scan() {
-			Log.Error(stderrScanner.Text())
-		}
-	}()
-
-	// start the command; we need this to 'fire and forget' so that we can manually
-	// capture and modify the commands output
-	if err := cmd.Start(); err != nil {
-		return err
-	}
-
-	// wait for the command to complete/fail and exit, giving us a chance to scan
-	// the output
-	if err := cmd.Wait(); err != nil {
-		return err
-	}
-
-	// switch back to project dir
-	setContext(config.CWDir)
-
-	return nil
-}
-
-// download downloads the newest nanobox vagrant image and the corresponding md5
-// hash
-func download() error {
-
-	// download vm
-	box, err := os.Create(config.Root + "/nanobox-boot2docker.box")
-	if err != nil {
-		config.Fatal("[util/vagrant/vagrant] os.Create() failed - ", err.Error())
-	}
-	defer box.Close()
-
-	//
-	return fileutil.Progress(fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/boxes/vagrant/nanobox-boot2docker.box"), box)
-}
-
-// add adds the nanobox vagrant image to the list of images (always overriding the
-// currently installed image)
-func add() error {
-	if b, err := exec.Command("vagrant", "box", "add", "--force", "--name", "nanobox/boot2docker", config.Root+"/nanobox-boot2docker.box").CombinedOutput(); err != nil {
-		return fmt.Errorf("[util/vagrant/vagrant] add() failed - %v: %v", err.Error(), string(b))
-	}
-
-	return nil
-}
-
-// setContext changes the working directory to the designated context
-func setContext(context string) {
-	if err := os.Chdir(context); err != nil {
-		fmt.Printf("No app found at %s, exiting...\n", config.AppDir)
-		os.Exit(1)
-	}
 }

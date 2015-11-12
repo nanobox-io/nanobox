@@ -4,7 +4,6 @@ package vagrant
 type (
 	vagrant struct{}
 	Vagrant interface {
-		HaveImage() bool
 		Install() error
 		Update() error
 		Destroy() error
@@ -57,10 +56,6 @@ func (vagrant) Init() {
 
 func (vagrant) Destroy() error {
 	return Destroy()
-}
-
-func (vagrant) HaveImage() bool {
-	return HaveImage()
 }
 
 func (vagrant) Install() error {
