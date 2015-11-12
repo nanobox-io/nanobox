@@ -3,8 +3,25 @@ package util
 
 import (
 	"fmt"
+	"os/exec"
 	"testing"
 )
+
+// test if VboxExists works as intended
+func TestVboxExists(t *testing.T) {
+
+	exists := false
+	if err := exec.Command("vboxmanage", "-v").Run(); err == nil {
+		exists = true
+	}
+
+	//
+	testExists := VboxExists()
+
+	if testExists != exists {
+		t.Error("Results don't match!")
+	}
+}
 
 //
 func TestMD5sMatch(t *testing.T) {

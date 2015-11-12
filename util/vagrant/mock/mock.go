@@ -38,6 +38,16 @@ func (_mr *_MockVagrantRecorder) Destroy() *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "Destroy")
 }
 
+func (_m *MockVagrant) Exists() bool {
+	ret := _m.ctrl.Call(_m, "Exists")
+	ret0, _ := ret[0].(bool)
+	return ret0
+}
+
+func (_mr *_MockVagrantRecorder) Exists() *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "Exists")
+}
+
 func (_m *MockVagrant) Init() {
 	_m.ctrl.Call(_m, "Init")
 }
