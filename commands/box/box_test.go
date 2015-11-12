@@ -2,13 +2,13 @@
 package box
 
 import (
-	"errors"
+	// "errors"
 	"github.com/golang/mock/gomock"
 	"github.com/nanobox-io/nanobox/config/mock"
 	"github.com/nanobox-io/nanobox/util/mock"
 	"github.com/nanobox-io/nanobox/util/vagrant/mock"
-	"github.com/spf13/cobra"
-	"testing"
+	// "github.com/spf13/cobra"
+	// "testing"
 )
 
 //
