@@ -121,7 +121,7 @@ increasing your max file descriptor limit to re-enable this functionality.
 
 			// call the handler for each even fired
 			if err := handle(&event); err != nil {
-				return err
+				config.Error("[util/notify/notify] handle error - ", err.Error())
 			}
 
 		// handle any errors by calling the handler function
