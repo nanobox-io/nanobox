@@ -1,43 +1,43 @@
-## Nanobox CLI
+[![nanoboxdesktop logo](http://nano-assets.gopagoda.io/readme-headers/nanoboxdesktop.png)](http://nanobox.io/open-source#nanoboxdesktop)
+[![Build Status](https://travis-ci.org/nanopack/nanobox.svg)](https://travis-ci.org/nanopack/nanobox)
 
-Releases available for the following Operating Systems (OS) and Architectures (OSArch):
+## Nanobox Desktop
 
-Tested:
+[Nanobox desktop](https://desktop.nanobox.io/) gets rid of conventional "environments", such as development and production, and creates one unified environment; a nanobox environment. [Engines](https://docs.nanobox.io/engines/) help nanobox create these isolated, shareable, disposable environments, ensuring that whatever environment is created with nanobox is the same no matter where it lives.
 
-* OSX 10.6+ (darwin) - 386 | amd64
-* Linux - 386 | amd64 | arm
-* Windows 98+ - 386 | amd64
 
-Untested:
+## How It Works
 
-* FreeBSD - 386 | amd64 | arm
-* NetBSD - 386 | amd64 | arm
-* OpenBSD - 386 | amd64
-* Solaris - amd64
+Leveraging Vagrant and Docker, nanobox creates a virtual machine and launches docker containers that represent each piece of your application. Your nanobox environment will have everything it needs to run your application. Once you are done with it, you can "throw it away", leaving your machine clean. You'll never have to worry about having the right version of a language installed or managing dependencies again.
+
+
+## Why Nanobox?
+
+Nanobox allows you to stop configuring environments and just code. It guarantees that any project you start will work the same for anyone else collaborating on the project. When it's time to launch the project, you'll know that your production app will work, because it already works on nanobox.
+
 
 ### Installation
 
-To install the CLI first download the build that corresponds to your OS/OSArch from [nanobox.io/downloads](https://nanobox.io/downloads), then depending on your OS follow the steps below.
+[Nanobox desktop](https://desktop.nanobox.io/downloads/) can be installed in two different ways:
+
+1. Just the nanobox desktop binary.
+2. The nanobox desktop installer which includes the binary and all its dependencies (Vagrant, and Virtualbox)
 
 
-#### OSX and Linux:
+#### When using just the binary:
 
-1. Place the binary in your $PATH (ex. ~/bin) and run `chmod 755 nanobox`.
+##### OSX and Linux:
+
+1. Place the binary in your $PATH (ex. ~/bin) and run "chmod 755 nanobox".
+3. Run "which nanobox" to ensure it's accessible from your $PATH.
 2. Type `nanobox` to view a list of available commands.
 
 
-#### Windows
+##### Windows
 
 It is _**highly recommended**_ that you use [git bash](http://git-scm.com/downloads) as your shell. Not only will this provide the git workflow you'll need for Nanobox, but it will also give the CLI what it needs for features such as tunneling and SSH access to servers.
 
 1. Place the nanobox.exe file in your $PATH (ex. C:/Windows), then you can either run it by clicking on it or using a shell.
-
-
-#### From source:
-
-1. `cd` into the folder on your GOPATH where you want the project to live.
-2. `git clone git@github.com/nanobox-io/nanobox`.
-3. Type `nanobox` and follow the instructions to authenticate the CLI with Nanobox.
 
 
 ### Usage
@@ -50,7 +50,7 @@ Available Commands:
   run           Starts a nanobox, provisions the app, & runs the app's exec
   dev           Starts the nanobox, provisions app, & opens an interactive terminal
   info          Displays information about the nanobox and your app
-  console       Opens an interactive terminal from inside your app on the nanobox
+  console       Opens an interactive terminal from inside your app on nanobox
   destroy       Destroys the nanobox
   stop          Suspends the nanobox
   update        Updates the CLI to the newest available version
@@ -61,7 +61,6 @@ Available Commands:
 Flags:
       --background[=false]: Stops nanobox from auto-suspending.
   -f, --force[=false]: Forces a command to run (effects vary per command).
-  -h, --help[=false]: help for nanobox
   -v, --verbose[=false]: Increase command output from 'info' to 'debug'.
       --version[=false]: Display the current version of this CLI
 
@@ -78,18 +77,16 @@ Use "nanobox [command] --help" for more information about a command.
 
 
 ## Todo/Doing
-- Tests!
 - Make it work on Windows
+- More tests (you can never had enough!)
 
 
 ## Contributing
-1. Fork it
-2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Added some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+Contributing to nanobox desktop is easy, just follow this [guide](https://docs.nanobox.io/contributing/)
 
 
 ### Contact
 
-For help using the CLI or if you have any questions or suggestions, please find us on IRC (freenode) at #nanobox.
+For help using nanobox desktop or if you have any questions/suggestions, please find us on IRC (freenode) at #nanobox.
+
+[![nanobox logo](http://nano-assets.gopagoda.io/open-src/nanobox-open-src.png)](http://nanobox.io/open-source)

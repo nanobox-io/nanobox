@@ -3,9 +3,9 @@ package mist
 
 import (
 	"encoding/json"
-	mistClient "github.com/nanobox-io/golang-mist"
 	"github.com/nanobox-io/nanobox/config"
 	printutil "github.com/nanobox-io/nanobox/util/print"
+	mistClient "github.com/nanopack/mist/core"
 	"regexp"
 	"strings"
 )
