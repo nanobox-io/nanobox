@@ -1,5 +1,5 @@
 [![nanoboxdesktop logo](http://nano-assets.gopagoda.io/readme-headers/nanoboxdesktop.png)](http://nanobox.io/open-source#nanoboxdesktop)
-[![Build Status](https://travis-ci.org/nanopack/nanobox.svg)](https://travis-ci.org/nanopack/nanobox)
+[![Build Status](https://travis-ci.org/nanobox-io/nanobox.svg)](https://travis-ci.org/nanobox-io/nanobox)
 
 ## Nanobox Desktop
 
