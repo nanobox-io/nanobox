@@ -29,8 +29,11 @@ func Watch(path string, handle func(e *fsnotify.Event) error) error {
 
 	// get a list of directories that should not be watched; this is done because
 	// there is a limit to how many files can be watched at a time, so folders like
-	// node_modules, bower_components, vendor, etc...
-	getIgnoreDirs()
+	// node_modules, bower_components, vendor, etc...; if this fails we probably
+	// want to return an error because we would be detremental to watch those files
+	if err := getIgnoreDirs(); err != nil {
+		return fmt.Errorf("Unable to read ignore dirs - %v", err.Error())
+	}
 
 	// add source control files to be ignored (git, mercuriel, svn)
 	ignoreDirs = append(ignoreDirs, ".git", ".hg", "trunk")
@@ -47,7 +50,8 @@ increasing your max file descriptor limit to re-enable this functionality.
 `)
 		}
 
-		config.Fatal("[util/notify/notify] watcher.NewWatcher() failed - ", err.Error())
+		// return error here because w/o a watcher we really cant do anything
+		return fmt.Errorf("Failed to create watcher - %v", err.Error())
 	}
 
 	// return this err because that means the path to the file they are trying to
@@ -85,9 +89,8 @@ increasing your max file descriptor limit to re-enable this functionality.
 		// handle any file events by calling the handler function
 		case event := <-watcher.Events:
 
-			// I use fileinfo here instead of error simply to avoid err collisions; the
-			// error would be just as good at indicating if the file existed or not
-			fi, _ := os.Stat(event.Name)
+			//
+			fi, err := os.Stat(event.Name)
 
 			switch event.Op {
 
@@ -98,7 +101,7 @@ increasing your max file descriptor limit to re-enable this functionality.
 				// ensure that the file still exists before trying to watch it; ran into
 				// a case with VIM where some tmp file (.swpx) was create and removed in
 				// the same instant causing the watch to panic
-				if fi != nil && fi.Mode().IsDir() {
+				if err == nil && fi != nil && fi.Mode().IsDir() {
 
 					// just ignore errors here since there isn't really anything that can
 					// be done about it
@@ -111,17 +114,18 @@ increasing your max file descriptor limit to re-enable this functionality.
 
 				// ensure thath the file is still available to be removed before attempting
 				// to remove it; the main reason for manually removing files is to help
-				// spare the ulimit
-				if fi != nil {
+				// spare the ulimit; just log errors here, dont disrupt workflow.
+				if err == nil {
 					if err := watcher.Remove(event.Name); err != nil {
-						config.Fatal("[util/notify/notify] watcher.Remove() failed - ", err.Error())
+						config.Info(fmt.Sprintf("Unable to watch file %v - %v", event.Name, err.Error()))
 					}
 				}
 			}
 
-			// call the handler for each even fired
+			// call the handler for each even fired; just log errors here, dont disrupt
+			// workflow.
 			if err := handle(&event); err != nil {
-				config.Error("[util/notify/notify] handle error - ", err.Error())
+				config.Info(fmt.Sprintf("Unable to stop watching file %v - %v", event.Name, err.Error()))
 			}
 
 		// handle any errors by calling the handler function
@@ -145,10 +149,11 @@ func watchDir(path string, fi os.FileInfo, err error) error {
 	}
 
 	// recursively add watchers to directores only (fsnotify will watch all files
-	// in an added directory). Also, dont watch any files/dirs on the ignore list
+	// in an added directory). Also, dont watch any files/dirs on the ignore list;
+	// just log errors here, dont disrupt workflow.
 	if fi.Mode().IsDir() {
 		if err = watcher.Add(path); err != nil {
-			config.Fatal("[util/notify/notify] watcher.Add() failed - ", err.Error())
+			config.Info(fmt.Sprintf("Unable to watch dir %v - %v", path, err.Error()))
 		}
 	}
 
@@ -166,20 +171,18 @@ func isIgnoreDir(name string) bool {
 }
 
 // getIgnoreDirs
-func getIgnoreDirs() {
+func getIgnoreDirs() error {
 	res, err := http.Get(fmt.Sprintf("%s/libdirs", config.ServerURL))
 	if err != nil {
-		config.Fatal("[util/notify/notify] htto.Get() failed - ", err.Error())
+		return err
 	}
 	defer res.Body.Close()
 
 	//
 	b, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		config.Fatal("[util/notify/notify] ioutil.ReadAll() failed - ", err.Error())
+		return err
 	}
 
-	if err := json.Unmarshal(b, &ignoreDirs); err != nil {
-		config.Fatal("[util/notify/notify] json.Unmarshal() failed - ", err.Error())
-	}
+	return json.Unmarshal(b, &ignoreDirs)
 }
