@@ -8,6 +8,7 @@ import (
 	mistClient "github.com/nanopack/mist/core"
 	"regexp"
 	"strings"
+	"time"
 )
 
 //
@@ -70,12 +71,21 @@ func Listen(tags []string, handle func(string) error) error {
 		return nil
 	}
 
-	// connect
-	client := connect()
+	// connect to mist
+	client, err := mistClient.NewRemoteClient(config.MistURI)
+	if err != nil {
+		config.Fatal("[util/server/mist/mist] mist.NewRemoteClient() failed - ", err.Error())
+	}
 	defer client.Close()
 
+	// this is a bandaid to fix a race condition in mist when immediatly subscribing
+	// after connecting a client; once this is fixed in mist this can be removed
+	<-time.After(time.Second * 1)
+
 	// subscribe
-	subscribe(client, tags)
+	if err := client.Subscribe(tags); err != nil {
+		config.Fatal("[util/server/mist/mist] client.Subscribe() failed - ", err.Error())
+	}
 	defer delete(subscriptions, strings.Join(tags, ""))
 
 	// add tags to list of subscriptions
@@ -109,12 +119,21 @@ func Stream(tags []string, handle func(Log)) {
 		return
 	}
 
-	// connect
-	client := connect()
+	// connect to mist
+	client, err := mistClient.NewRemoteClient(config.MistURI)
+	if err != nil {
+		config.Fatal("[util/server/mist/mist] mist.NewRemoteClient() failed - ", err.Error())
+	}
 	defer client.Close()
 
+	// this is a bandaid to fix a race condition in mist when immediatly subscribing
+	// after connecting a client; once this is fixed in mist this can be removed
+	<-time.After(time.Second * 1)
+
 	// subscribe
-	subscribe(client, tags)
+	if err := client.Subscribe(tags); err != nil {
+		config.Fatal("[util/server/mist/mist] client.Subscribe() failed - ", err.Error())
+	}
 	defer delete(subscriptions, strings.Join(tags, ""))
 
 	// add tags to list of subscriptions
@@ -133,23 +152,6 @@ func Stream(tags []string, handle func(Log)) {
 
 		//
 		handle(log)
-	}
-}
-
-// connect connects 'mist' to the server running on the guest machine
-func connect() mistClient.Client {
-	mistClient, err := mistClient.NewRemoteClient(config.MistURI)
-	if err != nil {
-		config.Fatal("[util/server/mist/mist] mist.NewRemoteClient() failed - ", err.Error())
-	}
-
-	return mistClient
-}
-
-// subscribe
-func subscribe(client mistClient.Client, tags []string) {
-	if err := client.Subscribe(tags); err != nil {
-		config.Fatal("[util/server/mist/mist] client.Subscribe() failed - ", err.Error())
 	}
 }
 
