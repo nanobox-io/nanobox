@@ -78,7 +78,7 @@ Use "nanobox [command] --help" for more information about a command.
 
 ## Todo/Doing
 - Make it work on Windows
-- More tests (you can never had enough!)
+- More tests (you can never have enough!)
 
 
 ## Contributing
