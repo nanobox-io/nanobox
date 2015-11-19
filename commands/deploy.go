@@ -6,6 +6,7 @@ import (
 	"github.com/nanobox-io/nanobox-golang-stylish"
 	"github.com/nanobox-io/nanobox/config"
 	engineutil "github.com/nanobox-io/nanobox/util/engine"
+	"github.com/nanobox-io/nanobox/util/server"
 	"github.com/spf13/cobra"
 	"net/url"
 	"strconv"
@@ -62,8 +63,8 @@ func deploy(ccmd *cobra.Command, args []string) {
 	}
 
 	// run a deploy
-	if err := Server.Deploy(v.Encode()); err != nil {
-		Config.Fatal("[commands/deploy] server.Deploy() failed", err.Error())
+	if err := server.Deploy(v.Encode()); err != nil {
+		server.Fatal("[commands/deploy] server.Deploy() failed", err.Error())
 	}
 
 	// wait for a status update (blocking)
