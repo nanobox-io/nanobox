@@ -119,14 +119,15 @@ func runUpdate() error {
 		return err
 	}
 
+	//
+
 	prog := filepath.Base(os.Args[0])
 	tmpDir := config.Root + "/tmp"
 	tmpFile := tmpDir + "/" + prog
 
-	// create a tmp dir to download the new cli to
-	if err := os.Mkdir(tmpDir, 0755); err != nil {
-		return err
-	}
+	// create a tmp dir to download the new cli to; don't care about the error here
+	// because if the tmp dir already exists we'll just use it
+	os.Mkdir(tmpDir, 0755)
 
 	// create a tmp cli in tmp dir
 	cli, err := os.Create(tmpFile)
