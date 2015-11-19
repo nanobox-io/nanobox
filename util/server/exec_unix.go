@@ -11,8 +11,10 @@ import (
 
 func monitorTerminal(stdOutFD uintptr, params string) {
 	sigs := make(chan os.Signal, 1)
+
 	signal.Notify(sigs, syscall.SIGWINCH)
 	defer signal.Stop(sigs)
+
 	for range sigs {
 		w, h := terminal.GetTTYSize(stdOutFD)
 		resizeTTY(stdOutFD, params, w, h)

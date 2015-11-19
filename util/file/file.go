@@ -150,7 +150,7 @@ func Download(path string, w io.Writer) error {
 
 	b, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		config.Fatal("[util/file/file] ioutil.ReadAll() failed - ", err.Error())
+		config.Fatal("[util/file/file] ioutil.ReadAll() failed", err.Error())
 	}
 
 	w.Write(b)

@@ -3,10 +3,9 @@ package commands
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
-	// "github.com/nanobox-io/nanobox-golang-stylish"
 	"github.com/nanobox-io/nanobox/config"
 	"github.com/nanobox-io/nanobox/util/server"
+	"github.com/spf13/cobra"
 )
 
 //
@@ -39,9 +38,9 @@ Nanobox Files  : %s
 
 	//
 	var services []server.Service
-	res, err := Server.Get("/services", &services)
+	res, err := server.Get("/services", &services)
 	if err != nil {
-		Config.Fatal("[commands/info] failed - ", err.Error())
+		server.Fatal("[commands/info] failed", err.Error())
 	}
 	defer res.Body.Close()
 

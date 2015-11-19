@@ -74,7 +74,7 @@ func Listen(tags []string, handle func(string) error) error {
 	// connect to mist
 	client, err := mistClient.NewRemoteClient(config.MistURI)
 	if err != nil {
-		config.Fatal("[util/server/mist/mist] mist.NewRemoteClient() failed - ", err.Error())
+		config.Fatal("[util/server/mist/mist] mist.NewRemoteClient() failed", err.Error())
 	}
 	defer client.Close()
 
@@ -84,7 +84,7 @@ func Listen(tags []string, handle func(string) error) error {
 
 	// subscribe
 	if err := client.Subscribe(tags); err != nil {
-		config.Fatal("[util/server/mist/mist] client.Subscribe() failed - ", err.Error())
+		config.Fatal("[util/server/mist/mist] client.Subscribe() failed", err.Error())
 	}
 	defer delete(subscriptions, strings.Join(tags, ""))
 
@@ -97,7 +97,7 @@ func Listen(tags []string, handle func(string) error) error {
 
 		// unmarshal the incoming Message
 		if err := json.Unmarshal([]byte(msg.Data), &model); err != nil {
-			config.Fatal("[util/server/mist/mist] json.Unmarshal() failed - ", err.Error())
+			config.Fatal("[util/server/mist/mist] json.Unmarshal() failed", err.Error())
 		}
 
 		// handle the status; when the handler returns false, it's time to break the
@@ -122,7 +122,7 @@ func Stream(tags []string, handle func(Log)) {
 	// connect to mist
 	client, err := mistClient.NewRemoteClient(config.MistURI)
 	if err != nil {
-		config.Fatal("[util/server/mist/mist] mist.NewRemoteClient() failed - ", err.Error())
+		config.Fatal("[util/server/mist/mist] mist.NewRemoteClient() failed", err.Error())
 	}
 	defer client.Close()
 
@@ -132,7 +132,7 @@ func Stream(tags []string, handle func(Log)) {
 
 	// subscribe
 	if err := client.Subscribe(tags); err != nil {
-		config.Fatal("[util/server/mist/mist] client.Subscribe() failed - ", err.Error())
+		config.Fatal("[util/server/mist/mist] client.Subscribe() failed", err.Error())
 	}
 	defer delete(subscriptions, strings.Join(tags, ""))
 
@@ -147,7 +147,7 @@ func Stream(tags []string, handle func(Log)) {
 
 		// unmarshal the incoming Message
 		if err := json.Unmarshal([]byte(msg.Data), &log); err != nil {
-			config.Fatal("[util/server/mist/mist] json.Unmarshal() failed - ", err.Error())
+			config.Fatal("[util/server/mist/mist] json.Unmarshal() failed", err.Error())
 		}
 
 		//

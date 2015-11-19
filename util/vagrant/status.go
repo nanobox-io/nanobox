@@ -36,13 +36,13 @@ func Status() (status string) {
 	// get the initial data
 	machineIndex := make(map[string]json.RawMessage)
 	if err := json.Unmarshal(b, &machineIndex); err != nil {
-		config.Fatal("[util/vagrant/status] json.Unmarshal() machineIndex failed - ", err.Error())
+		config.Fatal("[util/vagrant/status] json.Unmarshal() machineIndex failed", err.Error())
 	}
 
 	// read the machines from machineIndex
 	machines := make(map[string]json.RawMessage)
 	if err := json.Unmarshal(machineIndex["machines"], &machines); err != nil {
-		config.Fatal("[util/vagrant/status] json.Unmarshal() machines failed - ", err.Error())
+		config.Fatal("[util/vagrant/status] json.Unmarshal() machines failed", err.Error())
 	}
 
 	// attempt to pull the machine based on the uuid
@@ -54,7 +54,7 @@ func Status() (status string) {
 	}{}
 	if m, ok := machines[uuid]; ok {
 		if err := json.Unmarshal(m, &machine); err != nil {
-			config.Fatal("[util/vagrant/status] json.Unmarshal() machine failed - ", err.Error())
+			config.Fatal("[util/vagrant/status] json.Unmarshal() machine failed", err.Error())
 		}
 	}
 

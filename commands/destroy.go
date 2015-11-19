@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 	"github.com/nanobox-io/nanobox/config"
+	"github.com/nanobox-io/nanobox/util/vagrant"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -45,11 +46,11 @@ func destroy(ccmd *cobra.Command, args []string) {
 	// re-created)
 	fmt.Printf(stylish.Bullet("Destroying nanobox..."))
 	fmt.Printf(stylish.Bullet("Nanobox may require admin privileges to modify your /etc/hosts file and /etc/exports."))
-	if err := Vagrant.Destroy(); err != nil {
+	if err := vagrant.Destroy(); err != nil {
 
 		// dont care if the project no longer exists... thats what we're doing anyway
 		if err != err.(*os.PathError) {
-			Config.Fatal("[commands/destroy] vagrant.Destroy() failed - ", err.Error())
+			vagrant.Fatal("[commands/destroy] vagrant.Destroy() failed", err.Error())
 		}
 	}
 

@@ -6,6 +6,7 @@ import (
 	"github.com/nanobox-io/nanobox-golang-stylish"
 	"github.com/nanobox-io/nanobox/config"
 	engineutil "github.com/nanobox-io/nanobox/util/engine"
+	"github.com/nanobox-io/nanobox/util/server"
 	"github.com/spf13/cobra"
 )
 
@@ -54,8 +55,8 @@ func dev(ccmd *cobra.Command, args []string) {
 			}
 
 			// run a deploy
-			if err := Server.Deploy(""); err != nil {
-				Config.Fatal("[commands/dev] server.Deploy() failed - ", err.Error())
+			if err := server.Deploy(""); err != nil {
+				server.Fatal("[commands/dev] server.Deploy() failed", err.Error())
 			}
 
 			// stream log output
@@ -79,8 +80,8 @@ func dev(ccmd *cobra.Command, args []string) {
 	}
 
 	//
-	if err := Server.Exec("develop", ""); err != nil {
-		config.Error("[commands/dev] Server.Exec failed", err.Error())
+	if err := server.Exec("develop", ""); err != nil {
+		server.Error("[commands/dev] Server.Exec failed", err.Error())
 	}
 
 	// PostRun: halt
