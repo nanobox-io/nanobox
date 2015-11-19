@@ -3,6 +3,7 @@ package commands
 
 import (
 	"fmt"
+
 	"github.com/nanobox-io/nanobox-golang-stylish"
 	"github.com/nanobox-io/nanobox/util/vagrant"
 	"github.com/spf13/cobra"

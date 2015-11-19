@@ -4,12 +4,13 @@ package server
 import (
 	"encoding/json"
 	"errors"
-	"github.com/nanobox-io/nanobox/config"
 	"io"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"time"
+
+	"github.com/nanobox-io/nanobox/config"
 )
 
 var (

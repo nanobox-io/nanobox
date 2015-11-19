@@ -3,12 +3,14 @@ package mist
 
 import (
 	"encoding/json"
-	"github.com/nanobox-io/nanobox/config"
-	printutil "github.com/nanobox-io/nanobox/util/print"
-	mistClient "github.com/nanopack/mist/core"
 	"regexp"
 	"strings"
 	"time"
+
+	mistClient "github.com/nanopack/mist/core"
+
+	"github.com/nanobox-io/nanobox/config"
+	printutil "github.com/nanobox-io/nanobox/util/print"
 )
 
 //

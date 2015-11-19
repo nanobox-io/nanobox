@@ -5,13 +5,14 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"github.com/nanobox-io/nanobox/config"
 	"os"
 	"os/exec"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/nanobox-io/nanobox/config"
 )
 
 //

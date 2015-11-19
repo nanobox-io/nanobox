@@ -3,9 +3,11 @@ package commands
 
 import (
 	"fmt"
+
+	"github.com/spf13/cobra"
+
 	"github.com/nanobox-io/nanobox/config"
 	"github.com/nanobox-io/nanobox/util/server"
-	"github.com/spf13/cobra"
 )
 
 //

@@ -3,10 +3,12 @@
 package server
 
 import (
-	syscall "github.com/docker/docker/pkg/signal"
-	"github.com/nanobox-io/nanobox/util/server/terminal"
 	"os"
 	"os/signal"
+
+	syscall "github.com/docker/docker/pkg/signal"
+
+	"github.com/nanobox-io/nanobox/util/server/terminal"
 )
 
 func monitorTerminal(stdOutFD uintptr, params string) {

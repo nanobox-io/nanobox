@@ -3,10 +3,11 @@ package main
 
 import (
 	"fmt"
-	"github.com/nanobox-io/nanobox/commands"
-	"github.com/nanobox-io/nanobox/config"
 	"os"
 	"runtime/debug"
+
+	"github.com/nanobox-io/nanobox/commands"
+	"github.com/nanobox-io/nanobox/config"
 )
 
 // main

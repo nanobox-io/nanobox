@@ -4,9 +4,6 @@ package server
 import (
 	"bytes"
 	"fmt"
-	"github.com/gorilla/pat"
-	"github.com/kr/pty"
-	"github.com/nanobox-io/nanobox/config"
 	"io"
 	"net"
 	"net/http"
@@ -14,6 +11,11 @@ import (
 	"regexp"
 	"testing"
 	"time"
+
+	"github.com/gorilla/pat"
+	"github.com/kr/pty"
+
+	"github.com/nanobox-io/nanobox/config"
 )
 
 func startServer(test *testing.T, handler http.Handler) io.Closer {

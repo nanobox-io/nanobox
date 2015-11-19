@@ -4,10 +4,11 @@ package hosts
 import (
 	"bufio"
 	"fmt"
-	"github.com/nanobox-io/nanobox/config"
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/nanobox-io/nanobox/config"
 )
 
 // HasDomain

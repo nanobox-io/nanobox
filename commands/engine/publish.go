@@ -6,18 +6,20 @@ import (
 	"bytes"
 	"crypto/md5"
 	"fmt"
-	api "github.com/nanobox-io/nanobox-api-client"
-	"github.com/nanobox-io/nanobox-golang-stylish"
-	"github.com/nanobox-io/nanobox/config"
-	engineutil "github.com/nanobox-io/nanobox/util/engine"
-	fileutil "github.com/nanobox-io/nanobox/util/file"
-	s3util "github.com/nanobox-io/nanobox/util/s3"
-	"github.com/spf13/cobra"
 	"io/ioutil"
 	"net/url"
 	"os"
 	"path/filepath"
 	"time"
+
+	api "github.com/nanobox-io/nanobox-api-client"
+	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/spf13/cobra"
+
+	"github.com/nanobox-io/nanobox/config"
+	engineutil "github.com/nanobox-io/nanobox/util/engine"
+	fileutil "github.com/nanobox-io/nanobox/util/file"
+	s3util "github.com/nanobox-io/nanobox/util/s3"
 )
 
 var tw *tar.Writer

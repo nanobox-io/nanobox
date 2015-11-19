@@ -3,12 +3,14 @@ package engine
 
 import (
 	"fmt"
-	"github.com/nanobox-io/nanobox-golang-stylish"
-	// "github.com/nanobox-io/nanobox/auth"
-	engineutil "github.com/nanobox-io/nanobox/util/engine"
-	"github.com/spf13/cobra"
 	"io"
 	"os"
+
+	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/spf13/cobra"
+
+	// "github.com/nanobox-io/nanobox/auth"
+	engineutil "github.com/nanobox-io/nanobox/util/engine"
 )
 
 //

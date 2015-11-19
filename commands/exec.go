@@ -2,10 +2,12 @@
 package commands
 
 import (
-	"github.com/nanobox-io/nanobox/util/server"
-	"github.com/spf13/cobra"
 	"net/url"
 	"strings"
+
+	"github.com/spf13/cobra"
+
+	"github.com/nanobox-io/nanobox/util/server"
 )
 
 //

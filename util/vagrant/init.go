@@ -3,11 +3,13 @@ package vagrant
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/nanobox-io/nanobox-golang-stylish"
+
 	"github.com/nanobox-io/nanobox/config"
 	"github.com/nanobox-io/nanobox/util"
 	engineutil "github.com/nanobox-io/nanobox/util/engine"
-	"os"
 )
 
 // Init

@@ -2,9 +2,10 @@
 package server
 
 import (
-	"github.com/nanobox-io/nanobox/config"
 	"net/http"
 	"time"
+
+	"github.com/nanobox-io/nanobox/config"
 )
 
 // Ping issues a ping to nanobox server

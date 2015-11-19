@@ -3,13 +3,15 @@ package server
 
 import (
 	"fmt"
-	"github.com/docker/docker/pkg/term"
-	"github.com/nanobox-io/nanobox/config"
-	notifyutil "github.com/nanobox-io/nanobox/util/notify"
-	"github.com/nanobox-io/nanobox/util/server/terminal"
 	"io"
 	"net"
 	"os"
+
+	"github.com/docker/docker/pkg/term"
+
+	"github.com/nanobox-io/nanobox/config"
+	notifyutil "github.com/nanobox-io/nanobox/util/notify"
+	"github.com/nanobox-io/nanobox/util/server/terminal"
 )
 
 // Exec

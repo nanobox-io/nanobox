@@ -3,9 +3,7 @@
 
 package mock_util
 
-import (
-	gomock "github.com/golang/mock/gomock"
-)
+import gomock "github.com/golang/mock/gomock"
 
 // Mock of Util interface
 type MockUtil struct {

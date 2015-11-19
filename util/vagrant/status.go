@@ -4,8 +4,9 @@ package vagrant
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/nanobox-io/nanobox/config"
 	"io/ioutil"
+
+	"github.com/nanobox-io/nanobox/config"
 )
 
 // Status returns the current status of the VM; this command needs to be run

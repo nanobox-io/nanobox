@@ -5,7 +5,6 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"fmt"
-	"github.com/nanobox-io/nanobox/config"
 	"io"
 	"io/ioutil"
 	"math"
@@ -13,6 +12,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/nanobox-io/nanobox/config"
 )
 
 // Tar takes a source and variable writers and walks 'source' writing each file

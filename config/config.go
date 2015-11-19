@@ -3,14 +3,15 @@ package config
 
 import (
 	"fmt"
-	"github.com/ghodss/yaml"
-	"github.com/mitchellh/go-homedir"
-	"github.com/nanobox-io/nanobox-golang-stylish"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
 	"sync"
+
+	"github.com/ghodss/yaml"
+	"github.com/mitchellh/go-homedir"
+	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
 const (

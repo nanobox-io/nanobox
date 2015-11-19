@@ -3,11 +3,13 @@ package commands
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/spf13/cobra"
+
 	"github.com/nanobox-io/nanobox/config"
 	"github.com/nanobox-io/nanobox/util/vagrant"
-	"github.com/spf13/cobra"
-	"os"
 )
 
 var (

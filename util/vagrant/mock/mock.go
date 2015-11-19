@@ -3,9 +3,7 @@
 
 package mock_vagrant
 
-import (
-	gomock "github.com/golang/mock/gomock"
-)
+import gomock "github.com/golang/mock/gomock"
 
 // Mock of Vagrant interface
 type MockVagrant struct {

@@ -3,17 +3,19 @@ package commands
 
 import (
 	"fmt"
-	"github.com/kardianos/osext"
-	"github.com/nanobox-io/nanobox-golang-stylish"
-	"github.com/nanobox-io/nanobox/config"
-	fileutil "github.com/nanobox-io/nanobox/util/file"
-	printutil "github.com/nanobox-io/nanobox/util/print"
-	"github.com/spf13/cobra"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 	"time"
+
+	"github.com/kardianos/osext"
+	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/spf13/cobra"
+
+	"github.com/nanobox-io/nanobox/config"
+	fileutil "github.com/nanobox-io/nanobox/util/file"
+	printutil "github.com/nanobox-io/nanobox/util/print"
 )
 
 var updateCmd = &cobra.Command{

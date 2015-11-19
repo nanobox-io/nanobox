@@ -2,9 +2,10 @@
 package server
 
 import (
-	"github.com/go-fsnotify/fsnotify"
 	"io"
 	"net/http"
+
+	"github.com/go-fsnotify/fsnotify"
 )
 
 type (
