@@ -3,8 +3,9 @@ package vagrant
 
 import (
 	"fmt"
-	"github.com/nanobox-io/nanobox-golang-stylish"
 	"os/exec"
+
+	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
 // Suspend runs a "vagrant suspend"

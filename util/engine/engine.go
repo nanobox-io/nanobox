@@ -3,14 +3,16 @@ package engine
 
 import (
 	"fmt"
-	api "github.com/nanobox-io/nanobox-api-client"
-	"github.com/nanobox-io/nanobox-golang-stylish"
-	"github.com/nanobox-io/nanobox/config"
-	fileutil "github.com/nanobox-io/nanobox/util/file"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
+
+	api "github.com/nanobox-io/nanobox-api-client"
+	"github.com/nanobox-io/nanobox-golang-stylish"
+
+	"github.com/nanobox-io/nanobox/config"
+	fileutil "github.com/nanobox-io/nanobox/util/file"
 )
 
 // RemountLocal simply calls MountLocal() but only returns the error as the

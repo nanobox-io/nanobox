@@ -4,14 +4,16 @@ package notify
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/go-fsnotify/fsnotify"
-	"github.com/nanobox-io/nanobox/config"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"os/signal"
 	"path/filepath"
 	"syscall"
+
+	"github.com/go-fsnotify/fsnotify"
+
+	"github.com/nanobox-io/nanobox/config"
 )
 
 var (
@@ -117,7 +119,7 @@ increasing your max file descriptor limit to re-enable this functionality.
 				// spare the ulimit; just log errors here, dont disrupt workflow.
 				if err == nil {
 					if err := watcher.Remove(event.Name); err != nil {
-						config.Info(fmt.Sprintf("Unable to watch file %v - %v", event.Name, err.Error()))
+						config.Log.Info(fmt.Sprintf("Unable to watch file %v - %v", event.Name, err.Error()))
 					}
 				}
 			}
@@ -125,7 +127,7 @@ increasing your max file descriptor limit to re-enable this functionality.
 			// call the handler for each even fired; just log errors here, dont disrupt
 			// workflow.
 			if err := handle(&event); err != nil {
-				config.Info(fmt.Sprintf("Unable to stop watching file %v - %v", event.Name, err.Error()))
+				config.Log.Info(fmt.Sprintf("Unable to stop watching file %v - %v", event.Name, err.Error()))
 			}
 
 		// handle any errors by calling the handler function
@@ -153,7 +155,7 @@ func watchDir(path string, fi os.FileInfo, err error) error {
 	// just log errors here, dont disrupt workflow.
 	if fi.Mode().IsDir() {
 		if err = watcher.Add(path); err != nil {
-			config.Info(fmt.Sprintf("Unable to watch dir %v - %v", path, err.Error()))
+			config.Log.Info(fmt.Sprintf("Unable to watch dir %v - %v", path, err.Error()))
 		}
 	}
 

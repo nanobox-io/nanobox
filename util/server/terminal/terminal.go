@@ -3,10 +3,12 @@ package terminal
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/docker/docker/pkg/term"
 	"github.com/nanobox-io/nanobox-golang-stylish"
+
 	"github.com/nanobox-io/nanobox/config"
-	"os"
 )
 
 //

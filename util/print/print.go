@@ -4,11 +4,13 @@ package print
 import (
 	"bufio"
 	"fmt"
-	"github.com/howeyc/gopass"
-	"github.com/mitchellh/colorstring"
-	"github.com/nanobox-io/nanobox/config"
 	"os"
 	"strings"
+
+	"github.com/howeyc/gopass"
+	"github.com/mitchellh/colorstring"
+
+	"github.com/nanobox-io/nanobox/config"
 )
 
 // Verbose only prints a message if the 'verbose' flag is passed
@@ -39,7 +41,7 @@ func Prompt(p string, v ...interface{}) string {
 
 	input, err := reader.ReadString('\n')
 	if err != nil {
-		config.Fatal("[util/print] reader.ReadString() failed - ", err.Error())
+		config.Fatal("[util/print] reader.ReadString() failed", err.Error())
 	}
 
 	return strings.TrimSpace(input)

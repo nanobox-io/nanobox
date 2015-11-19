@@ -4,10 +4,11 @@ package hosts
 import (
 	"bufio"
 	"fmt"
-	"github.com/nanobox-io/nanobox/config"
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/nanobox-io/nanobox/config"
 )
 
 // HasDomain
@@ -16,7 +17,7 @@ func HasDomain() (has bool) {
 	// open the /etc/hosts file for scanning...
 	f, err := os.Open("/etc/hosts")
 	if err != nil {
-		config.Fatal("[util/file/hosts] os.Open() failed - ", err.Error())
+		config.Fatal("[util/file/hosts] os.Open() failed", err.Error())
 	}
 	defer f.Close()
 
@@ -39,14 +40,14 @@ func AddDomain() {
 	// open hosts file
 	f, err := os.OpenFile("/etc/hosts", os.O_RDWR|os.O_APPEND, 0644)
 	if err != nil {
-		config.Fatal("[util/file/hosts] os.OpenFile() failed - ", err.Error())
+		config.Fatal("[util/file/hosts] os.OpenFile() failed", err.Error())
 	}
 	defer f.Close()
 
 	// write the entry to the file
 	entry := fmt.Sprintf("\n%-15v   %s # '%v' private network (added by nanobox)", config.Nanofile.IP, config.Nanofile.Domain, config.Nanofile.Name)
 	if _, err := f.WriteString(entry); err != nil {
-		config.Fatal("[util/file/hosts] file.WriteString() failed - ", err.Error())
+		config.Fatal("[util/file/hosts] file.WriteString() failed", err.Error())
 	}
 }
 
@@ -58,7 +59,7 @@ func RemoveDomain() {
 	// open hosts file
 	f, err := os.OpenFile("/etc/hosts", os.O_RDWR, 0644)
 	if err != nil {
-		config.Fatal("[util/file/hosts] os.OpenFile() failed - ", err.Error())
+		config.Fatal("[util/file/hosts] os.OpenFile() failed", err.Error())
 	}
 	defer f.Close()
 
@@ -80,6 +81,6 @@ func RemoveDomain() {
 
 	// write back the contents of the hosts file minus the removed entry
 	if err := ioutil.WriteFile("/etc/hosts", []byte(contents), 0644); err != nil {
-		config.Fatal("[util/file/hosts] ioutil.WriteFile failed - ", err.Error())
+		config.Fatal("[util/file/hosts] ioutil.WriteFile failed", err.Error())
 	}
 }

@@ -3,10 +3,12 @@ package vagrant
 
 import (
 	"fmt"
-	"github.com/nanobox-io/nanobox-golang-stylish"
-	"github.com/nanobox-io/nanobox/config"
 	"os"
 	"os/exec"
+
+	"github.com/nanobox-io/nanobox-golang-stylish"
+
+	"github.com/nanobox-io/nanobox/config"
 )
 
 // Install downloads the nanobox vagrant and adds it to the list of vagrant boxes

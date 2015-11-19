@@ -5,6 +5,7 @@ package mock_config
 
 import (
 	gomock "github.com/golang/mock/gomock"
+
 	config "github.com/nanobox-io/nanobox/config"
 )
 

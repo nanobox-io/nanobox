@@ -3,15 +3,17 @@ package commands
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
+
 	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/spf13/cobra"
+
 	"github.com/nanobox-io/nanobox/commands/box"
 	"github.com/nanobox-io/nanobox/commands/engine"
 	"github.com/nanobox-io/nanobox/commands/production"
 	"github.com/nanobox-io/nanobox/config"
 	"github.com/nanobox-io/nanobox/util"
-	"github.com/spf13/cobra"
-	"os"
-	"os/exec"
 )
 
 //
@@ -176,12 +178,12 @@ func halt(ccmd *cobra.Command, args []string) {
 	//
 
 	if err := Server.Suspend(); err != nil {
-		Config.Fatal("[commands/halt] server.Suspend() failed - ", err.Error())
+		Config.Fatal("[commands/halt] server.Suspend() failed", err.Error())
 	}
 
 	//
 	if err := Vagrant.Suspend(); err != nil {
-		Config.Fatal("[commands/halt] vagrant.Suspend() failed - ", err.Error())
+		Config.Fatal("[commands/halt] vagrant.Suspend() failed", err.Error())
 	}
 
 	//

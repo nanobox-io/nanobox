@@ -4,7 +4,9 @@ package commands
 //
 import (
 	"fmt"
+
 	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/nanobox-io/nanobox/util/server"
 	"github.com/spf13/cobra"
 )
 
@@ -38,8 +40,8 @@ func bootstrap(ccmd *cobra.Command, args []string) {
 	}()
 
 	// run a bootstrap
-	if err := Server.Bootstrap(""); err != nil {
-		Config.Fatal("[commands/bootstrap] server.Bootstrap() failed - ", err.Error())
+	if err := server.Bootstrap(""); err != nil {
+		server.Fatal("[commands/bootstrap] server.Bootstrap() failed", err.Error())
 	}
 
 	// wait for a status update (blocking)

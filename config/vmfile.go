@@ -31,7 +31,7 @@ func ParseVMfile() (vmfile VMfileConfig) {
 
 	// if a .vmfile does exists - parse it
 	if err := ParseConfig(vmfilePath, &vmfile); err != nil {
-		Fatal("[config/vmfile] ParseConfig() failed - ", err.Error())
+		Fatal("[config/vmfile] ParseConfig() failed", err.Error())
 	}
 
 	return
@@ -85,7 +85,7 @@ func (c *VMfileConfig) SuspendableIs(suspendable bool) {
 // each individual call
 func (c *VMfileConfig) parseVMfile(field bool) bool {
 	if err := ParseConfig(AppDir+"/.vmfile", c); err != nil {
-		Fatal("[config/vmfile] ParseConfig() failed - ", err.Error())
+		Fatal("[config/vmfile] ParseConfig() failed", err.Error())
 	}
 
 	return field
@@ -94,6 +94,6 @@ func (c *VMfileConfig) parseVMfile(field bool) bool {
 // writeVMfile writes to the vmfile with each field update
 func writeVMfile() {
 	if err := writeConfig(AppDir+"/.vmfile", VMfile); err != nil {
-		Fatal("[config/vmfile] writeConfig() failed - ", err.Error())
+		Fatal("[config/vmfile] writeConfig() failed", err.Error())
 	}
 }

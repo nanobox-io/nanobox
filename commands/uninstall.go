@@ -3,10 +3,12 @@ package commands
 
 import (
 	"fmt"
+	"os"
+
+	"github.com/spf13/cobra"
+
 	"github.com/nanobox-io/nanobox/config"
 	printutil "github.com/nanobox-io/nanobox/util/print"
-	"github.com/spf13/cobra"
-	"os"
 )
 
 var uninstallCmd = &cobra.Command{

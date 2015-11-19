@@ -3,10 +3,13 @@ package commands
 
 import (
 	"fmt"
+
 	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/spf13/cobra"
+
 	"github.com/nanobox-io/nanobox/config"
 	engineutil "github.com/nanobox-io/nanobox/util/engine"
-	"github.com/spf13/cobra"
+	"github.com/nanobox-io/nanobox/util/server"
 )
 
 //
@@ -48,8 +51,8 @@ func run(ccmd *cobra.Command, args []string) {
 	}
 
 	// run a deploy
-	if err := Server.Deploy("run=true"); err != nil {
-		Config.Fatal("[commands/run] server.Deploy() failed - ", err.Error())
+	if err := server.Deploy("run=true"); err != nil {
+		server.Fatal("[commands/run] server.Deploy() failed", err.Error())
 	}
 
 	// wait for a status update (blocking)

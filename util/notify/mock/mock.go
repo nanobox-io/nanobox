@@ -4,8 +4,9 @@
 package mock_notify
 
 import (
-	fsnotify "github.com/go-fsnotify/fsnotify"
 	gomock "github.com/golang/mock/gomock"
+
+	fsnotify "github.com/go-fsnotify/fsnotify"
 )
 
 // Mock of Notify interface

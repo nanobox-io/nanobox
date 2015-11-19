@@ -3,14 +3,15 @@ package config
 
 import (
 	"fmt"
-	"github.com/ghodss/yaml"
-	"github.com/mitchellh/go-homedir"
-	"github.com/nanobox-io/nanobox-golang-stylish"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
 	"sync"
+
+	"github.com/ghodss/yaml"
+	"github.com/mitchellh/go-homedir"
+	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
 const (
@@ -95,7 +96,7 @@ func init() {
 	if _, err := os.Stat(UpdateFile); err != nil {
 		f, err := os.Create(UpdateFile)
 		if err != nil {
-			Log.Fatal("[config/config] os.Create() failed - ", err.Error())
+			Log.Fatal("[config/config] os.Create() failed", err.Error())
 		}
 		defer f.Close()
 	}

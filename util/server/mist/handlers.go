@@ -3,6 +3,7 @@ package mist
 
 import (
 	"fmt"
+
 	"github.com/nanobox-io/nanobox/config"
 )
 
