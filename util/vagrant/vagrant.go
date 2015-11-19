@@ -172,7 +172,7 @@ func handleCMDout(cmd *exec.Cmd) {
 	stderrScanner := bufio.NewScanner(stderr)
 	go func() {
 		for stderrScanner.Scan() {
-			Log.Error(stderrScanner.Text())
+			Error("A vagrant error occured", stderrScanner.Text())
 		}
 	}()
 
@@ -193,6 +193,9 @@ func handleCMDout(cmd *exec.Cmd) {
 
 			txt := strings.TrimSpace(stdoutScanner.Text())
 			app := config.Nanofile.Name
+
+			// log all vagrant output (might as well)
+			Log.Info(txt)
 
 			// handle generic cases
 			switch {
