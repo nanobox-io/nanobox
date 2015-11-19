@@ -88,18 +88,24 @@ func Update() {
 }
 
 // updateAvailable
-func updateAvailable() (match bool, err error) {
+func updateAvailable() (bool, error) {
 
 	// get the path of the current executing CLI
 	exe, err := osext.Executable()
 	if err != nil {
-		return
+		return false, err
 	}
 
 	// check the current cli md5 against the remote md5; os.Args[0] is used as the
 	// final interpolation to determine standard/dev versions
 	md5 := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/%v.md5", runtime.GOOS, runtime.GOARCH, filepath.Base(os.Args[0]))
-	return Util.MD5sMatch(exe, md5)
+
+	match, err := Util.MD5sMatch(exe, md5)
+	if err != nil {
+		return false, err
+	}
+
+	return !match, nil
 }
 
 // runUpdate
