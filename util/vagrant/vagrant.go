@@ -172,7 +172,7 @@ func handleCMDout(cmd *exec.Cmd) {
 	stderrScanner := bufio.NewScanner(stderr)
 	go func() {
 		for stderrScanner.Scan() {
-			Error("[util/vagrant/vagrant] stderrScanner.Scan() failed", stderrScanner.Text())
+			Log.Error(stderrScanner.Text())
 		}
 	}()
 

@@ -4,6 +4,7 @@ package server
 import (
 	"fmt"
 	"github.com/jcelliott/lumber"
+	"github.com/nanobox-io/nanobox-golang-stylish"
 	"github.com/nanobox-io/nanobox/config"
 	"os"
 )
@@ -37,6 +38,8 @@ func NewLogger(path string) {
 	}
 
 	logFile = path
+
+	fmt.Printf(stylish.Bullet("Created %s", path))
 }
 
 // Debug
@@ -54,7 +57,7 @@ func Error(msg, err string) {
 
 // Fatal
 func Fatal(msg, err string) {
-	fmt.Printf("A nanobox server error occurred (See %s for details). Exiting...", logFile)
+	fmt.Printf("A fatal server error occurred (See %s for details). Exiting...", logFile)
 	Log.Fatal(fmt.Sprintf("%s - %s", msg, err))
 	Log.Close()
 	os.Exit(1)

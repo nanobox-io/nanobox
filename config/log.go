@@ -43,7 +43,7 @@ func Error(msg, err string) {
 
 // Fatal
 func Fatal(msg, err string) {
-	fmt.Printf("A Vagrant error occurred (See %s for details). Exiting...", LogFile)
+	fmt.Printf("A fatal error occurred (See %s for details). Exiting...", LogFile)
 	Log.Fatal(fmt.Sprintf("%s - %s", msg, err))
 	Log.Close()
 	os.Exit(1)
