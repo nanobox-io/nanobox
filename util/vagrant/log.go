@@ -32,7 +32,7 @@ func NewLogger(path string) {
 
 	var err error
 
-	// create a file logger
+	// create a file logger (append if already exists)
 	if Log, err = lumber.NewAppendLogger(path); err != nil {
 		config.Fatal("[util/vagrant/log] lumber.NewAppendLogger() failed", err.Error())
 	}
