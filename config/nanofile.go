@@ -18,6 +18,7 @@ type NanofileConfig struct {
 	Name     string `json:"name"`      // the name given to the project (defaults to cwd)
 	Provider string `json:"provider"`  // guest vm provider (virtual box, vmware, etc)
 	RAM      int    `json:"ram"`       // ammount of RAM to dedicate to the guest vm
+	HostDNS  string `json:"host_dns"`  // use the hosts dns resolver
 }
 
 // ParseNanofile
@@ -31,6 +32,7 @@ func ParseNanofile() NanofileConfig {
 		Name:     filepath.Base(CWDir),
 		Provider: "virtualbox", // this may change in the future (adding additional hosts such as vmware)
 		RAM:      1024,
+		HostDNS:  "off",
 	}
 
 	nanofilePath := Root + "/.nanofile"

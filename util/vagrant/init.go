@@ -61,16 +61,17 @@ func Init() {
 	network := fmt.Sprintf("nanobox.vm.network \"private_network\", ip: \"%s\"", config.Nanofile.IP)
 	sshport := fmt.Sprintf("nanobox.vm.network :forwarded_port, guest: 22, host: %v, id: 'ssh'", util.StringToPort(config.Nanofile.Name))
 
+
 	//
 	provider := fmt.Sprintf(`# VirtualBox
     nanobox.vm.provider "virtualbox" do |p|
       p.name = "%v"
 
-      p.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+      p.customize ["modifyvm", :id, "--natdnshostresolver1", "%+v"]
       p.customize ["modifyvm", :id, "--cpuexecutioncap", "%v"]
       p.cpus = %v
       p.memory = %v
-    end`, config.Nanofile.Name, config.Nanofile.CPUCap, config.Nanofile.CPUs, config.Nanofile.RAM)
+    end`, config.Nanofile.Name, config.Nanofile.HostDNS, config.Nanofile.CPUCap, config.Nanofile.CPUs, config.Nanofile.RAM)
 
 	//
 	// insert a provision script that will indicate to nanobox-server to boot into
