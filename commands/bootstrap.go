@@ -39,7 +39,7 @@ func bootstrap(ccmd *cobra.Command, args []string) {
 
 	// run a bootstrap
 	if err := Server.Bootstrap(""); err != nil {
-		Config.Fatal("[commands/bootstrap] server.Bootstrap() failed - ", err.Error())
+		Config.Fatal("[commands/bootstrap] server.Bootstrap() failed", err.Error())
 	}
 
 	// wait for a status update (blocking)

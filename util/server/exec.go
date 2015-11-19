@@ -80,7 +80,7 @@ func IsContainerExec(args []string) bool {
 	var services []Service
 	res, err := Get("/services", &services)
 	if err != nil {
-		Fatal("[util/server/exec] Get() failed - ", err.Error())
+		Fatal("[util/server/exec] Get() failed", err.Error())
 	}
 	res.Body.Close()
 
@@ -101,7 +101,7 @@ func IsContainerExec(args []string) bool {
 func sendSignal(sig os.Signal) {
 	res, err := Post(fmt.Sprintf("/killexec?signal=%v", sig), "text/plain", nil)
 	if err != nil {
-		Fatal("[util/server/exec_unix] Post() failed - ", err.Error())
+		Fatal("[util/server/exec_unix] Post() failed", err.Error())
 	}
 	res.Body.Close()
 }

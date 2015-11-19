@@ -4,21 +4,26 @@ package config
 import (
 	"fmt"
 	"github.com/jcelliott/lumber"
+	"os"
 )
 
 var (
 	Console *lumber.ConsoleLogger
 	Log     *lumber.FileLogger
+	LogFile string
 )
 
 // init
 func init() {
 
+	// set log file
+	LogFile = Root + "/nanobox.log"
+
 	// create a console logger
 	Console = lumber.NewConsoleLogger(lumber.INFO)
 
 	// create a file logger
-	if Log, err = lumber.NewAppendLogger(Root + "/nanobox.log"); err != nil {
+	if Log, err = lumber.NewAppendLogger(LogFile); err != nil {
 		Fatal("[config/log] lumber.NewAppendLogger() failed", err.Error())
 	}
 }
@@ -30,21 +35,16 @@ func Debug(msg string, debug bool) {
 	}
 }
 
-// Info
-func Info(msg string) {
-	Log.Info(msg)
-}
-
 // Error
 func Error(msg, err string) {
-	fmt.Printf("%s (See ~/.nanobox/nanobox.log for details)\n", msg)
+	fmt.Printf("%s (See %s for details)\n", msg, LogFile)
 	Log.Error(err)
 }
 
 // Fatal
 func Fatal(msg, err string) {
-	fmt.Println("A fatal error occurred (See ~/.nanobox/nanobox.log for details). Exiting...")
+	fmt.Printf("A Vagrant error occurred (See %s for details). Exiting...", LogFile)
 	Log.Fatal(fmt.Sprintf("%s - %s", msg, err))
 	Log.Close()
-	Exit(1)
+	os.Exit(1)
 }

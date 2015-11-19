@@ -36,7 +36,7 @@ func updateImages(ccmd *cobra.Command, args []string) {
 
 	// run an image update
 	if err := Server.Update(""); err != nil {
-		config.Fatal("[commands/update-images] server.Update() failed - ", err.Error())
+		config.Fatal("[commands/update-images] server.Update() failed", err.Error())
 	}
 
 	// wait for a status update (blocking)

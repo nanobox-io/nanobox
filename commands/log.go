@@ -58,7 +58,7 @@ func log(ccmd *cobra.Command, args []string) {
 
 		// show Mist history
 		if err := Server.Logs(v.Encode()); err != nil {
-			Config.Fatal("[commands/log] server.Logs() failed - ", err.Error())
+			Config.Fatal("[commands/log] server.Logs() failed", err.Error())
 		}
 	}
 }

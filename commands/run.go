@@ -49,7 +49,7 @@ func run(ccmd *cobra.Command, args []string) {
 
 	// run a deploy
 	if err := Server.Deploy("run=true"); err != nil {
-		Config.Fatal("[commands/run] server.Deploy() failed - ", err.Error())
+		Config.Fatal("[commands/run] server.Deploy() failed", err.Error())
 	}
 
 	// wait for a status update (blocking)

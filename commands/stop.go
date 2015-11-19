@@ -23,7 +23,7 @@ func stop(ccmd *cobra.Command, args []string) {
 
 	//
 	if err := Vagrant.Suspend(); err != nil {
-		Config.Fatal("[commands/stop] vagrant.Suspend() failed - ", err.Error())
+		Config.Fatal("[commands/stop] vagrant.Suspend() failed", err.Error())
 	}
 
 	// boot the machine normally (not backgrounded) on next command

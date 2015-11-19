@@ -165,14 +165,14 @@ func handleCMDout(cmd *exec.Cmd) {
 	// create a stderr pipe that will write any error messages to the log
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
-		config.Fatal("[util/vagrant/vagrant] cmd.StderrPipe() failed - ", err.Error())
+		Fatal("[util/vagrant/vagrant] cmd.StderrPipe() failed", err.Error())
 	}
 
 	// log any command errors to the log
 	stderrScanner := bufio.NewScanner(stderr)
 	go func() {
 		for stderrScanner.Scan() {
-			Log.Error(stderrScanner.Text())
+			Error("[util/vagrant/vagrant] stderrScanner.Scan() failed", stderrScanner.Text())
 		}
 	}()
 
@@ -180,7 +180,7 @@ func handleCMDout(cmd *exec.Cmd) {
 	// if needed a stderr pipe could also be created at some point
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		config.Fatal("[util/vagrant/vagrant] cmd.StdoutPipe() failed - ", err.Error())
+		Fatal("[util/vagrant/vagrant] cmd.StdoutPipe() failed", err.Error())
 	}
 
 	// scan the command output intercepting only 'important' lines of vagrant output'

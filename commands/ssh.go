@@ -26,6 +26,6 @@ func ssh(ccmd *cobra.Command, args []string) {
 
 	fmt.Printf(stylish.Bullet("SSHing into nanobox..."))
 	if err := Vagrant.SSH(); err != nil {
-		Config.Fatal("[commands/ssh] vagrant.SSH() failed - ", err.Error())
+		Config.Fatal("[commands/ssh] vagrant.SSH() failed", err.Error())
 	}
 }

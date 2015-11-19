@@ -41,7 +41,7 @@ Nanobox Files  : %s
 	var services []server.Service
 	res, err := Server.Get("/services", &services)
 	if err != nil {
-		Config.Fatal("[commands/info] failed - ", err.Error())
+		Config.Fatal("[commands/info] failed", err.Error())
 	}
 	defer res.Body.Close()
 

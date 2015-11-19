@@ -55,7 +55,7 @@ func dev(ccmd *cobra.Command, args []string) {
 
 			// run a deploy
 			if err := Server.Deploy(""); err != nil {
-				Config.Fatal("[commands/dev] server.Deploy() failed - ", err.Error())
+				Config.Fatal("[commands/dev] server.Deploy() failed", err.Error())
 			}
 
 			// stream log output

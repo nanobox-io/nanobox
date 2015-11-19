@@ -26,6 +26,6 @@ func resume(ccmd *cobra.Command, args []string) {
 
 	fmt.Printf(stylish.Bullet("Resuming nanobox..."))
 	if err := Vagrant.Resume(); err != nil {
-		Config.Fatal("[commands/resume] vagrant.Resume() failed - ", err.Error())
+		Config.Fatal("[commands/resume] vagrant.Resume() failed", err.Error())
 	}
 }

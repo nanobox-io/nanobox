@@ -63,7 +63,7 @@ func deploy(ccmd *cobra.Command, args []string) {
 
 	// run a deploy
 	if err := Server.Deploy(v.Encode()); err != nil {
-		Config.Fatal("[commands/deploy] server.Deploy() failed - ", err.Error())
+		Config.Fatal("[commands/deploy] server.Deploy() failed", err.Error())
 	}
 
 	// wait for a status update (blocking)

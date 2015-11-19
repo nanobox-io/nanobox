@@ -95,7 +95,7 @@ func init() {
 	if _, err := os.Stat(UpdateFile); err != nil {
 		f, err := os.Create(UpdateFile)
 		if err != nil {
-			Log.Fatal("[config/config] os.Create() failed - ", err.Error())
+			Log.Fatal("[config/config] os.Create() failed", err.Error())
 		}
 		defer f.Close()
 	}

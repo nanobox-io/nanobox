@@ -96,6 +96,6 @@ func fetch(ccmd *cobra.Command, args []string) {
 
 	// write the file
 	if _, err := io.Copy(dest, res.Body); err != nil {
-		os.Stderr.WriteString(fmt.Sprintf("[commands.fetch] io.Copy() failed - %s", err.Error()))
+		os.Stderr.WriteString(fmt.Sprintf("[commands.fetch] io.Copy() failed%s", err.Error()))
 	}
 }

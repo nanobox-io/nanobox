@@ -46,7 +46,7 @@ func build(ccmd *cobra.Command, args []string) {
 
 	// run a build
 	if err := Server.Build(""); err != nil {
-		Config.Fatal("[commands/build] server.Build() failed - ", err.Error())
+		Config.Fatal("[commands/build] server.Build() failed", err.Error())
 	}
 
 	// wait for a status update (blocking)

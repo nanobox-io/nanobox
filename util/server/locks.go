@@ -15,7 +15,7 @@ var lock net.Conn //
 func Lock() {
 	conn, err := net.Dial("tcp", config.ServerURI)
 	if err != nil {
-		config.Fatal("[util/server/locks] net.Dial() failed", err.Error())
+		Fatal("[util/server/locks] net.Dial() failed", err.Error())
 	}
 
 	conn.Write([]byte(fmt.Sprintf("PUT /lock? HTTP/1.1\r\n\r\n")))
