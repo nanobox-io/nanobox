@@ -48,6 +48,7 @@ func create(ccmd *cobra.Command, args []string) {
 
 	// boot the vm
 	fmt.Printf(stylish.Bullet("Creating a nanobox"))
+	fmt.Printf(stylish.Bullet("Nanobox may require admin privileges to modify your /etc/hosts file and /etc/exports."))
 	if err := Vagrant.Up(); err != nil {
 		Config.Fatal("[commands/create] vagrant.Up() failed - ", err.Error())
 	}

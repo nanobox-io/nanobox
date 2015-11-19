@@ -44,6 +44,7 @@ func destroy(ccmd *cobra.Command, args []string) {
 	// there is a Vagrantfile to run the command with (otherwise it will just get
 	// re-created)
 	fmt.Printf(stylish.Bullet("Destroying nanobox..."))
+	fmt.Printf(stylish.Bullet("Nanobox may require admin privileges to modify your /etc/hosts file and /etc/exports."))
 	if err := Vagrant.Destroy(); err != nil {
 
 		// dont care if the project no longer exists... thats what we're doing anyway
