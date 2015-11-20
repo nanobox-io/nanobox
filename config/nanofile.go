@@ -3,9 +3,10 @@ package config
 
 import (
 	"fmt"
-	"github.com/nanobox-io/nanobox/util"
 	"os"
 	"path/filepath"
+
+	"github.com/nanobox-io/nanobox/util"
 )
 
 // NanofileConfig represents all available/expected .nanofile configurable options

@@ -3,10 +3,13 @@ package commands
 
 import (
 	"fmt"
-	"github.com/nanobox-io/nanobox-golang-stylish"
-	"github.com/nanobox-io/nanobox/config"
-	"github.com/spf13/cobra"
 	"os"
+
+	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/spf13/cobra"
+
+	"github.com/nanobox-io/nanobox/config"
+	"github.com/nanobox-io/nanobox/util/vagrant"
 )
 
 var (
@@ -49,8 +52,8 @@ func create(ccmd *cobra.Command, args []string) {
 	// boot the vm
 	fmt.Printf(stylish.Bullet("Creating a nanobox"))
 	fmt.Printf(stylish.Bullet("Nanobox may require admin privileges to modify your /etc/hosts file and /etc/exports."))
-	if err := Vagrant.Up(); err != nil {
-		Config.Fatal("[commands/create] vagrant.Up() failed - ", err.Error())
+	if err := vagrant.Up(); err != nil {
+		vagrant.Fatal("[commands/create] vagrant.Up() failed", err.Error())
 	}
 
 	// after the machine boots, update the docker images

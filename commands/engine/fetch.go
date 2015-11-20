@@ -3,12 +3,14 @@ package engine
 
 import (
 	"fmt"
-	"github.com/nanobox-io/nanobox-golang-stylish"
-	// "github.com/nanobox-io/nanobox/auth"
-	engineutil "github.com/nanobox-io/nanobox/util/engine"
-	"github.com/spf13/cobra"
 	"io"
 	"os"
+
+	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/spf13/cobra"
+
+	// "github.com/nanobox-io/nanobox/auth"
+	engineutil "github.com/nanobox-io/nanobox/util/engine"
 )
 
 //
@@ -96,6 +98,6 @@ func fetch(ccmd *cobra.Command, args []string) {
 
 	// write the file
 	if _, err := io.Copy(dest, res.Body); err != nil {
-		os.Stderr.WriteString(fmt.Sprintf("[commands.fetch] io.Copy() failed - %s", err.Error()))
+		os.Stderr.WriteString(fmt.Sprintf("[commands.fetch] io.Copy() failed%s", err.Error()))
 	}
 }

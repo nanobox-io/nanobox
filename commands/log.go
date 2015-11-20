@@ -3,9 +3,11 @@ package commands
 
 import (
 	"fmt"
-	"github.com/nanobox-io/nanobox-golang-stylish"
-	"github.com/spf13/cobra"
 	"net/url"
+
+	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/nanobox-io/nanobox/util/server"
+	"github.com/spf13/cobra"
 )
 
 var (
@@ -57,8 +59,8 @@ func log(ccmd *cobra.Command, args []string) {
 		v.Add("offset", fmt.Sprintf("%v", offset))
 
 		// show Mist history
-		if err := Server.Logs(v.Encode()); err != nil {
-			Config.Fatal("[commands/log] server.Logs() failed - ", err.Error())
+		if err := server.Logs(v.Encode()); err != nil {
+			server.Fatal("[commands/log] server.Logs() failed", err.Error())
 		}
 	}
 }

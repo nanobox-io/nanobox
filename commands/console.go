@@ -3,10 +3,11 @@ package commands
 
 import (
 	"fmt"
+
 	"github.com/nanobox-io/nanobox-golang-stylish"
-	"github.com/nanobox-io/nanobox/config"
-	"github.com/nanobox-io/nanobox/util/server"
 	"github.com/spf13/cobra"
+
+	"github.com/nanobox-io/nanobox/util/server"
 )
 
 //
@@ -35,7 +36,7 @@ func console(ccmd *cobra.Command, args []string) {
 	// if 1 args is passed it's assumed to be a container to console into
 	case len(args) == 1:
 		if err := server.Exec("console", "container="+args[0]); err != nil {
-			config.Error("[commands/console] Server.Exec failed", err.Error())
+			server.Error("[commands/console] Server.Exec failed", err.Error())
 		}
 	}
 

@@ -3,10 +3,13 @@ package commands
 
 import (
 	"fmt"
+
 	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/spf13/cobra"
+
 	"github.com/nanobox-io/nanobox/config"
 	engineutil "github.com/nanobox-io/nanobox/util/engine"
-	"github.com/spf13/cobra"
+	"github.com/nanobox-io/nanobox/util/server"
 )
 
 //
@@ -45,8 +48,8 @@ func build(ccmd *cobra.Command, args []string) {
 	}
 
 	// run a build
-	if err := Server.Build(""); err != nil {
-		Config.Fatal("[commands/build] server.Build() failed - ", err.Error())
+	if err := server.Build(""); err != nil {
+		server.Fatal("[commands/build] server.Build() failed", err.Error())
 	}
 
 	// wait for a status update (blocking)

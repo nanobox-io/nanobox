@@ -3,14 +3,15 @@ package config
 
 import (
 	"fmt"
-	"github.com/ghodss/yaml"
-	"github.com/mitchellh/go-homedir"
-	"github.com/nanobox-io/nanobox-golang-stylish"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
 	"sync"
+
+	"github.com/ghodss/yaml"
+	"github.com/mitchellh/go-homedir"
+	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
 const (
@@ -19,7 +20,7 @@ const (
 	LOGTAP_PORT = ":6361"
 	MIST_PORT   = ":1445"
 	SERVER_PORT = ":1757"
-	VERSION     = "0.16.6"
+	VERSION     = "0.16.8"
 )
 
 type (
@@ -70,17 +71,21 @@ func init() {
 
 	// set the current working directory first, as it's used in other steps of the
 	// configuration process
-	if CWDir, err = os.Getwd(); err != nil {
+	if p, err := os.Getwd(); err != nil {
 		Log.Fatal("[config/config] os.Getwd() failed", err.Error())
+	} else {
+		CWDir = filepath.ToSlash(p)
 	}
 
 	// set Home based off the users homedir (~)
-	if Home, err = homedir.Dir(); err != nil {
+	if p, err := homedir.Dir(); err != nil {
 		Log.Fatal("[config/config] homedir.Dir() failed", err.Error())
+	} else {
+		Home = filepath.ToSlash(p)
 	}
 
 	// set nanobox's root directory;
-	Root = filepath.Join(Home, ".nanobox")
+	Root = filepath.ToSlash(filepath.Join(Home, ".nanobox"))
 
 	// check for a ~/.nanobox dir and create one if it's not found
 	if _, err := os.Stat(Root); err != nil {
@@ -91,17 +96,17 @@ func init() {
 	}
 
 	// check for a ~/.nanobox/.update file and create one if it's not found
-	UpdateFile = filepath.Join(Root, ".update")
+	UpdateFile = filepath.ToSlash(filepath.Join(Root, ".update"))
 	if _, err := os.Stat(UpdateFile); err != nil {
 		f, err := os.Create(UpdateFile)
 		if err != nil {
-			Log.Fatal("[config/config] os.Create() failed - ", err.Error())
+			Log.Fatal("[config/config] os.Create() failed", err.Error())
 		}
 		defer f.Close()
 	}
 
 	// check for a ~/.nanobox/engines dir and create one if it's not found
-	EnginesDir = filepath.Join(Root, "engines")
+	EnginesDir = filepath.ToSlash(filepath.Join(Root, "engines"))
 	if _, err := os.Stat(EnginesDir); err != nil {
 		if err := os.Mkdir(EnginesDir, 0755); err != nil {
 			Log.Fatal("[config/config] os.Mkdir() failed", err.Error())
@@ -109,7 +114,7 @@ func init() {
 	}
 
 	// check for a ~/.nanobox/apps dir and create one if it's not found
-	AppsDir = filepath.Join(Root, "apps")
+	AppsDir = filepath.ToSlash(filepath.Join(Root, "apps"))
 	if _, err := os.Stat(AppsDir); err != nil {
 		if err := os.Mkdir(AppsDir, 0755); err != nil {
 			Log.Fatal("[config/config] os.Mkdir() failed", err.Error())
@@ -128,7 +133,7 @@ func init() {
 
 	// set the 'App' first so it can be used in subsequent configurations; the 'App'
 	// is set to the name of the cwd; this can be overriden from a .nanofile
-	AppDir = filepath.Join(AppsDir, Nanofile.Name)
+	AppDir = filepath.ToSlash(filepath.Join(AppsDir, Nanofile.Name))
 }
 
 // ParseConfig

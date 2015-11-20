@@ -3,8 +3,9 @@
 package server
 
 import (
-	"github.com/nanobox-io/nanobox/util/server/terminal"
 	"time"
+
+	"github.com/nanobox-io/nanobox/util/server/terminal"
 )
 
 func monitorTerminal(stdOutFD uintptr, params string) {

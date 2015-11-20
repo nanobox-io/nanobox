@@ -1,11 +1,7 @@
 //
 package box
 
-import (
-	// "fmt"
-	// "github.com/nanobox-io/nanobox-golang-stylish"
-	"github.com/spf13/cobra"
-)
+import "github.com/spf13/cobra"
 
 var updateCmd = &cobra.Command{
 	Use:   "update",

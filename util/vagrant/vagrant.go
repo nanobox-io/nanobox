@@ -5,13 +5,14 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"github.com/nanobox-io/nanobox/config"
 	"os"
 	"os/exec"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/nanobox-io/nanobox/config"
 )
 
 //
@@ -165,14 +166,14 @@ func handleCMDout(cmd *exec.Cmd) {
 	// create a stderr pipe that will write any error messages to the log
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
-		config.Fatal("[util/vagrant/vagrant] cmd.StderrPipe() failed - ", err.Error())
+		Fatal("[util/vagrant/vagrant] cmd.StderrPipe() failed", err.Error())
 	}
 
 	// log any command errors to the log
 	stderrScanner := bufio.NewScanner(stderr)
 	go func() {
 		for stderrScanner.Scan() {
-			Log.Error(stderrScanner.Text())
+			Error("A vagrant error occured", stderrScanner.Text())
 		}
 	}()
 
@@ -180,7 +181,7 @@ func handleCMDout(cmd *exec.Cmd) {
 	// if needed a stderr pipe could also be created at some point
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		config.Fatal("[util/vagrant/vagrant] cmd.StdoutPipe() failed - ", err.Error())
+		Fatal("[util/vagrant/vagrant] cmd.StdoutPipe() failed", err.Error())
 	}
 
 	// scan the command output intercepting only 'important' lines of vagrant output'
@@ -193,6 +194,9 @@ func handleCMDout(cmd *exec.Cmd) {
 
 			txt := strings.TrimSpace(stdoutScanner.Text())
 			app := config.Nanofile.Name
+
+			// log all vagrant output (might as well)
+			Log.Info(txt)
 
 			// handle generic cases
 			switch {

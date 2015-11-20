@@ -3,10 +3,12 @@ package commands
 
 import (
 	"fmt"
+	"os"
+
+	"github.com/spf13/cobra"
+
 	"github.com/nanobox-io/nanobox/config"
 	printutil "github.com/nanobox-io/nanobox/util/print"
-	"github.com/spf13/cobra"
-	"os"
 )
 
 var uninstallCmd = &cobra.Command{
@@ -23,12 +25,12 @@ func uninstall(ccmd *cobra.Command, args []string) {
 	//
 	switch printutil.Prompt("Are you sure you want to uninstall nanobox (y/N)? ") {
 
-	// don't update by default
+	// don't uninstall by default
 	default:
 		fmt.Println("Nanobox has not been uninstalled!")
 		return
 
-	// if yes continue to update
+	// if yes continue to uninstall
 	case "Yes", "yes", "Y", "y":
 		break
 	}

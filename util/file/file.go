@@ -5,7 +5,6 @@ import (
 	"archive/tar"
 	"compress/gzip"
 	"fmt"
-	"github.com/nanobox-io/nanobox/config"
 	"io"
 	"io/ioutil"
 	"math"
@@ -13,6 +12,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/nanobox-io/nanobox/config"
 )
 
 // Tar takes a source and variable writers and walks 'source' writing each file
@@ -150,7 +151,7 @@ func Download(path string, w io.Writer) error {
 
 	b, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		config.Fatal("[util/file/file] ioutil.ReadAll() failed - ", err.Error())
+		config.Fatal("[util/file/file] ioutil.ReadAll() failed", err.Error())
 	}
 
 	w.Write(b)

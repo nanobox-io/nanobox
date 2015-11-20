@@ -3,17 +3,19 @@ package commands
 
 import (
 	"fmt"
-	"github.com/kardianos/osext"
-	"github.com/nanobox-io/nanobox-golang-stylish"
-	"github.com/nanobox-io/nanobox/config"
-	fileutil "github.com/nanobox-io/nanobox/util/file"
-	printutil "github.com/nanobox-io/nanobox/util/print"
-	"github.com/spf13/cobra"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 	"time"
+
+	"github.com/kardianos/osext"
+	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/spf13/cobra"
+
+	"github.com/nanobox-io/nanobox/config"
+	fileutil "github.com/nanobox-io/nanobox/util/file"
+	printutil "github.com/nanobox-io/nanobox/util/print"
 )
 
 var updateCmd = &cobra.Command{
@@ -86,18 +88,24 @@ func Update() {
 }
 
 // updateAvailable
-func updateAvailable() (match bool, err error) {
+func updateAvailable() (bool, error) {
 
 	// get the path of the current executing CLI
 	exe, err := osext.Executable()
 	if err != nil {
-		return
+		return false, err
 	}
 
 	// check the current cli md5 against the remote md5; os.Args[0] is used as the
 	// final interpolation to determine standard/dev versions
 	md5 := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/%v.md5", runtime.GOOS, runtime.GOARCH, filepath.Base(os.Args[0]))
-	return Util.MD5sMatch(exe, md5)
+
+	match, err := Util.MD5sMatch(exe, md5)
+	if err != nil {
+		return false, err
+	}
+
+	return !match, nil
 }
 
 // runUpdate
@@ -111,14 +119,15 @@ func runUpdate() error {
 		return err
 	}
 
+	//
+
 	prog := filepath.Base(os.Args[0])
 	tmpDir := config.Root + "/tmp"
 	tmpFile := tmpDir + "/" + prog
 
-	// create a tmp dir to download the new cli to
-	if err := os.Mkdir(tmpDir, 0755); err != nil {
-		return err
-	}
+	// create a tmp dir to download the new cli to; don't care about the error here
+	// because if the tmp dir already exists we'll just use it
+	os.Mkdir(tmpDir, 0755)
 
 	// create a tmp cli in tmp dir
 	cli, err := os.Create(tmpFile)
