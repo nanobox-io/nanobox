@@ -1,4 +1,3 @@
-//
 package hosts
 
 import (
@@ -15,7 +14,7 @@ import (
 func HasDomain() (has bool) {
 
 	// open the /etc/hosts file for scanning...
-	f, err := os.Open("/etc/hosts")
+	f, err := os.Open(hostsPath)
 	if err != nil {
 		config.Fatal("[util/file/hosts] os.Open() failed", err.Error())
 	}
@@ -38,7 +37,7 @@ func HasDomain() (has bool) {
 func AddDomain() {
 
 	// open hosts file
-	f, err := os.OpenFile("/etc/hosts", os.O_RDWR|os.O_APPEND, 0644)
+	f, err := os.OpenFile(hostsPath, os.O_RDWR|os.O_APPEND, 0644)
 	if err != nil {
 		config.Fatal("[util/file/hosts] os.OpenFile() failed", err.Error())
 	}
@@ -57,7 +56,7 @@ func RemoveDomain() {
 	var contents string
 
 	// open hosts file
-	f, err := os.OpenFile("/etc/hosts", os.O_RDWR, 0644)
+	f, err := os.OpenFile(hostsPath, os.O_RDWR, 0644)
 	if err != nil {
 		config.Fatal("[util/file/hosts] os.OpenFile() failed", err.Error())
 	}
@@ -80,7 +79,7 @@ func RemoveDomain() {
 	contents = strings.TrimSpace(contents)
 
 	// write back the contents of the hosts file minus the removed entry
-	if err := ioutil.WriteFile("/etc/hosts", []byte(contents), 0644); err != nil {
+	if err := ioutil.WriteFile(hostsPath, []byte(contents), 0644); err != nil {
 		config.Fatal("[util/file/hosts] ioutil.WriteFile failed", err.Error())
 	}
 }
