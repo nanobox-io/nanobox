@@ -18,11 +18,9 @@ func monitorTerminal(stdOutFD uintptr) {
 	defer signal.Stop(sigs)
 
 	// inform the server what the starting size is
-	w, h := terminal.GetTTYSize(stdOutFD)
-	resizeTTY(w, h)
+	resizeTTY(terminal.GetTTYSize(stdOutFD))
 
 	for range sigs {
-		w, h := terminal.GetTTYSize(stdOutFD)
-		resizeTTY(w, h)
+		resizeTTY(terminal.GetTTYSize(stdOutFD))
 	}
 }
