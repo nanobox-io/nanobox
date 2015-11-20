@@ -121,48 +121,6 @@ func dropCR(data []byte) []byte {
 // handleCMDout
 func handleCMDout(cmd *exec.Cmd) {
 
-	// start a goroutine that will act as an 'outputer' allowing us to add 'dots'
-	// to the end of each line (as these lines are a reduced version of the actual
-	// output there will be some delay between output)
-	output := make(chan string)
-	go func() {
-
-		tick := time.Second
-
-		// block until any one message outputs
-		msg, ok := <-output
-
-		// print initial message to 'get the ball rolling' on our 'outputer'
-		fmt.Printf("   - %s", msg)
-
-		// begin a loop to read off the channel until it's closed
-		for {
-			select {
-
-			// print any messages and reset ticker
-			case msg, ok = <-output:
-
-				// once the channel closes print the final newline and close the goroutine
-				if !ok {
-					fmt.Println("")
-					return
-				}
-
-				fmt.Printf("\n   - %s", msg)
-
-				tick = time.Second
-
-			// after every tick print a '.' until we get another message one the channel
-			// (at which point ticker is reset and it starts all over again)
-			case <-time.After(tick):
-				fmt.Print(".")
-
-				// increase the wait time by half of the total previous time
-				tick += tick / 2
-			}
-		}
-	}()
-
 	// create a stderr pipe that will write any error messages to the log
 	stderr, err := cmd.StderrPipe()
 	if err != nil {
@@ -183,6 +141,53 @@ func handleCMDout(cmd *exec.Cmd) {
 	if err != nil {
 		Fatal("[util/vagrant/vagrant] cmd.StdoutPipe() failed", err.Error())
 	}
+
+	//
+	output := make(chan string)
+
+	// start a goroutine that will act as an 'outputer' allowing us to add 'dots'
+	// to the end of each line (as these lines are a reduced version of the actual
+	// output there will be some delay between output)
+	go func() {
+
+		tick := time.Second
+
+		// by default, don't print dots until we've received at least one message
+		messaged := false
+
+		// begin a loop to read off the channel until it's closed
+		for {
+			select {
+
+			// print any messages and reset ticker
+			case msg, ok := <-output:
+
+				// once an one message is received, indicate that dots can now be printed
+				messaged = true
+
+				// once the channel closes print the final newline and close the goroutine
+				if !ok {
+					fmt.Printf("\n")
+					return
+				}
+
+				fmt.Printf("\n   - %s", msg)
+
+				tick = time.Second
+
+			// after every tick print a '.' until we get another message one the channel
+			// (at which point ticker is reset and it starts all over again)
+			case <-time.After(tick):
+				if messaged {
+					fmt.Print(".")
+
+					// increase the wait time by 1/4 of the total previous time; this should
+					// provide a good 'loading' effect w/o printing too many dots
+					tick += tick / 4
+				}
+			}
+		}
+	}()
 
 	// scan the command output intercepting only 'important' lines of vagrant output'
 	// and tailoring their message so as to not flood the output.
@@ -205,7 +210,7 @@ func handleCMDout(cmd *exec.Cmd) {
 			case strings.Contains(txt, "box: Progress:"):
 				subMatch := regexp.MustCompile(`box: Progress: (\d{1,3})% \(Rate: (.*), Estimated time remaining: (\d*:\d*:\d*)`).FindStringSubmatch(txt)
 
-				// ensure we have all the submatches needed before using them
+				// ensure we have all the submatches needed before trying to use them
 				if len(subMatch) >= 4 {
 					i, err := strconv.Atoi(subMatch[1])
 					if err != nil {
