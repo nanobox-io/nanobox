@@ -47,12 +47,14 @@ func execInternal(where, params string, in io.Reader, out io.Writer) error {
 		}
 	}()
 
-	// handle all incoming os signals and act accordingly; default behavior is to
-	// forward all signals to nanobox server
-	go monitorTerminal(stdOutFD)
 
 	// if we are using a term, lets upgrade it to RawMode
 	if isTerminal {
+
+		// handle all incoming os signals and act accordingly; default behavior is to
+		// forward all signals to nanobox server
+		go monitorTerminal(stdOutFD)
+		
 		oldState, err := term.SetRawTerminal(stdInFD)
 		// we only use raw mode if it is available.
 		if err == nil {
