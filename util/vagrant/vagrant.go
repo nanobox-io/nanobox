@@ -121,10 +121,33 @@ func dropCR(data []byte) []byte {
 // handleCMDout
 func handleCMDout(cmd *exec.Cmd) {
 
+	// create a stderr pipe that will write any error messages to the log
+	stderr, err := cmd.StderrPipe()
+	if err != nil {
+		Fatal("[util/vagrant/vagrant] cmd.StderrPipe() failed", err.Error())
+	}
+
+	// log any command errors to the log
+	stderrScanner := bufio.NewScanner(stderr)
+	go func() {
+		for stderrScanner.Scan() {
+			Error("A vagrant error occured", stderrScanner.Text())
+		}
+	}()
+
+	// create a stdout pipe that will allow for scanning the output line-by-line;
+	// if needed a stderr pipe could also be created at some point
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		Fatal("[util/vagrant/vagrant] cmd.StdoutPipe() failed", err.Error())
+	}
+
+	//
+	output := make(chan string)
+
 	// start a goroutine that will act as an 'outputer' allowing us to add 'dots'
 	// to the end of each line (as these lines are a reduced version of the actual
 	// output there will be some delay between output)
-	output := make(chan string)
 	go func() {
 
 		tick := time.Second
@@ -163,27 +186,6 @@ func handleCMDout(cmd *exec.Cmd) {
 		}
 	}()
 
-	// create a stderr pipe that will write any error messages to the log
-	stderr, err := cmd.StderrPipe()
-	if err != nil {
-		Fatal("[util/vagrant/vagrant] cmd.StderrPipe() failed", err.Error())
-	}
-
-	// log any command errors to the log
-	stderrScanner := bufio.NewScanner(stderr)
-	go func() {
-		for stderrScanner.Scan() {
-			Error("A vagrant error occured", stderrScanner.Text())
-		}
-	}()
-
-	// create a stdout pipe that will allow for scanning the output line-by-line;
-	// if needed a stderr pipe could also be created at some point
-	stdout, err := cmd.StdoutPipe()
-	if err != nil {
-		Fatal("[util/vagrant/vagrant] cmd.StdoutPipe() failed", err.Error())
-	}
-
 	// scan the command output intercepting only 'important' lines of vagrant output'
 	// and tailoring their message so as to not flood the output.
 	// styled according to: http://nanodocs.gopagoda.io/engines/style-guide
@@ -205,7 +207,7 @@ func handleCMDout(cmd *exec.Cmd) {
 			case strings.Contains(txt, "box: Progress:"):
 				subMatch := regexp.MustCompile(`box: Progress: (\d{1,3})% \(Rate: (.*), Estimated time remaining: (\d*:\d*:\d*)`).FindStringSubmatch(txt)
 
-				// ensure we have all the submatches needed before using them
+				// ensure we have all the submatches needed before trying to use them
 				if len(subMatch) >= 4 {
 					i, err := strconv.Atoi(subMatch[1])
 					if err != nil {
