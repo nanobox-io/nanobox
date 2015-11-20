@@ -5,7 +5,6 @@ package mock_config
 
 import (
 	gomock "github.com/golang/mock/gomock"
-
 	config "github.com/nanobox-io/nanobox/config"
 )
 
@@ -30,12 +29,12 @@ func (_m *MockConfig) EXPECT() *_MockConfigRecorder {
 	return _m.recorder
 }
 
-func (_m *MockConfig) Debug(_param0 string, _param1 bool) {
-	_m.ctrl.Call(_m, "Debug", _param0, _param1)
+func (_m *MockConfig) Debug(_param0 string) {
+	_m.ctrl.Call(_m, "Debug", _param0)
 }
 
-func (_mr *_MockConfigRecorder) Debug(arg0, arg1 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "Debug", arg0, arg1)
+func (_mr *_MockConfigRecorder) Debug(arg0 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "Debug", arg0)
 }
 
 func (_m *MockConfig) Error(_param0 string, _param1 string) {
@@ -52,14 +51,6 @@ func (_m *MockConfig) Fatal(_param0 string, _param1 string) {
 
 func (_mr *_MockConfigRecorder) Fatal(arg0, arg1 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "Fatal", arg0, arg1)
-}
-
-func (_m *MockConfig) Info(_param0 string) {
-	_m.ctrl.Call(_m, "Info", _param0)
-}
-
-func (_mr *_MockConfigRecorder) Info(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "Info", arg0)
 }
 
 func (_m *MockConfig) ParseConfig(_param0 string, _param1 interface{}) error {

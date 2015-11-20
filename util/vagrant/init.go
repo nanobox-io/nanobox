@@ -36,10 +36,10 @@ func Init() {
       mount_options: ["nfsvers=3", "proto=tcp"]`
 	}
 
-	// "mount" the engine file localy at ~/.nanobox/apps/<app>/<engine>
+	// "mount" the engine file locally at ~/.nanobox/apps/<app>/<engine>
 	name, path, err := engineutil.MountLocal()
 	if err != nil {
-		config.Error("Engine failed to mount and will not work!", err.Error())
+		config.Debug("No engine mounted (not found locally).")
 	}
 
 	// "mount" the engine into the VM (if there is one)

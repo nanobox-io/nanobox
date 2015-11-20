@@ -44,7 +44,7 @@ func build(ccmd *cobra.Command, args []string) {
 	// remount the engine file at ~/.nanobox/apps/<app>/<engine> so any new scripts
 	// are used during the build
 	if err := engineutil.RemountLocal(); err != nil {
-		config.Error("[util/vagrant/init] engineutil.RemountLocal() failed", err.Error())
+		config.Debug("No engine mounted (not found locally).")
 	}
 
 	// run a build
