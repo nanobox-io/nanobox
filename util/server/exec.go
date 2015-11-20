@@ -47,12 +47,14 @@ func execInternal(where, params string, in io.Reader, out io.Writer) error {
 		}
 	}()
 
-	// handle all incoming os signals and act accordingly; default behavior is to
-	// forward all signals to nanobox server
-	go monitorTerminal(stdOutFD, params)
 
 	// if we are using a term, lets upgrade it to RawMode
 	if isTerminal {
+
+		// handle all incoming os signals and act accordingly; default behavior is to
+		// forward all signals to nanobox server
+		go monitorTerminal(stdOutFD)
+		
 		oldState, err := term.SetRawTerminal(stdInFD)
 		// we only use raw mode if it is available.
 		if err == nil {
@@ -63,11 +65,11 @@ func execInternal(where, params string, in io.Reader, out io.Writer) error {
 	// make a http request
 	switch where {
 	case "develop":
-		if _, err := fmt.Fprintf(conn, "POST /develop?%v HTTP/1.1\r\n\r\n", params); err != nil {
+		if _, err := fmt.Fprintf(conn, "POST /develop?pid=%d&%v HTTP/1.1\r\n\r\n", os.Getpid(), params); err != nil {
 			return err
 		}
 	default:
-		if _, err := fmt.Fprintf(conn, "POST /exec?%v HTTP/1.1\r\n\r\n", params); err != nil {
+		if _, err := fmt.Fprintf(conn, "POST /exec?pid=%d&%v HTTP/1.1\r\n\r\n", os.Getpid(), params); err != nil {
 			return err
 		}
 	}
@@ -109,10 +111,10 @@ func sendSignal(sig os.Signal) {
 }
 
 // resizeTTY
-func resizeTTY(fd uintptr, params string, w, h int) {
+func resizeTTY(w, h int) {
 
 	//
-	res, err := Post(fmt.Sprintf("/resizeexec?w=%d&h=%d&%v", w, h, params), "text/plain", nil)
+	res, err := Post(fmt.Sprintf("/resizeexec?pid=%d&w=%d&h=%d", os.Getpid(), w, h), "text/plain", nil)
 	if err != nil {
 		fmt.Printf("Error issuing resize: %s\n", err)
 	}
