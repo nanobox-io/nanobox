@@ -5,6 +5,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"regexp"
@@ -20,9 +21,33 @@ var err error
 
 // Exists ensure vagrant is installed
 func Exists() (exists bool) {
-	if err := exec.Command("vagrant", "-v").Run(); err == nil {
+
+	// check if vagrant is installed
+	if err := exec.Command("which", "vagrant").Run(); err == nil {
+
+		// read setup_version to determine if the version of vagrant is too old
+		// (< 1.5.0) and needs to be migrated
+		b, err := ioutil.ReadFile(config.Home + "/.vagrant.d/setup_version")
+		if err != nil {
+			panic(err)
+		}
+
+		// convert the []byte value from the file into a float 'version'
+		version, err := strconv.ParseFloat(string(b), 64)
+		if err != nil {
+			panic(err)
+		}
+
+		// if the current version of vagrant is less than the 'working version',
+		if version < 1.5 {
+			fmt.Println(`
+You're running a super old version of vagrant and need to update!
+			`)
+		}
+
 		exists = true
 	}
+
 	return
 }
 
