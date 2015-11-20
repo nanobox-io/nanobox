@@ -10,7 +10,7 @@ type (
 		Fatal(string, string)
 		Root() string
 		ParseConfig(path string, v interface{}) error
-		Debug(msg string, debug bool)
+		Debug(msg string)
 		Error(msg, err string)
 		ParseNanofile() NanofileConfig
 		ParseVMfile() VMfileConfig
@@ -28,8 +28,8 @@ func (config) ParseNanofile() NanofileConfig {
 	return ParseNanofile()
 }
 
-func (config) Debug(msg string, debug bool) {
-	Debug(msg, debug)
+func (config) Debug(msg string) {
+	Debug(msg)
 }
 
 func (config) Error(msg, err string) {

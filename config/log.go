@@ -30,8 +30,8 @@ func init() {
 }
 
 // Debug
-func Debug(msg string, debug bool) {
-	if debug {
+func Debug(msg string) {
+	if Verbose {
 		fmt.Printf(msg)
 	}
 }

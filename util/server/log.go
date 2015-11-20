@@ -45,8 +45,8 @@ func NewLogger(path string) {
 }
 
 // Debug
-func Debug(msg string, debug bool) {
-	if debug {
+func Debug(msg string) {
+	if config.Verbose {
 		fmt.Printf(msg)
 	}
 }

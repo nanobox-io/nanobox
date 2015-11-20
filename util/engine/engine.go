@@ -26,26 +26,28 @@ func RemountLocal() (err error) {
 func MountLocal() (mountName, mountDir string, err error) {
 
 	// parse the boxfile and see if there is an engine declared; if none is declared
-	// simply return
-	engine := config.ParseBoxfile().Build.Engine
-	if engine == "" {
+	// simply return.
+	enginePath := config.ParseBoxfile().Build.Engine
+	if enginePath == "" {
 		return
 	}
 
 	//
-	mountName = filepath.Base(engine)
+	mountName = filepath.Base(enginePath)
 
-	// if an engine is found, ensure the path exists before continuing
-	if _, err = os.Stat(engine); err != nil {
+	// if no local engine is found return since there is nothing more to do here;
+	// when an engine is specified but not found, it's assumed that the desired
+	// engine exists on nanobox.io
+	if _, err = os.Stat(enginePath); err != nil {
 		return
 	}
 
 	//
-	enginefile := filepath.Join(engine, "./Enginefile")
+	enginefile := filepath.Join(enginePath, "Enginefile")
 
 	// ensure there is an enginefile at the engine location
 	if _, err = os.Stat(enginefile); err != nil {
-		err = fmt.Errorf("No enginefile found at '%v', Exiting...\n", engine)
+		err = fmt.Errorf("No enginefile found at '%v', Exiting...\n", enginePath)
 		return
 	}
 
@@ -59,7 +61,7 @@ func MountLocal() (mountName, mountDir string, err error) {
 		return
 	}
 
-	mountDir = filepath.Join(config.AppDir, filepath.Base(engine))
+	mountDir = filepath.Join(config.AppDir, mountName)
 
 	// if the enginefile parses successfully create the mount only if it doesn't
 	// already exist
@@ -76,7 +78,7 @@ func MountLocal() (mountName, mountDir string, err error) {
 
 	var abs string
 
-	abs, err = filepath.Abs(engine)
+	abs, err = filepath.Abs(enginePath)
 	if err != nil {
 		return
 	}
