@@ -152,22 +152,22 @@ func handleCMDout(cmd *exec.Cmd) {
 
 		tick := time.Second
 
-		// block until any one message outputs
-		msg, ok := <-output
-
-		// print initial message to 'get the ball rolling' on our 'outputer'
-		fmt.Printf("   - %s", msg)
+		// by default, don't print dots until we've received at least one message
+		messaged := false
 
 		// begin a loop to read off the channel until it's closed
 		for {
 			select {
 
 			// print any messages and reset ticker
-			case msg, ok = <-output:
+			case msg, ok := <-output:
+
+				// once an one message is received, indicate that dots can now be printed
+				messaged = true
 
 				// once the channel closes print the final newline and close the goroutine
 				if !ok {
-					fmt.Println("")
+					fmt.Printf("\n")
 					return
 				}
 
@@ -178,10 +178,13 @@ func handleCMDout(cmd *exec.Cmd) {
 			// after every tick print a '.' until we get another message one the channel
 			// (at which point ticker is reset and it starts all over again)
 			case <-time.After(tick):
-				fmt.Print(".")
+				if messaged {
+					fmt.Print(".")
 
-				// increase the wait time by half of the total previous time
-				tick += tick / 2
+					// increase the wait time by 1/4 of the total previous time; this should
+					// provide a good 'loading' effect w/o printing too many dots
+					tick += tick / 4
+				}
 			}
 		}
 	}()
