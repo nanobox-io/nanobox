@@ -146,7 +146,7 @@ increasing your max file descriptor limit to re-enable this functionality.
 func watchDir(path string, fi os.FileInfo, err error) error {
 
 	// don't walk any directory that is an ignore dir
-	if isIgnoreDir(fi.Name()) {
+	if fi == nil || isIgnoreDir(fi.Name()) {
 		return filepath.SkipDir
 	}
 
