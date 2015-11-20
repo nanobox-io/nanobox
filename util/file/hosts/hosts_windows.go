@@ -2,4 +2,4 @@
 
 package hosts
 
-var hostsPath = `c:\windows\system32\etc\hosts`
+var hostsPath = `C:\Windows\System32\etc\hosts`
