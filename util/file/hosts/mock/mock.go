@@ -3,7 +3,9 @@
 
 package mock_hosts
 
-import gomock "github.com/golang/mock/gomock"
+import (
+	gomock "github.com/golang/mock/gomock"
+)
 
 // Mock of Host interface
 type MockHost struct {

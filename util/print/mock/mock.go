@@ -3,7 +3,9 @@
 
 package mock_print
 
-import gomock "github.com/golang/mock/gomock"
+import (
+	gomock "github.com/golang/mock/gomock"
+)
 
 // Mock of Print interface
 type MockPrint struct {

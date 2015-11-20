@@ -5,7 +5,6 @@ package mock_mist
 
 import (
 	gomock "github.com/golang/mock/gomock"
-
 	mist "github.com/nanobox-io/nanobox/util/server/mist"
 )
 
