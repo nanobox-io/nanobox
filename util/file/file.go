@@ -192,7 +192,7 @@ func Progress(path string, w io.Writer) error {
 
 		switch {
 		// return any other error
-		default :
+		default:
 			// update the percent downloaded
 			percent = (float64(down) / float64(download.ContentLength)) * 100
 
@@ -212,7 +212,7 @@ func Progress(path string, w io.Writer) error {
 			} else {
 				return err
 			}
-		}		
+		}
 	}
 
 	return nil
