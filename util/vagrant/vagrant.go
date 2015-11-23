@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -27,7 +28,7 @@ func Exists() (exists bool) {
 
 		// read setup_version to determine if the version of vagrant is too old
 		// (< 1.5.0) and needs to be migrated
-		b, err := ioutil.ReadFile(config.Home + "/.vagrant.d/setup_version")
+		b, err := ioutil.ReadFile(filepath.Join(config.Home, ".vagrant.d", "setup_version"))
 		if err != nil {
 			config.Fatal("[util/vagrant/vagrant] ioutil.ReadFile() failed", err.Error())
 		}
