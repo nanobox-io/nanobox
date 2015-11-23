@@ -29,22 +29,29 @@ func Exists() (exists bool) {
 		// (< 1.5.0) and needs to be migrated
 		b, err := ioutil.ReadFile(config.Home + "/.vagrant.d/setup_version")
 		if err != nil {
-			panic(err)
+			config.Fatal("[util/vagrant/vagrant] ioutil.ReadFile() failed", err.Error())
 		}
 
 		// convert the []byte value from the file into a float 'version'
 		version, err := strconv.ParseFloat(string(b), 64)
 		if err != nil {
-			panic(err)
+			config.Fatal("[util/vagrant/vagrant] strconv.ParseFloat() failed", err.Error())
 		}
 
-		// if the current version of vagrant is less than the 'working version',
+		// if the current version of vagrant is less than a 'working version' (1.5)
+		// give instructions on how to update
 		if version < 1.5 {
 			fmt.Println(`
-You're running a super old version of vagrant and need to update!
+Nanobox has detected that you are using an old version of Vagrant (<1.5). Before
+you can continue you'll need to run "vagrant update" and follow the instructions
+to update Vagrant.
 			`)
+
+			// exit here to allow for upgrade
+			os.Exit(0)
 		}
 
+		// if all checks pass
 		exists = true
 	}
 
