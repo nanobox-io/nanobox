@@ -5,8 +5,10 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
@@ -20,9 +22,40 @@ var err error
 
 // Exists ensure vagrant is installed
 func Exists() (exists bool) {
-	if err := exec.Command("vagrant", "-v").Run(); err == nil {
+
+	// check if vagrant is installed
+	if err := exec.Command("which", "vagrant").Run(); err == nil {
+
+		// read setup_version to determine if the version of vagrant is too old
+		// (< 1.5.0) and needs to be migrated
+		b, err := ioutil.ReadFile(filepath.Join(config.Home, ".vagrant.d", "setup_version"))
+		if err != nil {
+			config.Fatal("[util/vagrant/vagrant] ioutil.ReadFile() failed", err.Error())
+		}
+
+		// convert the []byte value from the file into a float 'version'
+		version, err := strconv.ParseFloat(string(b), 64)
+		if err != nil {
+			config.Fatal("[util/vagrant/vagrant] strconv.ParseFloat() failed", err.Error())
+		}
+
+		// if the current version of vagrant is less than a 'working version' (1.5)
+		// give instructions on how to update
+		if version < 1.5 {
+			fmt.Println(`
+Nanobox has detected that you are using an old version of Vagrant (<1.5). Before
+you can continue you'll need to run "vagrant update" and follow the instructions
+to update Vagrant.
+			`)
+
+			// exit here to allow for upgrade
+			os.Exit(0)
+		}
+
+		// if all checks pass
 		exists = true
 	}
+
 	return
 }
 

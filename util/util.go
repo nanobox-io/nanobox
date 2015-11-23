@@ -16,7 +16,7 @@ import (
 // VboxExists ensure virtualbox is installed; if ever there is a virtualbox package
 // this can be moved there
 func VboxExists() (exists bool) {
-	if err := exec.Command("vboxmanage", "-v").Run(); err == nil {
+	if err := exec.Command("which", "vboxmanage").Run(); err == nil {
 		exists = true
 	}
 
