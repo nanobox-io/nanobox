@@ -56,6 +56,18 @@ func Init() {
 		}
 	}
 
+  sshLocation := sshLocation()
+  if config.Nanofile.SshLocation != "" {
+    sshLocation = config.Nanofile.SshLocation
+  }
+
+  sshFolder, err := os.Stat(sshLocation)
+    
+  if err == nil && sshFolder.IsDir() {
+    synced_folders += fmt.Sprintf(`
+    nanobox.vm.synced_folder '%s', "/mnt/ssh"`, sshLocation)
+  }
+
 	//
 	// nanofile config
 
@@ -160,7 +172,6 @@ Vagrant.configure(2) do |config|
     nanobox.vm.synced_folder ".", "/vagrant", disabled: true
 
     # add nanobox shared folders
-    nanobox.vm.synced_folder "~/.ssh", "/mnt/ssh"
     %s
 
 
