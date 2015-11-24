@@ -2,6 +2,4 @@
 
 package vagrant
 
-func sshLocation() string {
-	return "~/.ssh"
-}
+var sshPath = "~/.ssh"

@@ -11,8 +11,7 @@ import (
 	"github.com/nanobox-io/nanobox-golang-stylish"
 )
 
-// privilegeExec runs a command but assumes 
-// your already running as adminsitrator
+// privilegeExec runs a command, but assumes your already running as adminsitrator
 func privilegeExec(command, msg string) {
 	fmt.Printf(stylish.Bullet(msg))
 
@@ -25,6 +24,6 @@ func privilegeExec(command, msg string) {
 
 	// run command
 	if err := cmd.Run(); err != nil {
-		Config.Fatal("[commands/halt]", err.Error())
+		Config.Fatal("[commands/commands_windows]", err.Error())
 	}
 }

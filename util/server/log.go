@@ -13,10 +13,10 @@ import (
 
 //
 var (
-	mutex  = &sync.Mutex{}
 	Console *lumber.ConsoleLogger
 	Log     *lumber.FileLogger
 	logFile string
+	mutex   = &sync.Mutex{}
 )
 
 // create a console and default file logger
@@ -60,7 +60,11 @@ func Error(msg, err string) {
 func Fatal(msg, err string) {
 	fmt.Printf("A fatal server error occurred (See %s for details). Exiting...", logFile)
 	Log.Fatal(fmt.Sprintf("%s - %s", msg, err))
+
+	// add a mutex lock in so that if multiple errors are happening at the same
+	// time we dont try closing the log twice
 	mutex.Lock()
+
 	Log.Close()
 	os.Exit(1)
 }

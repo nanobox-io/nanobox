@@ -23,6 +23,6 @@ func privilegeExec(command, msg string) {
 
 	// run command
 	if err := cmd.Run(); err != nil {
-		Config.Fatal("[commands/halt]", err.Error())
+		Config.Fatal("[commands/commands_unix]", err.Error())
 	}
 }

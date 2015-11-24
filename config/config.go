@@ -52,11 +52,11 @@ var (
 	LogtapURI string // logtap's host:port combo (IP:6361)
 
 	// flags
-	Background bool   //
-	Devmode    bool   //
-	Force      bool   //
-	Verbose    bool   //
-	Silent     bool   //
+	Background bool   // don't suspend the vm on exit
+	Devmode    bool   // run nanobox in devmode
+	Force      bool   // force a command to run (effects very per command)
+	Verbose    bool   // run cli with log level "debug"
+	Silent     bool   // silence all ouput
 	LogLevel   string //
 
 	//

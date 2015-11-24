@@ -40,9 +40,7 @@ func Download(path string) (*http.Response, error) {
 
 // Upload
 func Upload(path string, body io.Reader) error {
-	res, err := Request("PUT", path, body)
-	defer res.Body.Close()
-
+	_, err := Request("PUT", path, body)
 	return err
 }
 
