@@ -29,7 +29,7 @@ type (
 
 var (
 	err   error //
-	mutex *sync.Mutex
+	mutex = &sync.Mutex{}
 
 	//
 	AppDir     string // the path to the application (~/.nanobox/apps/<app>)

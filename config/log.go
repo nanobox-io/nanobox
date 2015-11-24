@@ -46,6 +46,11 @@ func Error(msg, err string) {
 func Fatal(msg, err string) {
 	fmt.Printf("A fatal error occurred (See %s for details). Exiting...", LogFile)
 	Log.Fatal(fmt.Sprintf("%s - %s", msg, err))
+
+	// add a mutex lock in so that if multiple errors
+  // are happening at the same time we dont try closing 
+  // the log twice
+	mutex.Lock()
 	Log.Close()
 	os.Exit(1)
 }
