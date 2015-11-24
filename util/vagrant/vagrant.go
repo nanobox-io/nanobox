@@ -5,6 +5,7 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"runtime"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -22,9 +23,12 @@ var err error
 
 // Exists ensure vagrant is installed
 func Exists() (exists bool) {
-
+	verb := "which"
+	if runtime.GOOS == "windows" {
+		verb = "where"
+	}
 	// check if vagrant is installed
-	if err := exec.Command("which", "vagrant").Run(); err == nil {
+	if err := exec.Command(verb, "vagrant").Run(); err == nil {
 
 		// read setup_version to determine if the version of vagrant is too old
 		// (< 1.5.0) and needs to be migrated

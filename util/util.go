@@ -5,6 +5,7 @@ import (
 	"crypto/md5"
 	"encoding/binary"
 	"fmt"
+	"runtime"
 	"io"
 	"io/ioutil"
 	"net"
@@ -16,7 +17,12 @@ import (
 // VboxExists ensure virtualbox is installed; if ever there is a virtualbox package
 // this can be moved there
 func VboxExists() (exists bool) {
-	if err := exec.Command("which", "vboxmanage").Run(); err == nil {
+	verb := "which"
+	if runtime.GOOS == "windows" {
+		verb = "where"
+	}
+
+	if err := exec.Command(verb, "vboxmanage").Run(); err == nil {
 		exists = true
 	}
 
