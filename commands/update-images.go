@@ -25,8 +25,6 @@ func updateImages(ccmd *cobra.Command, args []string) {
 
 	// PreRun: boot
 
-	fmt.Printf(stylish.Bullet("Updating nanobox docker images..."))
-
 	// stream update output
 	go Mist.Stream([]string{"log", "deploy"}, Mist.PrintLogStream)
 
@@ -35,6 +33,8 @@ func updateImages(ccmd *cobra.Command, args []string) {
 	go func() {
 		errch <- Mist.Listen([]string{"job", "imageupdate"}, Mist.ImageUpdates)
 	}()
+
+	fmt.Printf(stylish.Bullet("Updating nanobox docker images (this may take awhile)..."))
 
 	// run an image update
 	if err := server.Update(""); err != nil {
