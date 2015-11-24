@@ -4,6 +4,7 @@ package server
 import (
 	"fmt"
 	"os"
+	"sync"
 
 	"github.com/jcelliott/lumber"
 
