@@ -1,8 +1,10 @@
 //
 package vagrant
 
-import "os/exec"
-import "runtime"
+import (
+	"os/exec"
+	"runtime"
+)
 
 // Up runs a vagrant up
 func Up() error {

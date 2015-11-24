@@ -1,8 +1,10 @@
 //
 package vagrant
 
-import "os/exec"
-import "runtime"
+import (
+	"os/exec"
+	"runtime"
+)
 
 // Reload runs a vagrant reload
 func Reload() error {
