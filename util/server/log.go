@@ -12,6 +12,7 @@ import (
 
 //
 var (
+	mutex  = &sync.Mutex{}
 	Console *lumber.ConsoleLogger
 	Log     *lumber.FileLogger
 	logFile string
@@ -58,6 +59,7 @@ func Error(msg, err string) {
 func Fatal(msg, err string) {
 	fmt.Printf("A fatal server error occurred (See %s for details). Exiting...", logFile)
 	Log.Fatal(fmt.Sprintf("%s - %s", msg, err))
+	mutex.Lock()
 	Log.Close()
 	os.Exit(1)
 }
