@@ -4,7 +4,6 @@ package commands
 import (
 	"fmt"
 	"os"
-	"os/exec"
 
 	"github.com/nanobox-io/nanobox-golang-stylish"
 	"github.com/spf13/cobra"
@@ -188,21 +187,4 @@ func halt(ccmd *cobra.Command, args []string) {
 
 	//
 	// os.Exit(0)
-}
-
-// sudo runs a command as sudo
-func sudo(command, msg string) {
-	fmt.Printf(stylish.Bullet(msg))
-
-	//
-	cmd := exec.Command("/bin/sh", "-c", fmt.Sprintf("sudo %v %v", os.Args[0], command))
-
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	// run command
-	if err := cmd.Run(); err != nil {
-		Config.Fatal("[commands/halt]", err.Error())
-	}
 }

@@ -101,21 +101,12 @@ func IsContainerExec(args []string) bool {
 	return false
 }
 
-func sendSignal(sig os.Signal) {
-	res, err := Post(fmt.Sprintf("/killexec?signal=%v", sig), "text/plain", nil)
-	if err != nil {
-		Fatal("[util/server/exec_unix] Post() failed", err.Error())
-	}
-	res.Body.Close()
-}
-
 // resizeTTY
 func resizeTTY(w, h int) {
 
 	//
-	res, err := Post(fmt.Sprintf("/resizeexec?pid=%d&w=%d&h=%d", os.Getpid(), w, h), "text/plain", nil)
+	_, err := Post(fmt.Sprintf("/resizeexec?pid=%d&w=%d&h=%d", os.Getpid(), w, h), "text/plain", nil)
 	if err != nil {
 		fmt.Printf("Error issuing resize: %s\n", err)
 	}
-	res.Body.Close()
 }

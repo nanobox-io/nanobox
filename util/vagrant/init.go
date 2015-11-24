@@ -56,17 +56,19 @@ func Init() {
 		}
 	}
 
-  sshLocation := sshLocation()
-  if config.Nanofile.SshLocation != "" {
-    sshLocation = config.Nanofile.SshLocation
-  }
+	// get the default sshlocation and then replace it
+	// if one was specified in the nanofile
+	sshLocation := sshLocation()
+	if config.Nanofile.SshLocation != "" {
+		sshLocation = config.Nanofile.SshLocation
+	}
 
-  sshFolder, err := os.Stat(sshLocation)
-    
-  if err == nil && sshFolder.IsDir() {
-    synced_folders += fmt.Sprintf(`
+	// ensure the ssh location is a valid place
+	sshFolder, err := os.Stat(sshLocation)
+	if err == nil && sshFolder.IsDir() {
+		synced_folders += fmt.Sprintf(`
     nanobox.vm.synced_folder '%s', "/mnt/ssh"`, sshLocation)
-  }
+	}
 
 	//
 	// nanofile config

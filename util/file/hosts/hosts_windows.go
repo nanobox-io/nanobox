@@ -4,8 +4,8 @@ package hosts
 
 import "os"
 
-var hostsPath = `C:\Windows\System32\etc\hosts`
+var hostsPath = `C:\Windows\System32\drivers\etc\hosts`
 
 func init() {
-	hostsPath = os.Getenv("windir")+`\System32\etc\hosts`
+	hostsPath = os.Getenv("windir") + `\System32\drivers\etc\hosts`
 }

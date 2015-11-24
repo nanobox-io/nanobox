@@ -5,5 +5,5 @@ import (
 )
 
 func sshLocation() string {
-	return os.Getenv("HOMEDRIVE")+os.Getenv("HOMEDRIVE")+`\.ssh`
+	return os.Getenv("HOMEDRIVE") + os.Getenv("HOMEDRIVE") + `\.ssh`
 }
