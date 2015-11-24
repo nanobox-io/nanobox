@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/nanobox-io/nanobox/util"
 )
@@ -20,6 +21,7 @@ type NanofileConfig struct {
 	Provider string `json:"provider"`  // guest vm provider (virtual box, vmware, etc)
 	RAM      int    `json:"ram"`       // ammount of RAM to dedicate to the guest vm
 	HostDNS  string `json:"host_dns"`  // use the hosts dns resolver
+	SshPath  string `json:"ssh_path"`  // provide the path to the .ssh directory (if any)
 }
 
 // ParseNanofile
@@ -57,6 +59,9 @@ func ParseNanofile() NanofileConfig {
 			Exit(1)
 		}
 	}
+
+	// make sure the name doesnt have any spaces
+	nanofile.Name = strings.Replace(nanofile.Name, " ", "-", -1)
 
 	// set name specific options after potential .nanofiles have been parsed
 	nanofile.Domain = fmt.Sprintf("%s.dev", nanofile.Name)

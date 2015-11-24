@@ -14,11 +14,9 @@ func Logs(params string) error {
 	logs := []mist.Log{}
 
 	//
-	res, err := Get("/logs?"+params, &logs)
-	if err != nil {
+	if _, err := Get("/logs?"+params, &logs); err != nil {
 		return err
 	}
-	defer res.Body.Close()
 
 	//
 	fmt.Printf(stylish.Bullet("Showing last %v entries:", len(logs)))

@@ -64,5 +64,5 @@ func destroy(ccmd *cobra.Command, args []string) {
 	}
 
 	// attempt to remove the entry regardless of whether its there or not
-	sudo("destroy --remove-entry", fmt.Sprintf("Removing %s domain from /etc/hosts", config.Nanofile.Domain))
+	privilegeExec("destroy --remove-entry", fmt.Sprintf("Removing %s domain from /etc/hosts", config.Nanofile.Domain))
 }

@@ -81,11 +81,9 @@ func IsContainerExec(args []string) bool {
 
 	// fetch services to see if the command is trying to run on a specific container
 	var services []Service
-	res, err := Get("/services", &services)
-	if err != nil {
+	if _, err := Get("/services", &services); err != nil {
 		Fatal("[util/server/exec] Get() failed", err.Error())
 	}
-	res.Body.Close()
 
 	// make an exception for build1, as it wont show up on the list, but will always exist
 	if args[0] == "build1" {
@@ -101,21 +99,11 @@ func IsContainerExec(args []string) bool {
 	return false
 }
 
-func sendSignal(sig os.Signal) {
-	res, err := Post(fmt.Sprintf("/killexec?signal=%v", sig), "text/plain", nil)
-	if err != nil {
-		Fatal("[util/server/exec_unix] Post() failed", err.Error())
-	}
-	res.Body.Close()
-}
-
 // resizeTTY
 func resizeTTY(w, h int) {
 
 	//
-	res, err := Post(fmt.Sprintf("/resizeexec?pid=%d&w=%d&h=%d", os.Getpid(), w, h), "text/plain", nil)
-	if err != nil {
+	if _, err := Post(fmt.Sprintf("/resizeexec?pid=%d&w=%d&h=%d", os.Getpid(), w, h), "text/plain", nil); err != nil {
 		fmt.Printf("Error issuing resize: %s\n", err)
 	}
-	res.Body.Close()
 }

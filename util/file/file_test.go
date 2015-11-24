@@ -21,10 +21,10 @@ func TestTarUntar(t *testing.T) {
 
 	//
 	tarball, err := os.Create(filepath.Join(dst, "file.tar.gz"))
-	defer tarball.Close()
 	if err != nil {
 		t.Error("Unexpected error - ", err.Error())
 	}
+	defer tarball.Close()
 
 	// create a tarball from src
 	if err := Tar(src, tarball); err != nil {
@@ -38,10 +38,10 @@ func TestTarUntar(t *testing.T) {
 
 	//
 	archive, err := os.Open(filepath.Join(dst, "file.tar.gz"))
-	defer archive.Close()
 	if err != nil {
 		t.Error("Unexpected error - ", err.Error())
 	}
+	defer archive.Close()
 
 	// untar tarball
 	if err := Untar(dst, archive); err != nil {

@@ -4,9 +4,9 @@ package vagrant
 import (
 	"fmt"
 	"os"
+	"sync"
 
 	"github.com/jcelliott/lumber"
-	"github.com/nanobox-io/nanobox-golang-stylish"
 
 	"github.com/nanobox-io/nanobox/config"
 )
@@ -16,6 +16,7 @@ var (
 	Console *lumber.ConsoleLogger
 	Log     *lumber.FileLogger
 	logFile string
+	mutex   = &sync.Mutex{}
 )
 
 // create a console and default file logger
@@ -40,8 +41,6 @@ func NewLogger(path string) {
 	}
 
 	logFile = path
-
-	fmt.Printf(stylish.Bullet("Created %s", path))
 }
 
 // Debug
@@ -61,6 +60,11 @@ func Error(msg, err string) {
 func Fatal(msg, err string) {
 	fmt.Printf("A fatal Vagrant error occurred (See %s for details). Exiting...", logFile)
 	Log.Fatal(fmt.Sprintf("%s - %s", msg, err))
+
+	// add a mutex lock in so that if multiple errors are happening at the same
+	// time we dont try closing the log twice
+	mutex.Lock()
+
 	Log.Close()
 	os.Exit(1)
 }

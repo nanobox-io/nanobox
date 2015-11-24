@@ -40,11 +40,9 @@ Nanobox Files  : %s
 
 	//
 	var services []server.Service
-	res, err := server.Get("/services", &services)
-	if err != nil {
+	if _, err := server.Get("/services", &services); err != nil {
 		server.Fatal("[commands/info] failed", err.Error())
 	}
-	defer res.Body.Close()
 
 	//
 	if len(services) >= 1 {

@@ -47,13 +47,24 @@ func Init() {
 		synced_folders += fmt.Sprintf(`
     nanobox.vm.synced_folder '%s', "/vagrant/engines/%s"`, path, name)
 
-		// mount engine directory as NFS unless configured otherwise; if not mounted in
-		// this way Vagrant will just decide what it thinks is best
+		// mount engine directory as NFS unless configured otherwise; if not mounted
+		// in this way Vagrant will just decide what it thinks is best
 		if config.Nanofile.MountNFS {
 			synced_folders += `,
       type: "nfs",
       mount_options: ["nfsvers=3", "proto=tcp"]`
 		}
+	}
+
+	// if an sshPath is provided in the nanofile override the default
+	if config.Nanofile.SshPath != "" {
+		sshPath = config.Nanofile.SshPath
+	}
+
+	// ensure the ssh location is a valid place
+	if sshDir, err := os.Stat(sshPath); err == nil && sshDir.IsDir() {
+		synced_folders += fmt.Sprintf(`
+    nanobox.vm.synced_folder '%s', "/mnt/ssh"`, sshPath)
 	}
 
 	//
@@ -160,7 +171,6 @@ Vagrant.configure(2) do |config|
     nanobox.vm.synced_folder ".", "/vagrant", disabled: true
 
     # add nanobox shared folders
-    nanobox.vm.synced_folder "~/.ssh", "/mnt/ssh"
     %s
 
 

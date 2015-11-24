@@ -6,11 +6,9 @@ import ()
 // Build issues a build to nanobox server
 func Build(params string) error {
 
-	res, err := Post("/builds?"+params, "text/plain", nil)
-	if err != nil {
+	if _, err := Post("/builds?"+params, "text/plain", nil); err != nil {
 		return err
 	}
-	defer res.Body.Close()
 
 	return nil
 }
