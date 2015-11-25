@@ -30,7 +30,7 @@ func reload(ccmd *cobra.Command, args []string) {
 
 	// generate a new Vagrantfile on reload; this is done because there may be times
 	// when a user needs a new Vagrantfile (ie. adding a custom engine after the VM
-	// already exists). The only way to accomplish this right now is either destroying
+	// already exists). The only way to accomplish this otherwise is either destroying
 	// the VM entirely or running the hidden "nanobox init -f"
 	Vagrant.Init()
 
