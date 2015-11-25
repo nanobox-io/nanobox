@@ -4,6 +4,7 @@ package vagrant
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/nanobox-io/nanobox-golang-stylish"
 
@@ -25,35 +26,15 @@ func Init() {
 	//
 	// create synced folders
 
-	// mount code directory (mounted as nfs by default)
-	synced_folders := fmt.Sprintf(`nanobox.vm.synced_folder '%s', '/vagrant/code/%s'`, config.CWDir, config.Nanofile.Name)
+	var sshMount, engineMount, codeMount string
 
-	// mount code directory as NFS unless configured otherwise; if not mounted in
-	// this way Vagrant will just decide what it thinks is best
-	if config.Nanofile.MountNFS {
-		synced_folders += `,
-      type: "nfs",
-      mount_options: ["nfsvers=3", "proto=tcp"]`
-	}
+	//
+	// default path to ssh dir (assumes Unix)
+	sshPath := filepath.Join(config.Home, ".ssh")
 
-	// "mount" the engine file locally at ~/.nanobox/apps/<app>/<engine>
-	name, path, err := engineutil.MountLocal()
-	if err != nil {
-		config.Debug("No engine mounted (not found locally).")
-	}
-
-	// "mount" the engine into the VM (if there is one)
-	if name != "" && path != "" {
-		synced_folders += fmt.Sprintf(`
-    nanobox.vm.synced_folder '%s', "/vagrant/engines/%s"`, path, name)
-
-		// mount engine directory as NFS unless configured otherwise; if not mounted
-		// in this way Vagrant will just decide what it thinks is best
-		if config.Nanofile.MountNFS {
-			synced_folders += `,
-      type: "nfs",
-      mount_options: ["nfsvers=3", "proto=tcp"]`
-		}
+	// default path to ssh (windows)
+	if config.OS == "windows" {
+		sshPath = os.Getenv("HOMEDRIVE") + os.Getenv("HOMEPATH") + `\.ssh`
 	}
 
 	// if an sshPath is provided in the nanofile override the default
@@ -61,10 +42,52 @@ func Init() {
 		sshPath = config.Nanofile.SshPath
 	}
 
-	// ensure the ssh location is a valid place
-	if sshDir, err := os.Stat(sshPath); err == nil && sshDir.IsDir() {
-		synced_folders += fmt.Sprintf(`
-    nanobox.vm.synced_folder '%s', "/mnt/ssh"`, sshPath)
+	// ensure the ssh location is a valid place; if the ssh dir is found, mount it
+	sshDir, err := os.Stat(sshPath)
+	if err == nil && sshDir.IsDir() {
+		sshMount = fmt.Sprintf(`nanobox.vm.synced_folder '%s', "/mnt/ssh"`, sshPath)
+
+		// if not found print this friendly warning
+	} else {
+		fmt.Printf(`
+WARNING: Nanobox was unable to mount your .ssh folder into the VM because it was
+unable to detect the location of an .ssh directory at:
+%s
+
+While nanobox is still usable for local development, this may result in failures
+to fetch dependancies that require the use of those credentials`, sshPath)
+	}
+
+	//
+	// mount code directory (mounted as nfs by default)
+	codeMount = fmt.Sprintf(`nanobox.vm.synced_folder '%s', '/vagrant/code/%s'`, config.CWDir, config.Nanofile.Name)
+
+	// mount code directory as NFS unless configured otherwise; if not mounted in
+	// this way Vagrant will just decide what it thinks is best
+	if config.Nanofile.MountNFS {
+		codeMount += `,
+      type: "nfs", mount_options: ["nfsvers=3", "proto=tcp"]`
+	}
+
+	//
+	// "mount" the engine file locally at ~/.nanobox/apps/<app>/<engine>; this is
+	// done when a local engine is detected so that the engine can be developed
+	// and changed are reflected in the VM
+	name, path, err := engineutil.MountLocal()
+	if err != nil {
+		config.Debug("No engine mounted (not found locally).")
+	}
+
+	// "mount" the engine into the VM (if there is one)
+	if name != "" && path != "" {
+		engineMount = fmt.Sprintf(`nanobox.vm.synced_folder '%s', "/vagrant/engines/%s"`, path, name)
+
+		// mount engine directory as NFS unless configured otherwise; if not mounted
+		// in this way Vagrant will just decide what it thinks is best
+		if config.Nanofile.MountNFS {
+			engineMount += `,
+      type: "nfs", mount_options: ["nfsvers=3", "proto=tcp"]`
+		}
 	}
 
 	//
@@ -155,14 +178,14 @@ Vagrant.configure(2) do |config|
     WAIT
 
     ## box
-    nanobox.vm.box     = "nanobox/boot2docker"
+    nanobox.vm.box = "nanobox/boot2docker"
 
 
     ## network
 
     # add custom private network and ip and custom ssh port forward
-    %s
-    %s
+    `+network+`
+    `+sshport+`
 
 
     ## shared folders
@@ -171,11 +194,12 @@ Vagrant.configure(2) do |config|
     nanobox.vm.synced_folder ".", "/vagrant", disabled: true
 
     # add nanobox shared folders
-    %s
-
+    `+sshMount+`
+    `+codeMount+`
+    `+engineMount+`
 
     ## provider configs
-    %s
+    `+provider+`
 
     ## wait for the dhcp service to come online
     nanobox.vm.provision "shell", inline: <<-WAIT
@@ -198,5 +222,5 @@ Vagrant.configure(2) do |config|
     %s
 
   end
-end`, config.Nanofile.Name, config.Nanofile.Domain, network, sshport, synced_folders, provider, devmode)))
+end`, config.Nanofile.Name, config.Nanofile.Domain, devmode)))
 }
