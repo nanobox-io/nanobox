@@ -5,12 +5,12 @@ import (
 	"crypto/md5"
 	"encoding/binary"
 	"fmt"
-	"runtime"
 	"io"
 	"io/ioutil"
 	"net"
 	"net/http"
 	"os/exec"
+	"runtime"
 	"strings"
 )
 

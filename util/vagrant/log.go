@@ -4,8 +4,8 @@ package vagrant
 import (
 	"fmt"
 	"os"
-	"sync"
 	"runtime"
+	"sync"
 	"time"
 
 	"github.com/jcelliott/lumber"
