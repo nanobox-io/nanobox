@@ -3,6 +3,8 @@ package config
 
 import (
 	"fmt"
+	"runtime"
+	"time"
 
 	"github.com/jcelliott/lumber"
 	"os"
@@ -52,5 +54,9 @@ func Fatal(msg, err string) {
 	mutex.Lock()
 
 	Log.Close()
+	if runtime.GOOS == "windows" {
+		// temporarily deadlock
+		<-time.After(time.Hour)
+	}
 	os.Exit(1)
 }
