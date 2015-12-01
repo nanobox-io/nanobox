@@ -43,7 +43,7 @@ func update(ccmd *cobra.Command, args []string) {
 			if _, ok := err.(*os.LinkError); ok {
 				fmt.Println(`Nanobox was unable to update, try again with admin privilege (ex. "sudo nanobox update")`)
 			} else {
-				Config.Fatal("[commands/update] updateAvailable() failed", err.Error())
+				Config.Fatal("[commands/update] runUpdate() failed", err.Error())
 			}
 		}
 	default:
@@ -92,7 +92,7 @@ func Update() {
 				if _, ok := err.(*os.LinkError); ok {
 					fmt.Println(`Nanobox was unable to update, try again with admin privilege (ex. "sudo nanobox update")`)
 				} else {
-					Config.Fatal("[commands/update] updateAvailable() failed", err.Error())
+					Config.Fatal("[commands/update] runUpdate() failed", err.Error())
 				}
 			}
 		}
