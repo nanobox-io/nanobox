@@ -11,14 +11,15 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
-	"runtime"
 	"strings"
+
+	"github.com/nanobox-io/nanobox/config"
 )
 
 // VboxExists ensure virtualbox is installed; if ever there is a virtualbox package
 // this can be moved there
 func VboxExists() (exists bool) {
-	if runtime.GOOS == "windows" {
+	if config.OS == "windows" {
 		exists = os.Getenv("VBOX_MSI_INSTALL_PATH") != ""
 	} else if err := exec.Command("which", "vboxmanage").Run(); err == nil {
 		exists = true

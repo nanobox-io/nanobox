@@ -6,15 +6,16 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"testing"
+
+	"github.com/nanobox-io/nanobox/config"
 )
 
 // test if VboxExists works as intended
 func TestVboxExists(t *testing.T) {
 	cmd := "vboxmanage"
 
-	if runtime.GOOS == "windows" {
+	if config.OS == "windows" {
 		if installPath := os.Getenv("VBOX_MSI_INSTALL_PATH"); installPath != "" {
 			cmd = filepath.Join(installPath, cmd)
 		}
