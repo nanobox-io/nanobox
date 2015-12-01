@@ -7,7 +7,7 @@ import (
 )
 
 // tests if appNameToIP works as intended
-func TestappNameToIP(t *testing.T) {
+func TestAppNameToIP(t *testing.T) {
 	name := "test-app"
 	target := "172.16.7.24" // pre-calculated IP for "test-app"
 	actual := appNameToIP(name)
