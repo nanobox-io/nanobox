@@ -39,7 +39,13 @@ func update(ccmd *cobra.Command, args []string) {
 	// if the md5s don't match or it's been forced, update
 	switch {
 	case update, config.Force:
-		runUpdate()
+		if err := runUpdate(); err != nil {
+			if _, ok := err.(*os.LinkError); ok {
+				fmt.Println(`Nanobox was unable to update, try again with admin privilege (ex. "sudo nanobox update")`)
+			} else {
+				Config.Fatal("[commands/update] updateAvailable() failed", err.Error())
+			}
+		}
 	default:
 		fmt.Printf(stylish.SubBullet("[√] Nanobox is up-to-date"))
 	}
@@ -82,7 +88,13 @@ func Update() {
 
 		// if yes continue to update
 		case "Yes", "yes", "Y", "y":
-			runUpdate()
+			if err := runUpdate(); err != nil {
+				if _, ok := err.(*os.LinkError); ok {
+					fmt.Println(`Nanobox was unable to update, try again with admin privilege (ex. "sudo nanobox update")`)
+				} else {
+					Config.Fatal("[commands/update] updateAvailable() failed", err.Error())
+				}
+			}
 		}
 	}
 }
