@@ -3,15 +3,25 @@ package util
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
+	"path/filepath"
+	"runtime"
 	"testing"
 )
 
 // test if VboxExists works as intended
 func TestVboxExists(t *testing.T) {
+	cmd := "vboxmanage"
+
+	if runtime.GOOS == "windows" {
+		if installPath := os.Getenv("VBOX_MSI_INSTALL_PATH"); installPath != "" {
+			cmd = filepath.Join(installPath, cmd)
+		}
+	}
 
 	exists := false
-	if err := exec.Command("vboxmanage", "-v").Run(); err == nil {
+	if err := exec.Command(cmd, "-v").Run(); err == nil {
 		exists = true
 	}
 

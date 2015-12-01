@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
+	"os"
 	"os/exec"
 	"runtime"
 	"strings"
@@ -17,12 +18,9 @@ import (
 // VboxExists ensure virtualbox is installed; if ever there is a virtualbox package
 // this can be moved there
 func VboxExists() (exists bool) {
-	verb := "which"
 	if runtime.GOOS == "windows" {
-		verb = "where"
-	}
-
-	if err := exec.Command(verb, "vboxmanage").Run(); err == nil {
+		exists = os.Getenv("VBOX_MSI_INSTALL_PATH") != ""
+	} else if err := exec.Command("which", "vboxmanage").Run(); err == nil {
 		exists = true
 	}
 
