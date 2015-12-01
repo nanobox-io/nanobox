@@ -22,9 +22,10 @@ var err error
 
 // Exists ensure vagrant is installed
 func Exists() (exists bool) {
+	var err error
 
 	// check if vagrant is installed
-	if err := exec.Command("which", "vagrant").Run(); err == nil {
+	if _, err = exec.LookPath("vagrant"); err == nil {
 
 		// initilize Vagrant incase it hasn't been; there is a chance that Vagrant has
 		// never been used meaning there won't be a .vagrant.d folder, so we initialize
