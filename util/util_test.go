@@ -25,6 +25,7 @@ func TestVboxExists(t *testing.T) {
 
 //
 func TestMD5sMatch(t *testing.T) {
+	// not yet implemented
 }
 
 // tests if StringToIP works as intended
