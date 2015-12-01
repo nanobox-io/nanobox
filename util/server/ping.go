@@ -19,8 +19,6 @@ func Ping() (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	defer res.Body.Close()
-
 	//
 	return res.StatusCode/100 == 2, nil
 }

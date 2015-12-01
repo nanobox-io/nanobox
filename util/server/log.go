@@ -4,7 +4,9 @@ package server
 import (
 	"fmt"
 	"os"
+	"runtime"
 	"sync"
+	"time"
 
 	"github.com/jcelliott/lumber"
 
@@ -64,6 +66,10 @@ func Fatal(msg, err string) {
 	// add a mutex lock in so that if multiple errors are happening at the same
 	// time we dont try closing the log twice
 	mutex.Lock()
+	if runtime.GOOS == "windows" {
+		// temporarily deadlock
+		<-time.After(time.Hour)
+	}
 
 	Log.Close()
 	os.Exit(1)
