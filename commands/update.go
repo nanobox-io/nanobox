@@ -31,8 +31,7 @@ func update(ccmd *cobra.Command, args []string) {
 
 	update, err := updateAvailable()
 	if err != nil {
-		fmt.Println("Unable to determing if updates are available (see log for details).")
-		Config.Error("[commands/update] updateAvailable() failed", err.Error())
+		Config.Error("Unable to determing if updates are available", err.Error())
 		return
 	}
 
@@ -56,8 +55,7 @@ func Update() {
 
 	update, err := updateAvailable()
 	if err != nil {
-		fmt.Println("Unable to determing if updates are available (see log for details).")
-		Config.Error("[commands/update] updateAvailable() failed", err.Error())
+		Config.Error("Unable to determing if updates are available.", err.Error())
 		return
 	}
 
@@ -80,8 +78,7 @@ func Update() {
 			// if they don't update, assume then that they'll either do it manually or just
 			// wait 14 more days
 			if err := touchUpdate(); err != nil {
-				fmt.Println("Failed to touch update")
-				Config.Error("[commands/update] updateAvailable() failed", err.Error())
+				Config.Error("Failed to touch update", err.Error())
 			}
 
 			return
