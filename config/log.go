@@ -3,9 +3,9 @@ package config
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/jcelliott/lumber"
-	"os"
 )
 
 var (
