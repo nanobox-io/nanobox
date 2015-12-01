@@ -2,14 +2,15 @@
 package vagrant
 
 import (
+	"crypto/md5"
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 
 	"github.com/nanobox-io/nanobox-golang-stylish"
 
 	"github.com/nanobox-io/nanobox/config"
-	"github.com/nanobox-io/nanobox/util"
 	engineutil "github.com/nanobox-io/nanobox/util/engine"
 )
 
@@ -95,7 +96,7 @@ to fetch dependancies that require the use of those credentials`, sshPath)
 
 	// create nanobox private network and unique forward port
 	network := fmt.Sprintf("nanobox.vm.network \"private_network\", ip: \"%s\"", config.Nanofile.IP)
-	sshport := fmt.Sprintf("nanobox.vm.network :forwarded_port, guest: 22, host: %v, id: 'ssh'", util.StringToPort(config.Nanofile.Name))
+	sshport := fmt.Sprintf("nanobox.vm.network :forwarded_port, guest: 22, host: %v, id: 'ssh'", appNameToPort(config.Nanofile.Name))
 
 	//
 	provider := fmt.Sprintf(`# VirtualBox
@@ -223,4 +224,22 @@ Vagrant.configure(2) do |config|
 
   end
 end`, config.Nanofile.Name, config.Nanofile.Domain, devmode)))
+}
+
+// appNameToPort generates a unique network port to allow running multiple vms at
+// once
+func appNameToPort(s string) string {
+
+	port := 10000 // starting port is > than 100000 to try and avoid confilcts
+
+	// create an md5 of the app name to ensure a uniqe port is generated each time
+	h := md5.New()
+	io.WriteString(h, s)
+
+	// iterate through each byte in the md5 hash summing along the way
+	for _, v := range []byte(h.Sum(nil)) {
+		port += int(v)
+	}
+
+	return fmt.Sprint(port)
 }

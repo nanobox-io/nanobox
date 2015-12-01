@@ -27,6 +27,14 @@ func Exists() (exists bool) {
 	// check if vagrant is installed
 	if _, err = exec.LookPath("vagrant"); err == nil {
 
+		// initilize Vagrant incase it hasn't been; there is a chance that Vagrant has
+		// never been used meaning there won't be a .vagrant.d folder, so we initialize
+		// vagrant just to ensure it's ready to be used with nanobox by running any
+		// vagrant command (in this case "vagrant -v").
+		if b, err := exec.Command("vagrant", "-v").CombinedOutput(); err != nil {
+			config.Fatal("[util/vagrant/vagrant] exec.Command() failed", string(b))
+		}
+
 		// read setup_version to determine if the version of vagrant is too old
 		// (< 1.5.0) and needs to be migrated
 		b, err := ioutil.ReadFile(filepath.Join(config.Home, ".vagrant.d", "setup_version"))
