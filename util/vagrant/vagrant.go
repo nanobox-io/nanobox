@@ -22,9 +22,10 @@ var err error
 
 // Exists ensure vagrant is installed
 func Exists() (exists bool) {
+	var err error
 
 	// check if vagrant is installed
-	if err := exec.Command("which", "vagrant").Run(); err == nil {
+	if _, err = exec.LookPath("vagrant"); err == nil {
 
 		// read setup_version to determine if the version of vagrant is too old
 		// (< 1.5.0) and needs to be migrated
