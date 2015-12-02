@@ -4,14 +4,47 @@ package server
 
 import (
 	"fmt"
+	"io"
 	"path/filepath"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/go-fsnotify/fsnotify"
 	"github.com/nanobox-io/nanobox/util/server/mist"
 
 	"github.com/nanobox-io/nanobox/config"
 )
+
+var timoutReader *TimeoutReader
+
+type TimeoutReader struct {
+	Files   chan string
+	timeout time.Duration
+	once    sync.Once
+}
+
+func (self *TimeoutReader) Read(buf []byte) (n int, err error) {
+	n = 0
+	err = nil
+	select {
+	case file := <-self.Files:
+		// if i recieve a file on the channel let it be read
+		n = copy(buf, file+"\n")
+		if n < len(file+"\n") {
+			err = fmt.Errorf("Filename not coppied")
+		}
+		return
+	case <-time.After(self.timeout):
+		// if the timeout happens close the connection and EOF
+		timoutReader = nil
+		self.once.Do(func() {
+			close(self.Files)
+		})
+		return 0, io.EOF
+	}
+	return
+}
 
 // NotifyRebuild
 func NotifyRebuild(event *fsnotify.Event) (err error) {
@@ -87,14 +120,27 @@ func NotifyRebuild(event *fsnotify.Event) (err error) {
 
 // NotifyServer
 func NotifyServer(event *fsnotify.Event) error {
+	// if there is no timeout reader or open request create one
+	if timoutReader == nil {
+		// create a new timeout reader
+		timoutReader = &TimeoutReader{
+			Files:   make(chan string),
+			timeout: 10 * time.Second,
+		}
 
-	//
+		go func() {
+			if _, err := Post("/file-changes", "text/plain", timoutReader); err != nil {
+				config.Error("file changes error", err.Error())
+			}
+		}()
+	}
+
+	// get the name from the event and put the full path on it
 	name := strings.Replace(event.Name, config.CWDir, "", -1)
 
+	// if it is not just a chmod send the file
 	if event.Op != fsnotify.Chmod {
-		if _, err := Post("/file-changes?filename="+name, "text/plain", nil); err != nil {
-			return err
-		}
+		timoutReader.Files <- name
 	}
 
 	return nil
