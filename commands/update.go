@@ -31,15 +31,20 @@ func update(ccmd *cobra.Command, args []string) {
 
 	update, err := updateAvailable()
 	if err != nil {
-		fmt.Println("Unable to determing if updates are available (see log for details).")
-		Config.Error("[commands/update] updateAvailable() failed", err.Error())
+		Config.Error("Unable to determing if updates are available", err.Error())
 		return
 	}
 
 	// if the md5s don't match or it's been forced, update
 	switch {
 	case update, config.Force:
-		runUpdate()
+		if err := runUpdate(); err != nil {
+			if _, ok := err.(*os.LinkError); ok {
+				fmt.Println(`Nanobox was unable to update, try again with admin privilege (ex. "sudo nanobox update")`)
+			} else {
+				Config.Fatal("[commands/update] runUpdate() failed", err.Error())
+			}
+		}
 	default:
 		fmt.Printf(stylish.SubBullet("[√] Nanobox is up-to-date"))
 	}
@@ -50,8 +55,7 @@ func Update() {
 
 	update, err := updateAvailable()
 	if err != nil {
-		fmt.Println("Unable to determing if updates are available (see log for details).")
-		Config.Error("[commands/update] updateAvailable() failed", err.Error())
+		Config.Error("Unable to determing if updates are available.", err.Error())
 		return
 	}
 
@@ -74,15 +78,20 @@ func Update() {
 			// if they don't update, assume then that they'll either do it manually or just
 			// wait 14 more days
 			if err := touchUpdate(); err != nil {
-				fmt.Println("Failed to touch update")
-				Config.Error("[commands/update] updateAvailable() failed", err.Error())
+				Config.Error("Failed to touch update", err.Error())
 			}
 
 			return
 
 		// if yes continue to update
 		case "Yes", "yes", "Y", "y":
-			runUpdate()
+			if err := runUpdate(); err != nil {
+				if _, ok := err.(*os.LinkError); ok {
+					fmt.Println(`Nanobox was unable to update, try again with admin privilege (ex. "sudo nanobox update")`)
+				} else {
+					Config.Fatal("[commands/update] runUpdate() failed", err.Error())
+				}
+			}
 		}
 	}
 }
