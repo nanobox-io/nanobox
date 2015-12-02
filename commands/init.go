@@ -17,11 +17,14 @@ var initCmd = &cobra.Command{
 	Short: "Creates a nanobox-flavored Vagrantfile",
 	Long:  ``,
 
-	Run: initialize,
+	PreRun: runnable,
+	Run:    initialize,
 }
 
 // initialize
 func initialize(ccmd *cobra.Command, args []string) {
+
+	// PreRun: runnable
 
 	// check to see if a box needs to be installed
 	box.Install(nil, args)

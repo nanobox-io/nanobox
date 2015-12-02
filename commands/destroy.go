@@ -20,7 +20,8 @@ var (
 		Short: "Destroys the nanobox",
 		Long:  ``,
 
-		Run: destroy,
+		PreRun: runnable,
+		Run:    destroy,
 	}
 
 	//
@@ -35,6 +36,8 @@ func init() {
 
 // destroy
 func destroy(ccmd *cobra.Command, args []string) {
+
+	// PreRun: runnable
 
 	// if the command is being run with --remove-entry, it means an entry needs
 	// to be removed from the hosts file and execution yielded back to the parent
