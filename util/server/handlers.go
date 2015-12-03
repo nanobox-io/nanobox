@@ -16,34 +16,36 @@ import (
 	"github.com/nanobox-io/nanobox/config"
 )
 
-var timoutReader *TimeoutReader
-
+// A TimeoutReader reads from Files until timeout returning EOF
 type TimeoutReader struct {
 	Files   chan string
 	timeout time.Duration
 	once    sync.Once
 }
 
-func (self *TimeoutReader) Read(buf []byte) (n int, err error) {
-	n = 0
-	err = nil
+var timoutReader *TimeoutReader
+
+// Read
+func (r *TimeoutReader) Read(p []byte) (n int, err error) {
+
 	select {
-	case file := <-self.Files:
-		// if i recieve a file on the channel let it be read
-		n = copy(buf, file+"\n")
+
+	// if a file is received on the channel, read it
+	case file := <-r.Files:
+		n = copy(p, file+"\n")
 		if n < len(file+"\n") {
 			err = fmt.Errorf("Filename not coppied")
 		}
 		return
-	case <-time.After(self.timeout):
-		// if the timeout happens close the connection and EOF
+
+	// if no files are received before the timout send EOF to kill the connection
+	case <-time.After(r.timeout):
 		timoutReader = nil
-		self.once.Do(func() {
-			close(self.Files)
+		r.once.Do(func() {
+			close(r.Files)
 		})
 		return 0, io.EOF
 	}
-	return
 }
 
 // NotifyRebuild
@@ -120,14 +122,19 @@ func NotifyRebuild(event *fsnotify.Event) (err error) {
 
 // NotifyServer
 func NotifyServer(event *fsnotify.Event) error {
-	// if there is no timeout reader or open request create one
+
+	// if there is no timeout reader create one and open a request; if there is no
+	// timeout reader there wont be an open request, so checking for timeoutReader
+	// is enough
 	if timoutReader == nil {
+
 		// create a new timeout reader
 		timoutReader = &TimeoutReader{
 			Files:   make(chan string),
 			timeout: 10 * time.Second,
 		}
 
+		// launch a new request that is held open until EOF from the timeoutReader
 		go func() {
 			if _, err := Post("/file-changes", "text/plain", timoutReader); err != nil {
 				config.Error("file changes error", err.Error())
@@ -135,12 +142,13 @@ func NotifyServer(event *fsnotify.Event) error {
 		}()
 	}
 
-	// get the name from the event and put the full path on it
-	name := strings.Replace(event.Name, config.CWDir, "", -1)
+	// strip the current working directory from the filepath
+	path := strings.Replace(event.Name, config.CWDir, "", -1)
 
-	// if it is not just a chmod send the file
+	// for any event other than Chmod, append the filepath to the list of files to
+	// be read
 	if event.Op != fsnotify.Chmod {
-		timoutReader.Files <- name
+		timoutReader.Files <- path
 	}
 
 	return nil
