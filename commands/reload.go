@@ -13,8 +13,6 @@ import (
 
 //
 var reloadCmd = &cobra.Command{
-	Hidden: true,
-
 	Use:   "reload",
 	Short: "Reloads the nanobox",
 	Long:  ``,
