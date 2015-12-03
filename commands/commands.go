@@ -24,14 +24,9 @@ var (
 		Short: "",
 		Long:  ``,
 
-		//
+		// if the verbose flag is used, up the log level (this will cascade into
+		// all subcommands since this is the root command)
 		PersistentPreRun: func(ccmd *cobra.Command, args []string) {
-
-			// ensures all dependencies are satisfied before running nanobox commands
-			runnable(ccmd, args)
-
-			// if the verbose flag is used, up the log level (this will cascade into
-			// all subcommands since this is the root command)
 			if config.Verbose {
 				config.LogLevel = "debug"
 			}
@@ -120,8 +115,8 @@ func runnable(ccmd *cobra.Command, args []string) {
 // boot
 func boot(ccmd *cobra.Command, args []string) {
 
-	// ensure the cli can run before trying to boot vm
-	runnable(ccmd, nil)
+	// ensures the cli can run before trying to boot vm
+	runnable(nil, args)
 
 	// ensure a Vagrantfile is available before attempting to boot the VM
 	initialize(nil, args)

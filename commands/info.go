@@ -16,11 +16,14 @@ var infoCmd = &cobra.Command{
 	Short: "Displays information about the nanobox and your app",
 	Long:  ``,
 
-	Run: info,
+	PreRun: runnable,
+	Run:    info,
 }
 
 // info runs 'vagrant status'
 func info(ccmd *cobra.Command, args []string) {
+
+	// PreRun: runnable
 
 	// determine status
 	status := Vagrant.Status()
