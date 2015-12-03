@@ -16,14 +16,14 @@ import (
 	"github.com/nanobox-io/nanobox/config"
 )
 
+var timoutReader *TimeoutReader
+
 // A TimeoutReader reads from Files until timeout returning EOF
 type TimeoutReader struct {
 	Files   chan string
 	timeout time.Duration
 	once    sync.Once
 }
-
-var timoutReader *TimeoutReader
 
 // Read
 func (r *TimeoutReader) Read(p []byte) (n int, err error) {
@@ -143,12 +143,12 @@ func NotifyServer(event *fsnotify.Event) error {
 	}
 
 	// strip the current working directory from the filepath
-	path := strings.Replace(event.Name, config.CWDir, "", -1)
+	relPath := strings.Replace(event.Name, config.CWDir, "", -1)
 
 	// for any event other than Chmod, append the filepath to the list of files to
 	// be read
 	if event.Op != fsnotify.Chmod {
-		timoutReader.Files <- path
+		timoutReader.Files <- relPath
 	}
 
 	return nil
