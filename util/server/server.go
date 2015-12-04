@@ -63,13 +63,7 @@ func Get(path string, v interface{}) (*http.Response, error) {
 
 // Post issues a "POST" to nanobox server
 func Post(path, contentType string, body io.Reader) (*http.Response, error) {
-
-	res, err := http.Post(config.ServerURL+path, contentType, body)
-	if err != nil {
-		return nil, err
-	}
-
-	return res, nil
+	return http.Post(config.ServerURL+path, contentType, body)
 }
 
 // Put
@@ -82,12 +76,7 @@ func Put(path string, body io.Reader) (*http.Response, error) {
 	}
 
 	//
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-
-	return res, nil
+	return http.DefaultClient.Do(req)
 }
 
 // WriteTCP
