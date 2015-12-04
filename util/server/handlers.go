@@ -7,7 +7,6 @@ import (
 	"io"
 	"path/filepath"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/go-fsnotify/fsnotify"
@@ -16,34 +15,41 @@ import (
 	"github.com/nanobox-io/nanobox/config"
 )
 
-var timoutReader *TimeoutReader
+var timeoutReader *TimeoutReader
 
 // A TimeoutReader reads from Files until timeout returning EOF
 type TimeoutReader struct {
-	Files   chan string
-	timeout time.Duration
-	once    sync.Once
+	Files    chan string
+	timeout  time.Duration
+	leftover []byte
 }
 
 // Read
 func (r *TimeoutReader) Read(p []byte) (n int, err error) {
+	// if there are leftovers try feeding those to the reader
+	if len(r.leftover) != 0 {
+		n = copy(p, r.leftover)
+		if n < len(r.leftover) {
+			r.leftover = r.leftover[n:]
+		} else {
+			r.leftover = nil
+		}
+		return
+	}
 
 	select {
-
 	// if a file is received on the channel, read it
 	case file := <-r.Files:
-		n = copy(p, file+"\n")
-		if n < len(file+"\n") {
-			err = fmt.Errorf("Filename not coppied")
+		file = file + "\n"
+		n = copy(p, file)
+		if n < len(file) {
+			r.leftover = []byte(file)[n:]
 		}
 		return
 
 	// if no files are received before the timout send EOF to kill the connection
 	case <-time.After(r.timeout):
-		timoutReader = nil
-		r.once.Do(func() {
-			close(r.Files)
-		})
+		timeoutReader = nil
 		return 0, io.EOF
 	}
 }
@@ -126,17 +132,18 @@ func NotifyServer(event *fsnotify.Event) error {
 	// if there is no timeout reader create one and open a request; if there is no
 	// timeout reader there wont be an open request, so checking for timeoutReader
 	// is enough
-	if timoutReader == nil {
+	tr := timeoutReader
+	if tr == nil {
 
 		// create a new timeout reader
-		timoutReader = &TimeoutReader{
+		tr = &TimeoutReader{
 			Files:   make(chan string),
 			timeout: 10 * time.Second,
 		}
-
+		timeoutReader = tr
 		// launch a new request that is held open until EOF from the timeoutReader
 		go func() {
-			if _, err := Post("/file-changes", "text/plain", timoutReader); err != nil {
+			if _, err := Post("/file-changes", "text/plain", tr); err != nil {
 				config.Error("file changes error", err.Error())
 			}
 		}()
@@ -148,7 +155,7 @@ func NotifyServer(event *fsnotify.Event) error {
 	// for any event other than Chmod, append the filepath to the list of files to
 	// be read
 	if event.Op != fsnotify.Chmod {
-		timoutReader.Files <- relPath
+		tr.Files <- relPath
 	}
 
 	return nil

@@ -1,12 +1,11 @@
 package server
 
 import (
+	"io"
 	"testing"
 	"time"
-	"io"
 )
 
-	
 func TestTimeoutReader(t *testing.T) {
 	// create a new timeout reader
 	timoutReader = &TimeoutReader{
@@ -21,7 +20,7 @@ func TestTimeoutReader(t *testing.T) {
 	if n != 2 || err != nil || string(bytes[:n]) != "1\n" {
 		t.Errorf("the reader didnt output the right data n %d, err %+v, data %q", n, err, bytes)
 	}
-	
+
 	timoutReader.Files <- "123"
 	n, err = timoutReader.Read(bytes)
 	if n != 4 || err != nil || string(bytes[:n]) != "123\n" {
