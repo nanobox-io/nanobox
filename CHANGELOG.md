@@ -4,15 +4,15 @@ FEATURES:
 
   - **New Command: `nanobox reload`**: This will reload the nanobox by suspending
   the VM and resuming it. This is an effective way to attempt to recover a VM
-  before destroying it completely. (84e7d68)
+  before destroying it completely (84e7d68).
 
 IMPROVEMENTS:
 
-  - Cleaned up some crufty code to improve readability (9b4e0d3)
+  - Cleaned up some crufty code to improve readability (9b4e0d3).
 
 BUG FIXES:
 
-  - Merged #113 - Fixes the first read of when watching files (e7075e7)
+  - Merged #113 - Fixes the first read of when watching files (e7075e7).
 
 
 ## Previous (December 9, 2015)
