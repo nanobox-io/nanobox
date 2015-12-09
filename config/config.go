@@ -20,7 +20,7 @@ const (
 	LOGTAP_PORT = ":6361"
 	MIST_PORT   = ":1445"
 	SERVER_PORT = ":1757"
-	VERSION     = "0.16.14"
+	VERSION     = "0.16.15"
 )
 
 type (
