@@ -1,3 +1,16 @@
+## v0.16.16 (December 10, 2015)
+
+IMPROVEMENTS:
+  - Moved some file close defers to be more idiomatic (c615cab).
+  - Added newlines to various log output where it had been missed (c615cab).
+  - Use config rather than runtime to determine environment in update.go (c615cab).
+  - Minor cleanup of merge #119 (c615cab).
+
+BUG FIXES:
+
+  - Merged #119 - Check to ensure the newly downloaded CLI matches the remote md5
+  (this also fixed issue #116)
+
 ## v0.16.15 (December 9, 2015)
 
 FEATURES:
@@ -12,7 +25,7 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
-  - Merged #113 - Fixes the first read of when watching files (e7075e7).
+  - Merged #113 - Fixes the first read of when watching files.
 
 
 ## Previous (December 9, 2015)

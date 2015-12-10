@@ -12,6 +12,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/nanobox-io/nanobox/config"
@@ -172,8 +173,14 @@ func handleCMDout(cmd *exec.Cmd) {
 	// log any command errors to the log
 	stderrScanner := bufio.NewScanner(stderr)
 	go func() {
+
+		//
+		var once sync.Once
 		for stderrScanner.Scan() {
-			Error("A vagrant error occured", stderrScanner.Text())
+
+			// only display the error message once, but log every error
+			once.Do(func() { Error("A vagrant error occured", "") })
+			Log.Error(stderrScanner.Text())
 		}
 	}()
 
