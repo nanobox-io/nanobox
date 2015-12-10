@@ -122,7 +122,7 @@ func runInContext(cmd *exec.Cmd) error {
 // setContext changes the working directory to the designated context
 func setContext(context string) {
 	if err := os.Chdir(context); err != nil {
-		fmt.Printf("No app found at %s, exiting...\n", config.AppDir)
+		fmt.Printf("No app found at %s. Exiting...\n", config.AppDir)
 		os.Exit(1)
 	}
 }

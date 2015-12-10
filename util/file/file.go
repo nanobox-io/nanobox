@@ -144,10 +144,10 @@ func Untar(dst string, r io.Reader) error {
 // Download downloads a file
 func Download(path string, w io.Writer) error {
 	res, err := http.Get(path)
-	defer res.Body.Close()
 	if err != nil {
 		return err
 	}
+	defer res.Body.Close()
 
 	b, err := ioutil.ReadAll(res.Body)
 	if err != nil {
@@ -164,10 +164,10 @@ func Progress(path string, w io.Writer) error {
 
 	//
 	download, err := http.Get(path)
-	defer download.Body.Close()
 	if err != nil {
 		return err
 	}
+	defer download.Body.Close()
 
 	var percent float64
 	var down int

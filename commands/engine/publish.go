@@ -54,7 +54,7 @@ func publish(ccmd *cobra.Command, args []string) {
 
 	// ensure there is an Enginefile
 	if _, err := os.Stat("./Enginefile"); err != nil {
-		fmt.Println("Enginefile not found. Be sure to publish from a project directory. Exiting... ")
+		fmt.Printf("Enginefile not found. Be sure to publish from a project directory. Exiting...\n")
 		os.Exit(1)
 	}
 

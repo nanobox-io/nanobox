@@ -153,7 +153,7 @@ func GetOverlay(overlay, dst string) {
 	case 2, 3:
 		break
 	case 4, 5:
-		os.Stderr.WriteString(stylish.ErrBullet("Unable to fetch '%v' overlay, exiting...", engine))
+		os.Stderr.WriteString(stylish.ErrBullet("Unable to fetch '%v' overlay. Exiting...\n", engine))
 		os.Exit(1)
 	}
 
