@@ -204,6 +204,9 @@ func handleCMDout(cmd *exec.Cmd) {
 		// by default, don't print dots until we've received at least one message
 		messaged := false
 
+		// empty previous message by default
+		prevMsg := ""
+
 		// begin a loop to read off the channel until it's closed
 		for {
 			select {
@@ -211,7 +214,17 @@ func handleCMDout(cmd *exec.Cmd) {
 			// print any messages and reset ticker
 			case msg, ok := <-output:
 
-				// once an one message is received, indicate that dots can now be printed
+				// if the previous message isn't empty and doesn't equal the "new" message
+				// print a new line; I dont really like this, but it works for now.
+				if prevMsg != "" && prevMsg != msg {
+					fmt.Printf("\n")
+				}
+
+				// set previous message = to current message
+				prevMsg = msg
+
+				// once any, one, message is received indicate that dots should now be
+				// printed
 				messaged = true
 
 				// once the channel closes print the final newline and close the goroutine
@@ -220,7 +233,7 @@ func handleCMDout(cmd *exec.Cmd) {
 					return
 				}
 
-				fmt.Printf("\n   - %s", msg)
+				fmt.Printf("   - %s", msg)
 
 				tick = time.Second
 
