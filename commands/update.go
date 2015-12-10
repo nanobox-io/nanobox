@@ -55,7 +55,7 @@ func Update() {
 
 	update, err := updateAvailable()
 	if err != nil {
-		Config.Error("Unable to determing if updates are available.", err.Error())
+		Config.Error("Unable to determine if updates are available.", err.Error())
 		return
 	}
 
@@ -151,6 +151,14 @@ func runUpdate() error {
 
 	// make new CLI executable
 	if err := os.Chmod(tmpFile, 0755); err != nil {
+		return err
+	}
+
+	// check new CLI's md5 to make sure it's not corrupt
+	md5 := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/%v.md5", runtime.GOOS, runtime.GOARCH, filepath.Base(os.Args[0]))
+	_, err = Util.MD5sMatch(tmpFile, md5)
+	if err != nil {
+		fmt.Printf("Nanobox was unable to correctly download the update. Please check your internet connection and try again.")
 		return err
 	}
 
