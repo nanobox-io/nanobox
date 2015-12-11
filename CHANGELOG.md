@@ -6,6 +6,8 @@ IMPROVEMENTS:
   - Use config rather than runtime to determine environment in update.go (c615cab).
   - Minor cleanup of merge #119 (c615cab).
   - Only show vagrant log error once (rather than per error) to reduce log spam (e7060e0).
+  - Removed blank newline character from vagrant output
+  - 
 
 BUG FIXES:
 
