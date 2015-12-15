@@ -3,6 +3,7 @@ package commands
 
 import (
 	"fmt"
+	"net/url"
 
 	"github.com/nanobox-io/nanobox-golang-stylish"
 	"github.com/spf13/cobra"
@@ -26,14 +27,17 @@ var (
 	}
 
 	//
-	rebuild bool // force a deploy
-	nobuild bool // force skip a deploy
+	devconfig string // sets the type of environment to be configured on the guest vm
+	nobuild   bool   // force skip a deploy
+	rebuild   bool   // force a deploy
 )
 
 //
 func init() {
-	devCmd.Flags().BoolVarP(&rebuild, "rebuild", "", false, "Force a rebuild")
+	devCmd.Flags().StringVarP(&devconfig, "dev-config", "", config.Nanofile.DevConfig, "The environment to configure on the guest vm")
 	devCmd.Flags().BoolVarP(&nobuild, "no-build", "", false, "Force skip a rebuild")
+	devCmd.Flags().BoolVarP(&rebuild, "rebuild", "", false, "Force a rebuild")
+
 }
 
 // dev
@@ -81,8 +85,13 @@ func dev(ccmd *cobra.Command, args []string) {
 		}
 	}
 
+	v := url.Values{}
+
 	//
-	if err := server.Exec("develop", ""); err != nil {
+	v.Add("dev_config", devconfig)
+
+	//
+	if err := server.Exec("develop", v.Encode()); err != nil {
 		server.Error("[commands/dev] Server.Exec failed", err.Error())
 	}
 
