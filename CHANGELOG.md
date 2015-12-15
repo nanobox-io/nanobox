@@ -1,3 +1,12 @@
+## v0.16.16 (December 15, 2015)
+
+FEATURES:
+
+  - Added `dev_config` to the .nanofile parser to allow the setting of the guest
+  vm environment (c4bf44a).
+  - Added `dev-config` flag to `nanobox dev` allowing on-the-fly setting of the
+  guest vm environment(c4bf44a).
+
 ## v0.16.15 (December 9, 2015)
 
 FEATURES:
