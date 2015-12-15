@@ -4,6 +4,7 @@ package commands
 import (
 	"fmt"
 	"net/url"
+	"os"
 
 	"github.com/nanobox-io/nanobox-golang-stylish"
 	"github.com/spf13/cobra"
@@ -44,6 +45,13 @@ func init() {
 func dev(ccmd *cobra.Command, args []string) {
 
 	// PreRun: boot
+
+	// check to see if the devconfig option is one of our predetermined values. If
+	// not indicate as much and return
+	if _, ok := map[string]int{"mount": 1, "copy": 1, "none": 1}[devconfig]; !ok {
+		fmt.Printf(`--dev-config option "%s" is not accepted. Please choose either "mount", "copy", or "none"\n`, devconfig)
+		os.Exit(1)
+	}
 
 	// don't rebuild
 	if !nobuild {
