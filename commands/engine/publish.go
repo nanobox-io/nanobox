@@ -195,7 +195,7 @@ Please ensure all required fields are provided and try again.`))
 
 	// create the temp engines folder for building the tarball
 	tarPath := filepath.Join(config.EnginesDir, release.Name)
-	if err := os.Mkdir(tarPath, 0755); err != nil {
+	if err := os.MkdirAll(tarPath, 0755); err != nil {
 		Config.Fatal("[commands/engine/publish] os.Create() failed", err.Error())
 	}
 
