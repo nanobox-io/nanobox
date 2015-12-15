@@ -7,7 +7,7 @@ IMPROVEMENTS:
   - Minor cleanup of merge #119 (c615cab).
   - Only show vagrant log error once (rather than per error) to reduce log spam (e7060e0).
   - Removed blank newline character from vagrant output
-  - 
+  - Show 100% when nanobox/boot2docker is done downloading
 
 BUG FIXES:
 
