@@ -54,7 +54,7 @@ func publish(ccmd *cobra.Command, args []string) {
 
 	// ensure there is an Enginefile
 	if _, err := os.Stat("./Enginefile"); err != nil {
-		fmt.Println("Enginefile not found. Be sure to publish from a project directory. Exiting... ")
+		fmt.Printf("Enginefile not found. Be sure to publish from a project directory. Exiting...\n")
 		os.Exit(1)
 	}
 
@@ -202,7 +202,7 @@ Please ensure all required fields are provided and try again.`))
 	// remove tarDir once published
 	defer func() {
 		if err := os.RemoveAll(tarPath); err != nil {
-			os.Stderr.WriteString(stylish.ErrBullet("Faild to remove '%v'...", tarPath))
+			os.Stderr.WriteString(stylish.ErrBullet("Failed to remove '%v'...", tarPath))
 		}
 	}()
 

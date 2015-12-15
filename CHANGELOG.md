@@ -21,7 +21,7 @@ IMPROVEMENTS:
 
 BUG FIXES:
 
-  - Merged #113 - Fixes the first read of when watching files (e7075e7).
+  - Merged #113 - Fixes the first read of when watching files.
 
 
 ## Previous (December 9, 2015)

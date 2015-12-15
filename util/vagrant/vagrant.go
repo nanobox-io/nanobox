@@ -12,6 +12,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/nanobox-io/nanobox/config"
@@ -122,7 +123,7 @@ func runInContext(cmd *exec.Cmd) error {
 // setContext changes the working directory to the designated context
 func setContext(context string) {
 	if err := os.Chdir(context); err != nil {
-		fmt.Printf("No app found at %s, exiting...\n", config.AppDir)
+		fmt.Printf("No app found at %s. Exiting...\n", config.AppDir)
 		os.Exit(1)
 	}
 }
@@ -172,8 +173,14 @@ func handleCMDout(cmd *exec.Cmd) {
 	// log any command errors to the log
 	stderrScanner := bufio.NewScanner(stderr)
 	go func() {
+
+		//
+		var once sync.Once
 		for stderrScanner.Scan() {
-			Error("A vagrant error occured", stderrScanner.Text())
+
+			// only display the error message once, but log every error
+			once.Do(func() { Error("A vagrant error occured", "") })
+			Log.Error(stderrScanner.Text())
 		}
 	}()
 
@@ -184,121 +191,179 @@ func handleCMDout(cmd *exec.Cmd) {
 		Fatal("[util/vagrant/vagrant] cmd.StdoutPipe() failed", err.Error())
 	}
 
-	//
-	output := make(chan string)
-
-	// start a goroutine that will act as an 'outputer' allowing us to add 'dots'
-	// to the end of each line (as these lines are a reduced version of the actual
-	// output there will be some delay between output)
-	go func() {
-
-		tick := time.Second
-
-		// by default, don't print dots until we've received at least one message
-		messaged := false
-
-		// begin a loop to read off the channel until it's closed
-		for {
-			select {
-
-			// print any messages and reset ticker
-			case msg, ok := <-output:
-
-				// once an one message is received, indicate that dots can now be printed
-				messaged = true
-
-				// once the channel closes print the final newline and close the goroutine
-				if !ok {
-					fmt.Printf("\n")
-					return
-				}
-
-				fmt.Printf("\n   - %s", msg)
-
-				tick = time.Second
-
-			// after every tick print a '.' until we get another message one the channel
-			// (at which point ticker is reset and it starts all over again)
-			case <-time.After(tick):
-				if messaged {
-					fmt.Print(".")
-
-					// increase the wait time by 1/4 of the total previous time; this should
-					// provide a good 'loading' effect w/o printing too many dots
-					tick += tick / 4
-				}
-			}
-		}
-	}()
-
 	// scan the command output intercepting only 'important' lines of vagrant output'
 	// and tailoring their message so as to not flood the output.
 	// styled according to: http://nanodocs.gopagoda.io/engines/style-guide
 	stdoutScanner := bufio.NewScanner(stdout)
 	stdoutScanner.Split(customScanner)
+
+	// this is a mapping of all the vagrant output and our output to show instead
+	filter := map[string]string{
+		"VM not created. Moving on...":                   "Nanobox not yet created, use 'nanobox dev' or 'nanobox run' to create it.",
+		"VirtualBox VM is already running.":              "This nanobox is already running",
+		"Importing base box 'nanobox/boot2docker'...":    "Importing nanobox base image",
+		"Booting VM...":                                  "Booting virtual machine",
+		"Configuring and enabling network interfaces...": "Configuring virtual network",
+		"Mounting shared folders...":                     fmt.Sprintf("Mounting source code (%s)", config.CWDir),
+		"Waiting for nanobox server...":                  "Starting nanobox server",
+		"Attempting graceful shutdown of VM...":          "Shutting down virtual machine",
+		"Forcing shutdown of VM...":                      "Shutting down virtual machine",
+		"Saving VM state and suspending execution...":    "Saving virtual machine",
+		"Resuming suspended VM...":                       "", // "Resuming virtual machine", // this is output by its command
+		"Destroying VM and associated drives...":         "", // "Destroying virtual machine", // this is output by its command
+	}
+
+	var done chan bool
+	var next chan string
+	progressing := false
+
+	//
 	go func() {
 		for stdoutScanner.Scan() {
 
+			//
 			txt := strings.TrimSpace(stdoutScanner.Text())
-			app := config.Nanofile.Name
 
 			// log all vagrant output (might as well)
 			Log.Info(txt)
 
-			// handle generic cases
+			//
 			switch {
 
-			// show the progress bar when trying to download nanobox/boot2docker
+			// show the progress bar if vagrant downloads nanobox/boot2docker
 			case strings.Contains(txt, "box: Progress:"):
+
+				progressing = true
+
+				// subMatch[1] - percentage downloaded
+				// subMatch[2] - amount/s
+				// subMatch[3] - estimated time remaining
 				subMatch := regexp.MustCompile(`box: Progress: (\d{1,3})% \(Rate: (.*), Estimated time remaining: (\d*:\d*:\d*)`).FindStringSubmatch(txt)
 
-				// ensure we have all the submatches needed before trying to use them
-				if len(subMatch) >= 4 {
-					i, err := strconv.Atoi(subMatch[1])
-					if err != nil {
+				// if for some reason we don't get the matches we need just skip that
+				// line; this should never happen unless vagrant change their ouput
+				if len(subMatch) < 4 {
+					continue
+				}
 
+				// if for some reason the submatch fails to convert to an int just skip
+				// the line; this will likely never happen
+				i, err := strconv.Atoi(subMatch[1])
+				if err != nil {
+					continue
+				}
+
+				// show download progress: [*** progress *** 0.0%] 00:00:00 remaining
+				fmt.Printf("\r\033[K   [%-41s %s%%] %s (%s remaining)", strings.Repeat("*", int(float64(i)/2.5)), subMatch[1], subMatch[2], subMatch[3])
+
+			// if it's NOT a progress string and we were previously progressing
+			case !strings.Contains(txt, "box: Progress:") && progressing:
+				fmt.Printf("\r\033[K   [**************************************** 100.0%%] 00:00:00 remaining\n")
+				progressing = false
+
+				// fallthrough so we dont miss any messages
+				fallthrough
+
+			// filter and print any messages received from vagrant
+			case strings.HasPrefix(txt, fmt.Sprintf("==> %v: ", config.Nanofile.Name)):
+				subMatch := regexp.MustCompile(`==> \S*:\s(.*)`).FindStringSubmatch(txt)
+
+				// if for some reason the regex failed to pull anything just skip the
+				// line; this should never happen unless vagrant changes their output
+				if len(subMatch) <= 1 {
+					continue
+				}
+
+				// if the line is found in our filter print it
+				if v, ok := filter[subMatch[1]]; ok {
+
+					// indicate that there the next message has arrived by closing the previous
+					// message channel
+					if next != nil {
+						close(next)
 					}
 
-					// show download progress: [*** progress *** 0.0%] 00:00:00 remaining
-					fmt.Printf("\r   [%-41s %s%%] %s (%s remaining)", strings.Repeat("*", int(float64(i)/2.5)), subMatch[1], subMatch[2], subMatch[3])
+					// wait on done (skipping the first wait)
+					if done != nil {
+						<-done
+					}
+
+					// make a new next
+					next = make(chan string)
+
+					// make a new done
+					done = make(chan bool)
+
+					// fire up the printer/dotter
+					go printMessage(next, done)
+
+					// send the next message
+					next <- v
 				}
-			}
-
-			// handle specific cases
-			switch txt {
-
-			// nanobox vm has not yet been created
-			case fmt.Sprintf("==> %v: VM not created. Moving on...", app):
-				output <- "Nanobox not yet created, use 'nanobox dev' or 'nanobox run' to create it."
-
-			// nanobox is already running
-			case fmt.Sprintf("==> %v: VirtualBox VM is already running.", app):
-				continue
-
-			case fmt.Sprintf("==> %v: Importing base box 'nanobox/boot2docker'...", app):
-				output <- "Importing nanobox base image"
-			case fmt.Sprintf("==> %v: Booting VM...", app):
-				output <- "Booting virtual machine"
-			case fmt.Sprintf("==> %v: Configuring and enabling network interfaces...", app):
-				output <- "Configuring virtual network"
-			case fmt.Sprintf("==> %v: Mounting shared folders...", app):
-				output <- fmt.Sprintf("Mounting source code (%s)", config.CWDir)
-			case fmt.Sprintf("==> %v: Waiting for nanobox server...", app):
-				output <- "Starting nanobox server"
-			case fmt.Sprintf("==> %v: Attempting graceful shutdown of VM...", app):
-				output <- "Shutting down virtual machine"
-			case fmt.Sprintf("==> %v: Destroying VM and associated drives...", app):
-				// output <- "Destroying virtual machine"
-			case fmt.Sprintf("==> %v: Forcing shutdown of VM...", app):
-				output <- "Shutting down virtual machine"
-			case fmt.Sprintf("==> %v: Saving VM state and suspending execution...", app):
-				output <- "Saving virtual machine"
-			case fmt.Sprintf("==> %v: Resuming suspended VM...", app):
-				// output <- "Resuming virtual machine"
 			}
 		}
 
-		// close the output channel once all lines of command output have been read
-		close(output)
+		// close next once the scan is complete
+		if next != nil {
+			close(next)
+		}
+
+		// close done once the scan is complete
+		// if done != nil {
+		// 	close(done)
+		// }
 	}()
+}
+
+// printMessage takes a message and done channel, reading of the message channel
+// and printing the message with a loader
+func printMessage(msg chan string, done chan bool) {
+
+	var out string
+
+	for {
+		select {
+
+		// read the message
+		case msg, ok := <-msg:
+
+			// if !ok that means the channel was closed (another message received) so
+			// print the final output, close the spinner and done, and return
+			if !ok {
+				fmt.Printf("\r\033[K   - %s\n", out)
+
+				// stop the spinner
+				done <- true
+
+				close(done)
+				return
+			}
+
+			// because a final message ("") will come when the channel is closed, store
+			// the message here after that happens to have the actual messages
+			out = msg
+
+			// fire up the spinner
+			go func() {
+
+				spinner := `-\|/`
+				i := 0
+
+				for {
+					select {
+
+					// spin baby spin
+					default:
+						fmt.Printf("\r\033[K   %s %s", string(spinner[i%len(spinner)]), out)
+						<-time.After(time.Second / 24)
+						i++
+
+					// message complete, stop spinner
+					case <-done:
+						return
+					}
+				}
+			}()
+		}
+	}
 }

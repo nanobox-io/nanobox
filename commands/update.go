@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"time"
 
 	"github.com/kardianos/osext"
@@ -107,7 +106,7 @@ func updateAvailable() (bool, error) {
 
 	// check the current cli md5 against the remote md5; os.Args[0] is used as the
 	// final interpolation to determine standard/dev versions
-	md5 := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/%v.md5", runtime.GOOS, runtime.GOARCH, filepath.Base(os.Args[0]))
+	md5 := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/%v.md5", config.OS, config.ARCH, filepath.Base(os.Args[0]))
 
 	match, err := Util.MD5sMatch(exe, md5)
 	if err != nil {
@@ -146,7 +145,7 @@ func runUpdate() error {
 	defer cli.Close()
 
 	// download the new cli
-	dl := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/%v", runtime.GOOS, runtime.GOARCH, prog)
+	dl := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/%v", config.OS, config.ARCH, prog)
 	fileutil.Progress(dl, cli)
 
 	// make new CLI executable
@@ -154,10 +153,10 @@ func runUpdate() error {
 		return err
 	}
 
-	// check new CLI's md5 to make sure it's not corrupt
-	md5 := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/%v.md5", runtime.GOOS, runtime.GOARCH, filepath.Base(os.Args[0]))
-	_, err = Util.MD5sMatch(tmpFile, md5)
-	if err != nil {
+	// ensure new CLI download matches the remote md5; if the download fails for any
+	// reason this md5 should NOT match.
+	md5 := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/%v.md5", config.OS, config.ARCH, filepath.Base(os.Args[0]))
+	if _, err = Util.MD5sMatch(tmpFile, md5); err != nil {
 		fmt.Printf("Nanobox was unable to correctly download the update. Please check your internet connection and try again.")
 		return err
 	}

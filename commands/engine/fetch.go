@@ -87,7 +87,8 @@ func fetch(ccmd *cobra.Command, args []string) {
 		//
 		f, err := os.Create(fFile)
 		if err != nil {
-			os.Stderr.WriteString(stylish.ErrBullet("Unable to save file, exiting... %v", err.Error()))
+			os.Stderr.WriteString(stylish.ErrBullet("Unable to save file - %v", err.Error()))
+			os.Stderr.WriteString("Exiting...\n")
 			return
 		}
 
