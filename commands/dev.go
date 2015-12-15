@@ -3,6 +3,8 @@ package commands
 
 import (
 	"fmt"
+	"net/url"
+	"os"
 
 	"github.com/nanobox-io/nanobox-golang-stylish"
 	"github.com/spf13/cobra"
@@ -26,20 +28,30 @@ var (
 	}
 
 	//
-	rebuild bool // force a deploy
-	nobuild bool // force skip a deploy
+	devconfig string // sets the type of environment to be configured on the guest vm
+	nobuild   bool   // force skip a deploy
+	rebuild   bool   // force a deploy
 )
 
 //
 func init() {
-	devCmd.Flags().BoolVarP(&rebuild, "rebuild", "", false, "Force a rebuild")
+	devCmd.Flags().StringVarP(&devconfig, "dev-config", "", config.Nanofile.DevConfig, "The environment to configure on the guest vm")
 	devCmd.Flags().BoolVarP(&nobuild, "no-build", "", false, "Force skip a rebuild")
+	devCmd.Flags().BoolVarP(&rebuild, "rebuild", "", false, "Force a rebuild")
+
 }
 
 // dev
 func dev(ccmd *cobra.Command, args []string) {
 
 	// PreRun: boot
+
+	// check to see if the devconfig option is one of our predetermined values. If
+	// not indicate as much and return
+	if _, ok := map[string]int{"mount": 1, "copy": 1, "none": 1}[devconfig]; !ok {
+		fmt.Printf(`--dev-config option "%s" is not accepted. Please choose either "mount", "copy", or "none"\n`, devconfig)
+		os.Exit(1)
+	}
 
 	// don't rebuild
 	if !nobuild {
@@ -81,8 +93,13 @@ func dev(ccmd *cobra.Command, args []string) {
 		}
 	}
 
+	v := url.Values{}
+
 	//
-	if err := server.Exec("develop", ""); err != nil {
+	v.Add("dev_config", devconfig)
+
+	//
+	if err := server.Exec("develop", v.Encode()); err != nil {
 		server.Error("[commands/dev] Server.Exec failed", err.Error())
 	}
 

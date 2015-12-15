@@ -14,16 +14,17 @@ import (
 
 // NanofileConfig represents all available/expected .nanofile configurable options
 type NanofileConfig struct {
-	CPUCap   int    `json:"cpu_cap"`   // max %CPU usage allowed to the guest vm
-	CPUs     int    `json:"cpus"`      // number of CPUs to dedicate to the guest vm
-	Domain   string `json:"domain"`    // the domain to use in conjuntion with the ip when accesing the guest vm (defaults to <Name>.dev)
-	IP       string `json:"ip"`        // the ip added to the /etc/hosts file for accessing the guest vm
-	MountNFS bool   `json:"mount_nfs"` // does the code directory get mounted as NFS
-	Name     string `json:"name"`      // the name given to the project (defaults to cwd)
-	Provider string `json:"provider"`  // guest vm provider (virtual box, vmware, etc)
-	RAM      int    `json:"ram"`       // ammount of RAM to dedicate to the guest vm
-	HostDNS  string `json:"host_dns"`  // use the hosts dns resolver
-	SshPath  string `json:"ssh_path"`  // provide the path to the .ssh directory (if any)
+	CPUCap    int    `json:"cpu_cap"`    // max %CPU usage allowed to the guest vm
+	CPUs      int    `json:"cpus"`       // number of CPUs to dedicate to the guest vm
+	DevConfig string `json:"dev_config"` // the type of dev environment to configure on the guest vm
+	Domain    string `json:"domain"`     // the domain to use in conjuntion with the ip when accesing the guest vm (defaults to <Name>.dev)
+	IP        string `json:"ip"`         // the ip added to the /etc/hosts file for accessing the guest vm
+	MountNFS  bool   `json:"mount_nfs"`  // does the code directory get mounted as NFS
+	Name      string `json:"name"`       // the name given to the project (defaults to cwd)
+	Provider  string `json:"provider"`   // guest vm provider (virtual box, vmware, etc)
+	RAM       int    `json:"ram"`        // ammount of RAM to dedicate to the guest vm
+	HostDNS   string `json:"host_dns"`   // use the hosts dns resolver
+	SshPath   string `json:"ssh_path"`   // provide the path to the .ssh directory (if any)
 }
 
 // ParseNanofile
@@ -76,6 +77,11 @@ func ParseNanofile() NanofileConfig {
 	// if the OS is Windows folders CANNOT be mounted as NFS
 	if OS == "windows" {
 		nanofile.MountNFS = false
+	}
+
+	// if no dev config is provided, the default is "mount"
+	if nanofile.DevConfig == "" {
+		nanofile.DevConfig = "mount"
 	}
 
 	return nanofile
