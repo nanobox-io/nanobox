@@ -117,11 +117,11 @@ to fetch dependancies that require the use of those credentials`, sshPath)
 		fmt.Printf(stylish.Bullet("Configuring vm to run in 'devmode'"))
 
 		devmode = `# added because --dev was detected; boots the server into 'devmode'
-		nanobox.vm.provision "shell", inline: <<-DEVMODE
-			echo "Starting VM in dev mode..."
-			mkdir -p /mnt/sda/var/nanobox
-			touch /mnt/sda/var/nanobox/DEV
-		DEVMODE`
+    nanobox.vm.provision "shell", inline: <<-DEVMODE
+      echo "Starting VM in dev mode..."
+      mkdir -p /mnt/sda/var/nanobox
+      touch /mnt/sda/var/nanobox/DEV
+    DEVMODE`
 	}
 
 	//
@@ -132,19 +132,19 @@ to fetch dependancies that require the use of those credentials`, sshPath)
 		fmt.Printf(stylish.Bullet("Configuring vm to use 'proxy' vars"))
 
 		proxy = `# added because env 'use_proxy' was set; configures vm to use proxy
-		nanobox.vm.provision "shell" do |s|
-			s.inline = <<-PROXY
-				echo "Configuring VM for proxy..."
-				cat > /var/lib/boot2docker/profile <<-EOF
+    nanobox.vm.provision "shell" do |s|
+      s.inline = <<-PROXY
+        echo "Configuring VM for proxy..."
+        cat > /var/lib/boot2docker/profile <<-EOF
 export http_proxy="$1"
 export https_proxy="$2"
 export https_user="$3"
 export https_pass="$4"
 EOF
-				sudo /usr/local/etc/init.d/docker restart
-			PROXY
-			s.args = "'#{ENV['http_proxy']}' '#{ENV['https_proxy']}' '#{ENV['https_user']}' '#{ENV['https_pass']}'"
-		end`
+        sudo /usr/local/etc/init.d/docker restart
+      PROXY
+      s.args = "'#{ENV['http_proxy']}' '#{ENV['https_proxy']}' '#{ENV['https_user']}' '#{ENV['https_pass']}'"
+    end`
 	}
 
 	//
