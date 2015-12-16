@@ -32,7 +32,9 @@ func main() {
 	}()
 
 	// check to see if nanobox needs to be updated
-	commands.Update()
+	if err := commands.Update(); err != nil {
+		fmt.Println("FAILED TO OPDATE!")
+	}
 
 	//
 	commands.NanoboxCmd.Execute()
