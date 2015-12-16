@@ -20,6 +20,7 @@ type NanofileConfig struct {
 	Domain    string `json:"domain"`     // the domain to use in conjuntion with the ip when accesing the guest vm (defaults to <Name>.dev)
 	IP        string `json:"ip"`         // the ip added to the /etc/hosts file for accessing the guest vm
 	MountNFS  bool   `json:"mount_nfs"`  // does the code directory get mounted as NFS
+	UseProxy  bool   `json:"use_proxy"`  // import http[s]_proxy variables into boot2docker
 	Name      string `json:"name"`       // the name given to the project (defaults to cwd)
 	Provider  string `json:"provider"`   // guest vm provider (virtual box, vmware, etc)
 	RAM       int    `json:"ram"`        // ammount of RAM to dedicate to the guest vm
@@ -35,6 +36,7 @@ func ParseNanofile() NanofileConfig {
 		CPUCap:   50,
 		CPUs:     2,
 		MountNFS: true,
+		UseProxy: false,
 		Name:     filepath.Base(CWDir),
 		Provider: "virtualbox", // this may change in the future (adding additional hosts such as vmware)
 		RAM:      1024,
@@ -74,7 +76,7 @@ func ParseNanofile() NanofileConfig {
 		nanofile.IP = appNameToIP(nanofile.Name)
 	}
 
-	// if the OS is Windows folders CANNOT be mounted as NFS
+	// if the OS is Windows, folders CANNOT be mounted as NFS
 	if OS == "windows" {
 		nanofile.MountNFS = false
 	}
