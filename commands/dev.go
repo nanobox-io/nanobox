@@ -48,7 +48,10 @@ func dev(ccmd *cobra.Command, args []string) {
 
 	// check to see if the devconfig option is one of our predetermined values. If
 	// not indicate as much and return
-	if _, ok := map[string]int{"mount": 1, "copy": 1, "none": 1}[devconfig]; !ok {
+	switch devconfig {
+	case "mount", "copy", "none":
+		break
+	default:
 		fmt.Printf(`--dev-config option "%s" is not accepted. Please choose either "mount", "copy", or "none"\n`, devconfig)
 		os.Exit(1)
 	}
