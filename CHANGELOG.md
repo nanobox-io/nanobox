@@ -1,4 +1,4 @@
-## v0.16.17 (December 15, 2015)
+## v0.16.17 (December 17, 2015)
 
 IMPROVEMENTS:
   - Moved some file close defers to be more idiomatic (c615cab).
@@ -12,7 +12,10 @@ IMPROVEMENTS:
 BUG FIXES:
 
   - Merged #119 - Check to ensure the newly downloaded CLI matches the remote md5
-  (this also fixed issue #116)
+  (this also fixed issue #116).
+  - Removed empty vagrant output lines (f076651).
+  - Prompting for admin before delete runs to avoid password prompt showing up in
+  the middle of vagrant output (f076651).
 
 ## v0.16.16 (December 15, 2015)
 
