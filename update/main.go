@@ -42,7 +42,7 @@ func main() {
 
 	fmt.Printf("Updating %s...\n", download)
 
-	// set Home based off the users homedir (~)
+	// get the current users home dir
 	home, err := homedir.Dir()
 	if err != nil {
 		fmt.Println("Unable to determine home directory - ", err.Error())
@@ -70,16 +70,16 @@ func main() {
 	// download the new CLI
 	progress(fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/%v", runtime.GOOS, runtime.GOARCH, download), tmpFile)
 
-	// make new CLI executable
-	if err := os.Chmod(tmpPath, 0755); err != nil {
-		fmt.Println("Failed to set permissions - ", err.Error())
-	}
-
 	// ensure new CLI download matches the remote md5; if the download fails for any
 	// reason these md5's should NOT match.
 	if _, err = md5sMatch(tmpPath, fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/%v.md5", runtime.GOOS, runtime.GOARCH, download)); err != nil {
 		fmt.Printf("Nanobox was unable to correctly download the update. Please check your internet connection and try again.")
 		os.Exit(1)
+	}
+
+	// make new CLI executable
+	if err := os.Chmod(tmpPath, 0755); err != nil {
+		fmt.Println("Failed to set permissions - ", err.Error())
 	}
 
 	// replace the old CLI with the new one
@@ -88,10 +88,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	// execute the new CLI printing the version to verify update;  if the new CLI
+	// execute the new CLI printing the version to verify update
 	out, err := exec.Command(path, "-v").Output()
 
-	// fails to execute, just print a generic message and return
+	// if the new CLI fails to execute, just print a generic message and return
 	if err != nil {
 		fmt.Printf("[√] Update successful")
 		return
