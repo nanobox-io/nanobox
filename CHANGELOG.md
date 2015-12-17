@@ -1,4 +1,4 @@
-## v0.16.17 (December 15, 2015)
+## v0.16.17 (December 17, 2015)
 
 IMPROVEMENTS:
   - Moved some file close defers to be more idiomatic (c615cab).
