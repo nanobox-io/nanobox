@@ -39,7 +39,7 @@ func update(ccmd *cobra.Command, args []string) {
 	switch {
 	case update, config.Force:
 		if err := runUpdate(); err != nil {
-			fmt.Printf("ERR?? %#v\n", err)
+			fmt.Printf("ERR?? %#v\n", err.Error())
 			if _, ok := err.(*os.LinkError); ok {
 				fmt.Println(`Nanobox was unable to update, try again with admin privilege (ex. "sudo nanobox update")`)
 			} else {
@@ -102,12 +102,9 @@ func updatable() (bool, error) {
 		config.Log.Fatal("[commands/update] osext.Executable() failed", err.Error())
 	}
 
-	// check the current cli md5 against the remote md5; os.Args[0] is used as the
-	// final interpolation to determine standard/dev versions
-	md5 := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/%v.md5", config.OS, config.ARCH, filepath.Base(os.Args[0]))
-
-	// check the path of the md5 current executing cli against the remote md5
-	match, err := Util.MD5sMatch(path, md5)
+	// check the md5 of the current executing cli against the remote md5;
+	// os.Args[0] is used as the final interpolation to determine standard/dev versions
+	match, err := Util.MD5sMatch(path, fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%s/%s/%s.md5", config.OS, config.ARCH, filepath.Base(os.Args[0])))
 	if err != nil {
 		return false, err
 	}
@@ -120,23 +117,19 @@ func updatable() (bool, error) {
 func runUpdate() error {
 
 	//
-	path, err := osext.Executable()
+	epath, err := osext.Executable()
 	if err != nil {
-		config.Log.Fatal("[commands/update] osext.Executable() failed", err.Error())
+		return err
 	}
 
 	// get the directory of the current executing cli
-	dir := filepath.Dir(path)
+	dir := filepath.Dir(epath)
 
 	// see if the updater is available on PATH
-	updater, err := exec.LookPath("nupdate")
-
-	fmt.Println("UPDATER?", updater)
+	upath, err := exec.LookPath("nanobox-update")
 	if err != nil {
 
-		fmt.Println("UPDATER NOT FOUND!")
-
-		tmpFile := filepath.Join(config.TmpDir, "updater")
+		tmpFile := filepath.Join(config.TmpDir, "nanobox-update")
 
 		// create a tmp updater in tmp dir
 		f, err := os.Create(tmpFile)
@@ -146,17 +139,17 @@ func runUpdate() error {
 		defer f.Close()
 
 		// the updateder is not available and needs to be downloaded
-		dl := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/update", config.OS, config.ARCH)
+		dl := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/updaters/%s/%s/nanobox-update", config.OS, config.ARCH)
 
 		fmt.Printf("Updater not found. Downloading from %s\n", dl)
 
 		fileutil.Progress(dl, f)
 
-		// ensure new CLI download matches the remote md5; if the download fails for any
+		// ensure updater download matches the remote md5; if the download fails for any
 		// reason this md5 should NOT match.
-		md5 := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/udpate", config.OS, config.ARCH)
+		md5 := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/updaters/%s/%s/nanobox-udpate.md5", config.OS, config.ARCH)
 		if _, err = util.MD5sMatch(tmpFile, md5); err != nil {
-			fmt.Println("BONK!")
+			return err
 		}
 
 		// make new updater executable
@@ -165,15 +158,21 @@ func runUpdate() error {
 		}
 
 		// move updater to the same location as the cli
-		if err = os.Rename(tmpFile, dir); err != nil {
+		if err = os.Rename(tmpFile, filepath.Join(dir, "nanobox-update")); err != nil {
 			return err
 		}
 	}
 
-	fmt.Println("RUNNING UPDATER!")
+	fmt.Println("RUNNING UPDATER!", upath, "|", epath, filepath.Base(epath))
+	fmt.Println("PLACE!", filepath.Join(dir, "nanobox-update"))
+
+	cmd := exec.Command(filepath.Join(dir, "nanobox-update"), "-o", filepath.Base(epath))
+
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 
 	// run the updater
-	if err := exec.Command(updater, "-o", filepath.Base(path)).Run(); err != nil {
+	if err := cmd.Run(); err != nil {
 		Config.Fatal("[commands/update] exec.Command().Run() failed", err.Error())
 	}
 
