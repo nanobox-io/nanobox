@@ -142,6 +142,7 @@ export https_user="$3"
 export https_pass="$4"
 EOF
         sudo /usr/local/etc/init.d/docker restart
+        sudo /etc/init.d/services/nanoboxd stop && sudo /etc/init.d/services/nanoboxd start
       PROXY
       s.args = "'#{ENV['http_proxy']}' '#{ENV['https_proxy']}' '#{ENV['https_user']}' '#{ENV['https_pass']}'"
     end`
