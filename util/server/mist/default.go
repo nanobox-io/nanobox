@@ -1,11 +1,14 @@
 //
 package mist
 
+import mistClient "github.com/nanopack/mist/core"
+
 type (
 	mist struct{}
 	Mist interface {
 		Listen(tags []string, handle func(string) error) error
 		Stream(tags []string, handle func(Log))
+		Connect(tags []string, handle func(Log)) (client mistClient.Client, err error)
 		ProcessLog(log Log)
 		DeployUpdates(status string) (err error)
 		BuildUpdates(status string) (err error)
@@ -26,6 +29,10 @@ func (mist) Listen(tags []string, handle func(string) error) error {
 
 func (mist) Stream(tags []string, handle func(Log)) {
 	Stream(tags, handle)
+}
+
+func (mist) Connect(tags []string, handle func(Log)) (clinet mistClient.Client, err error) {
+	return Connect(tags, handle)
 }
 
 func (mist) ProcessLog(log Log) {

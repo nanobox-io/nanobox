@@ -1,25 +1,22 @@
 // +build windows
 
-package server
+package terminal
 
-import (
-	"time"
+import "time"
 
-	"github.com/nanobox-io/nanobox/util/server/terminal"
-)
-
-func monitorTerminal(stdOutFD uintptr) {
+// monitor
+func monitor(stdOutFD uintptr) {
 	tick := time.Tick(time.Millisecond * 250)
 
-	//
-	prevW, prevH := terminal.GetTTYSize(stdOutFD)
 	// inform the server what the starting size is
+	prevW, prevH := getTTYSize(stdOutFD)
 	resizeTTY(prevW, prevH)
 
+	// periodically resize the tty
 	for {
 		select {
 		case <-tick:
-			w, h := terminal.GetTTYSize(stdOutFD)
+			w, h := getTTYSize(stdOutFD)
 
 			if prevW != w || prevH != h {
 				resizeTTY(w, h)

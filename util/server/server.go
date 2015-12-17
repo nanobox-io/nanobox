@@ -4,10 +4,12 @@ package server
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/nanobox-io/nanobox/config"
@@ -79,34 +81,61 @@ func Put(path string, body io.Reader) (*http.Response, error) {
 	return http.DefaultClient.Do(req)
 }
 
-// WriteTCP
+// connect
+func connect(params string) (net.Conn, error) {
+
+	// if we can't connect to the server, lets bail out early
+	conn, err := net.Dial("tcp4", config.ServerURI)
+	if err != nil {
+		return conn, err
+	}
+	defer conn.Close()
+
+	// make a http request
+	if _, err := fmt.Fprintf(conn, "POST /exec?pid=%d&%v HTTP/1.1\r\n\r\n", os.Getpid(), params); err != nil {
+		return conn, err
+	}
+
+	//
+	p := make([]byte, 512)
+
+	// wait trying to read from the connection until a single read happens (blocking)
+	for {
+		n, err := conn.Read(p)
+		if err != nil {
+			return conn, err
+		}
+
+		// once a single read happens write the string and break out of the loop
+		if n > 0 {
+			os.Stderr.WriteString(string(p))
+			break
+		}
+	}
+
+	return conn, nil
+}
+
+// pipeToConnection
 func pipeToConnection(conn net.Conn, in io.Reader, out io.Writer) error {
 
 	// set up notification channels so that when a ping check fails, we can disconnect the active console
 	pingService := make(chan interface{})
+	ping := make(chan interface{}, 1)
 
-	// pipe data from the server to out, and from in to the server
+	// pipe data from the server to out
 	go func() {
 		io.Copy(conn, in)
 		conn.(*net.TCPConn).CloseWrite()
 	}()
 
-	//
+	// pipe data from in to the server
 	go func() {
 		io.Copy(out, conn)
 		close(pingService)
 	}()
 
-	//
-	return monitorServer(pingService, 5*time.Second)
-}
-
-// monitor the server for disconnects
-func monitorServer(done chan interface{}, wait time.Duration) error {
-
-	ping := make(chan interface{}, 1)
-
-	//
+	// monitor the server connection
 	for {
 
 		// ping the server
@@ -132,11 +161,11 @@ func monitorServer(done chan interface{}, wait time.Duration) error {
 			time.Sleep(time.Second)
 
 			//
-		case <-time.After(wait):
+		case <-time.After(5 * time.Second):
 			return DisconnectedFromServer
 
 		//
-		case <-done:
+		case <-pingService:
 			return nil
 		}
 	}

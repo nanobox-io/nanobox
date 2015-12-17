@@ -13,7 +13,7 @@ import (
 
 //
 var (
-	Console *lumber.ConsoleLogger
+	// Console *lumber.ConsoleLogger
 	Log     *lumber.FileLogger
 	logFile string
 	mutex   = &sync.Mutex{}
@@ -23,7 +23,7 @@ var (
 func init() {
 
 	// create a default console logger
-	Console = config.Console
+	// Console = config.Console
 
 	// create a default file logger
 	Log = config.Log
