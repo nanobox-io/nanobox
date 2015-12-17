@@ -82,7 +82,7 @@ func Put(path string, body io.Reader) (*http.Response, error) {
 }
 
 // connect
-func connect(params string) (net.Conn, error) {
+func connect(path string) (net.Conn, error) {
 
 	// if we can't connect to the server, lets bail out early
 	conn, err := net.Dial("tcp4", config.ServerURI)
@@ -92,7 +92,7 @@ func connect(params string) (net.Conn, error) {
 	defer conn.Close()
 
 	// make a http request
-	if _, err := fmt.Fprintf(conn, "POST /exec?pid=%d&%v HTTP/1.1\r\n\r\n", os.Getpid(), params); err != nil {
+	if _, err := fmt.Fprint(conn, path); err != nil {
 		return conn, err
 	}
 

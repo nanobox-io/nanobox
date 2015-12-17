@@ -17,7 +17,7 @@ import (
 func Develop(params string, mist mistClient.Client) error {
 
 	// connect to the server
-	conn, err := connect(params)
+	conn, err := connect(fmt.Sprintf("POST /develop?pid=%d&%v HTTP/1.1\r\n\r\n", os.Getpid(), params))
 	if err != nil {
 		return err
 	}

@@ -3,6 +3,7 @@ package server
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/docker/docker/pkg/term"
 
@@ -15,7 +16,7 @@ import (
 func Exec(params string) error {
 
 	// connect to the server
-	conn, err := connect(params)
+	conn, err := connect(fmt.Sprintf("POST /exec?pid=%d&%v HTTP/1.1\r\n\r\n", os.Getpid(), params))
 	if err != nil {
 		return err
 	}
