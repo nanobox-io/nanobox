@@ -100,18 +100,12 @@ func connect(path string) (net.Conn, error) {
 	p := make([]byte, 512)
 
 	// wait trying to read from the connection until a single read happens (blocking)
-	for {
-		n, err := conn.Read(p)
-		if err != nil {
-			return conn, err
-		}
-
-		// once a single read happens write the string and break out of the loop
-		if n > 0 {
-			os.Stderr.WriteString(string(p))
-			break
-		}
+	if _, err := conn.Read(p); err != nil {
+		return conn, err
 	}
+
+	// once a single read happens write the string and break out of the loop
+	os.Stderr.WriteString(string(p))
 
 	return conn, nil
 }

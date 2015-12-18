@@ -52,7 +52,7 @@ func dev(ccmd *cobra.Command, args []string) {
 	case "mount", "copy", "none":
 		break
 	default:
-		fmt.Printf(`--dev-config option "%s" is not accepted. Please choose either "mount", "copy", or "none"\n`, devconfig)
+		fmt.Printf("--dev-config option '%s' is not accepted. Please choose either 'mount', 'copy', or 'none'\n", devconfig)
 		os.Exit(1)
 	}
 
