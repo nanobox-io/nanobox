@@ -9,7 +9,6 @@ import (
 	"io/ioutil"
 	"net"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/nanobox-io/nanobox/config"
@@ -100,7 +99,7 @@ func connect(path string) (net.Conn, []byte, error) {
 	}
 
 	// wait trying to read from the connection until a single read happens (blocking)
-	if _, err := conn.Read(p); err != nil {
+	if _, err := conn.Read(b); err != nil {
 		return conn, b, err
 	}
 
