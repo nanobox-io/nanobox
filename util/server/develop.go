@@ -17,7 +17,7 @@ import (
 func Develop(params string, mist mistClient.Client) error {
 
 	// connect to the server
-	conn, err := connect(fmt.Sprintf("POST /develop?pid=%d&%v HTTP/1.1\r\n\r\n", os.Getpid(), params))
+	conn, data, err := connect(fmt.Sprintf("POST /develop?pid=%d&%v HTTP/1.1\r\n\r\n", os.Getpid(), params))
 	if err != nil {
 		return err
 	}
@@ -65,6 +65,9 @@ the vm or local will be mirrored.
 
 	//
 	terminal.Connect(stdIn, stdOut)
+
+	// once a single read happens write the string and break out of the loop
+	os.Stderr.WriteString(string(data))
 
 	//
 	return pipeToConnection(conn, stdIn, stdOut)

@@ -16,7 +16,7 @@ import (
 func Exec(params string) error {
 
 	// connect to the server
-	conn, err := connect(fmt.Sprintf("POST /exec?pid=%d&%v HTTP/1.1\r\n\r\n", os.Getpid(), params))
+	conn, data, err := connect(fmt.Sprintf("POST /exec?pid=%d&%v HTTP/1.1\r\n\r\n", os.Getpid(), params))
 	if err != nil {
 		return err
 	}
@@ -33,6 +33,9 @@ func Exec(params string) error {
 
 	//
 	terminal.Connect(stdIn, stdOut)
+
+	// once a single read happens write the string and break out of the loop
+	os.Stderr.WriteString(string(data))
 
 	//
 	return pipeToConnection(conn, stdIn, stdOut)

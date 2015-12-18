@@ -82,32 +82,29 @@ func Put(path string, body io.Reader) (*http.Response, error) {
 }
 
 // connect
-func connect(path string) (net.Conn, error) {
+func connect(path string) (net.Conn, []byte, error) {
+
+	//
+	b := make([]byte, 1)
 
 	// if we can't connect to the server, lets bail out early
 	conn, err := net.Dial("tcp4", config.ServerURI)
 	if err != nil {
-		return conn, err
+		return conn, b, err
 	}
 	defer conn.Close()
 
 	// make a http request
 	if _, err := fmt.Fprint(conn, path); err != nil {
-		return conn, err
+		return conn, b, err
 	}
-
-	//
-	p := make([]byte, 512)
 
 	// wait trying to read from the connection until a single read happens (blocking)
 	if _, err := conn.Read(p); err != nil {
-		return conn, err
+		return conn, b, err
 	}
 
-	// once a single read happens write the string and break out of the loop
-	os.Stderr.WriteString(string(p))
-
-	return conn, nil
+	return conn, b, nil
 }
 
 // pipeToConnection
