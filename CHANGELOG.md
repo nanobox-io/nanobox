@@ -1,6 +1,24 @@
-## v0.17.0 (December 21, 2015)
+## v0.17.1 (December 21, 2015)
 
 IMPROVEMENTS:
+
+  - Moved a significant amount of logic related to creating/managing the tty
+  terminal out of the server package and into the terminal package (61399a2).
+  - Turned the execInternal command into three commands that would relate
+  specifically to what they were doing (Console, Develop, Exec); this was done
+  to help separate out functionality and provide clarity (61399a2).
+  - Added a function (Connect) to mist that emulates the Stream functionality, but returns
+  the client to be closed externally to the function (61399a2).
+  - 'nanobox dev' will now always connect to mist (not just on deploy), passing
+  the connection into its respective sever call, which closes the connection after
+  it receives data from the server; this is done to allow hooks to contain output
+  that can be displayed to the client via mist (61399a2).
+  - More idiomatic way of checking flag in dev command (59b8735).
+
+## v0.17.0 (December 21, 2015)
+
+FEATURES:
+
   - Moved the update functionality into it's own script; the reason for this is
   to keep updating "safe". In the past there has been a break to the updating
   that has made it impossible to update to new versions of nanobox that contain
@@ -12,6 +30,7 @@ IMPROVEMENTS:
 ## v0.16.17 (December 17, 2015)
 
 IMPROVEMENTS:
+
   - Moved some file close defers to be more idiomatic (c615cab).
   - Added newlines to various log output where it had been missed (c615cab).
   - Use config rather than runtime to determine environment in update.go (c615cab).
