@@ -157,6 +157,57 @@ func Stream(tags []string, handle func(Log)) {
 	}
 }
 
+// Connect is the same as stream however it go routines the stream internally and
+// returns the client
+func Connect(tags []string, handle func(Log)) (client mistClient.Client, err error) {
+
+	// add log level to tags
+	tags = append(tags, config.LogLevel)
+
+	// if this subscription already exists, exit; this prevents double subscriptions
+	if _, ok := subscriptions[strings.Join(tags, "")]; ok {
+		return
+	}
+
+	// connect to mist
+	if client, err = mistClient.NewRemoteClient(config.MistURI); err != nil {
+		return
+	}
+	defer client.Close()
+
+	// this is a bandaid to fix a race condition in mist when immediatly subscribing
+	// after connecting a client; once this is fixed in mist this can be removed
+	<-time.After(time.Second * 1)
+
+	// subscribe
+	if err = client.Subscribe(tags); err != nil {
+		return
+	}
+	defer delete(subscriptions, strings.Join(tags, ""))
+
+	// add tags to list of subscriptions
+	subscriptions[strings.Join(tags, "")] = struct{}{}
+
+	//
+	go func() {
+		for msg := range client.Messages() {
+
+			//
+			log := Log{}
+
+			// unmarshal the incoming Message
+			if err := json.Unmarshal([]byte(msg.Data), &log); err != nil {
+				config.Fatal("[util/server/mist/mist] json.Unmarshal() failed", err.Error())
+			}
+
+			//
+			handle(log)
+		}
+	}()
+
+	return
+}
+
 // ProcessLog takes a Logvac or Stormpack log and breaks it apart into pieces that
 // are then reconstructed in a 'digestible' way, colorized, and output to the
 // terminal

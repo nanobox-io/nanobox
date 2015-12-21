@@ -176,16 +176,16 @@ func Progress(path string, w io.Writer) error {
 	total := float64(download.ContentLength) / math.Pow(1024, 2)
 
 	// create a 'buffer' to read into
-	p := make([]byte, 2048)
+	b := make([]byte, 2048)
 
 	//
 	for {
 
 		// read the response body (streaming)
-		n, err := download.Body.Read(p)
+		n, err := download.Body.Read(b)
 
 		// write to our buffer
-		w.Write(p[:n])
+		w.Write(b[:n])
 
 		// update the total bytes read
 		down += n

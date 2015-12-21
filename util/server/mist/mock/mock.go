@@ -6,6 +6,7 @@ package mock_mist
 import (
 	gomock "github.com/golang/mock/gomock"
 	mist "github.com/nanobox-io/nanobox/util/server/mist"
+	core "github.com/nanopack/mist/core"
 )
 
 // Mock of Mist interface
@@ -47,6 +48,17 @@ func (_m *MockMist) BuildUpdates(_param0 string) error {
 
 func (_mr *_MockMistRecorder) BuildUpdates(arg0 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "BuildUpdates", arg0)
+}
+
+func (_m *MockMist) Connect(_param0 []string, _param1 func(mist.Log)) (core.Client, error) {
+	ret := _m.ctrl.Call(_m, "Connect", _param0, _param1)
+	ret0, _ := ret[0].(core.Client)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+func (_mr *_MockMistRecorder) Connect(arg0, arg1 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "Connect", arg0, arg1)
 }
 
 func (_m *MockMist) DeployUpdates(_param0 string) error {

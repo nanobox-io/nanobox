@@ -48,9 +48,20 @@ func dev(ccmd *cobra.Command, args []string) {
 
 	// check to see if the devconfig option is one of our predetermined values. If
 	// not indicate as much and return
-	if _, ok := map[string]int{"mount": 1, "copy": 1, "none": 1}[devconfig]; !ok {
-		fmt.Printf(`--dev-config option "%s" is not accepted. Please choose either "mount", "copy", or "none"\n`, devconfig)
+	switch devconfig {
+	case "mount", "copy", "none":
+		break
+	default:
+		fmt.Printf("--dev-config option '%s' is not accepted. Please choose either 'mount', 'copy', or 'none'\n", devconfig)
 		os.Exit(1)
+	}
+
+	// stream log output; this is done here because there might be output from hooks
+	// that needs to be streamed to the client. This will also capture any output
+	// that would come from a deploy (if one is run).
+	mist, err := Mist.Connect([]string{"log", "deploy"}, Mist.PrintLogStream)
+	if err != nil {
+		config.Fatal("[commands/dev] mist.Connect() failed", err.Error())
 	}
 
 	// don't rebuild
@@ -73,9 +84,6 @@ func dev(ccmd *cobra.Command, args []string) {
 				server.Fatal("[commands/dev] server.Deploy() failed", err.Error())
 			}
 
-			// stream log output
-			go Mist.Stream([]string{"log", "deploy"}, Mist.PrintLogStream)
-
 			// listen for status updates
 			errch := make(chan error)
 			go func() {
@@ -93,14 +101,13 @@ func dev(ccmd *cobra.Command, args []string) {
 		}
 	}
 
-	v := url.Values{}
-
 	//
+	v := url.Values{}
 	v.Add("dev_config", devconfig)
 
 	//
-	if err := server.Exec("develop", v.Encode()); err != nil {
-		server.Error("[commands/dev] Server.Exec failed", err.Error())
+	if err := server.Develop(v.Encode(), mist); err != nil {
+		server.Error("[commands/dev] Server.Develop failed", err.Error())
 	}
 
 	// PostRun: halt

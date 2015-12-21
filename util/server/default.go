@@ -14,8 +14,7 @@ type (
 		Bootstrap(params string) error
 		Build(params string) error
 		Deploy(params string) error
-		Exec(where, params string) error
-		IsContainerExec(args []string) (found bool)
+		Exec(params string) error
 		NotifyRebuild(event *fsnotify.Event) error
 		NotifyServer(event *fsnotify.Event) error
 		Lock()
@@ -47,12 +46,8 @@ func (server) Deploy(params string) error {
 	return Deploy(params)
 }
 
-func (server) Exec(where, params string) error {
-	return Exec(where, params)
-}
-
-func (server) IsContainerExec(args []string) (found bool) {
-	return IsContainerExec(args)
+func (server) Exec(params string) error {
+	return Exec(params)
 }
 
 func (server) NotifyRebuild(event *fsnotify.Event) error {

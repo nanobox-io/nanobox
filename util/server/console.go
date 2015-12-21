@@ -12,8 +12,8 @@ import (
 	"github.com/nanobox-io/nanobox/util/server/terminal"
 )
 
-// Exec
-func Exec(params string) error {
+// Console
+func Console(params string) error {
 
 	// connect to the server; this will wait until a single read is returned from
 	// the server (blocking)
@@ -28,6 +28,27 @@ func Exec(params string) error {
 			fmt.Printf(err.Error())
 		}
 	}()
+
+	//
+	os.Stderr.WriteString(`+> Opening a nanobox console:
+
+
+                                   **
+                                ********
+                             ***************
+                          *********************
+                            *****************
+                          ::    *********    ::
+                             ::    ***    ::
+                           ++   :::   :::   ++
+                              ++   :::   ++
+                                 ++   ++
+                                    +
+
+                    _  _ ____ _  _ ____ ___  ____ _  _
+                    |\ | |__| |\ | |  | |__) |  |  \/
+                    | \| |  | | \| |__| |__) |__| _/\_
+`)
 
 	// get current term info
 	stdIn, stdOut, _ := term.StdStreams()

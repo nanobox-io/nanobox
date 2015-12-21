@@ -61,14 +61,14 @@ func (_mr *_MockServerRecorder) Deploy(arg0 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "Deploy", arg0)
 }
 
-func (_m *MockServer) Exec(_param0 string, _param1 string) error {
-	ret := _m.ctrl.Call(_m, "Exec", _param0, _param1)
+func (_m *MockServer) Exec(_param0 string) error {
+	ret := _m.ctrl.Call(_m, "Exec", _param0)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-func (_mr *_MockServerRecorder) Exec(arg0, arg1 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "Exec", arg0, arg1)
+func (_mr *_MockServerRecorder) Exec(arg0 interface{}) *gomock.Call {
+	return _mr.mock.ctrl.RecordCall(_mr.mock, "Exec", arg0)
 }
 
 func (_m *MockServer) Get(_param0 string, _param1 interface{}) (*http.Response, error) {
@@ -80,16 +80,6 @@ func (_m *MockServer) Get(_param0 string, _param1 interface{}) (*http.Response, 
 
 func (_mr *_MockServerRecorder) Get(arg0, arg1 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "Get", arg0, arg1)
-}
-
-func (_m *MockServer) IsContainerExec(_param0 []string) bool {
-	ret := _m.ctrl.Call(_m, "IsContainerExec", _param0)
-	ret0, _ := ret[0].(bool)
-	return ret0
-}
-
-func (_mr *_MockServerRecorder) IsContainerExec(arg0 interface{}) *gomock.Call {
-	return _mr.mock.ctrl.RecordCall(_mr.mock, "IsContainerExec", arg0)
 }
 
 func (_m *MockServer) Lock() {
