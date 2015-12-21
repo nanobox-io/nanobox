@@ -39,7 +39,6 @@ func update(ccmd *cobra.Command, args []string) {
 	switch {
 	case update, config.Force:
 		if err := runUpdate(); err != nil {
-			fmt.Printf("ERR?? %#v\n", err.Error())
 			if _, ok := err.(*os.LinkError); ok {
 				fmt.Println(`Nanobox was unable to update, try again with admin privilege (ex. "sudo nanobox update")`)
 			} else {
@@ -126,8 +125,7 @@ func runUpdate() error {
 	dir := filepath.Dir(epath)
 
 	// see if the updater is available on PATH
-	upath, err := exec.LookPath("nanobox-update")
-	if err != nil {
+	if _, err := exec.LookPath("nanobox-update"); err != nil {
 
 		tmpFile := filepath.Join(config.TmpDir, "nanobox-update")
 
@@ -162,9 +160,6 @@ func runUpdate() error {
 			return err
 		}
 	}
-
-	fmt.Println("RUNNING UPDATER!", upath, "|", epath, filepath.Base(epath))
-	fmt.Println("PLACE!", filepath.Join(dir, "nanobox-update"))
 
 	cmd := exec.Command(filepath.Join(dir, "nanobox-update"), "-o", filepath.Base(epath))
 
