@@ -33,7 +33,7 @@ func main() {
 
 	// check to see if nanobox needs to be updated
 	if err := commands.Update(); err != nil {
-		fmt.Println("FAILED TO OPDATE!")
+		fmt.Println("Nanobox was unable to update because of the following error:\n", err.Error())
 	}
 
 	//

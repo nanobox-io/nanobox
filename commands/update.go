@@ -55,8 +55,7 @@ func Update() error {
 
 	update, err := updatable()
 	if err != nil {
-		Config.Error("Unable to determine if updates are available.", err.Error())
-		return err
+		return fmt.Errorf("Nanobox was unable to determine if updates are available - %s", err.Error())
 	}
 
 	// stat the update file to get ModTime(); an error here means the file doesn't
@@ -83,7 +82,7 @@ func Update() error {
 				if _, ok := err.(*os.LinkError); ok {
 					fmt.Println(`Nanobox was unable to update, try again with admin privilege (ex. "sudo nanobox update")`)
 				} else {
-					Config.Fatal("[commands/update] runUpdate() failed", err.Error())
+					return fmt.Errorf("Nanobox was unable to update - %s", err.Error())
 				}
 			}
 		}
