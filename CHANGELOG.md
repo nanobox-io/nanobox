@@ -1,3 +1,14 @@
+## v0.17.0 (December 21, 2015)
+
+IMPROVEMENTS:
+  - Moved the update functionality into it's own script; the reason for this is
+  to keep updating "safe". In the past there has been a break to the updating
+  that has made it impossible to update to new versions of nanobox that contain
+  fixes, meaning the only option is to manually download a new nanobox. Now however,
+  the update script will work independently of nanobox, and nanobox will download
+  and use the script when updating. If a break should occur the script can be
+  run manually to update nanobox for fixes (30881d9).
+
 ## v0.16.17 (December 17, 2015)
 
 IMPROVEMENTS:
