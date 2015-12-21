@@ -139,7 +139,7 @@ func runUpdate() error {
 		// the updateder is not available and needs to be downloaded
 		dl := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/updaters/%s/%s/nanobox-update", config.OS, config.ARCH)
 
-		fmt.Printf("Updater not found. Downloading from %s\n", dl)
+		fmt.Printf("'nanobox-update' not found. Downloading from %s\n", dl)
 
 		fileutil.Progress(dl, f)
 
