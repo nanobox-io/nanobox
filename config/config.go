@@ -20,7 +20,7 @@ const (
 	LOGTAP_PORT = ":6361"
 	MIST_PORT   = ":1445"
 	SERVER_PORT = ":1757"
-	VERSION     = "0.16.17"
+	VERSION     = "0.17.0"
 )
 
 type (
@@ -32,14 +32,15 @@ var (
 	mutex = &sync.Mutex{}
 
 	//
-	AppDir     string // the path to the application (~/.nanobox/apps/<app>)
-	AppsDir    string // ~/.nanobox/apps
+	AppDir     string // ~/.nanobox/apps/<app>; the path to the application
+	AppsDir    string // ~/.nanobox/apps; the path where 'apps' are stored
 	CWDir      string // the current working directory
 	EnginesDir string // ~/.nanobox/engines
 	Home       string // the users home directory (~)
 	IP         string // the guest vm's private network ip (generated from app name)
-	Root       string // nanobox's root directory path (~/.nanobox)
-	UpdateFile string // the path to the .update file (~/.nanobox/.update)
+	Root       string // ~/.nanobox; nanobox's root directory path
+	TmpDir     string // ~/.nanobox/tmp; a place to put downloads before moving them
+	UpdateFile string // ~/.nanobox/.update; the path to the .update file
 
 	//
 	Nanofile NanofileConfig // parsed nanofile options
@@ -55,9 +56,9 @@ var (
 	Background bool   // don't suspend the vm on exit
 	Devmode    bool   // run nanobox in devmode
 	Force      bool   // force a command to run (effects very per command)
-	Verbose    bool   // run cli with log level "debug"
-	Silent     bool   // silence all ouput
 	LogLevel   string //
+	Silent     bool   // silence all ouput
+	Verbose    bool   // run cli with log level "debug"
 
 	//
 	Exit exiter = os.Exit
@@ -84,13 +85,11 @@ func init() {
 		Home = filepath.ToSlash(p)
 	}
 
-	// set nanobox's root directory;
-	Root = filepath.ToSlash(filepath.Join(Home, ".nanobox"))
-
 	// check for a ~/.nanobox dir and create one if it's not found
+	Root = filepath.ToSlash(filepath.Join(Home, ".nanobox"))
 	if _, err := os.Stat(Root); err != nil {
 		fmt.Printf(stylish.Bullet("Creating %s directory", Root))
-		if err := os.Mkdir(Root, 0755); err != nil {
+		if err := os.MkdirAll(Root, 0755); err != nil {
 			Log.Fatal("[config/config] os.Mkdir() failed", err.Error())
 		}
 	}
@@ -107,18 +106,21 @@ func init() {
 
 	// check for a ~/.nanobox/engines dir and create one if it's not found
 	EnginesDir = filepath.ToSlash(filepath.Join(Root, "engines"))
-	if _, err := os.Stat(EnginesDir); err != nil {
-		if err := os.Mkdir(EnginesDir, 0755); err != nil {
-			Log.Fatal("[config/config] os.Mkdir() failed", err.Error())
-		}
+	if err := os.MkdirAll(EnginesDir, 0755); err != nil {
+		Log.Fatal("[config/config] os.Mkdir() failed", err.Error())
 	}
 
 	// check for a ~/.nanobox/apps dir and create one if it's not found
 	AppsDir = filepath.ToSlash(filepath.Join(Root, "apps"))
-	if _, err := os.Stat(AppsDir); err != nil {
-		if err := os.Mkdir(AppsDir, 0755); err != nil {
-			Log.Fatal("[config/config] os.Mkdir() failed", err.Error())
-		}
+	if err := os.MkdirAll(AppsDir, 0755); err != nil {
+		Log.Fatal("[config/config] os.Mkdir() failed", err.Error())
+	}
+
+	// create a tmp dir for putting things before moved to a final location; this
+	// is used mainly when downloading the updater or a new cli
+	TmpDir = filepath.ToSlash(filepath.Join(Root, "tmp"))
+	if err := os.MkdirAll(TmpDir, 0755); err != nil {
+		Log.Fatal("[config/config] os.Mkdir() failed", err.Error())
 	}
 
 	// the .nanofile needs to be parsed right away so that its config options are
