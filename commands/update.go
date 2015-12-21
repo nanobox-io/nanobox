@@ -13,6 +13,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/config"
+	"github.com/nanobox-io/nanobox/util"
 	fileutil "github.com/nanobox-io/nanobox/util/file"
 	printutil "github.com/nanobox-io/nanobox/util/print"
 )
@@ -28,7 +29,7 @@ var updateCmd = &cobra.Command{
 // update
 func update(ccmd *cobra.Command, args []string) {
 
-	update, err := updateAvailable()
+	update, err := updatable()
 	if err != nil {
 		Config.Error("Unable to determing if updates are available", err.Error())
 		return
@@ -50,12 +51,11 @@ func update(ccmd *cobra.Command, args []string) {
 }
 
 // Update
-func Update() {
+func Update() error {
 
-	update, err := updateAvailable()
+	update, err := updatable()
 	if err != nil {
-		Config.Error("Unable to determine if updates are available.", err.Error())
-		return
+		return fmt.Errorf("Nanobox was unable to determine if updates are available - %s", err.Error())
 	}
 
 	// stat the update file to get ModTime(); an error here means the file doesn't
@@ -70,17 +70,11 @@ func Update() {
 		//
 		switch printutil.Prompt("Nanobox is out of date, would you like to update it now (y/N)? ") {
 
-		// don't update by default
+		// don't update by default, assuming they'll just do it manually, prompting
+		// again after 14 days
 		default:
 			fmt.Println("You can manually update at any time with 'nanobox update'.")
-
-			// if they don't update, assume then that they'll either do it manually or just
-			// wait 14 more days
-			if err := touchUpdate(); err != nil {
-				Config.Error("Failed to touch update", err.Error())
-			}
-
-			return
+			return touchUpdate()
 
 		// if yes continue to update
 		case "Yes", "yes", "Y", "y":
@@ -88,92 +82,94 @@ func Update() {
 				if _, ok := err.(*os.LinkError); ok {
 					fmt.Println(`Nanobox was unable to update, try again with admin privilege (ex. "sudo nanobox update")`)
 				} else {
-					Config.Fatal("[commands/update] runUpdate() failed", err.Error())
+					return fmt.Errorf("Nanobox was unable to update - %s", err.Error())
 				}
 			}
 		}
 	}
+
+	return nil
 }
 
-// updateAvailable
-func updateAvailable() (bool, error) {
+// updatable
+func updatable() (bool, error) {
 
-	// get the path of the current executing CLI
-	exe, err := osext.Executable()
+	//
+	path, err := osext.Executable()
 	if err != nil {
 		return false, err
 	}
 
-	// check the current cli md5 against the remote md5; os.Args[0] is used as the
-	// final interpolation to determine standard/dev versions
-	md5 := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/%v.md5", config.OS, config.ARCH, filepath.Base(os.Args[0]))
-
-	match, err := Util.MD5sMatch(exe, md5)
+	// check the md5 of the current executing cli against the remote md5;
+	// os.Args[0] is used as the final interpolation to determine standard/dev versions
+	match, err := Util.MD5sMatch(path, fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%s/%s/%s.md5", config.OS, config.ARCH, filepath.Base(os.Args[0])))
 	if err != nil {
 		return false, err
 	}
 
+	// if the MD5's DONT match we want to update
 	return !match, nil
 }
 
-// runUpdate
+// runUpdate attemtps to update using the updater; if it's not available nanobox
+// will download it and then run it.
 func runUpdate() error {
 
-	fmt.Printf(stylish.Bullet("Updating nanobox..."))
-
-	// get the path of the current executing CLI
-	exe, err := osext.Executable()
-	if err != nil {
-		return err
-	}
-
 	//
-
-	prog := filepath.Base(os.Args[0])
-	tmpDir := config.Root + "/tmp"
-	tmpFile := tmpDir + "/" + prog
-
-	// create a tmp dir to download the new cli to; don't care about the error here
-	// because if the tmp dir already exists we'll just use it
-	os.Mkdir(tmpDir, 0755)
-
-	// create a tmp cli in tmp dir
-	cli, err := os.Create(tmpFile)
+	path, err := osext.Executable()
 	if err != nil {
 		return err
 	}
-	defer cli.Close()
 
-	// download the new cli
-	dl := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/%v", config.OS, config.ARCH, prog)
-	fileutil.Progress(dl, cli)
+	// get the directory of the current executing cli
+	dir := filepath.Dir(path)
 
-	// make new CLI executable
-	if err := os.Chmod(tmpFile, 0755); err != nil {
-		return err
+	// see if the updater is available on PATH
+	if _, err := exec.LookPath("nanobox-update"); err != nil {
+
+		tmpFile := filepath.Join(config.TmpDir, "nanobox-update")
+
+		// create a tmp updater in tmp dir
+		f, err := os.Create(tmpFile)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+
+		// the updateder is not available and needs to be downloaded
+		dl := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/updaters/%s/%s/nanobox-update", config.OS, config.ARCH)
+
+		fmt.Printf("'nanobox-update' not found. Downloading from %s\n", dl)
+
+		fileutil.Progress(dl, f)
+
+		// ensure updater download matches the remote md5; if the download fails for any
+		// reason this md5 should NOT match.
+		md5 := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/updaters/%s/%s/nanobox-udpate.md5", config.OS, config.ARCH)
+		if _, err = util.MD5sMatch(tmpFile, md5); err != nil {
+			return err
+		}
+
+		// make new updater executable
+		if err := os.Chmod(tmpFile, 0755); err != nil {
+			return err
+		}
+
+		// move updater to the same location as the cli
+		if err = os.Rename(tmpFile, filepath.Join(dir, "nanobox-update")); err != nil {
+			return err
+		}
 	}
 
-	// ensure new CLI download matches the remote md5; if the download fails for any
-	// reason this md5 should NOT match.
-	md5 := fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/%v.md5", config.OS, config.ARCH, filepath.Base(os.Args[0]))
-	if _, err = Util.MD5sMatch(tmpFile, md5); err != nil {
-		fmt.Printf("Nanobox was unable to correctly download the update. Please check your internet connection and try again.")
-		return err
-	}
+	cmd := exec.Command(filepath.Join(dir, "nanobox-update"), "-o", filepath.Base(path))
 
-	// move new executable over current CLI's location
-	if err = os.Rename(tmpFile, exe); err != nil {
-		return err
-	}
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 
-	// if the new CLI fails to execute, just print a generic message and return
-	out, err := exec.Command(exe, "-v").Output()
-	if err != nil {
-		fmt.Printf(stylish.SubBullet("[√] Update successful"))
-		return nil
+	// run the updater
+	if err := cmd.Run(); err != nil {
+		Config.Fatal("[commands/update] exec.Command().Run() failed", err.Error())
 	}
-
-	fmt.Printf(stylish.SubBullet("[√] Now running %s", string(out)))
 
 	// update the .update file
 	return touchUpdate()

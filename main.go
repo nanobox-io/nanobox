@@ -32,7 +32,9 @@ func main() {
 	}()
 
 	// check to see if nanobox needs to be updated
-	commands.Update()
+	if err := commands.Update(); err != nil {
+		fmt.Println("Nanobox was unable to update because of the following error:\n", err.Error())
+	}
 
 	//
 	commands.NanoboxCmd.Execute()

@@ -27,5 +27,7 @@ _testmain.go
 .DS_Store
 TODO
 nanobox
+nanobox-update
+update/update
 build
 rsrc.syso
