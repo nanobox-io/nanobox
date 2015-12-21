@@ -97,7 +97,7 @@ func updatable() (bool, error) {
 	//
 	path, err := osext.Executable()
 	if err != nil {
-		config.Log.Fatal("[commands/update] osext.Executable() failed", err.Error())
+		return false, err
 	}
 
 	// check the md5 of the current executing cli against the remote md5;
@@ -107,6 +107,7 @@ func updatable() (bool, error) {
 		return false, err
 	}
 
+	// if the MD5's DONT match we want to update
 	return !match, nil
 }
 
@@ -115,13 +116,13 @@ func updatable() (bool, error) {
 func runUpdate() error {
 
 	//
-	epath, err := osext.Executable()
+	path, err := osext.Executable()
 	if err != nil {
 		return err
 	}
 
 	// get the directory of the current executing cli
-	dir := filepath.Dir(epath)
+	dir := filepath.Dir(path)
 
 	// see if the updater is available on PATH
 	if _, err := exec.LookPath("nanobox-update"); err != nil {
@@ -160,7 +161,7 @@ func runUpdate() error {
 		}
 	}
 
-	cmd := exec.Command(filepath.Join(dir, "nanobox-update"), "-o", filepath.Base(epath))
+	cmd := exec.Command(filepath.Join(dir, "nanobox-update"), "-o", filepath.Base(path))
 
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
