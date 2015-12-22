@@ -18,14 +18,14 @@ type NanofileConfig struct {
 	CPUs      int    `json:"cpus"`       // number of CPUs to dedicate to the guest vm
 	DevConfig string `json:"dev_config"` // the type of dev environment to configure on the guest vm
 	Domain    string `json:"domain"`     // the domain to use in conjuntion with the ip when accesing the guest vm (defaults to <Name>.dev)
+	HostDNS   string `json:"host_dns"`   // use the hosts dns resolver
 	IP        string `json:"ip"`         // the ip added to the /etc/hosts file for accessing the guest vm
 	MountNFS  bool   `json:"mount_nfs"`  // does the code directory get mounted as NFS
-	UseProxy  bool   `json:"use_proxy"`  // import http[s]_proxy variables into boot2docker
 	Name      string `json:"name"`       // the name given to the project (defaults to cwd)
 	Provider  string `json:"provider"`   // guest vm provider (virtual box, vmware, etc)
 	RAM       int    `json:"ram"`        // ammount of RAM to dedicate to the guest vm
-	HostDNS   string `json:"host_dns"`   // use the hosts dns resolver
 	SshPath   string `json:"ssh_path"`   // provide the path to the .ssh directory (if any)
+	UseProxy  bool   `json:"use_proxy"`  // import http[s]_proxy variables into boot2docker
 }
 
 // ParseNanofile
@@ -35,12 +35,12 @@ func ParseNanofile() NanofileConfig {
 	nanofile := NanofileConfig{
 		CPUCap:   50,
 		CPUs:     2,
+		HostDNS:  "off",
 		MountNFS: true,
-		UseProxy: false,
 		Name:     filepath.Base(CWDir),
 		Provider: "virtualbox", // this may change in the future (adding additional hosts such as vmware)
 		RAM:      1024,
-		HostDNS:  "off",
+		UseProxy: false,
 	}
 
 	nanofilePath := Root + "/.nanofile"
