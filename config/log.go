@@ -32,7 +32,8 @@ func init() {
 // Debug
 func Debug(msg string) {
 	if Verbose {
-		fmt.Printf(msg)
+                // let there be newlines
+		fmt.Println(msg)
 	}
 }
 
