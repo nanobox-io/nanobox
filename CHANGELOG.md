@@ -1,3 +1,9 @@
+## v0.17.2 (December 22, 2015)
+
+FEATURES:
+  - Adds the ability to forward local proxy variables to the vm, for docker and
+  nanobox server use (97fbfcc).
+
 ## v0.17.1 (December 21, 2015)
 
 IMPROVEMENTS:
