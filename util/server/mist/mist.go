@@ -173,7 +173,8 @@ func Connect(tags []string, handle func(Log)) (client mistClient.Client, err err
 	if client, err = mistClient.NewRemoteClient(config.MistURI); err != nil {
 		return
 	}
-	defer client.Close()
+	// we dont defer a client.Close() here because we're returning the client and
+	// want it to remain open
 
 	// this is a bandaid to fix a race condition in mist when immediatly subscribing
 	// after connecting a client; once this is fixed in mist this can be removed

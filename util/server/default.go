@@ -21,7 +21,6 @@ type (
 		Unlock()
 		NewLogger(path string)
 		Logs(params string) error
-		Ping() (bool, error)
 		Get(path string, v interface{}) (*http.Response, error)
 		Post(path, contentType string, body io.Reader) (*http.Response, error)
 		Put(path string, body io.Reader) (*http.Response, error)
@@ -72,10 +71,6 @@ func (server) NewLogger(path string) {
 
 func (server) Logs(params string) error {
 	return Logs(params)
-}
-
-func (server) Ping() (bool, error) {
-	return Ping()
 }
 
 func (server) Get(path string, v interface{}) (*http.Response, error) {

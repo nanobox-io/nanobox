@@ -22,6 +22,7 @@ func Develop(params string, mist mistClient.Client) error {
 	if err != nil {
 		return err
 	}
+	defer conn.Close()
 
 	// disconnect mist
 	mist.Close()

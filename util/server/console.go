@@ -21,6 +21,7 @@ func Console(params string) error {
 	if err != nil {
 		return err
 	}
+	defer conn.Close()
 
 	// begin watching for changes to the project
 	go func() {

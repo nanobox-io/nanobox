@@ -209,8 +209,8 @@ func handleCMDout(cmd *exec.Cmd) {
 		"Attempting graceful shutdown of VM...":          "Shutting down virtual machine",
 		"Forcing shutdown of VM...":                      "Shutting down virtual machine",
 		"Saving VM state and suspending execution...":    "Saving virtual machine",
-		// "Resuming suspended VM...":                       "Resuming virtual machine",   // this is output by its command
-		// "Destroying VM and associated drives...":         "Destroying virtual machine", // this is output by its command
+		// "Resuming suspended VM...":                       "Resuming virtual machine",   // this is handled by commands/resume.go
+		// "Destroying VM and associated drives...":         "Destroying virtual machine", // this is handled by commands/destroy.go
 	}
 
 	var done chan bool

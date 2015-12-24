@@ -16,7 +16,7 @@ func Suspend() error {
 	if err := runInContext(exec.Command("vagrant", "suspend")); err != nil {
 		return err
 	}
-	fmt.Printf(stylish.Bullet("Exiting"))
+	fmt.Printf(stylish.Bullet("Exiting!"))
 
 	return nil
 }
