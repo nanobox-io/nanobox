@@ -50,7 +50,7 @@ func getTTYSize(fd uintptr) (int, int) {
 func resizeTTY(w, h int) {
 
 	//
-	if _, err := http.Post(fmt.Sprintf("/resizeexec?pid=%d&w=%d&h=%d", os.Getpid(), w, h), "text/plain", nil); err != nil {
+	if _, err := http.Post(fmt.Sprintf("%s/resizeexec?pid=%d&w=%d&h=%d", config.ServerURL, os.Getpid(), w, h), "text/plain", nil); err != nil {
 		fmt.Printf("Error issuing resize: %s\n", err)
 	}
 }

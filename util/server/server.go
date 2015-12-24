@@ -3,7 +3,6 @@ package server
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -12,10 +11,6 @@ import (
 	"time"
 
 	"github.com/nanobox-io/nanobox/config"
-)
-
-var (
-	DisconnectedFromServer = errors.New("the server went away")
 )
 
 // Service
@@ -91,9 +86,10 @@ func connect(path string) (net.Conn, []byte, error) {
 	if err != nil {
 		return conn, b, err
 	}
-	defer conn.Close()
+	// we dont defer a conn.Close() here because we're returning the conn and
+	// want it to remain open
 
-	// make a http request
+	// make an http request
 	if _, err := fmt.Fprint(conn, path); err != nil {
 		return conn, b, err
 	}
@@ -110,19 +106,19 @@ func connect(path string) (net.Conn, []byte, error) {
 func pipeToConnection(conn net.Conn, in io.Reader, out io.Writer) error {
 
 	// set up notification channels so that when a ping check fails, we can disconnect the active console
-	pingService := make(chan interface{})
-	ping := make(chan interface{}, 1)
+	pong := make(chan interface{}, 1)
+	done := make(chan interface{})
 
-	// pipe data from the server to out
+	// pipe data from the conn (server) to in
 	go func() {
 		io.Copy(conn, in)
 		conn.(*net.TCPConn).CloseWrite()
 	}()
 
-	// pipe data from in to the server
+	// pipe data from out to the conn (server)
 	go func() {
 		io.Copy(out, conn)
-		close(pingService)
+		close(done)
 	}()
 
 	// monitor the server connection
@@ -130,33 +126,51 @@ func pipeToConnection(conn net.Conn, in io.Reader, out io.Writer) error {
 
 		// ping the server
 		go func() {
-			if ok, _ := Ping(); ok {
-				ping <- true
-			} else {
-				close(ping)
+			if ok, _ := ping(); !ok {
+				close(pong)
+				return
 			}
+			pong <- true
 		}()
 
+		// wait for the result of pinging the server
 		select {
 
 		//
-		case _, ok := <-ping:
+		case _, ok := <-pong:
 
-			//
+			// if the ping fails pong is closed
 			if !ok {
-				return DisconnectedFromServer
+				return fmt.Errorf("The server went away...")
 			}
 
-			//
-			time.Sleep(time.Second)
+			// loop, pinging at 1 second intervals
+			<-time.After(time.Second * 1)
 
-			//
+		// ping failed after 5 seconds
 		case <-time.After(5 * time.Second):
-			return DisconnectedFromServer
+			return fmt.Errorf("The server went away...")
 
-		//
-		case <-pingService:
+			//
+		case <-done:
 			return nil
 		}
 	}
+}
+
+// ping issues a ping to nanobox server
+func ping() (bool, error) {
+
+	// a new client is used to allow for shortening the request timeout
+	client := http.Client{Timeout: time.Duration(2 * time.Second)}
+
+	//
+	res, err := client.Get(config.ServerURL + "/ping")
+	if err != nil {
+		return false, err
+	}
+	defer res.Body.Close()
+
+	//
+	return res.StatusCode/100 == 2, nil
 }
