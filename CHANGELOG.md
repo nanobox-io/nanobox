@@ -1,3 +1,10 @@
+## v0.17.3 (December 24, 2015)
+
+BUG FIXES:
+  - Fixed a regression caused by the previous version in which some clients were
+  being prematurely closed causing panics when they were later attempted to close
+  because it was presumed they were left open.
+
 ## v0.17.2 (December 22, 2015)
 
 FEATURES:
