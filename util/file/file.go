@@ -184,7 +184,7 @@ func Progress(path string, w io.Writer) error {
 		// read the response body (streaming)
 		n, err := download.Body.Read(b)
 
-		// write to our buffer
+		// write the contents of our buffer to the writer
 		w.Write(b[:n])
 
 		// update the total bytes read

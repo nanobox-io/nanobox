@@ -39,7 +39,7 @@ var (
 			// CLI
 			if version || config.Verbose {
 				fmt.Printf("nanobox v%s\n", config.VERSION)
-				os.Exit(0)
+				return
 			}
 
 			// fall back on default help if no args/flags are passed
