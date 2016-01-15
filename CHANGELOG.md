@@ -1,3 +1,8 @@
+## v0.17.4 ()
+
+ - Removed anything related to logtap since it isn't used in this way anymore
+ (nanobox gets all its historical logs from a /logs route to the server)
+
 ## v0.17.3 (December 24, 2015)
 
 BUG FIXES:

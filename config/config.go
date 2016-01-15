@@ -17,7 +17,6 @@ import (
 const (
 	OS          = runtime.GOOS
 	ARCH        = runtime.GOARCH
-	LOGTAP_PORT = ":6361"
 	MIST_PORT   = ":1445"
 	SERVER_PORT = ":1757"
 	VERSION     = "0.17.3"
@@ -50,7 +49,6 @@ var (
 	ServerURI string // nanobox-server host:port combo (IP:1757)
 	ServerURL string // nanobox-server host:port combo (IP:1757) (http)
 	MistURI   string // mist's host:port combo (IP:1445)
-	LogtapURI string // logtap's host:port combo (IP:6361)
 
 	// flags
 	Background bool   // don't suspend the vm on exit
@@ -131,7 +129,6 @@ func init() {
 	ServerURI = Nanofile.IP + SERVER_PORT
 	ServerURL = "http://" + ServerURI
 	MistURI = Nanofile.IP + MIST_PORT
-	LogtapURI = Nanofile.IP + LOGTAP_PORT
 
 	// set the 'App' first so it can be used in subsequent configurations; the 'App'
 	// is set to the name of the cwd; this can be overriden from a .nanofile
