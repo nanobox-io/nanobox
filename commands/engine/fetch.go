@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 
 	// "github.com/nanobox-io/nanobox/auth"
+	"github.com/nanobox-io/nanobox/config"
 	engineutil "github.com/nanobox-io/nanobox/util/engine"
 )
 
@@ -61,7 +62,7 @@ func fetch(ccmd *cobra.Command, args []string) {
 	// pull the engine from nanobox.io
 	res, err := engineutil.GetEngine(user, engine, version)
 	if err != nil {
-		Config.Fatal("[commands/engine/fetch] http.Get() failed", err.Error())
+		config.Fatal("[commands/engine/fetch] http.Get() failed", err.Error())
 	}
 	defer res.Body.Close()
 

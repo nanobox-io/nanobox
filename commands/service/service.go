@@ -3,8 +3,6 @@ package service
 
 import (
 	"github.com/spf13/cobra"
-
-	"github.com/nanobox-io/nanobox/config"
 )
 
 //
@@ -16,9 +14,6 @@ var (
 		Short: "Subcommands to aid in developing a custom services",
 		Long:  ``,
 	}
-
-	//
-	Config = config.Default
 
 	//
 	fFile string // destination file when fetching an engine
