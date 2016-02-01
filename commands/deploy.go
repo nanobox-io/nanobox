@@ -78,5 +78,9 @@ func deploy(ccmd *cobra.Command, args []string) {
 		return
 	}
 
+	// reset "reloaded" to false after a successful deploy so as NOT to deploy on
+	// subsequent runnings of "nanobox dev"
+	config.VMfile.ReloadedIs(false)
+
 	// PostRun: halt
 }
