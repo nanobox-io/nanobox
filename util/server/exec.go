@@ -40,7 +40,7 @@ func Exec(params string) error {
 	}
 
 	// print the first read data from above
-	os.Stderr.WriteString(string(data))
+	os.Stderr.Write(data)
 
 	//
 	return pipeToConnection(conn, stdIn, stdOut)

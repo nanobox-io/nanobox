@@ -72,7 +72,7 @@ the vm or local will be mirrored.
 	}
 
 	// print the first read data from above
-	os.Stderr.WriteString(string(data))
+	os.Stderr.Write(data)
 
 	//
 	return pipeToConnection(conn, stdIn, stdOut)
