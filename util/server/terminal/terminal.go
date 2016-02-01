@@ -13,25 +13,24 @@ import (
 )
 
 // Connect
-func Connect(in io.Reader, out io.Writer) {
+func Connect(in io.Reader, out io.Writer) (*term.State, error) {
 
-	stdInFD, isTerminal := term.GetFdInfo(in)
+	stdInFD, _ := term.GetFdInfo(in)
 	stdOutFD, _ := term.GetFdInfo(out)
 
-	// if we are using a term, lets upgrade it to RawMode
-	if isTerminal {
+	// handle all incoming os signals and act accordingly; default behavior is to
+	// forward all signals to nanobox server
+	go monitor(stdOutFD)
 
-		// handle all incoming os signals and act accordingly; default behavior is to
-		// forward all signals to nanobox server
-		go monitor(stdOutFD)
+	// try to upgrade to a raw terminal; if accessed via a terminal this will upgrade
+	// with no error, if not an error will be returned
+	return term.SetRawTerminal(stdInFD)
+}
 
-		oldState, err := term.SetRawTerminal(stdInFD)
-
-		// we only use raw mode if it is available.
-		if err == nil {
-			defer term.RestoreTerminal(stdInFD, oldState)
-		}
-	}
+// Disconnect
+func Disconnect(in io.Reader, oldState *term.State) {
+	stdInFD, _ := term.GetFdInfo(in)
+	term.RestoreTerminal(stdInFD, oldState)
 }
 
 // getTTYSize

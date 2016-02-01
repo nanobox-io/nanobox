@@ -11,15 +11,18 @@ import (
 
 // monitor
 func monitor(stdOutFD uintptr) {
-	sigs := make(chan os.Signal, 1)
-
-	signal.Notify(sigs, syscall.SIGWINCH)
-	defer signal.Stop(sigs)
 
 	// inform the server what the starting size is
 	resizeTTY(getTTYSize(stdOutFD))
 
-	// resize the tty for any signals received
+	//
+	sigs := make(chan os.Signal, 1)
+
+	//
+	signal.Notify(sigs, syscall.SIGWINCH)
+	defer signal.Stop(sigs)
+
+	// wait to resize the tty on SIGWINCH (blocking)
 	for range sigs {
 		resizeTTY(getTTYSize(stdOutFD))
 	}

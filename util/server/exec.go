@@ -33,8 +33,11 @@ func Exec(params string) error {
 	// get current term info
 	stdIn, stdOut, _ := term.StdStreams()
 
-	//
-	terminal.Connect(stdIn, stdOut)
+	// connect a raw terminal; if no error is returned defer resetting the terminal
+	state, err := terminal.Connect(stdIn, stdOut)
+	if err == nil {
+		defer terminal.Disconnect(stdIn, state)
+	}
 
 	// print the first read data from above
 	os.Stderr.WriteString(string(data))
