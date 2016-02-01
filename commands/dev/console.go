@@ -1,5 +1,5 @@
 //
-package commands
+package dev
 
 import (
 	"fmt"

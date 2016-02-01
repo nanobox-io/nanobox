@@ -1,5 +1,5 @@
 //
-package commands
+package dev
 
 import (
 	"fmt"
@@ -8,6 +8,7 @@ import (
 
 	"github.com/nanobox-io/nanobox/config"
 	"github.com/nanobox-io/nanobox/util/server"
+	"github.com/nanobox-io/nanobox/util/vagrant"
 )
 
 //
@@ -26,7 +27,7 @@ func info(ccmd *cobra.Command, args []string) {
 	// PreRun: runnable
 
 	// determine status
-	status := Vagrant.Status()
+	status := vagrant.Status()
 
 	fmt.Printf(`
 Local Domain   : %s

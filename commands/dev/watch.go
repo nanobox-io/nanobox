@@ -1,5 +1,5 @@
 //
-package commands
+package dev
 
 import (
 	"fmt"
@@ -8,6 +8,8 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/config"
+	"github.com/nanobox-io/nanobox/util/notify"
+	"github.com/nanobox-io/nanobox/util/server"
 )
 
 //
@@ -26,7 +28,7 @@ func watch(ccmd *cobra.Command, args []string) {
 	fmt.Printf(stylish.Bullet("Watching app files for changes"))
 
 	// begin watching for file changes at cwd
-	if err := Notify.Watch(config.CWDir, Server.NotifyRebuild); err != nil {
+	if err := notify.Watch(config.CWDir, server.NotifyRebuild); err != nil {
 		fmt.Printf(err.Error())
 	}
 }

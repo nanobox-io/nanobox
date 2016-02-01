@@ -1,13 +1,14 @@
 //
-package commands
+package dev
 
-//
 import (
 	"fmt"
 
 	"github.com/nanobox-io/nanobox-golang-stylish"
-	"github.com/nanobox-io/nanobox/util/server"
 	"github.com/spf13/cobra"
+
+	"github.com/nanobox-io/nanobox/util/server"
+	mistutil "github.com/nanobox-io/nanobox/util/server/mist"
 )
 
 //
@@ -31,12 +32,12 @@ func bootstrap(ccmd *cobra.Command, args []string) {
 	fmt.Printf(stylish.Bullet("Bootstrapping codebase..."))
 
 	// stream bootstrap output
-	go Mist.Stream([]string{"log", "deploy"}, Mist.PrintLogStream)
+	go mistutil.Stream([]string{"log", "deploy"}, mistutil.PrintLogStream)
 
 	// listen for status updates
 	errch := make(chan error)
 	go func() {
-		errch <- Mist.Listen([]string{"job", "bootstrap"}, Mist.BootstrapUpdates)
+		errch <- mistutil.Listen([]string{"job", "bootstrap"}, mistutil.BootstrapUpdates)
 	}()
 
 	// run a bootstrap

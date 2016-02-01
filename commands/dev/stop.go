@@ -1,10 +1,11 @@
 //
-package commands
+package dev
 
 import (
+	"github.com/spf13/cobra"
+
 	"github.com/nanobox-io/nanobox/config"
 	"github.com/nanobox-io/nanobox/util/vagrant"
-	"github.com/spf13/cobra"
 )
 
 //

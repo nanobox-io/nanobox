@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/go-fsnotify/fsnotify"
-	"github.com/nanobox-io/nanobox/util/server/mist"
+	mistutil "github.com/nanobox-io/nanobox/util/server/mist"
 
 	"github.com/nanobox-io/nanobox/config"
 )
@@ -78,7 +78,7 @@ func NotifyRebuild(event *fsnotify.Event) (err error) {
 `)
 
 			go func() {
-				errch <- mist.Listen([]string{"job", "build"}, mist.BuildUpdates)
+				errch <- mistutil.Listen([]string{"job", "build"}, mistutil.BuildUpdates)
 			}()
 
 			//
@@ -93,7 +93,7 @@ func NotifyRebuild(event *fsnotify.Event) (err error) {
 `)
 
 			go func() {
-				errch <- mist.Listen([]string{"job", "deploy"}, mist.DeployUpdates)
+				errch <- mistutil.Listen([]string{"job", "deploy"}, mistutil.DeployUpdates)
 			}()
 
 			//

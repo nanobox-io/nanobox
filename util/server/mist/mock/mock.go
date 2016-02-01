@@ -5,7 +5,7 @@ package mock_mist
 
 import (
 	gomock "github.com/golang/mock/gomock"
-	mist "github.com/nanobox-io/nanobox/util/server/mist"
+	mistutil "github.com/nanobox-io/nanobox/util/server/mist"
 	core "github.com/nanopack/mist/core"
 )
 
@@ -50,7 +50,7 @@ func (_mr *_MockMistRecorder) BuildUpdates(arg0 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "BuildUpdates", arg0)
 }
 
-func (_m *MockMist) Connect(_param0 []string, _param1 func(mist.Log)) (core.Client, error) {
+func (_m *MockMist) Connect(_param0 []string, _param1 func(mistutil.Log)) (core.Client, error) {
 	ret := _m.ctrl.Call(_m, "Connect", _param0, _param1)
 	ret0, _ := ret[0].(core.Client)
 	ret1, _ := ret[1].(error)
@@ -91,7 +91,7 @@ func (_mr *_MockMistRecorder) Listen(arg0, arg1 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "Listen", arg0, arg1)
 }
 
-func (_m *MockMist) PrintLogStream(_param0 mist.Log) {
+func (_m *MockMist) PrintLogStream(_param0 mistutil.Log) {
 	_m.ctrl.Call(_m, "PrintLogStream", _param0)
 }
 
@@ -99,7 +99,7 @@ func (_mr *_MockMistRecorder) PrintLogStream(arg0 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "PrintLogStream", arg0)
 }
 
-func (_m *MockMist) ProcessLog(_param0 mist.Log) {
+func (_m *MockMist) ProcessLog(_param0 mistutil.Log) {
 	_m.ctrl.Call(_m, "ProcessLog", _param0)
 }
 
@@ -107,7 +107,7 @@ func (_mr *_MockMistRecorder) ProcessLog(arg0 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "ProcessLog", arg0)
 }
 
-func (_m *MockMist) ProcessLogStream(_param0 mist.Log) {
+func (_m *MockMist) ProcessLogStream(_param0 mistutil.Log) {
 	_m.ctrl.Call(_m, "ProcessLogStream", _param0)
 }
 
@@ -115,7 +115,7 @@ func (_mr *_MockMistRecorder) ProcessLogStream(arg0 interface{}) *gomock.Call {
 	return _mr.mock.ctrl.RecordCall(_mr.mock, "ProcessLogStream", arg0)
 }
 
-func (_m *MockMist) Stream(_param0 []string, _param1 func(mist.Log)) {
+func (_m *MockMist) Stream(_param0 []string, _param1 func(mistutil.Log)) {
 	_m.ctrl.Call(_m, "Stream", _param0, _param1)
 }
 

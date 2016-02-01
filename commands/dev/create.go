@@ -1,5 +1,5 @@
 //
-package commands
+package dev
 
 import (
 	"fmt"
@@ -9,6 +9,8 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/config"
+	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/file/hosts"
 	"github.com/nanobox-io/nanobox/util/vagrant"
 )
 
@@ -45,7 +47,7 @@ func create(ccmd *cobra.Command, args []string) {
 	// if the command is being run with the "add" flag, it means an entry needs to
 	// be added to the hosts file and execution yielded back to the parent
 	if addEntry {
-		Hosts.AddDomain()
+		hosts.AddDomain()
 		os.Exit(0) // this exits the sudoed (child) created, not the parent proccess
 	}
 
@@ -60,8 +62,8 @@ func create(ccmd *cobra.Command, args []string) {
 	updateImages(nil, args)
 
 	// add the entry if needed
-	if !Hosts.HasDomain() {
-		privilegeExec("create --add-entry", fmt.Sprintf("Adding %v domain to hosts file", config.Nanofile.Domain))
+	if !hosts.HasDomain() {
+		util.PrivilegeExec("create --add-entry", fmt.Sprintf("Adding %v domain to hosts file", config.Nanofile.Domain))
 	}
 
 	// if devmode is detected, the machine needs to be rebooted for devmode to take

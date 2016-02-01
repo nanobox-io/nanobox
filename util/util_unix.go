@@ -1,6 +1,6 @@
 // +build !windows
 
-package commands
+package util
 
 import (
 	"fmt"
@@ -8,10 +8,12 @@ import (
 	"os/exec"
 
 	"github.com/nanobox-io/nanobox-golang-stylish"
+
+	"github.com/nanobox-io/nanobox/config"
 )
 
-// privilegeExec runs a command as sudo
-func privilegeExec(command, msg string) {
+// PrivilegeExec runs a command as sudo
+func PrivilegeExec(command, msg string) {
 	fmt.Printf(stylish.Bullet(msg))
 
 	//
@@ -23,6 +25,6 @@ func privilegeExec(command, msg string) {
 
 	// run command
 	if err := cmd.Run(); err != nil {
-		Config.Fatal("[commands/commands_unix]", err.Error())
+		config.Fatal("[util/util_unix]", err.Error())
 	}
 }

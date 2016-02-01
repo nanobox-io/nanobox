@@ -1,5 +1,5 @@
 //
-package commands
+package dev
 
 import (
 	"fmt"
@@ -12,6 +12,7 @@ import (
 	"github.com/nanobox-io/nanobox/config"
 	engineutil "github.com/nanobox-io/nanobox/util/engine"
 	"github.com/nanobox-io/nanobox/util/server"
+	mistutil "github.com/nanobox-io/nanobox/util/server/mist"
 )
 
 var (
@@ -46,12 +47,12 @@ func deploy(ccmd *cobra.Command, args []string) {
 	fmt.Printf(stylish.Bullet("Deploying codebase..."))
 
 	// stream deploy output
-	go Mist.Stream([]string{"log", "deploy"}, Mist.PrintLogStream)
+	go mistutil.Stream([]string{"log", "deploy"}, mistutil.PrintLogStream)
 
 	// listen for status updates
 	errch := make(chan error)
 	go func() {
-		errch <- Mist.Listen([]string{"job", "deploy"}, Mist.DeployUpdates)
+		errch <- mistutil.Listen([]string{"job", "deploy"}, mistutil.DeployUpdates)
 	}()
 
 	v := url.Values{}

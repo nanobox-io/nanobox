@@ -1,5 +1,5 @@
 //
-package commands
+package dev
 
 import (
 	"fmt"
@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/config"
+	"github.com/nanobox-io/nanobox/util/print"
 	"github.com/nanobox-io/nanobox/util/server"
 )
 
@@ -33,7 +34,7 @@ func execute(ccmd *cobra.Command, args []string) {
 
 	//
 	if len(args) == 0 {
-		args = append(args, Print.Prompt("Please specify a command you wish to exec: "))
+		args = append(args, print.Prompt("Please specify a command you wish to exec: "))
 	}
 
 	//

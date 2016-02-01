@@ -1,5 +1,5 @@
 //
-package commands
+package dev
 
 import (
 	"fmt"
@@ -9,6 +9,8 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/config"
+	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/file/hosts"
 	"github.com/nanobox-io/nanobox/util/vagrant"
 )
 
@@ -42,7 +44,7 @@ func destroy(ccmd *cobra.Command, args []string) {
 	// if the command is being run with --remove-entry, it means an entry needs
 	// to be removed from the hosts file and execution yielded back to the parent
 	if removeEntry {
-		Hosts.RemoveDomain()
+		hosts.RemoveDomain()
 		os.Exit(0) // this exits the sudoed (child) destroy, not the parent proccess
 	}
 
@@ -63,9 +65,9 @@ func destroy(ccmd *cobra.Command, args []string) {
 	// isn't just created again upon running the vagrant command
 	fmt.Printf(stylish.Bullet("Deleting nanobox files (%s)", config.AppDir))
 	if err := os.RemoveAll(config.AppDir); err != nil {
-		Config.Fatal("[commands/destroy] os.RemoveAll() failed", err.Error())
+		config.Fatal("[commands/destroy] os.RemoveAll() failed", err.Error())
 	}
 
 	// attempt to remove the entry regardless of whether its there or not
-	privilegeExec("destroy --remove-entry", fmt.Sprintf("Removing %s domain from /etc/hosts", config.Nanofile.Domain))
+	util.PrivilegeExec("destroy --remove-entry", fmt.Sprintf("Removing %s domain from /etc/hosts", config.Nanofile.Domain))
 }

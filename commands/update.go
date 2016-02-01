@@ -31,7 +31,7 @@ func update(ccmd *cobra.Command, args []string) {
 
 	update, err := updatable()
 	if err != nil {
-		Config.Error("Unable to determing if updates are available", err.Error())
+		config.Error("Unable to determing if updates are available", err.Error())
 		return
 	}
 
@@ -42,7 +42,7 @@ func update(ccmd *cobra.Command, args []string) {
 			if _, ok := err.(*os.LinkError); ok {
 				fmt.Println(`Nanobox was unable to update, try again with admin privilege (ex. "sudo nanobox update")`)
 			} else {
-				Config.Fatal("[commands/update] runUpdate() failed", err.Error())
+				config.Fatal("[commands/update] runUpdate() failed", err.Error())
 			}
 		}
 	default:
@@ -102,7 +102,7 @@ func updatable() (bool, error) {
 
 	// check the md5 of the current executing cli against the remote md5;
 	// os.Args[0] is used as the final interpolation to determine standard/dev versions
-	match, err := Util.MD5sMatch(path, fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%s/%s/%s.md5", config.OS, config.ARCH, filepath.Base(os.Args[0])))
+	match, err := util.MD5sMatch(path, fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%s/%s/%s.md5", config.OS, config.ARCH, filepath.Base(os.Args[0])))
 	if err != nil {
 		return false, err
 	}
@@ -168,7 +168,7 @@ func runUpdate() error {
 
 	// run the updater
 	if err := cmd.Run(); err != nil {
-		Config.Fatal("[commands/update] exec.Command().Run() failed", err.Error())
+		config.Fatal("[commands/update] exec.Command().Run() failed", err.Error())
 	}
 
 	// update the .update file

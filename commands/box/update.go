@@ -1,7 +1,11 @@
 //
 package box
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/spf13/cobra"
+
+	"github.com/nanobox-io/nanobox/util/vagrant"
+)
 
 var updateCmd = &cobra.Command{
 	Use:   "update",
@@ -13,5 +17,5 @@ var updateCmd = &cobra.Command{
 
 // Update
 func Update(ccmd *cobra.Command, args []string) {
-	Vagrant.Update()
+	vagrant.Update()
 }

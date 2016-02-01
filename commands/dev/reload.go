@@ -1,5 +1,5 @@
 //
-package commands
+package dev
 
 import (
 	"fmt"
@@ -30,7 +30,7 @@ func reload(ccmd *cobra.Command, args []string) {
 	// when a user needs a new Vagrantfile (ie. adding a custom engine after the VM
 	// already exists). The only way to accomplish this otherwise is either destroying
 	// the VM entirely or running the hidden "nanobox init -f"
-	Vagrant.Init()
+	vagrant.Init()
 
 	//
 	fmt.Printf(stylish.Bullet("Reloading nanobox..."))

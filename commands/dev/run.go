@@ -1,5 +1,5 @@
 //
-package commands
+package dev
 
 import (
 	"fmt"
@@ -9,7 +9,9 @@ import (
 
 	"github.com/nanobox-io/nanobox/config"
 	engineutil "github.com/nanobox-io/nanobox/util/engine"
+	"github.com/nanobox-io/nanobox/util/notify"
 	"github.com/nanobox-io/nanobox/util/server"
+	mistutil "github.com/nanobox-io/nanobox/util/server/mist"
 )
 
 //
@@ -36,12 +38,12 @@ func run(ccmd *cobra.Command, args []string) {
 	fmt.Printf(stylish.Bullet("Deploying codebase..."))
 
 	// stream deploy output
-	go Mist.Stream([]string{"log", "deploy"}, Mist.PrintLogStream)
+	go mistutil.Stream([]string{"log", "deploy"}, mistutil.PrintLogStream)
 
 	// listen for status updates
 	errch := make(chan error)
 	go func() {
-		errch <- Mist.Listen([]string{"job", "deploy"}, Mist.DeployUpdates)
+		errch <- mistutil.Listen([]string{"job", "deploy"}, mistutil.DeployUpdates)
 	}()
 
 	// remount the engine file at ~/.nanobox/apps/<app>/<engine> so any new scripts
@@ -85,10 +87,10 @@ To stream logs and watch files while in 'background mode' you can use
 `)
 
 	// stream app output
-	go Mist.Stream([]string{"log", "app"}, Mist.ProcessLogStream)
+	go mistutil.Stream([]string{"log", "app"}, mistutil.ProcessLogStream)
 
 	// begin watching for file changes (blocking)
-	if err := Notify.Watch(config.CWDir, Server.NotifyRebuild); err != nil {
+	if err := notify.Watch(config.CWDir, server.NotifyRebuild); err != nil {
 		fmt.Printf(err.Error())
 	}
 

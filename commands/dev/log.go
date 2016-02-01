@@ -1,13 +1,15 @@
 //
-package commands
+package dev
 
 import (
 	"fmt"
 	"net/url"
 
 	"github.com/nanobox-io/nanobox-golang-stylish"
-	"github.com/nanobox-io/nanobox/util/server"
 	"github.com/spf13/cobra"
+
+	"github.com/nanobox-io/nanobox/util/server"
+	mistutil "github.com/nanobox-io/nanobox/util/server/mist"
 )
 
 var (
@@ -47,7 +49,7 @@ func log(ccmd *cobra.Command, args []string) {
 		fmt.Printf(stylish.Bullet("Opening log stream"))
 
 		// stream logs (blocking)
-		Mist.Stream([]string{"log", "app"}, Mist.ProcessLogStream)
+		mistutil.Stream([]string{"log", "app"}, mistutil.ProcessLogStream)
 
 		// ...otherwise load historical logs
 	} else {

@@ -1,5 +1,5 @@
 //
-package commands
+package dev
 
 import (
 	"fmt"
@@ -10,6 +10,7 @@ import (
 	"github.com/nanobox-io/nanobox/config"
 	engineutil "github.com/nanobox-io/nanobox/util/engine"
 	"github.com/nanobox-io/nanobox/util/server"
+	mistutil "github.com/nanobox-io/nanobox/util/server/mist"
 )
 
 //
@@ -33,12 +34,12 @@ func build(ccmd *cobra.Command, args []string) {
 	fmt.Printf(stylish.Bullet("Building codebase..."))
 
 	// stream build output
-	go Mist.Stream([]string{"log", "deploy"}, Mist.PrintLogStream)
+	go mistutil.Stream([]string{"log", "deploy"}, mistutil.PrintLogStream)
 
 	// listen for status updates
 	errch := make(chan error)
 	go func() {
-		errch <- Mist.Listen([]string{"job", "build"}, Mist.BuildUpdates)
+		errch <- mistutil.Listen([]string{"job", "build"}, mistutil.BuildUpdates)
 	}()
 
 	// remount the engine file at ~/.nanobox/apps/<app>/<engine> so any new scripts

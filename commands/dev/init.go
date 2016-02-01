@@ -1,5 +1,5 @@
 //
-package commands
+package dev
 
 import (
 	"os"
@@ -8,6 +8,8 @@ import (
 
 	"github.com/nanobox-io/nanobox/commands/box"
 	"github.com/nanobox-io/nanobox/config"
+	"github.com/nanobox-io/nanobox/util/server"
+	"github.com/nanobox-io/nanobox/util/vagrant"
 )
 
 var initCmd = &cobra.Command{
@@ -33,18 +35,18 @@ func initialize(ccmd *cobra.Command, args []string) {
 	// exists) where the Vagrantfile and .vagrant dir will live for each app
 	if _, err := os.Stat(config.AppDir); err != nil {
 		if err := os.Mkdir(config.AppDir, 0755); err != nil {
-			Config.Fatal("[commands/init] os.Mkdir() failed", err.Error())
+			config.Fatal("[commands/init] os.Mkdir() failed", err.Error())
 		}
 	}
 
 	// set up a dedicated vagrant logger
-	Vagrant.NewLogger(config.AppDir + "/vagrant.log")
+	vagrant.NewLogger(config.AppDir + "/vagrant.log")
 
 	// set up a dedicated server logger
-	Server.NewLogger(config.AppDir + "/server.log")
+	server.NewLogger(config.AppDir + "/server.log")
 
 	// 'parse' the .vmfile (either creating one, or parsing it)
-	config.VMfile = Config.ParseVMfile()
+	config.VMfile = config.ParseVMfile()
 
 	//
 	// generate a Vagrantfile at ~/.nanobox/apps/<app-name>/Vagrantfile
@@ -55,5 +57,5 @@ func initialize(ccmd *cobra.Command, args []string) {
 		}
 	}
 
-	Vagrant.Init()
+	vagrant.Init()
 }

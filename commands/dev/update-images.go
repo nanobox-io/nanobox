@@ -1,5 +1,5 @@
 //
-package commands
+package dev
 
 import (
 	"fmt"
@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/util/server"
+	mistutil "github.com/nanobox-io/nanobox/util/server/mist"
 )
 
 var updateImagesCmd = &cobra.Command{
@@ -26,12 +27,12 @@ func updateImages(ccmd *cobra.Command, args []string) {
 	// PreRun: boot
 
 	// stream update output
-	go Mist.Stream([]string{"log", "deploy"}, Mist.PrintLogStream)
+	go mistutil.Stream([]string{"log", "deploy"}, mistutil.PrintLogStream)
 
 	// listen for status updates
 	errch := make(chan error)
 	go func() {
-		errch <- Mist.Listen([]string{"job", "imageupdate"}, Mist.ImageUpdates)
+		errch <- mistutil.Listen([]string{"job", "imageupdate"}, mistutil.ImageUpdates)
 	}()
 
 	fmt.Printf(stylish.Bullet("Updating nanobox docker images (this may take awhile)..."))

@@ -9,10 +9,12 @@ import (
 	"strings"
 
 	"github.com/nanobox-io/nanobox-golang-stylish"
+
+	"github.com/nanobox-io/nanobox/config"
 )
 
-// privilegeExec runs a command, but assumes your already running as adminsitrator
-func privilegeExec(command, msg string) {
+// PrivilegeExec runs a command, but assumes your already running as adminsitrator
+func PrivilegeExec(command, msg string) {
 	fmt.Printf(stylish.Bullet(msg))
 
 	//
@@ -24,6 +26,6 @@ func privilegeExec(command, msg string) {
 
 	// run command
 	if err := cmd.Run(); err != nil {
-		Config.Fatal("[commands/commands_windows]", err.Error())
+		config.Fatal("[commands/commands_windows]", err.Error())
 	}
 }

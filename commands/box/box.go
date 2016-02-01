@@ -7,7 +7,6 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox/config"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/vagrant"
 )
@@ -22,7 +21,7 @@ var (
 		PersistentPreRun: func(ccmd *cobra.Command, args []string) {
 
 			// ensure vagrant exists
-			if exists := Vagrant.Exists(); !exists {
+			if exists := vagrant.Exists(); !exists {
 				fmt.Println("Missing dependency 'Vagrant'. Please download and install it to continue (https://www.vagrantup.com/).")
 				os.Exit(1)
 			}
@@ -34,10 +33,6 @@ var (
 			}
 		},
 	}
-
-	Vagrant = vagrant.Default
-	Config  = config.Default
-	Util    = util.Default
 )
 
 //
