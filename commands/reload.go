@@ -39,6 +39,8 @@ func reload(ccmd *cobra.Command, args []string) {
 		vagrant.Fatal("[commands/reload] vagrant.Reload() failed", err.Error())
 	}
 
-	// indeicate that the VM has recently been reloaded
+	// indicate that the VM has recently been reloaded; we do this under the assumption
+	// that the reload command was called because something went wrong with the VM
+	// and a user is trying to "reset" things.
 	config.VMfile.ReloadedIs(true)
 }
