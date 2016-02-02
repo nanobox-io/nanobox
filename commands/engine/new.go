@@ -59,8 +59,8 @@ generic: false               # is the engine generic enough to encompass multipl
                              # within the given language
 license: MIT                 # the license to be applied to this software
 
-# engine overlays - any overlays that your engine requires to run
-overlays:
+# all dependencies that your engine requires to run
+build_files:
  -
 
 # a list of authors/contributors

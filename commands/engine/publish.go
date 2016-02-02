@@ -18,7 +18,6 @@ import (
 
 	"github.com/nanobox-io/nanobox/auth"
 	"github.com/nanobox-io/nanobox/config"
-	engineutil "github.com/nanobox-io/nanobox/util/engine"
 	fileutil "github.com/nanobox-io/nanobox/util/file"
 	s3util "github.com/nanobox-io/nanobox/util/s3"
 )
@@ -41,28 +40,30 @@ func publish(ccmd *cobra.Command, args []string) {
 	//
 	api.UserSlug, api.AuthToken = auth.Authenticate()
 
-	// create a new release
-	fmt.Printf(stylish.Bullet("Creating release..."))
-	release := &api.EngineRelease{}
-
-	// create an annonymous struct to hold data that doesn't relate to a release but
-	// is needed as part of the publish process
-	opts := &struct {
-		Generic  bool     `json:"generic"`
-		Language string   `json:"language"`
-		Overlays []string `json:"overlays"`
-	}{}
-
 	// ensure there is an Enginefile
 	if _, err := os.Stat("./Enginefile"); err != nil {
 		fmt.Printf("Enginefile not found. Be sure to publish from a project directory. Exiting...\n")
 		os.Exit(1)
 	}
 
+	// create a new release
+	fmt.Printf(stylish.Bullet("Creating release..."))
+	release := &api.EngineRelease{}
+
 	// parse the ./Enginefile into the new release
 	if err := config.ParseConfig("./Enginefile", release); err != nil {
 		fmt.Printf("Nanobox failed to parse your Enginefile. Please ensure it is valid YAML and try again.\n")
 		os.Exit(1)
+	}
+
+	// create an annonymous struct to hold data that doesn't relate to a release but
+	// is needed as part of the publish process
+	opts := &struct {
+		Generic  bool     `json:"generic"`
+		Language string   `json:"language"`
+		Build    []string `json:"build_files"`
+	}{
+		Build: []string{"./bin", "./Enginefile", "./meta.json"},
 	}
 
 	// parse the ./Enginefile again to get the remaining fields
@@ -75,9 +76,9 @@ func publish(ccmd *cobra.Command, args []string) {
 
 	// determine if any required fields (name, version, language, summary) are missing,
 	// if any are found to be missing exit 1
-	// NOTE: I do this using fallthrough for asthetics onlye. The message is generic
+	// NOTE: I do this using fallthrough for asthetics only. The message is generic
 	// enough that all cases will return the same message, and this looks better than
-	// a single giant case (var == "" || var == "" || ...)
+	// a single giant case/if (var == "" || var == "" || ...)
 	switch {
 	case opts.Language == "":
 		fallthrough
@@ -175,22 +176,11 @@ Please ensure all required fields are provided and try again.`))
 	// add any custom info to the metafile
 	meta.WriteString(fmt.Sprintf(`{"engine_id": "%s"}`, engine.ID))
 
-	// this is our predefined list of everything that gets archived as part of the
-	// engine being published
-	files := map[string][]string{
-		"required": []string{"./bin", "./Enginefile", "./meta.json"},
-		"optional": []string{"./lib", "./templates", "./files"},
-	}
-
 	// check to ensure no required files are missing
-	for k, v := range files {
-		if k == "required" {
-			for _, f := range v {
-				if _, err := os.Stat(f); err != nil {
-					fmt.Printf(stylish.Error("required files missing", "Your Engine is missing one or more required files for publishing. Please read the following documentation to ensure all required files are included and try again.:\n\ndocs.nanobox.io/engines/project-creation/#example-engine-file-structure\n"))
-					os.Exit(1)
-				}
-			}
+	for _, file := range opts.Build {
+		if _, err := os.Stat(file); err != nil {
+			fmt.Printf(stylish.Error("required files missing", "Unable to find %s; this file is either required, or was declared as a build_file in the Enginefile. Please read the following documentation to ensure all required files are included and try again. \n\ndocs.nanobox.io/engines/project-creation/#example-engine-file-structure\n"))
+			os.Exit(1)
 		}
 	}
 
@@ -213,20 +203,12 @@ Please ensure all required fields are provided and try again.`))
 		os.Exit(1)
 	}
 
-	// iterate through each overlay fetching it and untaring to the tar path
-	for _, overlay := range opts.Overlays {
-		engineutil.GetOverlay(overlay, tarPath)
-	}
+	// add each of the build_files to the final tarPath
+	for _, file := range opts.Build {
 
-	// range over each file from each file type, building the final list of files
-	// to be tarballed
-	for _, v := range files {
-		for _, f := range v {
-
-			// not handling error here because an error simply means the file doesn't
-			// exist and therefor wont be copied to the final tarball
-			fileutil.Copy(f, tarPath)
-		}
+		// not handling the error here because it simply means the file doesn't exist
+		// and therefor wont be copied to the final tarball
+		fileutil.Copy(file, tarPath)
 	}
 
 	// create an empty buffer for writing the file contents to for the subsequent

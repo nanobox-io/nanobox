@@ -71,11 +71,6 @@ func MountLocal() (mountName, mountDir string, err error) {
 		}
 	}
 
-	// iterate through each overlay and untar it to the mount dir
-	for _, overlay := range mount.Overlays {
-		GetOverlay(overlay, mountDir)
-	}
-
 	var abs string
 
 	abs, err = filepath.Abs(enginePath)
@@ -130,37 +125,6 @@ func GetEngine(user, archive, version string) (*http.Response, error) {
 
 	//
 	return http.Get(path)
-}
-
-// GetOverlay fetches an overlay from nanobox.io and untars it into dst
-func GetOverlay(overlay, dst string) {
-
-	// extract a user and archive (desired engine)
-	user, archive := ExtractArchive(overlay)
-
-	// extract an engine and version from the archive
-	engine, version := ExtractEngine(archive)
-
-	//
-	res, err := GetEngine(user, engine, version)
-	if err != nil {
-		config.Fatal("[util/engine/engine] http.Get() failed", err.Error())
-	}
-	defer res.Body.Close()
-
-	//
-	switch res.StatusCode / 100 {
-	case 2, 3:
-		break
-	case 4, 5:
-		os.Stderr.WriteString(stylish.ErrBullet("Unable to fetch '%v' overlay. Exiting...\n", engine))
-		os.Exit(1)
-	}
-
-	//
-	if err := fileutil.Untar(dst, res.Body); err != nil {
-		config.Fatal("[util/engine/engine] file.Untar() failed", err.Error())
-	}
 }
 
 // ExtractArchive splits args on "/" looking for a user and archive:
