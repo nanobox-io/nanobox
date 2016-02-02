@@ -31,15 +31,16 @@ var (
 	mutex = &sync.Mutex{}
 
 	//
-	AppDir     string // ~/.nanobox/apps/<app>; the path to the application
-	AppsDir    string // ~/.nanobox/apps; the path where 'apps' are stored
-	CWDir      string // the current working directory
-	EnginesDir string // ~/.nanobox/engines
-	Home       string // the users home directory (~)
-	IP         string // the guest vm's private network ip (generated from app name)
-	Root       string // ~/.nanobox; nanobox's root directory path
-	TmpDir     string // ~/.nanobox/tmp; a place to put downloads before moving them
-	UpdateFile string // ~/.nanobox/.update; the path to the .update file
+	AppDir      string // ~/.nanobox/apps/<app>; the path to the application
+	AppsDir     string // ~/.nanobox/apps; the path where 'apps' are stored
+	CWDir       string // the current working directory
+	EnginesDir  string // ~/.nanobox/engines; location where local engines are mounted
+	Home        string // the users home directory (~)
+	IP          string // the guest vm's private network ip (generated from app name)
+	Root        string // ~/.nanobox; nanobox's root directory path
+	ServicesDir string // ~/.nanobox/services; location where local services are mounted
+	TmpDir      string // ~/.nanobox/tmp; a place to put downloads before moving them
+	UpdateFile  string // ~/.nanobox/.update; the path to the .update file
 
 	//
 	Nanofile NanofileConfig // parsed nanofile options
@@ -83,7 +84,7 @@ func init() {
 		Home = filepath.ToSlash(p)
 	}
 
-	// check for a ~/.nanobox dir and create one if it's not found
+	// create a ~/.nanobox dir if one isnt found
 	Root = filepath.ToSlash(filepath.Join(Home, ".nanobox"))
 	if _, err := os.Stat(Root); err != nil {
 		fmt.Printf(stylish.Bullet("Creating %s directory", Root))
@@ -92,7 +93,7 @@ func init() {
 		}
 	}
 
-	// check for a ~/.nanobox/.update file and create one if it's not found
+	// create a ~/.nanobox/.update if one isnt found
 	UpdateFile = filepath.ToSlash(filepath.Join(Root, ".update"))
 	if _, err := os.Stat(UpdateFile); err != nil {
 		f, err := os.Create(UpdateFile)
@@ -102,13 +103,19 @@ func init() {
 		defer f.Close()
 	}
 
-	// check for a ~/.nanobox/engines dir and create one if it's not found
+	// create a ~/.nanobox/engines if one isnt found
 	EnginesDir = filepath.ToSlash(filepath.Join(Root, "engines"))
 	if err := os.MkdirAll(EnginesDir, 0755); err != nil {
 		Log.Fatal("[config/config] os.Mkdir() failed", err.Error())
 	}
 
-	// check for a ~/.nanobox/apps dir and create one if it's not found
+	// create a ~/.nanobox/services if one isnt found
+	ServicesDir = filepath.ToSlash(filepath.Join(Root, "services"))
+	if err := os.MkdirAll(ServicesDir, 0755); err != nil {
+		Log.Fatal("[config/config] os.Mkdir() failed", err.Error())
+	}
+
+	// create a ~/.nanobox/apps if one isnt found
 	AppsDir = filepath.ToSlash(filepath.Join(Root, "apps"))
 	if err := os.MkdirAll(AppsDir, 0755); err != nil {
 		Log.Fatal("[config/config] os.Mkdir() failed", err.Error())

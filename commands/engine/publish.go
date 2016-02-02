@@ -2,7 +2,6 @@
 package engine
 
 import (
-	"archive/tar"
 	"bytes"
 	"crypto/md5"
 	"fmt"
@@ -10,7 +9,6 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"time"
 
 	api "github.com/nanobox-io/nanobox-api-client"
 	"github.com/nanobox-io/nanobox-golang-stylish"
@@ -18,11 +16,10 @@ import (
 
 	"github.com/nanobox-io/nanobox/auth"
 	"github.com/nanobox-io/nanobox/config"
+	engineutil "github.com/nanobox-io/nanobox/util/engine"
 	fileutil "github.com/nanobox-io/nanobox/util/file"
 	s3util "github.com/nanobox-io/nanobox/util/s3"
 )
-
-var tw *tar.Writer
 
 //
 var publishCmd = &cobra.Command{
@@ -37,37 +34,18 @@ var publishCmd = &cobra.Command{
 func publish(ccmd *cobra.Command, args []string) {
 	stylish.Header("publishing engine")
 
-	//
-	api.UserSlug, api.AuthToken = auth.Authenticate()
-
-	// ensure there is an Enginefile
+	// ensure there is an ./Enginefile
 	if _, err := os.Stat("./Enginefile"); err != nil {
-		fmt.Printf("Enginefile not found. Be sure to publish from a project directory. Exiting...\n")
+		fmt.Printf("No Enginefile found. Be sure to publish from a project directory. Exiting...\n")
 		os.Exit(1)
 	}
 
 	// create a new release
 	fmt.Printf(stylish.Bullet("Creating release..."))
-	release := &api.EngineRelease{}
+	releaseConfig := &api.EngineReleaseConfig{}
 
 	// parse the ./Enginefile into the new release
-	if err := config.ParseConfig("./Enginefile", release); err != nil {
-		fmt.Printf("Nanobox failed to parse your Enginefile. Please ensure it is valid YAML and try again.\n")
-		os.Exit(1)
-	}
-
-	// create an annonymous struct to hold data that doesn't relate to a release but
-	// is needed as part of the publish process
-	opts := &struct {
-		Generic  bool     `json:"generic"`
-		Language string   `json:"language"`
-		Build    []string `json:"build_files"`
-	}{
-		Build: []string{"./bin", "./Enginefile", "./meta.json"},
-	}
-
-	// parse the ./Enginefile again to get the remaining fields
-	if err := config.ParseConfig("./Enginefile", opts); err != nil {
+	if err := config.ParseConfig("./Enginefile", releaseConfig); err != nil {
 		fmt.Printf("Nanobox failed to parse your Enginefile. Please ensure it is valid YAML and try again.\n")
 		os.Exit(1)
 	}
@@ -80,18 +58,15 @@ func publish(ccmd *cobra.Command, args []string) {
 	// enough that all cases will return the same message, and this looks better than
 	// a single giant case/if (var == "" || var == "" || ...)
 	switch {
-	case opts.Language == "":
+	case releaseConfig.Name == "":
 		fallthrough
-	case release.Name == "":
+	case releaseConfig.Summary == "":
 		fallthrough
-	case release.Summary == "":
-		fallthrough
-	case release.Version == "":
+	case releaseConfig.Version == "":
 		fmt.Printf(stylish.Error("required fields missing", `Your Enginefile is missing one or more of the following required fields for publishing:
 
   name:      # the name of your project
   version:   # the current version of the project
-  language:  # the lanauge (ruby, golang, etc.) of the engine
   summary:   # a 140 character summary of the project
 
 Please ensure all required fields are provided and try again.`))
@@ -110,57 +85,22 @@ Please ensure all required fields are provided and try again.`))
 	}
 
 	//
-	release.Readme = string(b)
+	releaseConfig.Readme = string(b)
 
 	// check to see if the engine already exists on nanobox.io
 	fmt.Printf(stylish.Bullet("Checking for existing engine on nanobox.io"))
-	engine, err := api.GetEngine(api.UserSlug, release.Name)
 
-	// if no engine exists, create a new one
+	//
+	api.UserSlug, api.AuthToken = auth.Authenticate()
+
+	// if no engine exists create a new one
+	engine, err := api.GetEngine(api.UserSlug, releaseConfig.Name)
 	if err != nil {
-
-		// if no engine is found create one
 		if apiErr, _ := err.(api.APIError); apiErr.Code == 404 {
-
-			fmt.Printf(stylish.SubTaskStart("Creating new engine on nanobox.io"))
-
-			//
-			engine = &api.Engine{
-				Generic:      opts.Generic,
-				LanguageName: opts.Language,
-				Name:         release.Name,
-			}
-
-			//
-			if _, err := api.CreateEngine(engine); err != nil {
-				fmt.Printf(stylish.ErrBullet("Unable to create engine (%v).", err))
-				os.Exit(1)
-			}
-
-			// wait until engine has been successfuly created before uploading to s3
-			for {
-				fmt.Print(".")
-
-				p, err := api.GetEngine(api.UserSlug, release.Name)
-				if err != nil {
-					config.Fatal("[commands/publish] api.GetEngine failed", err.Error())
-				}
-
-				// once the engine is "active", break
-				if p.State == "active" {
-					break
-				}
-
-				//
-				time.Sleep(1000 * time.Millisecond)
-			}
-
-			// generically handle any other errors
+			engine.ID = engineutil.Create(releaseConfig.Name)
 		} else {
-			config.Fatal("[commands/publish] api.GetEngine failed", err.Error())
+			config.Fatal("[commands/engine/publish] api.GetEngine failed", err.Error())
 		}
-
-		stylish.Success()
 	}
 
 	// create a meta.json file where we can add any extra data we might need; since
@@ -168,7 +108,7 @@ Please ensure all required fields are provided and try again.`))
 	// with it
 	meta, err := os.Create("./meta.json")
 	if err != nil {
-		config.Fatal("[commands/publish] os.Create() failed", err.Error())
+		config.Fatal("[commands/engine/publish] os.Create() failed", err.Error())
 	}
 	defer meta.Close()
 	defer os.Remove(meta.Name())
@@ -176,16 +116,19 @@ Please ensure all required fields are provided and try again.`))
 	// add any custom info to the metafile
 	meta.WriteString(fmt.Sprintf(`{"engine_id": "%s"}`, engine.ID))
 
-	// check to ensure no required files are missing
-	for _, file := range opts.Build {
+	// list of required files/folders for an engine
+	files := []string{"./bin", "./Enginefile", "./meta.json"}
+
+	// check to ensure no required files are missing from build folder
+	for _, file := range files {
 		if _, err := os.Stat(file); err != nil {
-			fmt.Printf(stylish.Error("required files missing", "Unable to find %s; this file is either required, or was declared as a build_file in the Enginefile. Please read the following documentation to ensure all required files are included and try again. \n\ndocs.nanobox.io/engines/project-creation/#example-engine-file-structure\n"))
+			fmt.Printf(stylish.Error("required files missing", fmt.Sprintf("Unable to find %s; this file is either required, or was declared as a required file in the Enginefile. Please read the following documentation to ensure all required files are included and try again. \n\ndocs.nanobox.io/engines/project-creation/#example-engine-file-structure\n", file)))
 			os.Exit(1)
 		}
 	}
 
 	// create the temp engines folder for building the tarball
-	tarPath := filepath.Join(config.EnginesDir, release.Name)
+	tarPath := filepath.Join(config.EnginesDir, releaseConfig.Name)
 	if err := os.MkdirAll(tarPath, 0755); err != nil {
 		config.Fatal("[commands/engine/publish] os.Create() failed", err.Error())
 	}
@@ -197,17 +140,16 @@ Please ensure all required fields are provided and try again.`))
 		}
 	}()
 
-	// parse the ./Enginefile again to get the overlays
-	if err := config.ParseConfig("./Enginefile", opts); err != nil {
+	// parse the ./Enginefile again to get all build files
+	if err := config.ParseConfig("./Enginefile", files); err != nil {
 		fmt.Printf("Nanobox failed to parse your Enginefile. Please ensure it is valid YAML and try again.\n")
 		os.Exit(1)
 	}
 
-	// add each of the build_files to the final tarPath
-	for _, file := range opts.Build {
-
-		// not handling the error here because it simply means the file doesn't exist
-		// and therefor wont be copied to the final tarball
+	// add each of the build files to the final tarPath; not handling the error here
+	// because it simply means the file doesn't exist and therefor wont be copied
+	// to the final tarball
+	for _, file := range files {
 		fileutil.Copy(file, tarPath)
 	}
 
@@ -218,13 +160,13 @@ Please ensure all required fields are provided and try again.`))
 	//
 	h := md5.New()
 
-	//
+	// create a tarball to upload the represents the engine
 	if err := fileutil.Tar(tarPath, archive, h); err != nil {
 		config.Fatal("[commands/engine/publish] file.Tar() failed", err.Error())
 	}
 
-	// add the checksum for the new release once its finished being archived
-	release.Checksum = fmt.Sprintf("%x", h.Sum(nil))
+	// create a checksum for the new release once its finished being archived
+	releaseConfig.Checksum = fmt.Sprintf("%x", h.Sum(nil))
 
 	//
 	// attempt to upload the release to S3
@@ -233,23 +175,23 @@ Please ensure all required fields are provided and try again.`))
 	v := url.Values{}
 	v.Add("user_slug", api.UserSlug)
 	v.Add("auth_token", api.AuthToken)
-	v.Add("version", release.Version)
+	v.Add("version", releaseConfig.Version)
 
 	//
-	s3url, err := s3util.RequestURL(fmt.Sprintf("http://api.nanobox.io/v1/engines/%v/request_upload?%v", release.Name, v.Encode()))
+	s3url, err := s3util.RequestURL(fmt.Sprintf("http://api.nanobox.io/v1/engines/%v/request_upload?%v", releaseConfig.Name, v.Encode()))
 	if err != nil {
-		config.Fatal("[commands/publish] s3.RequestURL() failed", err.Error())
+		config.Fatal("[commands/engine/publish] s3.RequestURL() failed", err.Error())
 	}
 
-	//
+	// upload the release to s3
 	if err := s3util.Upload(s3url, archive); err != nil {
-		config.Fatal("[commands/publish] s3.Upload() failed", err.Error())
+		config.Fatal("[commands/engine/publish] s3.Upload() failed", err.Error())
 	}
 
 	//
 	// if the release uploaded successfully to s3, created one on odin
 	fmt.Printf(stylish.Bullet("Uploading release to nanobox.io"))
-	if _, err := api.CreateEngineRelease(release.Name, release); err != nil {
+	if _, err := api.CreateEngineRelease(releaseConfig.Name, releaseConfig); err != nil {
 		fmt.Printf(stylish.ErrBullet("Unable to publish release (%v).", err))
 		os.Exit(1)
 	}

@@ -45,22 +45,19 @@ please see the documentation provided here: https://docs.nanobox.io/engines/`)
 
 		stylish.Bullet("Creating engine at")
 
-		if err := os.Mkdir(name, 0755); err != nil {
+		if err := os.MkdirAll(name, 0755); err != nil {
 			config.Fatal("[commands/new] os.Mkdir() failed", err.Error())
 		}
 
 		entry := fmt.Sprintf(`
 name: %-18s     # the name of your project (required)
 version: %-18s  # the current version of the project (required)
-language:                    # the lanauge (ruby, golang, etc.) of the engine (required)
 summary:                     # a 140 character short summary of the project (required)
 stability: alpha             # the current stability of the project (alpha/beta/stable)
-generic: false               # is the engine generic enough to encompass multiple frameworks
-                             # within the given language
 license: MIT                 # the license to be applied to this software
 
 # all dependencies that your engine requires to run
-build_files:
+files:
  -
 
 # a list of authors/contributors
@@ -82,7 +79,7 @@ authors:
 		}
 
 	} else {
-		fmt.Printf("A project by the name '%s' already exists at this location...\n", name)
+		fmt.Printf("An engine by the name '%s' already exists at this location...\n", name)
 	}
 
 	stylish.Bullet("Default Enginefile created at")

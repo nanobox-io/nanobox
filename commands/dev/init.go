@@ -31,12 +31,10 @@ func initialize(ccmd *cobra.Command, args []string) {
 	// check to see if a box needs to be installed
 	box.Install(nil, args)
 
-	// creates a project folder at ~/.nanobox/apps/<name> (if it doesn't already
-	// exists) where the Vagrantfile and .vagrant dir will live for each app
-	if _, err := os.Stat(config.AppDir); err != nil {
-		if err := os.Mkdir(config.AppDir, 0755); err != nil {
-			config.Fatal("[commands/init] os.Mkdir() failed", err.Error())
-		}
+	// creates a project folder at ~/.nanobox/apps/<name> where the Vagrantfile and
+	// .vagrant dir will live for each app
+	if err := os.MkdirAll(config.AppDir, 0755); err != nil {
+		config.Fatal("[commands/init] os.Mkdir() failed", err.Error())
 	}
 
 	// set up a dedicated vagrant logger

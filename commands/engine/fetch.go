@@ -60,7 +60,7 @@ func fetch(ccmd *cobra.Command, args []string) {
 	engine, version := engineutil.ExtractEngine(archive)
 
 	// pull the engine from nanobox.io
-	res, err := engineutil.GetEngine(user, engine, version)
+	res, err := engineutil.Get(user, engine, version)
 	if err != nil {
 		config.Fatal("[commands/engine/fetch] http.Get() failed", err.Error())
 	}
