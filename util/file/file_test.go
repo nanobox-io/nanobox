@@ -1,11 +1,12 @@
-//
-package file
+package file_test
 
 import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"testing"
+
+	fileutil "github.com/nanobox-io/nanobox/util/file"
 )
 
 // tests if Tar and Untar are working as intended; can't really test taring w/o
@@ -27,7 +28,7 @@ func TestTarUntar(t *testing.T) {
 	defer tarball.Close()
 
 	// create a tarball from src
-	if err := Tar(src, tarball); err != nil {
+	if err := fileutil.Tar(src, tarball); err != nil {
 		t.Error("Unexpected error - ", err.Error())
 	}
 
@@ -44,7 +45,7 @@ func TestTarUntar(t *testing.T) {
 	defer archive.Close()
 
 	// untar tarball
-	if err := Untar(dst, archive); err != nil {
+	if err := fileutil.Untar(dst, archive); err != nil {
 		t.Error("Unexpected error - ", err.Error())
 	}
 

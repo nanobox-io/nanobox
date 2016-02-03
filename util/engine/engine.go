@@ -167,10 +167,10 @@ func Get(userslug, name, version string) (*http.Response, error) {
 	return http.Get(path)
 }
 
-// ExtractArchive splits args on "/" looking for a user and archive:
+// ParseArchive splits args on "/" looking for a user and archive:
 // - user/engine-name
 // - user/engine-name=0.0.1
-func ExtractArchive(s string) (user, archive string) {
+func ParseArchive(s string) (user, archive string) {
 
 	split := strings.Split(s, "/")
 
@@ -196,8 +196,8 @@ func ExtractArchive(s string) (user, archive string) {
 	return
 }
 
-// ExtractEngine splits on the archive to find the engine and the release (version)
-func ExtractEngine(archive string) (engine, version string) {
+// ParseEngine splits on the archive to find the engine and the release (version)
+func ParseEngine(archive string) (engine, version string) {
 
 	// split on '=' looking for a version
 	split := strings.Split(archive, "=")

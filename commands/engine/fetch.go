@@ -54,13 +54,13 @@ func fetch(ccmd *cobra.Command, args []string) {
 	os.Stderr.WriteString(stylish.Bullet("Attempting to fetch '%v'", args[0]))
 
 	// extract a user and archive (desired engine) from args[0]
-	user, archive := engineutil.ExtractArchive(args[0])
+	user, engine := engineutil.ParseArchive(args[0])
 
 	// extract an engine and version from the archive
-	engine, version := engineutil.ExtractEngine(archive)
+	name, version := engineutil.ParseEngine(engine)
 
 	// pull the engine from nanobox.io
-	res, err := engineutil.Get(user, engine, version)
+	res, err := engineutil.Get(user, name, version)
 	if err != nil {
 		config.Fatal("[commands/engine/fetch] http.Get() failed", err.Error())
 	}
@@ -71,7 +71,7 @@ func fetch(ccmd *cobra.Command, args []string) {
 	case 2, 3:
 		break
 	case 4:
-		os.Stderr.WriteString(stylish.ErrBullet("No release by that version found for engine '%v'", engine))
+		os.Stderr.WriteString(stylish.ErrBullet("No release by that version found for engine '%v'", name))
 		os.Exit(1)
 	case 5:
 		os.Stderr.WriteString(stylish.ErrBullet("Failed to fetch release (%v).", res.Status))
