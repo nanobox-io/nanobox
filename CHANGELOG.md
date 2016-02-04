@@ -1,3 +1,8 @@
+## v0.18.1 (February 4, 2016)
+
+FEATURES:
+  - Nanobox will no longer create, publish, or fetch engines or services.
+
 ## v0.18.0 (February 4, 2016)
 
 BREAKING CHANGES:

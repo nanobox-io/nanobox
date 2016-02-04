@@ -8,8 +8,6 @@ import (
 
 	"github.com/nanobox-io/nanobox/commands/box"
 	"github.com/nanobox-io/nanobox/commands/dev"
-	"github.com/nanobox-io/nanobox/commands/engine"
-	"github.com/nanobox-io/nanobox/commands/service"
 	"github.com/nanobox-io/nanobox/config"
 )
 
@@ -71,6 +69,4 @@ func init() {
 	// subcommands
 	NanoboxCmd.AddCommand(box.BoxCmd)
 	NanoboxCmd.AddCommand(dev.DevCmd)
-	NanoboxCmd.AddCommand(engine.EngineCmd)
-	NanoboxCmd.AddCommand(service.ServiceCmd)
 }
