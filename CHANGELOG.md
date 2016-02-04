@@ -1,7 +1,31 @@
+## v0.18.0 (February 4, 2016)
+
+BREAKING CHANGES:
+  - All relevant "dev" commands are now sub-commands of "dev" in preparation
+  for production commands.
+
+FEATURES:
+  - Added the ability to create, publish, and fetch "services" similar to the way
+  "engines" are now.
+  - Removed "overlays" when publishing or fetching engines; engines now take a
+  list of files required for the build, specified in the Enginefile (this is done
+  as part of the most away from "zero config")
+
+IMPROVEMENTS:
+  - More tests added.
+  - Removed all "default" and "common" stuff for now in favor of a cleaner
+  implementation later
+
+BUG FIXES:
+  - Fixed an issue where the raw terminal was being closed early causing double
+  output and improper capturing of signals connected via "terminal commands".
+  - Fixed an issue causing deploys to happen on every dev, rather than only after
+  a recent reload.
+
 ## v0.17.4 ()
 
- - Removed anything related to logtap since it isn't used in this way anymore
- (nanobox gets all its historical logs from a /logs route to the server)
+  - Removed anything related to logtap since it isn't used in this way anymore
+  (nanobox gets all its historical logs from a /logs route to the server)
 
 ## v0.17.3 (December 24, 2015)
 
