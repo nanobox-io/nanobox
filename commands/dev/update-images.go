@@ -35,7 +35,7 @@ func updateImages(ccmd *cobra.Command, args []string) {
 		errch <- mistutil.Listen([]string{"job", "imageupdate"}, mistutil.ImageUpdates)
 	}()
 
-	fmt.Printf(stylish.Bullet("Updating nanobox docker images (this may take awhile)..."))
+	fmt.Printf(stylish.Bullet("Updating nanobox docker images (this may take a while)..."))
 
 	// run an image update
 	if err := server.Update(""); err != nil {
