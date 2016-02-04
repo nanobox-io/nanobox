@@ -3,16 +3,14 @@ package commands
 
 import (
 	"fmt"
-	"os"
 
-	"github.com/nanobox-io/nanobox-golang-stylish"
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/commands/box"
+	"github.com/nanobox-io/nanobox/commands/dev"
 	"github.com/nanobox-io/nanobox/commands/engine"
-	"github.com/nanobox-io/nanobox/commands/production"
+	"github.com/nanobox-io/nanobox/commands/service"
 	"github.com/nanobox-io/nanobox/config"
-	"github.com/nanobox-io/nanobox/util"
 )
 
 //
@@ -66,111 +64,13 @@ func init() {
 	// local flags
 	NanoboxCmd.Flags().BoolVarP(&version, "version", "", false, "Display the current version of this CLI")
 
-	// 'hidden' commands
-	NanoboxCmd.AddCommand(buildCmd)
-	NanoboxCmd.AddCommand(createCmd)
-	NanoboxCmd.AddCommand(deployCmd)
-	NanoboxCmd.AddCommand(execCmd)
-	NanoboxCmd.AddCommand(initCmd)
-	NanoboxCmd.AddCommand(logCmd)
-	NanoboxCmd.AddCommand(resumeCmd)
-	NanoboxCmd.AddCommand(sshCmd)
-	NanoboxCmd.AddCommand(watchCmd)
-
-	// 'nanobox' commands
-	NanoboxCmd.AddCommand(bootstrapCmd)
-	NanoboxCmd.AddCommand(runCmd)
-	NanoboxCmd.AddCommand(devCmd)
-	NanoboxCmd.AddCommand(reloadCmd)
-	NanoboxCmd.AddCommand(stopCmd)
-	NanoboxCmd.AddCommand(destroyCmd)
-	NanoboxCmd.AddCommand(infoCmd)
-	NanoboxCmd.AddCommand(consoleCmd)
+	// nanobox commands
 	NanoboxCmd.AddCommand(publishCmd)
 	NanoboxCmd.AddCommand(updateCmd)
-	NanoboxCmd.AddCommand(updateImagesCmd)
 
 	// subcommands
 	NanoboxCmd.AddCommand(box.BoxCmd)
+	NanoboxCmd.AddCommand(dev.DevCmd)
 	NanoboxCmd.AddCommand(engine.EngineCmd)
-	NanoboxCmd.AddCommand(production.ProductionCmd)
-}
-
-// runnable ensures all dependencies are satisfied before running box commands
-func runnable(ccmd *cobra.Command, args []string) {
-
-	// ensure vagrant exists
-	if exists := Vagrant.Exists(); !exists {
-		fmt.Println("Missing dependency 'Vagrant'. Please download and install it to continue (https://www.vagrantup.com/).")
-		os.Exit(1)
-	}
-
-	// ensure virtualbox exists
-	if exists := util.VboxExists(); !exists {
-		fmt.Println("Missing dependency 'Virtualbox'. Please download and install it to continue (https://www.virtualbox.org/wiki/Downloads).")
-		os.Exit(1)
-	}
-}
-
-// boot
-func boot(ccmd *cobra.Command, args []string) {
-
-	// ensures the cli can run before trying to boot vm
-	runnable(nil, args)
-
-	// ensure a Vagrantfile is available before attempting to boot the VM
-	initialize(nil, args)
-
-	// get the status to know what needs to happen with the VM
-	status := Vagrant.Status()
-
-	switch status {
-
-	// vm is running - do nothing
-	case "running":
-		fmt.Printf(stylish.Bullet("Nanobox is already running"))
-		break
-
-	// vm is suspended - resume it
-	case "saved":
-		resume(nil, args)
-
-	// vm is not created - create it
-	case "not created":
-		create(nil, args)
-
-	// vm is in some unknown state - reload it
-	default:
-		fmt.Printf(stylish.Bullet("Nanobox is in an unknown state (%s). Reloading...", status))
-		reload(nil, args)
-	}
-
-	//
-	Server.Lock()
-
-	// if the background flag is passed, set the mode to "background"
-	if config.Background {
-		config.VMfile.BackgroundIs(true)
-	}
-}
-
-// halt
-func halt(ccmd *cobra.Command, args []string) {
-
-	//
-	Server.Unlock()
-
-	//
-
-	if err := Server.Suspend(); err != nil {
-		Config.Fatal("[commands/halt] server.Suspend() failed", err.Error())
-	}
-
-	//
-	if err := Vagrant.Suspend(); err != nil {
-		Config.Fatal("[commands/halt] vagrant.Suspend() failed", err.Error())
-	}
-
-	//
-	// os.Exit(0)
+	NanoboxCmd.AddCommand(service.ServiceCmd)
 }

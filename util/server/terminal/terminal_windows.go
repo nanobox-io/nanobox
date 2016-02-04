@@ -6,7 +6,6 @@ import "time"
 
 // monitor
 func monitor(stdOutFD uintptr) {
-	tick := time.Tick(time.Millisecond * 250)
 
 	// inform the server what the starting size is
 	prevW, prevH := getTTYSize(stdOutFD)
@@ -15,7 +14,7 @@ func monitor(stdOutFD uintptr) {
 	// periodically resize the tty
 	for {
 		select {
-		case <-tick:
+		case <-time.After(time.Millisecond * 250):
 			w, h := getTTYSize(stdOutFD)
 
 			if prevW != w || prevH != h {

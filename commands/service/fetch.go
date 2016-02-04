@@ -1,5 +1,5 @@
 //
-package engine
+package service
 
 import (
 	"fmt"
@@ -11,22 +11,22 @@ import (
 
 	// "github.com/nanobox-io/nanobox/auth"
 	"github.com/nanobox-io/nanobox/config"
-	engineutil "github.com/nanobox-io/nanobox/util/engine"
+	serviceutil "github.com/nanobox-io/nanobox/util/service"
 )
 
 //
 var fetchCmd = &cobra.Command{
 	Use:   "fetch",
-	Short: "Fetches an engine from nanobox.io",
+	Short: "Fetches an service from nanobox.io",
 	Long: `
 Description:
-  Fetches an engine from nanobox.io
+  Fetches an service from nanobox.io
 
-  Allowed formats when fetching an engine
-  - engine-name
-  - engine-name=0.0.1
-  - user/engine-name
-  - user/engine-name=0.0.1
+  Allowed formats when fetching an service
+  - service-name
+  - service-name=0.0.1
+  - user/service-name
+  - user/service-name=0.0.1
 	`,
 
 	Run: fetch,
@@ -36,8 +36,8 @@ Description:
 func init() {
 
 	// no default is set here because we define the value later, once we know the
-	// name and version of the engine they are fetching
-	fetchCmd.Flags().StringVarP(&fFile, "ouput-document", "O", "", "specify where to save the engine")
+	// name and version of the service they are fetching
+	fetchCmd.Flags().StringVarP(&fFile, "ouput-document", "O", "", "specify where to save the service")
 }
 
 // fetch
@@ -47,22 +47,22 @@ func fetch(ccmd *cobra.Command, args []string) {
 	// api.UserSlug, api.AuthToken = auth.Authenticate()
 
 	if len(args) == 0 {
-		os.Stderr.WriteString("Please provide the name of an engine you would like to fetch, (run 'nanobox engine fetch -h' for details)")
+		os.Stderr.WriteString("Please provide the name of an service you would like to fetch, (run 'nanobox service fetch -h' for details)")
 		os.Exit(1)
 	}
 
 	os.Stderr.WriteString(stylish.Bullet("Attempting to fetch '%v'", args[0]))
 
-	// extract a user and archive (desired engine) from args[0]
-	user, engine := engineutil.ParseArchive(args[0])
+	// extract a user and archive (desired service) from args[0]
+	user, archive := serviceutil.ExtractArchive(args[0])
 
-	// extract an engine and version from the archive
-	name, version := engineutil.ParseEngine(engine)
+	// extract a service and version from the archive
+	service, version := serviceutil.ExtractService(archive)
 
-	// pull the engine from nanobox.io
-	res, err := engineutil.Get(user, name, version)
+	// pull the service from nanobox.io
+	res, err := serviceutil.Get(user, service, version)
 	if err != nil {
-		config.Fatal("[commands/engine/fetch] http.Get() failed", err.Error())
+		config.Fatal("[commands/service/fetch] http.Get() failed", err.Error())
 	}
 	defer res.Body.Close()
 
@@ -71,10 +71,10 @@ func fetch(ccmd *cobra.Command, args []string) {
 	case 2, 3:
 		break
 	case 4:
-		os.Stderr.WriteString(stylish.ErrBullet("No release by that version found for engine '%v'", name))
+		os.Stderr.WriteString(stylish.ErrBullet("No service at version '%v' found", version))
 		os.Exit(1)
 	case 5:
-		os.Stderr.WriteString(stylish.ErrBullet("Failed to fetch release (%v).", res.Status))
+		os.Stderr.WriteString(stylish.ErrBullet("Failed to fetch service (%v).", res.Status))
 		os.Exit(1)
 	}
 
@@ -94,7 +94,7 @@ func fetch(ccmd *cobra.Command, args []string) {
 		}
 
 		// if the file was created successfully then set it as the destination
-		os.Stderr.WriteString(stylish.Bullet("Saving engine as '%s'", fFile))
+		os.Stderr.WriteString(stylish.Bullet("Saving service as '%s'", fFile))
 		dest = f
 	}
 

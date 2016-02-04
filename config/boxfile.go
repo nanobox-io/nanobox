@@ -9,7 +9,8 @@ import (
 // BoxfileConfig represents all available/expected Boxfile configurable options
 type BoxfileConfig struct {
 	Build struct {
-		Engine string `json:"engine"`
+		Engine  string `json:"engine"`
+		Service string `json:"service"`
 	}
 }
 

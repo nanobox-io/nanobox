@@ -1,5 +1,4 @@
-//
-package util
+package util_test
 
 import (
 	"os"
@@ -8,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/nanobox-io/nanobox/config"
+	"github.com/nanobox-io/nanobox/util"
 )
 
 // test if VboxExists works as intended
@@ -26,7 +26,7 @@ func TestVboxExists(t *testing.T) {
 	}
 
 	//
-	testExists := VboxExists()
+	testExists := util.VboxExists()
 
 	if testExists != exists {
 		t.Error("Results don't match!")

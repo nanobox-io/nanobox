@@ -2,33 +2,33 @@
 package box
 
 import (
-	"github.com/golang/mock/gomock"
+	// "github.com/golang/mock/gomock"
 
-	"github.com/nanobox-io/nanobox/config/mock"
-	"github.com/nanobox-io/nanobox/util/mock"
-	"github.com/nanobox-io/nanobox/util/vagrant/mock"
+	// "github.com/nanobox-io/nanobox/config/mock"
+	// "github.com/nanobox-io/nanobox/util/mock"
+	// "github.com/nanobox-io/nanobox/util/vagrant/mock"
 )
 
 //
-func newUtil(mockCtrl *gomock.Controller) *mock_util.MockUtil {
-	testUtil := mock_util.NewMockUtil(mockCtrl)
-	Util = testUtil
-	return testUtil
-}
+// func newUtil(mockCtrl *gomock.Controller) *mock_util.MockUtil {
+// 	testUtil := mock_util.NewMockUtil(mockCtrl)
+// 	Util = testUtil
+// 	return testUtil
+// }
 
 //
-func newConfig(mockCtrl *gomock.Controller) *mock_config.MockConfig {
-	testConfig := mock_config.NewMockConfig(mockCtrl)
-	Config = testConfig
-	return testConfig
-}
+// func newConfig(mockCtrl *gomock.Controller) *mock_config.MockConfig {
+// 	testConfig := mock_config.NewMockConfig(mockCtrl)
+// 	Config = testConfig
+// 	return testConfig
+// }
 
 //
-func newVagrant(mockCtrl *gomock.Controller) *mock_vagrant.MockVagrant {
-	testVagrant := mock_vagrant.NewMockVagrant(mockCtrl)
-	Vagrant = testVagrant
-	return testVagrant
-}
+// func newVagrant(mockCtrl *gomock.Controller) *mock_vagrant.MockVagrant {
+// 	testVagrant := mock_vagrant.NewMockVagrant(mockCtrl)
+// 	Vagrant = testVagrant
+// 	return testVagrant
+// }
 
 //
 // func TestInstallWithImage(test *testing.T) {

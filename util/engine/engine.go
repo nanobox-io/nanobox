@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	api "github.com/nanobox-io/nanobox-api-client"
 	"github.com/nanobox-io/nanobox-golang-stylish"
@@ -51,42 +52,35 @@ func MountLocal() (mountName, mountDir string, err error) {
 		return
 	}
 
-	// if there is an enginefile attempt to parse it
-	mount := &struct {
-		Overlays []string `json:"overlays"`
-	}{}
-
-	if err = config.ParseConfig(enginefile, mount); err != nil {
+	// if there is an enginefile attempt to parse it to get any additional build
+	// files for mounting
+	files := []string{"./bin", "./Enginefile", "./meta.json"}
+	if err = config.ParseConfig(enginefile, files); err != nil {
 		err = fmt.Errorf("Nanobox failed to parse your Enginefile. Please ensure it is valid YAML and try again.\n")
 		return
 	}
 
+	// directory to mount
 	mountDir = filepath.Join(config.AppDir, mountName)
 
 	// if the enginefile parses successfully create the mount only if it doesn't
 	// already exist
-	if _, err = os.Stat(mountDir); err != nil {
-		if err = os.Mkdir(mountDir, 0755); err != nil {
-			return
-		}
-	}
-
-	// iterate through each overlay and untar it to the mount dir
-	for _, overlay := range mount.Overlays {
-		GetOverlay(overlay, mountDir)
+	if err = os.MkdirAll(mountDir, 0755); err != nil {
+		return
 	}
 
 	var abs string
 
+	//
 	abs, err = filepath.Abs(enginePath)
 	if err != nil {
 		return
 	}
 
-	// pull the remainin engine files into the mount
-	for _, f := range []string{"bin", "Enginefile", "lib", "templates", "files"} {
+	// pull the remaining engine files into the mount
+	for _, files := range files {
 
-		path := filepath.Join(abs, f)
+		path := filepath.Join(abs, files)
 
 		// just skip any files that aren't found; any required files will be
 		// caught before publishing, here it doesn't matter
@@ -103,11 +97,52 @@ func MountLocal() (mountName, mountDir string, err error) {
 	return
 }
 
-// GetEngine gets an engine from nanobox.io
-func GetEngine(user, archive, version string) (*http.Response, error) {
+// Create
+func Create(name string) string {
+
+	fmt.Printf(stylish.SubTaskStart("Creating new engine on nanobox.io"))
 
 	//
-	engine, err := api.GetEngine(user, archive)
+	engineConfig := &api.EngineConfig{
+		Name: name,
+	}
+
+	//
+	engine, err := api.CreateEngine(engineConfig)
+	if err != nil {
+		fmt.Printf(stylish.ErrBullet("Unable to create engine (%v).", err))
+		os.Exit(1)
+	}
+
+	// wait until engine has been successfuly created before continuing...
+	for {
+		fmt.Print(".")
+
+		e, err := api.GetEngine(api.UserSlug, name)
+		if err != nil {
+			config.Fatal("[commands/publish] api.GetEngine failed", err.Error())
+		}
+
+		// once the engine is "active", break
+		if e.State == "active" {
+			break
+		}
+
+		//
+		<-time.After(1 * time.Second)
+	}
+
+	stylish.Success()
+
+	//
+	return engine.ID
+}
+
+// Get gets an engine from nanobox.io
+func Get(userslug, name, version string) (*http.Response, error) {
+
+	//
+	engine, err := api.GetEngine(userslug, name)
 	if err != nil {
 		os.Stderr.WriteString(stylish.ErrBullet("No official engine, or engine for that user found."))
 		return nil, err
@@ -119,11 +154,11 @@ func GetEngine(user, archive, version string) (*http.Response, error) {
 	}
 
 	//
-	path := fmt.Sprintf("http://api.nanobox.io/v1/engines/%v/releases/%v/download", archive, version)
+	path := fmt.Sprintf("http://api.nanobox.io/v1/engines/%v/releases/%v/download", name, version)
 
 	// if a user is found, pull the engine from their engines
-	if user != "" {
-		path = fmt.Sprintf("http://api.nanobox.io/v1/engines/%v/%v/releases/%v/download", user, archive, version)
+	if userslug != "" {
+		path = fmt.Sprintf("http://api.nanobox.io/v1/engines/%v/%v/releases/%v/download", userslug, name, version)
 	}
 
 	os.Stderr.WriteString(stylish.Bullet("Fetching engine at '%s'", path))
@@ -132,41 +167,10 @@ func GetEngine(user, archive, version string) (*http.Response, error) {
 	return http.Get(path)
 }
 
-// GetOverlay fetches an overlay from nanobox.io and untars it into dst
-func GetOverlay(overlay, dst string) {
-
-	// extract a user and archive (desired engine)
-	user, archive := ExtractArchive(overlay)
-
-	// extract an engine and version from the archive
-	engine, version := ExtractEngine(archive)
-
-	//
-	res, err := GetEngine(user, engine, version)
-	if err != nil {
-		config.Fatal("[util/engine/engine] http.Get() failed", err.Error())
-	}
-	defer res.Body.Close()
-
-	//
-	switch res.StatusCode / 100 {
-	case 2, 3:
-		break
-	case 4, 5:
-		os.Stderr.WriteString(stylish.ErrBullet("Unable to fetch '%v' overlay. Exiting...\n", engine))
-		os.Exit(1)
-	}
-
-	//
-	if err := fileutil.Untar(dst, res.Body); err != nil {
-		config.Fatal("[util/engine/engine] file.Untar() failed", err.Error())
-	}
-}
-
-// ExtractArchive splits args on "/" looking for a user and archive:
+// ParseArchive splits args on "/" looking for a user and archive:
 // - user/engine-name
 // - user/engine-name=0.0.1
-func ExtractArchive(s string) (user, archive string) {
+func ParseArchive(s string) (user, archive string) {
 
 	split := strings.Split(s, "/")
 
@@ -192,8 +196,8 @@ func ExtractArchive(s string) (user, archive string) {
 	return
 }
 
-// ExtractEngine splits on the archive to find the engine and the release (version)
-func ExtractEngine(archive string) (engine, version string) {
+// ParseEngine splits on the archive to find the engine and the release (version)
+func ParseEngine(archive string) (engine, version string) {
 
 	// split on '=' looking for a version
 	split := strings.Split(archive, "=")
