@@ -19,7 +19,7 @@ const (
 	ARCH        = runtime.GOARCH
 	MIST_PORT   = ":1445"
 	SERVER_PORT = ":1757"
-	VERSION     = "0.18.0"
+	VERSION     = "0.18.1"
 )
 
 type (
