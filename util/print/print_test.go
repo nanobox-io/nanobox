@@ -6,22 +6,22 @@ import (
 	// printutil "github.com/nanobox-io/nanobox/util/print"
 )
 
-// Verbose
-func Verbose(t *testing.T) {
+// TestVerbose
+func TestVerbose(t *testing.T) {
 }
 
-// Silence
-func Silence(t *testing.T) {
+// TestSilence
+func TestSilence(t *testing.T) {
 }
 
-// Color
-func Color(t *testing.T) {
+// TestColor
+func TestColor(t *testing.T) {
 }
 
-// Prompt
-func Prompt(t *testing.T) {
+// TestPrompt
+func TestPrompt(t *testing.T) {
 }
 
-// Password
-func Password(t *testing.T) {
+// TestPassword
+func TestPassword(t *testing.T) {
 }
