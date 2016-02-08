@@ -1,3 +1,9 @@
+## v0.18.2 (February 8, 2016)
+
+BUG FIXES:
+  - Nanobox create/destroy will now call the correct command when attempting to
+  execute sudoed commands; this was caused after the move to dev subcommands.
+
 ## v0.18.1 (February 4, 2016)
 
 FEATURES:

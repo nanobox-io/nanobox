@@ -63,7 +63,7 @@ func create(ccmd *cobra.Command, args []string) {
 
 	// add the entry if needed
 	if !hosts.HasDomain() {
-		util.PrivilegeExec("create --add-entry", fmt.Sprintf("Adding %v domain to hosts file", config.Nanofile.Domain))
+		util.PrivilegeExec("dev create --add-entry", fmt.Sprintf("Adding %v domain to hosts file", config.Nanofile.Domain))
 	}
 
 	// if devmode is detected, the machine needs to be rebooted for devmode to take
