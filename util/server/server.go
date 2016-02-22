@@ -127,7 +127,7 @@ func pipeToConnection(conn net.Conn, in io.Reader, out io.Writer) error {
 		// ping the server
 		go func() {
 			if ok, err := ping(); !ok {
-				fmt.Errorf("Ping failed and the server returned: ", err)
+				fmt.Printf("Ping failed and the server returned: %s", err.Error())
 				close(pong)
 				return
 			}
