@@ -126,10 +126,12 @@ func pipeToConnection(conn net.Conn, in io.Reader, out io.Writer) error {
 
 		// ping the server
 		go func() {
-			if ok, _ := ping(); !ok {
+			if ok, err := ping(); !ok {
+				fmt.Errorf("Ping failed and the server returned: ", err)
 				close(pong)
 				return
 			}
+
 			pong <- true
 		}()
 
@@ -141,7 +143,7 @@ func pipeToConnection(conn net.Conn, in io.Reader, out io.Writer) error {
 
 			// if the ping fails pong is closed
 			if !ok {
-				return fmt.Errorf("The server went away...")
+				return fmt.Errorf("Connection lost... Server returned no response to ping.")
 			}
 
 			// loop, pinging at 1 second intervals
@@ -149,7 +151,7 @@ func pipeToConnection(conn net.Conn, in io.Reader, out io.Writer) error {
 
 		// ping failed after 5 seconds
 		case <-time.After(5 * time.Second):
-			return fmt.Errorf("The server went away...")
+			return fmt.Errorf("Connection timeout... Server returned no response to ping after 5 seconds.")
 
 			//
 		case <-done:

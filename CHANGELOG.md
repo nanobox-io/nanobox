@@ -1,3 +1,9 @@
+## v0.18.3 (February 22, 2016)
+
+IMPROVEMENTS:
+  - Better error messaging when nanobox is unable to communicate with nanobox-server
+
+
 ## v0.18.2 (February 8, 2016)
 
 BUG FIXES:
