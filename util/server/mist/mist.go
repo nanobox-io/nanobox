@@ -5,9 +5,8 @@ import (
 	"encoding/json"
 	"regexp"
 	"strings"
-	"time"
 
-	mistClient "github.com/nanopack/mist/core"
+	"github.com/nanopack/mist/clients"
 
 	"github.com/nanobox-io/nanobox/config"
 	printutil "github.com/nanobox-io/nanobox/util/print"
@@ -74,15 +73,11 @@ func Listen(tags []string, handle func(string) error) error {
 	}
 
 	// connect to mist
-	client, err := mistClient.NewRemoteClient(config.MistURI)
+	client, err := clients.New(config.MistURI)
 	if err != nil {
 		config.Fatal("[util/server/mist/mist] mist.NewRemoteClient() failed", err.Error())
 	}
 	defer client.Close()
-
-	// this is a bandaid to fix a race condition in mist when immediatly subscribing
-	// after connecting a client; once this is fixed in mist this can be removed
-	<-time.After(time.Second * 1)
 
 	// subscribe
 	if err := client.Subscribe(tags); err != nil {
@@ -122,15 +117,11 @@ func Stream(tags []string, handle func(Log)) {
 	}
 
 	// connect to mist
-	client, err := mistClient.NewRemoteClient(config.MistURI)
+	client, err := clients.New(config.MistURI)
 	if err != nil {
 		config.Fatal("[util/server/mist/mist] mist.NewRemoteClient() failed", err.Error())
 	}
 	defer client.Close()
-
-	// this is a bandaid to fix a race condition in mist when immediatly subscribing
-	// after connecting a client; once this is fixed in mist this can be removed
-	<-time.After(time.Second * 1)
 
 	// subscribe
 	if err := client.Subscribe(tags); err != nil {
@@ -159,7 +150,7 @@ func Stream(tags []string, handle func(Log)) {
 
 // Connect is the same as stream however it go routines the stream internally and
 // returns the client
-func Connect(tags []string, handle func(Log)) (client mistClient.Client, err error) {
+func Connect(tags []string, handle func(Log)) (client *clients.TCP, err error) {
 
 	// add log level to tags
 	tags = append(tags, config.LogLevel)
@@ -170,15 +161,11 @@ func Connect(tags []string, handle func(Log)) (client mistClient.Client, err err
 	}
 
 	// connect to mist
-	if client, err = mistClient.NewRemoteClient(config.MistURI); err != nil {
+	if client, err = clients.New(config.MistURI); err != nil {
 		return
 	}
 	// we dont defer a client.Close() here because we're returning the client and
 	// want it to remain open
-
-	// this is a bandaid to fix a race condition in mist when immediatly subscribing
-	// after connecting a client; once this is fixed in mist this can be removed
-	<-time.After(time.Second * 1)
 
 	// subscribe
 	if err = client.Subscribe(tags); err != nil {

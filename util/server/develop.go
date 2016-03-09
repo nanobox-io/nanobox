@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/docker/docker/pkg/term"
-	mistClient "github.com/nanopack/mist/core"
+	"github.com/nanopack/mist/clients"
 
 	"github.com/nanobox-io/nanobox/config"
 	notifyutil "github.com/nanobox-io/nanobox/util/notify"
@@ -14,7 +14,7 @@ import (
 )
 
 // Develop
-func Develop(params string, mist mistClient.Client) error {
+func Develop(params string, mist clients.TCP) error {
 
 	// connect to the server; this will wait until a single read is returned from
 	// the server (blocking)
