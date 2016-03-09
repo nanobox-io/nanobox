@@ -1,3 +1,8 @@
+## v0.18.4 (March 9, 2016)
+
+FEATURES:
+  - Updated to use the new Mist (1.0.0)
+
 ## v0.18.3 (February 22, 2016)
 
 IMPROVEMENTS:
@@ -134,5 +139,5 @@ BUG FIXES:
 
 ## Previous (December 9, 2015)
 
-This changelog began with version 0.16.15. Any prior changes can be seen by viewing
+This change log began with version 0.16.15. Any prior changes can be seen by viewing
 the commit history.
