@@ -133,7 +133,7 @@ func dev(ccmd *cobra.Command, args []string) {
 	v.Add("dev_config", devconfig)
 
 	//
-	if err := server.Develop(v.Encode(), mist); err != nil {
+	if err := server.Develop(v.Encode(), *mist); err != nil {
 		server.Error("[commands/dev] server.Develop failed", err.Error())
 	}
 
