@@ -3,16 +3,20 @@ package commands
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/commands/box"
 	"github.com/nanobox-io/nanobox/commands/dev"
 	"github.com/nanobox-io/nanobox/config"
+	"github.com/nanobox-io/nanobox/validate"
 )
 
 //
 var (
+
+	processConfig := processor.ProcessConfig{}
 
 	//
 	NanoboxCmd = &cobra.Command{
@@ -51,13 +55,13 @@ var (
 func init() {
 
 	// internal flags
-	NanoboxCmd.PersistentFlags().BoolVarP(&config.Devmode, "dev", "", false, "")
+	NanoboxCmd.PersistentFlags().BoolVarP(&processConfig.Devmode, "dev", "", false, "")
 	NanoboxCmd.PersistentFlags().MarkHidden("dev")
 
 	// persistent flags
-	NanoboxCmd.PersistentFlags().BoolVarP(&config.Background, "background", "", false, "Stops nanobox from auto-suspending.")
-	NanoboxCmd.PersistentFlags().BoolVarP(&config.Force, "force", "f", false, "Forces a command to run (effects vary per command).")
-	NanoboxCmd.PersistentFlags().BoolVarP(&config.Verbose, "verbose", "v", false, "Increase command output from 'info' to 'debug'.")
+	NanoboxCmd.PersistentFlags().BoolVarP(&processConfig.Background, "background", "", false, "Stops nanobox from auto-suspending.")
+	NanoboxCmd.PersistentFlags().BoolVarP(&processConfig.Force, "force", "f", false, "Forces a command to run (effects vary per command).")
+	NanoboxCmd.PersistentFlags().BoolVarP(&processConfig.Verbose, "verbose", "v", false, "Increase command output from 'info' to 'debug'.")
 
 	// local flags
 	NanoboxCmd.Flags().BoolVarP(&version, "version", "", false, "Display the current version of this CLI")
@@ -69,4 +73,13 @@ func init() {
 	// subcommands
 	NanoboxCmd.AddCommand(box.BoxCmd)
 	NanoboxCmd.AddCommand(dev.DevCmd)
+}
+
+func validCheck(checks ...string) func(ccmd *cobra.Command, args []string) {
+	return func(ccmd *cobra.Command, args []string) {
+		if err := validate.Check(checks...); err != nil {
+			fmt.Printf("Validation Failed:\n%s\n", err.Error())
+			os.Exit(1)
+		}
+	}
 }

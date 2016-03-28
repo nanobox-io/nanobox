@@ -15,6 +15,7 @@ import (
 	"github.com/nanobox-io/nanobox/util/server"
 	mistutil "github.com/nanobox-io/nanobox/util/server/mist"
 	"github.com/nanobox-io/nanobox/util/vagrant"
+	"github.com/nanobox-io/nanobox/processor"
 )
 
 var (
@@ -25,21 +26,27 @@ var (
 		Short: "Starts the nanobox, provisions app, & opens an interactive terminal",
 		Long:  ``,
 
-		PreRun:  boot,
-		Run:     dev,
-		PostRun: halt,
+		PreRun:  validCheck("vagrant", "virtualbox"),
+		Run:     func(ccmd *cobra.Command, args []string) {
+			processConfig.Meta["dev-config"] = devconfig
+			if rebuild {
+				processConfig.Meta["build-option"] = "rebuild"
+			}
+			processor.Run("dev", processConfig)
+		},
+		// PostRun: halt,
 	}
 
 	//
 	devconfig string // sets the type of environment to be configured on the guest vm
-	nobuild   bool   // force skip a deploy
+	// nobuild   bool   // force skip a deploy
 	rebuild   bool   // force a deploy
 )
 
 //
 func init() {
 	DevCmd.Flags().StringVarP(&devconfig, "dev-config", "", config.Nanofile.DevConfig, "The environment to configure on the guest vm")
-	DevCmd.Flags().BoolVarP(&nobuild, "no-build", "", false, "Force skip a rebuild")
+	// DevCmd.Flags().BoolVarP(&nobuild, "no-build", "", false, "Force skip a rebuild")
 	DevCmd.Flags().BoolVarP(&rebuild, "rebuild", "", false, "Force a rebuild")
 
 	// 'hidden' commands
