@@ -26,8 +26,11 @@ func Viper() *viper.Viper {
 
 	vip.SetConfigFile(filepath.Join(util.GlobalDir(), "nanofile.yml"))
 	vip.MergeInConfig() // using merge because it starts from existing config
-	vip.SetConfigFile(filepath.Join(util.LocalDir(), "nanofile.yml"))
-	vip.MergeInConfig()
+
+	// we no longer use the local nanofile 
+	// this is now in the boxfile under the 'dev' node
+	// vip.SetConfigFile(filepath.Join(util.LocalDir(), "nanofile.yml"))
+	// vip.MergeInConfig()
 	return vip
 }
 

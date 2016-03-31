@@ -1,6 +1,7 @@
 package processor
 
 import (
+	"os"
 )
 
 type dev struct {
@@ -25,22 +26,22 @@ func (self dev) Results() ProcessConfig {
 
 func (self dev) Process() error {
 	// setup the environment (boot vm)
-
-	// setup remote api (make sure nanoagent is working)
-
-	// setup mist
-
-	// setup portal
-
-	// setup Logvac
+	err := Run("provider_setup", self.config)
+	if err != nil {
+		fmt.Println("provider_setup:", err)
+		os.Exit(1)
+	}
 
 	// build code
+	
 
 	// start services
 
 	// start code
 
 	// update portal
+
+
 
 	return nil
 }

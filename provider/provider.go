@@ -8,12 +8,17 @@ import (
 
 type (
 	Provider interface {
-		Info() error
-		Display() error
-		Reload() error
+		Create() error
+		Reboot() error
 		Stop() error
+		Destroy() error
 		Start() error
-		Init() error
+		AddIP(ip string) error
+		RemoveIP(ip string) error
+		AddNat(ip, ip string) error
+		RemoveNat(ip, ip string) error
+		AddMount(local, host string) error
+		RemoveMount(local, host string) error
 	}
 )
 
@@ -24,26 +29,19 @@ func Register(name string, p Provider) {
 	providers[name] = p
 }
 
-func Info() error {
+func Create() error {
 	p, ok := providers[nanofile.Viper().GetString("provider")]
 	if !ok {
 		return invalidProvider
 	}
-	return p.Info()
+	return p.Create()
 }
-func Display() error {
+func Reboot() error {
 	p, ok := providers[nanofile.Viper().GetString("provider")]
 	if !ok {
 		return invalidProvider
 	}
-	return p.Display()
-}
-func Reload() error {
-	p, ok := providers[nanofile.Viper().GetString("provider")]
-	if !ok {
-		return invalidProvider
-	}
-	return p.Reload()
+	return p.Reboot()
 }
 func Stop() error {
 	p, ok := providers[nanofile.Viper().GetString("provider")]
@@ -52,6 +50,13 @@ func Stop() error {
 	}
 	return p.Stop()
 }
+func Destroy() error {
+	p, ok := providers[nanofile.Viper().GetString("provider")]
+	if !ok {
+		return invalidProvider
+	}
+	return p.Destroy()
+}
 func Start() error {
 	p, ok := providers[nanofile.Viper().GetString("provider")]
 	if !ok {
@@ -59,10 +64,45 @@ func Start() error {
 	}
 	return p.Start()
 }
-func Init() error {
+func AddIP(ip string) error {
 	p, ok := providers[nanofile.Viper().GetString("provider")]
 	if !ok {
 		return invalidProvider
 	}
-	return p.Init()
+	return p.AddIP(ip)
+}
+func RemoveIP(ip string) error {
+	p, ok := providers[nanofile.Viper().GetString("provider")]
+	if !ok {
+		return invalidProvider
+	}
+	return p.RemoveIP(ip)
+}
+func AddNat(ip, ip string) error {
+	p, ok := providers[nanofile.Viper().GetString("provider")]
+	if !ok {
+		return invalidProvider
+	}
+	return p.AddNat(ip, ip)
+}
+func RemoveNat(ip, ip string) error {
+	p, ok := providers[nanofile.Viper().GetString("provider")]
+	if !ok {
+		return invalidProvider
+	}
+	return p.RemoveNat(ip, ip)
+}
+func AddMount(local, host string) error {
+	p, ok := providers[nanofile.Viper().GetString("provider")]
+	if !ok {
+		return invalidProvider
+	}
+	return p.AddMount(local, host)
+}
+func RemoveMount(local, host string) error {
+	p, ok := providers[nanofile.Viper().GetString("provider")]
+	if !ok {
+		return invalidProvider
+	}
+	return p.RemoveMount(local, host)
 }
