@@ -15,6 +15,8 @@ func Viper() *viper.Viper {
 	}
 
 	vip = viper.New()
+	vip.SetDefault("external-network-space", "192.168.99.50/24")
+	vip.SetDefault("internal-network-space", "192.168.0.50/16")
 	vip.SetDefault("cpu-cap",  50)
 	vip.SetDefault("cpus",  2)
 	vip.SetDefault("host-dns", "off")

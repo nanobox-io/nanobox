@@ -40,7 +40,8 @@ func AppDir() string {
 
 	// read boxfile and look for dev->name
 	box := boxfile.NewFromPath(filepath.ToSlash(filepath.Join(GlobalDir(), "boxfile.yml")))
-	if box.Valid && (devName := box.Node("dev").StringValue("name"); devName != "") {
+	devName := box.Node("dev").StringValue("name")
+	if devName != "" {
 		app = devName
 	}
 	return filepath.ToSlash(filepath.Join(GlobalDir(), "apps", app))
