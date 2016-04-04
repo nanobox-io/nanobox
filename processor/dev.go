@@ -32,15 +32,15 @@ func (self dev) Process() error {
 		os.Exit(1)
 	}
 
+	// start nanoagent service
+
 	// build code
-	
 
 	// start services
 
 	// start code
 
-	// update portal
-
+	// update nanoagent portal
 
 
 	return nil

@@ -23,4 +23,3 @@ func (self providerSetup) Results() processor.ProcessConfig {
 func (self providerSetup) Process() error {
 	// TODO: Braxton...
 }
-
