@@ -57,7 +57,7 @@ func (self DockerMachine) hasIP(ip string) bool {
 	if err != nil {
 		return false
 	}
-	matched, regerr := regexp.Match("Running", output)
+	matched, regerr := regexp.Match(ip, output)
 	if regerr != nil {
 		return false
 	}
