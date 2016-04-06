@@ -33,15 +33,39 @@ func (self dev) Process() error {
 	}
 
 	// start nanoagent service
+	err := Run("nanoagent_setup", self.config)
+	if err != nil {
+		fmt.Println("nanoagent_setup:", err)
+		os.Exit(1)
+	}
 
 	// build code
+	err := Run("code_build", self.config)
+	if err != nil {
+		fmt.Println("code_build:", err)
+		os.Exit(1)
+	}
 
 	// start services
+	err := Run("service_setup", self.config)
+	if err != nil {
+		fmt.Println("service_setup:", err)
+		os.Exit(1)
+	}
 
 	// start code
+	err := Run("code_setup", self.config)
+	if err != nil {
+		fmt.Println("code_setup:", err)
+		os.Exit(1)
+	}
 
 	// update nanoagent portal
-
+	err := Run("update_portal", self.config)
+	if err != nil {
+		fmt.Println("update_portal:", err)
+		os.Exit(1)
+	}
 
 	return nil
 }

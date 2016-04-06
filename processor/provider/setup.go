@@ -2,6 +2,7 @@ package provider
 
 import (
 	"github.com/nanobox-io/nanobox/processor"
+	"github.com/nanobox-io/nanobox/provider"
 )
 
 type providerSetup struct {
@@ -21,5 +22,9 @@ func (self providerSetup) Results() processor.ProcessConfig {
 }
 
 func (self providerSetup) Process() error {
-	// TODO: Braxton...
+	err := provider.Create()
+	if err != nil {
+		return err
+	}
+	return provider.Start()
 }

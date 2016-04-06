@@ -6,5 +6,5 @@ import (
 
 func init() {
 	processor.Register("provider_setup", providerSetupFunc)
-	processor.Register("provider_destroy", providerSetupFunc)
+	processor.Register("provider_destroy", providerDestroyFunc)
 }
