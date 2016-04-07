@@ -7,9 +7,8 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox-golang-stylish"
-
-	"github.com/nanobox-io/nanobox/config"
 )
 
 // PrivilegeExec runs a command as sudo
@@ -25,6 +24,6 @@ func PrivilegeExec(command, msg string) {
 
 	// run command
 	if err := cmd.Run(); err != nil {
-		config.Fatal("[util/util_unix]", err.Error())
+		lumber.Fatal("[util/util_unix]", err.Error())
 	}
 }

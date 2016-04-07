@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 
 	"github.com/nanobox-io/nanobox/config"
@@ -26,6 +27,6 @@ func PrivilegeExec(command, msg string) {
 
 	// run command
 	if err := cmd.Run(); err != nil {
-		config.Fatal("[commands/commands_windows]", err.Error())
+		lumber.Fatal("[commands/commands_windows]", err.Error())
 	}
 }

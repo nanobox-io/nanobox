@@ -15,8 +15,8 @@ type (
 		Start() error
 		AddIP(ip string) error
 		RemoveIP(ip string) error
-		AddNat(ip, ip string) error
-		RemoveNat(ip, ip string) error
+		AddNat(host, container string) error
+		RemoveNat(host, container string) error
 		AddMount(local, host string) error
 		RemoveMount(local, host string) error
 	}
@@ -78,19 +78,19 @@ func RemoveIP(ip string) error {
 	}
 	return p.RemoveIP(ip)
 }
-func AddNat(ip, ip string) error {
+func AddNat(host, container string) error {
 	p, ok := providers[nanofile.Viper().GetString("provider")]
 	if !ok {
 		return invalidProvider
 	}
-	return p.AddNat(ip, ip)
+	return p.AddNat(host, container)
 }
-func RemoveNat(ip, ip string) error {
+func RemoveNat(host, container string) error {
 	p, ok := providers[nanofile.Viper().GetString("provider")]
 	if !ok {
 		return invalidProvider
 	}
-	return p.RemoveNat(ip, ip)
+	return p.RemoveNat(host, container)
 }
 func AddMount(local, host string) error {
 	p, ok := providers[nanofile.Viper().GetString("provider")]

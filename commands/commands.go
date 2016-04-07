@@ -6,18 +6,16 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
+	"github.com/jcelliott/lumber"
 
-	"github.com/nanobox-io/nanobox/commands/box"
-	"github.com/nanobox-io/nanobox/commands/dev"
-	"github.com/nanobox-io/nanobox/config"
 	"github.com/nanobox-io/nanobox/validate"
+	"github.com/nanobox-io/nanobox/processor"
+
 )
 
+const VERSION = "1.0.0"
 //
 var (
-
-	processConfig := processor.ProcessConfig{}
-
 	//
 	NanoboxCmd = &cobra.Command{
 		Use:   "nanobox",
@@ -27,8 +25,8 @@ var (
 		// if the verbose flag is used, up the log level (this will cascade into
 		// all subcommands since this is the root command)
 		PersistentPreRun: func(ccmd *cobra.Command, args []string) {
-			if config.Verbose {
-				config.LogLevel = "debug"
+			if processor.DefaultConfig.Verbose {
+				lumber.Level(lumber.DEBUG)
 			}
 		},
 
@@ -37,8 +35,8 @@ var (
 
 			// hijack the verbose flag (-v), and use it to display the version of the
 			// CLI
-			if version || config.Verbose {
-				fmt.Printf("nanobox v%s\n", config.VERSION)
+			if version || processor.DefaultConfig.Verbose {
+				fmt.Printf("nanobox v%s\n", version)
 				return
 			}
 
@@ -55,24 +53,23 @@ var (
 func init() {
 
 	// internal flags
-	NanoboxCmd.PersistentFlags().BoolVarP(&processConfig.Devmode, "dev", "", false, "")
+	NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultConfig.DevMode, "dev", "", false, "")
 	NanoboxCmd.PersistentFlags().MarkHidden("dev")
 
 	// persistent flags
-	NanoboxCmd.PersistentFlags().BoolVarP(&processConfig.Background, "background", "", false, "Stops nanobox from auto-suspending.")
-	NanoboxCmd.PersistentFlags().BoolVarP(&processConfig.Force, "force", "f", false, "Forces a command to run (effects vary per command).")
-	NanoboxCmd.PersistentFlags().BoolVarP(&processConfig.Verbose, "verbose", "v", false, "Increase command output from 'info' to 'debug'.")
+	NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultConfig.Background, "background", "", false, "Stops nanobox from auto-suspending.")
+	NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultConfig.Force, "force", "f", false, "Forces a command to run (effects vary per command).")
+	NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultConfig.Verbose, "verbose", "v", false, "Increase command output from 'info' to 'debug'.")
 
 	// local flags
 	NanoboxCmd.Flags().BoolVarP(&version, "version", "", false, "Display the current version of this CLI")
 
 	// nanobox commands
-	NanoboxCmd.AddCommand(publishCmd)
-	NanoboxCmd.AddCommand(updateCmd)
+	// comment to get things to work .. will be implemented later
+	// NanoboxCmd.AddCommand(updateCmd)
 
 	// subcommands
-	NanoboxCmd.AddCommand(box.BoxCmd)
-	NanoboxCmd.AddCommand(dev.DevCmd)
+	NanoboxCmd.AddCommand(DevCmd)
 }
 
 func validCheck(checks ...string) func(ccmd *cobra.Command, args []string) {

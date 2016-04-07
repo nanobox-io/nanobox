@@ -1,5 +1,7 @@
 package processor
 
+import "fmt"
+
 type (
 	ProcessConfig struct {
 		DevMode bool
@@ -18,6 +20,7 @@ type (
 )
 
 var (
+	DefaultConfig = ProcessConfig{}
 	processors = map[string]ProcessBuilder{}
 )
 
@@ -25,7 +28,7 @@ func Register(name string, sb ProcessBuilder) {
 	processors[name] = sb
 }
 
-func Build(name string, pc ProcessConfig) Processor, error {
+func Build(name string, pc ProcessConfig) (Processor, error) {
 	proc, ok := processors[name]
 	if !ok {
 		return nil, fmt.Errorf("Invalid Processor %s", name)

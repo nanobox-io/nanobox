@@ -34,15 +34,19 @@ func LocalDirName() string {
 	return filepath.Base(LocalDir())
 }
 
-func AppDir() string {
+func BoxfileLocation() string {
+	return filepath.ToSlash(filepath.Join(GlobalDir(), "boxfile.yml"))
+}
+
+func AppName() string {
 	// if no name is given use localDirName
 	app := LocalDirName()
 
 	// read boxfile and look for dev->name
-	box := boxfile.NewFromPath(filepath.ToSlash(filepath.Join(GlobalDir(), "boxfile.yml")))
+	box := boxfile.NewFromPath(BoxfileLocation())
 	devName := box.Node("dev").StringValue("name")
 	if devName != "" {
 		app = devName
 	}
-	return filepath.ToSlash(filepath.Join(GlobalDir(), "apps", app))
+	return app
 }

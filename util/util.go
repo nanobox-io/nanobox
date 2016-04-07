@@ -6,24 +6,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
-	"os/exec"
 	"strings"
-
-	"github.com/nanobox-io/nanobox/config"
 )
-
-// VboxExists ensure virtualbox is installed; if ever there is a virtualbox package
-// this can be moved there
-func VboxExists() (exists bool) {
-	if config.OS == "windows" {
-		exists = os.Getenv("VBOX_MSI_INSTALL_PATH") != ""
-	} else if err := exec.Command("which", "vboxmanage").Run(); err == nil {
-		exists = true
-	}
-
-	return
-}
 
 // MD5sMatch determines if a local MD5 matches a remote MD5
 func MD5sMatch(localFile, remotePath string) (bool, error) {

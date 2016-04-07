@@ -26,7 +26,7 @@ func (self DockerMachine) isCreated() bool {
 	return true
 }
 
-func (selfDockerMachine) hasNetwork() bool {
+func (self DockerMachine) hasNetwork() bool {
 	// docker-machine ssh nanobox docker network inspect nanobox
 	cmd := exec.Command("docker-machine", "ssh", "nanobox", "docker", "network", "inspect", "nanobox")
 	err := cmd.Run()
@@ -47,7 +47,7 @@ func (self DockerMachine) isStarted() bool {
 	if regerr != nil {
 		return false
 	}
-	return mached
+	return matched
 }
 
 func (self DockerMachine) hasIP(ip string) bool {
@@ -61,7 +61,7 @@ func (self DockerMachine) hasIP(ip string) bool {
 	if regerr != nil {
 		return false
 	}
-	return mached
+	return matched
 }
 
 func (self DockerMachine) hasNatPreroute(host_ip, container_ip string) bool {
@@ -95,7 +95,7 @@ func (self DockerMachine) hasMountHost(mount string) bool {
 	if regerr != nil {
 		return false
 	}
-	return mached
+	return matched
 }
 
 func (self DockerMachine) hasMountLocal(mount string) bool {
@@ -109,7 +109,7 @@ func (self DockerMachine) hasMountLocal(mount string) bool {
 	if regerr != nil {
 		return false
 	}
-	return mached
+	return matched
 }
 
 func (self DockerMachine) Create() error {

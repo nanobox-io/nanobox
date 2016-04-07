@@ -10,12 +10,11 @@ type providerSetup struct {
 }
 
 
-func providerSetupFunc(config processor.ProcessConfig) (Sequence, error) {
+func providerSetupFunc(config processor.ProcessConfig) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 
 	return providerSetup{config}, nil
 }
-
 
 func (self providerSetup) Results() processor.ProcessConfig {
 	return self.config
@@ -26,5 +25,11 @@ func (self providerSetup) Process() error {
 	if err != nil {
 		return err
 	}
-	return provider.Start()
+	err = provider.Start()
+	if err != nil {
+		return err
+	}
+	// mount my folder
+	err = provider.AddMount(util.LocalDir(), "/mount/apps/"+util.AppName()"/")
+	return nil
 }
