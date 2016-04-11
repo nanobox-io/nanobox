@@ -10,6 +10,10 @@ import (
 
 	"github.com/nanobox-io/nanobox/validate"
 	"github.com/nanobox-io/nanobox/processor"
+	_ "github.com/nanobox-io/nanobox/processor/nanopack"
+	_ "github.com/nanobox-io/nanobox/processor/provider"
+	_ "github.com/nanobox-io/nanobox/processor/service"
+
 
 )
 

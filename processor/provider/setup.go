@@ -1,8 +1,11 @@
 package provider
 
 import (
+
+	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
+	"github.com/nanobox-io/nanobox/util"
 )
 
 type providerSetup struct {
@@ -25,11 +28,28 @@ func (self providerSetup) Process() error {
 	if err != nil {
 		return err
 	}
+
 	err = provider.Start()
 	if err != nil {
 		return err
 	}
+
+	err = provider.DockerEnv()
+	if err != nil {
+		return err
+	}
+	
+	err = docker.Initialize("env")
+	if err != nil {
+		return err
+	}
+
 	// mount my folder
-	err = provider.AddMount(util.LocalDir(), "/mount/apps/"+util.AppName()"/")
-	return nil
+	if util.EngineDir() != "" {
+		err = provider.AddMount(util.EngineDir(), "/share/"+util.AppName()+"/engine")
+		if err != nil {
+			return err
+		}
+	}
+	return errprovider.AddMount(util.LocalDir(), "/share/"+util.AppName()+"/code")	
 }

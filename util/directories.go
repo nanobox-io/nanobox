@@ -50,3 +50,17 @@ func AppName() string {
 	}
 	return app
 }
+
+// get the director of the engine if it is a directory
+// and on my local file system
+func EngineDir() string {
+	box := boxfile.NewFromPath(BoxfileLocation())
+	engineName := box.Node("env").StringValue("engine")
+	if engineName != "" {
+		fi, err := os.Stat(engineName)
+		if err == nil && fi.IsDir() {
+			return engineName
+		}
+	}
+	return ""
+}

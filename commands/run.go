@@ -5,39 +5,27 @@ import (
   "github.com/spf13/cobra"
 
   "github.com/nanobox-io/nanobox/processor"
-  "github.com/nanobox-io/nanobox/util/nanofile"
 )
 
 var (
 
   //
   DevCmd = &cobra.Command{
-    Use:   "dev",
-    Short: "Starts the nanobox, provisions app, & opens an interactive terminal",
+    Use:   "run",
+    Short: "start a nanobox application as if it is in production",
     Long:  ``,
 
     PreRun:  validCheck("provider"),
     Run:     func(ccmd *cobra.Command, args []string) {
-      processor.DefaultConfig.Meta["dev-config"] = devconfig
-      if rebuild {
-        processor.DefaultConfig.Meta["build-option"] = "rebuild"
-      }
-      processor.Run("dev", processor.DefaultConfig)
+      processor.Run("run", processor.DefaultConfig)
     },
     // PostRun: halt,
   }
-
-  //
-  devconfig string // sets the type of environment to be configured on the guest vm
-  // nobuild   bool   // force skip a deploy
-  rebuild   bool   // force a deploy
 )
 
 //
 func init() {
-  DevCmd.Flags().StringVarP(&devconfig, "dev-config", "", nanofile.Viper().GetString("dev-config"), "The environment to configure on the guest vm")
   // DevCmd.Flags().BoolVarP(&nobuild, "no-build", "", false, "Force skip a rebuild")
-  DevCmd.Flags().BoolVarP(&rebuild, "rebuild", "", false, "Force a rebuild")
 
   // all gone for now.. will bring back the necessary ones.
   // // 'hidden' commands
@@ -53,7 +41,7 @@ func init() {
 
   // // 'nanobox dev' commands
   // DevCmd.AddCommand(bootstrapCmd)
-  DevCmd.AddCommand(runCmd)
+  // DevCmd.AddCommand(runCmd)
   // DevCmd.AddCommand(reloadCmd)
   // DevCmd.AddCommand(stopCmd)
   // DevCmd.AddCommand(destroyCmd)

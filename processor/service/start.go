@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/nanobox-io/nanobox-boxfile"
-	"github.com/nanobox-io/golang-docker-client"
 
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/models"
@@ -17,46 +16,33 @@ type serviceStart struct {
 	config processor.ProcessConfig
 }
 
-// {
-//   "logvac_host": "127.0.0.1",
-//   "platform": "local",
-//   "config": {
-//     "token": "123"
-//   },
-//   "member": {
-//     "local_ip": "192.168.0.2",
-//     "uid": "1",
-//     "role": "primary"
-//   },
-//   "component": {
-//     "name": "willy-walrus",
-//     "uid": "logvac1",
-//     "id": "9097d0a7-7e02-4be5-bce1-3d7cb1189488"
-//   },
-//   "users": [
+type member struct {
+	LocalIP string `json:"local_ip"`
+	UID     string `json:"uid"`
+	Role    string `json:"role"`
+}
 
-//   ]
-// }
+type component struct {
+	Name string `json:"name"`
+	UID  string `json:"uid"`
+	ID   string `json:"id"`
+}
+
 type configPayload struct {
 	LogvacHost string `json:"logvac_host"`
 	Platform   string `json:"platform"`
 	Config     map[string]interface{} `json:"config"`
-	Member     struct {
-		LocalIP string `json:"local_ip"`
-		UID     string `json:"uid"`
-		Role    string `json:"role"`
-	} `json:"member"`
-	Component struct {
-		Name string `json:"name"`
-		UID  string `json:"uid"`
-		ID   string `json:"id"`
-	}
+	Member     member `json:"member"`
+	Component  component `json:"component"`
 	Users []models.User `json:"users"`
 }
 
+type startPayload struct {
+	Config map[string]interface{} `json:"config"`
+}
+
 func init() {
-	processor.Register("serivce_start", serviceStartFunc)
-	docker.Initialize("env")
+	processor.Register("service_start", serviceStartFunc)
 }
 
 func serviceStartFunc(config processor.ProcessConfig) (processor.Processor, error) {
@@ -72,14 +58,31 @@ func (self serviceStart) configurePayload() string {
 	logvac := models.Service{}
 	data.Get(util.AppName(), "logvac", &logvac)
 
-	boxfile := boxfile.NewFromPath(util.BoxfileLocation())
+	boxfile := boxfile.New(self.config.Meta["boxfile"])
 	boxConfig := boxfile.Node(self.config.Meta["name"]).Node("config")
-
 
 	pload := configPayload{
 		LogvacHost: logvac.InternalIP,
+		Platform: "local",
 		Config: boxConfig.Parsed,
+		Member: member{
+			LocalIP: me.InternalIP,
+			UID: "1",
+			Role: "primary",
+		},
+		Component: component{
+			Name: "whydoesthismatter",
+			UID: self.config.Meta["name"],
+			ID: me.ID,
+		},
 		Users: me.Plan.Users,
+	}
+	if pload.Users == nil {
+		pload.Users = []models.User{}
+	}
+	switch self.config.Meta["name"] {
+	case "portal", "logvac", "hoarder", "mist":
+		pload.Config["token"] = "123"
 	}
 	j, err := json.Marshal(pload)
 	if err != nil {
@@ -90,7 +93,19 @@ func (self serviceStart) configurePayload() string {
 }
 
 func (self serviceStart) startPayload() string {
-	return ""
+	boxfile := boxfile.New(self.config.Meta["boxfile"])
+	boxConfig := boxfile.Node(self.config.Meta["name"]).Node("config")
+
+	pload := startPayload{boxConfig.Parsed}
+	switch self.config.Meta["name"] {
+	case "portal", "logvac", "hoarder", "mist":
+		pload.Config["token"] = "123"
+	}
+	j, err := json.Marshal(pload)
+	if err != nil {
+		return "{}"
+	}
+	return string(j)
 }
 
 func (self serviceStart) Results() processor.ProcessConfig {
@@ -115,8 +130,15 @@ func (self serviceStart) Process() error {
 		return nil
 	}
 
+	// run update 
+	output, err := util.Exec(service.ID, "update", "{}")
+	if err != nil {
+		fmt.Println(output)
+		return err
+	}
+
 	// run configure command TODO PAYLOAD
-	output, err := util.Exec(service.ID, "configure", self.configurePayload())
+	output, err = util.Exec(service.ID, "configure", self.configurePayload())
 	if err != nil {
 		fmt.Println(output)
 		return err

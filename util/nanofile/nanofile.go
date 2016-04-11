@@ -21,7 +21,7 @@ func Viper() *viper.Viper {
 	vip.SetDefault("cpus",  2)
 	vip.SetDefault("host-dns", "off")
 	vip.SetDefault("mount-nfs",  true)
-	vip.SetDefault("provider", "virtualbox") // this may change in the future (adding additional hosts such as vmware
+	vip.SetDefault("provider", "docker_machine") // this may change in the future (adding additional hosts such as vmware
 	vip.SetDefault("ram",  1024)
 	vip.SetDefault("use-proxy",  false)
 

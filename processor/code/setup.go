@@ -1,4 +1,4 @@
-package service
+package code
 
 import (
 	"errors"
@@ -17,24 +17,24 @@ import (
 	"github.com/nanobox-io/nanobox/util/ip_control"
 )
 
-type serviceSetup struct {
+type codeSetup struct {
 	config processor.ProcessConfig
 	fail bool
 }
 
-var missingImageOrName = errors.New("missing image or name")
+var missingName = errors.New("missing name")
 
 func init() {
-	processor.Register("service_setup", serviceSetupFunc)
+	processor.Register("code_setup", codeSetupFunc)
 }
 
-func serviceSetupFunc(config processor.ProcessConfig) (processor.Processor, error) {
+func codeSetupFunc(config processor.ProcessConfig) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 
-	return &serviceSetup{config: config}, nil
+	return &codeSetup{config: config}, nil
 }
 
-func (self *serviceSetup) clean(fn func()) func() {
+func (self *codeSetup) clean(fn func()) func() {
 	return func() {
 		if self.fail {
 			fn()
@@ -42,28 +42,32 @@ func (self *serviceSetup) clean(fn func()) func() {
 	}
 }
 
-func (self serviceSetup) Results() processor.ProcessConfig {
+func (self codeSetup) Results() processor.ProcessConfig {
 	return self.config
 }
 
-func (self *serviceSetup) Process() error {
+func (self *codeSetup) Process() error {
 	// make sure i was given a name and image
-	if self.config.Meta["name"] == "" || self.config.Meta["image"] == "" {
-		return missingImageOrName
+	if self.config.Meta["name"] == ""
+		return missingName
 	}
 
 	// get the service from the database
 	service := models.Service{}
-	data.Get(util.AppName(), self.config.Meta["name"], &service)
-
+	err := data.Get(util.AppName(), self.config.Meta["name"], &service)
 
 	// create docker container
-	if service.ID != "" {
+	if err == nil {
 		// quit early if the service was found to be created already
 		return nil
 	}
 
-	_, err := docker.ImagePull(self.config.Meta["image"])
+	image := self.config.Meta["image"]
+	if image == "" {
+		iamge = "nanobox/code"
+	}
+
+	_, err = docker.ImagePull(image)
 	if err != nil {
 		return err
 	}
@@ -87,7 +91,7 @@ func (self *serviceSetup) Process() error {
 
 	config := docker.ContainerConfig{
 		Name: fmt.Sprintf("%s-%s", util.AppName(), self.config.Meta["name"]),
-		Image: self.config.Meta["image"],
+		Image: image,
  		Network: "virt",
  		IP: local_ip.String(),
 	}
@@ -124,8 +128,6 @@ func (self *serviceSetup) Process() error {
 
 	boxfile := boxfile.New([]byte(self.config.Meta["boxfile"]))
 	boxConfig := boxfile.Node(self.config.Meta["name"]).Node("config")
-	planPayload := map[string]interface{}{"config": boxConfig.Parsed}
-	jsonPayload, _ := json.Marshal(planPayload)
 
 	// run plan hook TODO payload
 	output, err := util.Exec(container.ID, "plan", string(jsonPayload))

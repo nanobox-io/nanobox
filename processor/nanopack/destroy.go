@@ -13,9 +13,8 @@ func init() {
 }
 
 
-func nanopackDestroyFunc(config processor.ProcessConfig) (Sequence, error) {
+func nanopackDestroyFunc(config processor.ProcessConfig) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
-
 	return nanopackDestroy{config}, nil
 }
 
@@ -25,4 +24,5 @@ func (self nanopackDestroy) Results() processor.ProcessConfig {
 
 func (self nanopackDestroy) Process() error {
 	// TODO: setup the nanoagent services
+	return nil
 }

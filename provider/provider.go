@@ -3,16 +3,19 @@ package provider
 import (
 	"errors"
 
+	"github.com/nanobox-io/nanobox/validate"
 	"github.com/nanobox-io/nanobox/util/nanofile"
 )
 
 type (
 	Provider interface {
+		Valid() error
 		Create() error
 		Reboot() error
 		Stop() error
 		Destroy() error
 		Start() error
+		DockerEnv() error
 		AddIP(ip string) error
 		RemoveIP(ip string) error
 		AddNat(host, container string) error
@@ -27,6 +30,18 @@ var invalidProvider = errors.New("invalid provider")
 
 func Register(name string, p Provider) {
 	providers[name] = p
+}
+
+func init() {
+	validate.Register("provider", Valid)
+}
+
+func Valid() error {
+	p, ok := providers[nanofile.Viper().GetString("provider")]
+	if !ok {
+		return invalidProvider
+	}
+	return p.Valid()
 }
 
 func Create() error {
@@ -63,6 +78,13 @@ func Start() error {
 		return invalidProvider
 	}
 	return p.Start()
+}
+func DockerEnv() error {
+	p, ok := providers[nanofile.Viper().GetString("provider")]
+	if !ok {
+		return invalidProvider
+	}
+	return p.DockerEnv()
 }
 func AddIP(ip string) error {
 	p, ok := providers[nanofile.Viper().GetString("provider")]

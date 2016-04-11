@@ -9,7 +9,7 @@ import (
 var badExit = errors.New("bad exit code")
 
 func Exec(id, name, payload string) (string, error) {
-	exec, hj, err := docker.ExecStart(id, []string{"/opt/bin/"+name, payload}, false, true, true)
+	exec, hj, err := docker.ExecStart(id, []string{"/opt/nanobox/hooks/"+name, payload}, false, true, true)
 	if err != nil {
 		return "", err
 	}

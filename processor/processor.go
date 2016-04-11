@@ -1,6 +1,10 @@
 package processor
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/jcelliott/lumber"
+)
 
 type (
 	ProcessConfig struct {
@@ -20,7 +24,7 @@ type (
 )
 
 var (
-	DefaultConfig = ProcessConfig{}
+	DefaultConfig = ProcessConfig{Meta: map[string]string{}}
 	processors = map[string]ProcessBuilder{}
 )
 
@@ -37,6 +41,7 @@ func Build(name string, pc ProcessConfig) (Processor, error) {
 }
 
 func Run(name string, pc ProcessConfig) error {
+	lumber.Debug(name)
 	proc, err := Build(name, pc)
 	if err != nil {
 		return err

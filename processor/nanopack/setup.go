@@ -1,7 +1,8 @@
 package nanopack
 
 import (
-	"github.com/nanobox-io/nanobox/util/nanofile"
+	"fmt"
+	"os"
 	"github.com/nanobox-io/nanobox/processor"
 )
 
@@ -14,7 +15,7 @@ func init() {
 	processor.Register("nanopack_setup", nanopackSetupFunc)
 }
 
-func nanopackSetupFunc(config processor.ProcessConfig) (Sequence, error) {
+func nanopackSetupFunc(config processor.ProcessConfig) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 
 	return nanopackSetup{config}, nil
@@ -30,12 +31,12 @@ func (self nanopackSetup) Process() error {
 	
 	// setup Portal
 	portal := processor.ProcessConfig{
-		DevMode: self.config.DevMode
-		Verbose: self.config.Verbose
+		DevMode: self.config.DevMode,
+		Verbose: self.config.Verbose,
 		Meta: map[string]string{
 			"name":  "portal",
 			"image": "nanobox/portal",
-		}
+		},
 	}
 	err := processor.Run("service_setup", portal)
 	if err != nil {
@@ -45,14 +46,14 @@ func (self nanopackSetup) Process() error {
 
 	// setup Mist
 	mist := processor.ProcessConfig{
-		DevMode: self.config.DevMode
-		Verbose: self.config.Verbose
+		DevMode: self.config.DevMode,
+		Verbose: self.config.Verbose,
 		Meta: map[string]string{
 			"name":  "mist",
 			"image": "nanobox/mist",
-		}
+		},
 	}
-	err := processor.Run("service_setup", mist)
+	err = processor.Run("service_setup", mist)
 	if err != nil {
 		fmt.Println("mist_setup:", err)
 		os.Exit(1)
@@ -60,40 +61,61 @@ func (self nanopackSetup) Process() error {
 
 	// setup Logvac
 	logvac := processor.ProcessConfig{
-		DevMode: self.config.DevMode
-		Verbose: self.config.Verbose
+		DevMode: self.config.DevMode,
+		Verbose: self.config.Verbose,
 		Meta: map[string]string{
 			"name":  "logvac",
 			"image": "nanobox/logvac",
-		}
+		},
 	}
-	err := processor.Run("service_setup", logvac)
+	err = processor.Run("service_setup", logvac)
 	if err != nil {
 		fmt.Println("logvac_setup:", err)
 		os.Exit(1)
 	}
 
 	// setup Warehouse
-	warehouse := processor.ProcessConfig{
-		DevMode: self.config.DevMode
-		Verbose: self.config.Verbose
+	hoarder := processor.ProcessConfig{
+		DevMode: self.config.DevMode,
+		Verbose: self.config.Verbose,
 		Meta: map[string]string{
-			"name":  "warehouse",
-			"image": "nanobox/warehouse",
-		}
+			"name":  "hoarder",
+			"image": "nanobox/hoarder",
+		},
 	}
-	err := processor.Run("service_setup", warehouse)
+	err = processor.Run("service_setup", hoarder)
 	if err != nil {
-		fmt.Println("warehouse_setup:", err)
+		fmt.Println("hoarder_setup:", err)
 		os.Exit(1)
 	}
 
 	// start Portal
+	err = processor.Run("service_start", portal)
+	if err != nil {
+		fmt.Println("portal_start:", err)
+		os.Exit(1)
+	}
 
 	// start Mist
+	err = processor.Run("service_start", mist)
+	if err != nil {
+		fmt.Println("mist_start:", err)
+		os.Exit(1)
+	}
 
 	// start Logvac
+	err = processor.Run("service_start", logvac)
+	if err != nil {
+		fmt.Println("logvac_start:", err)
+		os.Exit(1)
+	}
 
 	// start Warehouse
+	err = processor.Run("service_start", hoarder)
+	if err != nil {
+		fmt.Println("hoarder_start:", err)
+		os.Exit(1)
+	}
 
+	return nil
 }
