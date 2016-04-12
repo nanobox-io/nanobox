@@ -6,8 +6,8 @@ import (
 
 	"github.com/nanobox-io/nanobox-boxfile"
 
-	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/data"
 )
@@ -29,12 +29,12 @@ type component struct {
 }
 
 type configPayload struct {
-	LogvacHost string `json:"logvac_host"`
-	Platform   string `json:"platform"`
+	LogvacHost string                 `json:"logvac_host"`
+	Platform   string                 `json:"platform"`
 	Config     map[string]interface{} `json:"config"`
-	Member     member `json:"member"`
-	Component  component `json:"component"`
-	Users []models.User `json:"users"`
+	Member     member                 `json:"member"`
+	Component  component              `json:"component"`
+	Users      []models.User          `json:"users"`
 }
 
 type startPayload struct {
@@ -58,22 +58,22 @@ func (self serviceStart) configurePayload() string {
 	logvac := models.Service{}
 	data.Get(util.AppName(), "logvac", &logvac)
 
-	boxfile := boxfile.New(self.config.Meta["boxfile"])
+	boxfile := boxfile.New([]byte(self.config.Meta["boxfile"]))
 	boxConfig := boxfile.Node(self.config.Meta["name"]).Node("config")
 
 	pload := configPayload{
 		LogvacHost: logvac.InternalIP,
-		Platform: "local",
-		Config: boxConfig.Parsed,
+		Platform:   "local",
+		Config:     boxConfig.Parsed,
 		Member: member{
 			LocalIP: me.InternalIP,
-			UID: "1",
-			Role: "primary",
+			UID:     "1",
+			Role:    "primary",
 		},
 		Component: component{
 			Name: "whydoesthismatter",
-			UID: self.config.Meta["name"],
-			ID: me.ID,
+			UID:  self.config.Meta["name"],
+			ID:   me.ID,
 		},
 		Users: me.Plan.Users,
 	}
@@ -93,7 +93,7 @@ func (self serviceStart) configurePayload() string {
 }
 
 func (self serviceStart) startPayload() string {
-	boxfile := boxfile.New(self.config.Meta["boxfile"])
+	boxfile := boxfile.New([]byte(self.config.Meta["boxfile"]))
 	boxConfig := boxfile.Node(self.config.Meta["name"]).Node("config")
 
 	pload := startPayload{boxConfig.Parsed}
@@ -130,7 +130,7 @@ func (self serviceStart) Process() error {
 		return nil
 	}
 
-	// run update 
+	// run update
 	output, err := util.Exec(service.ID, "update", "{}")
 	if err != nil {
 		fmt.Println(output)

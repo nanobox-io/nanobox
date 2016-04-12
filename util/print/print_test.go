@@ -1,8 +1,8 @@
 package print_test
 
 import (
-	"io/ioutil"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"testing"
 
@@ -13,7 +13,7 @@ import (
 // TestVerboseOn
 func TestVerboseOn(t *testing.T) {
 	config.Verbose = true
-	out := stdoutToString(func(){printutil.Verbose("test verbose output")})
+	out := stdoutToString(func() { printutil.Verbose("test verbose output") })
 	if out != "test verbose output" {
 		t.Error(fmt.Sprintf("Expected 'test verbose output' got '%s'", out))
 	}
@@ -22,7 +22,7 @@ func TestVerboseOn(t *testing.T) {
 // TestVerboseOff
 func TestVerboseOff(t *testing.T) {
 	config.Verbose = false
-	out := stdoutToString(func(){printutil.Verbose("test verbose output")})
+	out := stdoutToString(func() { printutil.Verbose("test verbose output") })
 	if out != "" {
 		t.Error(fmt.Sprintf("Expected nothing got '%s'", out))
 	}
@@ -31,7 +31,7 @@ func TestVerboseOff(t *testing.T) {
 // TestSilenceOn
 func TestSilenceOn(t *testing.T) {
 	config.Silent = true
-	out := stdoutToString(func(){printutil.Silence("test silence output")})
+	out := stdoutToString(func() { printutil.Silence("test silence output") })
 	if out != "" {
 		t.Error(fmt.Sprintf("Expected nothing got '%s'", out))
 	}
@@ -40,7 +40,7 @@ func TestSilenceOn(t *testing.T) {
 // TestSilenceOff
 func TestSilenceOff(t *testing.T) {
 	config.Silent = false
-	out := stdoutToString(func(){printutil.Silence("test silence output")})
+	out := stdoutToString(func() { printutil.Silence("test silence output") })
 	if out != "test silence output" {
 		t.Error(fmt.Sprintf("Expected 'test silence output' got '%s'", out))
 	}
@@ -49,7 +49,7 @@ func TestSilenceOff(t *testing.T) {
 // TestColor
 func TestColor(t *testing.T) {
 	raw := "\x1b[31mtest color output\x1b[0m\x1b[0m\n"
-	out := stdoutToString(func(){printutil.Color("[red]test color output[reset]")})
+	out := stdoutToString(func() { printutil.Color("[red]test color output[reset]") })
 	if out != raw {
 		t.Error(fmt.Sprintf("Expected '%q' got '%q'", raw, out))
 	}
@@ -67,15 +67,15 @@ func TestPassword(t *testing.T) {
 func stdoutToString(f func()) string {
 
 	rescueStdout := os.Stdout
-  r, w, _ := os.Pipe()
-  os.Stdout = w
+	r, w, _ := os.Pipe()
+	os.Stdout = w
 
 	//
-  f()
+	f()
 
-  w.Close()
-  out, _ := ioutil.ReadAll(r)
-  os.Stdout = rescueStdout
+	w.Close()
+	out, _ := ioutil.ReadAll(r)
+	os.Stdout = rescueStdout
 
 	return string(out)
 }

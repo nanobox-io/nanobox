@@ -5,19 +5,19 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/spf13/cobra"
 	"github.com/jcelliott/lumber"
+	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox/validate"
 	"github.com/nanobox-io/nanobox/processor"
+	_ "github.com/nanobox-io/nanobox/processor/code"
 	_ "github.com/nanobox-io/nanobox/processor/nanopack"
 	_ "github.com/nanobox-io/nanobox/processor/provider"
 	_ "github.com/nanobox-io/nanobox/processor/service"
-
-
+	"github.com/nanobox-io/nanobox/validate"
 )
 
 const VERSION = "1.0.0"
+
 //
 var (
 	//
@@ -74,6 +74,7 @@ func init() {
 
 	// subcommands
 	NanoboxCmd.AddCommand(DevCmd)
+	NanoboxCmd.AddCommand(RunCmd)
 }
 
 func validCheck(checks ...string) func(ccmd *cobra.Command, args []string) {

@@ -1,12 +1,11 @@
 package ip_control_test
 
 import (
-	"testing"
-	"os"
 	"github.com/nanobox-io/nanobox/util/ip_control"
 	"net"
+	"os"
+	"testing"
 )
-
 
 func TestMain(m *testing.M) {
 	ip_control.Flush()
@@ -74,4 +73,3 @@ func TestReuseIP(t *testing.T) {
 	ip_control.ReturnIP(three)
 
 }
-

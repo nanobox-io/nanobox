@@ -1,10 +1,10 @@
 package locker
 
 import (
+	"fmt"
 	"net"
 	"time"
-	"fmt"
-	
+
 	"github.com/nanobox-io/nanobox/util/nanofile"
 )
 
@@ -44,4 +44,3 @@ func Unlock() error {
 	ln = nil
 	return err
 }
-

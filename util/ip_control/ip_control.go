@@ -1,24 +1,23 @@
 package ip_control
 
 import (
-	"net"
 	"errors"
-	"sync"
 	"github.com/nanobox-io/nanobox/util/data"
-	"github.com/nanobox-io/nanobox/util/nanofile"
 	"github.com/nanobox-io/nanobox/util/locker"
+	"github.com/nanobox-io/nanobox/util/nanofile"
+	"net"
+	"sync"
 )
 
 type IPSpace struct {
 	GlobalIP  net.IP
 	GlobalNet net.IPNet
-	LocalIP		net.IP
+	LocalIP   net.IP
 	LocalNet  net.IPNet
 }
 
 var IpNotFound = errors.New("Ip Not Found")
 var mutex = sync.Mutex{}
-
 
 func ReserveGlobal() (net.IP, error) {
 	locker.Lock()
@@ -104,7 +103,7 @@ func getIpSpace() (IPSpace, error) {
 	locker.Lock()
 	ipSpace := IPSpace{}
 
-	// there was no data stored for ip space 
+	// there was no data stored for ip space
 	// so we need to populate it
 	ip, ipNet, err := net.ParseCIDR(nanofile.Viper().GetString("external-network-space"))
 	if err != nil {
@@ -119,7 +118,7 @@ func getIpSpace() (IPSpace, error) {
 	}
 	ipSpace.LocalIP = ip
 	ipSpace.LocalNet = *ipNet
-	
+
 	return ipSpace, nil
 }
 
@@ -143,7 +142,7 @@ func setReserved(ips []net.IP) error {
 }
 
 func inc(ip net.IP) {
-	for j := len(ip)-1; j>=0; j-- {
+	for j := len(ip) - 1; j >= 0; j-- {
 		ip[j]++
 		if ip[j] > 0 {
 			break

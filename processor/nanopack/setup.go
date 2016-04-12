@@ -2,14 +2,13 @@ package nanopack
 
 import (
 	"fmt"
-	"os"
 	"github.com/nanobox-io/nanobox/processor"
+	"os"
 )
 
 type nanopackSetup struct {
 	config processor.ProcessConfig
 }
-
 
 func init() {
 	processor.Register("nanopack_setup", nanopackSetupFunc)
@@ -21,14 +20,13 @@ func nanopackSetupFunc(config processor.ProcessConfig) (processor.Processor, err
 	return nanopackSetup{config}, nil
 }
 
-
 func (self nanopackSetup) Results() processor.ProcessConfig {
 	return self.config
 }
 
 func (self nanopackSetup) Process() error {
 	// TODO: make setups and starts concurrent
-	
+
 	// setup Portal
 	portal := processor.ProcessConfig{
 		DevMode: self.config.DevMode,

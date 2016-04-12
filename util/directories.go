@@ -8,14 +8,14 @@ import (
 
 	"github.com/nanobox-io/nanobox-boxfile"
 )
-	
+
 func GlobalDir() string {
 	// set Home based off the users homedir (~)
 	p, err := homedir.Dir()
 	if err != nil {
 		// Log.Fatal("[config/config] homedir.Dir() failed", err.Error())
 		return ""
-	} 
+	}
 	globalDir := filepath.ToSlash(filepath.Join(p, ".nanobox"))
 	os.MkdirAll(globalDir, 0755)
 	return globalDir

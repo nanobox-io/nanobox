@@ -1,15 +1,15 @@
 package util
 
 import (
-	"errors"
 	"bytes"
+	"errors"
 	"github.com/nanobox-io/golang-docker-client"
 )
 
 var badExit = errors.New("bad exit code")
 
 func Exec(id, name, payload string) (string, error) {
-	exec, hj, err := docker.ExecStart(id, []string{"/opt/nanobox/hooks/"+name, payload}, false, true, true)
+	exec, hj, err := docker.ExecStart(id, []string{"/opt/nanobox/hooks/" + name, payload}, false, true, true)
 	if err != nil {
 		return "", err
 	}
@@ -18,7 +18,7 @@ func Exec(id, name, payload string) (string, error) {
 	if err != nil {
 		return b.String(), err
 	}
-	data, err := docker.ExecInspect(exec.ID)	
+	data, err := docker.ExecInspect(exec.ID)
 	if err != nil {
 		return b.String(), err
 	}

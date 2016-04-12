@@ -4,7 +4,7 @@ import "testing"
 import "github.com/nanobox-io/nanobox/util/data"
 
 type Data struct {
-	Name string
+	Name   string
 	Number int
 	Cows   bool
 }

@@ -1,11 +1,11 @@
 package provider
 
 import (
-	"fmt"
-	"encoding/json"
-	"os"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"os"
 	"os/exec"
 	"regexp"
 
@@ -30,7 +30,6 @@ func (self DockerMachine) Valid() error {
 	return nil
 }
 
-
 func (self DockerMachine) Create() error {
 	if !self.isCreated() {
 		lumber.Debug("not yet created")
@@ -42,16 +41,7 @@ func (self DockerMachine) Create() error {
 			return err
 		}
 	}
-	if !self.hasNetwork() {
-		lumber.Debug("not yet networked")
-		// docker network create --driver=bridge --subnet=192.168.0.0/16 --opt="com.docker.network.driver.mtu=1450" --opt="com.docker.network.bridge.name=redd0" --gateway=192.168.0.1 nanobox
-		cmd := exec.Command("docker-machine", "ssh", "nanobox", "docker", "network", "create", "--driver=bridge", "--subnet=192.168.0.0/16", "--opt=\"com.docker.network.driver.mtu=1450\"", "--opt=\"com.docker.network.bridge.name=redd0\"", "--gateway=192.168.0.1", "nanobox")
-		b, err := cmd.CombinedOutput()
-		if err != nil {
-			lumber.Debug("add network output: %s", b)
-			return err
-		}
-	}
+
 	return nil
 }
 
@@ -100,15 +90,26 @@ func (self DockerMachine) Start() error {
 			return err
 		}
 	}
+
+	if !self.hasNetwork() {
+		lumber.Debug("not yet networked")
+		// docker network create --driver=bridge --subnet=192.168.0.0/16 --opt="com.docker.network.driver.mtu=1450" --opt="com.docker.network.bridge.name=redd0" --gateway=192.168.0.1 nanobox
+		cmd := exec.Command("docker-machine", "ssh", "nanobox", "docker", "network", "create", "--driver=bridge", "--subnet=192.168.0.0/16", "--opt=\"com.docker.network.driver.mtu=1450\"", "--opt=\"com.docker.network.bridge.name=redd0\"", "--gateway=192.168.0.1", "nanobox")
+		b, err := cmd.CombinedOutput()
+		if err != nil {
+			lumber.Debug("add network output: %s", b)
+			return err
+		}
+	}
 	return nil
 }
 
 func (self DockerMachine) DockerEnv() error {
-// docker-machine env nanobox
-// export DOCKER_TLS_VERIFY="1"
-// export DOCKER_HOST="tcp://192.168.99.102:2376"
-// export DOCKER_CERT_PATH="/Users/lyon/.docker/machine/machines/nanobox"
-// export DOCKER_MACHINE_NAME="nanobox"	
+	// docker-machine env nanobox
+	// export DOCKER_TLS_VERIFY="1"
+	// export DOCKER_HOST="tcp://192.168.99.102:2376"
+	// export DOCKER_CERT_PATH="/Users/lyon/.docker/machine/machines/nanobox"
+	// export DOCKER_MACHINE_NAME="nanobox"
 	inspect := struct {
 		Driver struct {
 			IPAddress string
@@ -371,4 +372,3 @@ func (self DockerMachine) hasMountLocal(mount string) bool {
 	}
 	return matched
 }
-

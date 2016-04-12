@@ -3,8 +3,8 @@ package provider
 import (
 	"errors"
 
-	"github.com/nanobox-io/nanobox/validate"
 	"github.com/nanobox-io/nanobox/util/nanofile"
+	"github.com/nanobox-io/nanobox/validate"
 )
 
 type (

@@ -1,17 +1,17 @@
 package service
 
 import (
-	"errors"
 	"encoding/json"
+	"errors"
 	"fmt"
 
-	"github.com/nanobox-io/nanobox-boxfile"
 	"github.com/jcelliott/lumber"
+	"github.com/nanobox-io/nanobox-boxfile"
 
 	"github.com/nanobox-io/golang-docker-client"
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
-	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/ip_control"
@@ -19,7 +19,7 @@ import (
 
 type serviceSetup struct {
 	config processor.ProcessConfig
-	fail bool
+	fail   bool
 }
 
 var missingImageOrName = errors.New("missing image or name")
@@ -56,7 +56,6 @@ func (self *serviceSetup) Process() error {
 	service := models.Service{}
 	data.Get(util.AppName(), self.config.Meta["name"], &service)
 
-
 	// create docker container
 	if service.ID != "" {
 		// quit early if the service was found to be created already
@@ -86,10 +85,10 @@ func (self *serviceSetup) Process() error {
 	})()
 
 	config := docker.ContainerConfig{
-		Name: fmt.Sprintf("%s-%s", util.AppName(), self.config.Meta["name"]),
-		Image: self.config.Meta["image"],
- 		Network: "virt",
- 		IP: local_ip.String(),
+		Name:    fmt.Sprintf("%s-%s", util.AppName(), self.config.Meta["name"]),
+		Image:   self.config.Meta["image"],
+		Network: "virt",
+		IP:      local_ip.String(),
 	}
 
 	container, err := docker.CreateContainer(config)
@@ -136,7 +135,7 @@ func (self *serviceSetup) Process() error {
 		return err
 	}
 
-	// save service in DB	
+	// save service in DB
 	service.ID = container.ID
 	service.Name = self.config.Meta["name"]
 	service.ExternalIP = global_ip.String()
@@ -151,7 +150,7 @@ func (self *serviceSetup) Process() error {
 		service.Plan.Users[i].Password = util.RandomPassword()
 	}
 
-	// save the service 
+	// save the service
 	err = data.Put(util.AppName(), self.config.Meta["name"], service)
 	if err != nil {
 		self.fail = true

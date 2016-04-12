@@ -2,16 +2,14 @@ package code
 
 import (
 	"errors"
-	"encoding/json"
 	"fmt"
 
-	"github.com/nanobox-io/nanobox-boxfile"
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/golang-docker-client"
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
-	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/ip_control"
@@ -19,10 +17,10 @@ import (
 
 type codeSetup struct {
 	config processor.ProcessConfig
-	fail bool
+	fail   bool
 }
 
-var missingName = errors.New("missing name")
+var missingImageOrName = errors.New("missing image or name")
 
 func init() {
 	processor.Register("code_setup", codeSetupFunc)
@@ -48,8 +46,8 @@ func (self codeSetup) Results() processor.ProcessConfig {
 
 func (self *codeSetup) Process() error {
 	// make sure i was given a name and image
-	if self.config.Meta["name"] == ""
-		return missingName
+	if self.config.Meta["name"] == "" || self.config.Meta["image"] == "" {
+		return missingImageOrName
 	}
 
 	// get the service from the database
@@ -62,12 +60,7 @@ func (self *codeSetup) Process() error {
 		return nil
 	}
 
-	image := self.config.Meta["image"]
-	if image == "" {
-		iamge = "nanobox/code"
-	}
-
-	_, err = docker.ImagePull(image)
+	_, err = docker.ImagePull(self.config.Meta["image"])
 	if err != nil {
 		return err
 	}
@@ -90,10 +83,17 @@ func (self *codeSetup) Process() error {
 	})()
 
 	config := docker.ContainerConfig{
-		Name: fmt.Sprintf("%s-%s", util.AppName(), self.config.Meta["name"]),
-		Image: image,
- 		Network: "virt",
- 		IP: local_ip.String(),
+		Name:    fmt.Sprintf("%s-%s", util.AppName(), self.config.Meta["name"]),
+		Image:   self.config.Meta["image"],
+		Network: "virt",
+		IP:      local_ip.String(),
+		Binds: []string{
+			// not sure what these are going to look like.
+			// we may not need any mounting here because if we are running
+			// code like production it will pull the build
+			// or deploy from the warehouse.
+			fmt.Sprintf("/mnt/%s/build:/mnt/build", util.AppName()),
+		},
 	}
 
 	container, err := docker.CreateContainer(config)
@@ -126,34 +126,13 @@ func (self *codeSetup) Process() error {
 		provider.RemoveNat(global_ip.String(), local_ip.String())
 	})()
 
-	boxfile := boxfile.New([]byte(self.config.Meta["boxfile"]))
-	boxConfig := boxfile.Node(self.config.Meta["name"]).Node("config")
-
-	// run plan hook TODO payload
-	output, err := util.Exec(container.ID, "plan", string(jsonPayload))
-	if err != nil {
-		fmt.Println(output)
-		self.fail = true
-		lumber.Error("plan: ", err)
-		return err
-	}
-
-	// save service in DB	
+	// save service in DB
 	service.ID = container.ID
 	service.Name = self.config.Meta["name"]
 	service.ExternalIP = global_ip.String()
 	service.InternalIP = local_ip.String()
 
-	err = json.Unmarshal([]byte(output), &service.Plan)
-	if err != nil {
-		self.fail = true
-		return err
-	}
-	for i := 0; i < len(service.Plan.Users); i++ {
-		service.Plan.Users[i].Password = util.RandomPassword()
-	}
-
-	// save the service 
+	// save the service
 	err = data.Put(util.AppName(), self.config.Meta["name"], service)
 	if err != nil {
 		self.fail = true

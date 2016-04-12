@@ -80,3 +80,15 @@ func Delete(bucket, id string) error {
 
 	})
 }
+
+func Keys(bucket string) ([]string, error) {
+	strArr := []string{}
+	err := db().View(func(tx *bolt.Tx) error {
+		bucket := tx.Bucket([]byte(bucket))
+		return bucket.ForEach(func(k, v []byte) error {
+			strArr = append(strArr, string(k))
+			return nil
+		})
+	})
+	return strArr, err
+}

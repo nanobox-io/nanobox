@@ -1,13 +1,12 @@
 package processor
 
 import (
-	"os"
 	"fmt"
+	"os"
 	"regexp"
-	
+
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox-boxfile"
-
 )
 
 type run struct {
@@ -58,7 +57,7 @@ func (self run) Process() error {
 		os.Exit(1)
 	}
 
-	// combine the boxfiles 
+	// combine the boxfiles
 	buildResult := buildProcessor.Results()
 	if buildResult.Meta["boxfile"] == "" {
 		fmt.Println("boxfile is empty!")
@@ -72,7 +71,7 @@ func (self run) Process() error {
 		serviceType := regexp.MustCompile(`\d+`).ReplaceAllString(serviceName, "")
 		image := boxfile.Node(serviceName).StringValue("image")
 		if image == "" {
-			image = "nanobox/"+serviceType
+			image = "nanobox/" + serviceType
 		}
 		service := ProcessConfig{
 			DevMode: self.config.DevMode,
@@ -82,13 +81,13 @@ func (self run) Process() error {
 				"image": image,
 			},
 		}
-		err := processor.Run("service_setup", service)
+		err := Run("service_setup", service)
 		if err != nil {
 			fmt.Printf("service_setup (%s): %s\n", serviceName, err.Error())
 			os.Exit(1)
 		}
 
-		err := processor.Run("service_start", service)
+		err = Run("service_start", service)
 		if err != nil {
 			fmt.Printf("service_setup (%s): %s\n", serviceName, err.Error())
 			os.Exit(1)
@@ -97,8 +96,8 @@ func (self run) Process() error {
 	}
 
 	// start code
-	for _, codeName := range buildBox.Nodes("code") {
-		image := buildBox.Node(codeName).StringValue("image")
+	for _, codeName := range boxfile.Nodes("code") {
+		image := boxfile.Node(codeName).StringValue("image")
 		if image == "" {
 			image = "nanobox/code"
 		}
@@ -110,13 +109,13 @@ func (self run) Process() error {
 				"image": image,
 			},
 		}
-		err := processor.Run("code_setup", code)
+		err := Run("code_setup", code)
 		if err != nil {
 			fmt.Printf("code_setup (%s): %s\n", codeName, err.Error())
 			os.Exit(1)
 		}
 
-		err := processor.Run("code_start", code)
+		err = Run("code_start", code)
 		if err != nil {
 			fmt.Printf("service_setup (%s): %s\n", codeName, err.Error())
 			os.Exit(1)

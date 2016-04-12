@@ -17,5 +17,5 @@ type Service struct {
 	ExternalIP string `json:"external_ip"`
 	InternalIP string `json:"internal_ip`
 	Plan       Plan   `json:"plan"`
-	Started bool
+	Started    bool
 }

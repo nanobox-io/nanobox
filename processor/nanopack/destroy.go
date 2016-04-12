@@ -12,7 +12,6 @@ func init() {
 	processor.Register("nanopack_destroy", nanopackDestroyFunc)
 }
 
-
 func nanopackDestroyFunc(config processor.ProcessConfig) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 	return nanopackDestroy{config}, nil
