@@ -7,6 +7,9 @@ import (
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox-boxfile"
+
+	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/data"
 )
 
 type run struct {
@@ -63,12 +66,12 @@ func (self run) Process() error {
 		fmt.Println("boxfile is empty!")
 		os.Exit(1)
 	}
-
 	boxfile := boxfile.New([]byte(buildResult.Meta["boxfile"]))
+	self.config.Meta["boxfile"] = buildResult.Meta["boxfile"]
 
 	// start services
-	for _, serviceName := range boxfile.Nodes("service") {
-		serviceType := regexp.MustCompile(`\d+`).ReplaceAllString(serviceName, "")
+	for _, serviceName := range boxfile.Nodes("data") {
+		serviceType := regexp.MustCompile(`.+\.`).ReplaceAllString(serviceName, "")
 		image := boxfile.Node(serviceName).StringValue("image")
 		if image == "" {
 			image = "nanobox/" + serviceType
@@ -79,6 +82,7 @@ func (self run) Process() error {
 			Meta: map[string]string{
 				"name":  serviceName,
 				"image": image,
+				"boxfile": self.config.Meta["boxfile"],
 			},
 		}
 		err := Run("service_setup", service)
@@ -92,7 +96,6 @@ func (self run) Process() error {
 			fmt.Printf("service_setup (%s): %s\n", serviceName, err.Error())
 			os.Exit(1)
 		}
-
 	}
 
 	// start code
@@ -107,6 +110,7 @@ func (self run) Process() error {
 			Meta: map[string]string{
 				"name":  codeName,
 				"image": image,
+				"boxfile": self.config.Meta["boxfile"],
 			},
 		}
 		err := Run("code_setup", code)
@@ -128,6 +132,25 @@ func (self run) Process() error {
 	if err != nil {
 		fmt.Println("update_portal:", err)
 		os.Exit(1)
+	}
+
+	keys, err := data.Keys(util.AppName())
+	for _, key := range keys {
+		if key != "evars" {
+			service := ProcessConfig{
+				DevMode: self.config.DevMode,
+				Verbose: self.config.Verbose,
+				Meta: map[string]string{
+					"name":  key,
+					"boxfile": self.config.Meta["boxfile"],
+				},
+			}
+			err := Run("service_remove", service)
+			if err != nil {
+				fmt.Printf("service_remove (%s): %s\n", key, err.Error())
+				os.Exit(1)
+			}
+		}
 	}
 
 	return nil

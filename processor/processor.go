@@ -36,6 +36,7 @@ func Register(name string, sb ProcessBuilder) {
 }
 
 func Build(name string, pc ProcessConfig) (Processor, error) {
+	lumber.Debug(name)
 	proc, ok := processors[name]
 	if !ok {
 		return nil, fmt.Errorf("Invalid Processor %s", name)
@@ -44,7 +45,6 @@ func Build(name string, pc ProcessConfig) (Processor, error) {
 }
 
 func Run(name string, pc ProcessConfig) error {
-	lumber.Debug(name)
 	proc, err := Build(name, pc)
 	if err != nil {
 		return err
