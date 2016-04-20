@@ -87,13 +87,6 @@ func (self *codeSetup) Process() error {
 		Image:   self.config.Meta["image"],
 		Network: "virt",
 		IP:      local_ip.String(),
-		Binds: []string{
-			// not sure what these are going to look like.
-			// we may not need any mounting here because if we are running
-			// code like production it will pull the build
-			// or deploy from the warehouse.
-			fmt.Sprintf("/mnt/%s/build:/mnt/build", util.AppName()),
-		},
 	}
 
 	container, err := docker.CreateContainer(config)

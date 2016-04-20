@@ -147,7 +147,7 @@ func (self *serviceSetup) Process() error {
 		return err
 	}
 	for i := 0; i < len(service.Plan.Users); i++ {
-		service.Plan.Users[i].Password = util.RandomPassword()
+		service.Plan.Users[i].Password = util.RandomString(10)
 	}
 
 	// save the service

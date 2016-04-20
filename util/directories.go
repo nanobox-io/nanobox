@@ -2,6 +2,9 @@ package util
 
 import (
 	"os"
+	"io/ioutil"
+	"fmt"
+	"encoding/json"
 	"path/filepath"
 
 	"github.com/mitchellh/go-homedir"
@@ -19,6 +22,15 @@ func GlobalDir() string {
 	globalDir := filepath.ToSlash(filepath.Join(p, ".nanobox"))
 	os.MkdirAll(globalDir, 0755)
 	return globalDir
+}
+
+func SshDir() string {
+	p, err := homedir.Dir()
+	if err != nil {
+		// Log.Fatal("[config/config] homedir.Dir() failed", err.Error())
+		return ""
+	}
+	return filepath.ToSlash(filepath.Join(p, ".ssh"))
 }
 
 func LocalDir() string {
@@ -63,4 +75,27 @@ func EngineDir() string {
 		}
 	}
 	return ""
+}
+
+func UserPayload() string {
+	sshFiles, err := ioutil.ReadDir(SshDir())
+	if err != nil {
+		fmt.Println("upserpayload", err)
+		return `{"ssh_files":{}}`
+	}
+	files := map[string]string{}
+	for _, file := range sshFiles {
+		if !file.IsDir() && file.Name() != "authorized_keys" && file.Name() != "config" && file.Name() != "known_hosts" {
+			content, err := ioutil.ReadFile(filepath.Join(SshDir(), file.Name()))
+			if err == nil {
+				files[file.Name()] = string(content)
+			}
+		}
+	}
+	b, err := json.Marshal(map[string]interface{}{"ssh_files": files})
+	if err != nil {
+		fmt.Println("upserpayload", err)
+		return `{"ssh_files":{}}`
+	}
+	return string(b)
 }

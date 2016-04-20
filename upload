@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+# temporaty stuff i just to make it work.
+
+s3cmd put --acl-public nanobox s3://tools.nanobox.io/nanobox/

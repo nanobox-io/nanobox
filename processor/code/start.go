@@ -75,6 +75,8 @@ func (self codeStart) Process() error {
 		return err
 	}
 
+	// fetch payload (needs hoarder data)
+
 	// run fetch build command
 	output, err = util.Exec(service.ID, "fetch", "{}")
 	if err != nil {

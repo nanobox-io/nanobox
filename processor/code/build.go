@@ -2,7 +2,6 @@ package code
 
 import (
 	"fmt"
-	"net"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox-boxfile"
@@ -32,110 +31,125 @@ func (self codeBuild) Results() processor.ProcessConfig {
 }
 
 func (self *codeBuild) Process() error {
-	// clean up old build containers
-	container, err := docker.GetContainer(fmt.Sprintf("%s-build", util.AppName()))
-	if err == nil {
-		docker.ContainerRemove(container.ID)
-		ipString := docker.GetIP(container)
-		ip_control.ReturnIP(net.ParseIP(ipString))
-	}
-
 	box := boxfile.NewFromPath(util.BoxfileLocation())
 	image := box.Node("build").StringValue("image")
 
 	if image == "" {
-		image = "nanobox/build"
+		image = "nanobox/build:v1"
 	}
 
-	_, err = docker.ImagePull(image)
+	_, err := docker.ImagePull(image)
 	if err != nil {
 		return err
 	}
 
 	// create build container
-	local_ip, err := ip_control.ReserveLocal()
+	localIp, err := ip_control.ReserveLocal()
 	if err != nil {
 		return err
 	}
 
+	// return ip
+	defer ip_control.ReturnIP(localIp)
+
+	appName := util.AppName()
 	config := docker.ContainerConfig{
 		Name:    fmt.Sprintf("%s-build", util.AppName()),
-		Image:   "nanobox/build", // this will need to be configurable some time
+		Image:   image, // this will need to be configurable some time
 		Network: "virt",
-		IP:      local_ip.String(),
+		IP:      localIp.String(),
 		Binds: []string{
-			fmt.Sprintf("/share/%s/code:/share/code", util.AppName()),
-			fmt.Sprintf("/share/%s/engine:/share/engine", util.AppName()),
-			fmt.Sprintf("/mnt/%s/build:/mnt/build", util.AppName()),
-			fmt.Sprintf("/mnt/%s/deploy:/mnt/deploy", util.AppName()),
-			fmt.Sprintf("/mnt/%s/cache:/mnt/cache", util.AppName()),
+			fmt.Sprintf("/share/%s/code:/share/code", appName),
+			fmt.Sprintf("/share/%s/engine:/share/engine", appName),
+			fmt.Sprintf("/mnt/%s/build:/mnt/build", appName),
+			fmt.Sprintf("/mnt/%s/live:/mnt/live", appName),
+			fmt.Sprintf("/mnt/%s/cache:/mnt/cache", appName),
 		},
 	}
 
-	container, err = docker.CreateContainer(config)
+	// start container
+	container, err := docker.CreateContainer(config)
 	if err != nil {
 		lumber.Error("container: ", err)
 		return err
 	}
 
+	// shutdown container
+	defer docker.ContainerRemove(container.ID)
+
+	// run user hook
+	output, err := util.Exec(container.ID, "user", util.UserPayload())
+	if err != nil {
+		fmt.Println("user", output)
+		goto FAILURE
+	}
+	
 	// run build hooks
-	output, err := util.Exec(container.ID, "configure", "{}")
+	output, err = util.Exec(container.ID, "configure", "{}")
 	if err != nil {
 		fmt.Println("configure", output)
-		return err
+		goto FAILURE
 	}
 
 	output, err = util.Exec(container.ID, "fetch", "{}")
 	if err != nil {
-		fmt.Println("build", output)
-		return err
-	}
-
-	output, err = util.Exec(container.ID, "sniff", "{}")
-	if err != nil {
-		fmt.Println(output)
-		return err
+		fmt.Println("fetch", output)
+		goto FAILURE
 	}
 
 	output, err = util.Exec(container.ID, "setup", "{}")
 	if err != nil {
-		fmt.Println(output)
-		return err
+		fmt.Println("setup", output)
+		goto FAILURE
 	}
 
 	output, err = util.Exec(container.ID, "boxfile", "{}")
 	if err != nil {
-		fmt.Println(output)
-		return err
+		fmt.Println("boxfile", output)
+		goto FAILURE
 	}
 	self.config.Meta["boxfile"] = output
 
 	output, err = util.Exec(container.ID, "prepare", "{}")
 	if err != nil {
-		fmt.Println(output)
-		return err
+		fmt.Println("prepare", output)
+		goto FAILURE
 	}
 
-	output, err = util.Exec(container.ID, "build", "{}")
-	if err != nil {
-		fmt.Println(output)
-		return err
+	// conditionally build
+	if self.config.Meta["build"] == "true" {
+		output, err = util.Exec(container.ID, "build", "{}")
+		if err != nil {
+			fmt.Println("build", output)
+			goto FAILURE
+		}
 	}
+
+	// output, err = util.Exec(container.ID, "clean", "{}")
+	// if err != nil {
+	// 	fmt.Println("clean", output)
+	// 	goto FAILURE
+	// }
 
 	output, err = util.Exec(container.ID, "pack", "{}")
 	if err != nil {
-		fmt.Println(output)
-		return err
+		fmt.Println("pack", output)
+		goto FAILURE
 	}
 
-	output, err = util.Exec(container.ID, "publish", "{}")
-	if err != nil {
-		fmt.Println(output)
-		return err
-	}
-
-	// shutdown build container
-	docker.ContainerRemove(container.ID)
-	ip_control.ReturnIP(local_ip)
 	return nil
-}
+
+FAILURE:
+	// a failure has happend and we are going to jump into the console
+	fmt.Println("there has been a failure")
+	if self.config.Verbose {
+		fmt.Println("we will be dropping you into the failed build container")
+		fmt.Println("GOOD LUCK!")
+		self.config.Meta["name"] = "build"
+		err := processor.Run("console", self.config)
+		if err != nil {
+			fmt.Println("unable to enter console", err)
+		}
+	}
+	return err
+}	

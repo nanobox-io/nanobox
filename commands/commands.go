@@ -74,7 +74,7 @@ func init() {
 
 	// subcommands
 	NanoboxCmd.AddCommand(DevCmd)
-	NanoboxCmd.AddCommand(RunCmd)
+	NanoboxCmd.AddCommand(BuildCmd)
 }
 
 func validCheck(checks ...string) func(ccmd *cobra.Command, args []string) {

@@ -17,14 +17,11 @@ type serviceRemove struct {
 	fail   bool
 }
 
-
 func init() {
-	processor.Register("service_setup", serviceRemoveFunc)
+	processor.Register("service_remove", serviceRemoveFunc)
 }
 
 func serviceRemoveFunc(config processor.ProcessConfig) (processor.Processor, error) {
-	// confirm the provider is an accessable one that we support.
-
 	return &serviceRemove{config: config}, nil
 }
 

@@ -30,7 +30,7 @@ var (
 
 func Register(name string, sb ProcessBuilder) {
 	if _, ok := processors[name]; ok {
-		panic("Duplicate Registration")
+		panic("Duplicate Registration - " + name)
 	}
 	processors[name] = sb
 }
