@@ -48,7 +48,6 @@ func (self console) Process() error {
 
 	command := []string{"exec", "-it", name, "/bin/bash"}
 
-
 	switch {
 	case self.config.Meta["workding_dir"] != "":
 		cd := fmt.Sprintf("cd %s; exec \"${SHELL:-sh}\"", self.config.Meta["workding_dir"])

@@ -88,28 +88,28 @@ func (self nanopackSetup) Process() error {
 	}
 
 	// start Portal
-	err = processor.Run("service_start", portal)
+	err = processor.Run("service_configure", portal)
 	if err != nil {
 		fmt.Println("portal_start:", err)
 		os.Exit(1)
 	}
 
 	// start Mist
-	err = processor.Run("service_start", mist)
+	err = processor.Run("service_configure", mist)
 	if err != nil {
 		fmt.Println("mist_start:", err)
 		os.Exit(1)
 	}
 
 	// start Logvac
-	err = processor.Run("service_start", logvac)
+	err = processor.Run("service_configure", logvac)
 	if err != nil {
 		fmt.Println("logvac_start:", err)
 		os.Exit(1)
 	}
 
 	// start Warehouse
-	err = processor.Run("service_start", hoarder)
+	err = processor.Run("service_configure", hoarder)
 	if err != nil {
 		fmt.Println("hoarder_start:", err)
 		os.Exit(1)

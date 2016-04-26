@@ -1,10 +1,10 @@
 package util
 
 import (
-	"os"
-	"io/ioutil"
-	"fmt"
 	"encoding/json"
+	"fmt"
+	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	"github.com/mitchellh/go-homedir"

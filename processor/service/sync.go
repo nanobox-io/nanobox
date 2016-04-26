@@ -2,10 +2,10 @@ package service
 
 import (
 	"errors"
-	"regexp"
-	"os"
 	"fmt"
-	
+	"os"
+	"regexp"
+
 	"github.com/nanobox-io/nanobox-boxfile"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
@@ -17,7 +17,6 @@ type serviceSync struct {
 	config processor.ProcessConfig
 	fail   bool
 }
-
 
 func init() {
 	processor.Register("service_sync", serviceSyncFunc)
@@ -54,16 +53,16 @@ func (self *serviceSync) Process() error {
 		// if the boxfile doesnt have a node for the service
 		// or if the old and new boxfiles dont match for this service
 		if key != "portal" &&
-		key != "hoarder" &&
-		key != "mist" &&
-		key != "logvac" &&
-		(!box.Node(key).Valid ||
-		box.Node(key).Equal(oldBoxfile.Node(key))) {
+			key != "hoarder" &&
+			key != "mist" &&
+			key != "logvac" &&
+			(!box.Node(key).Valid ||
+				box.Node(key).Equal(oldBoxfile.Node(key))) {
 			service := processor.ProcessConfig{
 				DevMode: self.config.DevMode,
 				Verbose: self.config.Verbose,
 				Meta: map[string]string{
-					"name":  key,
+					"name":    key,
 					"boxfile": self.config.Meta["boxfile"],
 				},
 			}
@@ -86,8 +85,8 @@ func (self *serviceSync) Process() error {
 			DevMode: self.config.DevMode,
 			Verbose: self.config.Verbose,
 			Meta: map[string]string{
-				"name":  serviceName,
-				"image": image,
+				"name":    serviceName,
+				"image":   image,
 				"boxfile": self.config.Meta["boxfile"],
 			},
 		}
@@ -97,7 +96,7 @@ func (self *serviceSync) Process() error {
 			os.Exit(1)
 		}
 
-		err = processor.Run("service_start", service)
+		err = processor.Run("service_configure", service)
 		if err != nil {
 			fmt.Printf("service_setup (%s): %s\n", serviceName, err.Error())
 			os.Exit(1)

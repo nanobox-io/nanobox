@@ -1,5 +1,5 @@
 package models
 
 type Boxfile struct {
-	Data   []byte
+	Data []byte
 }

@@ -70,7 +70,7 @@ func (self DockerMachine) Stop() error {
 func (self DockerMachine) Destroy() error {
 	if self.isCreated() {
 		// docker-machine rm nanobox
-		cmd := exec.Command("docker-machine", "rm", "nanobox")
+		cmd := exec.Command("docker-machine", "rm", "-f", "nanobox")
 		b, err := cmd.CombinedOutput()
 		if err != nil {
 			lumber.Debug("output: %s", b)
@@ -94,14 +94,17 @@ func (self DockerMachine) Start() error {
 	if !self.hasNetwork() {
 		lumber.Debug("not yet networked")
 		// docker network create --driver=bridge --subnet=192.168.0.0/16 --opt="com.docker.network.driver.mtu=1450" --opt="com.docker.network.bridge.name=redd0" --gateway=192.168.0.1 nanobox
-		cmd := exec.Command("docker-machine", "ssh", "nanobox", "docker", "network", "create", "--driver=bridge", "--subnet=192.168.0.0/16", "--opt=\"com.docker.network.driver.mtu=1450\"", "--opt=\"com.docker.network.bridge.name=redd0\"", "--gateway=192.168.0.1", "nanobox")
+		cmd := exec.Command("docker-machine", "ssh", "nanobox", "docker", "network", "create", "--driver=bridge", "--subnet=192.168.0.0/24", "--opt=\"com.docker.network.driver.mtu=1450\"", "--opt=\"com.docker.network.bridge.name=redd0\"", "--gateway=192.168.0.1", "nanobox")
 		b, err := cmd.CombinedOutput()
 		if err != nil {
 			lumber.Debug("add network output: %s", b)
 			return err
 		}
 	}
-	return nil
+	cmd := exec.Command("docker-machine", "ssh", "nanobox", "sudo", "modprobe", "ip_vs")
+	_, err := cmd.CombinedOutput()
+
+	return err
 }
 
 func (self DockerMachine) DockerEnv() error {

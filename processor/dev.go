@@ -2,14 +2,15 @@ package processor
 
 import (
 	"fmt"
-	"os"
 	"io/ioutil"
+	"os"
 
 	"github.com/jcelliott/lumber"
 
-	"github.com/nanobox-io/nanobox/util"	
-	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/data"
+	"github.com/nanobox-io/nanobox/util/locker"
 )
 
 type dev struct {
@@ -41,6 +42,13 @@ func (self dev) Process() error {
 		os.Exit(1)
 	}
 
+	// start all the services that are in standby
+	err = Run("service_start_all", self.config)
+	if err != nil {
+		fmt.Printf("service_start_all: %s\n", err.Error())
+		os.Exit(1)
+	}
+
 	// start nanopack service
 	err = Run("nanopack_setup", self.config)
 	if err != nil {
@@ -48,15 +56,15 @@ func (self dev) Process() error {
 		os.Exit(1)
 	}
 
+	locker.LocalLock()
 	box := models.Boxfile{}
 	box.Data, _ = ioutil.ReadFile(util.BoxfileLocation())
 
 	oldBoxData := models.Boxfile{}
 	data.Get(util.AppName()+"_meta", "boxfile", &oldBoxData)
 
-
 	if string(oldBoxData.Data) != string(box.Data) {
-	// build code (without build hook)
+		// build code (without build hook)
 		buildProcessor, err := Build("code_build", self.config)
 		if err != nil {
 			fmt.Println("code_build:", err)
@@ -85,16 +93,37 @@ func (self dev) Process() error {
 		}
 	}
 
+	// make sure everyone knows im using the app (so dont shut down)
+	app := models.App{}
+	data.Get("apps", util.AppName(), &app)
+	app.UsageCount++
+	data.Put("apps", util.AppName(), app)
+
+	locker.LocalUnlock()
 
 	// syncronize the services as per the new boxfile
 	self.config.Meta["name"] = "dev"
 	self.config.Meta["workding_dir"] = "/code"
 	err = Run("code_dev", self.config)
+	// make sure we stop let the db know we
+	// are done with the app and it can be
+	// shut down
+	data.Get("apps", util.AppName(), &app)
+	app.UsageCount--
+	data.Put("apps", util.AppName(), app)
+
 	if err != nil {
 		fmt.Println("code_dev:", err)
 		lumber.Close()
 		os.Exit(1)
-	}	
+	}
+
+	err = Run("dev_stop", self.config)
+	if err != nil {
+		fmt.Println("dev_stop:", err)
+		lumber.Close()
+		os.Exit(1)
+	}
 
 	return data.Put(util.AppName()+"_meta", "boxfile", box)
 }

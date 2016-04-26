@@ -8,10 +8,10 @@ import (
 	"github.com/nanobox-io/golang-portal-client"
 	"github.com/nanobox-io/nanobox-boxfile"
 
-	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util/data"
+	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/data"
 )
 
 type updatePortal struct {
@@ -38,7 +38,7 @@ func (self updatePortal) Process() error {
 		return err
 	}
 
-	pClient := portal.New(port.ExternalIP+":6580", "123")
+	pClient := portal.New(port.ExternalIP+":8443", "123")
 
 	// TODO: update portal
 	boxfile := boxfile.New([]byte(self.config.Meta["boxfile"]))
@@ -67,19 +67,23 @@ func (self updatePortal) Process() error {
 			} else {
 				routes = append(routes, route)
 			}
-			
+
 		}
-		
+
 	}
 
 	// send to pulse
 	err = pClient.UpdateServices(services)
 	if err != nil {
+		fmt.Println("update services", err)
+		fmt.Printf("%+v\n", services)
 		return err
 	}
 
 	err = pClient.UpdateRoutes(routes)
 	if err != nil {
+		fmt.Println("update routes", err)
+		fmt.Printf("%+v\n", routes)
 		return err
 	}
 	return nil
@@ -104,44 +108,45 @@ func duplciateRoute(services []portal.Route, service portal.Route) bool {
 	}
 	return false
 }
-	// Server struct {
-	// 	// todo: change "Id" to "name" (for clarity)
-	// 	Id             string `json:"id,omitempty"`
-	// 	Host           string `json:"host"`
-	// 	Port           int    `json:"port"`
-	// 	Forwarder      string `json:"forwarder"`
-	// 	Weight         int    `json:"weight"`
-	// 	UpperThreshold int    `json:"upper_threshold"`
-	// 	LowerThreshold int    `json:"lower_threshold"`
-	// }
-	// Service struct {
-	// 	Id          string   `json:"id,omitempty"`
-	// 	Host        string   `json:"host"`
-	// 	Interface   string   `json:"interface,omitempty"`
-	// 	Port        int      `json:"port"`
-	// 	Type        string   `json:"type"`
-	// 	Scheduler   string   `json:"scheduler"`
-	// 	Persistence int      `json:"persistence"`
-	// 	Netmask     string   `json:"netmask"`
-	// 	Servers     []Server `json:"servers,omitempty"`
-	// }
+
+// Server struct {
+// 	// todo: change "Id" to "name" (for clarity)
+// 	Id             string `json:"id,omitempty"`
+// 	Host           string `json:"host"`
+// 	Port           int    `json:"port"`
+// 	Forwarder      string `json:"forwarder"`
+// 	Weight         int    `json:"weight"`
+// 	UpperThreshold int    `json:"upper_threshold"`
+// 	LowerThreshold int    `json:"lower_threshold"`
+// }
+// Service struct {
+// 	Id          string   `json:"id,omitempty"`
+// 	Host        string   `json:"host"`
+// 	Interface   string   `json:"interface,omitempty"`
+// 	Port        int      `json:"port"`
+// 	Type        string   `json:"type"`
+// 	Scheduler   string   `json:"scheduler"`
+// 	Persistence int      `json:"persistence"`
+// 	Netmask     string   `json:"netmask"`
+// 	Servers     []Server `json:"servers,omitempty"`
+// }
 func (self updatePortal) buildService(boxfile boxfile.Boxfile, service models.Service) []portal.Service {
 	portServices := []portal.Service{}
 	for protocol, protocolMap := range ports(boxfile) {
 		for from, to := range protocolMap {
 			fromInt, _ := strconv.Atoi(from)
-			toInt, _ := strconv.Atoi(to)			
+			toInt, _ := strconv.Atoi(to)
 			portService := portal.Service{
 				Interface: "eth0",
-				Port: fromInt,
-				Type: protocol,
+				Port:      fromInt,
+				Type:      protocol,
 				Scheduler: "rr",
 				Servers: []portal.Server{
 					portal.Server{
-						Host: service.InternalIP,
-						Port: toInt, 
+						Host:      service.InternalIP,
+						Port:      toInt,
 						Forwarder: "m",
-						Weight: 1,
+						Weight:    1,
 					},
 				},
 			}
@@ -161,16 +166,16 @@ func (self updatePortal) buildService(boxfile boxfile.Boxfile, service models.Se
 	return portServices
 }
 
-	// Route struct {
-	// 	// defines match characteristics
-	// 	SubDomain string `json:"subdomain"` // subdomain to match on - "admin"
-	// 	Domain    string `json:"domain"`    // domain to match on - "myapp.com"
-	// 	Path      string `json:"path"`      // route to match on - "/admin"
-	// 	// defines actions
-	// 	Targets []string `json:"targets"` // ips of servers - ["http://127.0.0.1:8080/app1","http://127.0.0.2"] (optional)
-	// 	FwdPath string   `json:"fwdpath"` // path to forward to targets - "/goadmin" incoming req: test.com/admin -> 127.0.0.1/goadmin (optional)
-	// 	Page    string   `json:"page"`    // page to serve instead of routing to targets - "<HTML>We are fixing it</HTML>" (optional)
-	// }
+// Route struct {
+// 	// defines match characteristics
+// 	SubDomain string `json:"subdomain"` // subdomain to match on - "admin"
+// 	Domain    string `json:"domain"`    // domain to match on - "myapp.com"
+// 	Path      string `json:"path"`      // route to match on - "/admin"
+// 	// defines actions
+// 	Targets []string `json:"targets"` // ips of servers - ["http://127.0.0.1:8080/app1","http://127.0.0.2"] (optional)
+// 	FwdPath string   `json:"fwdpath"` // path to forward to targets - "/goadmin" incoming req: test.com/admin -> 127.0.0.1/goadmin (optional)
+// 	Page    string   `json:"page"`    // page to serve instead of routing to targets - "<HTML>We are fixing it</HTML>" (optional)
+// }
 func (self updatePortal) buildRoutes(boxfile boxfile.Boxfile, service models.Service) []portal.Route {
 	portalRoutes := []portal.Route{}
 	boxRoutes, ok := boxfile.Value("routes").([]string)
@@ -190,7 +195,7 @@ func (self updatePortal) buildRoutes(boxfile boxfile.Boxfile, service models.Ser
 		subdomain, path := parseRoute(route)
 		portalRoute := portal.Route{
 			SubDomain: subdomain,
-			Path: path,
+			Path:      path,
 		}
 
 		for _, to := range ports(boxfile)["http"] {
@@ -200,7 +205,7 @@ func (self updatePortal) buildRoutes(boxfile boxfile.Boxfile, service models.Ser
 			portalRoute.Targets = append(portalRoute.Targets, fmt.Sprintf("http://%s:%s", service.InternalIP, to))
 		}
 		if len(portalRoute.Targets) == 0 {
-			portalRoute.Targets = append(portalRoute.Targets, fmt.Sprintf("http://%s:%s", service.InternalIP, "80"))	
+			portalRoute.Targets = append(portalRoute.Targets, fmt.Sprintf("http://%s:%s", service.InternalIP, "80"))
 		}
 		portalRoutes = append(portalRoutes, portalRoute)
 	}
@@ -220,13 +225,12 @@ func parseRoute(route string) (subdomain, path string) {
 	return
 }
 
-
 func ports(box boxfile.Boxfile) map[string]map[string]string {
 	rtn := map[string]map[string]string{
-		"http": map[string]string{},
+		"http":  map[string]string{},
 		"https": map[string]string{},
-		"tcp": map[string]string{},
-		"udp": map[string]string{},
+		"tcp":   map[string]string{},
+		"udp":   map[string]string{},
 	}
 
 	ports, ok := box.Value("ports").([]interface{})

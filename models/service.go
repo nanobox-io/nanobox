@@ -1,8 +1,10 @@
 package models
 
 type Plan struct {
-	IPs   []string `json:"ips"`
-	Users []User   `json:"users"`
+	IPs           []string `json:"ips"`
+	Users         []User   `json:"users"`
+	MountProtocol string   `json:"mount_protocol"`
+	Behaviors     []string `json:"behaviors"`
 }
 
 type User struct {
@@ -18,4 +20,13 @@ type Service struct {
 	InternalIP string `json:"internal_ip`
 	Plan       Plan   `json:"plan"`
 	Started    bool
+}
+
+func (p Plan) BehaviorPresent(b string) bool {
+	for _, behavior := range p.Behaviors {
+		if behavior == b {
+			return true
+		}
+	}
+	return false
 }

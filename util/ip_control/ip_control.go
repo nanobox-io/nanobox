@@ -20,7 +20,8 @@ var IpNotFound = errors.New("Ip Not Found")
 var mutex = sync.Mutex{}
 
 func ReserveGlobal() (net.IP, error) {
-	locker.Lock()
+	locker.GlobalLock()
+	defer locker.GlobalUnlock()
 	mutex.Lock()
 	defer mutex.Unlock()
 
@@ -46,7 +47,8 @@ func ReserveGlobal() (net.IP, error) {
 }
 
 func Flush() {
-	locker.Lock()
+	locker.GlobalLock()
+	defer locker.GlobalUnlock()
 	mutex.Lock()
 	defer mutex.Unlock()
 
@@ -55,7 +57,8 @@ func Flush() {
 }
 
 func ReserveLocal() (net.IP, error) {
-	locker.Lock()
+	locker.GlobalLock()
+	defer locker.GlobalUnlock()
 	mutex.Lock()
 	defer mutex.Unlock()
 
@@ -80,7 +83,8 @@ func ReserveLocal() (net.IP, error) {
 }
 
 func ReturnIP(ip net.IP) error {
-	locker.Lock()
+	locker.GlobalLock()
+	defer locker.GlobalUnlock()
 	mutex.Lock()
 	defer mutex.Unlock()
 
@@ -100,7 +104,6 @@ func ReturnIP(ip net.IP) error {
 
 // do not store the space on the disk.
 func getIpSpace() (IPSpace, error) {
-	locker.Lock()
 	ipSpace := IPSpace{}
 
 	// there was no data stored for ip space

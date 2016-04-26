@@ -5,6 +5,8 @@ import (
 	"os"
 
 	"github.com/jcelliott/lumber"
+
+	"github.com/nanobox-io/nanobox/util/locker"
 )
 
 type build struct {
@@ -24,8 +26,10 @@ func (self build) Results() ProcessConfig {
 }
 
 func (self build) Process() error {
+	locker.LocalLock()
+	defer locker.LocalUnlock()
 	self.config.Meta["build"] = "true"
-	
+
 	// setup the environment (boot vm)
 	err := Run("provider_setup", self.config)
 	if err != nil {
@@ -35,7 +39,6 @@ func (self build) Process() error {
 	}
 
 	// build code
-	
 	err = Run("code_build", self.config)
 	if err != nil {
 		fmt.Println("code_build:", err)

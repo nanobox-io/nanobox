@@ -2,6 +2,8 @@ package provider
 
 import (
 	"github.com/nanobox-io/nanobox/processor"
+	"github.com/nanobox-io/nanobox/provider"
+	"github.com/nanobox-io/nanobox/util/locker"
 )
 
 type providerDestroy struct {
@@ -19,6 +21,7 @@ func (self providerDestroy) Results() processor.ProcessConfig {
 }
 
 func (self providerDestroy) Process() error {
-	// TODO: Braxton...
-	return nil
+	locker.GlobalLock()
+	defer locker.GlobalUnlock()
+	return provider.Destroy()
 }

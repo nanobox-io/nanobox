@@ -52,7 +52,7 @@ func init() {
 
 	// DevCmd.AddCommand(reloadCmd)
 	// DevCmd.AddCommand(stopCmd)
-	// DevCmd.AddCommand(destroyCmd)
+	DevCmd.AddCommand(DevDestroyCmd)
 	DevCmd.AddCommand(InfoCmd)
 	DevCmd.AddCommand(ExecCmd)
 	DevCmd.AddCommand(ConsoleCmd)

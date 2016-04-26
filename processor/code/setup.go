@@ -53,8 +53,6 @@ func (self *codeSetup) Process() error {
 	// get the service from the database
 	service := models.Service{}
 	err := data.Get(util.AppName(), self.config.Meta["name"], &service)
-
-	// create docker container
 	if err == nil {
 		// quit early if the service was found to be created already
 		return nil
@@ -89,6 +87,7 @@ func (self *codeSetup) Process() error {
 		IP:      local_ip.String(),
 	}
 
+	// create docker container
 	container, err := docker.CreateContainer(config)
 	if err != nil {
 		self.fail = true
@@ -132,6 +131,5 @@ func (self *codeSetup) Process() error {
 		lumber.Error("insert data: ", err)
 		return err
 	}
-	lumber.Debug("worked")
 	return nil
 }

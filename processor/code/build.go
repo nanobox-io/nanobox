@@ -61,9 +61,10 @@ func (self *codeBuild) Process() error {
 		Binds: []string{
 			fmt.Sprintf("/share/%s/code:/share/code", appName),
 			fmt.Sprintf("/share/%s/engine:/share/engine", appName),
-			fmt.Sprintf("/mnt/%s/build:/mnt/build", appName),
-			fmt.Sprintf("/mnt/%s/live:/mnt/live", appName),
-			fmt.Sprintf("/mnt/%s/cache:/mnt/cache", appName),
+			fmt.Sprintf("/mnt/sda1/%s/build:/mnt/build", appName),
+			fmt.Sprintf("/mnt/sda1/%s/deploy:/mnt/deploy", appName),
+			fmt.Sprintf("/mnt/sda1/%s/app:/mnt/app", appName),
+			fmt.Sprintf("/mnt/sda1/%s/cache:/mnt/cache", appName),
 		},
 	}
 
@@ -83,7 +84,7 @@ func (self *codeBuild) Process() error {
 		fmt.Println("user", output)
 		goto FAILURE
 	}
-	
+
 	// run build hooks
 	output, err = util.Exec(container.ID, "configure", "{}")
 	if err != nil {
@@ -118,23 +119,39 @@ func (self *codeBuild) Process() error {
 
 	// conditionally build
 	if self.config.Meta["build"] == "true" {
-		output, err = util.Exec(container.ID, "build", "{}")
+		output, err = util.Exec(container.ID, "compile", "{}")
 		if err != nil {
-			fmt.Println("build", output)
+			fmt.Println("compile", output)
 			goto FAILURE
 		}
+
+		output, err = util.Exec(container.ID, "pack-app", "{}")
+		if err != nil {
+			fmt.Println("pack", output)
+			goto FAILURE
+		}
+
 	}
 
-	// output, err = util.Exec(container.ID, "clean", "{}")
-	// if err != nil {
-	// 	fmt.Println("clean", output)
-	// 	goto FAILURE
-	// }
-
-	output, err = util.Exec(container.ID, "pack", "{}")
+	output, err = util.Exec(container.ID, "pack-deploy", "{}")
 	if err != nil {
-		fmt.Println("pack", output)
+		fmt.Println("pack-live", output)
 		goto FAILURE
+	}
+
+	// conditionally build
+	if self.config.Meta["build"] == "true" {
+		output, err = util.Exec(container.ID, "clean", "{}")
+		if err != nil {
+			fmt.Println("clean", output)
+			goto FAILURE
+		}
+
+		output, err = util.Exec(container.ID, "pack-deploy", "{}")
+		if err != nil {
+			fmt.Println("pack-deploy", output)
+			goto FAILURE
+		}
 	}
 
 	return nil
@@ -152,4 +169,4 @@ FAILURE:
 		}
 	}
 	return err
-}	
+}
