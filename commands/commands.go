@@ -4,10 +4,12 @@ package commands
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 
 	"github.com/jcelliott/lumber"
 	"github.com/spf13/cobra"
 
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/processor"
 	_ "github.com/nanobox-io/nanobox/processor/code"
 	_ "github.com/nanobox-io/nanobox/processor/nanopack"
@@ -30,6 +32,19 @@ var (
 		// all subcommands since this is the root command)
 		PersistentPreRun: func(ccmd *cobra.Command, args []string) {
 			if processor.DefaultConfig.Verbose {
+				// close the existing loggers
+				lumber.Close()
+				// create a new multi logger
+				multiLogger := lumber.NewMultiLogger()
+
+				fileLogger, err := lumber.NewTruncateLogger(filepath.ToSlash(filepath.Join(util.GlobalDir(), "nanobox.log")))
+				if err != nil {
+					fmt.Println("logging error:", err)
+				}
+
+				// now loges go to the console as well as a file
+				multiLogger.AddLoggers(fileLogger, lumber.NewConsoleLogger(lumber.DEBUG))
+				lumber.SetLogger(multiLogger)
 				lumber.Level(lumber.DEBUG)
 			}
 		},

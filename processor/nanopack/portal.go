@@ -72,7 +72,51 @@ func (self updatePortal) Process() error {
 
 	}
 
+	// if i have a web and no services i need to add a default one
+	if len(boxfile.Nodes("web")) != 0 && len(services) == 0 {
+		services = append(services, portal.Service{
+			Interface: "eth0",
+			Port:      80,
+			Type:      "tcp",
+			Scheduler: "rr",
+			Servers: []portal.Server{
+				portal.Server{
+					Host:      "127.0.0.1",
+					Port:      80,
+					Forwarder: "m",
+					Weight:    1,
+				},
+			},
+		})
+
+		services = append(services, portal.Service{
+			Interface: "eth0",
+			Port:      443,
+			Type:      "tcp",
+			Scheduler: "rr",
+			Servers: []portal.Server{
+				portal.Server{
+					Host:      "127.0.0.1",
+					Port:      443,
+					Forwarder: "m",
+					Weight:    1,
+				},
+			},
+		})
+	}
+
+	// if i have a web and no routes i need to add a default one
+	if len(boxfile.Nodes("web")) != 0 && len(routes) == 0  {
+		webNode := boxfile.Nodes("web")[0]
+		service := models.Service{}
+		data.Get(util.AppName(), webNode, &service)
+		routes = append(routes, portal.Route{
+			Path: "/",
+			Targets: []string{fmt.Sprintf("http://%s:%s", service.InternalIP, "80")},
+		})
+	}
 	// send to pulse
+	fmt.Printf("services: %+v\n", services)
 	err = pClient.UpdateServices(services)
 	if err != nil {
 		fmt.Println("update services", err)
@@ -80,6 +124,7 @@ func (self updatePortal) Process() error {
 		return err
 	}
 
+	fmt.Printf("routes: %+v\n", routes)
 	err = pClient.UpdateRoutes(routes)
 	if err != nil {
 		fmt.Println("update routes", err)
@@ -109,27 +154,6 @@ func duplciateRoute(services []portal.Route, service portal.Route) bool {
 	return false
 }
 
-// Server struct {
-// 	// todo: change "Id" to "name" (for clarity)
-// 	Id             string `json:"id,omitempty"`
-// 	Host           string `json:"host"`
-// 	Port           int    `json:"port"`
-// 	Forwarder      string `json:"forwarder"`
-// 	Weight         int    `json:"weight"`
-// 	UpperThreshold int    `json:"upper_threshold"`
-// 	LowerThreshold int    `json:"lower_threshold"`
-// }
-// Service struct {
-// 	Id          string   `json:"id,omitempty"`
-// 	Host        string   `json:"host"`
-// 	Interface   string   `json:"interface,omitempty"`
-// 	Port        int      `json:"port"`
-// 	Type        string   `json:"type"`
-// 	Scheduler   string   `json:"scheduler"`
-// 	Persistence int      `json:"persistence"`
-// 	Netmask     string   `json:"netmask"`
-// 	Servers     []Server `json:"servers,omitempty"`
-// }
 func (self updatePortal) buildService(boxfile boxfile.Boxfile, service models.Service) []portal.Service {
 	portServices := []portal.Service{}
 	for protocol, protocolMap := range ports(boxfile) {

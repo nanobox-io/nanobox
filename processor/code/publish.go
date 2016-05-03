@@ -12,6 +12,7 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/print"
 	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/ip_control"
 )
@@ -47,9 +48,12 @@ func (self *codePublish) Process() error {
 		image = "nanobox/build:v1"
 	}
 
-	_, err := docker.ImagePull(image)
-	if err != nil {
-		return err
+	if !docker.ImageExists(image) {
+		_, err := docker.ImagePull(image, &print.DockerImageDisplaySimple{})
+		if err != nil {
+			return err
+		}
+		
 	}
 
 	// create build container
@@ -98,6 +102,7 @@ func (self *codePublish) Process() error {
 		fmt.Println("output:", output)
 		goto FAILURE
 	}
+	fmt.Println("PUBLISHED boxfile:", output)
 	self.config.Meta["boxfile"] = output
 
 	// run build hooks

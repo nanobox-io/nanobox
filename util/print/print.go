@@ -10,22 +10,21 @@ import (
 	"github.com/howeyc/gopass"
 	"github.com/mitchellh/colorstring"
 
-	"github.com/nanobox-io/nanobox/config"
 )
 
-// Verbose only prints a message if the 'verbose' flag is passed
-func Verbose(msg string) {
-	if config.Verbose {
-		fmt.Printf(msg)
-	}
-}
+// // Verbose only prints a message if the 'verbose' flag is passed
+// func Verbose(msg string) {
+// 	if config.Verbose {
+// 		fmt.Printf(msg)
+// 	}
+// }
 
-// Silence prints output unless in silent mode
-func Silence(msg string) {
-	if !config.Silent {
-		fmt.Printf(msg)
-	}
-}
+// // Silence prints output unless in silent mode
+// func Silence(msg string) {
+// 	if !config.Silent {
+// 		fmt.Printf(msg)
+// 	}
+// }
 
 // Color wraps a print message in 'colorstring' and passes it to fmt.Println
 func Color(msg string, v ...interface{}) {
@@ -41,7 +40,8 @@ func Prompt(p string, v ...interface{}) string {
 
 	input, err := reader.ReadString('\n')
 	if err != nil {
-		config.Fatal("[util/print] reader.ReadString() failed", err.Error())
+		fmt.Println(err)
+		// config.Fatal("[util/print] reader.ReadString() failed", err.Error())
 	}
 
 	return strings.TrimSpace(input)

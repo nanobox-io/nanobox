@@ -39,6 +39,7 @@ func (self build) Process() error {
 	}
 
 	// build code
+	fmt.Println("building code")
 	err = Run("code_build", self.config)
 	if err != nil {
 		fmt.Println("code_build:", err)

@@ -19,7 +19,7 @@ type codeConfigure struct {
 
 type payload struct {
 	LogvacHost   string            `json:"logvac_host,omitempty"`
-	Config       interface{}       `json:"config"`
+	Config       interface{}       `json:"config,omitempty"`
 	Component    component         `json:"component,omitempty"`
 	Mounts       []mount           `json:"mounts,omitempty"`
 	WritableDirs interface{}       `json:"writable_dirs,omitempty"`
@@ -72,7 +72,7 @@ func (self codeConfigure) startPayload() string {
 func (self *codeConfigure) configurePayload() (string, error) {
 	me := models.Service{}
 	err := data.Get(util.AppName(), self.config.Meta["name"], &me)
-
+	fmt.Println("boxfile as i know it:", self.config.Meta["boxfile"])
 	boxfile := boxfile.New([]byte(self.config.Meta["boxfile"]))
 
 	logvac := models.Service{}

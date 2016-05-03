@@ -22,6 +22,7 @@ func LocalLock() error {
 		if ok, err := LocalTryLock(); ok {
 			return err
 		}
+		fmt.Println("local lock waiting...")
 		<-time.After(time.Second)
 	}
 	return nil

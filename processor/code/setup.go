@@ -11,6 +11,7 @@ import (
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/print"
 	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/ip_control"
 )
@@ -58,7 +59,7 @@ func (self *codeSetup) Process() error {
 		return nil
 	}
 
-	_, err = docker.ImagePull(self.config.Meta["image"])
+	_, err = docker.ImagePull(self.config.Meta["image"], &print.DockerImageDisplaySimple{})
 	if err != nil {
 		return err
 	}

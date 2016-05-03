@@ -34,19 +34,19 @@ func (self mistListen) Process() error {
 	mist := models.Service{}
 	data.Get(util.AppName(), "mist", &mist)
 
-	client, err := clients.New(mist.ExternalIP+":1446", "123")
+	client, err := clients.New(mist.ExternalIP+":1445", "123")
 	if err != nil {
 		return err
 	}
-
-	if err := client.Subscribe([]string{"log"}); err == nil {
+	
+	if err := client.Subscribe([]string{"log"}); err != nil {
 		return err
 	}
-
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt)
 	signal.Notify(sigChan, os.Kill)
 
+	
 	for {
 		select {
 		case msg := <-client.Messages():

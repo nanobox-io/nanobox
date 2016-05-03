@@ -9,6 +9,7 @@ import (
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/print"
 	"github.com/nanobox-io/nanobox/util/ip_control"
 )
 
@@ -38,7 +39,8 @@ func (self *codeBuild) Process() error {
 		image = "nanobox/build:v1"
 	}
 
-	_, err := docker.ImagePull(image)
+	fmt.Println("pulling image ("+image+")")
+	_, err := docker.ImagePull(image, &print.DockerImageDisplaySimple{})
 	if err != nil {
 		return err
 	}
@@ -109,6 +111,7 @@ func (self *codeBuild) Process() error {
 		fmt.Println("boxfile", output)
 		goto FAILURE
 	}
+	fmt.Println("boxfile", output)
 	self.config.Meta["boxfile"] = output
 
 	output, err = util.Exec(container.ID, "prepare", "{}")

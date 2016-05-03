@@ -1,5 +1,6 @@
-code.build:
-  engine: nanobox-io/nanobox-engine-nodejs#refactor/v1
-web.superdduper:
-  image: nanobox/code:v1
-  start: sleep 1h
+--- 
+code.build: 
+  engine: "nanobox-io/nanobox-engine-nodejs#refactor/v1"
+web.superdduper: 
+  image: "nanobox/code:v1"
+  start: "sleep 1h"

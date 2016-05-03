@@ -8,7 +8,9 @@ import (
 
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox/processor"
+
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/print"
 	"github.com/nanobox-io/nanobox/util/ip_control"
 )
 
@@ -38,7 +40,7 @@ func (self *codeDev) Process() error {
 		image = "nanobox/build:v1"
 	}
 
-	_, err := docker.ImagePull(image)
+	_, err := docker.ImagePull(image, &print.DockerImageDisplaySimple{})
 	if err != nil {
 		return err
 	}
@@ -60,8 +62,8 @@ func (self *codeDev) Process() error {
 		IP:      localIp.String(),
 		Binds: []string{
 			fmt.Sprintf("/share/%s/code:/code", appName),
-			fmt.Sprintf("/mnt/%s/build:/data", appName),
-			fmt.Sprintf("/mnt/%s/cache:/mnt/cache", appName),
+			fmt.Sprintf("/mnt/sda1/%s/build:/data", appName),
+			fmt.Sprintf("/mnt/sda1/%s/cache:/mnt/cache", appName),
 		},
 	}
 	for _, lib_dir := range box.Node("code.build").StringSliceValue("lib_dirs") {

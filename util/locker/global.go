@@ -18,6 +18,7 @@ func GlobalLock() error {
 		if ok, err := GlobalTryLock(); ok {
 			return err
 		}
+		fmt.Println("global lock waiting...")
 		<-time.After(time.Second)
 	}
 	mutex.Lock()
