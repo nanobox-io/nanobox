@@ -32,8 +32,9 @@ func (self DockerMachine) Valid() error {
 
 func (self DockerMachine) Create() error {
 	if !self.isCreated() {
-		fmt.Println("Creating docker-machine")
-		lumber.Debug("not yet created")
+		fmt.Println("-> platform init")
+		fmt.Println("  -> create platform")		
+		lumber.Debug("platform not yet created")
 		// docker-machine create --driver virtualbox nanobox
 		cmd := exec.Command("docker-machine", "create", "--driver", "virtualbox", "nanobox")
 		b, err := cmd.CombinedOutput()
@@ -83,6 +84,7 @@ func (self DockerMachine) Destroy() error {
 
 func (self DockerMachine) Start() error {
 	if !self.isStarted() {
+		fmt.Println("  -> start platform")
 		// docker-machine start nanobox
 		cmd := exec.Command("docker-machine", "start", "nanobox")
 		b, err := cmd.CombinedOutput()
@@ -93,7 +95,7 @@ func (self DockerMachine) Start() error {
 	}
 
 	if !self.hasNetwork() {
-		fmt.Println("setting up networking")
+		fmt.Println("  -> setting up networking")
 		lumber.Debug("not yet networked")
 		// docker network create --driver=bridge --subnet=192.168.0.0/16 --opt="com.docker.network.driver.mtu=1450" --opt="com.docker.network.bridge.name=redd0" --gateway=192.168.0.1 nanobox
 		cmd := exec.Command("docker-machine", "ssh", "nanobox", "docker", "network", "create", "--driver=bridge", "--subnet=192.168.0.0/24", "--opt=\"com.docker.network.driver.mtu=1450\"", "--opt=\"com.docker.network.bridge.name=redd0\"", "--gateway=192.168.0.1", "nanobox")

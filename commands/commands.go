@@ -9,12 +9,12 @@ import (
 	"github.com/jcelliott/lumber"
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/processor"
 	_ "github.com/nanobox-io/nanobox/processor/code"
 	_ "github.com/nanobox-io/nanobox/processor/nanopack"
 	_ "github.com/nanobox-io/nanobox/processor/provider"
 	_ "github.com/nanobox-io/nanobox/processor/service"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/validate"
 )
 
@@ -88,8 +88,12 @@ func init() {
 	// NanoboxCmd.AddCommand(updateCmd)
 
 	// subcommands
-	NanoboxCmd.AddCommand(DevCmd)
+	NanoboxCmd.AddCommand(LinkCmd)
+	NanoboxCmd.AddCommand(LoginCmd)
+	NanoboxCmd.AddCommand(LogoutCmd)
 	NanoboxCmd.AddCommand(BuildCmd)
+	NanoboxCmd.AddCommand(DevCmd)
+
 }
 
 func validCheck(checks ...string) func(ccmd *cobra.Command, args []string) {

@@ -118,6 +118,7 @@ func (self serviceConfigure) Process() error {
 		return missingImageOrName
 	}
 
+	fmt.Println("-> configuring", self.config.Meta["name"])
 	// get the service from the database
 	service := models.Service{}
 	err := data.Get(util.AppName(), self.config.Meta["name"], &service)

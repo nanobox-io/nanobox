@@ -106,17 +106,16 @@ func (self updatePortal) Process() error {
 	}
 
 	// if i have a web and no routes i need to add a default one
-	if len(boxfile.Nodes("web")) != 0 && len(routes) == 0  {
+	if len(boxfile.Nodes("web")) != 0 && len(routes) == 0 {
 		webNode := boxfile.Nodes("web")[0]
 		service := models.Service{}
 		data.Get(util.AppName(), webNode, &service)
 		routes = append(routes, portal.Route{
-			Path: "/",
+			Path:    "/",
 			Targets: []string{fmt.Sprintf("http://%s:%s", service.InternalIP, "80")},
 		})
 	}
 	// send to pulse
-	fmt.Printf("services: %+v\n", services)
 	err = pClient.UpdateServices(services)
 	if err != nil {
 		fmt.Println("update services", err)
@@ -124,7 +123,6 @@ func (self updatePortal) Process() error {
 		return err
 	}
 
-	fmt.Printf("routes: %+v\n", routes)
 	err = pClient.UpdateRoutes(routes)
 	if err != nil {
 		fmt.Println("update routes", err)

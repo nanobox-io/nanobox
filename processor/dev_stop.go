@@ -26,6 +26,7 @@ func (self devStop) Results() ProcessConfig {
 }
 
 func (self devStop) Process() error {
+	fmt.Println("-> stopping dev")
 	app := models.App{}
 	data.Get("apps", util.AppName(), app)
 
@@ -55,12 +56,14 @@ func (self devStop) Process() error {
 		if app.UsageCount != 0 {
 			// i found an app that is doing something
 			// so dont shut down the provider
+			fmt.Println("-> leaving provider running")
 			return nil
 		}
 	}
 
 	// this part only gets executed if we cant find any apps
 	// doing anything in the loop above
+	fmt.Println("-> stopping provider")
 	return Run("provider_stop", self.config)
 	// return nil
 }

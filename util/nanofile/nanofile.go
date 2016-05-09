@@ -24,6 +24,7 @@ func Viper() *viper.Viper {
 	vip.SetDefault("provider", "docker_machine") // this may change in the future (adding additional hosts such as vmware
 	vip.SetDefault("ram", 1024)
 	vip.SetDefault("use-proxy", false)
+	vip.SetDefault("production_host", "api.nanobox.io/v1/")
 
 	vip.SetConfigFile(filepath.Join(util.GlobalDir(), "nanofile.yml"))
 	vip.MergeInConfig() // using merge because it starts from existing config

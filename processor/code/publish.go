@@ -12,9 +12,9 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util"
-	"github.com/nanobox-io/nanobox/util/print"
 	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/ip_control"
+	"github.com/nanobox-io/nanobox/util/print"
 )
 
 type codePublish struct {
@@ -49,11 +49,11 @@ func (self *codePublish) Process() error {
 	}
 
 	if !docker.ImageExists(image) {
-		_, err := docker.ImagePull(image, &print.DockerImageDisplaySimple{})
+		_, err := docker.ImagePull(image, &print.DockerImageDisplaySimple{Prefix: "downloading "+image})
 		if err != nil {
 			return err
 		}
-		
+
 	}
 
 	// create build container
@@ -111,7 +111,6 @@ func (self *codePublish) Process() error {
 	pload["warehouse_token"] = self.config.Meta["warehouse_token"]
 	pload["boxfile"] = output
 	b, err = json.Marshal(pload)
-	fmt.Println("payload:", string(b))
 	output, err = util.Exec(container.ID, "publish", string(b))
 	if err != nil {
 		fmt.Println("output:", output)

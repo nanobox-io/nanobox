@@ -70,9 +70,9 @@ func (self codeConfigure) startPayload() string {
 }
 
 func (self *codeConfigure) configurePayload() (string, error) {
+
 	me := models.Service{}
 	err := data.Get(util.AppName(), self.config.Meta["name"], &me)
-	fmt.Println("boxfile as i know it:", self.config.Meta["boxfile"])
 	boxfile := boxfile.New([]byte(self.config.Meta["boxfile"]))
 
 	logvac := models.Service{}
@@ -162,6 +162,8 @@ func (self *codeConfigure) Process() error {
 		return err
 	}
 
+	fmt.Println("-> configuring", self.config.Meta["name"])
+
 	if service.Started {
 		return nil
 	}
@@ -179,7 +181,6 @@ func (self *codeConfigure) Process() error {
 		fmt.Println("error building configure payload", err)
 		return err
 	}
-	fmt.Println("configure payload", payload)
 	output, err = util.Exec(service.ID, "configure", payload)
 	if err != nil {
 		fmt.Println(output)
@@ -187,7 +188,6 @@ func (self *codeConfigure) Process() error {
 	}
 
 	// run start command
-	fmt.Println("start payload", self.startPayload())
 	output, err = util.Exec(service.ID, "start", self.startPayload())
 	if err != nil {
 		fmt.Println(output)

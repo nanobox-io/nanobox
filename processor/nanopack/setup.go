@@ -25,7 +25,7 @@ func (self nanopackSetup) Results() processor.ProcessConfig {
 }
 
 func (self nanopackSetup) Process() error {
-	// TODO: make setups and starts concurrent
+	fmt.Println("-> Setup Nanopack services")
 
 	// setup Portal
 	portal := processor.ProcessConfig{

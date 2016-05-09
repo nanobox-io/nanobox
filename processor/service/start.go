@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"errors"
 
 	"github.com/nanobox-io/golang-docker-client"
@@ -35,6 +36,7 @@ func (self *serviceStart) Process() error {
 		return missingImageOrName
 	}
 
+	fmt.Println("-> starting", self.config.Meta["name"])
 	// get the service from the database
 	service := models.Service{}
 	data.Get(util.AppName(), self.config.Meta["name"], &service)

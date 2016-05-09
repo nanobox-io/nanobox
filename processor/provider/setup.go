@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"fmt"
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/golang-docker-client"
@@ -62,6 +63,7 @@ func (self providerSetup) Process() error {
 
 	// mount my folder
 	if util.EngineDir() != "" {
+		fmt.Println("  -> mount engine")
 		err = provider.AddMount(util.EngineDir(), "/share/"+util.AppName()+"/engine")
 		if err != nil {
 			lumber.Error("AddMount", err)

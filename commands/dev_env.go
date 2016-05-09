@@ -7,9 +7,9 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/data"
-	"github.com/nanobox-io/nanobox/models"
 )
 
 var (
@@ -28,7 +28,7 @@ var (
 			evars := models.EnvVars{}
 			data.Get(util.AppName()+"_meta", "env", &evars)
 			for _, arg := range args {
-				
+
 				for _, pair := range strings.Split(arg, ",") {
 					parts := strings.Split(pair, ":")
 					if len(parts) == 2 {
@@ -67,9 +67,7 @@ var (
 			fmt.Println(evars)
 
 		},
-
 	}
-
 )
 
 func init() {

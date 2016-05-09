@@ -123,6 +123,7 @@ func (self devDeploy) Process() error {
 
 	}
 
+	fmt.Println("-> updating router")
 	// update nanoagent portal
 	err = Run("update_portal", self.config)
 	if err != nil {
@@ -130,6 +131,7 @@ func (self devDeploy) Process() error {
 		os.Exit(1)
 	}
 
+	fmt.Println("-> tailing logs")
 	// hang and do some logging until they are done
 	err = Run("mist_log", self.config)
 	if err != nil {

@@ -9,7 +9,6 @@ import (
 
 	"github.com/howeyc/gopass"
 	"github.com/mitchellh/colorstring"
-
 )
 
 // // Verbose only prints a message if the 'verbose' flag is passed

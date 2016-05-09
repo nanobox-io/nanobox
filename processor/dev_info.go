@@ -15,7 +15,7 @@ type info struct {
 }
 
 func init() {
-	Register("info", infoFunc)
+	Register("dev_info", infoFunc)
 }
 
 func infoFunc(config ProcessConfig) (Processor, error) {

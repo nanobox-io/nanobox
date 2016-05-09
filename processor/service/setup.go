@@ -13,9 +13,9 @@ import (
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util"
-	"github.com/nanobox-io/nanobox/util/print"
 	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/ip_control"
+	"github.com/nanobox-io/nanobox/util/print"
 )
 
 type serviceSetup struct {
@@ -48,10 +48,12 @@ func (self serviceSetup) Results() processor.ProcessConfig {
 }
 
 func (self *serviceSetup) Process() error {
+
 	// make sure i was given a name and image
 	if self.config.Meta["name"] == "" || self.config.Meta["image"] == "" {
 		return missingImageOrName
 	}
+	fmt.Println("-> setting up", self.config.Meta["name"])
 
 	// get the service from the database
 	service := models.Service{}
@@ -63,7 +65,7 @@ func (self *serviceSetup) Process() error {
 		return nil
 	}
 
-	_, err := docker.ImagePull(self.config.Meta["image"], &print.DockerImageDisplaySimple{})
+	_, err := docker.ImagePull(self.config.Meta["image"], &print.DockerImageDisplaySimple{Prefix: "downloading "+self.config.Meta["image"]})
 	if err != nil {
 		return err
 	}
@@ -92,6 +94,7 @@ func (self *serviceSetup) Process() error {
 		IP:      local_ip.String(),
 	}
 
+	fmt.Println("  -> starting container")
 	container, err := docker.CreateContainer(config)
 	if err != nil {
 		self.fail = true

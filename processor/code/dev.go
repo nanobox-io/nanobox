@@ -10,8 +10,8 @@ import (
 	"github.com/nanobox-io/nanobox/processor"
 
 	"github.com/nanobox-io/nanobox/util"
-	"github.com/nanobox-io/nanobox/util/print"
 	"github.com/nanobox-io/nanobox/util/ip_control"
+	"github.com/nanobox-io/nanobox/util/print"
 )
 
 type codeDev struct {
@@ -40,7 +40,7 @@ func (self *codeDev) Process() error {
 		image = "nanobox/build:v1"
 	}
 
-	_, err := docker.ImagePull(image, &print.DockerImageDisplaySimple{})
+	_, err := docker.ImagePull(image, &print.DockerImageDisplaySimple{Prefix: "downloading "+image})
 	if err != nil {
 		return err
 	}

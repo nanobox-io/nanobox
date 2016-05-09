@@ -23,5 +23,11 @@ func (self providerDestroy) Results() processor.ProcessConfig {
 func (self providerDestroy) Process() error {
 	locker.GlobalLock()
 	defer locker.GlobalUnlock()
+
+	err := self.RemoveDatabase()
+	if err != nil {
+		return err
+	}
+
 	return provider.Destroy()
 }

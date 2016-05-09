@@ -35,6 +35,7 @@ func (self serviceSync) Results() processor.ProcessConfig {
 }
 
 func (self *serviceSync) Process() error {
+	fmt.Println("-> provision data services")
 	// populate new boxfile
 	box := boxfile.New([]byte(self.config.Meta["boxfile"]))
 

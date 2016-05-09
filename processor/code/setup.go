@@ -11,9 +11,9 @@ import (
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util"
-	"github.com/nanobox-io/nanobox/util/print"
 	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/ip_control"
+	"github.com/nanobox-io/nanobox/util/print"
 )
 
 type codeSetup struct {
@@ -59,7 +59,7 @@ func (self *codeSetup) Process() error {
 		return nil
 	}
 
-	_, err = docker.ImagePull(self.config.Meta["image"], &print.DockerImageDisplaySimple{})
+	_, err = docker.ImagePull(self.config.Meta["image"], &print.DockerImageDisplaySimple{Prefix: "downloading "+self.config.Meta["image"]})
 	if err != nil {
 		return err
 	}
@@ -81,6 +81,7 @@ func (self *codeSetup) Process() error {
 		ip_control.ReturnIP(global_ip)
 	})()
 
+	fmt.Println("-> building container", self.config.Meta["name"])
 	config := docker.ContainerConfig{
 		Name:    fmt.Sprintf("%s-%s", util.AppName(), self.config.Meta["name"]),
 		Image:   self.config.Meta["image"],

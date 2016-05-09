@@ -2,12 +2,12 @@
 package print
 
 import (
-	"fmt"
 	"bytes"
-	"io"
-	"sort"
-	"os"
 	"encoding/json"
+	"fmt"
+	"io"
+	"os"
+	"sort"
 )
 
 // "Pulling fs layer"
@@ -29,37 +29,38 @@ const (
 	Complete
 )
 
-var(
+var (
 	displays = map[int]string{
-		Pulling: "_",
-		Waiting: ".",
+		Pulling:     "_",
+		Waiting:     ".",
 		Downloading: "_",
-		Verifying: "^",
-		DLComplete: "↓",
-		Extracting: "/",
-		Complete: "✓",
+		Verifying:   "^",
+		DLComplete:  "↓",
+		Extracting:  "/",
+		Complete:    "✓",
 	}
 	nextDownloader = map[string]string{
-		"":"_", // catch any messups during a download
-		"_":"-",
-		"-":"‾",
-		"‾":"_",
+		"":  "_", // catch any messups during a download
+		"_": "-",
+		"-": "‾",
+		"‾": "_",
 	}
 	nextExtracter = map[string]string{
-		"":"/", // catch messups during extracting
-		"/":"\\",
-		"\\":"/",
+		"":   "/", // catch messups during extracting
+		"/":  "\\",
+		"\\": "/",
 	}
 )
 
 type Status struct {
-	Status          string        `json:"status,omitempty"`
-	ID              string        `json:"id,omitempty"`
+	Status string `json:"status,omitempty"`
+	ID     string `json:"id,omitempty"`
 }
 
 type DockerImageDisplaySimple struct {
+	Prefix     string
 	idDisplays map[string]string
-	leftover []byte
+	leftover   []byte
 }
 
 func (self *DockerImageDisplaySimple) bar() string {
@@ -71,8 +72,8 @@ func (self *DockerImageDisplaySimple) bar() string {
 	sort.Sort(sort.StringSlice(keys))
 
 	s := ""
-	for _, key := range keys{
-		s = s+self.idDisplays[key]
+	for _, key := range keys {
+		s = s + self.idDisplays[key]
 	}
 	return fmt.Sprintf("[%s]", s)
 }
@@ -127,16 +128,17 @@ func (self *DockerImageDisplaySimple) Write(data []byte) (int, error) {
 			self.idDisplays[status.ID] = displays[Complete]
 		default:
 			if bytes.HasPrefix([]byte(status.Status), []byte("Status:")) {
-				fmt.Printf("\n%s\n", status.Status)
+				// clear the downloader
+				fmt.Fprintf(os.Stdout, "%c[2K\r", 27)
+				// fmt.Printf("\n%s\n", status.Status)
 				return len(data), nil
 			}
 			// fmt.Printf("couldnt find athing for : %+v", status)
 		}
 		fmt.Fprintf(os.Stdout, "%c[2K\r", 27)
-		fmt.Printf("downloading image: %s", self.bar())
+		fmt.Printf("%s: %s", self.Prefix, self.bar())
 
 	}
 
 	return len(data), nil
 }
-

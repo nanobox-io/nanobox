@@ -38,7 +38,7 @@ func (self mistListen) Process() error {
 	if err != nil {
 		return err
 	}
-	
+
 	if err := client.Subscribe([]string{"log"}); err != nil {
 		return err
 	}
@@ -46,13 +46,11 @@ func (self mistListen) Process() error {
 	signal.Notify(sigChan, os.Interrupt)
 	signal.Notify(sigChan, os.Kill)
 
-	
 	for {
 		select {
 		case msg := <-client.Messages():
 			fmt.Printf("message: %+v\n", msg)
 		case <-sigChan:
-			fmt.Println("quit")
 			return nil
 		}
 	}
