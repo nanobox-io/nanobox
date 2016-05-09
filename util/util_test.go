@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/nanobox-io/nanobox/config"
+	// "github.com/nanobox-io/nanobox/config"
 	"github.com/nanobox-io/nanobox/util"
 )
 
