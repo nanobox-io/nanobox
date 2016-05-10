@@ -126,7 +126,7 @@ FAILURE:
 		fmt.Println("we will be dropping you into the failed build container")
 		fmt.Println("GOOD LUCK!")
 		self.config.Meta["name"] = "build"
-		err := processor.Run("console", self.config)
+		err := processor.Run("dev_console", self.config)
 		if err != nil {
 			fmt.Println("unable to enter console", err)
 		}

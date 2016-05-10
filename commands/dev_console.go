@@ -14,7 +14,7 @@ var (
 	//
 	ConsoleCmd = &cobra.Command{
 		Use:   "console",
-		Short: "fire off a container",
+		Short: "do the console thing",
 		Long:  ``,
 
 		PreRun: validCheck("provider"),
@@ -24,7 +24,7 @@ var (
 				return
 			}
 			processor.DefaultConfig.Meta["name"] = args[0]
-			processor.Run("console", processor.DefaultConfig)
+			processor.Run("dev_console", processor.DefaultConfig)
 		},
 		// PostRun: halt,
 	}

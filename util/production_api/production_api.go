@@ -32,6 +32,25 @@ func App(slug string) (models.App, error) {
 	return app, doRequest("GET", "apps/"+slug, nil, &app)
 }
 
+func Deploy(appId, id, boxfile, message string) error {
+	body := map[string]string{
+	  "boxfile_content": boxfile,
+	  "build_id": id,
+	  "commit_message": message,
+	}
+	return doRequest("POST", fmt.Sprintf("/apps/%s/deploys", appId), body, nil)
+}
+
+func EstablishTunnel(appId, id string) (string, string, error) {
+	// do somethign else here
+	return "1.2.3.4", "secrettoken", nil
+}
+
+func EstablishConsole(appId, id string) (string, string, error) {
+	// do somethign else here
+	return "1.2.3.4", "secrettoken", nil
+}
+
 func doRequest(method, path string, requestBody, responseBody interface{}) error {
 	var rbodyReader io.Reader
 	if requestBody != nil {

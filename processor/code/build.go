@@ -83,26 +83,22 @@ func (self *codeBuild) Process() error {
 	// run user hook
 	output, err := util.Exec(container.ID, "user", util.UserPayload())
 	if err != nil {
-		fmt.Println("user", output)
 		goto FAILURE
 	}
 
 	// run build hooks
 	output, err = util.Exec(container.ID, "configure", "{}")
 	if err != nil {
-		fmt.Println("configure", output)
 		goto FAILURE
 	}
 
 	output, err = util.Exec(container.ID, "fetch", "{}")
 	if err != nil {
-		fmt.Println("fetch", output)
 		goto FAILURE
 	}
 
 	output, err = util.Exec(container.ID, "setup", "{}")
 	if err != nil {
-		fmt.Println("setup", output)
 		goto FAILURE
 	}
 
@@ -114,7 +110,6 @@ func (self *codeBuild) Process() error {
 
 	output, err = util.Exec(container.ID, "prepare", "{}")
 	if err != nil {
-		fmt.Println("prepare", output)
 		goto FAILURE
 	}
 
@@ -122,21 +117,18 @@ func (self *codeBuild) Process() error {
 	if self.config.Meta["build"] == "true" {
 		output, err = util.Exec(container.ID, "compile", "{}")
 		if err != nil {
-			fmt.Println("compile", output)
 			goto FAILURE
 		}
 
 		output, err = util.Exec(container.ID, "pack-app", "{}")
 		if err != nil {
-			fmt.Println("pack", output)
 			goto FAILURE
 		}
 
 	}
 
-	output, err = util.Exec(container.ID, "pack-deploy", "{}")
+	output, err = util.Exec(container.ID, "pack-build", "{}")
 	if err != nil {
-		fmt.Println("pack-live", output)
 		goto FAILURE
 	}
 
@@ -160,11 +152,12 @@ func (self *codeBuild) Process() error {
 FAILURE:
 	// a failure has happend and we are going to jump into the console
 	fmt.Println("there has been a failure")
+	fmt.Println(err)
 	if self.config.Verbose {
 		fmt.Println("we will be dropping you into the failed build container")
 		fmt.Println("GOOD LUCK!")
 		self.config.Meta["name"] = "build"
-		err := processor.Run("console", self.config)
+		err := processor.Run("dev_console", self.config)
 		if err != nil {
 			fmt.Println("unable to enter console", err)
 		}

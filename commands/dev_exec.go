@@ -30,7 +30,7 @@ var (
 				processor.DefaultConfig.Meta["name"] = args[0]
 				processor.DefaultConfig.Meta["command"] = strings.Join(args[1:], " ")
 			}
-			processor.Run("console", processor.DefaultConfig)
+			processor.Run("dev_console", processor.DefaultConfig)
 		},
 		// PostRun: halt,
 	}

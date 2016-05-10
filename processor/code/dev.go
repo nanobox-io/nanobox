@@ -61,13 +61,14 @@ func (self *codeDev) Process() error {
 		Network: "virt",
 		IP:      localIp.String(),
 		Binds: []string{
-			fmt.Sprintf("/share/%s/code:/code", appName),
+			fmt.Sprintf("/share/%s/code:/app", appName),
 			fmt.Sprintf("/mnt/sda1/%s/build:/data", appName),
 			fmt.Sprintf("/mnt/sda1/%s/cache:/mnt/cache", appName),
 		},
 	}
+	lumber.Debug("lib_dirs: %+v", box.Node("code.build").StringSliceValue("lib_dirs"))
 	for _, lib_dir := range box.Node("code.build").StringSliceValue("lib_dirs") {
-		config.Binds = append(config.Binds, fmt.Sprintf("/mnt/%s/cache/lib_dirs/%s:/code/%s", util.AppName(), lib_dir, lib_dir))
+		config.Binds = append(config.Binds, fmt.Sprintf("/mnt/%s/cache/lib_dirs/%s:/app/%s", util.AppName(), lib_dir, lib_dir))
 	}
 	// add lib_dirs
 	// fmt.Sprintf("/mnt/%s/cache/lib_dirs/vendor:/code/vendor", util.AppName()),
@@ -90,7 +91,7 @@ func (self *codeDev) Process() error {
 	}
 
 	// console into the dev container
-	err = processor.Run("console", self.config)
+	err = processor.Run("dev_console", self.config)
 	if err != nil {
 		fmt.Println("unable to enter console", err)
 	}

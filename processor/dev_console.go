@@ -12,23 +12,23 @@ import (
 	"github.com/nanobox-io/nanobox/util"
 )
 
-type console struct {
+type devConsole struct {
 	config ProcessConfig
 }
 
 func init() {
-	Register("console", consoleFunc)
+	Register("dev_console", devConsoleFunc)
 }
 
-func consoleFunc(conf ProcessConfig) (Processor, error) {
-	return console{conf}, nil
+func devConsoleFunc(conf ProcessConfig) (Processor, error) {
+	return devConsole{conf}, nil
 }
 
-func (self console) Results() ProcessConfig {
+func (self devConsole) Results() ProcessConfig {
 	return self.config
 }
 
-func (self console) Process() error {
+func (self devConsole) Process() error {
 	// setup the environment (boot vm)
 	err := Run("provider_setup", self.config)
 	if err != nil {
@@ -49,8 +49,8 @@ func (self console) Process() error {
 	command := []string{"exec", "-it", name, "/bin/bash"}
 
 	switch {
-	case self.config.Meta["workding_dir"] != "":
-		cd := fmt.Sprintf("cd %s; exec \"${SHELL:-sh}\"", self.config.Meta["workding_dir"])
+	case self.config.Meta["working_dir"] != "":
+		cd := fmt.Sprintf("cd %s; exec \"${SHELL:-sh}\"", self.config.Meta["working_dir"])
 		command = append(command, "-c", cd)
 	case self.config.Meta["command"] != "":
 		command = append(command, "-c", self.config.Meta["command"])

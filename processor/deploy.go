@@ -7,6 +7,9 @@ import (
 	"github.com/jcelliott/lumber"
 	// "github.com/nanobox-io/nanobox-boxfile"
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util/data"
+	"github.com/nanobox-io/nanobox/util/production_api"
 )
 
 type deploy struct {
@@ -62,7 +65,10 @@ func (self deploy) Process() error {
 	// boxfile := boxfile.New([]byte(publishResult.Meta["boxfile"]))
 	self.config.Meta["boxfile"] = publishResult.Meta["boxfile"]
 
-	// tell odin what happened
+	// get the appid for the deploying app
+	link := models.AppLinks{}
+	data.Get(util.AppName(), "links", &link)
 
-	return nil
+	// tell odin what happened
+	return production_api.Deploy(link["default"], self.config.Meta["build_id"], self.config.Meta["boxfile"], self.config.Meta["message"])
 }

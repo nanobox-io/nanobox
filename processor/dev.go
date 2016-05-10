@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/jcelliott/lumber"
+	"github.com/nanobox-io/nanobox-boxfile"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
@@ -63,7 +64,7 @@ func (self dev) Process() error {
 	oldBoxData := models.Boxfile{}
 	data.Get(util.AppName()+"_meta", "boxfile", &oldBoxData)
 
-	if string(oldBoxData.Data) != string(box.Data) {
+	if string(oldBoxData.Data) != string(box.Data) || len(box.Data) == 0 {
 		// build code (without build hook)
 		buildProcessor, err := Build("code_build", self.config)
 		if err != nil {
@@ -82,6 +83,7 @@ func (self dev) Process() error {
 			fmt.Println("boxfile is empty!")
 			os.Exit(1)
 		}
+		box.Data = []byte(buildResult.Meta["boxfile"])
 		self.config.Meta["boxfile"] = buildResult.Meta["boxfile"]
 
 		// syncronize the services as per the new boxfile
@@ -103,7 +105,12 @@ func (self dev) Process() error {
 
 	// syncronize the services as per the new boxfile
 	self.config.Meta["name"] = "dev"
-	self.config.Meta["workding_dir"] = "/code"
+	self.config.Meta["working_dir"] = "/app"
+	boxf := boxfile.New(box.Data)
+	if boxf.Node("dev").StringValue("cwd") != "" {
+		self.config.Meta["working_dir"] = boxf.Node("dev").StringValue("cwd")
+	}
+
 	err = Run("code_dev", self.config)
 	// make sure we stop let the db know we
 	// are done with the app and it can be
