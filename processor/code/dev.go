@@ -36,8 +36,7 @@ func (self codeDev) Results() processor.ProcessConfig {
 
 func (self *codeDev) Process() error {
 	bBox := models.Boxfile{}
-	data.Get(util.AppName()+"_meta", "build_boxfile", bBox)
-
+	data.Get(util.AppName()+"_meta", "build_boxfile", &bBox)
 	box := boxfile.New(bBox.Data)
 	image := box.Node("build").StringValue("image")
 
