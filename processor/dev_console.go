@@ -46,7 +46,7 @@ func (self devConsole) Process() error {
 		name = container.ID
 	}
 
-	command := []string{"exec", "-it", name, "/bin/bash"}
+	command := []string{"exec", "-u", "gonano", "-it", name, "/bin/bash"}
 
 	switch {
 	case self.config.Meta["working_dir"] != "":
