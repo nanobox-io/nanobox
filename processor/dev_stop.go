@@ -26,11 +26,11 @@ func (self devStop) Results() ProcessConfig {
 }
 
 func (self devStop) Process() error {
-	fmt.Println("-> stopping dev")
 	app := models.App{}
-	data.Get("apps", util.AppName(), app)
+	data.Get("apps", util.AppName(), &app)
 
 	if app.UsageCount == 0 {
+		fmt.Println("-> stopping dev")
 		// remove all code containers
 		boxfile := boxfile.New([]byte(self.config.Meta["boxfile"]))
 
