@@ -19,12 +19,8 @@ Frist `go get` the project...
 ### Usage
 
 Available styles:
-+ Header(header string)
 + ProcessStart(process string)
 + ProcessEnd(process string)
-+ SubTask(taks string)
-+ SubTaskSuccess()
-+ SubTaskFail()
 + Bullet(bullet string/[]string{"bullet", "bullet"...})
 + Warning(body string)
 + Fatal(header, body string)
@@ -34,55 +30,16 @@ For detailed information see the [complete documentation](http://godoc.org/githu
 
 ### Examples
 
-
-#### Headers
-```go
-stylish.Header("i am a header")
-
-// outputs
-:::::::::::::::::::::::::: I AM A HEADER :::::::::::::::::::::::::
-```
-
-
 #### Processes
 ```go
 stylish.ProcessStart("i am a process")
 // process output
-stylish.ProcessEnd("i am a process")
+stylish.ProcessEnd()
 
 // outputs
-I AM A PROCESS :::::::::::::::::::::::::::::::::::::::::::::::: =>
++ I am a process ------------------------------------------------------------ >
 // process output
-<= :::::::::::::::::::::::::::::::::::::::::::: END I AM A PROCESS
 ```
-
-
-#### SubTasks
-
-##### successful subtask
-```go
-stylish.SubTask("i am a successful sub task")
-// subtask output
-stylish.SubTaskSuccess()
-
-// outputs
-::::::::: I AM A SUCCESSFUL SUB TASK
-// subtask output
-<<<<<<<<< [√] SUCCESS
-```
-
-##### failed subtask
-```go
-stylish.SubTask("i am a failed sub task")
-// subtask output
-stylish.SubTaskFail()
-
-// outputs
-::::::::: I AM A FAILED SUB TASK
-// subtask output
-<<<<<<<<< [!] FAILED
-```
-
 
 #### Bullets
 
@@ -91,7 +48,7 @@ stylish.SubTaskFail()
 stylish.Bullet("i am a bullet")
 
 // outputs
-+> i am a bullet
++ i am a bullet
 ```
 
 ##### multiple bullets
@@ -99,10 +56,10 @@ stylish.Bullet("i am a bullet")
 stylish.Bullet([]string{"we", "are", "many", "bullets"})
 
 // outputs
-+> we
-+> are
-+> many
-+> bullets
++ we
++ are
++ many
++ bullets
 ```
 
 #### Warnings
@@ -110,7 +67,7 @@ stylish.Bullet([]string{"we", "are", "many", "bullets"})
 stylish.Warning("i am a warning")
 
 // outputs
------------------------------  WARNING  -----------------------------
+----------------------------------  WARNING  ----------------------------------
 i am a warning
 ```
 

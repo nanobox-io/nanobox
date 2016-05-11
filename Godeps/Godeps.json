@@ -1,7 +1,7 @@
 {
 	"ImportPath": "github.com/nanobox-io/nanobox",
 	"GoVersion": "go1.6",
-	"GodepVersion": "v63",
+	"GodepVersion": "v66",
 	"Deps": [
 		{
 			"ImportPath": "github.com/BurntSushi/toml",
@@ -215,7 +215,7 @@
 		},
 		{
 			"ImportPath": "github.com/nanobox-io/nanobox-golang-stylish",
-			"Rev": "8b1728713afff7463e5c45e5bd63e3b7958fffa6"
+			"Rev": "9d51d97518dfd0b49adaff375fac34bbd65a2737"
 		},
 		{
 			"ImportPath": "github.com/nanopack/mist/clients",
