@@ -15,7 +15,7 @@ import (
 var (
 	//
 	DevEnvCmd = &cobra.Command{
-		Use:   "env",
+		Use:   "evar",
 		Short: "run an env command",
 		Long:  ``,
 	}
