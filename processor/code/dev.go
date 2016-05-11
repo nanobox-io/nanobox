@@ -72,7 +72,7 @@ func (self *codeDev) Process() error {
 	}
 	lumber.Debug("lib_dirs: %+v", box.Node("code.build").StringSliceValue("lib_dirs"))
 	for _, lib_dir := range box.Node("code.build").StringSliceValue("lib_dirs") {
-		config.Binds = append(config.Binds, fmt.Sprintf("/mnt/%s/cache/lib_dirs/%s:/app/%s", util.AppName(), lib_dir, lib_dir))
+		config.Binds = append(config.Binds, fmt.Sprintf("/mnt/sda1/%s/cache/lib_dirs/%s:/app/%s", util.AppName(), lib_dir, lib_dir))
 	}
 	// add lib_dirs
 	// fmt.Sprintf("/mnt/%s/cache/lib_dirs/vendor:/code/vendor", util.AppName()),
@@ -81,11 +81,18 @@ func (self *codeDev) Process() error {
 	container, err := docker.CreateContainer(config)
 	if err != nil {
 		lumber.Error("container: ", err)
-		return err
+		// there may already be a container running so just log the error for now
 	}
 
-	// shutdown container
-	defer docker.ContainerRemove(container.ID)
+	if container.ContainerJSONBase != nil {
+		// shutdown container
+		defer docker.ContainerRemove(container.ID)
+	}
+
+	if container.ContainerJSONBase == nil {
+				// get the container if we dont have it
+		container, err = docker.ContainerInspect(config.Name) 
+	}
 
 	// run user hook
 	output, err := util.Exec(container.ID, "user", util.UserPayload())

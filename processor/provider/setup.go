@@ -55,7 +55,9 @@ func (self providerSetup) Process() error {
 	}
 
 	// setup my data in the database
-	data.Put("apps", util.AppName(), models.App{})
+	app := models.App{}
+	data.Get("apps", util.AppName(), &app)
+	data.Put("apps", util.AppName(), app)
 	evars := models.EnvVars{}
 	data.Get(util.AppName()+"_meta", "env", &evars)
 	evars["APP_NAME"] = util.AppName()

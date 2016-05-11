@@ -13,16 +13,10 @@ import (
 	"github.com/nanobox-io/nanobox/util"
 )
 
-var boltDB *bolt.DB
-
 // Establish a bolt.DB for future use.
 func db() *bolt.DB {
-	// reuse databse if one exists
-	if boltDB != nil {
-		return boltDB
-	}
 	var err error
-	boltDB, err = bolt.Open(filepath.ToSlash(filepath.Join(util.GlobalDir(), "data.db")), 0666, nil)
+	boltDB, err := bolt.Open(filepath.ToSlash(filepath.Join(util.GlobalDir(), "data.db")), 0666, nil)
 	if err != nil {
 		panic(err)
 	}
@@ -32,8 +26,9 @@ func db() *bolt.DB {
 
 // Insert or update an element into the bolt database
 func Put(bucket, id string, v interface{}) error {
-
-	return db().Update(func(tx *bolt.Tx) error {
+	d := db()
+	defer d.Close()
+	return d.Update(func(tx *bolt.Tx) error {
 		// Create a bucket.
 		bucket, err := tx.CreateBucketIfNotExists([]byte(bucket))
 		if err != nil {
@@ -54,7 +49,10 @@ func Put(bucket, id string, v interface{}) error {
 // an error if you try getting something that doesnt exist
 func Get(bucket, id string, v interface{}) error {
 	// Read value back in a different read-only transaction.
-	return db().View(func(tx *bolt.Tx) error {
+	d := db()
+	defer d.Close()
+
+	return d.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte(bucket))
 		if bucket == nil {
 			return fmt.Errorf("no record found")
@@ -69,7 +67,10 @@ func Get(bucket, id string, v interface{}) error {
 
 // delete an element from the bolt database
 func Delete(bucket, id string) error {
-	return db().Update(func(tx *bolt.Tx) error {
+	d := db()
+	defer d.Close()
+
+	return d.Update(func(tx *bolt.Tx) error {
 		// Create a bucket.
 		bucket, err := tx.CreateBucketIfNotExists([]byte(bucket))
 		if err != nil {
@@ -82,8 +83,11 @@ func Delete(bucket, id string) error {
 }
 
 func Keys(bucket string) ([]string, error) {
+	d := db()
+	defer d.Close()
+
 	strArr := []string{}
-	err := db().View(func(tx *bolt.Tx) error {
+	err := d.View(func(tx *bolt.Tx) error {
 		bucket := tx.Bucket([]byte(bucket))
 		if bucket == nil {
 			return nil

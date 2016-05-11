@@ -110,6 +110,7 @@ func (self *codeBuild) Process() error {
 	if err != nil {
 		goto FAILURE
 	}
+	
 	// store it in the database as well
 	bBox.Data = []byte(output)
 	data.Put(util.AppName()+"_meta", "build_boxfile", bBox)

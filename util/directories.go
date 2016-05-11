@@ -47,7 +47,7 @@ func LocalDirName() string {
 }
 
 func BoxfileLocation() string {
-	return filepath.ToSlash(filepath.Join(GlobalDir(), "boxfile.yml"))
+	return filepath.ToSlash(filepath.Join(LocalDir(), "boxfile.yml"))
 }
 
 func AppName() string {

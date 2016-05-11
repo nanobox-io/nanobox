@@ -59,12 +59,19 @@ func (self dev) Process() error {
 
 	locker.LocalLock()
 	box := models.Boxfile{}
-	box.Data, _ = ioutil.ReadFile(util.BoxfileLocation())
+	box.Data, err = ioutil.ReadFile(util.BoxfileLocation())
+	lumber.Debug("ioutil err %+v", err)
 
 	oldBoxData := models.Boxfile{}
 	data.Get(util.AppName()+"_meta", "boxfile", &oldBoxData)
 
 	if string(oldBoxData.Data) != string(box.Data) || len(box.Data) == 0 {
+		lumber.Debug("old boxfile:(%s)\nnew boxfile:(%s)", oldBoxData.Data, box.Data)
+		err = data.Put(util.AppName()+"_meta", "boxfile", box)
+		if err != nil {
+			fmt.Println("unable to store new boxfile:", err)
+		}
+
 		// build code (without build hook)
 		buildProcessor, err := Build("code_build", self.config)
 		if err != nil {
@@ -98,25 +105,47 @@ func (self dev) Process() error {
 	// make sure everyone knows im using the app (so dont shut down)
 	app := models.App{}
 	data.Get("apps", util.AppName(), &app)
-	app.UsageCount++
-	data.Put("apps", util.AppName(), app)
+	lumber.Debug("incrementing usagecount toto %d", app.UsageCount)
+	if app.UsageCount < 0 {
+		app.UsageCount = 0
+	}
+	app.UsageCount = app.UsageCount + 1
+	lumber.Debug("incrementing usagecount to %d", app.UsageCount)
+	err = data.Put("apps", util.AppName(), app)
+	lumber.Error("dataputerr: %+v", err)
+
+	appAfter := models.App{}
+	data.Get("apps", util.AppName(), &appAfter)
+	lumber.Debug("incrementing usagecount after %d", appAfter.UsageCount)
 
 	locker.LocalUnlock()
 
-	// syncronize the services as per the new boxfile
-	self.config.Meta["name"] = "dev"
+	// get the working dir from the last build
 	self.config.Meta["working_dir"] = "/app"
-	boxf := boxfile.New(box.Data)
+
+	bBox := models.Boxfile{}
+	data.Get(util.AppName()+"_meta", "build_boxfile", &bBox)
+	lumber.Debug("dev: buildBox: %s", bBox.Data)
+	boxf := boxfile.New(bBox.Data)
 	if boxf.Node("dev").StringValue("cwd") != "" {
 		self.config.Meta["working_dir"] = boxf.Node("dev").StringValue("cwd")
 	}
 
+	self.config.Meta["name"] = "dev"
 	err = Run("code_dev", self.config)
 	// make sure we stop let the db know we
 	// are done with the app and it can be
 	// shut down
-	data.Get("apps", util.AppName(), &app)
-	app.UsageCount--
+	lumber.Debug("decrementing usagecount fromfrom %d", app.UsageCount)
+	app = models.App{}
+	err = data.Get("apps", util.AppName(), &app)
+	lumber.Error("errfromdata:%+v",err)
+	lumber.Debug("decrementing usagecount from %d", app.UsageCount)
+	app.UsageCount = app.UsageCount - 1
+	if app.UsageCount < 0 {
+		app.UsageCount = 0
+	}
+	lumber.Debug("decrementing usagecount to %d", app.UsageCount)
 	data.Put("apps", util.AppName(), app)
 
 	if err != nil {
@@ -132,5 +161,5 @@ func (self dev) Process() error {
 		os.Exit(1)
 	}
 
-	return data.Put(util.AppName()+"_meta", "boxfile", box)
+	return nil
 }

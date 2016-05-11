@@ -2,10 +2,13 @@ package locker
 
 import (
 	"fmt"
-	"github.com/nanobox-io/nanobox/util/nanofile"
 	"net"
 	"sync"
 	"time"
+
+	"github.com/jcelliott/lumber"
+
+	"github.com/nanobox-io/nanobox/util/nanofile"
 )
 
 var gln net.Listener
@@ -14,15 +17,18 @@ var mutex = sync.Mutex{}
 
 // Lock locks on port
 func GlobalLock() error {
+	lumber.Debug("global locking")
 	for {
-		if ok, err := GlobalTryLock(); ok {
-			return err
+		if success, _ := GlobalTryLock(); success {
+			break
 		}
-		fmt.Println("global lock waiting...")
+		lumber.Debug("global lock waiting...")
 		<-time.After(time.Second)
 	}
+	
 	mutex.Lock()
 	gCount++
+	lumber.Debug("global lock aqquired (%d)", gCount)
 	mutex.Unlock()
 	return nil
 }
@@ -47,6 +53,7 @@ func GlobalTryLock() (bool, error) {
 func GlobalUnlock() error {
 	mutex.Lock()
 	gCount--
+	lumber.Debug("global lock released (%d)", gCount)
 	mutex.Unlock()
 	if gCount > 0 || gln == nil {
 		return nil

@@ -5,6 +5,7 @@ import (
 	"net"
 	"time"
 
+	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/nanofile"
 )
@@ -15,16 +16,17 @@ var lCount int = 0
 
 // Lock locks on port
 func LocalLock() error {
-	mutex.Lock()
-	lCount++
-	mutex.Unlock()
 	for {
-		if ok, err := LocalTryLock(); ok {
-			return err
+		if success, _ := LocalTryLock(); success {
+			break
 		}
-		fmt.Println("local lock waiting...")
+		lumber.Debug("local lock waiting...")
 		<-time.After(time.Second)
 	}
+	mutex.Lock()
+	lCount++
+	lumber.Debug("local lock aquired (%d)", lCount)
+	mutex.Unlock()
 	return nil
 }
 
@@ -47,7 +49,8 @@ func LocalTryLock() (bool, error) {
 
 func LocalUnlock() (err error) {
 	mutex.Lock()
-	lCount++
+	lCount--
+	lumber.Debug("local lock released (%d)", lCount)	
 	mutex.Unlock()
 	// if im not the last guy to release my lock
 	// quit immidiately instead of closing the connection
