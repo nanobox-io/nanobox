@@ -1,8 +1,4 @@
---- 
-code.build: 
+code.build:
   engine: "golang#refactor/v1"
   config:
     package: "github.com/nanobox-io/nanobox"
-web.superdduper: 
-  image: "nanobox/code:v1"
-  start: "sleep 1h"
