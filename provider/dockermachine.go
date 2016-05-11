@@ -244,7 +244,7 @@ func (self DockerMachine) AddMount(local, host string) error {
 		}
 
 		// docker-machine ssh nanobox sudo mount -t vboxsf <name> ${host}
-		cmd = exec.Command("docker-machine", "ssh", "nanobox", "sudo", "mount", "-t", "vboxsf", name, host)
+		cmd = exec.Command("docker-machine", "ssh", "nanobox", "sudo", "mount", "-t", "vboxsf", "-o", "uid=1000,gid=1000", name, host)
 		b, err = cmd.CombinedOutput()
 		if err != nil {
 			lumber.Debug("output: %s", b)
