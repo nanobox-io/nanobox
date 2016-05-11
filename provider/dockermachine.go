@@ -45,7 +45,10 @@ func (self DockerMachine) Create() error {
 	fmt.Print(stylish.ProcessStart("Starting docker-machine vm"))
 
 	cmd := exec.Command("docker-machine", "create", "--driver", "virtualbox", "nanobox")
-	if err := print.Stream(cmd, "  "); err != nil {
+	cmd.Stdout = print.NewStreamer("  ")
+	cmd.Stderr = print.NewStreamer("  ")
+
+	if err := cmd.Run(); err != nil {
 		return err
 	}
 
@@ -107,7 +110,10 @@ func (self DockerMachine) Start() error {
 		fmt.Print(stylish.ProcessStart("Starting docker-machine vm"))
 
 		cmd := exec.Command("docker-machine", "start", "nanobox")
-		if err := print.Stream(cmd, "  "); err != nil {
+		cmd.Stdout = print.NewStreamer("  ")
+		cmd.Stderr = print.NewStreamer("  ")
+
+		if err := cmd.Run(); err != nil {
 			return err
 		}
 

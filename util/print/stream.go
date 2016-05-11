@@ -4,9 +4,23 @@ import (
   "os/exec"
   "bufio"
   "fmt"
+  "io"
 )
 
+type streamer struct {
+  prefix string
+}
+
+func (s streamer) Write(p []byte) (n int, err error) {
+  fmt.Printf("%s%s", s.prefix, p)
+  return len(p), nil
+}
+
 // Stream executes a pre-assembled command and streams the output with a prefix
+func NewStreamer(prefix string) io.Writer {
+  return streamer{prefix}
+}
+
 func Stream(cmd *exec.Cmd, prefix string) error {
 
   // setup stderr pipe
