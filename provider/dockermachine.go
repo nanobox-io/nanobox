@@ -74,7 +74,10 @@ func (self DockerMachine) Stop() error {
 	fmt.Print(stylish.ProcessStart("Stopping docker-machine vm"))
 
 	cmd := exec.Command("docker-machine", "stop", "nanobox")
-	if err := print.Stream(cmd, "  "); err != nil {
+	cmd.Stdout = print.NewStreamer("  ")
+	cmd.Stderr = print.NewStreamer("  ")
+
+	if err := cmd.Run(); err != nil {
 		return nil
 	}
 
@@ -92,7 +95,10 @@ func (self DockerMachine) Destroy() error {
 	fmt.Print(stylish.ProcessStart("Destroying docker-machine vm"))
 
 	cmd := exec.Command("docker-machine", "rm", "-f", "nanobox")
-	if err := print.Stream(cmd, "  "); err != nil {
+	cmd.Stdout = print.NewStreamer("  ")
+	cmd.Stderr = print.NewStreamer("  ")
+
+	if err := cmd.Run(); err != nil {
 		return nil
 	}
 
@@ -126,16 +132,22 @@ func (self DockerMachine) Start() error {
 		fmt.Print(stylish.Bullet("Setting up custom docker network..."))
 
 		cmd := exec.Command("docker-machine", "ssh", "nanobox", "docker", "network", "create", "--driver=bridge", "--subnet=192.168.0.0/24", "--opt=\"com.docker.network.driver.mtu=1450\"", "--opt=\"com.docker.network.bridge.name=redd0\"", "--gateway=192.168.0.1", "nanobox")
-		if err := print.Stream(cmd, "  "); err != nil {
+		cmd.Stdout = print.NewStreamer("  ")
+		cmd.Stderr = print.NewStreamer("  ")
+
+		if err := cmd.Run(); err != nil {
 			return err
 		}
 	}
 
 	// load the ipvs kernel module for portal to work
-	fmt.Print(stylish.Bullet("Ensure kernel modules are loaded..."))
+	// fmt.Print(stylish.Bullet("Ensure kernel modules are loaded..."))
 
 	cmd := exec.Command("docker-machine", "ssh", "nanobox", "sudo", "modprobe", "ip_vs")
-	return print.Stream(cmd, "  ")
+	cmd.Stdout = print.NewStreamer("  ")
+	cmd.Stderr = print.NewStreamer("  ")
+
+	return cmd.Run()
 }
 
 // DockerEnv exports the docker connection information to the running process
