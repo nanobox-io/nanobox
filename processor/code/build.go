@@ -8,7 +8,9 @@ import (
 
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox/processor"
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/ip_control"
 	"github.com/nanobox-io/nanobox/util/print"
 )
@@ -34,6 +36,8 @@ func (self codeBuild) Results() processor.ProcessConfig {
 func (self *codeBuild) Process() error {
 	box := boxfile.NewFromPath(util.BoxfileLocation())
 	image := box.Node("build").StringValue("image")
+	bBox := models.Boxfile{}
+
 
 	if image == "" {
 		image = "nanobox/build:v1"
@@ -106,6 +110,9 @@ func (self *codeBuild) Process() error {
 	if err != nil {
 		goto FAILURE
 	}
+	// store it in the database as well
+	bBox.Data = []byte(output)
+	data.Put(util.AppName()+"_meta", "build_boxfile", bBox)
 	self.config.Meta["boxfile"] = output
 
 	output, err = util.Exec(container.ID, "prepare", "{}")
@@ -152,8 +159,8 @@ func (self *codeBuild) Process() error {
 FAILURE:
 	// a failure has happend and we are going to jump into the console
 	fmt.Println("there has been a failure")
-	fmt.Println(err)
 	if self.config.Verbose {
+		fmt.Println(err)
 		fmt.Println("we will be dropping you into the failed build container")
 		fmt.Println("GOOD LUCK!")
 		self.config.Meta["name"] = "build"

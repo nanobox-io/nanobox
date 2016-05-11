@@ -9,7 +9,9 @@ import (
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox/processor"
 
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/ip_control"
 	"github.com/nanobox-io/nanobox/util/print"
 )
@@ -33,7 +35,10 @@ func (self codeDev) Results() processor.ProcessConfig {
 }
 
 func (self *codeDev) Process() error {
-	box := boxfile.NewFromPath(util.BoxfileLocation())
+	bBox := models.Boxfile{}
+	data.Get(util.AppName()+"_meta", "build_boxfile", bBox)
+
+	box := boxfile.New(bBox.Data)
 	image := box.Node("build").StringValue("image")
 
 	if image == "" {
