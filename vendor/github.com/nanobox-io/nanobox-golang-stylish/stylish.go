@@ -32,8 +32,7 @@ func ProcessStart(msg string, v ...interface{}) string {
 	// print process, inserting a '-' (colon) 'n' times, where 'n' is the number
 	// remaining after subtracting subLen (number of 'reserved' characters) from
 	// maxLen (maximum number of allowed characters)
-	return fmt.Sprintf(`
-%s
+	return fmt.Sprintf(`%s
 `, fmt.Sprintf("+ %s %s >", process, strings.Repeat("-", (maxLen-subLen))))
 }
 

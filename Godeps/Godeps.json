@@ -215,7 +215,7 @@
 		},
 		{
 			"ImportPath": "github.com/nanobox-io/nanobox-golang-stylish",
-			"Rev": "9d51d97518dfd0b49adaff375fac34bbd65a2737"
+			"Rev": "1746ab1c323087d15779b38d31f55a6a379d9c21"
 		},
 		{
 			"ImportPath": "github.com/nanopack/mist/clients",

@@ -10,6 +10,9 @@ import (
 	"regexp"
 
 	"github.com/jcelliott/lumber"
+	"github.com/nanobox-io/nanobox-golang-stylish"
+
+	"github.com/nanobox-io/nanobox/util/print"
 )
 
 type (
@@ -21,7 +24,9 @@ func init() {
 	Register("docker_machine", DockerMachine{})
 }
 
+// Valid ensures docker-machine is installed and available
 func (self DockerMachine) Valid() error {
+
 	cmd := exec.Command("docker-machine", "version")
 	err := cmd.Run()
 	if err != nil {
@@ -30,93 +35,112 @@ func (self DockerMachine) Valid() error {
 	return nil
 }
 
+// Create creates the docker-machine vm
 func (self DockerMachine) Create() error {
-	if !self.isCreated() {
-		fmt.Println("-> platform init")
-		fmt.Println("  -> create platform")		
-		lumber.Debug("platform not yet created")
-		// docker-machine create --driver virtualbox nanobox
-		cmd := exec.Command("docker-machine", "create", "--driver", "virtualbox", "nanobox")
-		b, err := cmd.CombinedOutput()
-		if err != nil {
-			lumber.Debug("create output: %s", b)
-			return err
-		}
+
+	if self.isCreated() {
+		return nil
 	}
 
-	return nil
-}
+	fmt.Print(stylish.ProcessStart("Starting docker-machine vm"))
 
-func (self DockerMachine) Reboot() error {
-	err := self.Stop()
-	if err != nil {
+	cmd := exec.Command("docker-machine", "create", "--driver", "virtualbox", "nanobox")
+	if err := print.Stream(cmd, "  "); err != nil {
 		return err
 	}
-	err = self.Start()
-	return err
+
+	fmt.Print(stylish.ProcessEnd())
+
+	return nil
 }
 
+// Reboot reboots the docker-machine vm
+func (self DockerMachine) Reboot() error {
+	if err := self.Stop(); err != nil {
+		return err
+	}
+	return self.Start()
+}
+
+// Stop stops the docker-machine vm
 func (self DockerMachine) Stop() error {
-	if self.isStarted() {
-		// docker-machine stop nanobox
-		cmd := exec.Command("docker-machine", "stop", "nanobox")
-		b, err := cmd.CombinedOutput()
-		if err != nil {
-			lumber.Debug("output: %s", b)
-			return err
-		}
-	}
-	return nil
-}
-
-func (self DockerMachine) Destroy() error {
-	if self.isCreated() {
-		// docker-machine rm nanobox
-		cmd := exec.Command("docker-machine", "rm", "-f", "nanobox")
-		b, err := cmd.CombinedOutput()
-		if err != nil {
-			lumber.Debug("output: %s", b)
-			return err
-		}
-	}
-	return nil
-}
-
-func (self DockerMachine) Start() error {
 	if !self.isStarted() {
-		fmt.Println("  -> start platform")
-		// docker-machine start nanobox
-		cmd := exec.Command("docker-machine", "start", "nanobox")
-		b, err := cmd.CombinedOutput()
-		if err != nil {
-			lumber.Debug("output: %s", b)
-			return err
-		}
+		return nil
 	}
 
-	if !self.hasNetwork() {
-		fmt.Println("  -> setting up networking")
-		lumber.Debug("not yet networked")
-		// docker network create --driver=bridge --subnet=192.168.0.0/16 --opt="com.docker.network.driver.mtu=1450" --opt="com.docker.network.bridge.name=redd0" --gateway=192.168.0.1 nanobox
-		cmd := exec.Command("docker-machine", "ssh", "nanobox", "docker", "network", "create", "--driver=bridge", "--subnet=192.168.0.0/24", "--opt=\"com.docker.network.driver.mtu=1450\"", "--opt=\"com.docker.network.bridge.name=redd0\"", "--gateway=192.168.0.1", "nanobox")
-		b, err := cmd.CombinedOutput()
-		if err != nil {
-			lumber.Debug("add network output: %s", b)
-			return err
-		}
-	}
-	cmd := exec.Command("docker-machine", "ssh", "nanobox", "sudo", "modprobe", "ip_vs")
-	_, err := cmd.CombinedOutput()
+	fmt.Print(stylish.ProcessStart("Stopping docker-machine vm"))
 
-	return err
+	cmd := exec.Command("docker-machine", "stop", "nanobox")
+	if err := print.Stream(cmd, "  "); err != nil {
+		return nil
+	}
+
+	fmt.Print(stylish.ProcessEnd())
+
+	return nil
 }
 
+// Destroy destroys the docker-machine vm
+func (self DockerMachine) Destroy() error {
+	if !self.isCreated() {
+		return nil
+	}
+
+	fmt.Print(stylish.ProcessStart("Destroying docker-machine vm"))
+
+	cmd := exec.Command("docker-machine", "rm", "-f", "nanobox")
+	if err := print.Stream(cmd, "  "); err != nil {
+		return nil
+	}
+
+	fmt.Print(stylish.ProcessEnd())
+
+	return nil
+}
+
+// Start starts and bootstraps docker-machine vm
+func (self DockerMachine) Start() error {
+
+	// start the docker-machine vm
+	if !self.isStarted() {
+
+		fmt.Print(stylish.ProcessStart("Starting docker-machine vm"))
+
+		cmd := exec.Command("docker-machine", "start", "nanobox")
+		if err := print.Stream(cmd, "  "); err != nil {
+			return err
+		}
+
+		fmt.Print(stylish.ProcessEnd())
+	}
+
+	// create custom nanobox docker network
+	if !self.hasNetwork() {
+
+		fmt.Print(stylish.Bullet("Setting up custom docker network..."))
+
+		cmd := exec.Command("docker-machine", "ssh", "nanobox", "docker", "network", "create", "--driver=bridge", "--subnet=192.168.0.0/24", "--opt=\"com.docker.network.driver.mtu=1450\"", "--opt=\"com.docker.network.bridge.name=redd0\"", "--gateway=192.168.0.1", "nanobox")
+		if err := print.Stream(cmd, "  "); err != nil {
+			return err
+		}
+	}
+
+	// load the ipvs kernel module for portal to work
+	fmt.Print(stylish.Bullet("Ensure kernel modules are loaded..."))
+
+	cmd := exec.Command("docker-machine", "ssh", "nanobox", "sudo", "modprobe", "ip_vs")
+	return print.Stream(cmd, "  ")
+}
+
+// DockerEnv exports the docker connection information to the running process
 func (self DockerMachine) DockerEnv() error {
 	// docker-machine env nanobox
 	// export DOCKER_TLS_VERIFY="1"
 	// export DOCKER_HOST="tcp://192.168.99.102:2376"
 	// export DOCKER_CERT_PATH="/Users/lyon/.docker/machine/machines/nanobox"
 	// export DOCKER_MACHINE_NAME="nanobox"
+
+	// create an anonymous struct that we will populate after running inspect
 	inspect := struct {
 		Driver struct {
 			IPAddress string
@@ -130,96 +154,120 @@ func (self DockerMachine) DockerEnv() error {
 			}
 		}
 	}{}
+
+	// fetch the docker-machine endpoint information
 	cmd := exec.Command("docker-machine", "inspect", "nanobox")
 	b, err := cmd.CombinedOutput()
 	if err != nil {
 		lumber.Debug("output: %s", b)
 		return err
 	}
+
+	// marshal the json output into the anonymous struct as defined above
 	err = json.Unmarshal(b, &inspect)
 	if err != nil {
 		lumber.Debug("marshal: %s", b)
 		return err
 	}
+
+	// export TLS verify if set
 	if inspect.HostOptions.EngineOptions.TlsVerify {
 		os.Setenv("DOCKER_TLS_VERIFY", "1")
 	}
+
+	// set docker environment variables for client connections
 	os.Setenv("DOCKER_MACHINE_NAME", "nanobox")
 	os.Setenv("DOCKER_HOST", fmt.Sprintf("tcp://%s:2376", inspect.Driver.IPAddress))
 	os.Setenv("DOCKER_CERT_PATH", inspect.HostOptions.AuthOptions.StorePath)
+
 	return nil
 }
 
+// AddIp adds an IP into the docker-machine vm for host access
 func (self DockerMachine) AddIP(ip string) error {
-	if !self.hasIP(ip) {
-		// docker-machine ssh nanobox sudo ip addr add ${IP} dev eth1
-		cmd := exec.Command("docker-machine", "ssh", "nanobox", "sudo", "ip", "addr", "add", ip, "dev", "eth1")
-		b, err := cmd.CombinedOutput()
-		if err != nil {
-			lumber.Debug("output: %s", b)
-			return err
-		}
-	}
-	return nil
-}
-
-func (self DockerMachine) RemoveIP(ip string) error {
 	if self.hasIP(ip) {
-		// docker-machine ssh nanobox sudo ip addr del ${IP} dev eth1
-		cmd := exec.Command("docker-machine", "ssh", "nanobox", "sudo", "ip", "addr", "del", ip, "dev", "eth1")
-		b, err := cmd.CombinedOutput()
-		if err != nil {
-			lumber.Debug("output: %s", b)
-			return err
-		}
+		return nil
 	}
+
+	// docker-machine ssh nanobox sudo ip addr add ${IP} dev eth1
+	cmd := exec.Command("docker-machine", "ssh", "nanobox", "sudo", "ip", "addr", "add", ip, "dev", "eth1")
+	if b, err := cmd.CombinedOutput(); err != nil {
+		lumber.Debug("output: %s", b)
+		return err
+	}
+
 	return nil
 }
 
+// RemoveIP removes an IP from the docker-machine vm
+func (self DockerMachine) RemoveIP(ip string) error {
+	if !self.hasIP(ip) {
+		return nil
+	}
+
+	// docker-machine ssh nanobox sudo ip addr del ${IP} dev eth1
+	cmd := exec.Command("docker-machine", "ssh", "nanobox", "sudo", "ip", "addr", "del", ip, "dev", "eth1")
+	if b, err := cmd.CombinedOutput(); err != nil {
+		lumber.Debug("output: %s", b)
+		return err
+	}
+
+	return nil
+}
+
+// AddNat adds a nat to make an container accessible to the host network stack
 func (self DockerMachine) AddNat(ip, container_ip string) error {
+
+	// add iptables prerouting rule
 	if !self.hasNatPreroute(ip, container_ip) {
 		// docker-machine ssh nanobox sudo iptables -t nat -A PREROUTING -d ${host_ip} -j DNAT --to-destination ${container_ip}
 		cmd := exec.Command("docker-machine", "ssh", "nanobox", "sudo", "/usr/local/sbin/iptables", "-t", "nat", "-A", "PREROUTING", "-d", ip, "-j", "DNAT", "--to-destination", container_ip)
-		b, err := cmd.CombinedOutput()
-		if err != nil {
+		if b, err := cmd.CombinedOutput(); err != nil {
 			lumber.Debug("output: %s", b)
 			return err
 		}
 	}
+
+	// add iptables postrouting rule
 	if !self.hasNatPostroute(ip, container_ip) {
 		// docker-machine ssh nanobox sudo iptables -t nat -A POSTROUTING -s ${container_ip} -j SNAT --to-source ${host_ip}
 		cmd := exec.Command("docker-machine", "ssh", "nanobox", "sudo", "/usr/local/sbin/iptables", "-t", "nat", "-A", "POSTROUTING", "-s", container_ip, "-j", "SNAT", "--to-source", ip)
-		b, err := cmd.CombinedOutput()
-		if err != nil {
+		if b, err := cmd.CombinedOutput(); err != nil {
 			lumber.Debug("output: %s", b)
 			return err
 		}
 	}
+
 	return nil
 }
 
+// RemoveNat removes nat from making a container inaccessible to the host network stack
 func (self DockerMachine) RemoveNat(ip, container_ip string) error {
+
+	// remove iptables prerouting rule
 	if self.hasNatPreroute(ip, container_ip) {
 		// docker-machine ssh nanobox sudo iptables -t nat -D PREROUTING -d ${host_ip} -j DNAT --to-destination ${container_ip}
 		cmd := exec.Command("docker-machine", "ssh", "nanobox", "sudo", "/usr/local/sbin/iptables", "-t", "nat", "-D", "PREROUTING", "-d", ip, "-j", "DNAT", "--to-destination", container_ip)
-		b, err := cmd.CombinedOutput()
-		if err != nil {
+		if b, err := cmd.CombinedOutput(); err != nil {
 			lumber.Debug("output: %s", b)
 			return err
 		}
 	}
+
+	// remove iptables postrouting rule
 	if self.hasNatPostroute(ip, container_ip) {
 		// docker-machine ssh nanobox sudo iptables -t nat -D POSTROUTING -s ${container_ip} -j SNAT --to-source ${host_ip}
 		cmd := exec.Command("docker-machine", "ssh", "nanobox", "sudo", "/usr/local/sbin/iptables", "-t", "nat", "-D", "POSTROUTING", "-s", container_ip, "-j", "SNAT", "--to-source", ip)
-		b, err := cmd.CombinedOutput()
-		if err != nil {
+		if b, err := cmd.CombinedOutput(); err != nil {
 			lumber.Debug("output: %s", b)
 			return err
 		}
 	}
+
 	return nil
 }
 
+// AddMount adds a mount into the docker-machine vm
 func (self DockerMachine) AddMount(local, host string) error {
 	h := sha256.New()
 	h.Write([]byte(local))
