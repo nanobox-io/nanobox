@@ -26,6 +26,11 @@ func (self devStop) Results() ProcessConfig {
 }
 
 func (self devStop) Process() error {
+	// dont shut anything down if we are supposed to background
+	if DefaultConfig.Background {
+		return nil
+	}
+
 	app := models.App{}
 	data.Get("apps", util.AppName(), &app)
 

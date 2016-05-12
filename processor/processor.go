@@ -4,6 +4,10 @@ import (
 	"fmt"
 
 	"github.com/jcelliott/lumber"
+
+	"github.com/nanobox-io/nanobox/util"	
+	"github.com/nanobox-io/nanobox/util/data"	
+	"github.com/nanobox-io/nanobox/models"
 )
 
 type (
@@ -50,4 +54,17 @@ func Run(name string, pc ProcessConfig) error {
 		return err
 	}
 	return proc.Process()
+}
+
+func getAppID(alias string) string {
+	link := models.AppLinks{}
+	data.Get(util.AppName()+"_meta", "links", &link)
+	if alias == "" {
+		alias = "default"
+	}
+	app, ok := link[alias]
+	if !ok {
+		return alias
+	}
+	return app
 }

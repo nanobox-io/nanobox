@@ -37,10 +37,12 @@ func (self link) Process() error {
 	if err != nil {
 		return err
 	}
-
+	if self.config.Meta["alias"] == "" {
+		self.config.Meta["alias"] = "default"
+	}
 	// store the auth token
 	link := models.AppLinks{}
-	data.Get(util.AppName()"_meta", "links", &link)
+	data.Get(util.AppName()+"_meta", "links", &link)
 	link[self.config.Meta["alias"]] = app.ID
-	return data.Put(util.AppName()"_meta", "links", link)
+	return data.Put(util.AppName()+"_meta", "links", link)
 }

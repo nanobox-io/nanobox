@@ -10,7 +10,7 @@ import (
 var (
 
 	//
-	InfoCmd = &cobra.Command{
+	DevInfoCmd = &cobra.Command{
 		Use:   "info",
 		Short: "get this things information",
 		Long:  ``,

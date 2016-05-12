@@ -12,7 +12,7 @@ import (
 var (
 
 	//
-	DevConsoleCmd = &cobra.Command{
+	ConsoleCmd = &cobra.Command{
 		Use:   "console",
 		Short: "do the console thing",
 		Long:  ``,
@@ -23,9 +23,15 @@ var (
 				fmt.Println("i need a container to run in")
 				return
 			}
-			processor.DefaultConfig.Meta["name"] = args[0]
-			processor.Run("dev_console", processor.DefaultConfig)
+			processor.DefaultConfig.Meta["alias"] = app
+			processor.DefaultConfig.Meta["container"] = args[0]
+			processor.Run("console", processor.DefaultConfig)
 		},
 		// PostRun: halt,
 	}
+
 )
+
+func init() {
+	ConsoleCmd.Flags().StringVarP(&app, "app", "a", "", "production app name or alias")	
+}

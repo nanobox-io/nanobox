@@ -21,11 +21,9 @@ var (
 			processor.Run("link", processor.DefaultConfig)
 		},
 	}
-	appName string
-	alias   string
 )
 
 func init() {
-	LoginCmd.Flags().StringVarP(&appName, "app_name", "n", "", "app name")
+	LoginCmd.Flags().StringVarP(&app, "app_name", "n", "", "app name")
 	LoginCmd.Flags().StringVarP(&alias, "alias", "a", "", "alias")
 }

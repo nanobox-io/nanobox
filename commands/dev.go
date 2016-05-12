@@ -17,16 +17,10 @@ var (
 
 		PreRun: validCheck("provider"),
 		Run: func(ccmd *cobra.Command, args []string) {
-			// processor.DefaultConfig.Meta["dev-config"] = devconfig
 			processor.Run("dev", processor.DefaultConfig)
 		},
 		// PostRun: halt,
 	}
-
-	//
-	devconfig string // sets the type of environment to be configured on the guest vm
-	// nobuild   bool   // force skip a deploy
-	rebuild bool // force a deploy
 )
 
 //
@@ -52,9 +46,9 @@ func init() {
 
 	// DevCmd.AddCommand(reloadCmd)
 	DevCmd.AddCommand(DevDestroyCmd)
-	DevCmd.AddCommand(InfoCmd)
-	DevCmd.AddCommand(ExecCmd)
-	DevCmd.AddCommand(ConsoleCmd)
+	DevCmd.AddCommand(DevInfoCmd)
+	DevCmd.AddCommand(DevExecCmd)
+	DevCmd.AddCommand(DevConsoleCmd)
 	DevCmd.AddCommand(DevEnvCmd)
 	// DevCmd.AddCommand(updateImagesCmd)
 }

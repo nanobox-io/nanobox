@@ -41,14 +41,14 @@ func Deploy(appId, id, boxfile, message string) error {
 	return doRequest("POST", fmt.Sprintf("/apps/%s/deploys", appId), body, nil)
 }
 
-func EstablishTunnel(appId, id string) (string, string, error) {
+func EstablishTunnel(appId, id string) (string, string, string, error) {
 	// do somethign else here
-	return "1.2.3.4", "secrettoken", nil
+	return "secrettoken", "1.2.3.4", "dockerid", nil
 }
 
-func EstablishConsole(appId, id string) (string, string, error) {
+func EstablishConsole(appId, id string) (string, string, string, error) {
 	// do somethign else here
-	return "1.2.3.4", "secrettoken", nil
+	return "secrettoken", "1.2.3.4", "dockerid", nil
 }
 
 func doRequest(method, path string, requestBody, responseBody interface{}) error {

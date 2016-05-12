@@ -13,7 +13,7 @@ import (
 var (
 
 	//
-	ExecCmd = &cobra.Command{
+	DevExecCmd = &cobra.Command{
 		Use:   "exec",
 		Short: "execute a command",
 		Long:  ``,
