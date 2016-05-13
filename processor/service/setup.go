@@ -108,7 +108,10 @@ func (self *serviceSetup) validateImage() error {
 
 // loadService fetches the service from the database
 func (self *serviceSetup) loadService() error {
-	return data.Get(util.AppName(), self.config.Meta["name"], &self.service)
+	// the service really shouldn't exist yet, so let's not return the error if it fails
+	data.Get(util.AppName(), self.config.Meta["name"], &self.service)
+
+	return nil
 }
 
 // downloadImage downloads the docker image
@@ -164,7 +167,7 @@ func (self *serviceSetup) launchContainer() error {
 		IP:      self.local_ip.String(),
 	}
 
-	fmt.Print(stylish.NestedProcessStart("Starting docker container...", self.config.DisplayLevel))
+	fmt.Print(stylish.NestedBullet("Starting docker container...", self.config.DisplayLevel))
 	container, err := docker.CreateContainer(config)
 	if err != nil {
 		self.fail = true
@@ -183,7 +186,7 @@ func (self *serviceSetup) launchContainer() error {
 // attachNetwork attaches the IP addresses to the container
 func (self *serviceSetup) attachNetwork() error {
 	label := "Add container to host network..."
-	fmt.Print(stylish.NestedProcessStart(label, self.config.DisplayLevel))
+	fmt.Print(stylish.NestedBullet(label, self.config.DisplayLevel))
 
 	err := provider.AddIP(self.global_ip.String())
 	if err != nil {
@@ -210,7 +213,7 @@ func (self *serviceSetup) attachNetwork() error {
 
 // planService runs the plan hook
 func (self *serviceSetup) planService() error {
-	fmt.Print(stylish.NestedProcessStart("Gathering service requirements...", self.config.DisplayLevel))
+	fmt.Print(stylish.NestedBullet("Gathering service requirements...", self.config.DisplayLevel))
 
 	boxfile := boxfile.New([]byte(self.config.Meta["boxfile"]))
 	boxConfig := boxfile.Node(self.config.Meta["name"]).Node("config")

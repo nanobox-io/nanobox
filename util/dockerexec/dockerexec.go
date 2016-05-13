@@ -4,6 +4,7 @@ import (
   "io"
   "bytes"
   "errors"
+  "io/ioutil"
 
   "github.com/nanobox-io/golang-docker-client"
 )
@@ -57,5 +58,6 @@ func Command(id string, path string, payload string) *Cmd {
     Id: id,
     Path: path,
     Payload: payload,
+    Stdout: ioutil.Discard,
   }
 }

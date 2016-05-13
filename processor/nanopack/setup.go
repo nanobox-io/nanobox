@@ -132,6 +132,9 @@ func (self nanopackSetup) startService(service *nanoService) error {
 		return nil
 	}
 
+	header := fmt.Sprintf("Booting %s...", service.label)
+	fmt.Print(stylish.NestedBullet(header, self.config.DisplayLevel + 1))
+
 	config := processor.ProcessConfig{
 		DevMode: self.config.DevMode,
 		Verbose: self.config.Verbose,
@@ -168,19 +171,14 @@ func isPlatformRunning() bool {
 func isPlatformServiceCreated(service string) bool {
 	name := fmt.Sprintf("%s-%s", util.AppName(), service)
 
-	container, err := docker.GetContainer(name)
+	_, err := docker.GetContainer(name)
 
 	// if the container doesn't exist then just return false
 	if err != nil {
 		return false
 	}
 
-	// return true if the container is running
-	if container.State.Status == "running" {
-		return true
-	}
-
-	return false
+	return true
 }
 
 // isPlatformServiceRunning returns true if a service is already running

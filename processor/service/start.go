@@ -83,7 +83,7 @@ func (self *serviceStart) loadService() error {
 // startContainer starts a docker container
 func (self *serviceStart) startContainer() error {
 	label := "Starting container..."
-	fmt.Print(stylish.NestedProcessStart(label, self.config.DisplayLevel))
+	fmt.Print(stylish.NestedBullet(label, self.config.DisplayLevel))
 
 	err := docker.ContainerStart(self.service.ID)
 	if err != nil {
@@ -96,7 +96,7 @@ func (self *serviceStart) startContainer() error {
 // attachNetwork attaches the container to the host network
 func (self *serviceStart) attachNetwork() error {
 	label := "Add container to host network..."
-	fmt.Print(stylish.NestedProcessStart(label, self.config.DisplayLevel))
+	fmt.Print(stylish.NestedBullet(label, self.config.DisplayLevel))
 
 	err := provider.AddIP(self.service.ExternalIP)
 	if err != nil {
