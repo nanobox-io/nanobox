@@ -6,7 +6,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/nanobox-io/nanobox/config"
+	// "github.com/nanobox-io/nanobox/config"
 	printutil "github.com/nanobox-io/nanobox/util/print"
 )
 

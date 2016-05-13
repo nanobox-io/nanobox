@@ -1,6 +1,8 @@
 package service
 
 import (
+	"errors"
+
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
@@ -20,7 +22,7 @@ func init() {
 func serviceStopFunc(config processor.ProcessConfig) (processor.Processor, error) {
 	// make sure i was given a name and image
 	if config.Meta["name"] == "" {
-		return nil, missingImageOrName
+		return nil, errors.New("missing image or name")
 	}
 
 	return serviceStop{config: config}, nil

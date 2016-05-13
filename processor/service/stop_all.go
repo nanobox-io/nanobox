@@ -1,6 +1,8 @@
 package service
 
 import (
+	"errors"
+
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/data"
@@ -17,7 +19,7 @@ func init() {
 func serviceStopAllFunc(config processor.ProcessConfig) (processor.Processor, error) {
 	// make sure i was given a name and image
 	if config.Meta["name"] == "" {
-		return nil, missingImageOrName
+		return nil, errors.New("missing image or name")
 	}
 
 	return serviceStopAll{config: config}, nil

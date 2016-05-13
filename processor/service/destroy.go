@@ -2,6 +2,7 @@ package service
 
 import (
 	"net"
+	"errors"
 
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox/models"
@@ -23,7 +24,7 @@ func init() {
 func serviceDestroyFunc(config processor.ProcessConfig) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 	if config.Meta["name"] == "" {
-		return nil, missingImageOrName
+		return nil, errors.New("missing image or name")
 	}
 	return &serviceDestroy{config: config}, nil
 }

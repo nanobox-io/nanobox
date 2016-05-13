@@ -2,7 +2,6 @@ package util
 
 import (
 	"os"
-	"fmt"
 	"bytes"
 	"errors"
 
@@ -13,7 +12,6 @@ import (
 var badExit = errors.New("bad exit code")
 
 func Exec(id, name, payload string) (string, error) {
-	fmt.Println("  ->", name)
 	lumber.Debug("Execing %s in container %s with a payload of %s", name, id, payload)
 	exec, hj, err := docker.ExecStart(id, []string{"/opt/nanobox/hooks/" + name, payload}, false, true, true)
 	if err != nil {

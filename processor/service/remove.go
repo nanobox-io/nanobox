@@ -2,6 +2,7 @@ package service
 
 import (
 	"net"
+	"errors"
 
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox/models"
@@ -32,7 +33,7 @@ func (self serviceRemove) Results() processor.ProcessConfig {
 func (self *serviceRemove) Process() error {
 	// make sure i was given a name and image
 	if self.config.Meta["name"] == "" {
-		return missingImageOrName
+		return errors.New("missing image or name")
 	}
 
 	// get the service from the database

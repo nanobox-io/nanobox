@@ -3,17 +3,21 @@ package service
 import (
 	"encoding/json"
 	"fmt"
+	"errors"
 
 	"github.com/nanobox-io/nanobox-boxfile"
+	"github.com/nanobox-io/nanobox-golang-stylish"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/data"
+	"github.com/nanobox-io/nanobox/util/dockerexec"
 )
 
 type serviceConfigure struct {
 	config processor.ProcessConfig
+	service models.Service
 }
 
 type member struct {
@@ -43,6 +47,44 @@ type startPayload struct {
 
 func init() {
 	processor.Register("service_configure", serviceConfigureFunc)
+}
+
+func (self serviceConfigure) Results() processor.ProcessConfig {
+	return self.config
+}
+
+func (self serviceConfigure) Process() error {
+
+	if err := self.validateImage(); err != nil {
+		return err
+	}
+
+	if err := self.loadService(); err != nil {
+		return err
+	}
+
+	// short-circuit if the service is already started
+	if self.service.Started {
+		return nil
+	}
+
+	if err := self.runUpdate(); err != nil {
+		return nil
+	}
+
+	if err := self.runConfigure(); err != nil {
+		return nil
+	}
+
+	if err := self.runStart(); err != nil {
+		return nil
+	}
+
+	if err := self.persistService(); err != nil {
+		return nil
+	}
+
+	return nil
 }
 
 func serviceConfigureFunc(config processor.ProcessConfig) (processor.Processor, error) {
@@ -89,7 +131,6 @@ func (self serviceConfigure) configurePayload() string {
 		return "{}"
 	}
 	return string(j)
-
 }
 
 func (self serviceConfigure) startPayload() string {
@@ -108,52 +149,75 @@ func (self serviceConfigure) startPayload() string {
 	return string(j)
 }
 
-func (self serviceConfigure) Results() processor.ProcessConfig {
-	return self.config
-}
-
-func (self serviceConfigure) Process() error {
+// validateImage validates that the image is provided
+func (self *serviceConfigure) validateImage() error {
 	// make sure i was given a name and image
 	if self.config.Meta["name"] == "" {
-		return missingImageOrName
+		return errors.New("missing image or name")
 	}
 
-	fmt.Println("-> configuring", self.config.Meta["name"])
+	return nil
+}
+
+// loadService loads the service from the database
+func (self *serviceConfigure) loadService() error {
 	// get the service from the database
-	service := models.Service{}
-	err := data.Get(util.AppName(), self.config.Meta["name"], &service)
+	err := data.Get(util.AppName(), self.config.Meta["name"], &self.service)
 	if err != nil {
 		// cannot start a service that wasnt setup (ie saved in the database)
 		return err
 	}
 
-	if service.Started {
-		return nil
-	}
+	return nil
+}
 
+// runUpdate will run the update hook in the container
+func (self *serviceConfigure) runUpdate() error {
 	// run update
-	output, err := util.Exec(service.ID, "update", "{}")
-	if err != nil {
-		fmt.Println(output)
+	fmt.Print(stylish.NestedBullet("Updating...", self.config.DisplayLevel))
+
+	cmd := dockerexec.Command(self.service.ID, "update", "{}")
+	if err := cmd.Run(); err != nil {
+		fmt.Println(cmd.Output())
 		return err
 	}
 
-	// run configure command TODO PAYLOAD
-	output, err = util.Exec(service.ID, "configure", self.configurePayload())
-	if err != nil {
-		fmt.Println(output)
+	return nil
+}
+
+// runConfigure will run the configure hook in the container
+func (self *serviceConfigure) runConfigure() error {
+	// run update
+	fmt.Print(stylish.NestedBullet("Configuring services...", self.config.DisplayLevel))
+
+	cmd := dockerexec.Command(self.service.ID, "configure", "{}")
+	if err := cmd.Run(); err != nil {
+		fmt.Println(cmd.Output())
 		return err
 	}
 
-	// run start command TODO PAYLOAD
-	output, err = util.Exec(service.ID, "start", self.startPayload())
-	if err != nil {
-		fmt.Println(output)
+	return nil
+}
+
+// runStart will run the configure hook in the container
+func (self *serviceConfigure) runStart() error {
+	// run update
+	fmt.Print(stylish.NestedBullet("Starting services...", self.config.DisplayLevel))
+
+	cmd := dockerexec.Command(self.service.ID, "start", "{}")
+	if err := cmd.Run(); err != nil {
+		fmt.Println(cmd.Output())
 		return err
 	}
 
-	service.Started = true
-	err = data.Put(util.AppName(), self.config.Meta["name"], service)
+	return nil
+}
+
+// persistService saves the service entry to the database
+func (self *serviceConfigure) persistService() error {
+	// set started to true for further idempotency
+	self.service.Started = true
+	err := data.Put(util.AppName(), self.config.Meta["name"], &self.service)
 	if err != nil {
 		return err
 	}

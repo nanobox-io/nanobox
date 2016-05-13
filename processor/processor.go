@@ -8,11 +8,12 @@ import (
 
 type (
 	ProcessConfig struct {
-		DevMode    bool
-		Verbose    bool
-		Background bool
-		Force      bool
-		Meta       map[string]string
+		DevMode    		bool
+		Verbose    		bool
+		Background 		bool
+		Force      		bool
+		DisplayLevel 	int
+		Meta       		map[string]string
 	}
 
 	ProcessBuilder func(ProcessConfig) (Processor, error)

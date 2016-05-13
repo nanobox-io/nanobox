@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/nanobox-io/nanobox/config"
+	// "github.com/nanobox-io/nanobox/config"
 )
 
 // Tar takes a source and variable writers and walks 'source' writing each file

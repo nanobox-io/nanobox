@@ -43,13 +43,6 @@ func (self dev) Process() error {
 		os.Exit(1)
 	}
 
-	// start all the services that are in standby
-	err = Run("service_start_all", self.config)
-	if err != nil {
-		fmt.Printf("service_start_all: %s\n", err.Error())
-		os.Exit(1)
-	}
-
 	// start nanopack service
 	err = Run("nanopack_setup", self.config)
 	if err != nil {

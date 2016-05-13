@@ -94,6 +94,8 @@ func init() {
 	NanoboxCmd.AddCommand(LogoutCmd)
 	NanoboxCmd.AddCommand(BuildCmd)
 	NanoboxCmd.AddCommand(DevCmd)
+	// temporary
+	NanoboxCmd.AddCommand(TestCmd)
 
 }
 

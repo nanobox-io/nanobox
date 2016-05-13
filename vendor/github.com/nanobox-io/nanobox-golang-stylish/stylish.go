@@ -32,8 +32,14 @@ func ProcessStart(msg string, v ...interface{}) string {
 	// print process, inserting a '-' (colon) 'n' times, where 'n' is the number
 	// remaining after subtracting subLen (number of 'reserved' characters) from
 	// maxLen (maximum number of allowed characters)
-	return fmt.Sprintf(`%s
-`, fmt.Sprintf("+ %s %s >", process, strings.Repeat("-", (maxLen-subLen))))
+	return fmt.Sprintf("%s\n", fmt.Sprintf("+ %s %s >", process, strings.Repeat("-", (maxLen-subLen))))
+}
+
+// NestedProcessStart styles and prints a 'child process' as outlined at:
+// http://nanodocs.gopagoda.io/engines/style-guide#child-process
+// with a nested prefix according to the level specified
+func NestedProcessStart(msg string, level int) string {
+	return fmt.Sprintf("%s%s", GenerateNestedPrefix(level), ProcessStart(msg))
 }
 
 // ProcessEnd styles and prints a 'child process' as outlined at:
@@ -70,6 +76,13 @@ func Marker(mark, msg string, v ...interface{}) string {
 // + i am a bullet
 func Bullet(msg string, v ...interface{}) string {
 	return Marker("+", fmt.Sprintf(msg, v...))
+}
+
+// NestedBullet styles and prints a message as outlined at:
+// http://nanodocs.gopagoda.io/engines/style-guide#bullet-points
+// with a nested prefix according to the level specified
+func NestedBullet(msg string, level int) string {
+	return fmt.Sprintf("%s%s", GenerateNestedPrefix(level), Bullet(msg))
 }
 
 // SubBullet styles and prints a message as outlined at:
@@ -136,4 +149,16 @@ func ErrorBody(body string, v ...interface{}) string {
 // All your base are belong to us
 func Error(heading, body string) string {
 	return fmt.Sprintf("%s%s", ErrorHead(heading), ErrorBody(body))
+}
+
+// GenerateNestedPrefix will generate a prefix string of spaces to match the
+// specified depth level
+func GenerateNestedPrefix(level int) string {
+	prefix := ""
+
+	for i := 0; i < level; i++ {
+		prefix += "  "
+	}
+
+	return prefix
 }
