@@ -66,7 +66,7 @@ var (
 
 	//
 	version bool // display the version of nanobox
-	app string
+	app     string
 )
 
 // init creates the list of available nanobox commands and sub commands

@@ -7,8 +7,8 @@ import (
 	"github.com/nanobox-io/nanobox-boxfile"
 
 	"github.com/nanobox-io/golang-docker-client"
-	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/ip_control"
@@ -38,12 +38,11 @@ func (self *codeBuild) Process() error {
 	image := box.Node("build").StringValue("image")
 	bBox := models.Boxfile{}
 
-
 	if image == "" {
 		image = "nanobox/build:v1"
 	}
 
-	_, err := docker.ImagePull(image, &print.DockerImageDisplaySimple{Prefix: "downloading "+image})
+	_, err := docker.ImagePull(image, &print.DockerImageDisplaySimple{Prefix: "downloading " + image})
 	if err != nil {
 		return err
 	}
@@ -110,7 +109,7 @@ func (self *codeBuild) Process() error {
 	if err != nil {
 		goto FAILURE
 	}
-	
+
 	// store it in the database as well
 	bBox.Data = []byte(output)
 	data.Put(util.AppName()+"_meta", "build_boxfile", bBox)

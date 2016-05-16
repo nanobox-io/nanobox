@@ -1,20 +1,20 @@
 package print
 
 import (
-  "fmt"
-  "io"
+	"fmt"
+	"io"
 )
 
 type streamer struct {
-  prefix string
+	prefix string
 }
 
 func (s streamer) Write(p []byte) (n int, err error) {
-  fmt.Printf("%s%s", s.prefix, p)
-  return len(p), nil
+	fmt.Printf("%s%s", s.prefix, p)
+	return len(p), nil
 }
 
 // Stream executes a pre-assembled command and streams the output with a prefix
 func NewStreamer(prefix string) io.Writer {
-  return streamer{prefix}
+	return streamer{prefix}
 }

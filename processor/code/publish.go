@@ -49,7 +49,7 @@ func (self *codePublish) Process() error {
 	}
 
 	if !docker.ImageExists(image) {
-		_, err := docker.ImagePull(image, &print.DockerImageDisplaySimple{Prefix: "downloading "+image})
+		_, err := docker.ImagePull(image, &print.DockerImageDisplaySimple{Prefix: "downloading " + image})
 		if err != nil {
 			return err
 		}

@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io"
-	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -12,7 +11,7 @@ import (
 	syscall "github.com/docker/docker/pkg/signal"
 	"github.com/docker/docker/pkg/term"
 
-	"github.com/nanobox-io/nanobox/util/production_api"	
+	"github.com/nanobox-io/nanobox/util/production_api"
 )
 
 type console struct {
@@ -21,8 +20,8 @@ type console struct {
 
 var (
 	container string
-	key string
-	location string
+	key       string
+	location  string
 )
 
 func init() {
@@ -45,7 +44,7 @@ func (self console) Process() error {
 	if err != nil {
 		return err
 	}
-	
+
 	// establish connection to nanoagent
 	req, err := http.NewRequest("POST", fmt.Sprintf("/exec?key=%s&container=%s", key, container), nil)
 	if err != nil {
@@ -127,31 +126,4 @@ func resizeTTY(w, h int) {
 	if _, err := http.Post(fmt.Sprintf("https://%s/resizeexec?key=%s&container=%s&w=%d&h=%d", location, key, container, w, h), "plain/text", nil); err != nil {
 		fmt.Printf("Error issuing resize: %s\n", err)
 	}
-}
-
-func connect(req *http.Request) (net.Conn, []byte, error) {
-
-	//
-	b := make([]byte, 1)
-
-	// if we can't connect to the server, lets bail out early
-	conn, err := tls.Dial("tcp4", location, &tls.Config{InsecureSkipVerify: true})
-	if err != nil {
-		return conn, b, err
-	}
-	// we dont defer a conn.Close() here because we're returning the conn and
-	// want it to remain open
-
-	// make an http request
-
-	if err := req.Write(conn); err != nil {
-		return conn, b, err
-	}
-
-	// wait trying to read from the connection until a single read happens (blocking)
-	if _, err := conn.Read(b); err != nil {
-		return conn, b, err
-	}
-
-	return conn, b, nil
 }

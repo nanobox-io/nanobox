@@ -139,7 +139,7 @@ func (self dev) Process() error {
 	lumber.Debug("decrementing usagecount fromfrom %d", app.UsageCount)
 	app = models.App{}
 	err = data.Get("apps", util.AppName(), &app)
-	lumber.Error("errfromdata:%+v",err)
+	lumber.Error("errfromdata:%+v", err)
 	lumber.Debug("decrementing usagecount from %d", app.UsageCount)
 	app.UsageCount = app.UsageCount - 1
 	if app.UsageCount < 0 {

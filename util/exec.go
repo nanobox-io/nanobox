@@ -1,10 +1,10 @@
 package util
 
 import (
-	"os"
-	"fmt"
 	"bytes"
 	"errors"
+	"fmt"
+	"os"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"

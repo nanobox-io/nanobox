@@ -50,7 +50,7 @@ func LocalTryLock() (bool, error) {
 func LocalUnlock() (err error) {
 	mutex.Lock()
 	lCount--
-	lumber.Debug("local lock released (%d)", lCount)	
+	lumber.Debug("local lock released (%d)", lCount)
 	mutex.Unlock()
 	// if im not the last guy to release my lock
 	// quit immidiately instead of closing the connection

@@ -19,5 +19,4 @@ var (
 			processor.Run("deploy", processor.DefaultConfig)
 		},
 	}
-
 )

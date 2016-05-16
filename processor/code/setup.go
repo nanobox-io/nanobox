@@ -59,7 +59,7 @@ func (self *codeSetup) Process() error {
 		return nil
 	}
 
-	_, err = docker.ImagePull(self.config.Meta["image"], &print.DockerImageDisplaySimple{Prefix: "downloading "+self.config.Meta["image"]})
+	_, err = docker.ImagePull(self.config.Meta["image"], &print.DockerImageDisplaySimple{Prefix: "downloading " + self.config.Meta["image"]})
 	if err != nil {
 		return err
 	}

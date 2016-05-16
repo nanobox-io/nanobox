@@ -6,8 +6,8 @@ import (
 
 	"github.com/jcelliott/lumber"
 	// "github.com/nanobox-io/nanobox-boxfile"
-	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/production_api"
 )

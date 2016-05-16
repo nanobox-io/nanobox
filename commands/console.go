@@ -29,9 +29,8 @@ var (
 		},
 		// PostRun: halt,
 	}
-
 )
 
 func init() {
-	ConsoleCmd.Flags().StringVarP(&app, "app", "a", "", "production app name or alias")	
+	ConsoleCmd.Flags().StringVarP(&app, "app", "a", "", "production app name or alias")
 }

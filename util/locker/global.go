@@ -25,7 +25,7 @@ func GlobalLock() error {
 		lumber.Debug("global lock waiting...")
 		<-time.After(time.Second)
 	}
-	
+
 	mutex.Lock()
 	gCount++
 	lumber.Debug("global lock aqquired (%d)", gCount)

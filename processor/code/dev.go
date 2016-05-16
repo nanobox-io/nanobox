@@ -44,7 +44,7 @@ func (self *codeDev) Process() error {
 		image = "nanobox/build:v1"
 	}
 
-	_, err := docker.ImagePull(image, &print.DockerImageDisplaySimple{Prefix: "downloading "+image})
+	_, err := docker.ImagePull(image, &print.DockerImageDisplaySimple{Prefix: "downloading " + image})
 	if err != nil {
 		return err
 	}
@@ -90,8 +90,8 @@ func (self *codeDev) Process() error {
 	}
 
 	if container.ContainerJSONBase == nil {
-				// get the container if we dont have it
-		container, err = docker.ContainerInspect(config.Name) 
+		// get the container if we dont have it
+		container, err = docker.ContainerInspect(config.Name)
 	}
 
 	// run user hook

@@ -34,9 +34,9 @@ func App(slug string) (models.App, error) {
 
 func Deploy(appId, id, boxfile, message string) error {
 	body := map[string]string{
-	  "boxfile_content": boxfile,
-	  "build_id": id,
-	  "commit_message": message,
+		"boxfile_content": boxfile,
+		"build_id":        id,
+		"commit_message":  message,
 	}
 	return doRequest("POST", fmt.Sprintf("/apps/%s/deploys", appId), body, nil)
 }
