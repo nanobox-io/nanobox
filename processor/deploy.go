@@ -42,9 +42,15 @@ func (self deploy) Process() error {
 	}
 
 	// get remote hoarder credentials
+	appId := getAppID(self.config.Meta["alias"])
 	self.config.Meta["build_id"] = util.RandomString(30)
-	self.config.Meta["warehouse_url"] = "??"
-	self.config.Meta["warehouse_token"] = "??"
+	warehouseToken, warehouseUrl, err := production_api.GetWarehouse(appId)
+	self.config.Meta["warehouse_token"] = warehouseToken 
+	self.config.Meta["warehouse_url"] = warehouseUrl
+	if err != nil {
+		fmt.Println("unable to communicate with odin:", err)
+		os.Exit(1)
+	}
 
 	// publish code
 	publishProcessor, err := Build("code_publish", self.config)

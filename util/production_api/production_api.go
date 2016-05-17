@@ -43,13 +43,25 @@ func Deploy(appId, id, boxfile, message string) error {
 
 func EstablishTunnel(appId, id string) (string, string, string, error) {
 	// do somethign else here
-	return "secrettoken", "1.2.3.4", "dockerid", nil
+	r := map[string]string{}
+	err := doRequest("Get", fmt.Sprintf("/apps/%s/tunnels/%s", appId, id), nil, &r)
+	return r["token"], r["url"], r["container"], err
 }
 
 func EstablishConsole(appId, id string) (string, string, string, error) {
 	// do somethign else here
-	return "secrettoken", "1.2.3.4", "dockerid", nil
+	r := map[string]string{}
+	err := doRequest("Get", fmt.Sprintf("/apps/%s/consoles/%s", appId, id), nil, &r)
+	return r["token"], r["url"], r["container"], err
 }
+
+func GetWarehouse(appId string) (string, string, error) {
+	// do something else here
+	r := map[string]string{}
+	err := doRequest("Get", fmt.Sprintf("/apps/%s/warehouse", appId), nil, &r)
+	return r["token"], r["url"], err
+}
+
 
 func doRequest(method, path string, requestBody, responseBody interface{}) error {
 	var rbodyReader io.Reader
