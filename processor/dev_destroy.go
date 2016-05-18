@@ -28,28 +28,9 @@ func (self devDestroy) Results() ProcessConfig {
 
 func (self devDestroy) Process() error {
 
-	// if im the only app dont even worry about any of the service
-	// clean up just destroy the whole vm
-	data.Delete("apps", util.AppName())
-	keys, err := data.Keys("apps")
-	if err != nil {
-		fmt.Println("get apps data failure:", err)
-		lumber.Close()
-		os.Exit(1)
-	}
-	if len(keys) == 0 {
-		// if no other apps exist in container
-		err := Run("provider_destroy", self.config)
-		if err != nil {
-			fmt.Println("provider_setup:", err)
-			lumber.Close()
-			os.Exit(1)
-		}
-		return nil
-	}
 
 	// setup the environment (boot vm)
-	err = Run("provider_setup", self.config)
+	err := Run("provider_setup", self.config)
 	if err != nil {
 		fmt.Println("provider_setup:", err)
 		lumber.Close()
@@ -79,5 +60,25 @@ func (self devDestroy) Process() error {
 			}
 		}
 	}
+
+	// if im the only app dont even worry about any of the service
+	// clean up just destroy the whole vm
+	data.Delete("apps", util.AppName())
+	keys, err := data.Keys("apps")
+	if err != nil {
+		fmt.Println("get apps data failure:", err)
+		lumber.Close()
+		os.Exit(1)
+	}
+	if len(keys) == 0 {
+		// if no other apps exist in container
+		err := Run("provider_destroy", self.config)
+		if err != nil {
+			fmt.Println("provider_setup:", err)
+			lumber.Close()
+			os.Exit(1)
+		}
+		return nil
+	}	
 	return nil
 }
