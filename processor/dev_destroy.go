@@ -48,6 +48,15 @@ func (self devDestroy) Process() error {
 		return nil
 	}
 
+	// setup the environment (boot vm)
+	err = Run("provider_setup", self.config)
+	if err != nil {
+		fmt.Println("provider_setup:", err)
+		lumber.Close()
+		os.Exit(1)
+	}
+
+
 	// get all the services in the app
 	// and remove them
 	services, err := data.Keys(util.AppName())
