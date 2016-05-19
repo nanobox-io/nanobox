@@ -6,7 +6,6 @@ import (
 	"os/exec"
 	"runtime"
 	"path/filepath"
-	"strconv"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox-golang-stylish"
