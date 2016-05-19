@@ -94,13 +94,13 @@ func (self Native) Start() error {
 func (self Native) HostShareDir() string {
 	dir := filepath.ToSlash(filepath.Join(util.GlobalDir(), "share"))
 	os.MkdirAll(dir, 0755)
-	return dir
+	return dir+"/"
 }
 
 func (self Native) HostMntDir() string {
 	dir := filepath.ToSlash(filepath.Join(util.GlobalDir(), "mnt"))
 	os.MkdirAll(dir, 0755)
-	return dir
+	return dir+"/"
 }
 
 // docker env should already be configured if docker is installed
