@@ -9,6 +9,7 @@ import (
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
+	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/ip_control"
@@ -63,12 +64,12 @@ func (self *codeBuild) Process() error {
 		Network: "virt",
 		IP:      localIp.String(),
 		Binds: []string{
-			fmt.Sprintf("/share/%s/code:/share/code", appName),
-			fmt.Sprintf("/share/%s/engine:/share/engine", appName),
-			fmt.Sprintf("/mnt/sda1/%s/build:/mnt/build", appName),
-			fmt.Sprintf("/mnt/sda1/%s/deploy:/mnt/deploy", appName),
-			fmt.Sprintf("/mnt/sda1/%s/app:/mnt/app", appName),
-			fmt.Sprintf("/mnt/sda1/%s/cache:/mnt/cache", appName),
+			fmt.Sprintf("%s%s/code:/share/code", provider.HostShareDir(), appName),
+			fmt.Sprintf("%s%s/engine:/share/engine", provider.HostShareDir(), appName),
+			fmt.Sprintf("%s%s/build:/mnt/build", provider.HostMntDir(), appName),
+			fmt.Sprintf("%s%s/deploy:/mnt/deploy", provider.HostMntDir(), appName),
+			fmt.Sprintf("%s%s/app:/mnt/app", provider.HostMntDir(), appName),
+			fmt.Sprintf("%s%s/cache:/mnt/cache", provider.HostMntDir(), appName),
 		},
 	}
 

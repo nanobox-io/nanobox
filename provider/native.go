@@ -2,8 +2,12 @@ package provider
 
 import (
 	"fmt"
+	"os"
 	"os/exec"
 	"runtime"
+	"path/filepath"
+
+	"github.com/nanobox-io/nanobox/util"
 )
 
 type (
@@ -61,6 +65,18 @@ func (self Native) Destroy() error {
 func (self Native) Start() error {
 	// TODO: some networking maybe???
 	return nil
+}
+
+func (self Native) HostShareDir() string {
+	dir := filepath.ToSlash(filepath.Join(util.GlobalDir(), "share"))
+	os.MkdirAll(dir, 0755)
+	return dir
+}
+
+func (self Native) HostMntDir() string {
+	dir := filepath.ToSlash(filepath.Join(util.GlobalDir(), "mnt"))
+	os.MkdirAll(dir, 0755)
+	return dir
 }
 
 // docker env should already be configured if docker is installed

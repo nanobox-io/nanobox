@@ -10,6 +10,7 @@ import (
 	"github.com/nanobox-io/nanobox/processor"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/ip_control"
@@ -65,14 +66,14 @@ func (self *codeDev) Process() error {
 		Network: "virt",
 		IP:      localIp.String(),
 		Binds: []string{
-			fmt.Sprintf("/share/%s/code:/app", appName),
-			fmt.Sprintf("/mnt/sda1/%s/build:/data", appName),
-			fmt.Sprintf("/mnt/sda1/%s/cache:/mnt/cache", appName),
+			fmt.Sprintf("%s%s/code:/app", provider.HostShareDir(), appName),
+			fmt.Sprintf("%s%s/build:/data", provider.HostMntDir(), appName),
+			fmt.Sprintf("%s%s/cache:/mnt/cache", provider.HostMntDir(), appName),
 		},
 	}
 	lumber.Debug("lib_dirs: %+v", box.Node("code.build").StringSliceValue("lib_dirs"))
 	for _, lib_dir := range box.Node("code.build").StringSliceValue("lib_dirs") {
-		config.Binds = append(config.Binds, fmt.Sprintf("/mnt/sda1/%s/cache/lib_dirs/%s:/app/%s", util.AppName(), lib_dir, lib_dir))
+		config.Binds = append(config.Binds, fmt.Sprintf("%s%s/cache/lib_dirs/%s:/app/%s", provider.HostMntDir(), util.AppName(), lib_dir, lib_dir))
 	}
 	// add lib_dirs
 	// fmt.Sprintf("/mnt/%s/cache/lib_dirs/vendor:/code/vendor", util.AppName()),

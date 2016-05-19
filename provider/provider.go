@@ -9,6 +9,8 @@ import (
 
 type (
 	Provider interface {
+		HostShareDir() string
+		HostMntDir() string
 		Valid() error
 		Create() error
 		Reboot() error
@@ -78,6 +80,20 @@ func Start() error {
 		return invalidProvider
 	}
 	return p.Start()
+}
+func HostShareDir() string {
+	p, ok := providers[nanofile.Viper().GetString("provider")]
+	if !ok {
+		return ""
+	}
+	return p.HostShareDir()
+}
+func HostMntDir() string {
+	p, ok := providers[nanofile.Viper().GetString("provider")]
+	if !ok {
+		return ""
+	}
+	return p.HostMntDir()
 }
 func DockerEnv() error {
 	p, ok := providers[nanofile.Viper().GetString("provider")]

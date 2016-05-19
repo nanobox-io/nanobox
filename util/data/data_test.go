@@ -39,7 +39,6 @@ func TestDelete(t *testing.T) {
 	}
 	d := Data{}
 	err = data.Get("user", "1", &d)
-	fmt.Println(err)
 	if err == nil {
 		t.Errorf("removed data should not have been retrievable")
 	}

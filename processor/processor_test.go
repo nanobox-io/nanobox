@@ -10,7 +10,7 @@ import (
 	_ "github.com/nanobox-io/nanobox/processor/nanopack"
 	_ "github.com/nanobox-io/nanobox/processor/provider"
 	_ "github.com/nanobox-io/nanobox/processor/service"
-) 
+)
 
 type testProcessor struct {
 	run bool

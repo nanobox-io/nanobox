@@ -150,6 +150,14 @@ func (self DockerMachine) Start() error {
 	return cmd.Run()
 }
 
+func (self DockerMachine) HostShareDir() string {
+	return "/share/"
+}
+
+func (self DockerMachine) HostMntDir() string {
+	return "/mnt/sda1/"
+}
+
 // DockerEnv exports the docker connection information to the running process
 func (self DockerMachine) DockerEnv() error {
 	// docker-machine env nanobox
