@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"runtime"
 	"path/filepath"
+	"strconv"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox-golang-stylish"
@@ -166,7 +167,7 @@ func (self Native) hasNetwork() bool {
 }
 
 func (self Native) hasMount(mount string) bool {
-	fi, err := os.Stat(mount)
+	fi, err := os.Lstat(mount)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return false
