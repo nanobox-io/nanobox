@@ -140,6 +140,7 @@ func (self Native) RemoveNat(ip, container_ip string) error {
 func (self Native) AddMount(local, host string) error {
 	// TODO: ???
 	if !self.hasMount(host) {
+		os.MkdirAll(filepath.Dir(host), 0755)
 		return os.Symlink(local, host)
 	}
 	return nil
