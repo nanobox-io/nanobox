@@ -7,7 +7,11 @@ import (
 	"runtime"
 	"path/filepath"
 
+	"github.com/jcelliott/lumber"
+	"github.com/nanobox-io/nanobox-golang-stylish"
+
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/print"
 )
 
 type (
@@ -36,7 +40,6 @@ func (self Native) Valid() error {
 // does nothing for native
 func (self Native) Create() error {
 	// TODO: maybe some setup stuff???
-
 	return nil
 }
 
@@ -57,13 +60,34 @@ func (self Native) Stop() error {
 // does nothing on native
 func (self Native) Destroy() error {
 	// TODO: clean up stuff??
+	if self.hasNetwork() {
+		fmt.Print(stylish.Bullet("Removing custom docker network..."))
 
+		cmd := exec.Command("docker", "network", "rm", "nanobox")
+		cmd.Stdout = print.NewStreamer("  ")
+		cmd.Stderr = print.NewStreamer("  ")
+
+		if err := cmd.Run(); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
 // does nothing on native
 func (self Native) Start() error {
 	// TODO: some networking maybe???
+	if !self.hasNetwork() {
+		fmt.Print(stylish.Bullet("Setting up custom docker network..."))
+
+		cmd := exec.Command("docker", "network", "create", "--driver=bridge", "--subnet=192.168.0.0/24", "--opt=\"com.docker.network.driver.mtu=1450\"", "--opt=\"com.docker.network.bridge.name=redd0\"", "--gateway=192.168.0.1", "nanobox")
+		cmd.Stdout = print.NewStreamer("  ")
+		cmd.Stderr = print.NewStreamer("  ")
+
+		if err := cmd.Run(); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
@@ -115,10 +139,41 @@ func (self Native) RemoveNat(ip, container_ip string) error {
 // AddMount adds a mount into the docker-machine vm
 func (self Native) AddMount(local, host string) error {
 	// TODO: ???
+	if !self.hasMount(host) {
+		return os.Symlink(local, host)
+	}
 	return nil
 }
 
-func (self Native) RemoveMount(local, host string) error {
+func (self Native) RemoveMount(_, host string) error {
 	// TODO: ???
+	if self.hasMount(host) {
+		return os.Remove(host)
+	}
 	return nil
+}
+
+func (self Native) hasNetwork() bool {
+	// docker-machine ssh nanobox docker network inspect nanobox
+	cmd := exec.Command("nanobox", "docker", "network", "inspect", "nanobox")
+	b, err := cmd.CombinedOutput()
+	if err != nil {
+		lumber.Debug("hasNetwork output: %s", b)
+		return false
+	}
+	return true
+}
+
+func (self Native) hasMount(mount string) bool {
+	fi, err := os.Stat(mount)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false
+		}
+		lumber.Debug("Error checking mount: %s", err)
+	}
+	if ((fi.Mode() & os.ModeSymlink) > 0) {
+		return true
+	}
+	return false
 }
