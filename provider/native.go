@@ -155,7 +155,7 @@ func (self Native) RemoveMount(_, host string) error {
 
 func (self Native) hasNetwork() bool {
 	// docker-machine ssh nanobox docker network inspect nanobox
-	cmd := exec.Command("nanobox", "docker", "network", "inspect", "nanobox")
+	cmd := exec.Command("docker", "network", "inspect", "nanobox")
 	b, err := cmd.CombinedOutput()
 	if err != nil {
 		lumber.Debug("hasNetwork output: %s", b)
