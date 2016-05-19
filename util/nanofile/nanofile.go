@@ -22,10 +22,10 @@ func Viper() *viper.Viper {
 	vip.SetDefault("cpus", 2)
 	vip.SetDefault("host-dns", "off")
 	vip.SetDefault("mount-nfs", true)
+	vip.SetDefault("provider", "docker_machine") // this may change in the future (adding additional hosts such as vmware
 	if runtime.GOOS == "linux" {
 		vip.SetDefault("provider", "native")
 	}
-	vip.SetDefault("provider", "docker_machine") // this may change in the future (adding additional hosts such as vmware
 	vip.SetDefault("ram", 1024)
 	vip.SetDefault("use-proxy", false)
 	vip.SetDefault("production_host", "api.nanobox.io/v1/")
