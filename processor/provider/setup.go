@@ -66,11 +66,11 @@ func (self providerSetup) Process() error {
 	// mount my folder
 	if util.EngineDir() != "" {
 		fmt.Println("  -> mount engine")
-		err = provider.AddMount(util.EngineDir(), "/share/"+util.AppName()+"/engine")
+		err = provider.AddMount(util.EngineDir(), provider.HostShareDir()+util.AppName()+"/engine")
 		if err != nil {
 			lumber.Error("AddMount", err)
 			return err
 		}
 	}
-	return provider.AddMount(util.LocalDir(), "/share/"+util.AppName()+"/code")
+	return provider.AddMount(util.LocalDir(), provider.HostShareDir()+util.AppName()+"/code")
 }
