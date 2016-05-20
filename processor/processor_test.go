@@ -52,12 +52,12 @@ func TestRegister(t *testing.T) {
 	}
 }
 
-// func TestBuild(t *testing.T) {
-// 	err := processor.Run("build", processor.DefaultConfig)
-// 	if err != nil {
-// 		t.Errorf("error from build run", err)
-// 	}
-// }
+func TestBuild(t *testing.T) {
+	err := processor.Run("build", processor.DefaultConfig)
+	if err != nil {
+		t.Errorf("error from build run", err)
+	}
+}
 
 // func TestDevDeploy(t *testing.T) {
 // 	err := processor.Run("dev_deploy", processor.DefaultConfig)
