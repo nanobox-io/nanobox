@@ -59,12 +59,12 @@ func TestBuild(t *testing.T) {
 	}
 }
 
-// func TestDevDeploy(t *testing.T) {
-// 	err := processor.Run("dev_deploy", processor.DefaultConfig)
-// 	if err != nil {
-// 		t.Errorf("error from build run", err)
-// 	}
-// }
+func TestDevDeploy(t *testing.T) {
+	err := processor.Run("dev_deploy", processor.DefaultConfig)
+	if err != nil {
+		t.Errorf("error from build run", err)
+	}
+}
 
 // func TestDevDestroy(t *testing.T) {
 // 	err := processor.Run("dev_destroy", processor.DefaultConfig)
