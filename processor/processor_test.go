@@ -60,9 +60,9 @@ func TestBuild(t *testing.T) {
 }
 
 func TestDevDeploy(t *testing.T) {
-	err := processor.Run("dev_deploy", processor.DefaultConfig)
+	err := processor.Run("dev", processor.DefaultConfig)
 	if err != nil {
-		t.Errorf("error from build run", err)
+		t.Errorf("error from dev run", err)
 	}
 }
 
