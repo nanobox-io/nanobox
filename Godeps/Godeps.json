@@ -1,7 +1,7 @@
 {
 	"ImportPath": "github.com/nanobox-io/nanobox",
 	"GoVersion": "go1.6",
-	"GodepVersion": "v66",
+	"GodepVersion": "v63",
 	"Deps": [
 		{
 			"ImportPath": "github.com/BurntSushi/toml",
@@ -35,8 +35,8 @@
 		},
 		{
 			"ImportPath": "github.com/docker/docker/pkg/stdcopy",
-			"Comment": "v1.4.1-11899-g9837ec4",
-			"Rev": "9837ec4da53f15f9120d53a6e1517491ba8b0261"
+			"Comment": "v1.4.1-12158-g52debcd",
+			"Rev": "52debcd58ac91bf68503ce60561536911b74ff05"
 		},
 		{
 			"ImportPath": "github.com/docker/engine-api/client",
