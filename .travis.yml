@@ -2,3 +2,9 @@ language: go
 
 go:
   - 1.6
+
+before_install:
+  - sudo apt-get -y purge docker-engine
+  - bash <(curl -fsSL https://get.docker.com/)
+
+script: go test $(go list ./... | grep -v /vendor/)
