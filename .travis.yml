@@ -11,4 +11,5 @@ before_install:
   - sudo apt-get -y purge docker-engine
   - bash <(curl -fsSL https://get.docker.com/)
 
+install: echo "hi"
 script: go test $(go list ./... | grep -v /vendor/)
