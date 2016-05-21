@@ -2,7 +2,7 @@ package service
 
 import (
 	"net"
-	"errors"
+	"fmt"
 
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox/models"
@@ -23,17 +23,17 @@ func init() {
 
 func serviceDestroyFunc(config processor.ProcessConfig) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
-	if config.Meta["name"] == "" {
-		return nil, errors.New("missing image or name")
-	}
-	return &serviceDestroy{config: config}, nil
+	// if config.Meta["name"] == "" {
+	// 	return nil, errors.New("missing image or name")
+	// }
+	return serviceDestroy{config: config}, nil
 }
 
 func (self serviceDestroy) Results() processor.ProcessConfig {
 	return self.config
 }
 
-func (self *serviceDestroy) Process() error {
+func (self serviceDestroy) Process() error {
 
 	// get the service from the database
 	service := models.Service{}
@@ -43,7 +43,9 @@ func (self *serviceDestroy) Process() error {
 		return err
 	}
 
-	err = docker.ContainerRemove(service.ID)
+	fmt.Println("service detroy: " + self.config.Meta["name"])
+
+	err = docker.ContainerRemove(self.config.Meta["name"])
 	if err != nil {
 		return err
 	}

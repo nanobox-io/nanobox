@@ -164,7 +164,7 @@ func (self *codeConfigure) Process() error {
 
 	fmt.Println("-> configuring", self.config.Meta["name"])
 
-	if service.Started {
+	if service.State == "active" {
 		return nil
 	}
 
@@ -194,7 +194,7 @@ func (self *codeConfigure) Process() error {
 		return err
 	}
 
-	service.Started = true
+	service.State = "active"
 	err = data.Put(util.AppName(), self.config.Meta["name"], service)
 	if err != nil {
 		return err

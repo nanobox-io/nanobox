@@ -1,9 +1,7 @@
 package service
 
 import (
-	"errors"
 	"fmt"
-	"os"
 	"regexp"
 
 	"github.com/nanobox-io/nanobox-boxfile"
@@ -14,8 +12,16 @@ import (
 )
 
 type serviceSync struct {
-	config processor.ProcessConfig
-	fail   bool
+	config 			processor.ProcessConfig
+	fail   			bool
+	newBoxfile	models.Boxfile
+	oldBoxfile	models.Boxfile
+}
+
+type service struct {
+	label string
+	name	string
+	image	string
 }
 
 func init() {
@@ -23,10 +29,6 @@ func init() {
 }
 
 func serviceSyncFunc(config processor.ProcessConfig) (processor.Processor, error) {
-	if config.Meta["boxfile"] == "" {
-		return nil, errors.New("missing boxfile")
-	}
-
 	return &serviceSync{config: config}, nil
 }
 
@@ -35,75 +37,187 @@ func (self serviceSync) Results() processor.ProcessConfig {
 }
 
 func (self *serviceSync) Process() error {
-	fmt.Println("-> provision data services")
-	// populate new boxfile
-	box := boxfile.New([]byte(self.config.Meta["boxfile"]))
 
-	// get the previous boxfile
-	oldBoxData := models.Boxfile{}
-	data.Get(util.AppName()+"_meta", "oldBoxfile", &oldBoxData)
-	oldBoxfile := boxfile.New(oldBoxData.Data)
+	if err := self.loadNewBoxfile(); err != nil {
+		return err
+	}
 
-	// remove all the services no longer in the boxfile
-	// or a change has happened to the boxfile node
-	keys, err := data.Keys(util.AppName())
+	if err := self.loadOldBoxfile(); err != nil {
+		return err
+	}
+
+	if err := self.purgeDeltaServices(); err != nil {
+		return err
+	}
+
+	if err := self.provisionDataServices(); err != nil {
+		return err
+	}
+
+	if err := self.replaceOldBoxfile(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// loadNewBoxfile loads the new build boxfile from the database
+func (self *serviceSync) loadNewBoxfile() error {
+
+	if err := data.Get(util.AppName() + "_meta", "build_boxfile", &self.newBoxfile); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// loadOldBoxfile loads the old boxfile from the database
+func (self *serviceSync) loadOldBoxfile() error {
+
+	// we don't care about the error here because this could be the first build
+	data.Get(util.AppName() + "_meta", "old_build_boxfile", &self.oldBoxfile)
+
+	return nil
+}
+
+// replaceOldBoxfile replaces the old boxfile in the database with the new boxfile
+func (self *serviceSync) replaceOldBoxfile() error {
+
+	if err := data.Put(util.AppName() + "_meta", "old_build_boxfile", &self.newBoxfile); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// purgeDeltaServices will purge the services that were removed from the boxfile
+func (self *serviceSync) purgeDeltaServices() error {
+
+	// convert the data into boxfile library helpers
+	oldBoxfile := boxfile.New(self.oldBoxfile.Data)
+	newBoxfile := boxfile.New(self.newBoxfile.Data)
+
+	// fetch the services
+	uids, err := data.Keys(util.AppName())
 	if err != nil {
-		fmt.Println(err)
-	}
-	for _, key := range keys {
-		// if the boxfile doesnt have a node for the service
-		// or if the old and new boxfiles dont match for this service
-		if key != "portal" &&
-			key != "hoarder" &&
-			key != "mist" &&
-			key != "logvac" &&
-			(!box.Node(key).Valid ||
-				box.Node(key).Equal(oldBoxfile.Node(key))) {
-			service := processor.ProcessConfig{
-				DevMode: self.config.DevMode,
-				Verbose: self.config.Verbose,
-				Meta: map[string]string{
-					"name":    key,
-					"boxfile": self.config.Meta["boxfile"],
-				},
-			}
-			err := processor.Run("service_remove", service)
-			if err != nil {
-				fmt.Printf("service_remove (%s): %s\n", key, err.Error())
-				os.Exit(1)
-			}
-		}
+		return err
 	}
 
-	// add any missing services
-	for _, serviceName := range box.Nodes("data") {
-		image := box.Node(serviceName).StringValue("image")
+	for _, uid := range uids {
+
+		// ignore platform services
+		if isPlatformUID(uid) {
+			continue
+		}
+
+		// fetch the nodes
+		newNode := newBoxfile.Node(uid)
+		oldNode := oldBoxfile.Node(uid)
+
+		// skip if the nodes are the same
+		if newNode.Equal(oldNode) {
+			continue
+		}
+
+		if err := self.purgeService(uid); err != nil {
+			return err
+		}
+
+	}
+
+	return nil
+}
+
+// purgeService will purge a service from the nanobox
+func (self *serviceSync) purgeService(uid string) error {
+	service := processor.ProcessConfig{
+		DevMode: self.config.DevMode,
+		Verbose: self.config.Verbose,
+		Meta: map[string]string{
+			"name":    uid,
+		},
+	}
+
+	if err := processor.Run("service_remove", service); err != nil {
+		fmt.Printf("service_remove (%s): %s\n", uid, err.Error())
+		return err
+	}
+
+	return nil
+}
+
+// provisionServices will provision services that are defined in the boxfile
+// but not running on nanobox
+func (self *serviceSync) provisionDataServices() error {
+
+	// convert the data into boxfile library helpers
+	newBoxfile := boxfile.New(self.newBoxfile.Data)
+
+	// grab all of the data nodes
+	dataServices := newBoxfile.Nodes("data")
+
+	for _, uid := range dataServices {
+		image := newBoxfile.Node(uid).StringValue("image")
+
 		if image == "" {
-			serviceType := regexp.MustCompile(`.+\.`).ReplaceAllString(serviceName, "")
+			serviceType := regexp.MustCompile(`.+\.`).ReplaceAllString(uid, "")
 			image = "nanobox/" + serviceType
 		}
-		service := processor.ProcessConfig{
-			DevMode: self.config.DevMode,
-			Verbose: self.config.Verbose,
-			Meta: map[string]string{
-				"name":    serviceName,
-				"image":   image,
-				"boxfile": self.config.Meta["boxfile"],
-			},
-		}
-		err := processor.Run("service_setup", service)
-		if err != nil {
-			fmt.Printf("service_setup (%s): %s\n", serviceName, err.Error())
-			os.Exit(1)
+
+		service := service{
+			label:	uid,
+			name:		uid,
+			image:	image,
 		}
 
-		err = processor.Run("service_configure", service)
-		if err != nil {
-			fmt.Printf("service_setup (%s): %s\n", serviceName, err.Error())
-			os.Exit(1)
+		if err := self.provisionService(service); err != nil {
+			return err
 		}
 	}
 
-	// set the new box file as the old for next time we sync
-	return data.Put(util.AppName()+"_meta", "oldBoxfile", box)
+	return nil
+}
+
+// provisionService will provision an individual service
+func (self *serviceSync) provisionService(service service) error {
+
+	config := processor.ProcessConfig{
+		DevMode: self.config.DevMode,
+		Verbose: self.config.Verbose,
+		Meta: map[string]string{
+			"label": 	service.label,
+			"name":  	service.name,
+			"image":	service.image,
+		},
+	}
+
+	// provision
+	if err := processor.Run("service_provision", config); err != nil {
+		fmt.Println(fmt.Sprintf("%s_provision:", service.name), err)
+		return err
+	}
+
+	return nil
+}
+
+// isPlatform will return true if the uid matches a platform service
+func isPlatformUID(uid string) bool {
+
+	if uid == "portal" {
+		return true
+	}
+
+	if uid == "hoarder" {
+		return true
+	}
+
+	if uid == "mist" {
+		return true
+	}
+
+	if uid == "logvac" {
+		return true
+	}
+
+	return false
 }

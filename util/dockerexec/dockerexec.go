@@ -13,8 +13,8 @@ type Cmd struct {
   Id      string
   Path    string
   Payload string
-  Out     bytes.Buffer
   Stdout  io.Writer
+  out     bytes.Buffer
 }
 
 // Run builds a command and executes within the context of a docker container
@@ -29,7 +29,7 @@ func (cmd *Cmd) Run() error {
 	}
 
   // stream the output
-	if err := docker.ExecPipe(hj, nil, &cmd.Out, cmd.Stdout); err != nil {
+	if err := docker.ExecPipe(hj, nil, &cmd.out, cmd.Stdout); err != nil {
     return err
   }
 
@@ -49,7 +49,7 @@ func (cmd *Cmd) Run() error {
 
 // Output returns the output from the command
 func (cmd *Cmd) Output() string {
-  return cmd.Out.String()
+  return cmd.out.String()
 }
 
 // Command generates a new Cmd struct

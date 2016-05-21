@@ -14,8 +14,9 @@ import (
 )
 
 type serviceRemove struct {
-	config processor.ProcessConfig
-	fail   bool
+	config 	processor.ProcessConfig
+	fail   	bool
+	service models.Service
 }
 
 func init() {
@@ -31,38 +32,127 @@ func (self serviceRemove) Results() processor.ProcessConfig {
 }
 
 func (self *serviceRemove) Process() error {
-	// make sure i was given a name and image
+
+	if err := self.validateName(); err != nil {
+		return err
+	}
+
+	if err := self.loadService(); err != nil {
+		// short-circuit if this service doesn't exist
+		return nil
+	}
+
+	if err := self.removeNat(); err != nil {
+		return err
+	}
+
+	if err := self.removeIP(); err != nil {
+		return err
+	}
+
+	if err := self.removeContainer(); err != nil {
+		return err
+	}
+
+	if err := self.releaseIPs(); err != nil {
+		return err
+	}
+
+	if err := self.deleteService(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateName validates a name was provided in the metadata
+func (self *serviceRemove) validateName() error {
 	if self.config.Meta["name"] == "" {
-		return errors.New("missing image or name")
+		return errors.New("missing name")
 	}
 
-	// get the service from the database
-	service := models.Service{}
-	err := data.Get(util.AppName(), self.config.Meta["name"], &service)
-	if err != nil {
-		// quit early if the service was found to be created already
+	return nil
+}
+
+// loadService loads the service from the database
+func (self *serviceRemove) loadService() error {
+	name := self.config.Meta["name"]
+	if err := data.Get(util.AppName(), name, &self.service); err != nil {
 		return err
 	}
 
-	err = provider.RemoveNat(service.ExternalIP, service.InternalIP)
-	if err != nil {
+	return nil
+}
+
+// removeNat removes the nat from the container
+func (self *serviceRemove) removeNat() error {
+	extIP := self.service.ExternalIP
+	intIP := self.service.InternalIP
+
+	if err := provider.RemoveNat(extIP, intIP); err != nil {
 		return err
 	}
-	err = provider.RemoveIP(service.ExternalIP)
-	if err != nil {
+
+	return nil
+}
+
+// removeIP removes the IP from the host
+func (self *serviceRemove) removeIP() error {
+	if err := provider.RemoveIP(self.service.ExternalIP); err != nil {
 		return err
 	}
-	err = docker.ContainerRemove(service.ID)
-	if err != nil {
+
+	return nil
+}
+
+// releaseIPs releases the IPs back to the pool
+func (self *serviceRemove) releaseIPs() error {
+	extIP := net.ParseIP(self.service.ExternalIP)
+	intIP := net.ParseIP(self.service.InternalIP)
+
+	if err := ip_control.ReturnIP(intIP); err != nil {
 		return err
 	}
-	err = ip_control.ReturnIP(net.ParseIP(service.InternalIP))
-	if err != nil {
+
+	if err := ip_control.ReturnIP(extIP); err != nil {
 		return err
 	}
-	err = ip_control.ReturnIP(net.ParseIP(service.ExternalIP))
-	if err != nil {
+
+	return nil
+}
+
+// removeContainer removes a container from the provider
+func (self *serviceRemove) removeContainer() error {
+
+	if exists := self.containerExists(self.service.ID); exists != true {
+		return nil
+	}
+
+	if err := docker.ContainerRemove(self.service.ID); err != nil {
 		return err
 	}
-	return data.Delete(util.AppName(), self.config.Meta["name"])
+
+	return nil
+}
+
+// deleteServices removes the service entry from the database
+func (self *serviceRemove) deleteService() error {
+
+	name := self.config.Meta["name"]
+	if err := data.Delete(util.AppName(), name); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// todo: this should be a general helper in the docker library
+// containerExists checks to see if a container exists
+func (self *serviceRemove) containerExists(id string) bool {
+
+	if _, err := docker.GetContainer(id); err == nil {
+		return true
+	}
+
+	return false
 }

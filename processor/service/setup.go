@@ -8,7 +8,6 @@ import (
 	"io"
 	"os"
 
-	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox-boxfile"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 
@@ -24,14 +23,17 @@ import (
 	"github.com/nanobox-io/nanobox/util/dockerexec"
 )
 
+type cleanFunc func() error
+
 type serviceSetup struct {
-	config 		processor.ProcessConfig
-	service 	models.Service
-	local_ip 	net.IP
-	global_ip net.IP
-	container dockType.ContainerJSON
-	plan			string
-	fail   		bool
+	config 			processor.ProcessConfig
+	service 		models.Service
+	local_ip 		net.IP
+	global_ip 	net.IP
+	container 	dockType.ContainerJSON
+	plan				string
+	fail   			bool
+	cleanFuncs	[]cleanFunc
 }
 
 func init() {
@@ -41,15 +43,28 @@ func init() {
 func serviceSetupFunc(config processor.ProcessConfig) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 
-	return &serviceSetup{config: config}, nil
+	return &serviceSetup{
+		config: config,
+		cleanFuncs:	make([]cleanFunc, 0),
+	}, nil
 }
 
-func (self *serviceSetup) clean(fn func()) func() {
-	return func() {
-		if self.fail {
-			fn()
+// clean will iterate through the cleanup functions that were registered and
+// call them one-by-one
+func (self *serviceSetup) clean() error {
+	// short-circuit if we haven't failed
+	if self.fail == false {
+		return nil
+	}
+
+	// iterate through the cleanup functions that were registered and call them
+	for _, cleanF := range self.cleanFuncs {
+		if err := cleanF(); err != nil {
+			return err
 		}
 	}
+
+	return nil
 }
 
 func (self serviceSetup) Results() processor.ProcessConfig {
@@ -58,48 +73,59 @@ func (self serviceSetup) Results() processor.ProcessConfig {
 
 func (self *serviceSetup) Process() error {
 
-	if err := self.validateImage(); err != nil {
+	// call the cleanup function to ensure we don't leave any bad state
+	defer self.clean()
+
+	if err := self.validateMeta(); err != nil {
+		self.fail = true
 		return err
 	}
 
 	if err := self.loadService(); err != nil {
+		self.fail = true
 		return err
 	}
 
-	// quit early if the service was found to be created already
-	if self.service.ID != "" {
+	// short-circuit if the service has already progressed past this point
+	if self.service.State != "initialized" {
 		return nil
 	}
 
 	if err := self.downloadImage(); err != nil {
+		self.fail = true
 		return err
 	}
 
 	if err := self.reserveIps(); err != nil {
+		self.fail = true
 		return err
 	}
 
 	if err := self.launchContainer(); err != nil {
+		self.fail = true
 		return err
 	}
 
 	if err := self.attachNetwork(); err != nil {
+		self.fail = true
 		return err
 	}
 
 	if err := self.planService(); err != nil {
+		self.fail = true
 		return err
 	}
 
 	if err := self.persistService(); err != nil {
+		self.fail = true
 		return err
 	}
 
 	return nil
 }
 
-// validateImage ensures we were given a name and image
-func (self *serviceSetup) validateImage() error {
+// validateMeta ensures we were given a name and image
+func (self *serviceSetup) validateMeta() error {
 	if self.config.Meta["name"] == "" || self.config.Meta["image"] == "" {
 		return errors.New("missing image or name")
 	}
@@ -111,12 +137,17 @@ func (self *serviceSetup) loadService() error {
 	// the service really shouldn't exist yet, so let's not return the error if it fails
 	data.Get(util.AppName(), self.config.Meta["name"], &self.service)
 
+	// set the default state
+	if self.service.State == "" {
+		self.service.State = "initialized"
+	}
+
 	return nil
 }
 
 // downloadImage downloads the docker image
 func (self *serviceSetup) downloadImage() error {
-	label := "Downloading docker image " + self.config.Meta["image"]
+	label := "Pulling image " + self.config.Meta["image"]
 	fmt.Print(stylish.NestedProcessStart(label, self.config.DisplayLevel))
 
 	// Create a pipe to for the JSONMessagesStream to read from
@@ -138,18 +169,19 @@ func (self *serviceSetup) reserveIps() error {
 	if err != nil {
 		return err
 	}
-	defer self.clean(func() {
-		ip_control.ReturnIP(local_ip)
-	})()
+
+	self.cleanFuncs = append(self.cleanFuncs, func() error {
+		return ip_control.ReturnIP(local_ip)
+	})
 
 	global_ip, err := ip_control.ReserveGlobal()
 	if err != nil {
-		self.fail = true
 		return err
 	}
-	defer self.clean(func() {
-		ip_control.ReturnIP(global_ip)
-	})()
+
+	self.cleanFuncs = append(self.cleanFuncs, func() error {
+		return ip_control.ReturnIP(global_ip)
+	})
 
 	// assign back to the state
 	self.local_ip = local_ip
@@ -167,16 +199,15 @@ func (self *serviceSetup) launchContainer() error {
 		IP:      self.local_ip.String(),
 	}
 
-	fmt.Print(stylish.NestedBullet("Starting docker container...", self.config.DisplayLevel))
+	fmt.Print(stylish.NestedBullet("Starting container...", self.config.DisplayLevel))
 	container, err := docker.CreateContainer(config)
 	if err != nil {
-		self.fail = true
-		lumber.Error("container: ", err)
 		return err
 	}
-	defer self.clean(func() {
-		docker.ContainerRemove(container.ID)
-	})()
+
+	self.cleanFuncs = append(self.cleanFuncs, func() error {
+		return docker.ContainerRemove(container.ID)
+	})
 
 	self.container = container
 
@@ -185,28 +216,26 @@ func (self *serviceSetup) launchContainer() error {
 
 // attachNetwork attaches the IP addresses to the container
 func (self *serviceSetup) attachNetwork() error {
-	label := "Add container to host network..."
+	label := "Bridging container to host network..."
 	fmt.Print(stylish.NestedBullet(label, self.config.DisplayLevel))
 
 	err := provider.AddIP(self.global_ip.String())
 	if err != nil {
-		self.fail = true
-		lumber.Error("addip: ", err)
 		return err
 	}
-	defer self.clean(func() {
-		provider.RemoveIP(self.global_ip.String())
-	})()
+
+	self.cleanFuncs = append(self.cleanFuncs, func() error {
+		return provider.RemoveIP(self.global_ip.String())
+	})
 
 	err = provider.AddNat(self.global_ip.String(), self.local_ip.String())
 	if err != nil {
-		self.fail = true
-		lumber.Error("addnat: ", err)
 		return err
 	}
-	defer self.clean(func() {
-		provider.RemoveNat(self.global_ip.String(), self.local_ip.String())
-	})()
+
+	self.cleanFuncs = append(self.cleanFuncs, func() error {
+		return provider.RemoveNat(self.global_ip.String(), self.local_ip.String())
+	})
 
 	return nil
 }
@@ -224,8 +253,6 @@ func (self *serviceSetup) planService() error {
 	cmd := dockerexec.Command(self.container.ID, "plan", string(jsonPayload))
 	if err := cmd.Run(); err != nil {
 		fmt.Println(cmd.Output())
-		self.fail = true
-		lumber.Error("plan: ", err)
 		return err
 	}
 
@@ -237,14 +264,14 @@ func (self *serviceSetup) planService() error {
 // persistService saves the service in the database
 func (self *serviceSetup) persistService() error {
 	// save service in DB
-	self.service.ID = self.container.ID
-	self.service.Name = self.config.Meta["name"]
+	self.service.ID         = self.container.ID
+	self.service.Name       = self.config.Meta["name"]
 	self.service.ExternalIP = self.global_ip.String()
 	self.service.InternalIP = self.local_ip.String()
+	self.service.State      = "planned"
 
 	err := json.Unmarshal([]byte(self.plan), &self.service.Plan)
 	if err != nil {
-		self.fail = true
 		return err
 	}
 	for i := 0; i < len(self.service.Plan.Users); i++ {
@@ -254,8 +281,6 @@ func (self *serviceSetup) persistService() error {
 	// save the service
 	err = data.Put(util.AppName(), self.config.Meta["name"], &self.service)
 	if err != nil {
-		self.fail = true
-		lumber.Error("insert data: ", err)
 		return err
 	}
 

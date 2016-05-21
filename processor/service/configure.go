@@ -55,7 +55,7 @@ func (self serviceConfigure) Results() processor.ProcessConfig {
 
 func (self serviceConfigure) Process() error {
 
-	if err := self.validateImage(); err != nil {
+	if err := self.validateMeta(); err != nil {
 		return err
 	}
 
@@ -63,25 +63,25 @@ func (self serviceConfigure) Process() error {
 		return err
 	}
 
-	// short-circuit if the service is already started
-	if self.service.Started {
+	// short-circuit if the service has already progressed past this point
+	if self.service.State != "planned" {
 		return nil
 	}
 
 	if err := self.runUpdate(); err != nil {
-		return nil
+		return err
 	}
 
 	if err := self.runConfigure(); err != nil {
-		return nil
+		return err
 	}
 
 	if err := self.runStart(); err != nil {
-		return nil
+		return err
 	}
 
 	if err := self.persistService(); err != nil {
-		return nil
+		return err
 	}
 
 	return nil
@@ -149,11 +149,11 @@ func (self serviceConfigure) startPayload() string {
 	return string(j)
 }
 
-// validateImage validates that the image is provided
-func (self *serviceConfigure) validateImage() error {
+// validateMeta validates that the image is provided
+func (self *serviceConfigure) validateMeta() error {
 	// make sure i was given a name and image
 	if self.config.Meta["name"] == "" {
-		return errors.New("missing image or name")
+		return errors.New("missing name")
 	}
 
 	return nil
@@ -174,7 +174,7 @@ func (self *serviceConfigure) loadService() error {
 // runUpdate will run the update hook in the container
 func (self *serviceConfigure) runUpdate() error {
 	// run update
-	fmt.Print(stylish.NestedBullet("Updating...", self.config.DisplayLevel))
+	fmt.Print(stylish.NestedBullet("Updating services...", self.config.DisplayLevel))
 
 	cmd := dockerexec.Command(self.service.ID, "update", "{}")
 	if err := cmd.Run(); err != nil {
@@ -190,7 +190,7 @@ func (self *serviceConfigure) runConfigure() error {
 	// run update
 	fmt.Print(stylish.NestedBullet("Configuring services...", self.config.DisplayLevel))
 
-	cmd := dockerexec.Command(self.service.ID, "configure", "{}")
+	cmd := dockerexec.Command(self.service.ID, "configure", self.configurePayload())
 	if err := cmd.Run(); err != nil {
 		fmt.Println(cmd.Output())
 		return err
@@ -204,7 +204,7 @@ func (self *serviceConfigure) runStart() error {
 	// run update
 	fmt.Print(stylish.NestedBullet("Starting services...", self.config.DisplayLevel))
 
-	cmd := dockerexec.Command(self.service.ID, "start", "{}")
+	cmd := dockerexec.Command(self.service.ID, "start", self.startPayload())
 	if err := cmd.Run(); err != nil {
 		fmt.Println(cmd.Output())
 		return err
@@ -215,8 +215,7 @@ func (self *serviceConfigure) runStart() error {
 
 // persistService saves the service entry to the database
 func (self *serviceConfigure) persistService() error {
-	// set started to true for further idempotency
-	self.service.Started = true
+	self.service.State = "active"
 	err := data.Put(util.AppName(), self.config.Meta["name"], &self.service)
 	if err != nil {
 		return err
