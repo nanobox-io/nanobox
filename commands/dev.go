@@ -50,5 +50,6 @@ func init() {
 	DevCmd.AddCommand(DevExecCmd)
 	DevCmd.AddCommand(DevConsoleCmd)
 	DevCmd.AddCommand(DevEnvCmd)
+	DevCmd.AddCommand(DevResetCmd)
 	// DevCmd.AddCommand(updateImagesCmd)
 }

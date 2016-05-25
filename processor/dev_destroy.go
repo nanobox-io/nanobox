@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/jcelliott/lumber"
-	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/data"
 )
@@ -49,8 +48,8 @@ func (self devDestroy) Process() error {
 
 	for _, service := range services {
 		if service != "build" {
-			svc := models.Service{}
-			data.Get(util.AppName(), service, &svc)
+			// svc := models.Service{}
+			// data.Get(util.AppName(), service, &svc)
 			self.config.Meta["name"] = service
 			err := Run("service_destroy", self.config)
 			if err != nil {

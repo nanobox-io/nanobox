@@ -3,8 +3,10 @@ package service
 import (
 	"encoding/json"
 	"fmt"
+	"errors"
 
 	"github.com/nanobox-io/nanobox-boxfile"
+	"github.com/nanobox-io/nanobox-golang-stylish"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
@@ -14,6 +16,7 @@ import (
 
 type serviceConfigure struct {
 	config processor.ProcessConfig
+	service models.Service
 }
 
 type member struct {
@@ -43,6 +46,44 @@ type startPayload struct {
 
 func init() {
 	processor.Register("service_configure", serviceConfigureFunc)
+}
+
+func (self serviceConfigure) Results() processor.ProcessConfig {
+	return self.config
+}
+
+func (self serviceConfigure) Process() error {
+
+	if err := self.validateMeta(); err != nil {
+		return err
+	}
+
+	if err := self.loadService(); err != nil {
+		return err
+	}
+
+	// short-circuit if the service has already progressed past this point
+	if self.service.State != "planned" {
+		return nil
+	}
+
+	if err := self.runUpdate(); err != nil {
+		return err
+	}
+
+	if err := self.runConfigure(); err != nil {
+		return err
+	}
+
+	if err := self.runStart(); err != nil {
+		return err
+	}
+
+	if err := self.persistService(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func serviceConfigureFunc(config processor.ProcessConfig) (processor.Processor, error) {
@@ -89,7 +130,6 @@ func (self serviceConfigure) configurePayload() string {
 		return "{}"
 	}
 	return string(j)
-
 }
 
 func (self serviceConfigure) startPayload() string {
@@ -108,52 +148,56 @@ func (self serviceConfigure) startPayload() string {
 	return string(j)
 }
 
-func (self serviceConfigure) Results() processor.ProcessConfig {
-	return self.config
-}
-
-func (self serviceConfigure) Process() error {
+// validateMeta validates that the image is provided
+func (self *serviceConfigure) validateMeta() error {
 	// make sure i was given a name and image
 	if self.config.Meta["name"] == "" {
-		return missingImageOrName
+		return errors.New("missing name")
 	}
 
-	fmt.Println("-> configuring", self.config.Meta["name"])
+	return nil
+}
+
+// loadService loads the service from the database
+func (self *serviceConfigure) loadService() error {
 	// get the service from the database
-	service := models.Service{}
-	err := data.Get(util.AppName(), self.config.Meta["name"], &service)
+	err := data.Get(util.AppName(), self.config.Meta["name"], &self.service)
 	if err != nil {
 		// cannot start a service that wasnt setup (ie saved in the database)
 		return err
 	}
 
-	if service.Started {
-		return nil
-	}
+	return nil
+}
 
+// runUpdate will run the update hook in the container
+func (self *serviceConfigure) runUpdate() error {
 	// run update
-	output, err := util.Exec(service.ID, "update", "{}")
-	if err != nil {
-		fmt.Println(output)
-		return err
-	}
+	fmt.Print(stylish.NestedBullet("Updating services...", self.config.DisplayLevel))
+	_, err := util.Exec(self.service.ID, "update", "{}", nil)
+	return err
+}
 
-	// run configure command TODO PAYLOAD
-	output, err = util.Exec(service.ID, "configure", self.configurePayload())
-	if err != nil {
-		fmt.Println(output)
-		return err
-	}
+// runConfigure will run the configure hook in the container
+func (self *serviceConfigure) runConfigure() error {
+	// run update
+	fmt.Print(stylish.NestedBullet("Configuring services...", self.config.DisplayLevel))
+	_, err := util.Exec(self.service.ID, "configure", self.configurePayload(), nil)
+	return err
+}
 
-	// run start command TODO PAYLOAD
-	output, err = util.Exec(service.ID, "start", self.startPayload())
-	if err != nil {
-		fmt.Println(output)
-		return err
-	}
+// runStart will run the configure hook in the container
+func (self *serviceConfigure) runStart() error {
+	// run update
+	fmt.Print(stylish.NestedBullet("Starting services...", self.config.DisplayLevel))
+	_, err := util.Exec(self.service.ID, "start", self.startPayload(), nil)
+	return err
+}
 
-	service.Started = true
-	err = data.Put(util.AppName(), self.config.Meta["name"], service)
+// persistService saves the service entry to the database
+func (self *serviceConfigure) persistService() error {
+	self.service.State = "active"
+	err := data.Put(util.AppName(), self.config.Meta["name"], &self.service)
 	if err != nil {
 		return err
 	}

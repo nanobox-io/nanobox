@@ -4,7 +4,9 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/nanobox-io/nanobox-golang-stylish"
 	"github.com/nanobox-io/golang-docker-client"
+
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
@@ -13,7 +15,8 @@ import (
 )
 
 type serviceStart struct {
-	config processor.ProcessConfig
+	config 		processor.ProcessConfig
+	service 	models.Service
 }
 
 func init() {
@@ -31,35 +34,108 @@ func (self serviceStart) Results() processor.ProcessConfig {
 }
 
 func (self *serviceStart) Process() error {
-	// make sure i was given a name and image
-	if self.config.Meta["name"] == "" {
-		return missingImageOrName
+
+	if err := self.validateMeta(); err != nil {
+		return err
 	}
 
-	fmt.Println("-> starting", self.config.Meta["name"])
-	// get the service from the database
-	service := models.Service{}
-	data.Get(util.AppName(), self.config.Meta["name"], &service)
+	if running := self.isServiceRunning(); running == true {
+		// short-circuit, this is already running
+		return nil
+	}
 
-	// create docker container
-	if service.ID == "" {
-		// quit early if the service was found to be created already
+	if err := self.loadService(); err != nil {
+		return err
+	}
+
+	if self.service.State != "active" {
 		return errors.New("the service has not been created")
 	}
 
-	err := docker.ContainerStart(service.ID)
-	if err != nil {
+	if err := self.startContainer(); err != nil {
 		return err
 	}
 
-	err = provider.AddIP(service.ExternalIP)
-	if err != nil {
+	if err := self.attachNetwork(); err != nil {
 		return err
 	}
 
-	err = provider.AddNat(service.ExternalIP, service.InternalIP)
-	if err != nil {
-		return err
-	}
 	return nil
+}
+
+// validateMeta validates that the provided metadata is supplied
+func (self serviceStart) validateMeta() error {
+
+  if self.config.Meta["label"] == "" {
+    return errors.New("missing service label")
+  }
+
+  if self.config.Meta["name"] == "" {
+    return errors.New("missing service name")
+  }
+
+  return nil
+}
+
+// loadService loads the service from the database
+func (self *serviceStart) loadService() error {
+	// get the service from the database
+	err := data.Get(util.AppName(), self.config.Meta["name"], &self.service)
+	if err != nil {
+		// cannot start a service that wasnt setup (ie saved in the database)
+		return err
+	}
+
+	return nil
+}
+
+// startContainer starts a docker container
+func (self *serviceStart) startContainer() error {
+	header := fmt.Sprintf("Starting %s...", self.config.Meta["label"])
+	fmt.Print(stylish.NestedBullet(header, self.config.DisplayLevel))
+
+	err := docker.ContainerStart(self.service.ID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// attachNetwork attaches the container to the host network
+func (self *serviceStart) attachNetwork() error {
+
+	// todo: add these to a cleanup process in case of failure
+
+	err := provider.AddIP(self.service.ExternalIP)
+	if err != nil {
+		return err
+	}
+
+	err = provider.AddNat(self.service.ExternalIP, self.service.InternalIP)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// isServiceRunning returns true if a service is already running
+func (self serviceStart) isServiceRunning() bool {
+	uid := self.config.Meta["name"]
+	name := fmt.Sprintf("%s-%s", util.AppName(), uid)
+
+	container, err := docker.GetContainer(name)
+
+	// if the container doesn't exist then just return false
+	if err != nil {
+		return false
+	}
+
+	// return true if the container is running
+	if container.State.Status == "running" {
+		return true
+	}
+
+	return false
 }

@@ -14,12 +14,17 @@ import (
 )
 
 type (
+	BreadCrumbProcessor struct {
+		crumb string
+		proc Processor
+	}
 	ProcessConfig struct {
-		DevMode    bool
-		Verbose    bool
-		Background bool
-		Force      bool
-		Meta       map[string]string
+		DevMode    		bool
+		Verbose    		bool
+		Background 		bool
+		Force      		bool
+		DisplayLevel 	int
+		Meta       		map[string]string
 	}
 
 	ProcessBuilder func(ProcessConfig) (Processor, error)
@@ -35,6 +40,18 @@ var (
 	processors    = map[string]ProcessBuilder{}
 )
 
+func (bcp BreadCrumbProcessor) Process() error {
+	err := bcp.proc.Process()
+	if err != nil {
+		err = fmt.Errorf("%s:%s", bcp.crumb, err.Error())
+	}
+	return err
+}
+
+func (bcp BreadCrumbProcessor) Results() ProcessConfig {
+	return bcp.Results()
+}
+
 func Register(name string, sb ProcessBuilder) {
 	_, ok := processors[name]
 	if !DefaultConfig.Force && ok {
@@ -45,11 +62,12 @@ func Register(name string, sb ProcessBuilder) {
 
 func Build(name string, pc ProcessConfig) (Processor, error) {
 	lumber.Debug(name)
-	proc, ok := processors[name]
+	procFunc, ok := processors[name]
 	if !ok {
 		return nil, fmt.Errorf("Invalid Processor %s", name)
 	}
-	return proc(pc)
+	proc, err := procFunc(pc)
+	return BreadCrumbProcessor{name, proc}, err
 }
 
 func Run(name string, pc ProcessConfig) error {

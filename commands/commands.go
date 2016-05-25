@@ -11,7 +11,7 @@ import (
 
 	"github.com/nanobox-io/nanobox/processor"
 	_ "github.com/nanobox-io/nanobox/processor/code"
-	_ "github.com/nanobox-io/nanobox/processor/nanopack"
+	_ "github.com/nanobox-io/nanobox/processor/platform"
 	_ "github.com/nanobox-io/nanobox/processor/provider"
 	_ "github.com/nanobox-io/nanobox/processor/service"
 	"github.com/nanobox-io/nanobox/util"

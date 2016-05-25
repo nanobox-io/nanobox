@@ -1,4 +1,4 @@
-package nanopack
+package platform
 
 import (
 	"fmt"

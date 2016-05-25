@@ -164,14 +164,13 @@ func (self *codeConfigure) Process() error {
 
 	fmt.Println("-> configuring", self.config.Meta["name"])
 
-	if service.Started {
+	if service.State == "active" {
 		return nil
 	}
 
 	// run fetch build command
-	output, err := util.Exec(service.ID, "fetch", fmt.Sprintf(`{"build":"%s","warehouse":"%s","warehouse_token":"%s"}`, self.config.Meta["build_id"], self.config.Meta["warehouse_url"], self.config.Meta["warehouse_token"]))
+	_, err = util.Exec(service.ID, "fetch", fmt.Sprintf(`{"build":"%s","warehouse":"%s","warehouse_token":"%s"}`, self.config.Meta["build_id"], self.config.Meta["warehouse_url"], self.config.Meta["warehouse_token"]), nil)
 	if err != nil {
-		fmt.Println(output)
 		return err
 	}
 
@@ -181,20 +180,18 @@ func (self *codeConfigure) Process() error {
 		fmt.Println("error building configure payload", err)
 		return err
 	}
-	output, err = util.Exec(service.ID, "configure", payload)
+	_, err = util.Exec(service.ID, "configure", payload, nil)
 	if err != nil {
-		fmt.Println(output)
 		return err
 	}
 
 	// run start command
-	output, err = util.Exec(service.ID, "start", self.startPayload())
+	_, err = util.Exec(service.ID, "start", self.startPayload(), nil)
 	if err != nil {
-		fmt.Println(output)
 		return err
 	}
 
-	service.Started = true
+	service.State = "active"
 	err = data.Put(util.AppName(), self.config.Meta["name"], service)
 	if err != nil {
 		return err

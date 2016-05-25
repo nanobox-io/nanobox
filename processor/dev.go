@@ -1,21 +1,20 @@
 package processor
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
-
-	"github.com/jcelliott/lumber"
-	"github.com/nanobox-io/nanobox-boxfile"
+	"errors"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/data"
-	"github.com/nanobox-io/nanobox/util/locker"
 )
 
 type dev struct {
-	config ProcessConfig
+	config 				ProcessConfig
+	oldBoxfile		models.Boxfile
+	newBoxfile		models.Boxfile
+	buildBoxfile 	models.Boxfile
 }
 
 func init() {
@@ -27,7 +26,7 @@ func devFunc(config ProcessConfig) (Processor, error) {
 	// do some config validation
 	// check on the meta for the flags and make sure they work
 
-	return dev{config}, nil
+	return dev{config: config}, nil
 }
 
 func (self dev) Results() ProcessConfig {
@@ -35,131 +34,114 @@ func (self dev) Results() ProcessConfig {
 }
 
 func (self dev) Process() error {
-	// setup the environment (boot vm)
-	err := Run("provider_setup", self.config)
-	if err != nil {
-		fmt.Println("provider_setup:", err)
-		lumber.Close()
-		os.Exit(1)
-	}
 
-	// start all the services that are in standby
-	err = Run("service_start_all", self.config)
-	if err != nil {
-		fmt.Printf("service_start_all: %s\n", err.Error())
-		os.Exit(1)
-	}
-
-	// start nanopack service
-	err = Run("nanopack_setup", self.config)
-	if err != nil {
-		fmt.Println("nanoagent_setup:", err)
-		os.Exit(1)
-	}
-
-	locker.LocalLock()
-	box := models.Boxfile{}
-	box.Data, err = ioutil.ReadFile(util.BoxfileLocation())
-	lumber.Debug("ioutil err %+v", err)
-
-	oldBoxData := models.Boxfile{}
-	data.Get(util.AppName()+"_meta", "boxfile", &oldBoxData)
-
-	if string(oldBoxData.Data) != string(box.Data) || len(box.Data) == 0 {
-		lumber.Debug("old boxfile:(%s)\nnew boxfile:(%s)", oldBoxData.Data, box.Data)
-		err = data.Put(util.AppName()+"_meta", "boxfile", box)
-		if err != nil {
-			fmt.Println("unable to store new boxfile:", err)
-		}
-
-		// build code (without build hook)
-		buildProcessor, err := Build("code_build", self.config)
-		if err != nil {
-			fmt.Println("code_build:", err)
+	// defer the clean up so if we exit early the
+	// cleanup will always happen
+	defer func() {
+		if err := Run("dev_teardown", self.config); err != nil {
+			// this is bad, really bad...
+			// we should probably print a pretty message explaining that the app
+			// was left in a bad state and needs to be reset
 			os.Exit(1)
 		}
-		err = buildProcessor.Process()
-		if err != nil {
-			fmt.Println("code_build:", err)
-			os.Exit(1)
-		}
+	}()
 
-		// combine the boxfiles
-		buildResult := buildProcessor.Results()
-		if buildResult.Meta["boxfile"] == "" {
-			fmt.Println("boxfile is empty!")
-			os.Exit(1)
-		}
-		box.Data = []byte(buildResult.Meta["boxfile"])
-		self.config.Meta["boxfile"] = buildResult.Meta["boxfile"]
-
-		// syncronize the services as per the new boxfile
-		err = Run("service_sync", self.config)
-		if err != nil {
-			fmt.Println("service_sync:", err)
-			lumber.Close()
-			os.Exit(1)
-		}
+	if err := Run("dev_setup", self.config); err != nil {
+		// todo: how to display this?
+		return err
 	}
 
-	// make sure everyone knows im using the app (so dont shut down)
-	app := models.App{}
-	data.Get("apps", util.AppName(), &app)
-	lumber.Debug("incrementing usagecount toto %d", app.UsageCount)
-	if app.UsageCount < 0 {
-		app.UsageCount = 0
-	}
-	app.UsageCount = app.UsageCount + 1
-	lumber.Debug("incrementing usagecount to %d", app.UsageCount)
-	err = data.Put("apps", util.AppName(), app)
-	lumber.Error("dataputerr: %+v", err)
-
-	appAfter := models.App{}
-	data.Get("apps", util.AppName(), &appAfter)
-	lumber.Debug("incrementing usagecount after %d", appAfter.UsageCount)
-
-	locker.LocalUnlock()
-
-	// get the working dir from the last build
-	self.config.Meta["working_dir"] = "/app"
-
-	bBox := models.Boxfile{}
-	data.Get(util.AppName()+"_meta", "build_boxfile", &bBox)
-	lumber.Debug("dev: buildBox: %s", bBox.Data)
-	boxf := boxfile.New(bBox.Data)
-	if boxf.Node("dev").StringValue("cwd") != "" {
-		self.config.Meta["working_dir"] = boxf.Node("dev").StringValue("cwd")
+	if err := self.runBuild(); err != nil {
+		// todo: how to display this?
+		return err
 	}
 
-	self.config.Meta["name"] = "dev"
-	err = Run("code_dev", self.config)
-	// make sure we stop let the db know we
-	// are done with the app and it can be
-	// shut down
-	lumber.Debug("decrementing usagecount fromfrom %d", app.UsageCount)
-	app = models.App{}
-	err = data.Get("apps", util.AppName(), &app)
-	lumber.Error("errfromdata:%+v", err)
-	lumber.Debug("decrementing usagecount from %d", app.UsageCount)
-	app.UsageCount = app.UsageCount - 1
-	if app.UsageCount < 0 {
-		app.UsageCount = 0
-	}
-	lumber.Debug("decrementing usagecount to %d", app.UsageCount)
-	data.Put("apps", util.AppName(), app)
-
-	if err != nil {
-		fmt.Println("code_dev:", err)
-		lumber.Close()
-		os.Exit(1)
+	// startDataServices will start all data services
+	if err := Run("service_start_all", self.config); err != nil {
+		// todo: how to display this?
+		return err
 	}
 
-	err = Run("dev_stop", self.config)
-	if err != nil {
-		fmt.Println("dev_stop:", err)
-		lumber.Close()
-		os.Exit(1)
+	// starts a dev container and establishes a console session
+	if err := Run("code_dev", self.config); err != nil {
+		// todo: how to display this?
+		return err
 	}
 
 	return nil
+}
+
+func (self *dev) runBuild() error {
+	if err := self.fetchOldBoxfile(); err != nil {
+		return err
+	}
+
+	if err := self.fetchNewBoxfile(); err != nil {
+		return err
+	}
+
+	// todo: we need to consider a more stateful way of determining if a dev
+	// was successful previously. Otherwise a failure on the first run won't
+	// try a subsequent build
+	if self.hasBoxfileChanged() {
+		// build the code
+		if err := Run("code_build", self.config); err != nil {
+			return err
+		}
+
+		// syncronize the data services with the new build
+		if err := Run("service_sync", self.config); err != nil {
+			return err
+		}
+
+		// persist the new boxfile so we know not to build next time.
+		if err := self.persistNewBoxfile(); err != nil {
+			return err
+		}
+
+	}
+	return nil
+}
+
+// fetchOldBoxfile fetches the old boxfile from the db
+func (self *dev) fetchOldBoxfile() error {
+	// we don't care about the error here because it's very likely
+	// that there won't be an old boxfile.
+	data.Get(util.AppName()+"_meta", "boxfile", &self.oldBoxfile)
+
+	return nil
+}
+
+// fetchNewBoxfile fetches the new boxfile
+func (self *dev) fetchNewBoxfile() error {
+	rawData, err := ioutil.ReadFile(util.BoxfileLocation())
+
+	if err != nil {
+		return errors.New("unable to load boxfile.yml")
+	}
+
+	self.newBoxfile.Data = rawData
+
+	return nil
+}
+
+// persistNewBoxfile persists the new boxfile to the database
+func (self *dev) persistNewBoxfile() error {
+
+	key := util.AppName() + "_meta"
+	if err := data.Put(key, "boxfile", self.newBoxfile); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// hasBoxfileChanged returns true if the boxfile has changed
+func (self *dev) hasBoxfileChanged() bool {
+
+	if string(self.oldBoxfile.Data) != string(self.newBoxfile.Data) || len(self.oldBoxfile.Data) == 0 {
+		return true
+	}
+
+	return false
 }

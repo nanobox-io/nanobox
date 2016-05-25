@@ -146,6 +146,5 @@ func (self devDeploy) Process() error {
 		os.Exit(1)
 	}
 
-	// possibly shut down provider???
 	return nil
 }

@@ -7,6 +7,7 @@ import (
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox-boxfile"
+	"github.com/nanobox-io/nanobox-golang-stylish"
 
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox/models"
@@ -50,7 +51,8 @@ func (self *codePublish) Process() error {
 	}
 
 	if !docker.ImageExists(image) {
-		_, err := docker.ImagePull(image, &print.DockerImageDisplaySimple{Prefix: "downloading " + image})
+		prefix := fmt.Sprintf("%s+ Pulling %s -", stylish.GenerateNestedPrefix(self.config.DisplayLevel), image)
+		_, err := docker.ImagePull(image, &print.DockerPercentDisplay{Prefix: prefix})
 		if err != nil {
 			return err
 		}
@@ -98,7 +100,7 @@ func (self *codePublish) Process() error {
 	// can recognize get the new services
 
 	var b []byte
-	output, err := util.Exec(container.ID, "boxfile", "{}")
+	output, err := util.Exec(container.ID, "boxfile", "{}", nil)
 	if err != nil {
 		fmt.Println("output:", output)
 		goto FAILURE
@@ -112,7 +114,7 @@ func (self *codePublish) Process() error {
 	pload["warehouse_token"] = self.config.Meta["warehouse_token"]
 	pload["boxfile"] = output
 	b, err = json.Marshal(pload)
-	output, err = util.Exec(container.ID, "publish", string(b))
+	output, err = util.Exec(container.ID, "publish", string(b), nil)
 	if err != nil {
 		fmt.Println("output:", output)
 		goto FAILURE

@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/jcelliott/lumber"
+	"github.com/nanobox-io/nanobox-golang-stylish"
 
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox/models"
@@ -59,7 +60,8 @@ func (self *codeSetup) Process() error {
 		return nil
 	}
 
-	_, err = docker.ImagePull(self.config.Meta["image"], &print.DockerImageDisplaySimple{Prefix: "downloading " + self.config.Meta["image"]})
+	prefix := fmt.Sprintf("%s+ Pulling %s -", stylish.GenerateNestedPrefix(self.config.DisplayLevel), self.config.Meta["image"])
+	_, err = docker.ImagePull(self.config.Meta["image"], &print.DockerPercentDisplay{Prefix: prefix})
 	if err != nil {
 		return err
 	}

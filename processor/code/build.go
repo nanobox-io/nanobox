@@ -2,11 +2,15 @@ package code
 
 import (
 	"fmt"
+	"net"
+	"os"
+	// "io"
 
-	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox-boxfile"
-
+	dockType "github.com/docker/engine-api/types"
 	"github.com/nanobox-io/golang-docker-client"
+	"github.com/nanobox-io/nanobox-golang-stylish"
+
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
@@ -17,7 +21,12 @@ import (
 )
 
 type codeBuild struct {
-	config processor.ProcessConfig
+	config 				processor.ProcessConfig
+	boxfile 			boxfile.Boxfile
+	buildBoxfile 	models.Boxfile
+	localIP 			net.IP
+	image					string
+	container 		dockType.ContainerJSON
 }
 
 func init() {
@@ -35,34 +44,134 @@ func (self codeBuild) Results() processor.ProcessConfig {
 }
 
 func (self *codeBuild) Process() error {
-	box := boxfile.NewFromPath(util.BoxfileLocation())
-	image := box.Node("build").StringValue("image")
-	bBox := models.Boxfile{}
 
-	if image == "" {
-		image = "nanobox/build:v1"
+	if err := self.loadBoxfile(); err != nil {
+		return err
 	}
 
-	_, err := docker.ImagePull(image, &print.DockerImageDisplaySimple{Prefix: "downloading " + image})
+	if err := self.downloadImage(); err != nil {
+		return err
+	}
+
+	if err := self.reserveIP(); err != nil {
+		return err
+	}
+
+	defer self.releaseIP()
+
+	if err := self.startContainer(); err != nil {
+		return err
+	}
+
+	defer self.stopContainer()
+
+	if err := self.runUserHook(); err != nil {
+		return self.runDebugSession(err)
+	}
+
+	if err := self.runConfigureHook(); err != nil {
+		return self.runDebugSession(err)
+	}
+
+	if err := self.runFetchHook(); err != nil {
+		return self.runDebugSession(err)
+	}
+
+	if err := self.runSetupHook(); err != nil {
+		return self.runDebugSession(err)
+	}
+
+	if err := self.runBoxfileHook(); err != nil {
+		return self.runDebugSession(err)
+	}
+
+	if err := self.runPrepareHook(); err != nil {
+		return self.runDebugSession(err)
+	}
+
+	if self.config.Meta["build"] == "true" {
+
+		if err := self.runCompileHook(); err != nil {
+			return self.runDebugSession(err)
+		}
+
+		if err := self.runPackAppHook(); err != nil {
+			return self.runDebugSession(err)
+		}
+
+	}
+
+	if err := self.runPackBuildHook(); err != nil {
+		return self.runDebugSession(err)
+	}
+
+	if self.config.Meta["build"] == "true" {
+
+		if err := self.runCleanHook(); err != nil {
+			return self.runDebugSession(err)
+		}
+
+		if err := self.runPackDeployHook(); err != nil {
+			return self.runDebugSession(err)
+		}
+
+	}
+
+	return nil
+}
+
+// loadBoxfile loads the boxfile into the config state
+func (self *codeBuild) loadBoxfile() error {
+	// can this error?
+	self.boxfile = boxfile.NewFromPath(util.BoxfileLocation())
+
+	return nil
+}
+
+// downloadImage downloads a build image
+func (self *codeBuild) downloadImage() error {
+	self.image = self.boxfile.Node("build").StringValue("image")
+
+	if self.image == "" {
+		self.image = "nanobox/build:v1"
+	}
+
+	// create the prefix for the image message
+	prefix := fmt.Sprintf("%s+ Pulling %s -", stylish.GenerateNestedPrefix(self.config.DisplayLevel), self.image)
+	if _, err := docker.ImagePull(self.image, &print.DockerPercentDisplay{Prefix: prefix}); err != nil {
+		return err
+	}
+  fmt.Print(stylish.ProcessEnd())
+
+	return nil
+}
+
+// reserveIP reserves a local IP for the build container
+func (self *codeBuild) reserveIP() error {
+	IP, err := ip_control.ReserveLocal()
 	if err != nil {
 		return err
 	}
 
-	// create build container
-	localIp, err := ip_control.ReserveLocal()
-	if err != nil {
-		return err
-	}
+	self.localIP = IP
 
-	// return ip
-	defer ip_control.ReturnIP(localIp)
+	return nil
+}
+
+// releaseIP releases a local IP back into the pool
+func (self *codeBuild) releaseIP() error {
+	return ip_control.ReturnIP(self.localIP)
+}
+
+// startContainer starts a build container
+func (self *codeBuild) startContainer() error {
 
 	appName := util.AppName()
 	config := docker.ContainerConfig{
 		Name:    fmt.Sprintf("%s-build", util.AppName()),
-		Image:   image, // this will need to be configurable some time
+		Image:   self.image, // this will need to be configurable some time
 		Network: "virt",
-		IP:      localIp.String(),
+		IP:      self.localIP.String(),
 		Binds: []string{
 			fmt.Sprintf("%s%s/code:/share/code", provider.HostShareDir(), appName),
 			fmt.Sprintf("%s%s/engine:/share/engine", provider.HostShareDir(), appName),
@@ -74,91 +183,103 @@ func (self *codeBuild) Process() error {
 	}
 
 	// start container
-	fmt.Println("-> launch build container")
 	container, err := docker.CreateContainer(config)
 	if err != nil {
-		lumber.Error("container: ", err)
 		return err
 	}
 
-	// shutdown container
-	defer docker.ContainerRemove(container.ID)
+	self.container = container
 
-	// run user hook
-	output, err := util.Exec(container.ID, "user", util.UserPayload())
+	return nil
+}
+
+// stopContainer stops the docker build container
+func (self *codeBuild) stopContainer() error {
+	return docker.ContainerRemove(self.container.ID)
+}
+
+// runUserHook runs the user hook in the build container
+func (self *codeBuild) runUserHook() error {
+	_, err := util.Exec(self.container.ID, "user", util.UserPayload(), os.Stdout)
+	return err
+}
+
+// runConfigureHook runs the configure hook in the build container
+func (self *codeBuild) runConfigureHook() error {
+	_, err := util.Exec(self.container.ID, "configure", "{}", os.Stdout)
+	return err
+}
+
+// runFetchHook runs the fetch hook in the build container
+func (self *codeBuild) runFetchHook() error {
+	_, err := util.Exec(self.container.ID, "fetch", "{}", os.Stdout)
+	return err
+}
+
+// runSetupHook runs the setup hook in the build container
+func (self *codeBuild) runSetupHook() error {
+	_, err := util.Exec(self.container.ID, "setup", "{}", os.Stdout)
+	return err
+}
+
+// runBoxfileHook runs the boxfile hook in the build container
+func (self *codeBuild) runBoxfileHook() error {
+	output, err := util.Exec(self.container.ID, "boxfile", "{}", os.Stdout)
 	if err != nil {
-		goto FAILURE
+		return err
 	}
 
-	// run build hooks
-	output, err = util.Exec(container.ID, "configure", "{}")
-	if err != nil {
-		goto FAILURE
-	}
-
-	output, err = util.Exec(container.ID, "fetch", "{}")
-	if err != nil {
-		goto FAILURE
-	}
-
-	output, err = util.Exec(container.ID, "setup", "{}")
-	if err != nil {
-		goto FAILURE
-	}
-
-	output, err = util.Exec(container.ID, "boxfile", "{}")
-	if err != nil {
-		goto FAILURE
-	}
-
-	// store it in the database as well
-	bBox.Data = []byte(output)
-	data.Put(util.AppName()+"_meta", "build_boxfile", bBox)
+	// set the boxfile in the meta
 	self.config.Meta["boxfile"] = output
 
-	output, err = util.Exec(container.ID, "prepare", "{}")
-	if err != nil {
-		goto FAILURE
-	}
+	// store it in the database as well
+	self.buildBoxfile.Data = []byte(output)
 
-	// conditionally build
-	if self.config.Meta["build"] == "true" {
-		output, err = util.Exec(container.ID, "compile", "{}")
-		if err != nil {
-			goto FAILURE
-		}
-
-		output, err = util.Exec(container.ID, "pack-app", "{}")
-		if err != nil {
-			goto FAILURE
-		}
-
-	}
-
-	output, err = util.Exec(container.ID, "pack-build", "{}")
-	if err != nil {
-		goto FAILURE
-	}
-
-	// conditionally build
-	if self.config.Meta["build"] == "true" {
-		output, err = util.Exec(container.ID, "clean", "{}")
-		if err != nil {
-			fmt.Println("clean", output)
-			goto FAILURE
-		}
-
-		output, err = util.Exec(container.ID, "pack-deploy", "{}")
-		if err != nil {
-			fmt.Println("pack-deploy", output)
-			goto FAILURE
-		}
+	if err := data.Put(util.AppName()+"_meta", "build_boxfile", self.buildBoxfile); err != nil {
+		return err
 	}
 
 	return nil
+}
 
-FAILURE:
-	// a failure has happend and we are going to jump into the console
+// runPrepareHook runs the prepare hook in the build container
+func (self *codeBuild) runPrepareHook() error {
+	_, err := util.Exec(self.container.ID, "prepare", "{}", os.Stdout)
+	return err
+}
+
+// runCompileHook runs the compile hook in the build container
+func (self *codeBuild) runCompileHook() error {
+	_, err := util.Exec(self.container.ID, "compile", "{}", os.Stdout)
+	return err
+}
+
+// runPackAppHook runs the pack-app hook in the build container
+func (self *codeBuild) runPackAppHook() error {
+	_, err := util.Exec(self.container.ID, "pack-app", "{}", os.Stdout)
+	return err
+}
+
+// runPackBuildHook runs the pack-build hook in the build container
+func (self *codeBuild) runPackBuildHook() error {
+	_, err := util.Exec(self.container.ID, "pack-build", "{}", os.Stdout)
+	return err
+}
+
+// runCleanHook runs the clean hook in the build container
+func (self *codeBuild) runCleanHook() error {
+	_, err := util.Exec(self.container.ID, "clean", "{}", os.Stdout)
+	return err
+}
+
+// runPackDeployHook runs the pack-deploy hook in the build container
+func (self *codeBuild) runPackDeployHook() error {
+	_, err := util.Exec(self.container.ID, "pack-deploy", "{}", os.Stdout)
+	return err
+}
+
+// runDebugSession drops the user in the build container to debug
+func (self *codeBuild) runDebugSession(err error) error {
 	fmt.Println("there has been a failure")
 	if self.config.Verbose {
 		fmt.Println(err)
@@ -169,6 +290,9 @@ FAILURE:
 		if err != nil {
 			fmt.Println("unable to enter console", err)
 		}
+	} else {
+		return err
 	}
-	return err
+
+	return nil
 }
