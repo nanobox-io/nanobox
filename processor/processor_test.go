@@ -26,7 +26,7 @@ func TestMain(m *testing.M) {
 	processor.DefaultConfig.Quiet = true
 	// for testing we dont want to drop into a console
 	// or hang on mist logging
-	processor.Register("console", testProcessBuilder)
+	processor.Register("dev_console", testProcessBuilder)
 	processor.Register("mist_log", testProcessBuilder)
 	os.Exit(m.Run())
 }
