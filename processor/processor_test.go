@@ -55,7 +55,6 @@ func TestRegister(t *testing.T) {
 func TestBuild(t *testing.T) {
 	err := processor.Run("build", processor.DefaultConfig)
 	if err != nil {
-		panic(err)
 		t.Errorf("error from build run", err)
 	}
 }
@@ -63,7 +62,6 @@ func TestBuild(t *testing.T) {
 func TestDevDeploy(t *testing.T) {
 	err := processor.Run("dev", processor.DefaultConfig)
 	if err != nil {
-		panic(err)
 		t.Errorf("error from dev run", err)
 	}
 }
