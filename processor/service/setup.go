@@ -296,9 +296,9 @@ func (self *serviceSetup) updateEnvVars() error {
 		envVars[fmt.Sprintf("%s_%s_PASS", envName, strings.ToUpper(user.Username))] = user.Password
 		// if this user is the default user
 		// set additional default env vars
-		if user == self.service.Plan.DefaultUser {
-			envVars[envVars[fmt.Sprintf("%s_USER", envName)]] = user
-			envVars[envVars[fmt.Sprintf("%s_PASS", envName)]] = envVars[fmt.Sprintf("%s_%s_PW", envName, strings.ToUpper(user.Username))]
+		if user.Username == self.service.Plan.DefaultUser {
+			envVars[envVars[fmt.Sprintf("%s_USER", envName)]] = user.Username
+			envVars[envVars[fmt.Sprintf("%s_PASS", envName)]] = user.Password
 		}
 	}
 	if len(users) > 0 {
