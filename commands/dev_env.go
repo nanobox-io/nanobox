@@ -28,7 +28,6 @@ var (
 			evars := models.EnvVars{}
 			data.Get(util.AppName()+"_meta", "env", &evars)
 			for _, arg := range args {
-
 				for _, pair := range strings.Split(arg, ",") {
 					parts := strings.Split(pair, ":")
 					if len(parts) == 2 {
