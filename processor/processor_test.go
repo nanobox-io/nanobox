@@ -23,6 +23,7 @@ func TestMain(m *testing.M) {
 		return
 	}
 	processor.DefaultConfig.Force = true
+	processor.DefaultConfig.Quiet = true
 	// for testing we dont want to drop into a console
 	// or hang on mist logging
 	processor.Register("console", testProcessBuilder)
