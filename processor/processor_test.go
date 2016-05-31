@@ -7,7 +7,7 @@ import (
 
 	"github.com/nanobox-io/nanobox/processor"
 	_ "github.com/nanobox-io/nanobox/processor/code"
-	_ "github.com/nanobox-io/nanobox/processor/nanopack"
+	_ "github.com/nanobox-io/nanobox/processor/platform"
 	_ "github.com/nanobox-io/nanobox/processor/provider"
 	_ "github.com/nanobox-io/nanobox/processor/service"
 )
@@ -25,7 +25,7 @@ func TestMain(m *testing.M) {
 	processor.DefaultConfig.Force = true
 	// for testing we dont want to drop into a console
 	// or hang on mist logging
-	processor.Register("Console", testProcessBuilder)
+	processor.Register("console", testProcessBuilder)
 	processor.Register("mist_log", testProcessBuilder)
 	os.Exit(m.Run())
 }
