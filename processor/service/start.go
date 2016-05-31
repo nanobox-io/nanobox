@@ -68,20 +68,6 @@ func (self *serviceStart) Process() error {
 	return nil
 }
 
-// validateMeta validates that the provided metadata is supplied
-func (self serviceStart) validateMeta() error {
-
-	if self.control.Meta["label"] == "" {
-		return errors.New("missing service label")
-	}
-
-	if self.control.Meta["name"] == "" {
-		return errors.New("missing service name")
-	}
-
-	return nil
-}
-
 // loadService loads the service from the database
 func (self *serviceStart) loadService() error {
 	// get the service from the database

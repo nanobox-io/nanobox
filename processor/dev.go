@@ -3,6 +3,7 @@ package processor
 import (
 	"errors"
 	"io/ioutil"
+	"fmt"
 	
 	"os"
 
@@ -40,6 +41,8 @@ func (self dev) Process() error {
 	// cleanup will always happen
 	defer func() {
 		if err := Run("dev_teardown", self.control); err != nil {
+			fmt.Println("teardown broke")
+			fmt.Println(err)
 			// this is bad, really bad...
 			// we should probably print a pretty message explaining that the app
 			// was left in a bad state and needs to be reset

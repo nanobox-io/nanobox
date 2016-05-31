@@ -24,6 +24,13 @@ func init() {
 }
 
 func serviceStopFunc(control processor.ProcessControl) (processor.Processor, error) {
+	if control.Meta["name"] == "" {
+		return nil, errors.New("missing service name")
+	}	
+	if control.Meta["label"] == "" {
+		control.Meta["label"] = control.Meta["name"]
+	}
+
 	return serviceStop{control: control}, nil
 }
 
@@ -32,11 +39,6 @@ func (self serviceStop) Results() processor.ProcessControl {
 }
 
 func (self serviceStop) Process() error {
-
-	if err := self.validateMeta(); err != nil {
-		return err
-	}
-
 	if !self.isServiceRunning() {
 		// short-circuit, this is already stopped
 		return nil
@@ -56,20 +58,6 @@ func (self serviceStop) Process() error {
 
 	if err := self.detachNetwork(); err != nil {
 		return err
-	}
-
-	return nil
-}
-
-// validateMeta validates that the provided metadata is supplied
-func (self serviceStop) validateMeta() error {
-
-	if self.control.Meta["label"] == "" {
-		return errors.New("missing service label")
-	}
-
-	if self.control.Meta["name"] == "" {
-		return errors.New("missing service name")
 	}
 
 	return nil

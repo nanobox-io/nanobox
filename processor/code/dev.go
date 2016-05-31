@@ -104,10 +104,10 @@ func (self *codeDev) setup() error {
 			return err
 		}
 
-	}
+		if _, err := util.Exec(self.container.ID, "dev", self.devPayload(), processor.ExecWriter()); err != nil {
+			return err
+		}
 
-	if _, err := util.Exec(self.container.ID, "dev", self.devPayload(), processor.ExecWriter()); err != nil {
-		return err
 	}
 
 	return nil

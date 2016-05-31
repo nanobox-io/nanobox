@@ -180,8 +180,9 @@ func (self *serviceConfigure) runUpdate() error {
 
 // runConfigure will run the configure hook in the container
 func (self *serviceConfigure) runConfigure() error {
-	// run update
+	// run configure
 	self.control.Info(stylish.SubBullet("Configuring services..."))
+
 	_, err := util.Exec(self.service.ID, "configure", self.configurePayload(), nil)
 	return err
 }
