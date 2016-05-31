@@ -3,8 +3,8 @@ package clients
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net"
+	"io/ioutil"
 	"time"
 
 	"github.com/nanopack/mist/core"
@@ -63,6 +63,7 @@ func (c *TCP) connect() error {
 
 			// decode an array value (Message)
 			if err := decoder.Decode(&msg); err != nil {
+				
 
 				// an error decoding should be sent to the user
 				reader := decoder.Buffered()

@@ -14,14 +14,15 @@ import (
 	"github.com/mitchellh/go-wordwrap"
 )
 
-// Nest is a generic nesting function that
+
+// Nest is a generic nesting function that 
 // will generate the appropariate prefix based
 // on the nest level
 func Nest(level int, msg string) (rtn string) {
 	for index, line := range strings.Split(msg, "\n") {
 		// skip the last new line at the end of the message
 		// because we add the new line in on each Sprintf
-		if index == len(strings.Split(msg, "\n"))-1 && line == "" {
+		if index == len(strings.Split(msg, "\n")) - 1 && line == "" {
 			continue
 		}
 		rtn += fmt.Sprintf("%s%s\n", GenerateNestedPrefix(level), shorten(level, line))
@@ -94,7 +95,7 @@ func Bullet(msg string, v ...interface{}) string {
 // Output:
 //   i am a sub bullet
 func SubBullet(msg string, v ...interface{}) string {
-	return Marker("  +", fmt.Sprintf(msg, v...))
+	return Marker(" ", fmt.Sprintf(msg, v...))
 }
 
 // Warning styles and prints a message as outlined at:
@@ -178,7 +179,7 @@ func isProgress(line string) bool {
 }
 
 func shortenProgress(level int, msg string) string {
-	suffix := fmt.Sprintf("%s >", strings.Repeat("-", (level*2)))
+	suffix := fmt.Sprintf("%s >", strings.Repeat("-", (level * 2)))
 	return strings.Replace(msg, suffix, " >", 1)
 }
 

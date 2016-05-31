@@ -42,14 +42,14 @@
 			"Rev": "b7088d29c6ee508881153aed3bb46290f521e15d"
 		},
 		{
-			"ImportPath": "github.com/docker/docker/pkg/jsonlog",
+			"ImportPath": "github.com/docker/docker/pkg/signal",
 			"Comment": "v1.4.1-11899-g9837ec4",
 			"Rev": "9837ec4da53f15f9120d53a6e1517491ba8b0261"
 		},
 		{
 			"ImportPath": "github.com/docker/docker/pkg/stdcopy",
-			"Comment": "v1.4.1-12158-g52debcd",
-			"Rev": "52debcd58ac91bf68503ce60561536911b74ff05"
+			"Comment": "v1.4.1-11899-g9837ec4",
+			"Rev": "9837ec4da53f15f9120d53a6e1517491ba8b0261"
 		},
 		{
 			"ImportPath": "github.com/docker/docker/pkg/system",
