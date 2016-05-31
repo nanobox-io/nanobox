@@ -39,7 +39,7 @@ type configPayload struct {
 	Users      []models.User          `json:"users"`
 }
 
-type startPayload struct {
+type startUpdatePayload struct {
 	Config map[string]interface{} `json:"config"`
 }
 
@@ -131,11 +131,11 @@ func (self serviceConfigure) configurePayload() string {
 	return string(j)
 }
 
-func (self serviceConfigure) startPayload() string {
+func (self serviceConfigure) startUpdatePayload() string {
 	boxfile := boxfile.New([]byte(self.control.Meta["boxfile"]))
 	boxConfig := boxfile.Node(self.control.Meta["name"]).Node("config")
 
-	pload := startPayload{boxConfig.Parsed}
+	pload := startUpdatePayload{boxConfig.Parsed}
 	switch self.control.Meta["name"] {
 	case "portal", "logvac", "hoarder", "mist":
 		pload.Config["token"] = "123"
@@ -174,7 +174,7 @@ func (self *serviceConfigure) runUpdate() error {
 	self.control.Info(stylish.SubBullet("Updating services..."))
 
 	// run update
-	_, err := util.Exec(self.service.ID, "update", "{}", nil)
+	_, err := util.Exec(self.service.ID, "update", self.startUpdatePayload(), nil)
 	return err
 }
 
@@ -191,7 +191,7 @@ func (self *serviceConfigure) runConfigure() error {
 func (self *serviceConfigure) runStart() error {
 	// run update
 	self.control.Info(stylish.SubBullet("Starting services..."))
-	_, err := util.Exec(self.service.ID, "start", self.startPayload(), nil)
+	_, err := util.Exec(self.service.ID, "start", self.startUpdatePayload(), nil)
 	return err
 }
 

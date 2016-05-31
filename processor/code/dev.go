@@ -104,6 +104,7 @@ func (self *codeDev) setup() error {
 			return err
 		}
 
+		self.control.Info("dev payload: " +self.devPayload())
 		if _, err := util.Exec(self.container.ID, "dev", self.devPayload(), processor.ExecWriter()); err != nil {
 			return err
 		}
@@ -122,7 +123,7 @@ func (self *codeDev) teardown() error {
 	locker.LocalLock()
 	defer locker.LocalUnlock()
 
-	if unused := devIsUnused(); unused == true {
+	if devIsUnused() {
 
 		if err := self.removeContainer(); err != nil {
 			return err
@@ -228,7 +229,7 @@ func (self *codeDev) launchContainer() error {
 // removeContainer will lookup the dev container and remove it
 func (self *codeDev) removeContainer() error {
 
-	name := fmt.Sprintf("%s-dev", util.AppName())
+	name := fmt.Sprintf("nanobox-%s-dev", util.AppName())
 
 	// grab the container info
 	container, err := docker.GetContainer(name)
@@ -302,14 +303,5 @@ func isDevRunning() bool {
 	container, err := docker.GetContainer(name)
 
 	// if the container doesn't exist then just return false
-	if err != nil {
-		return false
-	}
-
-	// return true if the container is running
-	if container.State.Status == "running" {
-		return true
-	}
-
-	return false
+	return err == nil && container.State.Status == "running"
 }
