@@ -3,6 +3,7 @@ package code
 import (
 	"fmt"
 	"net"
+	"encoding/json"
 	// "io"
 
 	dockType "github.com/docker/engine-api/types"
@@ -81,7 +82,7 @@ func (self *codeDev) setup() error {
 		return err
 	}
 
-	if running := isDevRunning(); running == false {
+	if !isDevRunning() {
 
 		if err := self.setImage(); err != nil {
 			return err
@@ -99,10 +100,14 @@ func (self *codeDev) setup() error {
 			return err
 		}
 
-		if err := self.runUserHook(); err != nil {
+		if _, err := util.Exec(self.container.ID, "user", util.UserPayload(), processor.ExecWriter()); err != nil {
 			return err
 		}
 
+	}
+
+	if _, err := util.Exec(self.container.ID, "dev", self.devPayload(), processor.ExecWriter()); err != nil {
+		return err
 	}
 
 	return nil
@@ -240,10 +245,16 @@ func (self *codeDev) removeContainer() error {
 }
 
 // runUserHook runs the user hook in the dev container
-func (self *codeDev) runUserHook() error {
-	_, err := util.Exec(self.container.ID, "user", util.UserPayload(), processor.ExecWriter())
-	return err
+func (self *codeDev) devPayload() string {
+	rtn := map[string]interface{}{}
+	envVars := models.EnvVars{}
+	data.Get(util.AppName()+"_meta", "env", &envVars)
+	rtn["env"] = envVars
+	bytes, _ := json.Marshal(rtn)
+	return string(bytes)
 }
+
+
 
 // runConsole will establish a console within the dev container
 func (self *codeDev) runConsole() error {
