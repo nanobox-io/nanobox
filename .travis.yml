@@ -13,4 +13,4 @@ before_install:
   - go get github.com/tools/godep
 
 install: godep restore
-script: go test $(go list ./... | grep -v /vendor/)
+script: go test -v $(go list ./... | grep -v /vendor/)
