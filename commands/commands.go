@@ -79,7 +79,8 @@ func init() {
 	// persistent flags
 	NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultConfig.Background, "background", "", false, "Stops nanobox from auto-suspending.")
 	NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultConfig.Force, "force", "f", false, "Forces a command to run (effects vary per command).")
-	NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultConfig.Verbose, "verbose", "v", false, "Increase command output from 'info' to 'debug'.")
+	NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultConfig.Verbose, "verbose", "v", false, "Increase display output.")
+	NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultConfig.Quiet, "quiet", "q", false, "Decrease display output.")
 
 	// local flags
 	NanoboxCmd.Flags().BoolVarP(&version, "version", "", false, "Display the current version of this CLI")
@@ -104,5 +105,11 @@ func validCheck(checks ...string) func(ccmd *cobra.Command, args []string) {
 			fmt.Printf("Validation Failed:\n%s\n", err.Error())
 			os.Exit(1)
 		}
+	}
+}
+
+func handleError(err error) {
+	if err != nil {
+		fmt.Printf("It appears we have ran into some error:\n%s\n", err.Error())
 	}
 }

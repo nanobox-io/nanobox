@@ -7,24 +7,24 @@ import (
 )
 
 type linkRemove struct {
-	config ProcessConfig
+	control ProcessControl
 }
 
 func init() {
 	Register("link_remove", linkRemoveFunc)
 }
 
-func linkRemoveFunc(conf ProcessConfig) (Processor, error) {
+func linkRemoveFunc(conf ProcessControl) (Processor, error) {
 	return linkRemove{conf}, nil
 }
 
-func (self linkRemove) Results() ProcessConfig {
-	return self.config
+func (self linkRemove) Results() ProcessControl {
+	return self.control
 }
 
 func (self linkRemove) Process() error {
 	links := models.AppLinks{}
 	data.Get(util.AppName()+"_meta", "links", &links)
-	delete(links, self.config.Meta["alias"])
+	delete(links, self.control.Meta["alias"])
 	return data.Put(util.AppName()+"_meta", "links", links)
 }

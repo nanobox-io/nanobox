@@ -25,7 +25,7 @@ var (
 		Run: func(ccmd *cobra.Command, args []string) {
 			processor.DefaultConfig.Meta["name"] = app
 			processor.DefaultConfig.Meta["alias"] = alias
-			processor.Run("link_add", processor.DefaultConfig)
+			handleError(processor.Run("link_add", processor.DefaultConfig))
 		},
 	}
 
@@ -35,7 +35,7 @@ var (
 		Long:  `list`,
 
 		Run: func(ccmd *cobra.Command, args []string) {
-			processor.Run("link_list", processor.DefaultConfig)
+			handleError(processor.Run("link_list", processor.DefaultConfig))
 		},
 	}
 
@@ -46,7 +46,7 @@ var (
 
 		Run: func(ccmd *cobra.Command, args []string) {
 			processor.DefaultConfig.Meta["alias"] = alias
-			processor.Run("link_remove", processor.DefaultConfig)
+			handleError(processor.Run("link_remove", processor.DefaultConfig))
 		},
 	}
 )

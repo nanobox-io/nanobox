@@ -9,7 +9,6 @@ import (
 	printutil "github.com/nanobox-io/nanobox/util/print"
 )
 
-
 // TestColor
 func TestColor(t *testing.T) {
 	raw := "\x1b[31mtest color output\x1b[0m\x1b[0m\n"

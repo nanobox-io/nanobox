@@ -9,20 +9,20 @@ import (
 )
 
 type serviceStartAll struct {
-	config processor.ProcessConfig
+	control processor.ProcessControl
 }
 
 func init() {
 	processor.Register("service_start_all", serviceStartAllFunc)
 }
 
-func serviceStartAllFunc(config processor.ProcessConfig) (processor.Processor, error) {
+func serviceStartAllFunc(control processor.ProcessControl) (processor.Processor, error) {
 	// make sure i was given a name and image
-	return serviceStartAll{config: config}, nil
+	return serviceStartAll{control: control}, nil
 }
 
-func (self serviceStartAll) Results() processor.ProcessConfig {
-	return self.config
+func (self serviceStartAll) Results() processor.ProcessControl {
+	return self.control
 }
 
 func (self serviceStartAll) Process() error {
@@ -53,12 +53,12 @@ func (self serviceStartAll) startServices() error {
 // startService starts a service
 func (self serviceStartAll) startService(uid string) error {
 
-	config := processor.ProcessConfig{
-		DevMode: self.config.DevMode,
-		Verbose: self.config.Verbose,
+	config := processor.ProcessControl{
+		DevMode: self.control.DevMode,
+		Verbose: self.control.Verbose,
 		Meta: map[string]string{
-			"label": 	uid,
-			"name":  	uid,
+			"label": uid,
+			"name":  uid,
 		},
 	}
 

@@ -12,7 +12,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
 	// "github.com/nanobox-io/nanobox/config"
 )
 

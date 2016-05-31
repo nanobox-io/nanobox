@@ -6,17 +6,17 @@ import (
 )
 
 type providerStop struct {
-	config processor.ProcessConfig
+	control processor.ProcessControl
 }
 
-func providerStopFunc(config processor.ProcessConfig) (processor.Processor, error) {
+func providerStopFunc(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 
-	return providerStop{config}, nil
+	return providerStop{control}, nil
 }
 
-func (self providerStop) Results() processor.ProcessConfig {
-	return self.config
+func (self providerStop) Results() processor.ProcessControl {
+	return self.control
 }
 
 func (self providerStop) Process() error {

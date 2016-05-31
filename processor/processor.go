@@ -4,9 +4,12 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net"
+	"os"
+	"io"
 	"net/http"
 
 	"github.com/jcelliott/lumber"
+	"github.com/nanobox-io/nanobox-golang-stylish"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
@@ -16,41 +19,31 @@ import (
 type (
 	BreadCrumbProcessor struct {
 		crumb string
-		proc Processor
-	}
-	ProcessConfig struct {
-		DevMode    		bool
-		Verbose    		bool
-		Background 		bool
-		Force      		bool
-		DisplayLevel 	int
-		Meta       		map[string]string
+		proc  Processor
 	}
 
-	ProcessBuilder func(ProcessConfig) (Processor, error)
+	ProcessControl struct {
+		DevMode      bool
+		Quiet        bool
+		Verbose      bool
+		Background   bool
+		Force        bool
+		DisplayLevel int
+		Meta         map[string]string
+	}
+
+	ProcessBuilder func(ProcessControl) (Processor, error)
 
 	Processor interface {
 		Process() error
-		Results() ProcessConfig
+		Results() ProcessControl
 	}
 )
 
 var (
-	DefaultConfig = ProcessConfig{Meta: map[string]string{}}
+	DefaultConfig = ProcessControl{Meta: map[string]string{}}
 	processors    = map[string]ProcessBuilder{}
 )
-
-func (bcp BreadCrumbProcessor) Process() error {
-	err := bcp.proc.Process()
-	if err != nil {
-		err = fmt.Errorf("%s:%s", bcp.crumb, err.Error())
-	}
-	return err
-}
-
-func (bcp BreadCrumbProcessor) Results() ProcessConfig {
-	return bcp.Results()
-}
 
 func Register(name string, sb ProcessBuilder) {
 	_, ok := processors[name]
@@ -60,7 +53,7 @@ func Register(name string, sb ProcessBuilder) {
 	processors[name] = sb
 }
 
-func Build(name string, pc ProcessConfig) (Processor, error) {
+func Build(name string, pc ProcessControl) (Processor, error) {
 	lumber.Debug(name)
 	procFunc, ok := processors[name]
 	if !ok {
@@ -70,12 +63,48 @@ func Build(name string, pc ProcessConfig) (Processor, error) {
 	return BreadCrumbProcessor{name, proc}, err
 }
 
-func Run(name string, pc ProcessConfig) error {
+func Run(name string, pc ProcessControl) error {
 	proc, err := Build(name, pc)
 	if err != nil {
 		return err
 	}
 	return proc.Process()
+}
+
+func ExecWriter() io.Writer {
+	if DefaultConfig.Quiet {
+		return nil
+	}
+	return os.Stdout
+}
+
+func (bcp BreadCrumbProcessor) Process() error {
+	err := bcp.proc.Process()
+	if err != nil {
+		err = fmt.Errorf("%s:%s", bcp.crumb, err.Error())
+	}
+	return err
+}
+
+func (bcp BreadCrumbProcessor) Results() ProcessControl {
+	return bcp.proc.Results()
+}
+
+// displays all of the possible
+func (self ProcessControl) Display(msg string) {
+	fmt.Print(stylish.Nest(self.DisplayLevel, msg))
+}
+
+func (self ProcessControl) Info(msg string) {
+	if !DefaultConfig.Quiet {
+		fmt.Print(stylish.Nest(self.DisplayLevel, msg))
+	}
+}
+
+func (self ProcessControl) Trace(msg string) {
+	if DefaultConfig.Verbose {
+		fmt.Print(stylish.Nest(self.DisplayLevel, msg))
+	}
 }
 
 func getAppID(alias string) string {

@@ -1,9 +1,10 @@
 package processor
 
 import (
-	"io/ioutil"
-	"os"
 	"errors"
+	"io/ioutil"
+	
+	"os"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
@@ -11,26 +12,26 @@ import (
 )
 
 type dev struct {
-	config 				ProcessConfig
-	oldBoxfile		models.Boxfile
-	newBoxfile		models.Boxfile
-	buildBoxfile 	models.Boxfile
+	control       ProcessControl
+	oldBoxfile   models.Boxfile
+	newBoxfile   models.Boxfile
+	buildBoxfile models.Boxfile
 }
 
 func init() {
 	Register("dev", devFunc)
 }
 
-func devFunc(config ProcessConfig) (Processor, error) {
-	// config.Meta["dev-config"]
-	// do some config validation
+func devFunc(control ProcessControl) (Processor, error) {
+	// control.Meta["dev-control"]
+	// do some control validation
 	// check on the meta for the flags and make sure they work
 
-	return dev{config: config}, nil
+	return dev{control: control}, nil
 }
 
-func (self dev) Results() ProcessConfig {
-	return self.config
+func (self dev) Results() ProcessControl {
+	return self.control
 }
 
 func (self dev) Process() error {
@@ -38,7 +39,7 @@ func (self dev) Process() error {
 	// defer the clean up so if we exit early the
 	// cleanup will always happen
 	defer func() {
-		if err := Run("dev_teardown", self.config); err != nil {
+		if err := Run("dev_teardown", self.control); err != nil {
 			// this is bad, really bad...
 			// we should probably print a pretty message explaining that the app
 			// was left in a bad state and needs to be reset
@@ -46,25 +47,22 @@ func (self dev) Process() error {
 		}
 	}()
 
-	if err := Run("dev_setup", self.config); err != nil {
-		// todo: how to display this?
-		return err
-	}
-
-	if err := self.runBuild(); err != nil {
-		// todo: how to display this?
+	// get the vm and app up.
+	if err := Run("dev_setup", self.control); err != nil {
 		return err
 	}
 
 	// startDataServices will start all data services
-	if err := Run("service_start_all", self.config); err != nil {
-		// todo: how to display this?
+	if err := Run("service_start_all", self.control); err != nil {
+		return err
+	}
+
+	if err := self.runBuild(); err != nil {
 		return err
 	}
 
 	// starts a dev container and establishes a console session
-	if err := Run("code_dev", self.config); err != nil {
-		// todo: how to display this?
+	if err := Run("code_dev", self.control); err != nil {
 		return err
 	}
 
@@ -80,17 +78,17 @@ func (self *dev) runBuild() error {
 		return err
 	}
 
-	// todo: we need to consider a more stateful way of determining if a dev
-	// was successful previously. Otherwise a failure on the first run won't
-	// try a subsequent build
+	// if the build has been done or not we always have 
+	// to check the boxfile to determine if we are going to
+	// build/rebuild or use the existing one
 	if self.hasBoxfileChanged() {
 		// build the code
-		if err := Run("code_build", self.config); err != nil {
+		if err := Run("code_build", self.control); err != nil {
 			return err
 		}
 
 		// syncronize the data services with the new build
-		if err := Run("service_sync", self.config); err != nil {
+		if err := Run("service_sync", self.control); err != nil {
 			return err
 		}
 

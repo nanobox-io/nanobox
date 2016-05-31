@@ -45,8 +45,10 @@ func (self DockerMachine) Create() error {
 	fmt.Print(stylish.ProcessStart("Starting docker-machine vm"))
 
 	cmd := exec.Command("docker-machine", "create", "--driver", "virtualbox", "nanobox")
-	cmd.Stdout = print.NewStreamer("  ")
-	cmd.Stderr = print.NewStreamer("  ")
+	if verbose {
+		cmd.Stdout = print.NewStreamer("  ")
+		cmd.Stderr = print.NewStreamer("  ")
+	}
 
 	if err := cmd.Run(); err != nil {
 		return err
@@ -74,8 +76,10 @@ func (self DockerMachine) Stop() error {
 	fmt.Print(stylish.ProcessStart("Stopping docker-machine vm"))
 
 	cmd := exec.Command("docker-machine", "stop", "nanobox")
-	cmd.Stdout = print.NewStreamer("  ")
-	cmd.Stderr = print.NewStreamer("  ")
+	if verbose {
+		cmd.Stdout = print.NewStreamer("  ")
+		cmd.Stderr = print.NewStreamer("  ")
+	}
 
 	if err := cmd.Run(); err != nil {
 		return nil
@@ -95,8 +99,10 @@ func (self DockerMachine) Destroy() error {
 	fmt.Print(stylish.ProcessStart("Destroying docker-machine vm"))
 
 	cmd := exec.Command("docker-machine", "rm", "-f", "nanobox")
-	cmd.Stdout = print.NewStreamer("  ")
-	cmd.Stderr = print.NewStreamer("  ")
+	if verbose {
+		cmd.Stdout = print.NewStreamer("  ")
+		cmd.Stderr = print.NewStreamer("  ")
+	}
 
 	if err := cmd.Run(); err != nil {
 		return nil
@@ -116,8 +122,10 @@ func (self DockerMachine) Start() error {
 		fmt.Print(stylish.ProcessStart("Starting docker-machine vm"))
 
 		cmd := exec.Command("docker-machine", "start", "nanobox")
-		cmd.Stdout = print.NewStreamer("  ")
-		cmd.Stderr = print.NewStreamer("  ")
+		if verbose {
+			cmd.Stdout = print.NewStreamer("  ")
+			cmd.Stderr = print.NewStreamer("  ")
+		}
 
 		if err := cmd.Run(); err != nil {
 			return err
@@ -132,8 +140,10 @@ func (self DockerMachine) Start() error {
 		fmt.Print(stylish.Bullet("Setting up custom docker network..."))
 
 		cmd := exec.Command("docker-machine", "ssh", "nanobox", "docker", "network", "create", "--driver=bridge", "--subnet=192.168.0.0/24", "--opt=\"com.docker.network.driver.mtu=1450\"", "--opt=\"com.docker.network.bridge.name=redd0\"", "--gateway=192.168.0.1", "nanobox")
-		cmd.Stdout = print.NewStreamer("  ")
-		cmd.Stderr = print.NewStreamer("  ")
+		if verbose {
+			cmd.Stdout = print.NewStreamer("  ")
+			cmd.Stderr = print.NewStreamer("  ")
+		}
 
 		if err := cmd.Run(); err != nil {
 			return err
@@ -144,8 +154,10 @@ func (self DockerMachine) Start() error {
 	// fmt.Print(stylish.Bullet("Ensure kernel modules are loaded..."))
 
 	cmd := exec.Command("docker-machine", "ssh", "nanobox", "sudo", "modprobe", "ip_vs")
-	cmd.Stdout = print.NewStreamer("  ")
-	cmd.Stderr = print.NewStreamer("  ")
+	if verbose {
+		cmd.Stdout = print.NewStreamer("  ")
+		cmd.Stderr = print.NewStreamer("  ")
+	}
 
 	return cmd.Run()
 }
@@ -201,6 +213,9 @@ func (self DockerMachine) DockerEnv() error {
 		os.Setenv("DOCKER_TLS_VERIFY", "1")
 	}
 
+	if inspect.Driver.IPAddress == "" {
+		return fmt.Errorf("docker-machine didnt start docker properly")
+	}
 	// set docker environment variables for client connections
 	os.Setenv("DOCKER_MACHINE_NAME", "nanobox")
 	os.Setenv("DOCKER_HOST", fmt.Sprintf("tcp://%s:2376", inspect.Driver.IPAddress))

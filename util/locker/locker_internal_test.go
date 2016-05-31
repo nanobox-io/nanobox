@@ -53,7 +53,7 @@ func TestLocalStackLocking(t *testing.T) {
 		if err != nil {
 			t.Errorf("errored on multiple locks")
 		}
-	}	
+	}
 }
 
 func TestGlobalLock(t *testing.T) {
@@ -107,8 +107,5 @@ func TestGlobalStackLocking(t *testing.T) {
 		if err != nil {
 			t.Errorf("errored on multiple locks")
 		}
-	}	
+	}
 }
-
-
-

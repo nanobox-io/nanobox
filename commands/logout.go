@@ -16,7 +16,7 @@ var (
 		Long:  ``,
 
 		Run: func(ccmd *cobra.Command, args []string) {
-			processor.Run("logout", processor.DefaultConfig)
+			handleError(processor.Run("logout", processor.DefaultConfig))
 		},
 	}
 )

@@ -1,8 +1,8 @@
 package nanofile
 
 import (
-	"runtime"
 	"path/filepath"
+	"runtime"
 
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/spf13/viper"

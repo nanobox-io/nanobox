@@ -26,7 +26,7 @@ var (
 			processor.DefaultConfig.Meta["alias"] = app
 			processor.DefaultConfig.Meta["container"] = args[0]
 			processor.DefaultConfig.Meta["port"] = port
-			processor.Run("tunnel", processor.DefaultConfig)
+			handleError(processor.Run("tunnel", processor.DefaultConfig))
 		},
 		// PostRun: halt,
 	}

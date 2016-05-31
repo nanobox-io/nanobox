@@ -13,24 +13,23 @@ import (
 )
 
 type mistListen struct {
-	config processor.ProcessConfig
+	control processor.ProcessControl
 }
 
 func init() {
 	processor.Register("mist_log", mistListenFunc)
 }
 
-func mistListenFunc(config processor.ProcessConfig) (processor.Processor, error) {
+func mistListenFunc(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
-	return mistListen{config}, nil
+	return mistListen{control}, nil
 }
 
-func (self mistListen) Results() processor.ProcessConfig {
-	return self.config
+func (self mistListen) Results() processor.ProcessControl {
+	return self.control
 }
 
 func (self mistListen) Process() error {
-	// TODO: setup the nanoagent services
 	mist := models.Service{}
 	data.Get(util.AppName(), "mist", &mist)
 

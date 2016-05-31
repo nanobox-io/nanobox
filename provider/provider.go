@@ -29,6 +29,7 @@ type (
 
 var providers = map[string]Provider{}
 var invalidProvider = errors.New("invalid provider")
+var verbose = true
 
 func Register(name string, p Provider) {
 	providers[name] = p
@@ -36,6 +37,10 @@ func Register(name string, p Provider) {
 
 func init() {
 	validate.Register("provider", Valid)
+}
+
+func Display(verb bool) {
+	verbose = verb
 }
 
 func Valid() error {

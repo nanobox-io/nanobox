@@ -1,10 +1,13 @@
 package service
 
 import (
-	"net"
 	"fmt"
+	"net"
+	"strings"
 
+	"github.com/nanobox-io/nanobox-golang-stylish"
 	"github.com/nanobox-io/golang-docker-client"
+
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
@@ -14,38 +17,38 @@ import (
 )
 
 type serviceDestroy struct {
-	config processor.ProcessConfig
+	control processor.ProcessControl
 }
 
 func init() {
 	processor.Register("service_destroy", serviceDestroyFunc)
 }
 
-func serviceDestroyFunc(config processor.ProcessConfig) (processor.Processor, error) {
+func serviceDestroyFunc(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
-	// if config.Meta["name"] == "" {
+	// if control.Meta["name"] == "" {
 	// 	return nil, errors.New("missing image or name")
 	// }
-	return serviceDestroy{config: config}, nil
+	return serviceDestroy{control: control}, nil
 }
 
-func (self serviceDestroy) Results() processor.ProcessConfig {
-	return self.config
+func (self serviceDestroy) Results() processor.ProcessControl {
+	return self.control
 }
 
 func (self serviceDestroy) Process() error {
 
 	// get the service from the database
 	service := models.Service{}
-	err := data.Get(util.AppName(), self.config.Meta["name"], &service)
+	err := data.Get(util.AppName(), self.control.Meta["name"], &service)
 	if err != nil {
 		// cant find service
 		return err
 	}
 
-	fmt.Println("service detroy: " + self.config.Meta["name"])
+	self.control.Display(stylish.Bullet("Destroying %s", self.control.Meta["name"]))
 
-	err = docker.ContainerRemove(self.config.Meta["name"])
+	err = docker.ContainerRemove(fmt.Sprintf("nanobox-%s-%s", util.AppName(), self.control.Meta["name"]))
 	if err != nil {
 		return err
 	}
@@ -70,6 +73,24 @@ func (self serviceDestroy) Process() error {
 		return err
 	}
 
+	if err := self.updateEnvVars(); err != nil {
+		return err
+	}
+
 	// save the service
-	return data.Delete(util.AppName(), self.config.Meta["name"])
+	return data.Delete(util.AppName(), self.control.Meta["name"])
+}
+
+func (self serviceDestroy) updateEnvVars() error {
+	envVars := models.EnvVars{}
+	data.Get(util.AppName()+"_meta", "env", &envVars)
+
+	envName := strings.ToUpper(strings.Replace(self.control.Meta["name"], ".", "_", -1))
+	delete(envVars, envName+"_HOST")
+	users := strings.Split(envVars[envName+"_USERS"], " ")
+	for _, user := range users {
+		delete(envVars, fmt.Sprintf("%s_%s_PW", envName, strings.ToUpper(user)))
+	}
+	delete(envVars, envName+"_USERS")
+	return data.Put(util.AppName()+"_meta", "env", envVars)
 }

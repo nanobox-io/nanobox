@@ -7,6 +7,7 @@ import (
 	"net"
 	// "io"
 	// "os"
+	"strings"
 
 	"github.com/nanobox-io/nanobox-boxfile"
 	"github.com/nanobox-io/nanobox-golang-stylish"
@@ -25,26 +26,34 @@ import (
 type cleanFunc func() error
 
 type serviceSetup struct {
-	config 			processor.ProcessConfig
-	service 		models.Service
-	local_ip 		net.IP
-	global_ip 	net.IP
-	container 	dockType.ContainerJSON
-	plan				string
-	fail   			bool
-	cleanFuncs	[]cleanFunc
+	control     processor.ProcessControl
+	service    models.Service
+	localIP   net.IP
+	globalIP  net.IP
+	container  dockType.ContainerJSON
+	plan       string
+	fail       bool
+	cleanFuncs []cleanFunc
 }
 
 func init() {
 	processor.Register("service_setup", serviceSetupFunc)
 }
 
-func serviceSetupFunc(config processor.ProcessConfig) (processor.Processor, error) {
+func serviceSetupFunc(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
+	// ensure we have a name and immage
+	if control.Meta["name"] == "" || control.Meta["image"] == "" {
+		return nil, errors.New("missing image or name")
+	}
+	// add a label if im missing one
+	if control.Meta["label"] == "" {
+		control.Meta["label"] = control.Meta["name"]
+	}
 
 	return &serviceSetup{
-		config: config,
-		cleanFuncs:	make([]cleanFunc, 0),
+		control:     control,
+		cleanFuncs: make([]cleanFunc, 0),
 	}, nil
 }
 
@@ -52,7 +61,7 @@ func serviceSetupFunc(config processor.ProcessConfig) (processor.Processor, erro
 // call them one-by-one
 func (self *serviceSetup) clean() error {
 	// short-circuit if we haven't failed
-	if self.fail == false {
+	if !self.fail {
 		return nil
 	}
 
@@ -66,19 +75,17 @@ func (self *serviceSetup) clean() error {
 	return nil
 }
 
-func (self serviceSetup) Results() processor.ProcessConfig {
-	return self.config
+func (self serviceSetup) Results() processor.ProcessControl {
+	return self.control
 }
 
 func (self *serviceSetup) Process() error {
 
+	header := fmt.Sprintf("Launching %s...", self.control.Meta["label"])
+	self.control.Display(stylish.Bullet(header))
+
 	// call the cleanup function to ensure we don't leave any bad state
 	defer self.clean()
-
-	if err := self.validateMeta(); err != nil {
-		self.fail = true
-		return err
-	}
 
 	if err := self.loadService(); err != nil {
 		self.fail = true
@@ -120,21 +127,23 @@ func (self *serviceSetup) Process() error {
 		return err
 	}
 
+	if err := self.updateEnvVars(); err != nil {
+		self.fail = true
+		return err
+	}
+
 	return nil
 }
 
 // validateMeta ensures we were given a name and image
 func (self *serviceSetup) validateMeta() error {
-	if self.config.Meta["name"] == "" || self.config.Meta["image"] == "" {
-		return errors.New("missing image or name")
-	}
 	return nil
 }
 
 // loadService fetches the service from the database
 func (self *serviceSetup) loadService() error {
 	// the service really shouldn't exist yet, so let's not return the error if it fails
-	data.Get(util.AppName(), self.config.Meta["name"], &self.service)
+	data.Get(util.AppName(), self.control.Meta["name"], &self.service)
 
 	// set the default state
 	if self.service.State == "" {
@@ -146,45 +155,37 @@ func (self *serviceSetup) loadService() error {
 
 // downloadImage downloads the docker image
 func (self *serviceSetup) downloadImage() error {
-	label := "Pulling image " + self.config.Meta["image"]
-	fmt.Print(stylish.NestedProcessStart(label, self.config.DisplayLevel))
-
 	// Create a pipe to for the JSONMessagesStream to read from
 	// pr, pw := io.Pipe()
-	prefix := fmt.Sprintf("%s+ Pulling %s -", stylish.GenerateNestedPrefix(self.config.DisplayLevel), self.config.Meta["image"])
- //  go print.DisplayJSONMessagesStream(pr, os.Stdout, os.Stdout.Fd(), true, prefix, nil)
-	if _, err := docker.ImagePull(self.config.Meta["image"], &print.DockerPercentDisplay{Prefix: prefix}); err != nil {
+	prefix := fmt.Sprintf("%s+ Pulling %s -", stylish.GenerateNestedPrefix(self.control.DisplayLevel+1), self.control.Meta["image"])
+	//  go print.DisplayJSONMessagesStream(pr, os.Stdout, os.Stdout.Fd(), true, prefix, nil)
+	if _, err := docker.ImagePull(self.control.Meta["image"], &print.DockerPercentDisplay{Prefix: prefix}); err != nil {
 		return err
 	}
-  fmt.Print(stylish.ProcessEnd())
 
 	return nil
 }
 
 // reserveIps reserves a global and local ip for the container
 func (self *serviceSetup) reserveIps() error {
-
-	local_ip, err := ip_control.ReserveLocal()
+	var err error
+	self.localIP, err = ip_control.ReserveLocal()
 	if err != nil {
 		return err
 	}
 
 	self.cleanFuncs = append(self.cleanFuncs, func() error {
-		return ip_control.ReturnIP(local_ip)
+		return ip_control.ReturnIP(self.localIP)
 	})
 
-	global_ip, err := ip_control.ReserveGlobal()
+	self.globalIP, err = ip_control.ReserveGlobal()
 	if err != nil {
 		return err
 	}
 
 	self.cleanFuncs = append(self.cleanFuncs, func() error {
-		return ip_control.ReturnIP(global_ip)
+		return ip_control.ReturnIP(self.globalIP)
 	})
-
-	// assign back to the state
-	self.local_ip = local_ip
-	self.global_ip = global_ip
 
 	return nil
 }
@@ -192,13 +193,13 @@ func (self *serviceSetup) reserveIps() error {
 // launchContainer launches and starts a docker container
 func (self *serviceSetup) launchContainer() error {
 	config := docker.ContainerConfig{
-		Name:    fmt.Sprintf("%s-%s", util.AppName(), self.config.Meta["name"]),
-		Image:   self.config.Meta["image"],
+		Name:    fmt.Sprintf("nanobox-%s-%s", util.AppName(), self.control.Meta["name"]),
+		Image:   self.control.Meta["image"],
 		Network: "virt",
-		IP:      self.local_ip.String(),
+		IP:      self.localIP.String(),
 	}
 
-	fmt.Print(stylish.NestedBullet("Starting container...", self.config.DisplayLevel))
+	self.control.Info(stylish.SubBullet("Starting container..."))
 	container, err := docker.CreateContainer(config)
 	if err != nil {
 		return err
@@ -216,24 +217,24 @@ func (self *serviceSetup) launchContainer() error {
 // attachNetwork attaches the IP addresses to the container
 func (self *serviceSetup) attachNetwork() error {
 	label := "Bridging container to host network..."
-	fmt.Print(stylish.NestedBullet(label, self.config.DisplayLevel))
+	self.control.Info(stylish.SubBullet(label))
 
-	err := provider.AddIP(self.global_ip.String())
+	err := provider.AddIP(self.globalIP.String())
 	if err != nil {
 		return err
 	}
 
 	self.cleanFuncs = append(self.cleanFuncs, func() error {
-		return provider.RemoveIP(self.global_ip.String())
+		return provider.RemoveIP(self.globalIP.String())
 	})
 
-	err = provider.AddNat(self.global_ip.String(), self.local_ip.String())
+	err = provider.AddNat(self.globalIP.String(), self.localIP.String())
 	if err != nil {
 		return err
 	}
 
 	self.cleanFuncs = append(self.cleanFuncs, func() error {
-		return provider.RemoveNat(self.global_ip.String(), self.local_ip.String())
+		return provider.RemoveNat(self.globalIP.String(), self.localIP.String())
 	})
 
 	return nil
@@ -241,15 +242,14 @@ func (self *serviceSetup) attachNetwork() error {
 
 // planService runs the plan hook
 func (self *serviceSetup) planService() error {
-	fmt.Print(stylish.NestedBullet("Gathering service requirements...", self.config.DisplayLevel))
+	self.control.Info(stylish.SubBullet("Gathering service requirements..."))
 
-	boxfile := boxfile.New([]byte(self.config.Meta["boxfile"]))
-	boxConfig := boxfile.Node(self.config.Meta["name"]).Node("config")
+	boxfile := boxfile.New([]byte(self.control.Meta["boxfile"]))
+	boxConfig := boxfile.Node(self.control.Meta["name"]).Node("config")
 	planPayload := map[string]interface{}{"config": boxConfig.Parsed}
 	jsonPayload, _ := json.Marshal(planPayload)
 
-
-	p, err := util.Exec(self.container.ID, "plan", string(jsonPayload), nil)
+	p, err := util.Exec(self.container.ID, "plan", string(jsonPayload), processor.ExecWriter())
 	if err != nil {
 		return err
 	}
@@ -261,13 +261,13 @@ func (self *serviceSetup) planService() error {
 // persistService saves the service in the database
 func (self *serviceSetup) persistService() error {
 	// save service in DB
-	self.service.ID         = self.container.ID
-	self.service.Name       = self.config.Meta["name"]
-	self.service.ExternalIP = self.global_ip.String()
-	self.service.InternalIP = self.local_ip.String()
-	self.service.State      = "planned"
+	self.service.ID = self.container.ID
+	self.service.Name = self.control.Meta["name"]
+	self.service.ExternalIP = self.globalIP.String()
+	self.service.InternalIP = self.localIP.String()
+	self.service.State = "planned"
+	self.service.Type = "data"
 
-	
 	err := json.Unmarshal([]byte(self.plan), &self.service.Plan)
 	if err != nil {
 		return fmt.Errorf("persistService:%s", err.Error())
@@ -277,10 +277,26 @@ func (self *serviceSetup) persistService() error {
 	}
 
 	// save the service
-	err = data.Put(util.AppName(), self.config.Meta["name"], &self.service)
+	err = data.Put(util.AppName(), self.control.Meta["name"], &self.service)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func (self *serviceSetup) updateEnvVars() error {
+	envVars := models.EnvVars{}
+	data.Get(util.AppName()+"_meta", "env", &envVars)
+	envName := strings.ToUpper(strings.Replace(self.service.Name, ".", "_", -1))
+	users := []string{}
+	envVars[envName+"_HOST"] = self.service.InternalIP
+	for _, user := range self.service.Plan.Users {
+		users = append(users, user.Username)
+		envVars[fmt.Sprintf("%s_%s_PW", envName, strings.ToUpper(user.Username))] = user.Password
+	}
+	if len(users) > 0 {
+		envVars[envName+"_USERS"] = strings.Join(users, " ")
+	}
+	return data.Put(util.AppName()+"_meta", "env", envVars)
 }

@@ -9,19 +9,19 @@ import (
 )
 
 type link struct {
-	config ProcessConfig
+	control ProcessControl
 }
 
 func init() {
 	Register("link_list", linkFunc)
 }
 
-func linkFunc(conf ProcessConfig) (Processor, error) {
+func linkFunc(conf ProcessControl) (Processor, error) {
 	return link{conf}, nil
 }
 
-func (self link) Results() ProcessConfig {
-	return self.config
+func (self link) Results() ProcessControl {
+	return self.control
 }
 
 func (self link) Process() error {

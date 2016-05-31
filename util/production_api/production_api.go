@@ -62,7 +62,6 @@ func GetWarehouse(appId string) (string, string, error) {
 	return r["token"], r["url"], err
 }
 
-
 func doRequest(method, path string, requestBody, responseBody interface{}) error {
 	var rbodyReader io.Reader
 	if requestBody != nil {

@@ -6,7 +6,6 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
-
 	// "github.com/nanobox-io/nanobox/config"
 )
 

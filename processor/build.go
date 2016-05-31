@@ -1,48 +1,40 @@
 package processor
 
 import (
-	"fmt"
-	"os"
-
-	"github.com/jcelliott/lumber"
-
 	"github.com/nanobox-io/nanobox/util/locker"
 )
 
 type build struct {
-	config ProcessConfig
+	control ProcessControl
 }
 
 func init() {
 	Register("build", buildFunc)
 }
 
-func buildFunc(config ProcessConfig) (Processor, error) {
-	return build{config}, nil
+func buildFunc(control ProcessControl) (Processor, error) {
+	return build{control}, nil
 }
 
-func (self build) Results() ProcessConfig {
-	return self.config
+func (self build) Results() ProcessControl {
+	return self.control
 }
 
 func (self build) Process() error {
 	locker.LocalLock()
 	defer locker.LocalUnlock()
-	self.config.Meta["build"] = "true"
+	self.control.Meta["build"] = "true"
 
 	// setup the environment (boot vm)
-	err := Run("provider_setup", self.config)
-	if err != nil {
-		fmt.Println("provider_setup:", err)
-		lumber.Close()
-		os.Exit(1)
+	// but do not run the dev setup because
+	// we dont need any o fthe platform services
+	if err := Run("provider_setup", self.control); err != nil {
+		return err
 	}
 
 	// build code
-	err = Run("code_build", self.config)
-	if err != nil {
-		fmt.Println("code_build:", err)
-		os.Exit(1)
+	if err := Run("code_build", self.control); err != nil {
+		return err
 	}
 
 	return nil

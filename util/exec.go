@@ -1,56 +1,56 @@
 package util
 
 import (
-  "io"
-  "bytes"
-  "fmt"
+	"bytes"
+	"fmt"
+	"io"
 
-  "github.com/nanobox-io/golang-docker-client"
+	"github.com/nanobox-io/golang-docker-client"
 )
 
 type Cmd struct {
-  Id      string
-  Path    string
-  Payload string
-  Stdout  io.Writer
-  Stderr  io.Writer
+	Id      string
+	Path    string
+	Payload string
+	Stdout  io.Writer
+	Stderr  io.Writer
 }
 
 // Run builds a command and executes within the context of a docker container
 func (cmd *Cmd) Run() error {
-  // assemble the full command to run within the hooks dir
-  run := []string{"/opt/nanobox/hooks/" + cmd.Path, cmd.Payload}
+	// assemble the full command to run within the hooks dir
+	run := []string{"/opt/nanobox/hooks/" + cmd.Path, cmd.Payload}
 
-  // start the exec
+	// start the exec
 	exec, hj, err := docker.ExecStart(cmd.Id, run, false, true, true)
 	if err != nil {
 		return err
 	}
 
 	// if no streams are given then set a reasonable alternative
-	// this will be later used to make the error messaging 
+	// this will be later used to make the error messaging
 	// better
 	var buff bytes.Buffer
-  if cmd.Stderr == nil {
-    cmd.Stderr = &buff
-  }
+	if cmd.Stderr == nil {
+		cmd.Stderr = &buff
+	}
 
-  // stream the output
+	// stream the output
 	if err := docker.ExecPipe(hj, nil, cmd.Stdout, cmd.Stderr); err != nil {
-    return err
-  }
+		return err
+	}
 
-  // let's see if we can inspect a bit
+	// let's see if we can inspect a bit
 	data, err := docker.ExecInspect(exec.ID)
 	if err != nil {
 		return err
 	}
 
-  // was the exit code bad?
+	// was the exit code bad?
 	if data.ExitCode != 0 {
 		// if so use the buffer that may have been assigned to the
 		// streams to give message better error handling
-    return fmt.Errorf("bad exit code: %s", buff.String())
+		return fmt.Errorf("bad exit code: %s", buff.String())
 	}
 
 	return nil
@@ -65,17 +65,17 @@ func (cmd *Cmd) Output() (string, error) {
 
 	var buffer bytes.Buffer
 	cmd.Stdout = &buffer
-  err := cmd.Run()
-  return buffer.String(), err
+	err := cmd.Run()
+	return buffer.String(), err
 }
 
 // Command generates a new Cmd struct
 func DockerCommand(id string, path string, payload string) *Cmd {
-  return &Cmd{
-    Id: id,
-    Path: path,
-    Payload: payload,
-  }
+	return &Cmd{
+		Id:      id,
+		Path:    path,
+		Payload: payload,
+	}
 }
 
 // Exec is a shortcut for the process that turns the interface into a one liner

@@ -4,64 +4,63 @@ import (
 	"fmt"
 	"net"
 	// "io"
-	"os"
 
 	dockType "github.com/docker/engine-api/types"
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox-boxfile"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 
-	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/counter"
 	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/ip_control"
-	"github.com/nanobox-io/nanobox/util/print"
-	"github.com/nanobox-io/nanobox/util/counter"
 	"github.com/nanobox-io/nanobox/util/locker"
+	"github.com/nanobox-io/nanobox/util/print"
 )
 
 type codeDev struct {
-	config		processor.ProcessConfig
-	boxfile 	models.Boxfile
-	localIP		net.IP
-	image 		string
-	container	dockType.ContainerJSON
+	control    processor.ProcessControl
+	boxfile   models.Boxfile
+	localIP   net.IP
+	image     string
+	container dockType.ContainerJSON
 }
 
 func init() {
 	processor.Register("code_dev", codeDevFunc)
 }
 
-func codeDevFunc(config processor.ProcessConfig) (processor.Processor, error) {
+func codeDevFunc(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 
-	return &codeDev{config: config}, nil
+	return &codeDev{control: control}, nil
 }
 
-func (self codeDev) Results() processor.ProcessConfig {
-	return self.config
+func (self codeDev) Results() processor.ProcessControl {
+	return self.control
 }
 
 func (self *codeDev) Process() error {
 
+	defer func() {
+		if err := self.teardown(); err != nil {
+			// this is bad...
+			// we should probably print a pretty message explaining that the app
+			// was left in a bad state and needs to be reset
+			return
+		}
+	}()
+
 	if err := self.setup(); err != nil {
 		// todo: how to display this?
-		goto CLEANUP
+		return err
 	}
 
 	if err := self.runConsole(); err != nil {
 		// todo: how to display this?
-		goto CLEANUP
-	}
-
-CLEANUP:
-
-	if err := self.teardown(); err != nil {
-		// this is bad...
-		// we should probably print a pretty message explaining that the app
-		// was left in a bad state and needs to be reset
 		return err
 	}
 
@@ -78,11 +77,11 @@ func (self *codeDev) setup() error {
 	locker.LocalLock()
 	defer locker.LocalUnlock()
 
-	if running := isDevRunning(); running == false {
+	if err := self.loadBoxfile(); err != nil {
+		return err
+	}
 
-		if err := self.loadBoxfile(); err != nil {
-			return err
-		}
+	if running := isDevRunning(); running == false {
 
 		if err := self.setImage(); err != nil {
 			return err
@@ -136,7 +135,7 @@ func (self *codeDev) teardown() error {
 // loadBoxfile loads the build boxfile from the database
 func (self *codeDev) loadBoxfile() error {
 
-	if err := data.Get(util.AppName() + "_meta", "build_boxfile", &self.boxfile); err != nil {
+	if err := data.Get(util.AppName()+"_meta", "build_boxfile", &self.boxfile); err != nil {
 		return err
 	}
 
@@ -158,15 +157,14 @@ func (self *codeDev) setImage() error {
 
 // downloadImage downloads the dev docker image
 func (self *codeDev) downloadImage() error {
-	// Create a pipe to for the JSONMessagesStream to read from
-	// pr, pw := io.Pipe()
-	prefix := fmt.Sprintf("%s+ Pulling %s -", stylish.GenerateNestedPrefix(self.config.DisplayLevel), self.image)
-  // go print.DisplayJSONMessagesStream(pr, os.Stdout, os.Stdout.Fd(), true, prefix, nil)
-	if _, err := docker.ImagePull(self.image, &print.DockerPercentDisplay{Prefix: prefix}); err != nil {
-		return err
-	}
-  fmt.Print(stylish.ProcessEnd())
+	if !docker.ImageExists(self.image) {
+		prefix := fmt.Sprintf("%s+ Pulling %s -", stylish.GenerateNestedPrefix(self.control.DisplayLevel+1), self.image)
+		_, err := docker.ImagePull(self.image, &print.DockerPercentDisplay{Prefix: prefix})
+		if err != nil {
+			return err
+		}
 
+	}
 	return nil
 }
 
@@ -194,7 +192,7 @@ func (self *codeDev) launchContainer() error {
 	appName := util.AppName()
 
 	config := docker.ContainerConfig{
-		Name:    fmt.Sprintf("%s-dev", appName),
+		Name:    fmt.Sprintf("nanobox-%s-dev", appName),
 		Image:   self.image, // this will need to be configurable some time
 		Network: "virt",
 		IP:      self.localIP.String(),
@@ -243,18 +241,18 @@ func (self *codeDev) removeContainer() error {
 
 // runUserHook runs the user hook in the dev container
 func (self *codeDev) runUserHook() error {
-	_, err := util.Exec(self.container.ID, "user", util.UserPayload(), os.Stdout)
+	_, err := util.Exec(self.container.ID, "user", util.UserPayload(), processor.ExecWriter())
 	return err
 }
 
 // runConsole will establish a console within the dev container
 func (self *codeDev) runConsole() error {
 
-	config := processor.ProcessConfig{
-		DevMode: self.config.DevMode,
-		Verbose: self.config.Verbose,
+	config := processor.ProcessControl{
+		DevMode: self.control.DevMode,
+		Verbose: self.control.Verbose,
 		Meta: map[string]string{
-			"name": "dev",
+			"name":        "dev",
 			"working_dir": self.cwd(),
 		},
 	}
@@ -283,17 +281,12 @@ func (self *codeDev) cwd() string {
 // devIsUnused returns true if the dev isn't being used by any other session
 func devIsUnused() bool {
 	count, err := counter.Get(util.AppName() + "_dev")
-
-	if count == 0 && err == nil {
-		return true
-	}
-
-	return false
+	return count == 0 && err == nil
 }
 
 // isDevRunning returns true if a service is already running
 func isDevRunning() bool {
-	name := fmt.Sprintf("%s-%s", util.AppName(), "dev")
+	name := fmt.Sprintf("nanobox-%s-%s", util.AppName(), "dev")
 
 	container, err := docker.GetContainer(name)
 

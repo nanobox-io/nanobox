@@ -6,19 +6,19 @@ import (
 )
 
 type logout struct {
-	config ProcessConfig
+	control ProcessControl
 }
 
 func init() {
 	Register("logout", logoutFunc)
 }
 
-func logoutFunc(conf ProcessConfig) (Processor, error) {
+func logoutFunc(conf ProcessControl) (Processor, error) {
 	return logout{conf}, nil
 }
 
-func (self logout) Results() ProcessConfig {
-	return self.config
+func (self logout) Results() ProcessControl {
+	return self.control
 }
 
 func (self logout) Process() error {

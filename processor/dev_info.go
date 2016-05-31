@@ -3,6 +3,7 @@ package processor
 import (
 	"fmt"
 	"os"
+	"encoding/json"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox/models"
@@ -11,30 +12,22 @@ import (
 )
 
 type info struct {
-	config ProcessConfig
+	control ProcessControl
 }
 
 func init() {
 	Register("dev_info", infoFunc)
 }
 
-func infoFunc(config ProcessConfig) (Processor, error) {
-	return info{config}, nil
+func infoFunc(control ProcessControl) (Processor, error) {
+	return info{control}, nil
 }
 
-func (self info) Results() ProcessConfig {
-	return self.config
+func (self info) Results() ProcessControl {
+	return self.control
 }
 
 func (self info) Process() error {
-	// setup the environment (boot vm)
-	err := Run("provider_setup", self.config)
-	if err != nil {
-		fmt.Println("provider_setup:", err)
-		lumber.Close()
-		os.Exit(1)
-	}
-
 	services, err := data.Keys(util.AppName())
 	if err != nil {
 		fmt.Println("data keys:", err)
@@ -46,9 +39,15 @@ func (self info) Process() error {
 		if service != "builds" {
 			svc := models.Service{}
 			data.Get(util.AppName(), service, &svc)
-			fmt.Printf("%+v\n", svc)
+			bytes, _ := json.MarshalIndent(svc, "", "  ")
+			fmt.Printf("%s\n", bytes)
 		}
 	}
+
+	envVars := models.EnvVars{}
+	data.Get(util.AppName()+"_meta", "env", &envVars)
+	bytes, _ := json.MarshalIndent(envVars, "", "  ")
+	fmt.Printf("%s\n", bytes)
 
 	return nil
 }

@@ -14,12 +14,13 @@ type User struct {
 }
 
 type Service struct {
-	ID         	string `json:"id"`
-	Name       	string `json:"name"`
-	ExternalIP 	string `json:"external_ip"`
-	InternalIP 	string `json:"internal_ip`
-	Plan      	Plan   `json:"plan"`
-	State 			string `json:"state"`
+	ID         string `json:"id"`
+	Name       string `json:"name"`
+	Type       string `json:"type"`
+	ExternalIP string `json:"external_ip"`
+	InternalIP string `json:"internal_ip`
+	Plan       Plan   `json:"plan"`
+	State      string `json:"state"`
 }
 
 func (p Plan) BehaviorPresent(b string) bool {

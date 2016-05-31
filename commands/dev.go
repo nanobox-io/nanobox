@@ -17,7 +17,7 @@ var (
 
 		PreRun: validCheck("provider"),
 		Run: func(ccmd *cobra.Command, args []string) {
-			processor.Run("dev", processor.DefaultConfig)
+			handleError(processor.Run("dev", processor.DefaultConfig))
 		},
 		// PostRun: halt,
 	}

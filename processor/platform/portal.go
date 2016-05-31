@@ -15,20 +15,20 @@ import (
 )
 
 type updatePortal struct {
-	config processor.ProcessConfig
+	control processor.ProcessControl
 }
 
 func init() {
 	processor.Register("update_portal", updatePortalFunc)
 }
 
-func updatePortalFunc(config processor.ProcessConfig) (processor.Processor, error) {
+func updatePortalFunc(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
-	return updatePortal{config}, nil
+	return updatePortal{control}, nil
 }
 
-func (self updatePortal) Results() processor.ProcessConfig {
-	return self.config
+func (self updatePortal) Results() processor.ProcessControl {
+	return self.control
 }
 
 func (self updatePortal) Process() error {
@@ -40,8 +40,7 @@ func (self updatePortal) Process() error {
 
 	pClient := portal.New(port.ExternalIP+":8443", "123")
 
-	// TODO: update portal
-	boxfile := boxfile.New([]byte(self.config.Meta["boxfile"]))
+	boxfile := boxfile.New([]byte(self.control.Meta["boxfile"]))
 
 	services := []portal.Service{}
 	routes := []portal.Route{}
@@ -53,7 +52,7 @@ func (self updatePortal) Process() error {
 			continue
 		}
 		for _, service := range self.buildService(boxfile.Node(node), service) {
-			if duplciateService(services, service) {
+			if duplicateService(services, service) {
 				if service.Port != 80 && service.Port != 443 {
 					fmt.Println("duplicate port:", service.Port)
 				}
@@ -118,21 +117,17 @@ func (self updatePortal) Process() error {
 	// send to pulse
 	err = pClient.UpdateServices(services)
 	if err != nil {
-		fmt.Println("update services", err)
-		fmt.Printf("%+v\n", services)
 		return err
 	}
 
 	err = pClient.UpdateRoutes(routes)
 	if err != nil {
-		fmt.Println("update routes", err)
-		fmt.Printf("%+v\n", routes)
 		return err
 	}
 	return nil
 }
 
-func duplciateService(services []portal.Service, service portal.Service) bool {
+func duplicateService(services []portal.Service, service portal.Service) bool {
 	if service.Port == 80 || service.Port == 443 {
 		return false
 	}

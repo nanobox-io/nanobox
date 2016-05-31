@@ -20,7 +20,7 @@ var (
 			if len(args) == 1 {
 				processor.DefaultConfig.Meta["alias"] = args[0]
 			}
-			processor.Run("deploy", processor.DefaultConfig)
+			handleError(processor.Run("deploy", processor.DefaultConfig))
 		},
 	}
 )

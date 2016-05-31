@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"runtime"
 	"path/filepath"
+	"runtime"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox-golang-stylish"
@@ -94,13 +94,13 @@ func (self Native) Start() error {
 func (self Native) HostShareDir() string {
 	dir := filepath.ToSlash(filepath.Join(util.GlobalDir(), "share"))
 	os.MkdirAll(dir, 0755)
-	return dir+"/"
+	return dir + "/"
 }
 
 func (self Native) HostMntDir() string {
 	dir := filepath.ToSlash(filepath.Join(util.GlobalDir(), "mnt"))
 	os.MkdirAll(dir, 0755)
-	return dir+"/"
+	return dir + "/"
 }
 
 // docker env should already be configured if docker is installed
@@ -173,7 +173,7 @@ func (self Native) hasMount(mount string) bool {
 		}
 		lumber.Debug("Error checking mount: %s", err)
 	}
-	if ((fi.Mode() & os.ModeSymlink) > 0) {
+	if (fi.Mode() & os.ModeSymlink) > 0 {
 		return true
 	}
 	return false

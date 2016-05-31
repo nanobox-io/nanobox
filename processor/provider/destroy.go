@@ -7,17 +7,17 @@ import (
 )
 
 type providerDestroy struct {
-	config processor.ProcessConfig
+	control processor.ProcessControl
 }
 
-func providerDestroyFunc(config processor.ProcessConfig) (processor.Processor, error) {
+func providerDestroyFunc(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 
-	return providerDestroy{config}, nil
+	return providerDestroy{control}, nil
 }
 
-func (self providerDestroy) Results() processor.ProcessConfig {
-	return self.config
+func (self providerDestroy) Results() processor.ProcessControl {
+	return self.control
 }
 
 func (self providerDestroy) Process() error {

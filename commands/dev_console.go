@@ -24,7 +24,7 @@ var (
 				return
 			}
 			processor.DefaultConfig.Meta["name"] = args[0]
-			processor.Run("dev_console", processor.DefaultConfig)
+			handleError(processor.Run("dev_console", processor.DefaultConfig))
 		},
 		// PostRun: halt,
 	}

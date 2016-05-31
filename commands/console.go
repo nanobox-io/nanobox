@@ -25,7 +25,7 @@ var (
 			}
 			processor.DefaultConfig.Meta["alias"] = app
 			processor.DefaultConfig.Meta["container"] = args[0]
-			processor.Run("console", processor.DefaultConfig)
+			handleError(processor.Run("console", processor.DefaultConfig))
 		},
 		// PostRun: halt,
 	}

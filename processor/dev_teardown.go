@@ -2,24 +2,24 @@ package processor
 
 import (
 	"github.com/nanobox-io/nanobox/util"
-	"github.com/nanobox-io/nanobox/util/locker"
 	"github.com/nanobox-io/nanobox/util/counter"
+	"github.com/nanobox-io/nanobox/util/locker"
 )
 
 type devTeardown struct {
-	config ProcessConfig
+	control ProcessControl
 }
 
 func init() {
 	Register("dev_teardown", devTeardownFunc)
 }
 
-func devTeardownFunc(config ProcessConfig) (Processor, error) {
-	return &devTeardown{config}, nil
+func devTeardownFunc(control ProcessControl) (Processor, error) {
+	return &devTeardown{control}, nil
 }
 
-func (self devTeardown) Results() ProcessConfig {
-	return self.config
+func (self devTeardown) Results() ProcessControl {
+	return self.control
 }
 
 func (self *devTeardown) Process() error {
@@ -35,7 +35,6 @@ func (self *devTeardown) Process() error {
 	return self.teardownProvider()
 }
 
-
 // teardownApp tears down the app when it's not being used
 func (self *devTeardown) teardownApp() error {
 
@@ -49,12 +48,12 @@ func (self *devTeardown) teardownApp() error {
 	if unused := appIsUnused(); unused == true {
 
 		// Stop the platform services
-		if err := Run("platform_stop", self.config); err != nil {
+		if err := Run("platform_stop", self.control); err != nil {
 			return err
 		}
 
 		// stop all data services
-		if err := Run("service_stop_all", self.config); err != nil {
+		if err := Run("service_stop_all", self.control); err != nil {
 			return err
 		}
 	}
@@ -75,7 +74,7 @@ func (self *devTeardown) teardownProvider() error {
 
 	if unused := providerIsUnused(); unused == true {
 		// stop the provider
-		if err := Run("provider_stop", self.config); err != nil {
+		if err := Run("provider_stop", self.control); err != nil {
 			return err
 		}
 	}
@@ -85,11 +84,11 @@ func (self *devTeardown) teardownProvider() error {
 // appIsUnused returns true if the app isn't being used by any other session
 func appIsUnused() bool {
 	count, err := counter.Get(util.AppName())
-	return count == 0 && err == nil
+	return err == nil && count == 0
 }
 
 // providerIsUnused returns true if the provider is currently not being used
 func providerIsUnused() bool {
 	count, err := counter.Get("provider")
-	return count == 0 && err == nil
+	return err == nil && count == 0
 }

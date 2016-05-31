@@ -2,28 +2,28 @@ package processor
 
 import (
 	"github.com/nanobox-io/nanobox/util"
-	"github.com/nanobox-io/nanobox/util/locker"
 	"github.com/nanobox-io/nanobox/util/counter"
+	"github.com/nanobox-io/nanobox/util/locker"
 )
 
 type devSetup struct {
-	config 				ProcessConfig
+	control ProcessControl
 }
 
 func init() {
 	Register("dev_setup", devSetupFunc)
 }
 
-func devSetupFunc(config ProcessConfig) (Processor, error) {
-	// config.Meta["devSetup-config"]
-	// do some config validation
+func devSetupFunc(control ProcessControl) (Processor, error) {
+	// control.Meta["devSetup-control"]
+	// do some control validation
 	// check on the meta for the flags and make sure they work
 
-	return &devSetup{config: config}, nil
+	return &devSetup{control: control}, nil
 }
 
-func (self devSetup) Results() ProcessConfig {
-	return self.config
+func (self devSetup) Results() ProcessControl {
+	return self.control
 }
 
 func (self *devSetup) Process() error {
@@ -33,7 +33,6 @@ func (self *devSetup) Process() error {
 
 	return self.setupApp()
 }
-
 
 // setupProvider sets up the provider
 func (self *devSetup) setupProvider() error {
@@ -46,7 +45,7 @@ func (self *devSetup) setupProvider() error {
 	locker.GlobalLock()
 	defer locker.GlobalUnlock()
 
-	return Run("provider_setup", self.config)
+	return Run("provider_setup", self.control)
 }
 
 // setupApp sets up the app plaftorm and data services
@@ -61,10 +60,10 @@ func (self *devSetup) setupApp() error {
 	defer locker.LocalUnlock()
 
 	// clean up after any possible failures in a previous deploy
-	if err := Run("service_clean", self.config); err != nil {
+	if err := Run("service_clean", self.control); err != nil {
 		return err
 	}
 
 	// setup the platform services
-	return Run("platform_setup", self.config)
+	return Run("platform_setup", self.control)
 }

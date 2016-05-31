@@ -15,7 +15,7 @@ import (
 )
 
 type console struct {
-	config ProcessConfig
+	control ProcessControl
 }
 
 var (
@@ -28,19 +28,19 @@ func init() {
 	Register("console", consoleFunc)
 }
 
-func consoleFunc(config ProcessConfig) (Processor, error) {
-	return console{config}, nil
+func consoleFunc(control ProcessControl) (Processor, error) {
+	return console{control}, nil
 }
 
-func (self console) Results() ProcessConfig {
-	return self.config
+func (self console) Results() ProcessControl {
+	return self.control
 }
 
 func (self console) Process() error {
 	var err error
 	// get a key from odin
-	app := getAppID(self.config.Meta["alias"])
-	key, location, container, err = production_api.EstablishConsole(app, self.config.Meta["container"])
+	app := getAppID(self.control.Meta["alias"])
+	key, location, container, err = production_api.EstablishConsole(app, self.control.Meta["container"])
 	if err != nil {
 		return err
 	}
@@ -52,6 +52,7 @@ func (self console) Process() error {
 		return err
 	}
 
+	// connect to remote machine
 	remoteConn, bytes, err := connect(req)
 	if err != nil {
 		fmt.Println(err)
@@ -60,7 +61,7 @@ func (self console) Process() error {
 	defer remoteConn.Close()
 	stdIn, stdOut, _ := term.StdStreams()
 
-	//
+	// establish file descriptors
 	stdInFD, isTerminal := term.GetFdInfo(stdIn)
 	stdOutFD, _ := term.GetFdInfo(stdOut)
 

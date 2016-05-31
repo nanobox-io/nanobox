@@ -2,82 +2,87 @@ package processor
 
 import (
 	"fmt"
-	"os"
 
-	"github.com/jcelliott/lumber"
+	"github.com/nanobox-io/nanobox-golang-stylish"
+	
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
 type devDestroy struct {
-	config ProcessConfig
+	control ProcessControl
 }
 
 func init() {
 	Register("dev_destroy", devDestroyFunc)
 }
 
-func devDestroyFunc(config ProcessConfig) (Processor, error) {
-	return devDestroy{config}, nil
+func devDestroyFunc(control ProcessControl) (Processor, error) {
+	return devDestroy{control}, nil
 }
 
-func (self devDestroy) Results() ProcessConfig {
-	return self.config
+func (self devDestroy) Results() ProcessControl {
+	return self.control
 }
 
 func (self devDestroy) Process() error {
 
-
-	// setup the environment (boot vm)
-	err := Run("provider_setup", self.config)
-	if err != nil {
-		fmt.Println("provider_setup:", err)
-		lumber.Close()
-		os.Exit(1)
+	if err := Run("dev_setup", self.control); err != nil {
+		return err
 	}
 
+	// remove all the services (platform/service/code)
+	if err := self.removeServices(); err != nil {
+		return err
+	}
 
-	// get all the services in the app
-	// and remove them
+	// potentially destroy the platform
+	if err := self.destroyPlatfrom(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// get all the services in the app
+// and remove them
+func (self devDestroy) removeServices() error {
 	services, err := data.Keys(util.AppName())
 	if err != nil {
-		fmt.Println("data keys:", err)
-		lumber.Close()
-		os.Exit(1)
+		return fmt.Errorf("data keys: %s", err.Error())
 	}
-
+	self.control.Display(stylish.Bullet("Removing Services"))
+	self.control.DisplayLevel++
 	for _, service := range services {
 		if service != "build" {
 			// svc := models.Service{}
 			// data.Get(util.AppName(), service, &svc)
-			self.config.Meta["name"] = service
-			err := Run("service_destroy", self.config)
+			self.control.Meta["name"] = service
+			err := Run("service_destroy", self.control)
 			if err != nil {
-				fmt.Println("remove service failure:", err)
-				lumber.Close()
-				os.Exit(1)
+				self.control.Display(stylish.Warning("one of the services did not uninstall:\n%s", err.Error()))
+				// continue on to the next one. 
+				// we should continue trying to remove services
 			}
 		}
-	}
+	}	
+	self.control.DisplayLevel--
+	return nil
+}
 
-	// if im the only app dont even worry about any of the service
-	// clean up just destroy the whole vm
+// if im the only app destroy the whole vm
+func (self devDestroy) destroyPlatfrom() error {
 	data.Delete("apps", util.AppName())
 	keys, err := data.Keys("apps")
 	if err != nil {
-		fmt.Println("get apps data failure:", err)
-		lumber.Close()
-		os.Exit(1)
+		return err
 	}
 	if len(keys) == 0 {
 		// if no other apps exist in container
-		err := Run("provider_destroy", self.config)
-		if err != nil {
-			fmt.Println("provider_setup:", err)
-			lumber.Close()
-			os.Exit(1)
+		if err := Run("provider_destroy", self.control); err != nil {
+			return err
 		}
-		return nil
 	}	
 	return nil
 }
+

@@ -3,7 +3,6 @@ package code
 import (
 	"encoding/json"
 	"fmt"
-	"strings"
 
 	"github.com/nanobox-io/nanobox-boxfile"
 
@@ -14,7 +13,7 @@ import (
 )
 
 type codeConfigure struct {
-	config processor.ProcessConfig
+	control processor.ProcessControl
 }
 
 type payload struct {
@@ -45,21 +44,21 @@ func init() {
 	processor.Register("code_configure", codeConfigureFunc)
 }
 
-func codeConfigureFunc(config processor.ProcessConfig) (processor.Processor, error) {
+func codeConfigureFunc(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 	// make sure i was given a name and image
-	if config.Meta["name"] == "" || config.Meta["boxfile"] == "" {
+	if control.Meta["name"] == "" || control.Meta["boxfile"] == "" {
 		return nil, missingImageOrName
 	}
 
-	return &codeConfigure{config: config}, nil
+	return &codeConfigure{control: control}, nil
 }
 
 func (self codeConfigure) startPayload() string {
-	boxfile := boxfile.New([]byte(self.config.Meta["boxfile"]))
+	boxfile := boxfile.New([]byte(self.control.Meta["boxfile"]))
 	pload := payload{
-		Config: boxfile.Node(self.config.Meta["name"]).Value("config"),
-		Start:  boxfile.Node(self.config.Meta["name"]).StringValue("start"),
+		Config: boxfile.Node(self.control.Meta["name"]).Value("config"),
+		Start:  boxfile.Node(self.control.Meta["name"]).StringValue("start"),
 	}
 
 	bytes, err := json.Marshal(pload)
@@ -72,26 +71,26 @@ func (self codeConfigure) startPayload() string {
 func (self *codeConfigure) configurePayload() (string, error) {
 
 	me := models.Service{}
-	err := data.Get(util.AppName(), self.config.Meta["name"], &me)
-	boxfile := boxfile.New([]byte(self.config.Meta["boxfile"]))
+	err := data.Get(util.AppName(), self.control.Meta["name"], &me)
+	boxfile := boxfile.New([]byte(self.control.Meta["boxfile"]))
 
 	logvac := models.Service{}
 	data.Get(util.AppName(), "logvac", &logvac)
 
 	pload := payload{
 		LogvacHost: logvac.InternalIP,
-		Config:     boxfile.Node(self.config.Meta["name"]).Value("config"),
+		Config:     boxfile.Node(self.control.Meta["name"]).Value("config"),
 		Component: component{
 			Name: "whydoesthismatter",
-			UID:  self.config.Meta["name"],
+			UID:  self.control.Meta["name"],
 			ID:   me.ID,
 		},
 		Mounts:       self.mounts(),
-		WritableDirs: boxfile.Node(self.config.Meta["name"]).Value("writable_dirs"),
+		WritableDirs: boxfile.Node(self.control.Meta["name"]).Value("writable_dirs"),
 		Transform:    boxfile.Node("code.deploy").Value("transform"),
 		Env:          self.env(),
-		LogWatches:   boxfile.Node(self.config.Meta["name"]).Value("log_watch"),
-		Start:        boxfile.Node(self.config.Meta["name"]).Value("start"),
+		LogWatches:   boxfile.Node(self.control.Meta["name"]).Value("log_watch"),
+		Start:        boxfile.Node(self.control.Meta["name"]).Value("start"),
 	}
 
 	bytes, err := json.Marshal(pload)
@@ -99,8 +98,8 @@ func (self *codeConfigure) configurePayload() (string, error) {
 }
 
 func (self *codeConfigure) mounts() []mount {
-	boxfile := boxfile.New([]byte(self.config.Meta["boxfile"]))
-	boxNetworkDirs := boxfile.Node(self.config.Meta["name"]).Node("network_dirs")
+	boxfile := boxfile.New([]byte(self.control.Meta["boxfile"]))
+	boxNetworkDirs := boxfile.Node(self.control.Meta["name"]).Node("network_dirs")
 
 	m := []mount{}
 	for _, node := range boxNetworkDirs.Nodes() {
@@ -127,49 +126,32 @@ func (self *codeConfigure) mounts() []mount {
 func (self *codeConfigure) env() map[string]string {
 	envVars := models.EnvVars{}
 	data.Get(util.AppName()+"_meta", "env", &envVars)
-
-	serviceNames, _ := data.Keys(util.AppName())
-	for _, serviceName := range serviceNames {
-		// only look at data services
-		if strings.HasPrefix(serviceName, "data") {
-			envName := strings.ToUpper(strings.Replace(serviceName, ".", "_", -1))
-			service := models.Service{}
-			users := []string{}
-			data.Get(util.AppName(), serviceName, &service)
-			envVars[envName+"_HOST"] = service.InternalIP
-			for _, user := range service.Plan.Users {
-				users = append(users, user.Username)
-				envVars[fmt.Sprintf("%s_%s_PW", envName, strings.ToUpper(user.Username))] = user.Password
-			}
-			envVars[envName+"_USERS"] = strings.Join(users, " ")
-		}
-
-	}
 	return envVars
 }
 
-func (self *codeConfigure) Results() processor.ProcessConfig {
-	return self.config
+func (self *codeConfigure) Results() processor.ProcessControl {
+	return self.control
 }
 
 func (self *codeConfigure) Process() error {
 
 	// get the service from the database
 	service := models.Service{}
-	err := data.Get(util.AppName(), self.config.Meta["name"], &service)
+	err := data.Get(util.AppName(), self.control.Meta["name"], &service)
 	if err != nil {
 		// cannot start a service that wasnt setup (ie saved in the database)
 		return err
 	}
 
-	fmt.Println("-> configuring", self.config.Meta["name"])
+	fmt.Println("-> configuring", self.control.Meta["name"])
 
+	// quit now if the service was activated already
 	if service.State == "active" {
 		return nil
 	}
 
 	// run fetch build command
-	_, err = util.Exec(service.ID, "fetch", fmt.Sprintf(`{"build":"%s","warehouse":"%s","warehouse_token":"%s"}`, self.config.Meta["build_id"], self.config.Meta["warehouse_url"], self.config.Meta["warehouse_token"]), nil)
+	_, err = util.Exec(service.ID, "fetch", fmt.Sprintf(`{"build":"%s","warehouse":"%s","warehouse_token":"%s"}`, self.control.Meta["build_id"], self.control.Meta["warehouse_url"], self.control.Meta["warehouse_token"]), processor.ExecWriter())
 	if err != nil {
 		return err
 	}
@@ -177,7 +159,6 @@ func (self *codeConfigure) Process() error {
 	// run configure command
 	payload, err := self.configurePayload()
 	if err != nil {
-		fmt.Println("error building configure payload", err)
 		return err
 	}
 	_, err = util.Exec(service.ID, "configure", payload, nil)
@@ -192,7 +173,7 @@ func (self *codeConfigure) Process() error {
 	}
 
 	service.State = "active"
-	err = data.Put(util.AppName(), self.config.Meta["name"], service)
+	err = data.Put(util.AppName(), self.control.Meta["name"], service)
 	if err != nil {
 		return err
 	}

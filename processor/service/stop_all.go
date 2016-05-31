@@ -1,30 +1,32 @@
 package service
 
 import (
-	"fmt"
-	
+	"github.com/nanobox-io/nanobox-golang-stylish"
+
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
 type serviceStopAll struct {
-	config processor.ProcessConfig
+	control processor.ProcessControl
 }
 
 func init() {
 	processor.Register("service_stop_all", serviceStopAllFunc)
 }
 
-func serviceStopAllFunc(config processor.ProcessConfig) (processor.Processor, error) {
-	return serviceStopAll{config: config}, nil
+func serviceStopAllFunc(control processor.ProcessControl) (processor.Processor, error) {
+	return serviceStopAll{control: control}, nil
 }
 
-func (self serviceStopAll) Results() processor.ProcessConfig {
-	return self.config
+func (self serviceStopAll) Results() processor.ProcessControl {
+	return self.control
 }
 
 func (self serviceStopAll) Process() error {
+
+	self.control.Display(stylish.Bullet("Stopping All Services"))
 
 	if err := self.stopServices(); err != nil {
 		return err
@@ -52,18 +54,17 @@ func (self serviceStopAll) stopServices() error {
 // stopService stops a service
 func (self serviceStopAll) stopService(uid string) error {
 
-	config := processor.ProcessConfig{
-		DevMode: self.config.DevMode,
-		Verbose: self.config.Verbose,
+	config := processor.ProcessControl{
+		DevMode: self.control.DevMode,
+		Verbose: self.control.Verbose,
+		DisplayLevel: self.control.DisplayLevel+1,
 		Meta: map[string]string{
-			"label": 	uid,
-			"name":  	uid,
+			"name":  uid,
 		},
 	}
 
 	// provision
 	if err := processor.Run("service_stop", config); err != nil {
-		fmt.Println(fmt.Sprintf("%s_stop:", uid), err)
 		return err
 	}
 

@@ -1,7 +1,6 @@
 {
 	"ImportPath": "github.com/nanobox-io/nanobox",
 	"GoVersion": "go1.6",
-<<<<<<< HEAD
 	"GodepVersion": "v63",
 	"Deps": [
 		{
@@ -244,7 +243,7 @@
 		},
 		{
 			"ImportPath": "github.com/nanobox-io/nanobox-golang-stylish",
-			"Rev": "1f0567758fc3099e7a195e41f76810018e643c91"
+			"Rev": "01d35e938300277936ffbefc004525b95a836dd2"
 		},
 		{
 			"ImportPath": "github.com/nanopack/mist/clients",

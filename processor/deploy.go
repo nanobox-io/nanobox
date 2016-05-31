@@ -2,79 +2,78 @@ package processor
 
 import (
 	"fmt"
-	"os"
 
-	"github.com/jcelliott/lumber"
-	// "github.com/nanobox-io/nanobox-boxfile"
-	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
-	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/production_api"
 )
 
 type deploy struct {
-	config ProcessConfig
+	control ProcessControl
 }
 
 func init() {
 	Register("deploy", deployFunc)
 }
 
-func deployFunc(config ProcessConfig) (Processor, error) {
-	// config.Meta["deploy-config"]
-	// do some config validation
+func deployFunc(control ProcessControl) (Processor, error) {
+	// control.Meta["deploy-control"]
+	// do some control validation
 	// check on the meta for the flags and make sure they work
 
-	return deploy{config}, nil
+	return &deploy{control}, nil
 }
 
-func (self deploy) Results() ProcessConfig {
-	return self.config
+func (self deploy) Results() ProcessControl {
+	return self.control
 }
 
-func (self deploy) Process() error {
+func (self *deploy) Process() error {
 	// setup the environment (boot vm)
-	err := Run("provider_setup", self.config)
+	err := Run("provider_setup", self.control)
 	if err != nil {
-		fmt.Println("provider_setup:", err)
-		lumber.Close()
-		os.Exit(1)
+		return err
 	}
 
+
+	if err := self.setWarehouseToken(); err != nil {
+		return err
+	}
+
+	if err := self.publishCode(); err != nil {
+		return err
+	}
+
+	// tell odin what happened
+	return production_api.Deploy(self.control.Meta["app_id"], self.control.Meta["build_id"], self.control.Meta["boxfile"], self.control.Meta["message"])
+}
+
+func (self *deploy) setWarehouseToken() error {
 	// get remote hoarder credentials
-	appId := getAppID(self.config.Meta["alias"])
-	self.config.Meta["build_id"] = util.RandomString(30)
-	warehouseToken, warehouseUrl, err := production_api.GetWarehouse(appId)
-	self.config.Meta["warehouse_token"] = warehouseToken 
-	self.config.Meta["warehouse_url"] = warehouseUrl
+	self.control.Meta["app_id"] = getAppID(self.control.Meta["alias"])
+	self.control.Meta["build_id"] = util.RandomString(30)
+	warehouseToken, warehouseUrl, err := production_api.GetWarehouse(self.control.Meta["app_id"])
 	if err != nil {
-		fmt.Println("unable to communicate with odin:", err)
-		os.Exit(1)
+		return err
 	}
+	self.control.Meta["warehouse_token"] = warehouseToken
+	self.control.Meta["warehouse_url"] = warehouseUrl
+	return nil
+}
 
-	// publish code
-	publishProcessor, err := Build("code_publish", self.config)
+func (self *deploy) publishCode() error {
+	publishProcessor, err := Build("code_publish", self.control)
 	if err != nil {
-		fmt.Println("code_publish:", err)
-		os.Exit(1)
+		return err
 	}
-	err = publishProcessor.Process()
-	if err != nil {
-		fmt.Println("code_publish:", err)
-		os.Exit(1)
+	
+	if err := publishProcessor.Process(); err != nil {
+		return err
 	}
 	publishResult := publishProcessor.Results()
 	if publishResult.Meta["boxfile"] == "" {
-		fmt.Println("boxfile is empty!")
-		os.Exit(1)
+		return fmt.Errorf("the boxfile from publish was blank")
 	}
 	// boxfile := boxfile.New([]byte(publishResult.Meta["boxfile"]))
-	self.config.Meta["boxfile"] = publishResult.Meta["boxfile"]
-
-	// get the appid for the deploying app
-	link := models.AppLinks{}
-	data.Get(util.AppName(), "links", &link)
-
-	// tell odin what happened
-	return production_api.Deploy(link["default"], self.config.Meta["build_id"], self.config.Meta["boxfile"], self.config.Meta["message"])
+	self.control.Meta["boxfile"] = publishResult.Meta["boxfile"]
+	return nil
 }

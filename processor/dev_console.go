@@ -13,35 +13,35 @@ import (
 )
 
 type devConsole struct {
-	config ProcessConfig
+	control ProcessControl
 }
 
 func init() {
 	Register("dev_console", devConsoleFunc)
 }
 
-func devConsoleFunc(conf ProcessConfig) (Processor, error) {
+func devConsoleFunc(conf ProcessControl) (Processor, error) {
 	return devConsole{conf}, nil
 }
 
-func (self devConsole) Results() ProcessConfig {
-	return self.config
+func (self devConsole) Results() ProcessControl {
+	return self.control
 }
 
 func (self devConsole) Process() error {
 	// setup the environment (boot vm)
-	err := Run("provider_setup", self.config)
+	err := Run("provider_setup", self.control)
 	if err != nil {
 		fmt.Println("provider_setup:", err)
 		lumber.Close()
 		os.Exit(1)
 	}
 
-	name := self.config.Meta["name"]
+	name := self.control.Meta["name"]
 	if name == "" {
 		name = "build"
 	}
-	container, err := docker.GetContainer(fmt.Sprintf("%s-%s", util.AppName(), name))
+	container, err := docker.GetContainer(fmt.Sprintf("nanobox-%s-%s", util.AppName(), name))
 	if err == nil {
 		name = container.ID
 	}
@@ -49,11 +49,11 @@ func (self devConsole) Process() error {
 	command := []string{"exec", "-u", "gonano", "-it", name, "/bin/bash"}
 
 	switch {
-	case self.config.Meta["working_dir"] != "":
-		cd := fmt.Sprintf("cd %s; exec \"${SHELL:-sh}\"", self.config.Meta["working_dir"])
+	case self.control.Meta["working_dir"] != "":
+		cd := fmt.Sprintf("cd %s; exec \"${SHELL:-sh}\"", self.control.Meta["working_dir"])
 		command = append(command, "-c", cd)
-	case self.config.Meta["command"] != "":
-		command = append(command, "-c", self.config.Meta["command"])
+	case self.control.Meta["command"] != "":
+		command = append(command, "-c", self.control.Meta["command"])
 	}
 
 	cmd := exec.Command("docker", command...)

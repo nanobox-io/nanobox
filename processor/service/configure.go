@@ -2,7 +2,6 @@ package service
 
 import (
 	"encoding/json"
-	"fmt"
 	"errors"
 
 	"github.com/nanobox-io/nanobox-boxfile"
@@ -15,7 +14,7 @@ import (
 )
 
 type serviceConfigure struct {
-	config processor.ProcessConfig
+	control  processor.ProcessControl
 	service models.Service
 }
 
@@ -48,8 +47,8 @@ func init() {
 	processor.Register("service_configure", serviceConfigureFunc)
 }
 
-func (self serviceConfigure) Results() processor.ProcessConfig {
-	return self.config
+func (self serviceConfigure) Results() processor.ProcessControl {
+	return self.control
 }
 
 func (self serviceConfigure) Process() error {
@@ -86,21 +85,21 @@ func (self serviceConfigure) Process() error {
 	return nil
 }
 
-func serviceConfigureFunc(config processor.ProcessConfig) (processor.Processor, error) {
+func serviceConfigureFunc(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 
-	return serviceConfigure{config: config}, nil
+	return serviceConfigure{control: control}, nil
 }
 
 func (self serviceConfigure) configurePayload() string {
 	me := models.Service{}
-	data.Get(util.AppName(), self.config.Meta["name"], &me)
+	data.Get(util.AppName(), self.control.Meta["name"], &me)
 
 	logvac := models.Service{}
 	data.Get(util.AppName(), "logvac", &logvac)
 
-	boxfile := boxfile.New([]byte(self.config.Meta["boxfile"]))
-	boxConfig := boxfile.Node(self.config.Meta["name"]).Node("config")
+	boxfile := boxfile.New([]byte(self.control.Meta["boxfile"]))
+	boxConfig := boxfile.Node(self.control.Meta["name"]).Node("config")
 
 	pload := configPayload{
 		LogvacHost: logvac.InternalIP,
@@ -113,7 +112,7 @@ func (self serviceConfigure) configurePayload() string {
 		},
 		Component: component{
 			Name: "whydoesthismatter",
-			UID:  self.config.Meta["name"],
+			UID:  self.control.Meta["name"],
 			ID:   me.ID,
 		},
 		Users: me.Plan.Users,
@@ -121,7 +120,7 @@ func (self serviceConfigure) configurePayload() string {
 	if pload.Users == nil {
 		pload.Users = []models.User{}
 	}
-	switch self.config.Meta["name"] {
+	switch self.control.Meta["name"] {
 	case "portal", "logvac", "hoarder", "mist":
 		pload.Config["token"] = "123"
 	}
@@ -133,11 +132,11 @@ func (self serviceConfigure) configurePayload() string {
 }
 
 func (self serviceConfigure) startPayload() string {
-	boxfile := boxfile.New([]byte(self.config.Meta["boxfile"]))
-	boxConfig := boxfile.Node(self.config.Meta["name"]).Node("config")
+	boxfile := boxfile.New([]byte(self.control.Meta["boxfile"]))
+	boxConfig := boxfile.Node(self.control.Meta["name"]).Node("config")
 
 	pload := startPayload{boxConfig.Parsed}
-	switch self.config.Meta["name"] {
+	switch self.control.Meta["name"] {
 	case "portal", "logvac", "hoarder", "mist":
 		pload.Config["token"] = "123"
 	}
@@ -151,7 +150,7 @@ func (self serviceConfigure) startPayload() string {
 // validateMeta validates that the image is provided
 func (self *serviceConfigure) validateMeta() error {
 	// make sure i was given a name and image
-	if self.config.Meta["name"] == "" {
+	if self.control.Meta["name"] == "" {
 		return errors.New("missing name")
 	}
 
@@ -161,7 +160,7 @@ func (self *serviceConfigure) validateMeta() error {
 // loadService loads the service from the database
 func (self *serviceConfigure) loadService() error {
 	// get the service from the database
-	err := data.Get(util.AppName(), self.config.Meta["name"], &self.service)
+	err := data.Get(util.AppName(), self.control.Meta["name"], &self.service)
 	if err != nil {
 		// cannot start a service that wasnt setup (ie saved in the database)
 		return err
@@ -172,8 +171,9 @@ func (self *serviceConfigure) loadService() error {
 
 // runUpdate will run the update hook in the container
 func (self *serviceConfigure) runUpdate() error {
+	self.control.Info(stylish.SubBullet("Updating services..."))
+
 	// run update
-	fmt.Print(stylish.NestedBullet("Updating services...", self.config.DisplayLevel))
 	_, err := util.Exec(self.service.ID, "update", "{}", nil)
 	return err
 }
@@ -181,7 +181,7 @@ func (self *serviceConfigure) runUpdate() error {
 // runConfigure will run the configure hook in the container
 func (self *serviceConfigure) runConfigure() error {
 	// run update
-	fmt.Print(stylish.NestedBullet("Configuring services...", self.config.DisplayLevel))
+	self.control.Info(stylish.SubBullet("Configuring services..."))
 	_, err := util.Exec(self.service.ID, "configure", self.configurePayload(), nil)
 	return err
 }
@@ -189,7 +189,7 @@ func (self *serviceConfigure) runConfigure() error {
 // runStart will run the configure hook in the container
 func (self *serviceConfigure) runStart() error {
 	// run update
-	fmt.Print(stylish.NestedBullet("Starting services...", self.config.DisplayLevel))
+	self.control.Info(stylish.SubBullet("Starting services..."))
 	_, err := util.Exec(self.service.ID, "start", self.startPayload(), nil)
 	return err
 }
@@ -197,7 +197,7 @@ func (self *serviceConfigure) runStart() error {
 // persistService saves the service entry to the database
 func (self *serviceConfigure) persistService() error {
 	self.service.State = "active"
-	err := data.Put(util.AppName(), self.config.Meta["name"], &self.service)
+	err := data.Put(util.AppName(), self.control.Meta["name"], &self.service)
 	if err != nil {
 		return err
 	}

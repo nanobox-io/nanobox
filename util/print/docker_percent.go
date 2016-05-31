@@ -63,20 +63,20 @@ func (self *DockerPercentPart) update(status Status) {
 
 // {"status":"Downloading","progressDetail":{"current":676,"total":755},"progress":"[============================================\u003e      ]    676 B/755 B","id":"166102ec41af"}
 type Status struct {
-	Status string `json:"status,omitempty"`
-	ID     string `json:"id,omitempty"`
+	Status  string  `json:"status,omitempty"`
+	ID      string  `json:"id,omitempty"`
 	Details Details `json:"progressDetail"`
 }
 
 type Details struct {
 	Current int `json:"current"`
-	Total int `json:"total"`
+	Total   int `json:"total"`
 }
 
 type DockerPercentDisplay struct {
-	Prefix     string
-	parts      map[string]DockerPercentPart
-	leftover   []byte
+	Prefix   string
+	parts    map[string]DockerPercentPart
+	leftover []byte
 }
 
 func (self *DockerPercentDisplay) show() string {
@@ -92,7 +92,7 @@ func (self *DockerPercentDisplay) show() string {
 	if count == 0 {
 		count = 1
 	}
-	return fmt.Sprintf("Downloaded: %3d%% Extracted: %3d%% Total: %3d%%", downloaded/count, extracted/count, (downloaded/count + extracted/count)/2)
+	return fmt.Sprintf("Downloaded: %3d%% Extracted: %3d%% Total: %3d%%", downloaded/count, extracted/count, (downloaded/count+extracted/count)/2)
 }
 
 func (self *DockerPercentDisplay) Write(data []byte) (int, error) {
@@ -129,6 +129,7 @@ func (self *DockerPercentDisplay) Write(data []byte) (int, error) {
 		fmt.Fprintf(os.Stdout, "%c[2K\r", 27)
 		fmt.Printf("%s %s", self.Prefix, self.show())
 		if strings.HasPrefix(status.Status, "Status:") {
+			fmt.Printf("\n")
 			// maybe we want to display the status line here
 		}
 	}

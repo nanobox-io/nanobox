@@ -8,32 +8,32 @@ import (
 )
 
 type login struct {
-	config ProcessConfig
+	control ProcessControl
 }
 
 func init() {
 	Register("login", loginFunc)
 }
 
-func loginFunc(conf ProcessConfig) (Processor, error) {
+func loginFunc(conf ProcessControl) (Processor, error) {
 	return login{conf}, nil
 }
 
-func (self login) Results() ProcessConfig {
-	return self.config
+func (self login) Results() ProcessControl {
+	return self.control
 }
 
 func (self login) Process() error {
 	// request username and password
-	if self.config.Meta["username"] == "" {
-		self.config.Meta["username"] = print.Prompt("Username:")
+	if self.control.Meta["username"] == "" {
+		self.control.Meta["username"] = print.Prompt("Username:")
 	}
 
-	if self.config.Meta["password"] == "" {
-		self.config.Meta["password"] = print.Password("Password:")
+	if self.control.Meta["password"] == "" {
+		self.control.Meta["password"] = print.Password("Password:")
 	}
 	// ask odin to verify
-	token, err := production_api.Auth(self.config.Meta["username"], self.config.Meta["password"])
+	token, err := production_api.Auth(self.control.Meta["username"], self.control.Meta["password"])
 	if err != nil {
 		return err
 	}

@@ -10,25 +10,25 @@ import (
 )
 
 type tunnel struct {
-	config ProcessConfig
+	control ProcessControl
 }
 
 func init() {
 	Register("tunnel", tunnelFunc)
 }
 
-func tunnelFunc(config ProcessConfig) (Processor, error) {
-	return tunnel{config}, nil
+func tunnelFunc(control ProcessControl) (Processor, error) {
+	return tunnel{control}, nil
 }
 
-func (self tunnel) Results() ProcessConfig {
-	return self.config
+func (self tunnel) Results() ProcessControl {
+	return self.control
 }
 
 func (self tunnel) Process() error {
 	var err error
-	app := getAppID(self.config.Meta["alias"])
-	key, location, container, err = production_api.EstablishTunnel(app, self.config.Meta["container"])
+	app := getAppID(self.control.Meta["alias"])
+	key, location, container, err = production_api.EstablishTunnel(app, self.control.Meta["container"])
 	if err != nil {
 		return err
 	}
@@ -49,7 +49,7 @@ func (self tunnel) Process() error {
 	}
 	defer conn.Close()
 
-	serv, err := net.Listen("tcp4", ":"+self.config.Meta["port"])
+	serv, err := net.Listen("tcp4", ":"+self.control.Meta["port"])
 	if err != nil {
 		fmt.Println(err)
 		return err

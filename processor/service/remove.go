@@ -1,8 +1,8 @@
 package service
 
 import (
-	"net"
 	"errors"
+	"net"
 
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox/models"
@@ -14,8 +14,8 @@ import (
 )
 
 type serviceRemove struct {
-	config 	processor.ProcessConfig
-	fail   	bool
+	control  processor.ProcessControl
+	fail    bool
 	service models.Service
 }
 
@@ -23,12 +23,12 @@ func init() {
 	processor.Register("service_remove", serviceRemoveFunc)
 }
 
-func serviceRemoveFunc(config processor.ProcessConfig) (processor.Processor, error) {
-	return &serviceRemove{config: config}, nil
+func serviceRemoveFunc(control processor.ProcessControl) (processor.Processor, error) {
+	return &serviceRemove{control: control}, nil
 }
 
-func (self serviceRemove) Results() processor.ProcessConfig {
-	return self.config
+func (self serviceRemove) Results() processor.ProcessControl {
+	return self.control
 }
 
 func (self *serviceRemove) Process() error {
@@ -67,7 +67,7 @@ func (self *serviceRemove) Process() error {
 
 // validateName validates a name was provided in the metadata
 func (self *serviceRemove) validateName() error {
-	if self.config.Meta["name"] == "" {
+	if self.control.Meta["name"] == "" {
 		return errors.New("missing name")
 	}
 
@@ -76,7 +76,7 @@ func (self *serviceRemove) validateName() error {
 
 // loadService loads the service from the database
 func (self *serviceRemove) loadService() error {
-	name := self.config.Meta["name"]
+	name := self.control.Meta["name"]
 	if err := data.Get(util.AppName(), name, &self.service); err != nil {
 		return err
 	}
@@ -138,7 +138,7 @@ func (self *serviceRemove) removeContainer() error {
 // deleteServices removes the service entry from the database
 func (self *serviceRemove) deleteService() error {
 
-	name := self.config.Meta["name"]
+	name := self.control.Meta["name"]
 	if err := data.Delete(util.AppName(), name); err != nil {
 		return err
 	}

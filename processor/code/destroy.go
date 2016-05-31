@@ -13,30 +13,30 @@ import (
 )
 
 type codeDestroy struct {
-	config processor.ProcessConfig
+	control processor.ProcessControl
 }
 
 func init() {
 	processor.Register("code_destroy", codeDestroyFunc)
 }
 
-func codeDestroyFunc(config processor.ProcessConfig) (processor.Processor, error) {
+func codeDestroyFunc(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
-	if config.Meta["name"] == "" {
+	if control.Meta["name"] == "" {
 		return nil, missingImageOrName
 	}
-	return &codeDestroy{config: config}, nil
+	return &codeDestroy{control: control}, nil
 }
 
-func (self codeDestroy) Results() processor.ProcessConfig {
-	return self.config
+func (self codeDestroy) Results() processor.ProcessControl {
+	return self.control
 }
 
 func (self *codeDestroy) Process() error {
 
 	// get the service from the database
 	service := models.Service{}
-	err := data.Get(util.AppName(), self.config.Meta["name"], &service)
+	err := data.Get(util.AppName(), self.control.Meta["name"], &service)
 	if err != nil {
 		// cant find service
 		return err
@@ -68,5 +68,5 @@ func (self *codeDestroy) Process() error {
 	}
 
 	// save the service
-	return data.Delete(util.AppName(), self.config.Meta["name"])
+	return data.Delete(util.AppName(), self.control.Meta["name"])
 }

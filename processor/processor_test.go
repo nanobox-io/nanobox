@@ -1,9 +1,9 @@
 package processor_test
 
 import (
-	"testing"
-	"os"
 	"fmt"
+	"os"
+	"testing"
 
 	"github.com/nanobox-io/nanobox/processor"
 	_ "github.com/nanobox-io/nanobox/processor/code"
@@ -30,17 +30,16 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-
 func (self testProcessor) Process() error {
 	self.run = true
 	return nil
 }
 
-func (self testProcessor) Results() processor.ProcessConfig {
-	return processor.ProcessConfig{}
+func (self testProcessor) Results() processor.ProcessControl {
+	return processor.ProcessControl{}
 }
 
-func testProcessBuilder(p processor.ProcessConfig) (processor.Processor, error) {
+func testProcessBuilder(p processor.ProcessControl) (processor.Processor, error) {
 	return testProcessor{}, nil
 }
 

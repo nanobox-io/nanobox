@@ -18,7 +18,7 @@ var (
 		Run: func(ccmd *cobra.Command, args []string) {
 			processor.DefaultConfig.Meta["username"] = username
 			processor.DefaultConfig.Meta["password"] = password
-			processor.Run("login", processor.DefaultConfig)
+			handleError(processor.Run("login", processor.DefaultConfig))
 		},
 	}
 

@@ -4,147 +4,131 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox-boxfile"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/data"
-	"github.com/nanobox-io/nanobox/util/locker"
 )
 
 type devDeploy struct {
-	config ProcessConfig
+	control ProcessControl
+	box    boxfile.Boxfile
 }
 
 func init() {
 	Register("dev_deploy", devDeployFunc)
 }
 
-func devDeployFunc(config ProcessConfig) (Processor, error) {
-	// config.Meta["devDeploy-config"]
-	// do some config validation
+func devDeployFunc(control ProcessControl) (Processor, error) {
+	// control.Meta["devDeploy-control"]
+	// do some control validation
 	// check on the meta for the flags and make sure they work
 
-	return devDeploy{config}, nil
+	return devDeploy{control: control}, nil
 }
 
-func (self devDeploy) Results() ProcessConfig {
-	return self.config
+func (self devDeploy) Results() ProcessControl {
+	return self.control
 }
 
 func (self devDeploy) Process() error {
-	locker.LocalLock()
-	defer locker.LocalUnlock()
-	// setup the environment (boot vm)
-	err := Run("provider_setup", self.config)
-	if err != nil {
-		fmt.Println("provider_setup:", err)
-		lumber.Close()
-		os.Exit(1)
+
+	// defer the clean up so if we exit early the
+	// cleanup will always happen
+	defer func() {
+		if err := Run("dev_teardown", self.control); err != nil {
+			// this is bad, really bad...
+			// we should probably print a pretty message explaining that the app
+			// was left in a bad state and needs to be reset
+			os.Exit(1)
+		}
+	}()
+
+	if err := Run("dev_setup", self.control); err != nil {
+		// todo: how to display this?
+		return err
 	}
 
-	// start all the services that are in standby
-	err = Run("service_start_all", self.config)
-	if err != nil {
-		fmt.Printf("service_start_all: %s\n", err.Error())
-		os.Exit(1)
+	if err := self.publishCode(); err != nil {
+		return err
 	}
 
-	// start nanopack service
-	err = Run("nanopack_setup", self.config)
-	if err != nil {
-		fmt.Println("nanoagent_setup:", err)
-		os.Exit(1)
+	// syncronize the services as per the new boxfile
+	if err := Run("service_sync", self.control); err != nil {
+		return err
 	}
+
+	// start code
+	if err := self.startCodeServices(); err != nil {
+		return err
+	}
+
+	// clean up the code services
+	defer func() {
+		if err := Run("code_clean", self.control); err != nil {
+			// output this error message
+			// it doesnt break anything if the clean fails.
+		}
+	}()
+
+	// update nanoagent portal
+	if err := Run("update_portal", self.control); err != nil {
+		return err
+	}
+
+	// hang and do some logging until they are done
+	if err := Run("mist_log", self.control); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (self *devDeploy) publishCode() error {
 
 	// setup the var's required for code_publish
 	hoarder := models.Service{}
 	data.Get(util.AppName(), "hoarder", &hoarder)
-	self.config.Meta["build_id"] = "1234"
-	self.config.Meta["warehouse_url"] = hoarder.InternalIP
-	self.config.Meta["warehouse_token"] = "123"
+	self.control.Meta["build_id"] = "1234"
+	self.control.Meta["warehouse_url"] = hoarder.InternalIP
+	self.control.Meta["warehouse_token"] = "123"
 
 	// publish code
-	publishProcessor, err := Build("code_publish", self.config)
+	publishProcessor, err := Build("code_publish", self.control)
 	if err != nil {
-		fmt.Println("code_publish:", err)
-		os.Exit(1)
+		return err
 	}
 	err = publishProcessor.Process()
 	if err != nil {
-		fmt.Println("code_publish:", err)
-		os.Exit(1)
+		return err
 	}
 	publishResult := publishProcessor.Results()
 	if publishResult.Meta["boxfile"] == "" {
-		fmt.Println("boxfile is empty!")
-		os.Exit(1)
+		return fmt.Errorf("publishCode: the boxfile was empty")
 	}
-	boxfile := boxfile.New([]byte(publishResult.Meta["boxfile"]))
-	self.config.Meta["boxfile"] = publishResult.Meta["boxfile"]
+	// store the boxfile on myself
+	self.box = boxfile.New([]byte(publishResult.Meta["boxfile"]))
 
-	// syncronize the services as per the new boxfile
-	err = Run("service_sync", self.config)
-	if err != nil {
-		fmt.Println("service_sync:", err)
-		lumber.Close()
-		os.Exit(1)
-	}
+	// set it in the control file so child process have access to it as well
+	self.control.Meta["boxfile"] = publishResult.Meta["boxfile"]
+	return nil
+}
 
-	// start code
-	for _, codeName := range boxfile.Nodes("code") {
-		image := boxfile.Node(codeName).StringValue("image")
-		if image == "" {
-			image = "nanobox/code"
-		}
-		code := ProcessConfig{
-			DevMode: self.config.DevMode,
-			Verbose: self.config.Verbose,
-			Meta: map[string]string{
-				"name":            codeName,
-				"image":           image,
-				"boxfile":         self.config.Meta["boxfile"],
-				"build_id":        self.config.Meta["build_id"],
-				"warehouse_url":   self.config.Meta["warehouse_url"],
-				"warehouse_token": self.config.Meta["warehouse_token"],
-			},
-		}
-		err := Run("code_setup", code)
-		if err != nil {
-			fmt.Printf("code_setup (%s): %s\n", codeName, err.Error())
-			os.Exit(1)
-		}
-
-		err = Run("code_configure", code)
-		if err != nil {
-			fmt.Printf("code_start (%s): %s\n", codeName, err.Error())
-			os.Exit(1)
-		}
-
+func (self *devDeploy) startCodeServices() error {
+	code := ProcessControl{
+		DevMode: self.control.DevMode,
+		Verbose: self.control.Verbose,
+		Meta: map[string]string{
+			"boxfile":         self.control.Meta["boxfile"],
+			"build_id":        self.control.Meta["build_id"],
+			"warehouse_url":   self.control.Meta["warehouse_url"],
+			"warehouse_token": self.control.Meta["warehouse_token"],
+		},
 	}
 
-	fmt.Println("-> updating router")
-	// update nanoagent portal
-	err = Run("update_portal", self.config)
-	if err != nil {
-		fmt.Println("update_portal:", err)
-		os.Exit(1)
+	// synchronize my code services
+	if err := Run("code_sync", code); err != nil {
+		return err
 	}
-
-	fmt.Println("-> tailing logs")
-	// hang and do some logging until they are done
-	err = Run("mist_log", self.config)
-	if err != nil {
-		fmt.Printf("mist_log: %s\n", err.Error())
-		os.Exit(1)
-	}
-
-	// shut down all services
-	err = Run("dev_stop", self.config)
-	if err != nil {
-		fmt.Printf("service_start_all: %s\n", err.Error())
-		os.Exit(1)
-	}
-
 	return nil
 }
