@@ -293,7 +293,13 @@ func (self *serviceSetup) updateEnvVars() error {
 	envVars[envName+"_HOST"] = self.service.InternalIP
 	for _, user := range self.service.Plan.Users {
 		users = append(users, user.Username)
-		envVars[fmt.Sprintf("%s_%s_PW", envName, strings.ToUpper(user.Username))] = user.Password
+		envVars[fmt.Sprintf("%s_%s_PASS", envName, strings.ToUpper(user.Username))] = user.Password
+		// if this user is the default user
+		// set additional default env vars
+		if user == self.service.Plan.DefaultUser {
+			envVars[envVars[fmt.Sprintf("%s_USER", envName)]] = user
+			envVars[envVars[fmt.Sprintf("%s_PASS", envName)]] = envVars[fmt.Sprintf("%s_%s_PW", envName, strings.ToUpper(user.Username))]
+		}
 	}
 	if len(users) > 0 {
 		envVars[envName+"_USERS"] = strings.Join(users, " ")

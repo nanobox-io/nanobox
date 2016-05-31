@@ -5,6 +5,7 @@ type Plan struct {
 	Users         []User   `json:"users"`
 	MountProtocol string   `json:"mount_protocol"`
 	Behaviors     []string `json:"behaviors"`
+	DefaultUser   string   `json:"user"`
 }
 
 type User struct {
