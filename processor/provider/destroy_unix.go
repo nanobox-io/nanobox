@@ -1,4 +1,5 @@
-// +build !windows
+// +build !windows,!plan9,!solaris
+
 package provider
 
 import (
