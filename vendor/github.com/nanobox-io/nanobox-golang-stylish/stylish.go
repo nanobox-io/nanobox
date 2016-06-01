@@ -95,7 +95,7 @@ func Bullet(msg string, v ...interface{}) string {
 // Output:
 //   i am a sub bullet
 func SubBullet(msg string, v ...interface{}) string {
-	return Marker(" ", fmt.Sprintf(msg, v...))
+	return Marker("  +", fmt.Sprintf(msg, v...))
 }
 
 // Warning styles and prints a message as outlined at:
