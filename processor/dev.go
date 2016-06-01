@@ -90,17 +90,18 @@ func (self *dev) runBuild() error {
 			return err
 		}
 
-		// syncronize the data services with the new build
-		if err := Run("service_sync", self.control); err != nil {
-			return err
-		}
-
 		// persist the new boxfile so we know not to build next time.
 		if err := self.persistNewBoxfile(); err != nil {
 			return err
 		}
 
 	}
+
+	// syncronize the data services
+	if err := Run("service_sync", self.control); err != nil {
+		return err
+	}
+
 	return nil
 }
 

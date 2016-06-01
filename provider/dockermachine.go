@@ -1,5 +1,8 @@
 package provider
 
+// TODO: win: this section has not been tested for windows 
+// and may run into some issues
+
 import (
 	"crypto/sha256"
 	"encoding/hex"

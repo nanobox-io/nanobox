@@ -11,6 +11,9 @@ import (
 
 	"github.com/nanobox-io/nanobox-boxfile"
 )
+// TODO: win: make sure the folders are in the correct place
+// the go-homedir is supposed to work in both packages
+// and we used filpath.ToSlash which puts the correct slashes in.
 
 func GlobalDir() string {
 	// set Home based off the users homedir (~)

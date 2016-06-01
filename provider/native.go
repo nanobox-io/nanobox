@@ -46,7 +46,6 @@ func (self Native) Create() error {
 // does nothing for native
 func (self Native) Reboot() error {
 	// TODO: nothing??
-
 	return nil
 }
 
