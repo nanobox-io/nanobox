@@ -6,10 +6,11 @@ import (
 
 var client *dockClient.Client
 
+func init() {
+	Initialize("env")
+}
+
 func Initialize(host string) error {
-	if client != nil {
-		return nil
-	}
 	var err error
 	if host == "env" {
 		client, err = dockClient.NewEnvClient()
