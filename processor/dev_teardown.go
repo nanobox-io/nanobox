@@ -1,6 +1,8 @@
 package processor
 
 import (
+	"github.com/nanobox-io/nanobox-golang-stylish"
+
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/counter"
 	"github.com/nanobox-io/nanobox/util/locker"
@@ -45,7 +47,7 @@ func (self *devTeardown) teardownApp() error {
 	locker.LocalLock()
 	defer locker.LocalUnlock()
 
-	if unused := appIsUnused(); unused == true {
+	if appIsUnused() {
 
 		// Stop the platform services
 		if err := Run("platform_stop", self.control); err != nil {
@@ -64,7 +66,10 @@ func (self *devTeardown) teardownApp() error {
 // teardownProvider tears down the provider when it's not being used
 func (self *devTeardown) teardownProvider() error {
 
-	counter.Decrement("provider")
+	count, err := counter.Decrement("provider")
+	if err != nil {
+		return err
+	}
 
 	// establish a global lock to ensure we're the only ones bringing down
 	// the provider. Also we need to ensure that we release the lock even
@@ -72,12 +77,11 @@ func (self *devTeardown) teardownProvider() error {
 	locker.GlobalLock()
 	defer locker.GlobalUnlock()
 
-	if unused := providerIsUnused(); unused == true {
+	if providerIsUnused() {
 		// stop the provider
-		if err := Run("provider_stop", self.control); err != nil {
-			return err
-		}
+		return Run("provider_stop", self.control)
 	}
+	self.control.Display(stylish.Bullet("%d dev's still running so leaving the provider up", count))
 	return nil
 }
 

@@ -91,6 +91,9 @@ func (self serviceDestroy) updateEnvVars() error {
 	for _, user := range users {
 		delete(envVars, fmt.Sprintf("%s_%s_PW", envName, strings.ToUpper(user)))
 	}
+	delete(envVars, fmt.Sprintf("%s_USER", envName))
+	delete(envVars, fmt.Sprintf("%s_PASS", envName))
+
 	delete(envVars, envName+"_USERS")
 	return data.Put(util.AppName()+"_meta", "env", envVars)
 }

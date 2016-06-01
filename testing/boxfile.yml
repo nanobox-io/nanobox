@@ -1,5 +1,5 @@
 code.build:
-  engine: "golang#refactor/v1"
+  engine: "ruby#refactor/v1"
   config:
     package: "github.com/nanobox-io/nanobox"
 data.postgresql:

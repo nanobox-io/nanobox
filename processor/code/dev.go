@@ -104,7 +104,6 @@ func (self *codeDev) setup() error {
 			return err
 		}
 
-		self.control.Info("dev payload: " +self.devPayload())
 		if _, err := util.Exec(self.container.ID, "dev", self.devPayload(), processor.ExecWriter()); err != nil {
 			return err
 		}
