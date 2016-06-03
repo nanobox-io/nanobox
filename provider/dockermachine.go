@@ -1,6 +1,6 @@
 package provider
 
-// TODO: win: this section has not been tested for windows 
+// TODO: win: this section has not been tested for windows
 // and may run into some issues
 
 import (
@@ -142,7 +142,7 @@ func (self DockerMachine) Start() error {
 
 		fmt.Print(stylish.Bullet("Setting up custom docker network..."))
 
-		cmd := exec.Command("docker-machine", "ssh", "nanobox", "docker", "network", "create", "--driver=bridge", "--subnet=192.168.0.0/24", "--opt=\"com.docker.network.driver.mtu=1450\"", "--opt=\"com.docker.network.bridge.name=redd0\"", "--gateway=192.168.0.1", "nanobox")
+		cmd := exec.Command("docker-machine", "ssh", "nanobox", "docker", "network", "create", "--driver=bridge", "--subnet=192.168.0.0/24", "--opt='com.docker.network.driver.mtu=1450'", "--opt='com.docker.network.bridge.name=redd0'", "--gateway=192.168.0.1", "nanobox")
 		if verbose {
 			cmd.Stdout = print.NewStreamer("  ")
 			cmd.Stderr = print.NewStreamer("  ")
