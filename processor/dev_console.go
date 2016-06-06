@@ -41,16 +41,22 @@ func (self devConsole) Process() error {
 	if name == "" {
 		name = "build"
 	}
+
 	container, err := docker.GetContainer(fmt.Sprintf("nanobox-%s-%s", util.AppName(), name))
 	if err == nil {
 		name = container.ID
+	}
+
+	shell := self.control.Meta["shell"]
+	if shell == "" {
+		shell = "bash"
 	}
 
 	command := []string{"exec", "-u", "gonano", "-it", name, "/bin/bash"}
 
 	switch {
 	case self.control.Meta["working_dir"] != "":
-		cd := fmt.Sprintf("cd %s; exec \"${SHELL:-sh}\"", self.control.Meta["working_dir"])
+		cd := fmt.Sprintf("cd %s; exec \"%s\"", self.control.Meta["working_dir"], shell)
 		command = append(command, "-c", cd)
 	case self.control.Meta["command"] != "":
 		command = append(command, "-c", self.control.Meta["command"])

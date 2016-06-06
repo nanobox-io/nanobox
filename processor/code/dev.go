@@ -154,7 +154,7 @@ func (self *codeDev) setImage() error {
 	self.image = boxfile.Node("build").StringValue("image")
 
 	if self.image == "" {
-		self.image = "nanobox/build:v1"
+		self.image = "nanobox/dev"
 	}
 
 	return nil
@@ -265,6 +265,7 @@ func (self *codeDev) runConsole() error {
 		Meta: map[string]string{
 			"name":        "dev",
 			"working_dir": self.cwd(),
+			"shell":			 "zsh",
 		},
 	}
 
