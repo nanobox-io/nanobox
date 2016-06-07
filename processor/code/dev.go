@@ -60,6 +60,10 @@ func (self *codeDev) Process() error {
 		return err
 	}
 
+	if err := self.printMOTD(); err != nil {
+		return err
+	}
+
 	if err := self.runConsole(); err != nil {
 		// todo: how to display this?
 		return err
@@ -288,6 +292,11 @@ func (self *codeDev) cwd() string {
 	}
 
 	return "/app"
+}
+
+// printMOTD prints the motd with information for the user to connect
+func (self *codeDev) printMOTD() bool {
+	return nil
 }
 
 // devIsUnused returns true if the dev isn't being used by any other session
