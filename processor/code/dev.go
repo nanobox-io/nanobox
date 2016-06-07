@@ -1,9 +1,10 @@
 package code
 
 import (
+	"encoding/json"
 	"fmt"
 	"net"
-	"encoding/json"
+	"os"
 	// "io"
 
 	dockType "github.com/docker/engine-api/types"
@@ -23,7 +24,7 @@ import (
 )
 
 type codeDev struct {
-	control    processor.ProcessControl
+	control   processor.ProcessControl
 	boxfile   models.Boxfile
 	localIP   net.IP
 	image     string
@@ -258,8 +259,6 @@ func (self *codeDev) devPayload() string {
 	return string(bytes)
 }
 
-
-
 // runConsole will establish a console within the dev container
 func (self *codeDev) runConsole() error {
 
@@ -269,7 +268,7 @@ func (self *codeDev) runConsole() error {
 		Meta: map[string]string{
 			"name":        "dev",
 			"working_dir": self.cwd(),
-			"shell":			 "zsh",
+			"shell":       "zsh",
 		},
 	}
 
@@ -295,7 +294,24 @@ func (self *codeDev) cwd() string {
 }
 
 // printMOTD prints the motd with information for the user to connect
-func (self *codeDev) printMOTD() bool {
+func (self *codeDev) printMOTD() error {
+	os.Stderr.WriteString(`
+                                   **
+                                ********
+                             ***************
+                          *********************
+                            *****************
+                          ::    *********    ::
+                             ::    ***    ::
+                           ++   :::   :::   ++
+                              ++   :::   ++
+                                 ++   ++
+                                    +
+                    _  _ ____ _  _ ____ ___  ____ _  _
+                    |\ | |__| |\ | |  | |__) |  |  \/
+                    | \| |  | | \| |__| |__) |__| _/\_
+`)
+
 	return nil
 }
 
