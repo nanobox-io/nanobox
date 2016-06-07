@@ -1,4 +1,3 @@
-//
 package commands
 
 import (
@@ -9,7 +8,7 @@ import (
 
 var (
 
-	//
+	// LogoutCmd ...
 	LogoutCmd = &cobra.Command{
 		Use:   "logout",
 		Short: "remove api token and forget about the user",

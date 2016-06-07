@@ -1,4 +1,3 @@
-//
 package commands
 
 import (
@@ -9,7 +8,7 @@ import (
 
 var (
 
-	//
+	// DevInfoCmd ...
 	DevInfoCmd = &cobra.Command{
 		Use:   "info",
 		Short: "get this things information",

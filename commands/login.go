@@ -1,4 +1,3 @@
-//
 package commands
 
 import (
@@ -9,7 +8,7 @@ import (
 
 var (
 
-	//
+	// LoginCmd ...
 	LoginCmd = &cobra.Command{
 		Use:   "login",
 		Short: "get the production credentials and ensure production connection",
@@ -26,6 +25,7 @@ var (
 	password string
 )
 
+//
 func init() {
 	LoginCmd.Flags().StringVarP(&username, "username", "u", "", "username")
 	LoginCmd.Flags().StringVarP(&password, "password", "p", "", "password")

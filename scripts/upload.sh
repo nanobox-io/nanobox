@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 set -e
 
-# look through each os/arch/file and generate an md5 for each
+# try and use the correct MD5 lib (depending on user OS darwin/linux)
+MD5=$(which md5 || echo "$(which md5sum) | cut -f 1" )
+
 echo "Generating md5s..."
+
+# look through each os/arch/file and generate an md5 for each
 for os in $(ls ./build/v1); do
   for arch in $(ls ./build/v1/${os}); do
     for file in $(ls ./build/v1/${os}/${arch}); do

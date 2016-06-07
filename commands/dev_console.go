@@ -1,4 +1,3 @@
-//
 package commands
 
 import (
@@ -11,7 +10,7 @@ import (
 
 var (
 
-	//
+	// DevConsoleCmd ...
 	DevConsoleCmd = &cobra.Command{
 		Use:   "console",
 		Short: "do the console thing",

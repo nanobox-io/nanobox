@@ -1,4 +1,3 @@
-//
 package commands
 
 import (
@@ -9,7 +8,7 @@ import (
 
 var (
 
-	//
+	// DevDestroyCmd ...
 	DevDestroyCmd = &cobra.Command{
 		Use:   "destroy",
 		Short: "destroy the docker machines associated witht his app",

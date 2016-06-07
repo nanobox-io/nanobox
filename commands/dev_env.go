@@ -1,4 +1,3 @@
-//
 package commands
 
 import (
@@ -13,13 +12,15 @@ import (
 )
 
 var (
-	//
+
+	// DevEnvCmd ...
 	DevEnvCmd = &cobra.Command{
 		Use:   "evar",
 		Short: "run an env command",
 		Long:  ``,
 	}
 
+	// DevEnvAddCmd ...
 	DevEnvAddCmd = &cobra.Command{
 		Use:   "add",
 		Short: "run an env command",
@@ -40,6 +41,7 @@ var (
 		},
 	}
 
+	// DevEnvRemoveCmd ...
 	DevEnvRemoveCmd = &cobra.Command{
 		Use:   "remove",
 		Short: "run an env command",
@@ -56,6 +58,7 @@ var (
 		},
 	}
 
+	// DevEnvListCmd ...
 	DevEnvListCmd = &cobra.Command{
 		Use:   "list",
 		Short: "run an env command",
@@ -64,11 +67,11 @@ var (
 			evars := models.EnvVars{}
 			data.Get(util.AppName()+"_meta", "env", &evars)
 			fmt.Println(evars)
-
 		},
 	}
 )
 
+//
 func init() {
 	DevEnvCmd.AddCommand(DevEnvAddCmd)
 	DevEnvCmd.AddCommand(DevEnvRemoveCmd)

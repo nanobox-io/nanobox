@@ -1,4 +1,3 @@
-//
 package commands
 
 import (
@@ -9,7 +8,7 @@ import (
 
 var (
 
-	//
+	// DeployCmd ...
 	DeployCmd = &cobra.Command{
 		Use:   "deploy",
 		Short: "get the production credentials and ensure production connection",

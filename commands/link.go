@@ -1,4 +1,3 @@
-//
 package commands
 
 import (
@@ -10,13 +9,14 @@ import (
 var (
 	alias string
 
+	// LinkCmd ...
 	LinkCmd = &cobra.Command{
 		Use:   "link",
 		Short: "link a dev application with a production one",
 		Long:  `can be linked to more then one app`,
 	}
 
-	//
+	// LinkAddCmd ...
 	LinkAddCmd = &cobra.Command{
 		Use:   "add",
 		Short: "link a dev application with a production one",
@@ -29,6 +29,7 @@ var (
 		},
 	}
 
+	// LinkListCmd ...
 	LinkListCmd = &cobra.Command{
 		Use:   "List",
 		Short: "list",
@@ -39,6 +40,7 @@ var (
 		},
 	}
 
+	// LinkRemoveCmd ...
 	LinkRemoveCmd = &cobra.Command{
 		Use:   "remove",
 		Short: "remove",
@@ -51,6 +53,7 @@ var (
 	}
 )
 
+//
 func init() {
 	LinkAddCmd.Flags().StringVarP(&app, "app_name", "n", "", "app name")
 	LinkCmd.PersistentFlags().StringVarP(&alias, "alias", "a", "", "alias")

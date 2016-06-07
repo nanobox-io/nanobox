@@ -1,4 +1,3 @@
-//
 package commands
 
 import (
@@ -11,7 +10,7 @@ import (
 
 var (
 
-	//
+	// TunnelCmd ...
 	TunnelCmd = &cobra.Command{
 		Use:   "tunnel",
 		Short: "do the tunnel thing",
@@ -34,6 +33,7 @@ var (
 	port string
 )
 
+//
 func init() {
 	TunnelCmd.Flags().StringVarP(&app, "app", "a", "", "production app name or alias")
 	TunnelCmd.Flags().StringVarP(&port, "port", "p", "", "local port to start listening on")

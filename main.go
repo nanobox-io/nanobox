@@ -1,4 +1,4 @@
-//
+// Package main ...
 package main
 
 import (
@@ -15,14 +15,17 @@ import (
 
 // main
 func main() {
+
 	// setup a file logger, this will be replaced in verbose mode.
 	fileLogger, err := lumber.NewTruncateLogger(filepath.ToSlash(filepath.Join(util.GlobalDir(), "nanobox.log")))
 	if err != nil {
 		fmt.Println("logging error:", err)
 	}
 
+	//
 	lumber.SetLogger(fileLogger)
 	lumber.Level(lumber.DEBUG)
+
 	// global panic handler; this is done to avoid showing any panic output if
 	// something happens to fail. The output is logged and "pretty" message is
 	// shown
@@ -40,12 +43,6 @@ func main() {
 			os.Exit(1)
 		}
 	}()
-
-	// commented because we arent doing updates right now.
-	// // check to see if nanobox needs to be updated
-	// if err := commands.Update(); err != nil {
-	// 	fmt.Println("Nanobox was unable to update because of the following error:\n", err.Error())
-	// }
 
 	//
 	commands.NanoboxCmd.Execute()

@@ -1,4 +1,3 @@
-//
 package commands
 
 import (
@@ -12,7 +11,7 @@ import (
 
 var (
 
-	//
+	// DevExecCmd ...
 	DevExecCmd = &cobra.Command{
 		Use:   "exec",
 		Short: "execute a command",

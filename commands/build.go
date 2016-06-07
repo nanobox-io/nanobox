@@ -1,4 +1,3 @@
-//
 package commands
 
 import (
@@ -9,7 +8,7 @@ import (
 
 var (
 
-	//
+	// BuildCmd ...
 	BuildCmd = &cobra.Command{
 		Use:   "build",
 		Short: "do a build",

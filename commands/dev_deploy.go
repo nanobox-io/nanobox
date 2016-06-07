@@ -1,4 +1,3 @@
-//
 package commands
 
 import (
@@ -9,7 +8,7 @@ import (
 
 var (
 
-	//
+	// DevDeployCmd ...
 	DevDeployCmd = &cobra.Command{
 		Use:   "deploy",
 		Short: "start a nanobox application as if it is in production",

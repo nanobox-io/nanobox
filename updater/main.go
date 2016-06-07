@@ -1,4 +1,4 @@
-//
+// Package main ...
 package main
 
 import (
@@ -18,29 +18,39 @@ import (
 	"github.com/mitchellh/go-homedir"
 )
 
-// main
+var (
+
+	// path to nanobox download; this is hardcoded since the updater will only be
+	// responsible for updating minor and patch versions of nanobox. If another major
+	// version is released, it will include it's own downloader
+	pathToDownload = "https://s3.amazonaws.com/tools.nanobox.io/nanobox/v1"
+
+	// name of the file to download ("nanobox" or "nanobox-dev")
+	fileToDownload = "nanobox"
+
+	// map of available downloads
+	availableDownloads = map[string]bool{"nanobox": true, "nanobox-dev": true}
+)
+
+// main ...
 func main() {
 
-	var download string
-
 	// accept a flag allowing for alternate download options
-	flag.StringVar(&download, "o", "nanobox", "The version of nanobox to update")
+	flag.StringVar(&fileToDownload, "o", "nanobox", "The version of nanobox to update")
 	flag.Parse()
 
-	// if download is not one of our available download options default to "nanobox"
-	if _, ok := map[string]int{"nanobox": 1, "nanobox-dev": 1}[download]; !ok {
-		fmt.Printf("'%s' is not a valid option. Downloading 'nanobox'\n", download)
-		download = "nanobox"
+	// if download is not one of our available download options reset to "nanobox"
+	if _, ok := availableDownloads[fileToDownload]; !ok {
+		fmt.Printf("'%s' is not a valid option. Downloading 'nanobox'\n", fileToDownload)
+		fileToDownload = "nanobox"
 	}
 
 	// before attempting to update, ensure nanobox is installed (on the path)
-	path, err := exec.LookPath(download)
+	path, err := exec.LookPath(fileToDownload)
 	if err != nil {
-		fmt.Printf("Unable to update '%s' (not found on path)\n", download)
+		fmt.Printf("Unable to update '%s' - %v\n", fileToDownload, err)
 		os.Exit(1)
 	}
-
-	fmt.Printf("Updating %s...\n", download)
 
 	// get the current users home dir
 	home, err := homedir.Dir()
@@ -50,12 +60,11 @@ func main() {
 	}
 
 	tmpDir := filepath.Join(home, ".nanobox", "tmp")
-	tmpPath := filepath.Join(tmpDir, download)
+	tmpPath := filepath.Join(tmpDir, fileToDownload)
 
-	// if tmp dir doesn't exist fail. The updater shouldn't run if nanobox has never
-	// been run.
-	if _, err := os.Stat(tmpDir); err != nil {
-		fmt.Println("Nanobox updater required nanobox be configured (run once) before it can update.", err.Error())
+	// attempt to make a ~.nanobox/tmp directory just incase it doesn't exist
+	if err := os.MkdirAll(tmpDir, 0755); err != nil {
+		fmt.Printf("Failed to create '%v' - %v\n", tmpDir, err.Error())
 		os.Exit(1)
 	}
 
@@ -68,11 +77,12 @@ func main() {
 	defer tmpFile.Close()
 
 	// download the new CLI
-	progress(fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/%v", runtime.GOOS, runtime.GOARCH, download), tmpFile)
+	fmt.Printf("Updating %s...\n", fileToDownload)
+	progress(fmt.Sprintf("%s/%s/%s/%s", pathToDownload, runtime.GOOS, runtime.GOARCH, fileToDownload), tmpFile)
 
 	// ensure new CLI download matches the remote md5; if the download fails for any
 	// reason these md5's should NOT match.
-	if _, err = md5sMatch(tmpPath, fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%v/%v/%v.md5", runtime.GOOS, runtime.GOARCH, download)); err != nil {
+	if _, err = md5sMatch(tmpPath, fmt.Sprintf("%s/%s/%s/%s.md5", pathToDownload, runtime.GOOS, runtime.GOARCH, fileToDownload)); err != nil {
 		fmt.Printf("Nanobox was unable to correctly download the update. Please check your internet connection and try again.")
 		os.Exit(1)
 	}

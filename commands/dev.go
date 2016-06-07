@@ -1,4 +1,3 @@
-//
 package commands
 
 import (
@@ -9,7 +8,7 @@ import (
 
 var (
 
-	//
+	// DevCmd ...
 	DevCmd = &cobra.Command{
 		Use:   "dev",
 		Short: "Starts the nanobox, provisions app, & opens an interactive terminal",

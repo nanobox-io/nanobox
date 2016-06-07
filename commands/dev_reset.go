@@ -7,6 +7,8 @@ import (
 )
 
 var (
+
+	// DevResetCmd ...
 	DevResetCmd = &cobra.Command{
 		Use:   "reset",
 		Short: "reset the dev usage counters",
