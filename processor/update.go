@@ -10,6 +10,9 @@ import (
 
 	"github.com/jcelliott/lumber"
 	"github.com/kardianos/osext"
+	cryptoutil "github.com/sdomino/go-util/crypto"
+	fileutil "github.com/sdomino/go-util/file"
+	printutil "github.com/sdomino/go-util/print"
 
 	"github.com/nanobox-io/nanobox/util"
 )
@@ -81,7 +84,7 @@ func updatable() (bool, error) {
 
 	// check the md5 of the current nanobox against the remote md5; os.Args[0] is
 	// used as the final interpolation to determine standard/dev versions
-	match, err := util.MD5sMatch(path, fmt.Sprintf("%s/%s/%s/%s.md5", pathToDownload, runtime.GOOS, runtime.GOARCH, filepath.Base(os.Args[0])))
+	match, err := cryptoutil.MD5Match(path, fmt.Sprintf("%s/%s/%s/%s.md5", pathToDownload, runtime.GOOS, runtime.GOARCH, filepath.Base(os.Args[0])))
 	if err != nil {
 		return false, err
 	}
@@ -94,7 +97,7 @@ func updatable() (bool, error) {
 func autoUpdate() error {
 
 	//
-	switch util.Prompt("Nanobox is out of date, would you like to update it now (y/N)? ") {
+	switch printutil.Prompt("Nanobox is out of date, would you like to update it now (y/N)? ") {
 
 	// don't update by default, assuming they'll just do it manually, prompting
 	// again after 14 days
@@ -172,12 +175,12 @@ func downloadUpdater(location string) error {
 	fmt.Printf("'nanobox-updater' not found. Downloading from %s\n", dl)
 
 	// download the updater
-	util.Progress(dl, f)
+	fileutil.Progress(dl, f)
 
 	// ensure updater download matches the remote md5; if the download fails for
 	// any reason this md5 should NOT match.
 	md5 := fmt.Sprintf("%s/%s/%s/nanobox-updater.md5", pathToDownload, runtime.GOOS, runtime.GOARCH)
-	if _, err = util.MD5sMatch(tmpFile, md5); err != nil {
+	if _, err = cryptoutil.MD5Match(tmpFile, md5); err != nil {
 		return err
 	}
 

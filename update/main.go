@@ -25,7 +25,7 @@ var (
 	fileToDownload = "nanobox"
 
 	// map of available downloads
-	availableDownloads = map[string]bool{"nanobox": true, "nanobox-dev": true}
+	availableDownloads = map[string]int{"nanobox": 0, "nanobox-dev": 0}
 )
 
 // main ...
@@ -44,9 +44,11 @@ func main() {
 	// before attempting to update, ensure nanobox is installed (on the path)
 	path, err := exec.LookPath(fileToDownload)
 	if err != nil {
-		fmt.Printf("Unable to update '%s' - %v\n", fileToDownload, err)
+		fmt.Printf("Unable to update '%s' (not found on path)\n", fileToDownload)
 		os.Exit(1)
 	}
+
+	fmt.Printf("Updating %s...\n", fileToDownload)
 
 	// get the current users home dir
 	home, err := homedir.Dir()
@@ -58,9 +60,10 @@ func main() {
 	tmpDir := filepath.Join(home, ".nanobox", "tmp")
 	tmpPath := filepath.Join(tmpDir, fileToDownload)
 
-	// attempt to make a ~.nanobox/tmp directory just incase it doesn't exist
-	if err := os.MkdirAll(tmpDir, 0755); err != nil {
-		fmt.Printf("Failed to create '%v' - %v\n", tmpDir, err.Error())
+	// if tmp dir doesn't exist fail. The updater shouldn't run if nanobox has never
+	// been run.
+	if _, err = os.Stat(tmpDir); err != nil {
+		fmt.Println("Nanobox updater required nanobox be configured (run once) before it can update.", err.Error())
 		os.Exit(1)
 	}
 
@@ -73,7 +76,6 @@ func main() {
 	defer tmpFile.Close()
 
 	// download the new CLI
-	fmt.Printf("Updating %s...\n", fileToDownload)
 	fileutil.Progress(fmt.Sprintf("%s/%s/%s/%s", pathToDownload, runtime.GOOS, runtime.GOARCH, fileToDownload), tmpFile)
 
 	// ensure new CLI download matches the remote md5; if the download fails for any
