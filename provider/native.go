@@ -102,6 +102,13 @@ func (self Native) HostMntDir() string {
 	return dir + "/"
 }
 
+func (self Native) HostIP() (string, error) {
+	// this is needed for exporting nfs shares, which won't happen
+	// with a native provider. In case it does, we'll just return the
+	// loopback address.
+	return "127.0.0.1", nil
+}
+
 // docker env should already be configured if docker is installed
 func (self Native) DockerEnv() error {
 	// ensure setup??

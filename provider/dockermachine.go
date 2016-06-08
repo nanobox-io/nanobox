@@ -173,6 +173,33 @@ func (self DockerMachine) HostMntDir() string {
 	return "/mnt/sda1/"
 }
 
+// HostIP inspects docker-machine to return the IP address of the vm
+func (self DockerMachine) HostIP() (string, error) {
+	// create an anonymous struct that we will populate after running inspect
+	inspect := struct {
+		Driver struct {
+			IPAddress string
+		}
+	}{}
+
+	// fetch the docker-machine endpoint information
+	cmd := exec.Command("docker-machine", "inspect", "nanobox")
+	b, err := cmd.CombinedOutput()
+	if err != nil {
+		lumber.Debug("output: %s", b)
+		return "", err
+	}
+
+	// marshal the json output into the anonymous struct as defined above
+	err = json.Unmarshal(b, &inspect)
+	if err != nil {
+		lumber.Debug("marshal: %s", b)
+		return "", err
+	}
+
+	return inspect.Driver.IPAddress, nil
+}
+
 // DockerEnv exports the docker connection information to the running process
 func (self DockerMachine) DockerEnv() error {
 	// docker-machine env nanobox

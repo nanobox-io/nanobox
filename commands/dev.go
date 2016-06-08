@@ -24,30 +24,15 @@ var (
 
 //
 func init() {
-	// DevCmd.Flags().BoolVarP(&nobuild, "no-build", "", false, "Force skip a rebuild")
-	// DevCmd.Flags().BoolVarP(&rebuild, "rebuild", "", false, "Force a rebuild")
-
-	// all gone for now.. will bring back the necessary ones.
-	// // 'hidden' commands
-	// DevCmd.AddCommand(buildCmd)
-	// DevCmd.AddCommand(createCmd)
-	// DevCmd.AddCommand(deployCmd)
-	// DevCmd.AddCommand(initCmd)
-	// DevCmd.AddCommand(logCmd)
-	// DevCmd.AddCommand(resumeCmd)
-	// DevCmd.AddCommand(sshCmd)
-	// DevCmd.AddCommand(watchCmd)
-
-	// // 'nanobox dev' commands
-	// DevCmd.AddCommand(bootstrapCmd)
+	// public subcommands
 	DevCmd.AddCommand(DevDeployCmd)
-
-	// DevCmd.AddCommand(reloadCmd)
 	DevCmd.AddCommand(DevDestroyCmd)
 	DevCmd.AddCommand(DevInfoCmd)
 	DevCmd.AddCommand(DevExecCmd)
 	DevCmd.AddCommand(DevConsoleCmd)
 	DevCmd.AddCommand(DevEnvCmd)
 	DevCmd.AddCommand(DevResetCmd)
-	// DevCmd.AddCommand(updateImagesCmd)
+
+	// hidden subcommands
+	DevCmd.AddCommand(DevNetfsCmd)
 }
