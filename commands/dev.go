@@ -24,7 +24,6 @@ var (
 
 //
 func init() {
-	// DevCmd.Flags().StringVarP(&devconfig, "dev-config", "", nanofile.Viper().GetString("dev-config"), "The environment to configure on the guest vm")
 	// DevCmd.Flags().BoolVarP(&nobuild, "no-build", "", false, "Force skip a rebuild")
 	// DevCmd.Flags().BoolVarP(&rebuild, "rebuild", "", false, "Force a rebuild")
 

@@ -7,7 +7,7 @@ import (
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox/util"
-	"github.com/nanobox-io/nanobox/util/nanofile"
+	"github.com/nanobox-io/nanobox/util/config"
 )
 
 // local locking network
@@ -35,7 +35,7 @@ func LocalTryLock() (bool, error) {
 		return true, nil
 	}
 	var err error
-	port := nanofile.Viper().GetInt("lock-port")
+	port := config.Viper().GetInt("lock-port")
 	if port == 0 {
 		port = 12345
 	}

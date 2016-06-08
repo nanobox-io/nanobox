@@ -4,7 +4,7 @@ import (
 	"errors"
 	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/locker"
-	"github.com/nanobox-io/nanobox/util/nanofile"
+	"github.com/nanobox-io/nanobox/util/config"
 	"net"
 	"sync"
 )
@@ -108,14 +108,14 @@ func getIpSpace() (IPSpace, error) {
 
 	// there was no data stored for ip space
 	// so we need to populate it
-	ip, ipNet, err := net.ParseCIDR(nanofile.Viper().GetString("external-network-space"))
+	ip, ipNet, err := net.ParseCIDR(config.Viper().GetString("external-network-space"))
 	if err != nil {
 		return ipSpace, err
 	}
 	ipSpace.GlobalIP = ip
 	ipSpace.GlobalNet = *ipNet
 
-	ip, ipNet, err = net.ParseCIDR(nanofile.Viper().GetString("internal-network-space"))
+	ip, ipNet, err = net.ParseCIDR(config.Viper().GetString("internal-network-space"))
 	if err != nil {
 		return ipSpace, err
 	}

@@ -10,7 +10,7 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/data"
-	"github.com/nanobox-io/nanobox/util/nanofile"
+	"github.com/nanobox-io/nanobox/util/config"
 )
 
 func Auth(username, password string) (string, error) {
@@ -72,7 +72,7 @@ func doRequest(method, path string, requestBody, responseBody interface{}) error
 		rbodyReader = bytes.NewBuffer(jsonBytes)
 	}
 
-	host := nanofile.Viper().GetString("production_host")
+	host := config.Viper().GetString("production_host")
 	auth := models.Auth{}
 	data.Get("global", "user", &auth)
 
