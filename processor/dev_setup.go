@@ -59,6 +59,11 @@ func (self *devSetup) setupApp() error {
 	locker.LocalLock()
 	defer locker.LocalUnlock()
 
+	// setup the app
+	if err := Run("app_setup", self.control); err != nil {
+		return err
+	}
+
 	// clean up after any possible failures in a previous deploy
 	if err := Run("service_clean", self.control); err != nil {
 		return err

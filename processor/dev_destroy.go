@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/nanobox-io/nanobox-golang-stylish"
-	
+
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/data"
 )
@@ -41,6 +41,11 @@ func (self devDestroy) Process() error {
 		return err
 	}
 
+	// teardown the app
+	if err := Run("app_teardown", self.control); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -61,11 +66,11 @@ func (self devDestroy) removeServices() error {
 			err := Run("service_destroy", self.control)
 			if err != nil {
 				self.control.Display(stylish.Warning("one of the services did not uninstall:\n%s", err.Error()))
-				// continue on to the next one. 
+				// continue on to the next one.
 				// we should continue trying to remove services
 			}
 		}
-	}	
+	}
 	self.control.DisplayLevel--
 	return nil
 }
@@ -82,7 +87,6 @@ func (self devDestroy) destroyPlatfrom() error {
 		if err := Run("provider_destroy", self.control); err != nil {
 			return err
 		}
-	}	
+	}
 	return nil
 }
-

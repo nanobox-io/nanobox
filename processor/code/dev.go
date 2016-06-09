@@ -25,6 +25,7 @@ import (
 
 type codeDev struct {
 	control   processor.ProcessControl
+	app				models.App
 	boxfile   models.Boxfile
 	localIP   net.IP
 	image     string
@@ -56,6 +57,10 @@ func (self *codeDev) Process() error {
 		}
 	}()
 
+	if err := self.loadApp(); err != nil {
+		return err
+	}
+
 	if err := self.setup(); err != nil {
 		// todo: how to display this?
 		return err
@@ -71,6 +76,16 @@ func (self *codeDev) Process() error {
 	}
 
 	return nil
+}
+
+// loadApp loads the app from the db
+func (self *codeDev) loadApp() error {
+
+  if err := data.Get("apps", util.AppName(), &self.app); err != nil {
+		return err
+	}
+
+  return nil
 }
 
 func (self *codeDev) setup() error {
@@ -105,6 +120,10 @@ func (self *codeDev) setup() error {
 			return err
 		}
 
+		if err := self.attachNetwork(); err != nil {
+			return err
+		}
+
 		if _, err := util.Exec(self.container.ID, "user", util.UserPayload(), processor.ExecWriter()); err != nil {
 			return err
 		}
@@ -130,6 +149,10 @@ func (self *codeDev) teardown() error {
 	if devIsUnused() {
 
 		if err := self.removeContainer(); err != nil {
+			return err
+		}
+
+		if err := self.detachNetwork(); err != nil {
 			return err
 		}
 
@@ -295,7 +318,7 @@ func (self *codeDev) cwd() string {
 
 // printMOTD prints the motd with information for the user to connect
 func (self *codeDev) printMOTD() error {
-	os.Stderr.WriteString(`
+	os.Stderr.WriteString(fmt.Sprintf(`
                                    **
                                 ********
                              ***************
@@ -310,7 +333,43 @@ func (self *codeDev) printMOTD() error {
                     _  _ ____ _  _ ____ ___  ____ _  _
                     |\ | |__| |\ | |  | |__) |  |  \/
                     | \| |  | | \| |__| |__) |__| _/\_
-`)
+
+--------------------------------------------------------------------------------
++ You are in a virtual machine (vm)
++ Your local source code has been mounted into the vm
++ Changes to your code in either the vm or workstation will be mirrored
++ If you run a server, access it at >> %s
+--------------------------------------------------------------------------------
+
+`, self.app.DevIP))
+
+	return nil
+}
+
+// attachNetwork attaches the container to the host network
+func (self *codeDev) attachNetwork() error {
+
+	if err := provider.AddIP(self.app.DevIP); err != nil {
+		return err
+	}
+
+	if err := provider.AddNat(self.app.DevIP, self.localIP.String()); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// detachNetwork detaches the container from the host network
+func (self *codeDev) detachNetwork() error {
+
+	if err := provider.RemoveNat(self.app.DevIP, self.localIP.String()); err != nil {
+		return err
+	}
+
+	if err := provider.RemoveIP(self.app.DevIP); err != nil {
+		return err
+	}
 
 	return nil
 }
