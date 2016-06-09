@@ -11,7 +11,6 @@ type (
 	Provider interface {
 		HostShareDir() string
 		HostMntDir() string
-		HostIP() (string, error)
 		Valid() error
 		Create() error
 		Reboot() error
@@ -111,14 +110,6 @@ func HostMntDir() string {
 		return ""
 	}
 	return p.HostMntDir()
-}
-
-func HostIP() (string, error) {
-	p, err := fetchProvider()
-	if err != nil {
-		return "", nil
-	}
-	return p.HostIP()
 }
 
 func DockerEnv() error {

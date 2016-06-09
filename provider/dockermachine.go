@@ -16,6 +16,8 @@ import (
 	"github.com/nanobox-io/nanobox-golang-stylish"
 
 	"github.com/nanobox-io/nanobox/util/print"
+	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util/netfs"
 )
 
 type (
@@ -173,33 +175,6 @@ func (self DockerMachine) HostMntDir() string {
 	return "/mnt/sda1/"
 }
 
-// HostIP inspects docker-machine to return the IP address of the vm
-func (self DockerMachine) HostIP() (string, error) {
-	// create an anonymous struct that we will populate after running inspect
-	inspect := struct {
-		Driver struct {
-			IPAddress string
-		}
-	}{}
-
-	// fetch the docker-machine endpoint information
-	cmd := exec.Command("docker-machine", "inspect", "nanobox")
-	b, err := cmd.CombinedOutput()
-	if err != nil {
-		lumber.Debug("output: %s", b)
-		return "", err
-	}
-
-	// marshal the json output into the anonymous struct as defined above
-	err = json.Unmarshal(b, &inspect)
-	if err != nil {
-		lumber.Debug("marshal: %s", b)
-		return "", err
-	}
-
-	return inspect.Driver.IPAddress, nil
-}
-
 // DockerEnv exports the docker connection information to the running process
 func (self DockerMachine) DockerEnv() error {
 	// docker-machine env nanobox
@@ -340,11 +315,79 @@ func (self DockerMachine) RemoveNat(ip, container_ip string) error {
 
 // AddMount adds a mount into the docker-machine vm
 func (self DockerMachine) AddMount(local, host string) error {
+
+	// the mount type is configurable by the user
+	mountType := config.Viper().GetString("vm.mount")
+
+	// todo: we should display a warning when using native about performance
+
+	// since vm.mount is configurable, it's possible and even likely that a
+	// machine may already have mounts configured. For each mount type we'll
+	// need to check if an existing mount needs to be undone before continuing
+	switch mountType {
+	case "native":
+		// check to see if netfs is currently configured
+		if self.hasNetfsMountLocal(local) {
+			// teardown the netfs mount
+			if err := self.removeNetfsMount(local, host); err != nil {
+				return err
+			}
+		}
+
+		// build the native mount
+		if err := self.addNativeMount(local, host); err != nil {
+			return err
+		}
+
+	case "netfs":
+		// check to see if virtual box shared folders are currently configured
+		if self.hasNativeMountLocal(local) {
+			// teardown the netfs mount
+			if err := self.removeNativeMount(local, host); err != nil {
+				return err
+			}
+		}
+
+		// build the netfs mount
+		if err := self.addNetfsMount(local, host); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// removeMount removes a mount from the docker-machine vm
+func (self DockerMachine) RemoveMount(local, host string) error {
+
+	// we don't really care what mount type the user has configured here,
+	// we just need to teardown the mount however it was setup
+
+	// try to remove a native virtualbox mount
+	if self.hasNativeMountLocal(local) {
+		if err := self.removeNativeMount(local, host); err != nil {
+			return err
+		}
+	}
+
+	// try to remove a netfs mount
+	if self.hasNetfsMountLocal(local) {
+		if err := self.removeNetfsMount(local, host); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// addNativeMount adds a virtualbox shared folder to the vm
+func (self DockerMachine) addNativeMount(local, host string) error {
 	h := sha256.New()
 	h.Write([]byte(local))
 	h.Write([]byte(host))
 	name := hex.EncodeToString(h.Sum(nil))
-	if !self.hasMountLocal(local) {
+
+	if !self.hasNativeMountLocal(local) {
 		// VBoxManage sharedfolder add nanobox --name <name> --hostpath ${local} --transient
 		cmd := exec.Command("VBoxManage", "sharedfolder", "add", "nanobox", "--name", name, "--hostpath", local, "--transient")
 		b, err := cmd.CombinedOutput()
@@ -353,6 +396,7 @@ func (self DockerMachine) AddMount(local, host string) error {
 			return err
 		}
 	}
+
 	if !self.hasMountHost(host) {
 		// create folder
 		cmd := exec.Command("docker-machine", "ssh", "nanobox", "sudo", "mkdir", "-p", host)
@@ -370,15 +414,42 @@ func (self DockerMachine) AddMount(local, host string) error {
 			return err
 		}
 	}
+
 	return nil
 }
 
-func (self DockerMachine) RemoveMount(local, host string) error {
+// addNetfsMount will add a nfs or cifs share into the vm
+func (self DockerMachine) addNetfsMount(local, host string) error {
+
+	if !self.hasNetfsMountLocal(local) {
+		ip, err := self.hostIP()
+		if err != nil {
+			return err
+		}
+
+		if err := netfs.Add(ip, local); err != nil {
+			return err
+		}
+	}
+
+	if !self.hasMountHost(host) {
+		prefix := []string{"docker-machine", "ssh", "nanobox", "sudo"}
+		if err := netfs.Mount(local, host, prefix); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// removeNativeMount will remove a virtualbox shared folder
+func (self DockerMachine) removeNativeMount(local, host string) error {
 	h := sha256.New()
 	h.Write([]byte(local))
 	h.Write([]byte(host))
 	name := hex.EncodeToString(h.Sum(nil))
-	if self.hasMountLocal(local) {
+
+	if self.hasMountHost(host) {
 		// docker-machine ssh nanobox sudo umount ${host}
 		cmd := exec.Command("docker-machine", "ssh", "nanobox", "sudo", "umount", host)
 		b, err := cmd.CombinedOutput()
@@ -387,7 +458,8 @@ func (self DockerMachine) RemoveMount(local, host string) error {
 			return err
 		}
 	}
-	if self.hasMountHost(host) {
+
+	if self.hasNativeMountLocal(local) {
 		// VBoxManage sharedfolder remove nanobox --name <name> --transient
 		cmd := exec.Command("VBoxManage", "sharedfolder", "remove", "nanobox", "--name", name, "--transient")
 		b, err := cmd.CombinedOutput()
@@ -396,6 +468,34 @@ func (self DockerMachine) RemoveMount(local, host string) error {
 			return err
 		}
 	}
+
+	return nil
+}
+
+// removeNetfsMount will remove a nfs or cifs share
+func (self DockerMachine) removeNetfsMount(local, host string) error {
+
+	if self.hasMountHost(host) {
+		// docker-machine ssh nanobox sudo umount ${host}
+		cmd := exec.Command("docker-machine", "ssh", "nanobox", "sudo", "umount", host)
+		b, err := cmd.CombinedOutput()
+		if err != nil {
+			lumber.Debug("output: %s", b)
+			return err
+		}
+	}
+
+	if self.hasNetfsMountLocal(local) {
+		host, err := self.hostIP()
+		if err != nil {
+			return err
+		}
+
+		if err := netfs.Remove(host, local); err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 
@@ -418,6 +518,7 @@ func (self DockerMachine) hasNetwork() bool {
 		lumber.Debug("hasNetwork output: %s", b)
 		return false
 	}
+
 	return true
 }
 
@@ -428,10 +529,12 @@ func (self DockerMachine) isStarted() bool {
 	if err != nil {
 		return false
 	}
+
 	matched, regerr := regexp.Match("Running", output)
 	if regerr != nil {
 		return false
 	}
+
 	return matched
 }
 
@@ -442,10 +545,12 @@ func (self DockerMachine) hasIP(ip string) bool {
 	if err != nil {
 		return false
 	}
+
 	matched, regerr := regexp.Match(ip, output)
 	if regerr != nil {
 		return false
 	}
+
 	return matched
 }
 
@@ -457,6 +562,7 @@ func (self DockerMachine) hasNatPreroute(host_ip, container_ip string) bool {
 		lumber.Debug("output: %s", b)
 		return false
 	}
+
 	return true
 }
 
@@ -468,6 +574,7 @@ func (self DockerMachine) hasNatPostroute(host_ip, container_ip string) bool {
 		lumber.Debug("output: %s", b)
 		return false
 	}
+
 	return true
 }
 
@@ -478,23 +585,65 @@ func (self DockerMachine) hasMountHost(mount string) bool {
 	if err != nil {
 		return false
 	}
+
 	matched, regerr := regexp.Match(mount, output)
 	if regerr != nil {
 		return false
 	}
+
 	return matched
 }
 
-func (self DockerMachine) hasMountLocal(mount string) bool {
+// hasNativeMountLocal will return true if the virtualbox shared folder is setup
+func (self DockerMachine) hasNativeMountLocal(mount string) bool {
 	// VBoxManage showvminfo nanobox --machinereadable
 	cmd := exec.Command("VBoxManage", "showvminfo", "nanobox", "--machinereadable")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return false
 	}
+
 	matched, regerr := regexp.Match(mount, output)
 	if regerr != nil {
 		return false
 	}
+
 	return matched
+}
+
+// hasNetfsMountLocal will return true if the netfs mount is already exported
+func (self DockerMachine) hasNetfsMountLocal(mount string) bool {
+	host, err := self.hostIP()
+	if err != nil {
+		return false
+	}
+
+	return netfs.Exists(host, mount)
+}
+
+// hostIP inspects docker-machine to return the IP address of the vm
+func (self DockerMachine) hostIP() (string, error) {
+	// create an anonymous struct that we will populate after running inspect
+	inspect := struct {
+		Driver struct {
+			IPAddress string
+		}
+	}{}
+
+	// fetch the docker-machine endpoint information
+	cmd := exec.Command("docker-machine", "inspect", "nanobox")
+	b, err := cmd.CombinedOutput()
+	if err != nil {
+		lumber.Debug("output: %s", b)
+		return "", err
+	}
+
+	// marshal the json output into the anonymous struct as defined above
+	err = json.Unmarshal(b, &inspect)
+	if err != nil {
+		lumber.Debug("marshal: %s", b)
+		return "", err
+	}
+
+	return inspect.Driver.IPAddress, nil
 }

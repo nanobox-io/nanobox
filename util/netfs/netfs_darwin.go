@@ -11,12 +11,13 @@ import (
   "strconv"
   "strings"
 
-  "github.com/nanobox-io/nanobox/provider"
+  "github.com/jcelliott/lumber"
+
   "github.com/nanobox-io/nanobox/util"
 )
 
 // Add will export an nfs share
-func Add(path string) error {
+func Add(host, path string) error {
 
   // This process requires root, check to see if we're the root user.
   // If not, we need to run a hidden command as sudo that will just call this
@@ -27,7 +28,7 @@ func Add(path string) error {
     nanobox := os.Args[0]
 
     // call dev netfs add with the original path (ultimately leads right back here)
-    cmd := fmt.Sprintf("%s dev netfs add %s", nanobox, path)
+    cmd := fmt.Sprintf("%s dev netfs add %s %s", nanobox, host, path)
 
     fmt.Println("Admin privileges are required to export an nfs share, your password may be requested...")
 
@@ -40,19 +41,23 @@ func Add(path string) error {
     return nil
   }
 
-  if !Exists(path) {
+  if !Exists(host, path) {
     // add entry into the /etc/exports file
-    addEntry(path)
+    if err := addEntry(host, path); err != nil {
+      return err
+    }
 
     // reload nfsd
-    reloadServer()
+    if err := reloadServer(); err != nil {
+      return err
+    }
   }
 
   return nil
 }
 
 // Remove will remove an nfs share
-func Remove(path string) error {
+func Remove(host, path string) error {
 
   // This process requires root, check to see if we're the root user.
   // If not, we need to run a hidden command as sudo that will just call this
@@ -63,7 +68,7 @@ func Remove(path string) error {
     nanobox := os.Args[0]
 
     // call dev netfs add with the original path (ultimately leads right back here)
-    cmd := fmt.Sprintf("%s dev netfs rm %s", nanobox, path)
+    cmd := fmt.Sprintf("%s dev netfs rm %s %s", nanobox, host, path)
 
     fmt.Println("Admin privileges are required to remove an nfs share, your password may be requested...")
 
@@ -76,19 +81,23 @@ func Remove(path string) error {
     return nil
   }
 
-  if Exists(path) {
+  if Exists(host, path) {
     // add entry into the /etc/exports file
-    removeEntry(path)
+    if err := removeEntry(host, path); err != nil {
+      return err
+    }
 
     // reload nfsd
-    reloadServer()
+    if err := reloadServer(); err != nil {
+      return err
+    }
   }
 
   return nil
 }
 
 // Exists checks to see if the mount already exists
-func Exists(path string) bool {
+func Exists(host, path string) bool {
 	// open the /etc/exports file for scanning...
 	f, err := os.Open("/etc/exports")
 	if err != nil {
@@ -97,7 +106,7 @@ func Exists(path string) bool {
 	defer f.Close()
 
   // generate the exports entry
-  entry, err := entry(path)
+  entry, err := entry(host, path)
   if err != nil {
     return false
   }
@@ -114,18 +123,42 @@ func Exists(path string) bool {
 	return false
 }
 
-// MountCmds returns a list of commands to mount the path on a linux guest
-func MountCmds(path string) []string {
+// Mount mounts a share on a guest machine
+func Mount(host_path, mount_path string, context []string) error {
   // ensure portmap is running
-  //  portmap
+  run := append(context, "/usr/local/sbin/portmap")
+  cmd := exec.Command(run[0], run[1:]...)
+  b, err := cmd.CombinedOutput()
+  if err != nil {
+    lumber.Debug("output: %s", b)
+    return err
+  }
+
   // ensure the destination directory exists
-  //  mkdir /mnt/dir
-  // mount
-  //  mount -t nfs ${server_ip}:${host_path} ${mount_path}
+  run = append(context, []string{"/bin/mkdir", "-p", mount_path}...)
+  cmd = exec.Command(run[0], run[1:]...)
+  b, err = cmd.CombinedOutput()
+  if err != nil {
+    lumber.Debug("output: %s", b)
+    return err
+  }
+
+  // mount!
+  // todo: this IP shouldn't be hardcoded, needs to be figured out
+  source := fmt.Sprintf("192.168.99.1:%s", host_path)
+  run = append(context, []string{"/bin/mount", "-t", "nfs", source, mount_path}...)
+  cmd = exec.Command(run[0], run[1:]...)
+  b, err = cmd.CombinedOutput()
+  if err != nil {
+    lumber.Debug("output: %s", b)
+    return err
+  }
+
+  return nil
 }
 
 // addEntry will add the entry into the /etc/exports file
-func addEntry(path string) error {
+func addEntry(host, path string) error {
   // open exports file
   f, err := os.OpenFile("/etc/exports", os.O_RDWR|os.O_APPEND, 0644)
   if err != nil {
@@ -134,7 +167,7 @@ func addEntry(path string) error {
   defer f.Close()
 
   // generate the entry
-  entry, err := entry(path)
+  entry, err := entry(host, path)
   if err != nil {
     return err
   }
@@ -148,7 +181,7 @@ func addEntry(path string) error {
 }
 
 // removeEntry will remove the entry from the /etc/exports file
-func removeEntry(path string) error {
+func removeEntry(host, path string) error {
   var contents string
 
   // open exports file
@@ -159,7 +192,7 @@ func removeEntry(path string) error {
   defer f.Close()
 
   // generate the entry
-  entry, err := entry(path)
+  entry, err := entry(host, path)
   if err != nil {
     return err
   }
@@ -192,20 +225,14 @@ func removeEntry(path string) error {
 }
 
 // entry generates the mount entry for the exports file
-func entry(path string) (string, error) {
-
-  // we need to fetch the IP of the nanobox vm from the provider
-  ip, err := provider.HostIP()
-  if err != nil {
-    return "", err
-  }
+func entry(host, path string) (string, error) {
 
   // fetch the uid/gid for the export statement
   uid := uid()
   gid := gid()
 
   message := "\"%s\" %s -alldirs -mapall=%v:%v"
-  entry := fmt.Sprintf(message, path, ip, uid, gid)
+  entry := fmt.Sprintf(message, path, host, uid, gid)
 
   return entry, nil
 }
@@ -214,18 +241,21 @@ func entry(path string) (string, error) {
 func reloadServer() error {
   // todo: make sure nfsd is enabled
 
-
   // check the exports to make sure a reload will be successful
-  cmd := exec.Command("nfsd checkexports")
-  if err := cmd.Run(); err != nil {
+  cmd := exec.Command("nfsd", "checkexports")
+  b, err := cmd.CombinedOutput()
+  if err != nil {
     // todo: provide a clear message for a direction to fix
+    lumber.Debug("output: %s", b)
     return err
   }
 
   // update exports
-  cmd = exec.Command("nfsd update")
-  if err := cmd.Run(); err != nil {
+  cmd = exec.Command("nfsd", "update")
+  b, err = cmd.CombinedOutput()
+  if err != nil {
     // todo: provide a clear message for a direction to fix
+    lumber.Debug("output: %s", b)
     return err
   }
 
