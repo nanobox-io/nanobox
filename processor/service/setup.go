@@ -27,13 +27,13 @@ type cleanFunc func() error
 
 type serviceSetup struct {
 	control     processor.ProcessControl
-	service    models.Service
-	localIP   net.IP
-	globalIP  net.IP
-	container  dockType.ContainerJSON
-	plan       string
-	fail       bool
-	cleanFuncs []cleanFunc
+	service    	models.Service
+	localIP   	net.IP
+	globalIP  	net.IP
+	container  	dockType.ContainerJSON
+	plan       	string
+	fail       	bool
+	cleanFuncs 	[]cleanFunc
 }
 
 func init() {
@@ -285,24 +285,68 @@ func (self *serviceSetup) persistService() error {
 	return nil
 }
 
+// updateEnvVars will generate environment variables from the plan
 func (self *serviceSetup) updateEnvVars() error {
+	// fetch the environment variables model
 	envVars := models.EnvVars{}
 	data.Get(util.AppName()+"_meta", "env", &envVars)
-	envName := strings.ToUpper(strings.Replace(self.service.Name, ".", "_", -1))
+
+	// create a prefix for each of the environment variables.
+	// for example, if the service is 'data.db' the prefix
+	// would be DATA_DB. Dots are replaced with underscores,
+	// and characters are uppercased.
+	prefix := strings.ToUpper(strings.Replace(self.service.Name, ".", "_", -1))
+
+	// we need to create an host evar that holds the IP of the service
+	envVars[fmt.Sprintf("%s_HOST", prefix)] = self.service.InternalIP
+
+	// we need to create evars that contain usernames and passwords
+	//
+	// during the plan phase, the service was informed of potentially
+	// 	1 - users (all of the users)
+	// 	2 - user (the default user)
+	//
+	// First, we need to create an evar that contains the list of users.
+	// 	{prefix}_USERS
+	//
+	// Each user provided was given a password. For every user specified,
+	// we need to create a corresponding evars to store the password:
+	//  {prefix}_{username}_PASS
+	//
+	// Lastly, if a default user was provided, we need to create a pair
+	// of environment variables as a convenience to the user:
+	// 	1 - {prefix}_USER
+	// 	2 - {prefix}_PASS
+
+	// create a slice of user strings that we will use to generate the list of users
 	users := []string{}
-	envVars[envName+"_HOST"] = self.service.InternalIP
+
+	// users will have been loaded into the service plan, so let's iterate
 	for _, user := range self.service.Plan.Users {
+		// add this username to the list
 		users = append(users, user.Username)
-		envVars[fmt.Sprintf("%s_%s_PASS", envName, strings.ToUpper(user.Username))] = user.Password
+
+		// generate the corresponding evar for the password
+		key := fmt.Sprintf("%s_%s_PASS", prefix, strings.ToUpper(user.Username))
+		envVars[key] = user.Password
+
 		// if this user is the default user
 		// set additional default env vars
 		if user.Username == self.service.Plan.DefaultUser {
-			envVars[envVars[fmt.Sprintf("%s_USER", envName)]] = user.Username
-			envVars[envVars[fmt.Sprintf("%s_PASS", envName)]] = user.Password
+			envVars[envVars[fmt.Sprintf("%s_USER", prefix)]] = user.Username
+			envVars[envVars[fmt.Sprintf("%s_PASS", prefix)]] = user.Password
 		}
 	}
+
+	// if there are users, create an environment variable to represent the list
 	if len(users) > 0 {
-		envVars[envName+"_USERS"] = strings.Join(users, " ")
+		envVars[fmt.Sprintf("%s_USERS", prefix)] = strings.Join(users, " ")
 	}
-	return data.Put(util.AppName()+"_meta", "env", envVars)
+
+	// persist the evars
+	if err := data.Put(util.AppName()+"_meta", "env", envVars); err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -14,8 +14,9 @@ import (
 )
 
 type serviceConfigure struct {
-	control  processor.ProcessControl
-	service models.Service
+	control  	processor.ProcessControl
+	service 	models.Service
+	boxfile 	models.Boxfile
 }
 
 type member struct {
@@ -66,6 +67,10 @@ func (self serviceConfigure) Process() error {
 		return nil
 	}
 
+	if err := self.loadBoxfile(); err != nil {
+		return err
+	}
+
 	if err := self.runUpdate(); err != nil {
 		return err
 	}
@@ -98,8 +103,8 @@ func (self serviceConfigure) configurePayload() string {
 	logvac := models.Service{}
 	data.Get(util.AppName(), "logvac", &logvac)
 
-	boxfile := boxfile.New([]byte(self.control.Meta["boxfile"]))
-	boxConfig := boxfile.Node(self.control.Meta["name"]).Node("config")
+	box := boxfile.New([]byte(self.boxfile.Data))
+	boxConfig := box.Node(self.control.Meta["name"]).Node("config")
 
 	pload := configPayload{
 		LogvacHost: logvac.InternalIP,
@@ -163,6 +168,16 @@ func (self *serviceConfigure) loadService() error {
 	err := data.Get(util.AppName(), self.control.Meta["name"], &self.service)
 	if err != nil {
 		// cannot start a service that wasnt setup (ie saved in the database)
+		return err
+	}
+
+	return nil
+}
+
+// loadBoxfile loads the new build boxfile from the database
+func (self *serviceConfigure) loadBoxfile() error {
+
+	if err := data.Get(util.AppName()+"_meta", "build_boxfile", &self.boxfile); err != nil {
 		return err
 	}
 
