@@ -32,23 +32,23 @@ func serviceDestroyFunc(control processor.ProcessControl) (processor.Processor, 
 	return serviceDestroy{control: control}, nil
 }
 
-func (self serviceDestroy) Results() processor.ProcessControl {
-	return self.control
+func (destroy serviceDestroy) Results() processor.ProcessControl {
+	return destroy.control
 }
 
-func (self serviceDestroy) Process() error {
+func (destroy serviceDestroy) Process() error {
 
 	// get the service from the database
 	service := models.Service{}
-	err := data.Get(util.AppName(), self.control.Meta["name"], &service)
+	err := data.Get(util.AppName(), destroy.control.Meta["name"], &service)
 	if err != nil {
 		// cant find service
 		return err
 	}
 
-	self.control.Display(stylish.Bullet("Destroying %s", self.control.Meta["name"]))
+	destroy.control.Display(stylish.Bullet("Destroying %s", destroy.control.Meta["name"]))
 
-	err = docker.ContainerRemove(fmt.Sprintf("nanobox-%s-%s", util.AppName(), self.control.Meta["name"]))
+	err = docker.ContainerRemove(fmt.Sprintf("nanobox-%s-%s", util.AppName(), destroy.control.Meta["name"]))
 	if err != nil {
 		return err
 	}
@@ -73,27 +73,39 @@ func (self serviceDestroy) Process() error {
 		return err
 	}
 
-	if err := self.updateEnvVars(); err != nil {
+	if err := destroy.removeEnvVars(); err != nil {
 		return err
 	}
 
 	// save the service
-	return data.Delete(util.AppName(), self.control.Meta["name"])
+	return data.Delete(util.AppName(), destroy.control.Meta["name"])
 }
 
-func (self serviceDestroy) updateEnvVars() error {
+// removeEnvVars removes any env vars associated with this service
+func (destroy serviceDestroy) removeEnvVars() error {
+	// fetch the environment variables model
 	envVars := models.EnvVars{}
 	data.Get(util.AppName()+"_meta", "env", &envVars)
 
-	envName := strings.ToUpper(strings.Replace(self.control.Meta["name"], ".", "_", -1))
-	delete(envVars, envName+"_HOST")
-	users := strings.Split(envVars[envName+"_USERS"], " ")
-	for _, user := range users {
-		delete(envVars, fmt.Sprintf("%s_%s_PW", envName, strings.ToUpper(user)))
-	}
-	delete(envVars, fmt.Sprintf("%s_USER", envName))
-	delete(envVars, fmt.Sprintf("%s_PASS", envName))
+	// create a prefix for each of the environment variables.
+	// for example, if the service is 'data.db' the prefix
+	// would be DATA_DB. Dots are replaced with underscores,
+	// and characters are uppercased.
+	name := destroy.control.Meta["name"]
+	prefix := strings.ToUpper(strings.Replace(name, ".", "_", -1))
 
-	delete(envVars, envName+"_USERS")
-	return data.Put(util.AppName()+"_meta", "env", envVars)
+	// we loop over all environment variables and see if the key contains
+	// the prefix above. If so, we delete the item.
+	for key, _ := range envVars {
+		if strings.HasPrefix(key, prefix) {
+			delete(envVars, key)
+		}
+	}
+
+	// persist the evars
+	if err := data.Put(util.AppName()+"_meta", "env", envVars); err != nil {
+		return err
+	}
+
+	return nil
 }

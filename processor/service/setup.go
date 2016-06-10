@@ -127,7 +127,7 @@ func (self *serviceSetup) Process() error {
 		return err
 	}
 
-	if err := self.updateEnvVars(); err != nil {
+	if err := self.addEnvVars(); err != nil {
 		self.fail = true
 		return err
 	}
@@ -286,7 +286,7 @@ func (self *serviceSetup) persistService() error {
 }
 
 // updateEnvVars will generate environment variables from the plan
-func (self *serviceSetup) updateEnvVars() error {
+func (self *serviceSetup) addEnvVars() error {
 	// fetch the environment variables model
 	envVars := models.EnvVars{}
 	data.Get(util.AppName()+"_meta", "env", &envVars)
@@ -333,8 +333,8 @@ func (self *serviceSetup) updateEnvVars() error {
 		// if this user is the default user
 		// set additional default env vars
 		if user.Username == self.service.Plan.DefaultUser {
-			envVars[envVars[fmt.Sprintf("%s_USER", prefix)]] = user.Username
-			envVars[envVars[fmt.Sprintf("%s_PASS", prefix)]] = user.Password
+			envVars[fmt.Sprintf("%s_USER", prefix)] = user.Username
+			envVars[fmt.Sprintf("%s_PASS", prefix)] = user.Password
 		}
 	}
 
