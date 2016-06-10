@@ -42,6 +42,10 @@ func (teardown *appTeardown) Process() error {
 		return err
 	}
 
+	if err := teardown.deleteEvars(); err != nil {
+		return err
+	}
+
 	if err := teardown.deleteApp(); err != nil {
 		return err
 	}
@@ -72,7 +76,18 @@ func (teardown *appTeardown) releaseIPs() error {
 	return nil
 }
 
-// deleteApp saves the app to the db
+// deleteEvars deletes the evars from the db
+func (teardown *appTeardown) deleteEvars() error {
+
+	// delete the evars model
+	if err := data.Delete(util.AppName() + "_meta", "env"); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// deleteApp deletes the app to the db
 func (teardown *appTeardown) deleteApp() error {
 
 	// delete the app model

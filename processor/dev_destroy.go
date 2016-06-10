@@ -5,6 +5,7 @@ import (
 
 	"github.com/nanobox-io/nanobox-golang-stylish"
 
+	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/data"
 )
@@ -21,28 +22,32 @@ func devDestroyFunc(control ProcessControl) (Processor, error) {
 	return devDestroy{control}, nil
 }
 
-func (self devDestroy) Results() ProcessControl {
-	return self.control
+func (destroy devDestroy) Results() ProcessControl {
+	return destroy.control
 }
 
-func (self devDestroy) Process() error {
+func (destroy devDestroy) Process() error {
 
-	if err := Run("dev_setup", self.control); err != nil {
+	if err := Run("dev_setup", destroy.control); err != nil {
 		return err
 	}
 
 	// remove all the services (platform/service/code)
-	if err := self.removeServices(); err != nil {
-		return err
-	}
-
-	// potentially destroy the platform
-	if err := self.destroyPlatfrom(); err != nil {
+	if err := destroy.removeServices(); err != nil {
 		return err
 	}
 
 	// teardown the app
-	if err := Run("app_teardown", self.control); err != nil {
+	if err := Run("app_teardown", destroy.control); err != nil {
+		return err
+	}
+
+	if err := destroy.removeMounts(); err != nil {
+		return err
+	}
+
+	// potentially destroy the provider
+	if err := destroy.destroyProvider(); err != nil {
 		return err
 	}
 
@@ -51,40 +56,77 @@ func (self devDestroy) Process() error {
 
 // get all the services in the app
 // and remove them
-func (self devDestroy) removeServices() error {
+func (destroy devDestroy) removeServices() error {
 	services, err := data.Keys(util.AppName())
 	if err != nil {
 		return fmt.Errorf("data keys: %s", err.Error())
 	}
-	self.control.Display(stylish.Bullet("Removing Services"))
-	self.control.DisplayLevel++
+	destroy.control.Display(stylish.Bullet("Removing Services"))
+	destroy.control.DisplayLevel++
 	for _, service := range services {
 		if service != "build" {
 			// svc := models.Service{}
 			// data.Get(util.AppName(), service, &svc)
-			self.control.Meta["name"] = service
-			err := Run("service_destroy", self.control)
+			destroy.control.Meta["name"] = service
+			err := Run("service_destroy", destroy.control)
 			if err != nil {
-				self.control.Display(stylish.Warning("one of the services did not uninstall:\n%s", err.Error()))
+				destroy.control.Display(stylish.Warning("one of the services did not uninstall:\n%s", err.Error()))
 				// continue on to the next one.
 				// we should continue trying to remove services
 			}
 		}
 	}
-	self.control.DisplayLevel--
+	destroy.control.DisplayLevel--
 	return nil
 }
 
-// if im the only app destroy the whole vm
-func (self devDestroy) destroyPlatfrom() error {
-	data.Delete("apps", util.AppName())
+// removeMounts will add the shares and mounts for this app
+func (destroy devDestroy) removeMounts() error {
+
+	// unmount the engine if it's a local directory
+	if util.EngineDir() != "" {
+		src := util.EngineDir()
+		dst := fmt.Sprintf("%s%s/engine", provider.HostShareDir(), util.AppName())
+
+		// unmount the share on the provider
+		if err := provider.RemoveMount(src, dst); err != nil {
+			return err
+		}
+
+		// remove the share on the workstation
+		if err := provider.RemoveShare(src, dst); err != nil {
+			return err
+		}
+	}
+
+	// unmount the app src
+	src := util.LocalDir()
+	dst := fmt.Sprintf("%s%s/code", provider.HostShareDir(), util.AppName())
+
+	// unmount the share on the provider
+	if err := provider.RemoveMount(src, dst); err != nil {
+		return err
+	}
+
+	// remove the share on the workstation
+	if err := provider.RemoveShare(src, dst); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// destroyProvider destroys the provider if there are no remaining apps
+func (destroy devDestroy) destroyProvider() error {
+	// fetch all of the apps
 	keys, err := data.Keys("apps")
 	if err != nil {
 		return err
 	}
+
 	if len(keys) == 0 {
 		// if no other apps exist in container
-		if err := Run("provider_destroy", self.control); err != nil {
+		if err := Run("provider_destroy", destroy.control); err != nil {
 			return err
 		}
 	}
