@@ -24,7 +24,7 @@ func init() {
 }
 
 // Valid ensures docker-machine is installed and available
-func (self Native) Valid() error {
+func (native Native) Valid() error {
 	if runtime.GOOS != "linux" {
 		fmt.Errorf("Native only works on linux (currently)")
 	}
@@ -38,28 +38,28 @@ func (self Native) Valid() error {
 }
 
 // does nothing for native
-func (self Native) Create() error {
+func (native Native) Create() error {
 	// TODO: maybe some setup stuff???
 	return nil
 }
 
 // does nothing for native
-func (self Native) Reboot() error {
+func (native Native) Reboot() error {
 	// TODO: nothing??
 	return nil
 }
 
 // does nothing on native
-func (self Native) Stop() error {
+func (native Native) Stop() error {
 	// TODO: stop what??
 
 	return nil
 }
 
 // does nothing on native
-func (self Native) Destroy() error {
+func (native Native) Destroy() error {
 	// TODO: clean up stuff??
-	if self.hasNetwork() {
+	if native.hasNetwork() {
 		fmt.Print(stylish.Bullet("Removing custom docker network..."))
 
 		cmd := exec.Command("docker", "network", "rm", "nanobox")
@@ -74,9 +74,9 @@ func (self Native) Destroy() error {
 }
 
 // does nothing on native
-func (self Native) Start() error {
+func (native Native) Start() error {
 	// TODO: some networking maybe???
-	if !self.hasNetwork() {
+	if !native.hasNetwork() {
 		fmt.Print(stylish.Bullet("Setting up custom docker network..."))
 
 		cmd := exec.Command("docker", "network", "create", "--driver=bridge", "--subnet=192.168.0.0/24", "--opt=\"com.docker.network.driver.mtu=1450\"", "--opt=\"com.docker.network.bridge.name=redd0\"", "--gateway=192.168.0.1", "nanobox")
@@ -90,55 +90,65 @@ func (self Native) Start() error {
 	return nil
 }
 
-func (self Native) HostShareDir() string {
+func (native Native) HostShareDir() string {
 	dir := filepath.ToSlash(filepath.Join(util.GlobalDir(), "share"))
 	os.MkdirAll(dir, 0755)
 	return dir + "/"
 }
 
-func (self Native) HostMntDir() string {
+func (native Native) HostMntDir() string {
 	dir := filepath.ToSlash(filepath.Join(util.GlobalDir(), "mnt"))
 	os.MkdirAll(dir, 0755)
 	return dir + "/"
 }
 
 // docker env should already be configured if docker is installed
-func (self Native) DockerEnv() error {
+func (native Native) DockerEnv() error {
 	// ensure setup??
 	return nil
 }
 
 // AddIp adds an IP into the host for host access
-func (self Native) AddIP(ip string) error {
+func (native Native) AddIP(ip string) error {
 	// TODO: ???
 
 	return nil
 }
 
 // RemoveIP removes an IP from the docker-machine vm
-func (self Native) RemoveIP(ip string) error {
+func (native Native) RemoveIP(ip string) error {
 	// TODO: ???
 
 	return nil
 }
 
 // AddNat adds a nat to make an container accessible to the host network stack
-func (self Native) AddNat(ip, container_ip string) error {
+func (native Native) AddNat(ip, container_ip string) error {
 	// TODO: ???
 	return nil
 }
 
 // RemoveNat removes nat from making a container inaccessible to the host network stack
-func (self Native) RemoveNat(ip, container_ip string) error {
+func (native Native) RemoveNat(ip, container_ip string) error {
 	// TODO: ???
 
 	return nil
 }
 
+// AddShare is not applicable for the native adapter, so will return nil
+func (native Native) AddShare(_, _ string) error {
+	return nil
+}
+
+// RemoveShare is not applicable for the native adapter, so will return nil
+func (native Native) RemoveShare(_, _ string) error {
+	return nil
+}
+
 // AddMount adds a mount into the docker-machine vm
-func (self Native) AddMount(local, host string) error {
+func (native Native) AddMount(local, host string) error {
 	// TODO: ???
-	if !self.hasMount(host) {
+	if !native.hasMount(host) {
 		err := os.MkdirAll(filepath.Dir(host), 0755)
 		if err != nil {
 			return err
@@ -148,15 +158,15 @@ func (self Native) AddMount(local, host string) error {
 	return nil
 }
 
-func (self Native) RemoveMount(_, host string) error {
+func (native Native) RemoveMount(_, host string) error {
 	// TODO: ???
-	if self.hasMount(host) {
+	if native.hasMount(host) {
 		return os.Remove(host)
 	}
 	return nil
 }
 
-func (self Native) hasNetwork() bool {
+func (native Native) hasNetwork() bool {
 	// docker-machine ssh nanobox docker network inspect nanobox
 	cmd := exec.Command("docker", "network", "inspect", "nanobox")
 	b, err := cmd.CombinedOutput()
@@ -167,7 +177,7 @@ func (self Native) hasNetwork() bool {
 	return true
 }
 
-func (self Native) hasMount(mount string) bool {
+func (native Native) hasMount(mount string) bool {
 	fi, err := os.Lstat(mount)
 	if err != nil {
 		if os.IsNotExist(err) {

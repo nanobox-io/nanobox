@@ -1,8 +1,11 @@
 package processor
 
 import (
+	"fmt"
+
 	"github.com/nanobox-io/nanobox-golang-stylish"
 
+	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/counter"
 	"github.com/nanobox-io/nanobox/util/locker"
@@ -20,25 +23,33 @@ func devTeardownFunc(control ProcessControl) (Processor, error) {
 	return &devTeardown{control}, nil
 }
 
-func (self devTeardown) Results() ProcessControl {
-	return self.control
+func (teardown devTeardown) Results() ProcessControl {
+	return teardown.control
 }
 
-func (self *devTeardown) Process() error {
+func (teardown *devTeardown) Process() error {
 	// dont shut anything down if we are supposed to background
 	if DefaultConfig.Background {
 		return nil
 	}
 
-	if err := self.teardownApp(); err != nil {
+	if err := teardown.teardownApp(); err != nil {
 		return err
 	}
 
-	return self.teardownProvider()
+	if err := teardown.teardownMounts(); err != nil {
+		return err
+	}
+
+	if err := teardown.teardownProvider(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // teardownApp tears down the app when it's not being used
-func (self *devTeardown) teardownApp() error {
+func (teardown *devTeardown) teardownApp() error {
 
 	counter.Decrement(util.AppName())
 
@@ -50,12 +61,12 @@ func (self *devTeardown) teardownApp() error {
 	if appIsUnused() {
 
 		// Stop the platform services
-		if err := Run("platform_stop", self.control); err != nil {
+		if err := Run("platform_stop", teardown.control); err != nil {
 			return err
 		}
 
 		// stop all data services
-		if err := Run("service_stop_all", self.control); err != nil {
+		if err := Run("service_stop_all", teardown.control); err != nil {
 			return err
 		}
 	}
@@ -63,8 +74,44 @@ func (self *devTeardown) teardownApp() error {
 	return nil
 }
 
+// teardownMounts removes the unused mounts from the provider
+func (teardown *devTeardown) teardownMounts() error {
+
+	// establish a local app lock to ensure we're the only ones bringing
+	// down the app platform. Also ensure that we release it even if we error
+	locker.LocalLock()
+	defer locker.LocalUnlock()
+
+	// short-circuit if the app is still in use
+	if !appIsUnused() {
+		return nil
+	}
+
+	// unmount the engine if it's a local directory
+	if util.EngineDir() != "" {
+		src := util.EngineDir()
+		dst := fmt.Sprintf("%s%s/engine", provider.HostShareDir(), util.AppName())
+
+		// unmount the share on the provider
+		if err := provider.RemoveMount(src, dst); err != nil {
+			return err
+		}
+	}
+
+	// unmount the app src
+	src := util.LocalDir()
+	dst := fmt.Sprintf("%s%s/code", provider.HostShareDir(), util.AppName())
+
+	// unmount the share on the provider
+	if err := provider.RemoveMount(src, dst); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // teardownProvider tears down the provider when it's not being used
-func (self *devTeardown) teardownProvider() error {
+func (teardown *devTeardown) teardownProvider() error {
 
 	count, err := counter.Decrement("provider")
 	if err != nil {
@@ -79,9 +126,9 @@ func (self *devTeardown) teardownProvider() error {
 
 	if providerIsUnused() {
 		// stop the provider
-		return Run("provider_stop", self.control)
+		return Run("provider_stop", teardown.control)
 	}
-	self.control.Display(stylish.Bullet("%d dev's still running so leaving the provider up", count))
+	teardown.control.Display(stylish.Bullet("%d dev's still running so leaving the provider up", count))
 	return nil
 }
 

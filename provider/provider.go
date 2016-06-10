@@ -22,6 +22,8 @@ type (
 		RemoveIP(ip string) error
 		AddNat(host, container string) error
 		RemoveNat(host, container string) error
+		AddShare(local, host string) error
+		RemoveShare(local, host string) error
 		AddMount(local, host string) error
 		RemoveMount(local, host string) error
 	}
@@ -155,6 +157,24 @@ func RemoveNat(host, container string) error {
 	}
 
 	return p.RemoveNat(host, container)
+}
+
+func AddShare(local, host string) error {
+	p, err := fetchProvider()
+	if err != nil {
+		return err
+	}
+
+	return p.AddShare(local, host)
+}
+
+func RemoveShare(local, host string) error {
+	p, err := fetchProvider()
+	if err != nil {
+		return err
+	}
+
+	return p.RemoveShare(local, host)
 }
 
 func AddMount(local, host string) error {
