@@ -177,9 +177,9 @@ func (self *serviceConfigure) loadService() error {
 // loadBoxfile loads the new build boxfile from the database
 func (self *serviceConfigure) loadBoxfile() error {
 
-	if err := data.Get(util.AppName()+"_meta", "build_boxfile", &self.boxfile); err != nil {
-		return err
-	}
+	// we won't worry about erroring here, because there may not be
+	// a build_boxfile at this point
+	data.Get(util.AppName()+"_meta", "build_boxfile", &self.boxfile)
 
 	return nil
 }
