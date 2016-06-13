@@ -35,12 +35,32 @@ var (
 		// all subcommands since this is the root command)
 		PersistentPreRun: func(ccmd *cobra.Command, args []string) {
 
-			// each time nanobox is run we want to check to see if there are updates
-			// available (if we haven't checked for [14 days]). If we need to update
-			// UpdateCmd is run with the Force option set to true, this will trigger
-			// the update processor to run the automatic update. After the update nanobox
-			// will os.Exit(0) (see update processor)
-			if fi, _ := os.Stat(util.UpdateFile()); time.Since(fi.ModTime()).Hours() >= 336.0 {
+			// NOTE: each time nanobox is run we want to check to see if there are
+			// updates available. If we need to update, UpdateCmd is run. After an
+			// update nanobox will os.Exit(0) (see processor/update.go)
+
+			// stat the ~.nanobox/.update file to get its last modified time; we don't
+			// need to handle the error here becase util.UpdateFile() will either return
+			// safely if the file exists, or create it if it doesn't.
+			fi, _ := os.Stat(util.UpdateFile())
+
+			// get the last modified time in hours; Hours() is the greatest measurement
+			// of time in go, otherwise I would have used days
+			lastUpdated := time.Since(fi.ModTime()).Hours()
+
+			//
+			switch {
+
+			// if lastUpdated is less than [< 10 seconds] ago then we'll assume that the
+			// file was just created and we'll run an update; this case is for people
+			// who probably used the installer and most likely have an old version of
+			// nanobox
+			case lastUpdated <= 0.0025:
+				UpdateCmd.Run(nil, nil)
+
+			// if lastUpdated is more than [14 days] ago, then we'll run the auto-update
+			// process, prompting the user if they want to update
+			case lastUpdated >= 336.0:
 				processor.DefaultConfig.Force = true
 				UpdateCmd.Run(nil, nil)
 			}
