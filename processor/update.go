@@ -48,7 +48,7 @@ func (u *update) Process() error {
 	// determine if nanobox needs to be updated
 	update, err := updatable()
 	if err != nil {
-		return fmt.Errorf("Unable to determin if updates are available %v", err.Error())
+		return fmt.Errorf("Unable to determine if updates are available %v", err.Error())
 	}
 
 	// NOTE: we just want to os.Exit(0) after an update; the reason is contextual...
@@ -67,6 +67,10 @@ func (u *update) Process() error {
 	case update && u.control.Force:
 		autoUpdate()
 		os.Exit(0)
+
+	// everything is up-to-date
+	default:
+		fmt.Printf("Nanobox is up-to-date (v%s)\n", util.VERSION)
 	}
 
 	return nil
@@ -172,9 +176,8 @@ func downloadUpdater(location string) error {
 	// the updateder is not available and needs to be downloaded
 	dl := fmt.Sprintf("%s/%s/%s/nanobox-updater", pathToDownload, runtime.GOOS, runtime.GOARCH)
 
-	fmt.Printf("'nanobox-updater' not found. Downloading from %s\n", dl)
-
 	// download the updater
+	fmt.Printf("'nanobox-updater' not found. Downloading from '%s' to '%s'\n", dl, location)
 	fileutil.Progress(dl, f)
 
 	// ensure updater download matches the remote md5; if the download fails for
