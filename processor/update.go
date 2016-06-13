@@ -20,28 +20,28 @@ import (
 //
 var pathToDownload = "https://s3.amazonaws.com/tools.nanobox.io/nanobox/v1"
 
-// updateProcess is the process created for updating nanobox
-type updateProcess struct {
+// processUpdate is the process created for updating nanobox
+type processUpdate struct {
 	control ProcessControl
 }
 
-// init registers "updateFunc" to "update" command
+//
 func init() {
 	Register("update", updateFunc)
 }
 
-// updateFunc returns "update" (above) to be run as a processor
+//
 func updateFunc(control ProcessControl) (Processor, error) {
-	return &updateProcess{control}, nil
+	return &processUpdate{control}, nil
 }
 
-// Results ...
-func (update updateProcess) Results() ProcessControl {
+//
+func (update processUpdate) Results() ProcessControl {
 	return update.control
 }
 
-// Process ...
-func (update *updateProcess) Process() error {
+//
+func (update *processUpdate) Process() error {
 
 	// determine if nanobox needs to be updated
 	updateAvailable, err := updatable()
@@ -55,15 +55,17 @@ func (update *updateProcess) Process() error {
 	// exit and let them re-run their command
 	switch {
 
+	// update if the update command is run, updates are available, AND the command
+	// as forced; this is how we handle our auto update or updating on first run.
+	// We need to check this first because we want it to happen before a regular
+	// update
+	case updateAvailable && update.control.Force:
+		autoUpdate()
+		os.Exit(0)
+
 	// update if the update command is run and updates are available
 	case updateAvailable:
 		manualUpdate()
-		os.Exit(0)
-
-		// update if the update command is run, updates are available, AND the command
-		// as forced; this is how we handle our auto update...
-	case updateAvailable && update.control.Force:
-		autoUpdate()
 		os.Exit(0)
 
 	// everything is up-to-date
@@ -99,17 +101,17 @@ func updatable() (bool, error) {
 func autoUpdate() error {
 
 	//
-	switch printutil.Prompt("Nanobox is out of date, would you like to update it now (y/N)? ") {
+	switch printutil.Prompt("Nanobox is out of date, would you like to update it now (Y/n)? ") {
 
-	// don't update by default, assuming they'll just do it manually, prompting
-	// again after 14 days
+	// update by default
 	default:
+		manualUpdate()
+
+	// if no update, then update the .nanobox/.update file; this will cause nanobox
+	// to check for updates again after [14 days]
+	case "NO", "No", "no", "N", "n":
 		fmt.Println("You can manually update at any time with 'nanobox update'.")
 		return touchUpdate()
-
-	// if yes continue to update
-	case "Yes", "yes", "Y", "y":
-		manualUpdate()
 	}
 
 	return nil

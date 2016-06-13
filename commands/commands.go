@@ -51,16 +51,18 @@ var (
 			switch {
 
 			// if lastUpdated is less than [< 10 seconds] ago then we'll assume that the
-			// file was just created and we'll run an update; this case is for people
-			// who probably used the installer and most likely have an old version of
-			// nanobox
+			// file was just created and we'll prompt for an update; this case is for
+			// people who probably used the installer and most likely have an old version
+			// of nanobox
 			case lastUpdated <= 0.0025:
 				fmt.Printf(stylish.Bullet("First time running nanobox - checking for updates..."))
+				processor.DefaultConfig.Force = true
 				UpdateCmd.Run(nil, nil)
 
 			// if lastUpdated is more than [14 days] ago, then we'll run the auto-update
 			// process, prompting the user if they want to update
 			case lastUpdated >= 336.0:
+				fmt.Printf(stylish.Bullet("14 days since last update - checking for updates ..."))
 				processor.DefaultConfig.Force = true
 				UpdateCmd.Run(nil, nil)
 			}
