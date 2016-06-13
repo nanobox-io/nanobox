@@ -13,13 +13,13 @@ var (
 	// ConsoleCmd ...
 	ConsoleCmd = &cobra.Command{
 		Use:   "console",
-		Short: "do the console thing",
+		Short: "Opens an interactive console inside a production component.",
 		Long:  ``,
 
 		PreRun: validCheck("provider"),
 		Run: func(ccmd *cobra.Command, args []string) {
 			if len(args) != 1 {
-				fmt.Println("i need a container to run in")
+				fmt.Println("I need a component to run in")
 				return
 			}
 			processor.DefaultConfig.Meta["alias"] = app
@@ -31,5 +31,5 @@ var (
 )
 
 func init() {
-	ConsoleCmd.Flags().StringVarP(&app, "app", "a", "", "production app name or alias")
+	ConsoleCmd.Flags().StringVarP(&app, "app", "a", "", "app-name or alias")
 }

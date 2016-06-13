@@ -13,8 +13,12 @@ var (
 	// TunnelCmd ...
 	TunnelCmd = &cobra.Command{
 		Use:   "tunnel",
-		Short: "do the tunnel thing",
-		Long:  ``,
+		Short: "Creates a secure tunnel between your local machine & a production component.",
+		Long:  `
+Creates a secure tunnel between your local machine & a
+production component. The tunnel allows you to manage
+production data using your local client of choice.
+		`,
 
 		PreRun: validCheck("provider"),
 		Run: func(ccmd *cobra.Command, args []string) {

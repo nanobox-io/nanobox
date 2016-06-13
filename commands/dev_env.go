@@ -16,15 +16,18 @@ var (
 	// DevEnvCmd ...
 	DevEnvCmd = &cobra.Command{
 		Use:   "evar",
-		Short: "run an env command",
+		Short: "Manages environment variables in your local dev app.",
 		Long:  ``,
 	}
 
 	// DevEnvAddCmd ...
 	DevEnvAddCmd = &cobra.Command{
 		Use:   "add",
-		Short: "run an env command",
-		Long:  ``,
+		Short: "Adds environment variable(s) to your dev app.",
+		Long:  `
+Adds environment variable(s) to your dev app. Multiple key-value
+pairs can be added simultaneously using a comma-delimited list.
+		`,
 		Run: func(ccmd *cobra.Command, args []string) {
 			evars := models.EnvVars{}
 			data.Get(util.AppName()+"_meta", "env", &evars)
@@ -44,8 +47,11 @@ var (
 	// DevEnvRemoveCmd ...
 	DevEnvRemoveCmd = &cobra.Command{
 		Use:   "remove",
-		Short: "run an env command",
-		Long:  ``,
+		Short: "Removes environment variable(s) from your dev app.",
+		Long:  `
+Removes environment variable(s) from your dev app. Multiple keys
+can be removed simultaneously using a comma-delimited list.
+		`,
 		Run: func(ccmd *cobra.Command, args []string) {
 			evars := models.EnvVars{}
 			data.Get(util.AppName()+"_meta", "env", &evars)
@@ -61,7 +67,7 @@ var (
 	// DevEnvListCmd ...
 	DevEnvListCmd = &cobra.Command{
 		Use:   "list",
-		Short: "run an env command",
+		Short: "Lists all environment variables registered in your dev app.",
 		Long:  ``,
 		Run: func(ccmd *cobra.Command, args []string) {
 			evars := models.EnvVars{}

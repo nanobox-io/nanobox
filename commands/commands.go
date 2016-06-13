@@ -114,11 +114,11 @@ func init() {
 	// persistent flags
 	NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultConfig.Background, "background", "", false, "Stops nanobox from auto-suspending.")
 	NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultConfig.Force, "force", "f", false, "Forces a command to run (effects vary per command).")
-	NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultConfig.Verbose, "verbose", "v", false, "Increase display output.")
-	NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultConfig.Quiet, "quiet", "q", false, "Decrease display output.")
+	NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultConfig.Verbose, "verbose", "v", false, "Increases display output.")
+	NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultConfig.Quiet, "quiet", "q", false, "Decreases display output.")
 
 	// local flags
-	NanoboxCmd.Flags().BoolVarP(&version, "version", "", false, "Display the current version of this CLI")
+	NanoboxCmd.Flags().BoolVarP(&version, "version", "", false, "Displays the current version of this CLI.")
 
 	// nanobox commands
 	NanoboxCmd.AddCommand(UpdateCmd)

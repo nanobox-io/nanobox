@@ -11,7 +11,7 @@ var (
 	// DevNetfsCmd ...
 	DevNetfsCmd = &cobra.Command{
 		Use:    "netfs",
-		Short:  "add or remove netfs directories",
+		Short:  "Add or remove netfs directories.",
 		Long:   ``,
 		Hidden: true,
 	}
@@ -19,7 +19,7 @@ var (
 	// DevNetfsAddCmd ...
 	DevNetfsAddCmd = &cobra.Command{
 		Use:    "add",
-		Short:  "add a netfs export",
+		Short:  "Add a netfs export.",
 		Long:   ``,
 		Hidden: true,
 		Run:    devNetfsAddFunc,
@@ -28,7 +28,7 @@ var (
 	// DevNetfsRmCmd ...
 	DevNetfsRmCmd = &cobra.Command{
 		Use:    "rm",
-		Short:  "remove a netfs export",
+		Short:  "Remove a netfs export.",
 		Long:   ``,
 		Hidden: true,
 		Run:    devNetfsRmFunc,

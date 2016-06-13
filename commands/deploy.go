@@ -11,7 +11,7 @@ var (
 	// DeployCmd ...
 	DeployCmd = &cobra.Command{
 		Use:   "deploy",
-		Short: "get the production credentials and ensure production connection",
+		Short: "Deploys your generated build package to a production app.",
 		Long:  ``,
 
 		Run: func(ccmd *cobra.Command, args []string) {

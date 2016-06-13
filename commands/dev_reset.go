@@ -11,7 +11,7 @@ var (
 	// DevResetCmd ...
 	DevResetCmd = &cobra.Command{
 		Use:   "reset",
-		Short: "reset the dev usage counters",
+		Short: "Resets the dev VM registry.",
 		Long:  ``,
 
 		PreRun: validCheck("provider"),

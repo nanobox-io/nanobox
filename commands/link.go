@@ -12,15 +12,19 @@ var (
 	// LinkCmd ...
 	LinkCmd = &cobra.Command{
 		Use:   "link",
-		Short: "link a dev application with a production one",
-		Long:  `can be linked to more then one app`,
+		Short: "Manages links between dev & production apps.",
+		Long:  ``,
 	}
 
 	// LinkAddCmd ...
 	LinkAddCmd = &cobra.Command{
 		Use:   "add",
-		Short: "link a dev application with a production one",
-		Long:  `can be linked to more then one app`,
+		Short: "Adds a new link between a dev & production app.",
+		Long:  `
+Adds a new link between a dev and production app. A dev app can
+be linked to multiple production apps. Each link needs an alias.
+If no alias is provided, 'default' is assumed.
+		`,
 
 		Run: func(ccmd *cobra.Command, args []string) {
 			processor.DefaultConfig.Meta["name"] = app
@@ -31,9 +35,9 @@ var (
 
 	// LinkListCmd ...
 	LinkListCmd = &cobra.Command{
-		Use:   "List",
-		Short: "list",
-		Long:  `list`,
+		Use:   "list",
+		Short: "Lists all links for the current dev app.",
+		Long:  ``,
 
 		Run: func(ccmd *cobra.Command, args []string) {
 			handleError(processor.Run("link_list", processor.DefaultConfig))
@@ -43,8 +47,8 @@ var (
 	// LinkRemoveCmd ...
 	LinkRemoveCmd = &cobra.Command{
 		Use:   "remove",
-		Short: "remove",
-		Long:  `remove`,
+		Short: "Removes a link between a dev & production app.",
+		Long:  ``,
 
 		Run: func(ccmd *cobra.Command, args []string) {
 			processor.DefaultConfig.Meta["alias"] = alias

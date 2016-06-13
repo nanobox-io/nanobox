@@ -11,7 +11,7 @@ var (
 	// DevInfoCmd ...
 	DevInfoCmd = &cobra.Command{
 		Use:   "info",
-		Short: "get this things information",
+		Short: "Displays information about the running app and its components.",
 		Long:  ``,
 
 		PreRun: validCheck("provider"),

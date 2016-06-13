@@ -11,7 +11,7 @@ var (
 	// LoginCmd ...
 	LoginCmd = &cobra.Command{
 		Use:   "login",
-		Short: "get the production credentials and ensure production connection",
+		Short: "Authenticates your nanobox client with your nanobox.io account.",
 		Long:  ``,
 
 		Run: func(ccmd *cobra.Command, args []string) {

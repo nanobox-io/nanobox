@@ -11,8 +11,12 @@ var (
 	// DevCmd ...
 	DevCmd = &cobra.Command{
 		Use:   "dev",
-		Short: "Starts the nanobox, provisions app, & opens an interactive terminal",
-		Long:  ``,
+		Short: "Starts the Nanobox VM, provisions app, & opens an interactive terminal.",
+		Long:  `
+Starts the Nanobox VM, provisions app, & opens an interactive
+terminal. This is the primary command for managing local dev
+apps and interacting with your Nanobox VM.
+		`,
 
 		PreRun: validCheck("provider"),
 		Run: func(ccmd *cobra.Command, args []string) {

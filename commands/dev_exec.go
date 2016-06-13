@@ -14,7 +14,7 @@ var (
 	// DevExecCmd ...
 	DevExecCmd = &cobra.Command{
 		Use:   "exec",
-		Short: "execute a command",
+		Short: "Executes a command inside your local dev app.",
 		Long:  ``,
 
 		PreRun: validCheck("provider"),

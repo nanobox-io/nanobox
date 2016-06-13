@@ -13,13 +13,13 @@ var (
 	// DevConsoleCmd ...
 	DevConsoleCmd = &cobra.Command{
 		Use:   "console",
-		Short: "do the console thing",
+		Short: "Opens an interactive console inside your Nanobox VM.",
 		Long:  ``,
 
 		PreRun: validCheck("provider"),
 		Run: func(ccmd *cobra.Command, args []string) {
 			if len(args) != 1 {
-				fmt.Println("i need a container to run in")
+				fmt.Println("I need a container to run in")
 				return
 			}
 			processor.DefaultConfig.Meta["name"] = args[0]

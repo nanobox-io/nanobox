@@ -11,8 +11,12 @@ var (
 	// DevDeployCmd ...
 	DevDeployCmd = &cobra.Command{
 		Use:   "deploy",
-		Short: "start a nanobox application as if it is in production",
-		Long:  ``,
+		Short: "Deploys your build package into your Nanobox VM and starts all services.",
+		Long:  `
+Deploys your build package into your Nanobox VM and
+starts all services. This is used to simulate a full
+deploy locally, before deploying into production.
+		`,
 
 		PreRun: validCheck("provider"),
 		Run: func(ccmd *cobra.Command, args []string) {

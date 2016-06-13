@@ -13,8 +13,11 @@ var (
 	// UpdateCmd ...
 	UpdateCmd = &cobra.Command{
 		Use:   "update",
-		Short: "Updates this CLI to the newest available version (does not update major versions)",
-		Long:  ``,
+		Short: "Updates the Nanobox CLI to the newest available *minor* version.",
+		Long:  `
+Updates the Nanobox CLI to the newest available *minor* version.
+Major version updates must be manually downloaded & installed.
+		`,
 
 		Run: func(ccmd *cobra.Command, args []string) {
 
