@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/jcelliott/lumber"
+	"github.com/pagodabox/nanobox-golang-stylish"
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/processor"
@@ -20,12 +21,10 @@ import (
 	"github.com/nanobox-io/nanobox/validate"
 )
 
-// VERSION ...
-const VERSION = "1.0.0"
-
 //
 var (
-	//
+
+	// NanoboxCmd ...
 	NanoboxCmd = &cobra.Command{
 		Use:   "nanobox",
 		Short: "",
@@ -56,6 +55,7 @@ var (
 			// who probably used the installer and most likely have an old version of
 			// nanobox
 			case lastUpdated <= 0.0025:
+				fmt.Printf(stylish.Bullet("First time running nanobox - checking for updates..."))
 				UpdateCmd.Run(nil, nil)
 
 			// if lastUpdated is more than [14 days] ago, then we'll run the auto-update
@@ -90,7 +90,7 @@ var (
 			// hijack the verbose flag (-v), and use it to display the version of the
 			// CLI
 			if version || processor.DefaultConfig.Verbose {
-				fmt.Printf("nanobox v%v\n", VERSION)
+				fmt.Printf("nanobox v%v\n", util.VERSION)
 				return
 			}
 
