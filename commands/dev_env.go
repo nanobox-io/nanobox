@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
@@ -24,13 +24,13 @@ var (
 	DevEnvAddCmd = &cobra.Command{
 		Use:   "add",
 		Short: "Adds environment variable(s) to your dev app.",
-		Long:  `
+		Long: `
 Adds environment variable(s) to your dev app. Multiple key-value
 pairs can be added simultaneously using a comma-delimited list.
 		`,
 		Run: func(ccmd *cobra.Command, args []string) {
 			evars := models.EnvVars{}
-			data.Get(util.AppName()+"_meta", "env", &evars)
+			data.Get(config.AppName()+"_meta", "env", &evars)
 			for _, arg := range args {
 				for _, pair := range strings.Split(arg, ",") {
 					parts := strings.Split(pair, ":")
@@ -40,7 +40,7 @@ pairs can be added simultaneously using a comma-delimited list.
 				}
 			}
 
-			data.Put(util.AppName()+"_meta", "env", evars)
+			data.Put(config.AppName()+"_meta", "env", evars)
 		},
 	}
 
@@ -48,19 +48,19 @@ pairs can be added simultaneously using a comma-delimited list.
 	DevEnvRemoveCmd = &cobra.Command{
 		Use:   "remove",
 		Short: "Removes environment variable(s) from your dev app.",
-		Long:  `
+		Long: `
 Removes environment variable(s) from your dev app. Multiple keys
 can be removed simultaneously using a comma-delimited list.
 		`,
 		Run: func(ccmd *cobra.Command, args []string) {
 			evars := models.EnvVars{}
-			data.Get(util.AppName()+"_meta", "env", &evars)
+			data.Get(config.AppName()+"_meta", "env", &evars)
 			for _, arg := range args {
 				for _, key := range strings.Split(arg, ",") {
 					delete(evars, strings.ToUpper(key))
 				}
 			}
-			data.Put(util.AppName()+"_meta", "env", evars)
+			data.Put(config.AppName()+"_meta", "env", evars)
 		},
 	}
 
@@ -71,7 +71,7 @@ can be removed simultaneously using a comma-delimited list.
 		Long:  ``,
 		Run: func(ccmd *cobra.Command, args []string) {
 			evars := models.EnvVars{}
-			data.Get(util.AppName()+"_meta", "env", &evars)
+			data.Get(config.AppName()+"_meta", "env", &evars)
 			fmt.Println(evars)
 		},
 	}

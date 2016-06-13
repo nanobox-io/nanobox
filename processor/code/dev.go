@@ -15,6 +15,7 @@ import (
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/counter"
 	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/ipControl"
@@ -87,7 +88,7 @@ func (codeDev *processCodeDev) Process() error {
 // loadApp loads the app from the db
 func (codeDev *processCodeDev) loadApp() error {
 
-	if err := data.Get("apps", util.AppName(), &codeDev.app); err != nil {
+	if err := data.Get("apps", config.AppName(), &codeDev.app); err != nil {
 		return err
 	}
 
@@ -98,7 +99,7 @@ func (codeDev *processCodeDev) loadApp() error {
 func (codeDev *processCodeDev) setup() error {
 
 	// let anyone else know we're using the provider
-	counter.Increment(util.AppName() + "_dev")
+	counter.Increment(config.AppName() + "_dev")
 
 	// establish a local lock to ensure we're the only ones bringing up the
 	// dev container. Also, we need to ensure the lock is released even in we error
@@ -139,7 +140,7 @@ func (codeDev *processCodeDev) setup() error {
 		}
 
 		//
-		if _, err := util.Exec(codeDev.container.ID, "user", util.UserPayload(), processor.ExecWriter()); err != nil {
+		if _, err := util.Exec(codeDev.container.ID, "user", config.UserPayload(), processor.ExecWriter()); err != nil {
 			return err
 		}
 
@@ -155,7 +156,7 @@ func (codeDev *processCodeDev) setup() error {
 // teardown ...
 func (codeDev *processCodeDev) teardown() error {
 
-	counter.Decrement(util.AppName() + "_dev")
+	counter.Decrement(config.AppName() + "_dev")
 
 	// establish a local app lock to ensure we're the only ones bringing
 	// down the app platform. Also ensure that we release it even if we error
@@ -187,7 +188,7 @@ func (codeDev *processCodeDev) teardown() error {
 // loadBoxfile loads the build boxfile from the database
 func (codeDev *processCodeDev) loadBoxfile() error {
 
-	if err := data.Get(util.AppName()+"_meta", "build_boxfile", &codeDev.boxfile); err != nil {
+	if err := data.Get(config.AppName()+"_meta", "build_boxfile", &codeDev.boxfile); err != nil {
 		return err
 	}
 
@@ -240,7 +241,7 @@ func (codeDev *processCodeDev) releaseIP() error {
 func (codeDev *processCodeDev) launchContainer() error {
 	// parse the boxfile data
 	boxfile := boxfile.New(codeDev.boxfile.Data)
-	appName := util.AppName()
+	appName := config.AppName()
 
 	config := docker.ContainerConfig{
 		Name:    fmt.Sprintf("nanobox-%s-dev", appName),
@@ -275,7 +276,7 @@ func (codeDev *processCodeDev) launchContainer() error {
 // removeContainer will lookup the dev container and remove it
 func (codeDev *processCodeDev) removeContainer() error {
 
-	name := fmt.Sprintf("nanobox-%s-dev", util.AppName())
+	name := fmt.Sprintf("nanobox-%s-dev", config.AppName())
 
 	// grab the container info
 	container, err := docker.GetContainer(name)
@@ -295,7 +296,7 @@ func (codeDev *processCodeDev) removeContainer() error {
 func (codeDev *processCodeDev) devPayload() string {
 	rtn := map[string]interface{}{}
 	envVars := models.EnvVars{}
-	data.Get(util.AppName()+"_meta", "env", &envVars)
+	data.Get(config.AppName()+"_meta", "env", &envVars)
 	rtn["env"] = envVars
 	bytes, _ := json.Marshal(rtn)
 	return string(bytes)
@@ -398,13 +399,13 @@ func (codeDev *processCodeDev) detachNetwork() error {
 
 // devIsUnused returns true if the dev isn't being used by any other session
 func devIsUnused() bool {
-	count, err := counter.Get(util.AppName() + "_dev")
+	count, err := counter.Get(config.AppName() + "_dev")
 	return count == 0 && err == nil
 }
 
 // isDevRunning returns true if a service is already running
 func isDevRunning() bool {
-	name := fmt.Sprintf("nanobox-%s-%s", util.AppName(), "dev")
+	name := fmt.Sprintf("nanobox-%s-%s", config.AppName(), "dev")
 
 	container, err := docker.GetContainer(name)
 

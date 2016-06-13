@@ -8,7 +8,7 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/ipControl"
 )
@@ -82,7 +82,7 @@ func (serviceRemove *processServiceRemove) validateName() error {
 // loadService loads the service from the database
 func (serviceRemove *processServiceRemove) loadService() error {
 	name := serviceRemove.control.Meta["name"]
-	if err := data.Get(util.AppName(), name, &serviceRemove.service); err != nil {
+	if err := data.Get(config.AppName(), name, &serviceRemove.service); err != nil {
 		return err
 	}
 
@@ -144,7 +144,7 @@ func (serviceRemove *processServiceRemove) removeContainer() error {
 func (serviceRemove *processServiceRemove) deleteService() error {
 
 	name := serviceRemove.control.Meta["name"]
-	if err := data.Delete(util.AppName(), name); err != nil {
+	if err := data.Delete(config.AppName(), name); err != nil {
 		return err
 	}
 

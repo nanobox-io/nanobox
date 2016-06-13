@@ -6,7 +6,7 @@ import (
 	"github.com/nanobox-io/nanobox-golang-stylish"
 
 	"github.com/nanobox-io/nanobox/provider"
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
@@ -61,7 +61,7 @@ func (devDestroy processDevDestroy) Process() error {
 
 // removeServices gets all the services in the app and remove them
 func (devDestroy processDevDestroy) removeServices() error {
-	services, err := data.Keys(util.AppName())
+	services, err := data.Keys(config.AppName())
 	if err != nil {
 		return fmt.Errorf("data keys: %s", err.Error())
 	}
@@ -70,7 +70,7 @@ func (devDestroy processDevDestroy) removeServices() error {
 	for _, service := range services {
 		if service != "build" {
 			// svc := models.Service{}
-			// data.Get(util.AppName(), service, &svc)
+			// data.Get(config.AppName(), service, &svc)
 			devDestroy.control.Meta["name"] = service
 			err := Run("service_destroy", devDestroy.control)
 			if err != nil {
@@ -88,9 +88,9 @@ func (devDestroy processDevDestroy) removeServices() error {
 func (devDestroy processDevDestroy) removeMounts() error {
 
 	// unmount the engine if it's a local directory
-	if util.EngineDir() != "" {
-		src := util.EngineDir()
-		dst := fmt.Sprintf("%s%s/engine", provider.HostShareDir(), util.AppName())
+	if config.EngineDir() != "" {
+		src := config.EngineDir()
+		dst := fmt.Sprintf("%s%s/engine", provider.HostShareDir(), config.AppName())
 
 		// unmount the share on the provider
 		if err := provider.RemoveMount(src, dst); err != nil {
@@ -104,8 +104,8 @@ func (devDestroy processDevDestroy) removeMounts() error {
 	}
 
 	// unmount the app src
-	src := util.LocalDir()
-	dst := fmt.Sprintf("%s%s/code", provider.HostShareDir(), util.AppName())
+	src := config.LocalDir()
+	dst := fmt.Sprintf("%s%s/code", provider.HostShareDir(), config.AppName())
 
 	// unmount the share on the provider
 	if err := provider.RemoveMount(src, dst); err != nil {

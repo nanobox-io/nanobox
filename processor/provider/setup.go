@@ -15,6 +15,11 @@ type processProviderSetup struct {
 }
 
 //
+func init() {
+	processor.Register("provider_setup", providerSetupFunc)
+}
+
+//
 func providerSetupFunc(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 

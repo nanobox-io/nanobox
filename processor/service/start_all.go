@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/nanobox-io/nanobox/processor"
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
@@ -41,7 +41,7 @@ func (serviceStartAll processServiceStartAll) Process() error {
 
 // startServices starts all of the services saved in the database
 func (serviceStartAll processServiceStartAll) startServices() error {
-	services, err := data.Keys(util.AppName())
+	services, err := data.Keys(config.AppName())
 	if err != nil {
 		return err
 	}

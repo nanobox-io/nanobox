@@ -9,6 +9,7 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
@@ -75,7 +76,7 @@ func (codeConfigure *processCodeConfigure) Process() error {
 	service := models.Service{}
 
 	//
-	if err := data.Get(util.AppName(), codeConfigure.control.Meta["name"], &service); err != nil {
+	if err := data.Get(config.AppName(), codeConfigure.control.Meta["name"], &service); err != nil {
 		return err
 	}
 
@@ -109,7 +110,7 @@ func (codeConfigure *processCodeConfigure) Process() error {
 
 	//
 	service.State = ACTIVE
-	if err := data.Put(util.AppName(), codeConfigure.control.Meta["name"], service); err != nil {
+	if err := data.Put(config.AppName(), codeConfigure.control.Meta["name"], service); err != nil {
 		return err
 	}
 
@@ -136,11 +137,11 @@ func (codeConfigure processCodeConfigure) startPayload() string {
 func (codeConfigure *processCodeConfigure) configurePayload() (string, error) {
 
 	me := models.Service{}
-	err := data.Get(util.AppName(), codeConfigure.control.Meta["name"], &me)
+	err := data.Get(config.AppName(), codeConfigure.control.Meta["name"], &me)
 	boxfile := boxfile.New([]byte(codeConfigure.control.Meta["boxfile"]))
 
 	logvac := models.Service{}
-	data.Get(util.AppName(), "logvac", &logvac)
+	data.Get(config.AppName(), "logvac", &logvac)
 
 	pload := payload{
 		LogvacHost: logvac.InternalIP,
@@ -172,7 +173,7 @@ func (codeConfigure *processCodeConfigure) mounts() []mount {
 		// i think i store these as data.name
 		// cleanNode := regexp.MustCompile(`.+\.`).ReplaceAllString(node, "")
 		service := models.Service{}
-		err := data.Get(util.AppName(), node, &service)
+		err := data.Get(config.AppName(), node, &service)
 		if err != nil {
 			// skip because of problems
 			fmt.Println("cant get service:", err)
@@ -193,7 +194,7 @@ func (codeConfigure *processCodeConfigure) mounts() []mount {
 // env ...
 func (codeConfigure *processCodeConfigure) env() map[string]string {
 	envVars := models.EnvVars{}
-	data.Get(util.AppName()+"_meta", "env", &envVars)
+	data.Get(config.AppName()+"_meta", "env", &envVars)
 
 	return envVars
 }

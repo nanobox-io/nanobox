@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/productionAPI"
 )
@@ -51,8 +51,8 @@ func (linkAdd processLinkAdd) Process() error {
 
 	// store the auth token
 	link := models.AppLinks{}
-	data.Get(util.AppName()+"_meta", "links", &link)
+	data.Get(config.AppName()+"_meta", "links", &link)
 	link[linkAdd.control.Meta["alias"]] = app.ID
 
-	return data.Put(util.AppName()+"_meta", "links", link)
+	return data.Put(config.AppName()+"_meta", "links", link)
 }

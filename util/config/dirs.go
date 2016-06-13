@@ -1,4 +1,4 @@
-package util
+package config
 
 import (
 	"os"
@@ -63,7 +63,7 @@ func SSHDir() string {
 // local file system
 func EngineDir() string {
 
-	box := boxfile.NewFromPath(BoxfileLocation())
+	box := boxfile.NewFromPath(Boxfile())
 	engineName := box.Node("env").StringValue("engine")
 
 	//
@@ -88,28 +88,6 @@ func TmpDir() (tmpDir string) {
 	if err := os.MkdirAll(tmpDir, 0755); err != nil {
 		lumber.Fatal("[config/config] os.Mkdir() failed", err.Error())
 	}
-
-	return
-}
-
-// UpdateFile creates an update file thats used in the update process to determine
-// when the last time nanobox was updated
-func UpdateFile() (updateFile string) {
-
-	//
-	updateFile = filepath.ToSlash(filepath.Join(GlobalDir(), ".update"))
-
-	// return the filepath if it's already created...
-	if _, err := os.Stat(updateFile); err == nil {
-		return
-	}
-
-	// ...otherwise create the file
-	f, err := os.Create(updateFile)
-	if err != nil {
-		lumber.Fatal("[config/config] os.Create() failed", err.Error())
-	}
-	defer f.Close()
 
 	return
 }

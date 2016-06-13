@@ -13,6 +13,7 @@ import (
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/ipControl"
 	"github.com/nanobox-io/nanobox/util/print"
@@ -71,7 +72,7 @@ func (codeBuild *processCodeBuild) Process() error {
 	defer codeBuild.stopContainer()
 
 	// run the user hook in the build container
-	if _, err := util.Exec(codeBuild.container.ID, "user", util.UserPayload(), processor.ExecWriter()); err != nil {
+	if _, err := util.Exec(codeBuild.container.ID, "user", config.UserPayload(), processor.ExecWriter()); err != nil {
 		return codeBuild.runDebugSession(err)
 	}
 
@@ -139,7 +140,7 @@ func (codeBuild *processCodeBuild) Process() error {
 
 // loadBoxfile loads the boxfile into the control state
 func (codeBuild *processCodeBuild) loadBoxfile() error {
-	codeBuild.boxfile = boxfile.NewFromPath(util.BoxfileLocation())
+	codeBuild.boxfile = boxfile.NewFromPath(config.Boxfile())
 
 	return nil
 }
@@ -181,9 +182,9 @@ func (codeBuild *processCodeBuild) releaseIP() error {
 // startContainer starts a build container
 func (codeBuild *processCodeBuild) startContainer() error {
 
-	appName := util.AppName()
+	appName := config.AppName()
 	config := docker.ContainerConfig{
-		Name:    fmt.Sprintf("nanobox-%s-build", util.AppName()),
+		Name:    fmt.Sprintf("nanobox-%s-build", config.AppName()),
 		Image:   codeBuild.image, // this will need to be controlurable some time
 		Network: "virt",
 		IP:      codeBuild.localIP.String(),
@@ -226,7 +227,7 @@ func (codeBuild *processCodeBuild) runBoxfileHook() error {
 	// store it in the database as well
 	codeBuild.buildBoxfile.Data = []byte(output)
 
-	return data.Put(util.AppName()+"_meta", "build_boxfile", codeBuild.buildBoxfile)
+	return data.Put(config.AppName()+"_meta", "build_boxfile", codeBuild.buildBoxfile)
 }
 
 // runDebugSession drops the user in the build container to debug

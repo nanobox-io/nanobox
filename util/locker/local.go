@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/jcelliott/lumber"
-	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 )
 
@@ -83,7 +82,7 @@ func LocalUnlock() (err error) {
 // localPort ...
 func localPort() (num int) {
 
-	b := []byte(util.AppName())
+	b := []byte(config.AppName())
 
 	//
 	for i := 0; i < len(b); i++ {

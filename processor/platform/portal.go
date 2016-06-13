@@ -10,7 +10,7 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
@@ -40,7 +40,7 @@ func (updatePortal processUpdatePortal) Process() error {
 	port := models.Service{}
 
 	//
-	if err := data.Get(util.AppName(), "portal", &port); err != nil {
+	if err := data.Get(config.AppName(), "portal", &port); err != nil {
 		return err
 	}
 
@@ -52,7 +52,7 @@ func (updatePortal processUpdatePortal) Process() error {
 	//
 	for _, node := range boxfile.Nodes("code") {
 		service := models.Service{}
-		if err := data.Get(util.AppName(), node, &service); err != nil {
+		if err := data.Get(config.AppName(), node, &service); err != nil {
 			continue // unable to get the service
 		}
 
@@ -117,7 +117,7 @@ func (updatePortal processUpdatePortal) Process() error {
 	if len(boxfile.Nodes("web")) != 0 && len(routes) == 0 {
 		webNode := boxfile.Nodes("web")[0]
 		service := models.Service{}
-		data.Get(util.AppName(), webNode, &service)
+		data.Get(config.AppName(), webNode, &service)
 		routes = append(routes, portal.Route{
 			Path:    "/",
 			Targets: []string{fmt.Sprintf("http://%s:%s", service.InternalIP, "80")},

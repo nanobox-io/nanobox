@@ -10,7 +10,7 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
@@ -76,7 +76,7 @@ func (serviceStart *processServiceStart) Process() error {
 // loadService loads the service from the database
 func (serviceStart *processServiceStart) loadService() error {
 	// get the service from the database
-	err := data.Get(util.AppName(), serviceStart.control.Meta["name"], &serviceStart.service)
+	err := data.Get(config.AppName(), serviceStart.control.Meta["name"], &serviceStart.service)
 	if err != nil {
 		// cannot start a service that wasnt setup (ie saved in the database)
 		return err
@@ -120,7 +120,7 @@ func (serviceStart *processServiceStart) attachNetwork() error {
 func (serviceStart processServiceStart) isServiceRunning() bool {
 	uid := serviceStart.control.Meta["name"]
 
-	container, err := docker.GetContainer(fmt.Sprintf("nanobox-%s-%s", util.AppName(), uid))
+	container, err := docker.GetContainer(fmt.Sprintf("nanobox-%s-%s", config.AppName(), uid))
 
 	// if the container doesn't exist then just return false
 	return err == nil && container.State.Status == "running"

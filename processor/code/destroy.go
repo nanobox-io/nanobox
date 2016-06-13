@@ -7,7 +7,7 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/ipControl"
 )
@@ -43,7 +43,7 @@ func (codeDestroy *processCodeDestroy) Process() error {
 	service := models.Service{}
 
 	//
-	if err := data.Get(util.AppName(), codeDestroy.control.Meta["name"], &service); err != nil {
+	if err := data.Get(config.AppName(), codeDestroy.control.Meta["name"], &service); err != nil {
 		return err
 	}
 
@@ -73,5 +73,5 @@ func (codeDestroy *processCodeDestroy) Process() error {
 	}
 
 	// save the service
-	return data.Delete(util.AppName(), codeDestroy.control.Meta["name"])
+	return data.Delete(config.AppName(), codeDestroy.control.Meta["name"])
 }

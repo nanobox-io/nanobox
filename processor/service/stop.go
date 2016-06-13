@@ -10,7 +10,7 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
@@ -72,7 +72,7 @@ func (serviceStop processServiceStop) Process() error {
 func (serviceStop processServiceStop) isServiceRunning() bool {
 	uid := serviceStop.control.Meta["name"]
 
-	container, err := docker.GetContainer(fmt.Sprintf("nanobox-%s-%s", util.AppName(), uid))
+	container, err := docker.GetContainer(fmt.Sprintf("nanobox-%s-%s", config.AppName(), uid))
 
 	return err == nil && container.State.Status == "running"
 }
@@ -80,7 +80,7 @@ func (serviceStop processServiceStop) isServiceRunning() bool {
 // loadService loads the service from the database
 func (serviceStop *processServiceStop) loadService() error {
 	// get the service from the database
-	err := data.Get(util.AppName(), serviceStop.control.Meta["name"], &serviceStop.service)
+	err := data.Get(config.AppName(), serviceStop.control.Meta["name"], &serviceStop.service)
 	if err != nil {
 		// cannot stop a service that wasnt setup (ie saved in the database)
 		return err

@@ -15,6 +15,7 @@ import (
 	printutil "github.com/sdomino/go-util/print"
 
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 )
 
 //
@@ -164,7 +165,7 @@ func runUpdate() error {
 
 // downloadUpdater attempts to download the nanobox-updater from S3.
 func downloadUpdater(location string) error {
-	tmpFile := filepath.Join(util.TmpDir(), "nanobox-updater")
+	tmpFile := filepath.Join(config.TmpDir(), "nanobox-updater")
 
 	// create a tmp updater in tmp dir
 	f, err := os.Create(tmpFile)
@@ -202,5 +203,5 @@ func downloadUpdater(location string) error {
 
 // touchUpdate updates the mod time on the ~/.nanobox/.update file
 func touchUpdate() error {
-	return os.Chtimes(util.UpdateFile(), time.Now(), time.Now())
+	return os.Chtimes(config.UpdateFile(), time.Now(), time.Now())
 }

@@ -18,6 +18,7 @@ import (
 	_ "github.com/nanobox-io/nanobox/processor/provider"
 	_ "github.com/nanobox-io/nanobox/processor/service"
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/validate"
 )
 
@@ -39,9 +40,9 @@ var (
 			// update nanobox will os.Exit(0) (see processor/update.go)
 
 			// stat the ~.nanobox/.update file to get its last modified time; we don't
-			// need to handle the error here becase util.UpdateFile() will either return
+			// need to handle the error here becase config.UpdateFile() will either return
 			// safely if the file exists, or create it if it doesn't.
-			fi, _ := os.Stat(util.UpdateFile())
+			fi, _ := os.Stat(config.UpdateFile())
 
 			// get the last modified time in hours; Hours() is the greatest measurement
 			// of time in go, otherwise I would have used days
@@ -74,7 +75,7 @@ var (
 				// create a new multi logger
 				multiLogger := lumber.NewMultiLogger()
 
-				fileLogger, err := lumber.NewTruncateLogger(filepath.ToSlash(filepath.Join(util.GlobalDir(), "nanobox.log")))
+				fileLogger, err := lumber.NewTruncateLogger(filepath.ToSlash(filepath.Join(config.GlobalDir(), "nanobox.log")))
 				if err != nil {
 					fmt.Println("logging error:", err)
 				}
@@ -147,6 +148,6 @@ func validCheck(checks ...string) func(ccmd *cobra.Command, args []string) {
 // handleError ...
 func handleError(err error) {
 	if err != nil {
-		fmt.Printf("It appears we have ran into some error:\n%s\n", err.Error())
+		fmt.Printf("It appears you have encountered error:\n%s\n", err.Error())
 	}
 }

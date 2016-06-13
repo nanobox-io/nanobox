@@ -6,7 +6,7 @@ import (
 
 	"github.com/nanobox-io/nanobox-boxfile"
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
@@ -95,7 +95,7 @@ func (devDeploy *processDevDeploy) publishCode() error {
 
 	// setup the var's required for code_publish
 	hoarder := models.Service{}
-	data.Get(util.AppName(), "hoarder", &hoarder)
+	data.Get(config.AppName(), "hoarder", &hoarder)
 	devDeploy.control.Meta["build_id"] = "1234"
 	devDeploy.control.Meta["warehouse_url"] = hoarder.InternalIP
 	devDeploy.control.Meta["warehouse_token"] = "123"

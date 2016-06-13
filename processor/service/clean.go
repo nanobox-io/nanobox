@@ -8,7 +8,7 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
@@ -47,7 +47,7 @@ func (serviceClean processServiceClean) Process() error {
 // they were left in a bad state
 func (serviceClean processServiceClean) cleanServices() error {
 
-	uids, err := data.Keys(util.AppName())
+	uids, err := data.Keys(config.AppName())
 	if err != nil {
 		return err
 	}
@@ -99,7 +99,7 @@ func isServiceDirty(uid string) bool {
 	service := models.Service{}
 
 	// fetch the entry from the database
-	if err := data.Get(util.AppName(), uid, &service); err != nil {
+	if err := data.Get(config.AppName(), uid, &service); err != nil {
 		return true
 	}
 
@@ -113,6 +113,6 @@ func isServiceDirty(uid string) bool {
 
 // containerExists will check to see if a docker container exists on the provider
 func containerExists(uid string) bool {
-	_, err := docker.GetContainer(fmt.Sprintf("nanobox-%s-%s", util.AppName(), uid))
+	_, err := docker.GetContainer(fmt.Sprintf("nanobox-%s-%s", config.AppName(), uid))
 	return err == nil
 }

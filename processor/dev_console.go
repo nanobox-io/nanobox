@@ -6,9 +6,8 @@ import (
 	"os/exec"
 
 	"github.com/jcelliott/lumber"
-
 	"github.com/nanobox-io/golang-docker-client"
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 )
 
 // processDevConsole ...
@@ -46,7 +45,7 @@ func (devConsole processDevConsole) Process() error {
 		name = "build"
 	}
 
-	container, err := docker.GetContainer(fmt.Sprintf("nanobox-%s-%s", util.AppName(), name))
+	container, err := docker.GetContainer(fmt.Sprintf("nanobox-%s-%s", config.AppName(), name))
 	if err == nil {
 		name = container.ID
 	}

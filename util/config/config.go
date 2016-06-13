@@ -4,7 +4,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/nanobox-io/nanobox/util"
 	"github.com/spf13/viper"
 )
 
@@ -64,7 +63,7 @@ func parseConfig() error {
 	if configExists() {
 
 		// parse config file
-		configFile := filepath.Join(util.GlobalDir(), "config.yml")
+		configFile := filepath.Join(GlobalDir(), "config.yml")
 		config.SetConfigFile(configFile)
 
 		// merge with defaults
@@ -80,8 +79,7 @@ func parseConfig() error {
 func configExists() bool {
 
 	// we simply stat the file and if there are no errors the file exists
-	configFile := filepath.Join(util.GlobalDir(), "config.yml")
-	if _, err := os.Stat(configFile); err == nil {
+	if _, err := os.Stat(filepath.Join(GlobalDir(), "config.yml")); err == nil {
 		return true
 	}
 

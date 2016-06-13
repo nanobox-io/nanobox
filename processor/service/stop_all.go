@@ -4,7 +4,7 @@ import (
 	"github.com/nanobox-io/nanobox-golang-stylish"
 
 	"github.com/nanobox-io/nanobox/processor"
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
@@ -42,7 +42,7 @@ func (serviceStopAll processServiceStopAll) Process() error {
 
 // stopServices stops all of the services saved in the database
 func (serviceStopAll processServiceStopAll) stopServices() error {
-	services, err := data.Keys(util.AppName())
+	services, err := data.Keys(config.AppName())
 	if err != nil {
 		return err
 	}

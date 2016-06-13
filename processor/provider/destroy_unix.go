@@ -6,10 +6,10 @@ import (
 	"os/exec"
 	"path/filepath"
 
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 )
 
 // removeDatabase ...
 func (providerDestroy processProviderDestroy) removeDatabase() error {
-	return exec.Command("rm", filepath.ToSlash(filepath.Join(util.GlobalDir(), "data.db"))).Run()
+	return exec.Command("rm", filepath.ToSlash(filepath.Join(config.GlobalDir(), "data.db"))).Run()
 }

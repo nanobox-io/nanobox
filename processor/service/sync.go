@@ -7,7 +7,7 @@ import (
 	"github.com/nanobox-io/nanobox-boxfile"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
@@ -73,7 +73,7 @@ func (serviceSync *processServiceSync) Process() error {
 // loadNewBoxfile loads the new build boxfile from the database
 func (serviceSync *processServiceSync) loadNewBoxfile() error {
 
-	if err := data.Get(util.AppName()+"_meta", "build_boxfile", &serviceSync.newBoxfile); err != nil {
+	if err := data.Get(config.AppName()+"_meta", "build_boxfile", &serviceSync.newBoxfile); err != nil {
 		return err
 	}
 
@@ -84,7 +84,7 @@ func (serviceSync *processServiceSync) loadNewBoxfile() error {
 func (serviceSync *processServiceSync) loadOldBoxfile() error {
 
 	// we don't care about the error here because this could be the first build
-	data.Get(util.AppName()+"_meta", "old_build_boxfile", &serviceSync.oldBoxfile)
+	data.Get(config.AppName()+"_meta", "old_build_boxfile", &serviceSync.oldBoxfile)
 
 	return nil
 }
@@ -92,7 +92,7 @@ func (serviceSync *processServiceSync) loadOldBoxfile() error {
 // replaceOldBoxfile replaces the old boxfile in the database with the new boxfile
 func (serviceSync *processServiceSync) replaceOldBoxfile() error {
 
-	if err := data.Put(util.AppName()+"_meta", "old_build_boxfile", &serviceSync.newBoxfile); err != nil {
+	if err := data.Put(config.AppName()+"_meta", "old_build_boxfile", &serviceSync.newBoxfile); err != nil {
 		return err
 	}
 
@@ -107,7 +107,7 @@ func (serviceSync *processServiceSync) purgeDeltaServices() error {
 	newBoxfile := boxfile.New(serviceSync.newBoxfile.Data)
 
 	// fetch the services
-	uids, err := data.Keys(util.AppName())
+	uids, err := data.Keys(config.AppName())
 	if err != nil {
 		return err
 	}

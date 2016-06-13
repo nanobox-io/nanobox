@@ -3,7 +3,7 @@ package app
 import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/ipControl"
 )
@@ -16,7 +16,7 @@ type processAppSetup struct {
 
 //
 func init() {
-	processor.Register("app_appSetup", appSetupFunc)
+	processor.Register("app_setup", appSetupFunc)
 }
 
 //
@@ -59,7 +59,7 @@ func (appSetup *processAppSetup) Process() error {
 // loadApp loads the app from the db
 func (appSetup *processAppSetup) loadApp() error {
 	// the app might not exist yet, so let's not return the error if it fails
-	data.Get("apps", util.AppName(), &appSetup.app)
+	data.Get("apps", config.AppName(), &appSetup.app)
 
 	// set the default state
 	if appSetup.app.State == "" {
@@ -90,13 +90,13 @@ func (appSetup *processAppSetup) generateEvars() error {
 	evars := models.EnvVars{}
 
 	// ignore the error because it's likely to not exist
-	data.Get(util.AppName()+"_meta", "env", &evars)
+	data.Get(config.AppName()+"_meta", "env", &evars)
 
 	if evars["APP_NAME"] == "" {
-		evars["APP_NAME"] = util.AppName()
+		evars["APP_NAME"] = config.AppName()
 	}
 
-	if err := data.Put(util.AppName()+"_meta", "env", evars); err != nil {
+	if err := data.Put(config.AppName()+"_meta", "env", evars); err != nil {
 		return err
 	}
 
@@ -110,7 +110,7 @@ func (appSetup *processAppSetup) persistApp() error {
 	appSetup.app.State = ACTIVE
 
 	// save the app
-	if err := data.Put("apps", util.AppName(), &appSetup.app); err != nil {
+	if err := data.Put("apps", config.AppName(), &appSetup.app); err != nil {
 		return err
 	}
 

@@ -7,7 +7,7 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanopack/mist/clients"
 )
@@ -36,7 +36,7 @@ func (mistListen processMistListen) Results() processor.ProcessControl {
 //
 func (mistListen processMistListen) Process() error {
 	mist := models.Service{}
-	data.Get(util.AppName(), "mist", &mist)
+	data.Get(config.AppName(), "mist", &mist)
 
 	//
 	client, err := clients.New(mist.ExternalIP+":1445", "123")

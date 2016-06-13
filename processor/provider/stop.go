@@ -11,6 +11,11 @@ type processProviderStop struct {
 }
 
 //
+func init() {
+	processor.Register("provider_stop", providerStopFunc)
+}
+
+//
 func providerStopFunc(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 	return processProviderStop{control}, nil

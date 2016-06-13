@@ -7,7 +7,7 @@ import (
 	"os"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
@@ -115,14 +115,14 @@ func (dev *processDev) runBuild() error {
 func (dev *processDev) fetchOldBoxfile() error {
 	// we don't care about the error here because it's very likely
 	// that there won't be an old boxfile.
-	data.Get(util.AppName()+"_meta", "boxfile", &dev.oldBoxfile)
+	data.Get(config.AppName()+"_meta", "boxfile", &dev.oldBoxfile)
 
 	return nil
 }
 
 // fetchNewBoxfile fetches the new boxfile
 func (dev *processDev) fetchNewBoxfile() error {
-	rawData, err := ioutil.ReadFile(util.BoxfileLocation())
+	rawData, err := ioutil.ReadFile(config.Boxfile())
 
 	if err != nil {
 		return errors.New("unable to load boxfile.yml")
@@ -136,7 +136,7 @@ func (dev *processDev) fetchNewBoxfile() error {
 // persistNewBoxfile persists the new boxfile to the database
 func (dev *processDev) persistNewBoxfile() error {
 
-	key := util.AppName() + "_meta"
+	key := config.AppName() + "_meta"
 	if err := data.Put(key, "boxfile", dev.newBoxfile); err != nil {
 		return err
 	}

@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/nanobox-io/nanobox/provider"
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/counter"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
@@ -74,9 +74,9 @@ func (devSetup *processDevSetup) setupProvider() error {
 func (devSetup *processDevSetup) setupMounts() error {
 
 	// mount the engine if it's a local directory
-	if util.EngineDir() != "" {
-		src := util.EngineDir()
-		dst := fmt.Sprintf("%s%s/engine", provider.HostShareDir(), util.AppName())
+	if config.EngineDir() != "" {
+		src := config.EngineDir()
+		dst := fmt.Sprintf("%s%s/engine", provider.HostShareDir(), config.AppName())
 
 		// first export the share on the workstation
 		if err := provider.AddShare(src, dst); err != nil {
@@ -90,8 +90,8 @@ func (devSetup *processDevSetup) setupMounts() error {
 	}
 
 	// mount the app src
-	src := util.LocalDir()
-	dst := fmt.Sprintf("%s%s/code", provider.HostShareDir(), util.AppName())
+	src := config.LocalDir()
+	dst := fmt.Sprintf("%s%s/code", provider.HostShareDir(), config.AppName())
 
 	// first export the share on the workstation
 	if err := provider.AddShare(src, dst); err != nil {
@@ -110,7 +110,7 @@ func (devSetup *processDevSetup) setupMounts() error {
 func (devSetup *processDevSetup) setupApp() error {
 
 	// let anyone else know we're using the app
-	counter.Increment(util.AppName())
+	counter.Increment(config.AppName())
 
 	// establish an app-level lock to ensure we're the only ones setting up an app
 	// also, we need to ensure that the lock is released even if we error out.

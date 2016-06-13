@@ -10,6 +10,7 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
@@ -111,10 +112,10 @@ func (serviceConfigure processServiceConfigure) Process() error {
 // configurePayload ...
 func (serviceConfigure processServiceConfigure) configurePayload() string {
 	me := models.Service{}
-	data.Get(util.AppName(), serviceConfigure.control.Meta["name"], &me)
+	data.Get(config.AppName(), serviceConfigure.control.Meta["name"], &me)
 
 	logvac := models.Service{}
-	data.Get(util.AppName(), LOGVAC, &logvac)
+	data.Get(config.AppName(), LOGVAC, &logvac)
 
 	box := boxfile.New([]byte(serviceConfigure.boxfile.Data))
 	boxConfig := box.Node(serviceConfigure.control.Meta["name"]).Node("config")
@@ -180,7 +181,7 @@ func (serviceConfigure *processServiceConfigure) validateMeta() error {
 func (serviceConfigure *processServiceConfigure) loadService() error {
 	// get the service from the database; an error means we could not start a service
 	// that wasnt setup (ie saved in the database)
-	if err := data.Get(util.AppName(), serviceConfigure.control.Meta["name"], &serviceConfigure.service); err != nil {
+	if err := data.Get(config.AppName(), serviceConfigure.control.Meta["name"], &serviceConfigure.service); err != nil {
 		return err
 	}
 
@@ -192,7 +193,7 @@ func (serviceConfigure *processServiceConfigure) loadBoxfile() error {
 
 	// we won't worry about erroring here, because there may not be
 	// a build_boxfile at this point
-	data.Get(util.AppName()+"_meta", "build_boxfile", &serviceConfigure.boxfile)
+	data.Get(config.AppName()+"_meta", "build_boxfile", &serviceConfigure.boxfile)
 
 	return nil
 }
@@ -228,7 +229,7 @@ func (serviceConfigure *processServiceConfigure) runStart() error {
 func (serviceConfigure *processServiceConfigure) persistService() error {
 	serviceConfigure.service.State = ACTIVE
 
-	if err := data.Put(util.AppName(), serviceConfigure.control.Meta["name"], &serviceConfigure.service); err != nil {
+	if err := data.Put(config.AppName(), serviceConfigure.control.Meta["name"], &serviceConfigure.service); err != nil {
 		return err
 	}
 

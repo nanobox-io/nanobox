@@ -12,7 +12,7 @@ import (
 	"github.com/nanobox-io/nanobox-golang-stylish"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
@@ -125,7 +125,7 @@ func (control ProcessControl) Trace(msg string) {
 // getAppID ...
 func getAppID(alias string) string {
 	link := models.AppLinks{}
-	data.Get(util.AppName()+"_meta", "links", &link)
+	data.Get(config.AppName()+"_meta", "links", &link)
 	if alias == "" {
 		alias = "default"
 	}

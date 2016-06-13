@@ -2,7 +2,7 @@ package processor
 
 import (
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
@@ -29,7 +29,7 @@ func (linkRemove processLinkRemove) Results() ProcessControl {
 //
 func (linkRemove processLinkRemove) Process() error {
 	links := models.AppLinks{}
-	data.Get(util.AppName()+"_meta", "links", &links)
+	data.Get(config.AppName()+"_meta", "links", &links)
 	delete(links, linkRemove.control.Meta["alias"])
-	return data.Put(util.AppName()+"_meta", "links", links)
+	return data.Put(config.AppName()+"_meta", "links", links)
 }

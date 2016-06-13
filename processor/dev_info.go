@@ -7,7 +7,7 @@ import (
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
@@ -33,7 +33,7 @@ func (devInfo processDevInfo) Results() ProcessControl {
 
 //
 func (devInfo processDevInfo) Process() error {
-	services, err := data.Keys(util.AppName())
+	services, err := data.Keys(config.AppName())
 	if err != nil {
 		fmt.Println("data keys:", err)
 		lumber.Close()
@@ -43,14 +43,14 @@ func (devInfo processDevInfo) Process() error {
 	for _, service := range services {
 		if service != "builds" {
 			svc := models.Service{}
-			data.Get(util.AppName(), service, &svc)
+			data.Get(config.AppName(), service, &svc)
 			bytes, _ := json.MarshalIndent(svc, "", "  ")
 			fmt.Printf("%s\n", bytes)
 		}
 	}
 
 	envVars := models.EnvVars{}
-	data.Get(util.AppName()+"_meta", "env", &envVars)
+	data.Get(config.AppName()+"_meta", "env", &envVars)
 	bytes, _ := json.MarshalIndent(envVars, "", "  ")
 	fmt.Printf("%s\n", bytes)
 

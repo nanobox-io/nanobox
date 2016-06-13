@@ -5,7 +5,7 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
@@ -90,7 +90,7 @@ func (platformSetup processPlatformSetup) isServiceActive(id string) bool {
 
 	// fetch the entry from the database, ignoring any errors as the service
 	// might not exist yet
-	data.Get(util.AppName(), id, &service)
+	data.Get(config.AppName(), id, &service)
 
 	return service.State == "active"
 }

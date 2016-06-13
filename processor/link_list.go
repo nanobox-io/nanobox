@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
@@ -33,7 +33,7 @@ func (linkList processLinkList) Process() error {
 
 	// store the auth token
 	links := models.AppLinks{}
-	err := data.Get(util.AppName()+"_meta", "links", &links)
+	err := data.Get(config.AppName()+"_meta", "links", &links)
 	fmt.Printf("%+v\n", links)
 
 	return err

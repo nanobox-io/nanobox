@@ -11,7 +11,7 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/ipControl"
 )
@@ -23,7 +23,7 @@ type processServiceDestroy struct {
 
 //
 func init() {
-	processor.Register("service_servicedestroy", serviceDestroyFunc)
+	processor.Register("service_destroy", serviceDestroyFunc)
 }
 
 //
@@ -45,7 +45,7 @@ func (servicedestroy processServiceDestroy) Process() error {
 
 	// get the service from the database
 	service := models.Service{}
-	err := data.Get(util.AppName(), servicedestroy.control.Meta["name"], &service)
+	err := data.Get(config.AppName(), servicedestroy.control.Meta["name"], &service)
 	if err != nil {
 		// cant find service
 		return err
@@ -53,7 +53,7 @@ func (servicedestroy processServiceDestroy) Process() error {
 
 	servicedestroy.control.Display(stylish.Bullet("Destroying %s", servicedestroy.control.Meta["name"]))
 
-	err = docker.ContainerRemove(fmt.Sprintf("nanobox-%s-%s", util.AppName(), servicedestroy.control.Meta["name"]))
+	err = docker.ContainerRemove(fmt.Sprintf("nanobox-%s-%s", config.AppName(), servicedestroy.control.Meta["name"]))
 	if err != nil {
 		return err
 	}
@@ -83,14 +83,14 @@ func (servicedestroy processServiceDestroy) Process() error {
 	}
 
 	// save the service
-	return data.Delete(util.AppName(), servicedestroy.control.Meta["name"])
+	return data.Delete(config.AppName(), servicedestroy.control.Meta["name"])
 }
 
 // removeEnvVars removes any env vars associated with this service
 func (servicedestroy processServiceDestroy) removeEnvVars() error {
 	// fetch the environment variables model
 	envVars := models.EnvVars{}
-	data.Get(util.AppName()+"_meta", "env", &envVars)
+	data.Get(config.AppName()+"_meta", "env", &envVars)
 
 	// create a prefix for each of the environment variables.
 	// for example, if the service is 'data.db' the prefix
@@ -108,7 +108,7 @@ func (servicedestroy processServiceDestroy) removeEnvVars() error {
 	}
 
 	// persist the evars
-	if err := data.Put(util.AppName()+"_meta", "env", envVars); err != nil {
+	if err := data.Put(config.AppName()+"_meta", "env", envVars); err != nil {
 		return err
 	}
 

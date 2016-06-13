@@ -16,6 +16,7 @@ import (
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/ipControl"
 	"github.com/nanobox-io/nanobox/util/print"
@@ -151,7 +152,7 @@ func (serviceSetup *processServiceSetup) validateMeta() error {
 // loadService fetches the service from the database
 func (serviceSetup *processServiceSetup) loadService() error {
 	// the service really shouldn't exist yet, so let's not return the error if it fails
-	data.Get(util.AppName(), serviceSetup.control.Meta["name"], &serviceSetup.service)
+	data.Get(config.AppName(), serviceSetup.control.Meta["name"], &serviceSetup.service)
 
 	// set the default state
 	if serviceSetup.service.State == "" {
@@ -201,7 +202,7 @@ func (serviceSetup *processServiceSetup) reserveIps() error {
 // launchContainer launches and starts a docker container
 func (serviceSetup *processServiceSetup) launchContainer() error {
 	config := docker.ContainerConfig{
-		Name:    fmt.Sprintf("nanobox-%s-%s", util.AppName(), serviceSetup.control.Meta["name"]),
+		Name:    fmt.Sprintf("nanobox-%s-%s", config.AppName(), serviceSetup.control.Meta["name"]),
 		Image:   serviceSetup.control.Meta["image"],
 		Network: "virt",
 		IP:      serviceSetup.localIP.String(),
@@ -285,7 +286,7 @@ func (serviceSetup *processServiceSetup) persistService() error {
 	}
 
 	// save the service
-	err = data.Put(util.AppName(), serviceSetup.control.Meta["name"], &serviceSetup.service)
+	err = data.Put(config.AppName(), serviceSetup.control.Meta["name"], &serviceSetup.service)
 	if err != nil {
 		return err
 	}
@@ -297,7 +298,7 @@ func (serviceSetup *processServiceSetup) persistService() error {
 func (serviceSetup *processServiceSetup) addEnvVars() error {
 	// fetch the environment variables model
 	envVars := models.EnvVars{}
-	data.Get(util.AppName()+"_meta", "env", &envVars)
+	data.Get(config.AppName()+"_meta", "env", &envVars)
 
 	// create a prefix for each of the environment variables.
 	// for example, if the service is 'data.db' the prefix
@@ -352,7 +353,7 @@ func (serviceSetup *processServiceSetup) addEnvVars() error {
 	}
 
 	// persist the evars
-	if err := data.Put(util.AppName()+"_meta", "env", envVars); err != nil {
+	if err := data.Put(config.AppName()+"_meta", "env", envVars); err != nil {
 		return err
 	}
 

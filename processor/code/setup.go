@@ -11,7 +11,7 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/ipControl"
 	"github.com/nanobox-io/nanobox/util/print"
@@ -93,7 +93,7 @@ func (codeSetup *processCodeSetup) Process() error {
 	defer codeSetup.clean(codeSetup.removeIPFromProvider)()
 
 	// save the service
-	if err := data.Put(util.AppName(), codeSetup.control.Meta["name"], codeSetup.service); err != nil {
+	if err := data.Put(config.AppName(), codeSetup.control.Meta["name"], codeSetup.service); err != nil {
 		codeSetup.fail = true
 		lumber.Error("insert data: ", err)
 		return err
@@ -105,7 +105,7 @@ func (codeSetup *processCodeSetup) Process() error {
 // serviceExists ...
 func (codeSetup *processCodeSetup) serviceExists() bool {
 	service := models.Service{}
-	databaseErr := data.Get(util.AppName(), codeSetup.control.Meta["name"], &service)
+	databaseErr := data.Get(config.AppName(), codeSetup.control.Meta["name"], &service)
 
 	// set the service i found so i dont re allocate ips
 	if databaseErr == nil {
@@ -188,7 +188,7 @@ func (codeSetup *processCodeSetup) createContainer() error {
 	// configure the container
 	fmt.Println("-> building container", codeSetup.control.Meta["name"])
 	config := docker.ContainerConfig{
-		Name:    fmt.Sprintf("nanobox-%s-%s", util.AppName(), codeSetup.control.Meta["name"]),
+		Name:    fmt.Sprintf("nanobox-%s-%s", config.AppName(), codeSetup.control.Meta["name"]),
 		Image:   codeSetup.control.Meta["image"],
 		Network: "virt",
 		IP:      codeSetup.service.InternalIP,

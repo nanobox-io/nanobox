@@ -5,7 +5,7 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/ipControl"
 )
@@ -18,7 +18,7 @@ type processAppTeardown struct {
 
 //
 func init() {
-	processor.Register("app_appTeardown", appTeardownFunc)
+	processor.Register("app_teardown", appTeardownFunc)
 }
 
 //
@@ -61,7 +61,7 @@ func (appTeardown *processAppTeardown) Process() error {
 // loadApp loads the app from the db
 func (appTeardown *processAppTeardown) loadApp() error {
 	// the app might not exist yet, so let's not return the error if it fails
-	data.Get("apps", util.AppName(), &appTeardown.app)
+	data.Get("apps", config.AppName(), &appTeardown.app)
 
 	// set the default state
 	if appTeardown.app.State == "" {
@@ -85,7 +85,7 @@ func (appTeardown *processAppTeardown) releaseIPs() error {
 func (appTeardown *processAppTeardown) deleteEvars() error {
 
 	// delete the evars model
-	if err := data.Delete(util.AppName()+"_meta", "env"); err != nil {
+	if err := data.Delete(config.AppName()+"_meta", "env"); err != nil {
 		return err
 	}
 
@@ -96,7 +96,7 @@ func (appTeardown *processAppTeardown) deleteEvars() error {
 func (appTeardown *processAppTeardown) deleteApp() error {
 
 	// delete the app model
-	if err := data.Delete("apps", util.AppName()); err != nil {
+	if err := data.Delete("apps", config.AppName()); err != nil {
 		return err
 	}
 

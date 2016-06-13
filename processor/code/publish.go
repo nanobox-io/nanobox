@@ -14,6 +14,7 @@ import (
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/ipControl"
 	"github.com/nanobox-io/nanobox/util/print"
 )
@@ -87,7 +88,7 @@ func (codePublish *processCodePublish) Process() error {
 
 // pullImage ...
 func (codePublish *processCodePublish) pullImage() error {
-	box := boxfile.NewFromPath(util.BoxfileLocation())
+	box := boxfile.NewFromPath(config.Boxfile())
 	codePublish.image = box.Node(BUILD).StringValue("image")
 
 	if codePublish.image == "" {
@@ -107,9 +108,9 @@ func (codePublish *processCodePublish) pullImage() error {
 
 // createContainer ...
 func (codePublish *processCodePublish) createContainer() error {
-	appName := util.AppName()
+	appName := config.AppName()
 	config := docker.ContainerConfig{
-		Name:    fmt.Sprintf("nanobox-%s-build", util.AppName()),
+		Name:    fmt.Sprintf("nanobox-%s-build", config.AppName()),
 		Image:   codePublish.image, // this will need to be configurable some time
 		Network: "virt",
 		IP:      codePublish.service.InternalIP,

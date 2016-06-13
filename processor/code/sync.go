@@ -6,7 +6,7 @@ import (
 	"github.com/nanobox-io/nanobox-boxfile"
 
 	"github.com/nanobox-io/nanobox/processor"
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/counter"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
@@ -45,7 +45,7 @@ func (codeSync processCodeSync) Results() processor.ProcessControl {
 //
 func (codeSync *processCodeSync) Process() error {
 	// increment the counter so we know how many deploys are waiting
-	counter.Increment(util.AppName() + "_deploy")
+	counter.Increment(config.AppName() + "_deploy")
 
 	// do not allow more then one process to run the code sync at the same time
 	locker.LocalLock()

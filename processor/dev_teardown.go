@@ -6,7 +6,7 @@ import (
 	"github.com/nanobox-io/nanobox-golang-stylish"
 
 	"github.com/nanobox-io/nanobox/provider"
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/counter"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
@@ -56,7 +56,7 @@ func (devTeardown *processDevTeardown) Process() error {
 // teardownApp tears down the app when it's not being used
 func (devTeardown *processDevTeardown) teardownApp() error {
 
-	counter.Decrement(util.AppName())
+	counter.Decrement(config.AppName())
 
 	// establish a local app lock to ensure we're the only ones bringing
 	// down the app platform. Also ensure that we release it even if we error
@@ -93,9 +93,9 @@ func (devTeardown *processDevTeardown) teardownMounts() error {
 	}
 
 	// unmount the engine if it's a local directory
-	if util.EngineDir() != "" {
-		src := util.EngineDir()
-		dst := fmt.Sprintf("%s%s/engine", provider.HostShareDir(), util.AppName())
+	if config.EngineDir() != "" {
+		src := config.EngineDir()
+		dst := fmt.Sprintf("%s%s/engine", provider.HostShareDir(), config.AppName())
 
 		// unmount the share on the provider
 		if err := provider.RemoveMount(src, dst); err != nil {
@@ -104,8 +104,8 @@ func (devTeardown *processDevTeardown) teardownMounts() error {
 	}
 
 	// unmount the app src
-	src := util.LocalDir()
-	dst := fmt.Sprintf("%s%s/code", provider.HostShareDir(), util.AppName())
+	src := config.LocalDir()
+	dst := fmt.Sprintf("%s%s/code", provider.HostShareDir(), config.AppName())
 
 	// unmount the share on the provider
 	if err := provider.RemoveMount(src, dst); err != nil {
@@ -139,7 +139,7 @@ func (devTeardown *processDevTeardown) teardownProvider() error {
 
 // appIsUnused returns true if the app isn't being used by any other session
 func appIsUnused() bool {
-	count, err := counter.Get(util.AppName())
+	count, err := counter.Get(config.AppName())
 	return err == nil && count == 0
 }
 

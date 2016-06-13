@@ -3,7 +3,7 @@ package code
 import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/counter"
 	"github.com/nanobox-io/nanobox/util/data"
 )
@@ -38,13 +38,13 @@ func (codeClean *processCodeClean) Process() error {
 	}
 
 	// if other deploys are in progress do nothing
-	count, _ := counter.Decrement(util.AppName() + "_deploy")
+	count, _ := counter.Decrement(config.AppName() + "_deploy")
 	if count != 0 {
 		return nil
 	}
 
 	// remove all the existing code services
-	keys, err := data.Keys(util.AppName())
+	keys, err := data.Keys(config.AppName())
 	if err != nil {
 		return err
 	}
@@ -52,7 +52,7 @@ func (codeClean *processCodeClean) Process() error {
 	// get all the code services and remove them
 	for _, key := range keys {
 		service := models.Service{}
-		data.Get(util.AppName(), key, &key)
+		data.Get(config.AppName(), key, &key)
 		if service.Type == "code" {
 			codeClean.control.Meta["name"] = key
 			if err := processor.Run("code_destroy", codeClean.control); err != nil {

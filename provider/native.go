@@ -10,7 +10,7 @@ import (
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/print"
 )
 
@@ -100,7 +100,7 @@ func (native Native) Start() error {
 
 // HostShareDir ...
 func (native Native) HostShareDir() string {
-	dir := filepath.ToSlash(filepath.Join(util.GlobalDir(), "share"))
+	dir := filepath.ToSlash(filepath.Join(config.GlobalDir(), "share"))
 	os.MkdirAll(dir, 0755)
 
 	return dir + "/"
@@ -108,7 +108,7 @@ func (native Native) HostShareDir() string {
 
 // HostMntDir ...
 func (native Native) HostMntDir() string {
-	dir := filepath.ToSlash(filepath.Join(util.GlobalDir(), "mnt"))
+	dir := filepath.ToSlash(filepath.Join(config.GlobalDir(), "mnt"))
 	os.MkdirAll(dir, 0755)
 
 	return dir + "/"

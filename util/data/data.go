@@ -7,15 +7,14 @@ import (
 	"path/filepath"
 
 	"github.com/boltdb/bolt"
-
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 )
 
 // db establishes a bolt.DB for future use
 func db() *bolt.DB {
 
 	//
-	boltDB, err := bolt.Open(filepath.ToSlash(filepath.Join(util.GlobalDir(), "data.db")), 0666, nil)
+	boltDB, err := bolt.Open(filepath.ToSlash(filepath.Join(config.GlobalDir(), "data.db")), 0666, nil)
 	if err != nil {
 		panic(err)
 	}
