@@ -9,6 +9,7 @@ import (
 	"github.com/nanobox-io/nanobox/util"
 )
 
-func (self providerDestroy) RemoveDatabase() error {
+// removeDatabase ...
+func (providerDestroy processProviderDestroy) removeDatabase() error {
 	return exec.Command("rm", filepath.ToSlash(filepath.Join(util.GlobalDir(), "data.db"))).Run()
 }

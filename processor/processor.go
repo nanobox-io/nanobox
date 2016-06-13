@@ -3,10 +3,10 @@ package processor
 import (
 	"crypto/tls"
 	"fmt"
-	"net"
-	"os"
 	"io"
+	"net"
 	"net/http"
+	"os"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox-golang-stylish"
@@ -17,11 +17,14 @@ import (
 )
 
 type (
+
+	// BreadCrumbProcessor ...
 	BreadCrumbProcessor struct {
 		crumb string
 		proc  Processor
 	}
 
+	// ProcessControl ...
 	ProcessControl struct {
 		DevMode      bool
 		Quiet        bool
@@ -32,8 +35,10 @@ type (
 		Meta         map[string]string
 	}
 
+	// ProcessBuilder ...
 	ProcessBuilder func(ProcessControl) (Processor, error)
 
+	// Processor ...
 	Processor interface {
 		Process() error
 		Results() ProcessControl
@@ -41,10 +46,13 @@ type (
 )
 
 var (
+	// DefaultConfig ...
 	DefaultConfig = ProcessControl{Meta: map[string]string{}}
-	processors    = map[string]ProcessBuilder{}
+
+	processors = map[string]ProcessBuilder{}
 )
 
+// Register ...
 func Register(name string, sb ProcessBuilder) {
 	_, ok := processors[name]
 	if !DefaultConfig.Force && ok {
@@ -53,6 +61,7 @@ func Register(name string, sb ProcessBuilder) {
 	processors[name] = sb
 }
 
+// Build ...
 func Build(name string, pc ProcessControl) (Processor, error) {
 	lumber.Debug(name)
 	procFunc, ok := processors[name]
@@ -63,6 +72,7 @@ func Build(name string, pc ProcessControl) (Processor, error) {
 	return BreadCrumbProcessor{name, proc}, err
 }
 
+// Run ...
 func Run(name string, pc ProcessControl) error {
 	proc, err := Build(name, pc)
 	if err != nil {
@@ -71,6 +81,7 @@ func Run(name string, pc ProcessControl) error {
 	return proc.Process()
 }
 
+// ExecWriter ...
 func ExecWriter() io.Writer {
 	if DefaultConfig.Quiet {
 		return nil
@@ -78,6 +89,7 @@ func ExecWriter() io.Writer {
 	return os.Stdout
 }
 
+// Process ...
 func (bcp BreadCrumbProcessor) Process() error {
 	err := bcp.proc.Process()
 	if err != nil {
@@ -86,27 +98,31 @@ func (bcp BreadCrumbProcessor) Process() error {
 	return err
 }
 
+// Results ...
 func (bcp BreadCrumbProcessor) Results() ProcessControl {
 	return bcp.proc.Results()
 }
 
-// displays all of the possible
-func (self ProcessControl) Display(msg string) {
-	fmt.Print(stylish.Nest(self.DisplayLevel, msg))
+// Display displays all of the possible
+func (control ProcessControl) Display(msg string) {
+	fmt.Print(stylish.Nest(control.DisplayLevel, msg))
 }
 
-func (self ProcessControl) Info(msg string) {
+// Info ...
+func (control ProcessControl) Info(msg string) {
 	if !DefaultConfig.Quiet {
-		fmt.Print(stylish.Nest(self.DisplayLevel, msg))
+		fmt.Print(stylish.Nest(control.DisplayLevel, msg))
 	}
 }
 
-func (self ProcessControl) Trace(msg string) {
+// Trace ...
+func (control ProcessControl) Trace(msg string) {
 	if DefaultConfig.Verbose {
-		fmt.Print(stylish.Nest(self.DisplayLevel, msg))
+		fmt.Print(stylish.Nest(control.DisplayLevel, msg))
 	}
 }
 
+// getAppID ...
 func getAppID(alias string) string {
 	link := models.AppLinks{}
 	data.Get(util.AppName()+"_meta", "links", &link)
@@ -117,9 +133,11 @@ func getAppID(alias string) string {
 	if !ok {
 		return alias
 	}
+
 	return app
 }
 
+// connect ...
 func connect(req *http.Request) (net.Conn, []byte, error) {
 
 	//

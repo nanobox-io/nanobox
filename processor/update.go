@@ -18,12 +18,10 @@ import (
 )
 
 //
-var (
-	pathToDownload = "https://s3.amazonaws.com/tools.nanobox.io/nanobox/v1"
-)
+var pathToDownload = "https://s3.amazonaws.com/tools.nanobox.io/nanobox/v1"
 
-// update is the process created for updating nanobox
-type update struct {
+// updateProcess is the process created for updating nanobox
+type updateProcess struct {
 	control ProcessControl
 }
 
@@ -34,19 +32,19 @@ func init() {
 
 // updateFunc returns "update" (above) to be run as a processor
 func updateFunc(control ProcessControl) (Processor, error) {
-	return &update{control}, nil
+	return &updateProcess{control}, nil
 }
 
 // Results ...
-func (u update) Results() ProcessControl {
-	return u.control
+func (update updateProcess) Results() ProcessControl {
+	return update.control
 }
 
 // Process ...
-func (u *update) Process() error {
+func (update *updateProcess) Process() error {
 
 	// determine if nanobox needs to be updated
-	update, err := updatable()
+	updateAvailable, err := updatable()
 	if err != nil {
 		return fmt.Errorf("Unable to determine if updates are available %v", err.Error())
 	}
@@ -58,13 +56,13 @@ func (u *update) Process() error {
 	switch {
 
 	// update if the update command is run and updates are available
-	case update:
+	case updateAvailable:
 		manualUpdate()
 		os.Exit(0)
 
-	// update if the update command is run, updates are available, AND the command
-	// as forced; this is how we handle our auto update...
-	case update && u.control.Force:
+		// update if the update command is run, updates are available, AND the command
+		// as forced; this is how we handle our auto update...
+	case updateAvailable && update.control.Force:
 		autoUpdate()
 		os.Exit(0)
 

@@ -2,6 +2,7 @@ package locker
 
 import "testing"
 
+// TestLocalLock ...
 func TestLocalLock(t *testing.T) {
 	err := LocalLock()
 	if err != nil {
@@ -12,6 +13,7 @@ func TestLocalLock(t *testing.T) {
 	}
 }
 
+// TestLocalTryLock ...
 func TestLocalTryLock(t *testing.T) {
 	locked, err := LocalTryLock()
 	if err != nil {
@@ -25,6 +27,7 @@ func TestLocalTryLock(t *testing.T) {
 	}
 }
 
+// TestLocalUnlock ...
 func TestLocalUnlock(t *testing.T) {
 	err := LocalUnlock()
 	if err != nil {
@@ -35,6 +38,7 @@ func TestLocalUnlock(t *testing.T) {
 	}
 }
 
+// TestLocalStackLocking ...
 func TestLocalStackLocking(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		if lCount != i {
@@ -56,6 +60,7 @@ func TestLocalStackLocking(t *testing.T) {
 	}
 }
 
+// TestGlobalLock ...
 func TestGlobalLock(t *testing.T) {
 	err := GlobalLock()
 	if err != nil {
@@ -66,6 +71,7 @@ func TestGlobalLock(t *testing.T) {
 	}
 }
 
+// TestGlobalTryLock ...
 func TestGlobalTryLock(t *testing.T) {
 	locked, err := GlobalTryLock()
 	if err != nil {
@@ -79,6 +85,7 @@ func TestGlobalTryLock(t *testing.T) {
 	}
 }
 
+// TestGlobalUnlock ...
 func TestGlobalUnlock(t *testing.T) {
 	err := GlobalUnlock()
 	if err != nil {
@@ -89,6 +96,7 @@ func TestGlobalUnlock(t *testing.T) {
 	}
 }
 
+// TestGlobalStackLocking ...
 func TestGlobalStackLocking(t *testing.T) {
 	for i := 0; i < 10; i++ {
 		if gCount != i {

@@ -6,26 +6,29 @@ import (
 	"github.com/nanobox-io/nanobox/util/locker"
 )
 
-type providerDestroy struct {
+// processProviderDestroy ...
+type processProviderDestroy struct {
 	control processor.ProcessControl
 }
 
+//
 func providerDestroyFunc(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
-
-	return providerDestroy{control}, nil
+	return processProviderDestroy{control}, nil
 }
 
-func (self providerDestroy) Results() processor.ProcessControl {
-	return self.control
+//
+func (providerDestroy processProviderDestroy) Results() processor.ProcessControl {
+	return providerDestroy.control
 }
 
-func (self providerDestroy) Process() error {
+//
+func (providerDestroy processProviderDestroy) Process() error {
 	locker.GlobalLock()
 	defer locker.GlobalUnlock()
 
-	err := self.RemoveDatabase()
-	if err != nil {
+	//
+	if err := providerDestroy.removeDatabase(); err != nil {
 		return err
 	}
 

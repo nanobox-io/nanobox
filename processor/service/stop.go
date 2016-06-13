@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 
-	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
@@ -14,49 +14,54 @@ import (
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
-type serviceStop struct {
-	control  processor.ProcessControl
+// processServiceStop ...
+type processServiceStop struct {
+	control processor.ProcessControl
 	service models.Service
 }
 
+//
 func init() {
 	processor.Register("service_stop", serviceStopFunc)
 }
 
+//
 func serviceStopFunc(control processor.ProcessControl) (processor.Processor, error) {
 	if control.Meta["name"] == "" {
 		return nil, errors.New("missing service name")
-	}	
+	}
 	if control.Meta["label"] == "" {
 		control.Meta["label"] = control.Meta["name"]
 	}
 
-	return serviceStop{control: control}, nil
+	return processServiceStop{control: control}, nil
 }
 
-func (self serviceStop) Results() processor.ProcessControl {
-	return self.control
+//
+func (serviceStop processServiceStop) Results() processor.ProcessControl {
+	return serviceStop.control
 }
 
-func (self serviceStop) Process() error {
-	if !self.isServiceRunning() {
+//
+func (serviceStop processServiceStop) Process() error {
+	if !serviceStop.isServiceRunning() {
 		// short-circuit, this is already stopped
 		return nil
 	}
 
-	if err := self.loadService(); err != nil {
+	if err := serviceStop.loadService(); err != nil {
 		return err
 	}
 
-	if self.service.ID == "" {
+	if serviceStop.service.ID == "" {
 		return errors.New("the service has not been created")
 	}
 
-	if err := self.stopContainer(); err != nil {
+	if err := serviceStop.stopContainer(); err != nil {
 		return err
 	}
 
-	if err := self.detachNetwork(); err != nil {
+	if err := serviceStop.detachNetwork(); err != nil {
 		return err
 	}
 
@@ -64,8 +69,8 @@ func (self serviceStop) Process() error {
 }
 
 // isServiceRunning returns true if a service is already running
-func (self serviceStop) isServiceRunning() bool {
-	uid := self.control.Meta["name"]
+func (serviceStop processServiceStop) isServiceRunning() bool {
+	uid := serviceStop.control.Meta["name"]
 
 	container, err := docker.GetContainer(fmt.Sprintf("nanobox-%s-%s", util.AppName(), uid))
 
@@ -73,9 +78,9 @@ func (self serviceStop) isServiceRunning() bool {
 }
 
 // loadService loads the service from the database
-func (self *serviceStop) loadService() error {
+func (serviceStop *processServiceStop) loadService() error {
 	// get the service from the database
-	err := data.Get(util.AppName(), self.control.Meta["name"], &self.service)
+	err := data.Get(util.AppName(), serviceStop.control.Meta["name"], &serviceStop.service)
 	if err != nil {
 		// cannot stop a service that wasnt setup (ie saved in the database)
 		return err
@@ -85,10 +90,10 @@ func (self *serviceStop) loadService() error {
 }
 
 // stopContainer stops a docker container
-func (self *serviceStop) stopContainer() error {
-	self.control.Display(stylish.Bullet("Stopping %s...", self.control.Meta["label"]))
+func (serviceStop *processServiceStop) stopContainer() error {
+	serviceStop.control.Display(stylish.Bullet("Stopping %s...", serviceStop.control.Meta["label"]))
 
-	err := docker.ContainerStop(self.service.ID)
+	err := docker.ContainerStop(serviceStop.service.ID)
 	if err != nil {
 		return err
 	}
@@ -97,13 +102,13 @@ func (self *serviceStop) stopContainer() error {
 }
 
 // detachNetwork detaches the container to the host network
-func (self *serviceStop) detachNetwork() error {
+func (serviceStop *processServiceStop) detachNetwork() error {
 
-	if err := provider.RemoveNat(self.service.ExternalIP, self.service.InternalIP); err != nil {
+	if err := provider.RemoveNat(serviceStop.service.ExternalIP, serviceStop.service.InternalIP); err != nil {
 		return err
 	}
 
-	if err := provider.RemoveIP(self.service.ExternalIP); err != nil {
+	if err := provider.RemoveIP(serviceStop.service.ExternalIP); err != nil {
 		return err
 	}
 

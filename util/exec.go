@@ -8,8 +8,9 @@ import (
 	"github.com/nanobox-io/golang-docker-client"
 )
 
+// Cmd ...
 type Cmd struct {
-	Id      string
+	ID      string
 	Path    string
 	Payload string
 	Stdout  io.Writer
@@ -22,7 +23,7 @@ func (cmd *Cmd) Run() error {
 	run := []string{"/opt/nanobox/hooks/" + cmd.Path, cmd.Payload}
 
 	// start the exec
-	exec, hj, err := docker.ExecStart(cmd.Id, run, false, true, true)
+	exec, hj, err := docker.ExecStart(cmd.ID, run, false, true, true)
 	if err != nil {
 		return err
 	}
@@ -69,10 +70,10 @@ func (cmd *Cmd) Output() (string, error) {
 	return buffer.String(), err
 }
 
-// Command generates a new Cmd struct
+// DockerCommand generates a new Cmd struct
 func DockerCommand(id string, path string, payload string) *Cmd {
 	return &Cmd{
-		Id:      id,
+		ID:      id,
 		Path:    path,
 		Payload: payload,
 	}

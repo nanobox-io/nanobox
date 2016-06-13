@@ -6,25 +6,30 @@ import (
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
-type linkRemove struct {
+// processLinkRemove ...
+type processLinkRemove struct {
 	control ProcessControl
 }
 
+//
 func init() {
 	Register("link_remove", linkRemoveFunc)
 }
 
+//
 func linkRemoveFunc(conf ProcessControl) (Processor, error) {
-	return linkRemove{conf}, nil
+	return processLinkRemove{conf}, nil
 }
 
-func (self linkRemove) Results() ProcessControl {
-	return self.control
+//
+func (linkRemove processLinkRemove) Results() ProcessControl {
+	return linkRemove.control
 }
 
-func (self linkRemove) Process() error {
+//
+func (linkRemove processLinkRemove) Process() error {
 	links := models.AppLinks{}
 	data.Get(util.AppName()+"_meta", "links", &links)
-	delete(links, self.control.Meta["alias"])
+	delete(links, linkRemove.control.Meta["alias"])
 	return data.Put(util.AppName()+"_meta", "links", links)
 }

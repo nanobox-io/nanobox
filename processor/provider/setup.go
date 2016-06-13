@@ -9,21 +9,25 @@ import (
 	"github.com/nanobox-io/nanobox/util/locker"
 )
 
-type providerSetup struct {
+// processProviderSetup ...
+type processProviderSetup struct {
 	control processor.ProcessControl
 }
 
+//
 func providerSetupFunc(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 
-	return providerSetup{control}, nil
+	return processProviderSetup{control}, nil
 }
 
-func (setup providerSetup) Results() processor.ProcessControl {
-	return setup.control
+//
+func (providerSetup processProviderSetup) Results() processor.ProcessControl {
+	return providerSetup.control
 }
 
-func (setup providerSetup) Process() error {
+//
+func (providerSetup processProviderSetup) Process() error {
 	// set the provider display level
 	provider.Display(!processor.DefaultConfig.Quiet)
 

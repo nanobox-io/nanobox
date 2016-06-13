@@ -6,29 +6,34 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/nanobox-io/nanobox/util/production_api"
+	"github.com/nanobox-io/nanobox/util/productionAPI"
 )
 
-type tunnel struct {
+// processTunnel ...
+type processTunnel struct {
 	control ProcessControl
 }
 
+//
 func init() {
 	Register("tunnel", tunnelFunc)
 }
 
+//
 func tunnelFunc(control ProcessControl) (Processor, error) {
-	return tunnel{control}, nil
+	return processTunnel{control}, nil
 }
 
-func (self tunnel) Results() ProcessControl {
-	return self.control
+//
+func (tunnel processTunnel) Results() ProcessControl {
+	return tunnel.control
 }
 
-func (self tunnel) Process() error {
+//
+func (tunnel processTunnel) Process() error {
 	var err error
-	app := getAppID(self.control.Meta["alias"])
-	key, location, container, err = production_api.EstablishTunnel(app, self.control.Meta["container"])
+	app := getAppID(tunnel.control.Meta["alias"])
+	key, location, container, err = productionAPI.EstablishTunnel(app, tunnel.control.Meta["container"])
 	if err != nil {
 		return err
 	}
@@ -49,7 +54,7 @@ func (self tunnel) Process() error {
 	}
 	defer conn.Close()
 
-	serv, err := net.Listen("tcp4", ":"+self.control.Meta["port"])
+	serv, err := net.Listen("tcp4", fmt.Sprintf(":%v", tunnel.control.Meta["port"]))
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -64,6 +69,7 @@ func (self tunnel) Process() error {
 	}
 }
 
+// handleConnection ...
 func handleConnection(conn net.Conn) {
 	req, err := http.NewRequest("POST", fmt.Sprintf("/tunnel?key=%s", key), nil)
 	if err != nil {

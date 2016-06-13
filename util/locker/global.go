@@ -11,13 +11,17 @@ import (
 	"github.com/nanobox-io/nanobox/util/config"
 )
 
-var gln net.Listener
-var gCount int = 0
-var mutex = sync.Mutex{}
+var (
+	gln    net.Listener
+	gCount int
+	mutex  = sync.Mutex{}
+)
 
-// Lock locks on port
+// GlobalLock locks on port
 func GlobalLock() error {
 	lumber.Debug("global locking")
+
+	//
 	for {
 		if success, _ := GlobalTryLock(); success {
 			break
@@ -30,35 +34,50 @@ func GlobalLock() error {
 	gCount++
 	lumber.Debug("global lock aqquired (%d)", gCount)
 	mutex.Unlock()
+
 	return nil
 }
 
+// GlobalTryLock ...
 func GlobalTryLock() (bool, error) {
+
+	var err error
+
+	//
 	if gln != nil {
 		return true, nil
 	}
-	var err error
+
+	//
 	port := config.Viper().GetInt("lock-port")
 	if port == 0 {
 		port = 12345
 	}
+
+	//
 	if gln, err = net.Listen("tcp", fmt.Sprintf(":%d", port)); err == nil {
 		return true, nil
 	}
+
 	return false, nil
 }
 
-// remove the lock if im the last global unlock to be called
-// this needs to be called exactlyt he same number of tiems as lock
+// GlobalUnlock removes the lock if im the last global unlock to be called; this
+// needs to be called EXACTLY he same number of tiems as lock
 func GlobalUnlock() error {
+
 	mutex.Lock()
 	gCount--
 	lumber.Debug("global lock released (%d)", gCount)
 	mutex.Unlock()
+
+	//
 	if gCount > 0 || gln == nil {
 		return nil
 	}
+
 	err := gln.Close()
 	gln = nil
+
 	return err
 }

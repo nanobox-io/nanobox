@@ -14,15 +14,18 @@ import (
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
-type serviceStart struct {
-	control  processor.ProcessControl
+// processServiceStart ...
+type processServiceStart struct {
+	control processor.ProcessControl
 	service models.Service
 }
 
+//
 func init() {
 	processor.Register("service_start", serviceStartFunc)
 }
 
+//
 func serviceStartFunc(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 
@@ -35,33 +38,35 @@ func serviceStartFunc(control processor.ProcessControl) (processor.Processor, er
 		control.Meta["label"] = control.Meta["name"]
 	}
 
-	return &serviceStart{control: control}, nil
+	return &processServiceStart{control: control}, nil
 }
 
-func (self serviceStart) Results() processor.ProcessControl {
-	return self.control
+//
+func (serviceStart processServiceStart) Results() processor.ProcessControl {
+	return serviceStart.control
 }
 
-func (self *serviceStart) Process() error {
+//
+func (serviceStart *processServiceStart) Process() error {
 
-	if running := self.isServiceRunning(); running == true {
+	if running := serviceStart.isServiceRunning(); running == true {
 		// short-circuit, this is already running
 		return nil
 	}
 
-	if err := self.loadService(); err != nil {
+	if err := serviceStart.loadService(); err != nil {
 		return err
 	}
 
-	if self.service.State != "active" {
+	if serviceStart.service.State != ACTIVE {
 		return errors.New("the service has not been created")
 	}
 
-	if err := self.startContainer(); err != nil {
+	if err := serviceStart.startContainer(); err != nil {
 		return err
 	}
 
-	if err := self.attachNetwork(); err != nil {
+	if err := serviceStart.attachNetwork(); err != nil {
 		return err
 	}
 
@@ -69,9 +74,9 @@ func (self *serviceStart) Process() error {
 }
 
 // loadService loads the service from the database
-func (self *serviceStart) loadService() error {
+func (serviceStart *processServiceStart) loadService() error {
 	// get the service from the database
-	err := data.Get(util.AppName(), self.control.Meta["name"], &self.service)
+	err := data.Get(util.AppName(), serviceStart.control.Meta["name"], &serviceStart.service)
 	if err != nil {
 		// cannot start a service that wasnt setup (ie saved in the database)
 		return err
@@ -81,11 +86,11 @@ func (self *serviceStart) loadService() error {
 }
 
 // startContainer starts a docker container
-func (self *serviceStart) startContainer() error {
-	header := fmt.Sprintf("Starting %s...", self.control.Meta["label"])
-	self.control.Info(stylish.Bullet(header))
+func (serviceStart *processServiceStart) startContainer() error {
+	header := fmt.Sprintf("Starting %s...", serviceStart.control.Meta["label"])
+	serviceStart.control.Info(stylish.Bullet(header))
 
-	err := docker.ContainerStart(self.service.ID)
+	err := docker.ContainerStart(serviceStart.service.ID)
 	if err != nil {
 		return err
 	}
@@ -94,16 +99,16 @@ func (self *serviceStart) startContainer() error {
 }
 
 // attachNetwork attaches the container to the host network
-func (self *serviceStart) attachNetwork() error {
+func (serviceStart *processServiceStart) attachNetwork() error {
 
 	// todo: add these to a cleanup process in case of failure
 
-	err := provider.AddIP(self.service.ExternalIP)
+	err := provider.AddIP(serviceStart.service.ExternalIP)
 	if err != nil {
 		return err
 	}
 
-	err = provider.AddNat(self.service.ExternalIP, self.service.InternalIP)
+	err = provider.AddNat(serviceStart.service.ExternalIP, serviceStart.service.InternalIP)
 	if err != nil {
 		return err
 	}
@@ -112,8 +117,8 @@ func (self *serviceStart) attachNetwork() error {
 }
 
 // isServiceRunning returns true if a service is already running
-func (self serviceStart) isServiceRunning() bool {
-	uid := self.control.Meta["name"]
+func (serviceStart processServiceStart) isServiceRunning() bool {
+	uid := serviceStart.control.Meta["name"]
 
 	container, err := docker.GetContainer(fmt.Sprintf("nanobox-%s-%s", util.AppName(), uid))
 

@@ -11,37 +11,42 @@ import (
 	"github.com/nanobox-io/nanobox/util/locker"
 )
 
-type devTeardown struct {
+// processDevTeardown ...
+type processDevTeardown struct {
 	control ProcessControl
 }
 
+//
 func init() {
 	Register("dev_teardown", devTeardownFunc)
 }
 
+//
 func devTeardownFunc(control ProcessControl) (Processor, error) {
-	return &devTeardown{control}, nil
+	return &processDevTeardown{control}, nil
 }
 
-func (teardown devTeardown) Results() ProcessControl {
-	return teardown.control
+//
+func (devTeardown processDevTeardown) Results() ProcessControl {
+	return devTeardown.control
 }
 
-func (teardown *devTeardown) Process() error {
+//
+func (devTeardown *processDevTeardown) Process() error {
 	// dont shut anything down if we are supposed to background
 	if DefaultConfig.Background {
 		return nil
 	}
 
-	if err := teardown.teardownApp(); err != nil {
+	if err := devTeardown.teardownApp(); err != nil {
 		return err
 	}
 
-	if err := teardown.teardownMounts(); err != nil {
+	if err := devTeardown.teardownMounts(); err != nil {
 		return err
 	}
 
-	if err := teardown.teardownProvider(); err != nil {
+	if err := devTeardown.teardownProvider(); err != nil {
 		return err
 	}
 
@@ -49,7 +54,7 @@ func (teardown *devTeardown) Process() error {
 }
 
 // teardownApp tears down the app when it's not being used
-func (teardown *devTeardown) teardownApp() error {
+func (devTeardown *processDevTeardown) teardownApp() error {
 
 	counter.Decrement(util.AppName())
 
@@ -61,12 +66,12 @@ func (teardown *devTeardown) teardownApp() error {
 	if appIsUnused() {
 
 		// Stop the platform services
-		if err := Run("platform_stop", teardown.control); err != nil {
+		if err := Run("platform_stop", devTeardown.control); err != nil {
 			return err
 		}
 
 		// stop all data services
-		if err := Run("service_stop_all", teardown.control); err != nil {
+		if err := Run("service_stop_all", devTeardown.control); err != nil {
 			return err
 		}
 	}
@@ -75,7 +80,7 @@ func (teardown *devTeardown) teardownApp() error {
 }
 
 // teardownMounts removes the unused mounts from the provider
-func (teardown *devTeardown) teardownMounts() error {
+func (devTeardown *processDevTeardown) teardownMounts() error {
 
 	// establish a local app lock to ensure we're the only ones bringing
 	// down the app platform. Also ensure that we release it even if we error
@@ -111,7 +116,7 @@ func (teardown *devTeardown) teardownMounts() error {
 }
 
 // teardownProvider tears down the provider when it's not being used
-func (teardown *devTeardown) teardownProvider() error {
+func (devTeardown *processDevTeardown) teardownProvider() error {
 
 	count, err := counter.Decrement("provider")
 	if err != nil {
@@ -126,9 +131,9 @@ func (teardown *devTeardown) teardownProvider() error {
 
 	if providerIsUnused() {
 		// stop the provider
-		return Run("provider_stop", teardown.control)
+		return Run("provider_stop", devTeardown.control)
 	}
-	teardown.control.Display(stylish.Bullet("%d dev's still running so leaving the provider up", count))
+	devTeardown.control.Display(stylish.Bullet("%d dev's still running so leaving the provider up", count))
 	return nil
 }
 

@@ -11,50 +11,59 @@ import (
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
-type serviceSync struct {
-	control     processor.ProcessControl
-	fail       bool
-	newBoxfile models.Boxfile
-	oldBoxfile models.Boxfile
-}
+type (
 
-type service struct {
-	label string
-	name  string
-	image string
-}
+	// service ...
+	service struct {
+		label string
+		name  string
+		image string
+	}
 
+	// processServiceSync ...
+	processServiceSync struct {
+		control    processor.ProcessControl
+		fail       bool
+		newBoxfile models.Boxfile
+		oldBoxfile models.Boxfile
+	}
+)
+
+//
 func init() {
 	processor.Register("service_sync", serviceSyncFunc)
 }
 
+//
 func serviceSyncFunc(control processor.ProcessControl) (processor.Processor, error) {
-	return &serviceSync{control: control}, nil
+	return &processServiceSync{control: control}, nil
 }
 
-func (self serviceSync) Results() processor.ProcessControl {
-	return self.control
+//
+func (serviceSync processServiceSync) Results() processor.ProcessControl {
+	return serviceSync.control
 }
 
-func (self *serviceSync) Process() error {
+//
+func (serviceSync *processServiceSync) Process() error {
 
-	if err := self.loadNewBoxfile(); err != nil {
+	if err := serviceSync.loadNewBoxfile(); err != nil {
 		return err
 	}
 
-	if err := self.loadOldBoxfile(); err != nil {
+	if err := serviceSync.loadOldBoxfile(); err != nil {
 		return err
 	}
 
-	if err := self.purgeDeltaServices(); err != nil {
+	if err := serviceSync.purgeDeltaServices(); err != nil {
 		return err
 	}
 
-	if err := self.provisionDataServices(); err != nil {
+	if err := serviceSync.provisionDataServices(); err != nil {
 		return err
 	}
 
-	if err := self.replaceOldBoxfile(); err != nil {
+	if err := serviceSync.replaceOldBoxfile(); err != nil {
 		return err
 	}
 
@@ -62,9 +71,9 @@ func (self *serviceSync) Process() error {
 }
 
 // loadNewBoxfile loads the new build boxfile from the database
-func (self *serviceSync) loadNewBoxfile() error {
+func (serviceSync *processServiceSync) loadNewBoxfile() error {
 
-	if err := data.Get(util.AppName()+"_meta", "build_boxfile", &self.newBoxfile); err != nil {
+	if err := data.Get(util.AppName()+"_meta", "build_boxfile", &serviceSync.newBoxfile); err != nil {
 		return err
 	}
 
@@ -72,18 +81,18 @@ func (self *serviceSync) loadNewBoxfile() error {
 }
 
 // loadOldBoxfile loads the old boxfile from the database
-func (self *serviceSync) loadOldBoxfile() error {
+func (serviceSync *processServiceSync) loadOldBoxfile() error {
 
 	// we don't care about the error here because this could be the first build
-	data.Get(util.AppName()+"_meta", "old_build_boxfile", &self.oldBoxfile)
+	data.Get(util.AppName()+"_meta", "old_build_boxfile", &serviceSync.oldBoxfile)
 
 	return nil
 }
 
 // replaceOldBoxfile replaces the old boxfile in the database with the new boxfile
-func (self *serviceSync) replaceOldBoxfile() error {
+func (serviceSync *processServiceSync) replaceOldBoxfile() error {
 
-	if err := data.Put(util.AppName()+"_meta", "old_build_boxfile", &self.newBoxfile); err != nil {
+	if err := data.Put(util.AppName()+"_meta", "old_build_boxfile", &serviceSync.newBoxfile); err != nil {
 		return err
 	}
 
@@ -91,11 +100,11 @@ func (self *serviceSync) replaceOldBoxfile() error {
 }
 
 // purgeDeltaServices will purge the services that were removed from the boxfile
-func (self *serviceSync) purgeDeltaServices() error {
+func (serviceSync *processServiceSync) purgeDeltaServices() error {
 
 	// convert the data into boxfile library helpers
-	oldBoxfile := boxfile.New(self.oldBoxfile.Data)
-	newBoxfile := boxfile.New(self.newBoxfile.Data)
+	oldBoxfile := boxfile.New(serviceSync.oldBoxfile.Data)
+	newBoxfile := boxfile.New(serviceSync.newBoxfile.Data)
 
 	// fetch the services
 	uids, err := data.Keys(util.AppName())
@@ -119,7 +128,7 @@ func (self *serviceSync) purgeDeltaServices() error {
 			continue
 		}
 
-		if err := self.purgeService(uid); err != nil {
+		if err := serviceSync.purgeService(uid); err != nil {
 			return err
 		}
 
@@ -129,10 +138,10 @@ func (self *serviceSync) purgeDeltaServices() error {
 }
 
 // purgeService will purge a service from the nanobox
-func (self *serviceSync) purgeService(uid string) error {
+func (serviceSync *processServiceSync) purgeService(uid string) error {
 	service := processor.ProcessControl{
-		DevMode: self.control.DevMode,
-		Verbose: self.control.Verbose,
+		DevMode: serviceSync.control.DevMode,
+		Verbose: serviceSync.control.Verbose,
 		Meta: map[string]string{
 			"name": uid,
 		},
@@ -148,10 +157,10 @@ func (self *serviceSync) purgeService(uid string) error {
 
 // provisionServices will provision services that are defined in the boxfile
 // but not running on nanobox
-func (self *serviceSync) provisionDataServices() error {
+func (serviceSync *processServiceSync) provisionDataServices() error {
 
 	// convert the data into boxfile library helpers
-	newBoxfile := boxfile.New(self.newBoxfile.Data)
+	newBoxfile := boxfile.New(serviceSync.newBoxfile.Data)
 
 	// grab all of the data nodes
 	dataServices := newBoxfile.Nodes("data")
@@ -165,9 +174,9 @@ func (self *serviceSync) provisionDataServices() error {
 		}
 
 		config := processor.ProcessControl{
-			DevMode:      self.control.DevMode,
-			Verbose:      self.control.Verbose,
-			DisplayLevel: self.control.DisplayLevel + 1,
+			DevMode:      serviceSync.control.DevMode,
+			Verbose:      serviceSync.control.Verbose,
+			DisplayLevel: serviceSync.control.DisplayLevel + 1,
 			Meta: map[string]string{
 				"name":  uid,
 				"image": image,
@@ -191,5 +200,5 @@ func (self *serviceSync) provisionDataServices() error {
 
 // isPlatform will return true if the uid matches a platform service
 func isPlatformUID(uid string) bool {
-	return uid == "portal" || uid == "hoarder" || uid == "mist" || uid == "logvac"
+	return uid == PORTAL || uid == HOARDER || uid == MIST || uid == LOGVAC
 }

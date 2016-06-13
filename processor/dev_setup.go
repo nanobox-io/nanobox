@@ -9,37 +9,43 @@ import (
 	"github.com/nanobox-io/nanobox/util/locker"
 )
 
-type devSetup struct {
+// processDevSetup ...
+type processDevSetup struct {
 	control ProcessControl
 }
 
+//
 func init() {
 	Register("dev_setup", devSetupFunc)
 }
 
+//
 func devSetupFunc(control ProcessControl) (Processor, error) {
-	// control.Meta["devSetup-control"]
-	// do some control validation
-	// check on the meta for the flags and make sure they work
+	// control.Meta["processDevSetup-control"]
 
-	return &devSetup{control: control}, nil
+	// do some control validation check on the meta for the flags and make sure they
+	// work
+
+	return &processDevSetup{control: control}, nil
 }
 
-func (setup devSetup) Results() ProcessControl {
-	return setup.control
+//
+func (devSetup processDevSetup) Results() ProcessControl {
+	return devSetup.control
 }
 
-func (setup *devSetup) Process() error {
+//
+func (devSetup *processDevSetup) Process() error {
 
-	if err := setup.setupProvider(); err != nil {
+	if err := devSetup.setupProvider(); err != nil {
 		return err
 	}
 
-	if err := setup.setupMounts(); err != nil {
+	if err := devSetup.setupMounts(); err != nil {
 		return err
 	}
 
-	if err := setup.setupApp(); err != nil {
+	if err := devSetup.setupApp(); err != nil {
 		return err
 	}
 
@@ -47,7 +53,7 @@ func (setup *devSetup) Process() error {
 }
 
 // setupProvider sets up the provider
-func (setup *devSetup) setupProvider() error {
+func (devSetup *processDevSetup) setupProvider() error {
 
 	// let anyone else know we're using the provider
 	counter.Increment("provider")
@@ -57,7 +63,7 @@ func (setup *devSetup) setupProvider() error {
 	locker.GlobalLock()
 	defer locker.GlobalUnlock()
 
-	if err := Run("provider_setup", setup.control); err != nil {
+	if err := Run("provider_setup", devSetup.control); err != nil {
 		return err
 	}
 
@@ -65,7 +71,7 @@ func (setup *devSetup) setupProvider() error {
 }
 
 // setupMounts will add the shares and mounts for this app
-func (setup *devSetup) setupMounts() error {
+func (devSetup *processDevSetup) setupMounts() error {
 
 	// mount the engine if it's a local directory
 	if util.EngineDir() != "" {
@@ -101,7 +107,7 @@ func (setup *devSetup) setupMounts() error {
 }
 
 // setupApp sets up the app plaftorm and data services
-func (setup *devSetup) setupApp() error {
+func (devSetup *processDevSetup) setupApp() error {
 
 	// let anyone else know we're using the app
 	counter.Increment(util.AppName())
@@ -112,15 +118,15 @@ func (setup *devSetup) setupApp() error {
 	defer locker.LocalUnlock()
 
 	// setup the app
-	if err := Run("app_setup", setup.control); err != nil {
+	if err := Run("app_setup", devSetup.control); err != nil {
 		return err
 	}
 
 	// clean up after any possible failures in a previous deploy
-	if err := Run("service_clean", setup.control); err != nil {
+	if err := Run("service_clean", devSetup.control); err != nil {
 		return err
 	}
 
 	// setup the platform services
-	return Run("platform_setup", setup.control)
+	return Run("platform_setup", devSetup.control)
 }

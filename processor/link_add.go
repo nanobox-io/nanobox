@@ -7,42 +7,52 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/data"
-	"github.com/nanobox-io/nanobox/util/production_api"
+	"github.com/nanobox-io/nanobox/util/productionAPI"
 )
 
-type linkAdd struct {
+// processLinkAdd
+type processLinkAdd struct {
 	control ProcessControl
 }
 
+//
 func init() {
 	Register("link_add", linkAddFunc)
 }
 
+//
 func linkAddFunc(conf ProcessControl) (Processor, error) {
-	return linkAdd{conf}, nil
+	return processLinkAdd{conf}, nil
 }
 
-func (self linkAdd) Results() ProcessControl {
-	return self.control
+//
+func (linkAdd processLinkAdd) Results() ProcessControl {
+	return linkAdd.control
 }
 
-func (self linkAdd) Process() error {
-	if self.control.Meta["name"] == "" {
+//
+func (linkAdd processLinkAdd) Process() error {
+	if linkAdd.control.Meta["name"] == "" {
+
 		fmt.Println("you need to provide a app name to link to")
 		os.Exit(1)
 	}
 
 	// get app id
-	app, err := production_api.App(self.control.Meta["name"])
+	app, err := productionAPI.App(linkAdd.control.Meta["name"])
 	if err != nil {
 		return err
 	}
-	if self.control.Meta["alias"] == "" {
-		self.control.Meta["alias"] = "default"
+
+	//
+	if linkAdd.control.Meta["alias"] == "" {
+		linkAdd.control.Meta["alias"] = "default"
 	}
+
 	// store the auth token
 	link := models.AppLinks{}
 	data.Get(util.AppName()+"_meta", "links", &link)
-	link[self.control.Meta["alias"]] = app.ID
+	link[linkAdd.control.Meta["alias"]] = app.ID
+
 	return data.Put(util.AppName()+"_meta", "links", link)
 }

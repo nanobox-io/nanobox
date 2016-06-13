@@ -1,9 +1,9 @@
 package processor
 
 import (
+	"encoding/json"
 	"fmt"
 	"os"
-	"encoding/json"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox/models"
@@ -11,23 +11,28 @@ import (
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
-type info struct {
+// processDevInfo ...
+type processDevInfo struct {
 	control ProcessControl
 }
 
+//
 func init() {
-	Register("dev_info", infoFunc)
+	Register("dev_info", devInfoFunc)
 }
 
-func infoFunc(control ProcessControl) (Processor, error) {
-	return info{control}, nil
+//
+func devInfoFunc(control ProcessControl) (Processor, error) {
+	return processDevInfo{control}, nil
 }
 
-func (self info) Results() ProcessControl {
-	return self.control
+//
+func (devInfo processDevInfo) Results() ProcessControl {
+	return devInfo.control
 }
 
-func (self info) Process() error {
+//
+func (devInfo processDevInfo) Process() error {
 	services, err := data.Keys(util.AppName())
 	if err != nil {
 		fmt.Println("data keys:", err)

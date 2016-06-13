@@ -3,12 +3,12 @@
 package netfs
 
 import (
-  "errors"
+	"errors"
 )
 
 // reloadServer reloads the nfs server with the new export configuration
 func reloadServer() error {
-  // todo: figure out how to do this :/
 
-  return errors.New("Reloading an NFS server is not yet implemented on linux")
+	// TODO: figure out how to do this :/
+	return errors.New("Reloading an NFS server is not yet implemented on linux")
 }

@@ -10,78 +10,82 @@ import (
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
-type devDestroy struct {
+// processDevDestroy ...
+type processDevDestroy struct {
 	control ProcessControl
 }
 
+//
 func init() {
 	Register("dev_destroy", devDestroyFunc)
 }
 
+//
 func devDestroyFunc(control ProcessControl) (Processor, error) {
-	return devDestroy{control}, nil
+	return processDevDestroy{control}, nil
 }
 
-func (destroy devDestroy) Results() ProcessControl {
-	return destroy.control
+//
+func (devDestroy processDevDestroy) Results() ProcessControl {
+	return devDestroy.control
 }
 
-func (destroy devDestroy) Process() error {
+//
+func (devDestroy processDevDestroy) Process() error {
 
-	if err := Run("dev_setup", destroy.control); err != nil {
+	if err := Run("dev_setup", devDestroy.control); err != nil {
 		return err
 	}
 
 	// remove all the services (platform/service/code)
-	if err := destroy.removeServices(); err != nil {
+	if err := devDestroy.removeServices(); err != nil {
 		return err
 	}
 
 	// teardown the app
-	if err := Run("app_teardown", destroy.control); err != nil {
+	if err := Run("app_teardown", devDestroy.control); err != nil {
 		return err
 	}
 
-	if err := destroy.removeMounts(); err != nil {
+	if err := devDestroy.removeMounts(); err != nil {
 		return err
 	}
 
 	// potentially destroy the provider
-	if err := destroy.destroyProvider(); err != nil {
+	if err := devDestroy.destroyProvider(); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-// get all the services in the app
-// and remove them
-func (destroy devDestroy) removeServices() error {
+// removeServices gets all the services in the app and remove them
+func (devDestroy processDevDestroy) removeServices() error {
 	services, err := data.Keys(util.AppName())
 	if err != nil {
 		return fmt.Errorf("data keys: %s", err.Error())
 	}
-	destroy.control.Display(stylish.Bullet("Removing Services"))
-	destroy.control.DisplayLevel++
+	devDestroy.control.Display(stylish.Bullet("Removing Services"))
+	devDestroy.control.DisplayLevel++
 	for _, service := range services {
 		if service != "build" {
 			// svc := models.Service{}
 			// data.Get(util.AppName(), service, &svc)
-			destroy.control.Meta["name"] = service
-			err := Run("service_destroy", destroy.control)
+			devDestroy.control.Meta["name"] = service
+			err := Run("service_destroy", devDestroy.control)
 			if err != nil {
-				destroy.control.Display(stylish.Warning("one of the services did not uninstall:\n%s", err.Error()))
+				devDestroy.control.Display(stylish.Warning("one of the services did not uninstall:\n%s", err.Error()))
 				// continue on to the next one.
 				// we should continue trying to remove services
 			}
 		}
 	}
-	destroy.control.DisplayLevel--
+	devDestroy.control.DisplayLevel--
 	return nil
 }
 
 // removeMounts will add the shares and mounts for this app
-func (destroy devDestroy) removeMounts() error {
+func (devDestroy processDevDestroy) removeMounts() error {
 
 	// unmount the engine if it's a local directory
 	if util.EngineDir() != "" {
@@ -117,7 +121,7 @@ func (destroy devDestroy) removeMounts() error {
 }
 
 // destroyProvider destroys the provider if there are no remaining apps
-func (destroy devDestroy) destroyProvider() error {
+func (devDestroy processDevDestroy) destroyProvider() error {
 	// fetch all of the apps
 	keys, err := data.Keys("apps")
 	if err != nil {
@@ -126,7 +130,7 @@ func (destroy devDestroy) destroyProvider() error {
 
 	if len(keys) == 0 {
 		// if no other apps exist in container
-		if err := Run("provider_destroy", destroy.control); err != nil {
+		if err := Run("provider_destroy", devDestroy.control); err != nil {
 			return err
 		}
 	}

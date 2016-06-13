@@ -3,32 +3,30 @@
 package netfs
 
 import (
-  "os/exec"
+	"os/exec"
 
-  "github.com/jcelliott/lumber"
+	"github.com/jcelliott/lumber"
 )
 
 // reloadServer will reload the nfs server with the new export configuration
 func reloadServer() error {
-  // todo: make sure nfsd is enabled
 
-  // check the exports to make sure a reload will be successful
-  cmd := exec.Command("nfsd", "checkexports")
-  b, err := cmd.CombinedOutput()
-  if err != nil {
-    // todo: provide a clear message for a direction to fix
-    lumber.Debug("output: %s", b)
-    return err
-  }
+	// TODO: make sure nfsd is enabled
 
-  // update exports
-  cmd = exec.Command("nfsd", "update")
-  b, err = cmd.CombinedOutput()
-  if err != nil {
-    // todo: provide a clear message for a direction to fix
-    lumber.Debug("output: %s", b)
-    return err
-  }
+	// check the exports to make sure a reload will be successful; TODO: provide a
+	// clear message for a direction to fix
+	cmd := exec.Command("nfsd", "checkexports")
+	if b, err := cmd.CombinedOutput(); err != nil {
+		lumber.Debug("output: %s", b)
+		return err
+	}
 
-  return nil
+	// update exports; TODO: provide a clear error message for a direction to fix
+	cmd = exec.Command("nfsd", "update")
+	if b, err := cmd.CombinedOutput(); err != nil {
+		lumber.Debug("output: %s", b)
+		return err
+	}
+
+	return nil
 }

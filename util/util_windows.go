@@ -10,7 +10,6 @@ import (
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox-golang-stylish"
-	// "github.com/nanobox-io/nanobox/config"
 )
 
 // PrivilegeExec runs a command, but assumes your already running as adminsitrator

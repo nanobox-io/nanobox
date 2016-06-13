@@ -8,33 +8,37 @@ import (
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
-// Clean all the code services after a dev deploy
-// unlike the service clean it doenst clean ones no longer in the box file
-// but instead removes them all.
-type codeClean struct {
+// processCodeClean ...
+type processCodeClean struct {
 	control processor.ProcessControl
 }
 
+//
 func init() {
 	processor.Register("code_clean", codeCleanFunc)
 }
 
+//
 func codeCleanFunc(control processor.ProcessControl) (processor.Processor, error) {
-	return &codeClean{control: control}, nil
+	return &processCodeClean{control: control}, nil
 }
 
-func (self codeClean) Results() processor.ProcessControl {
-	return self.control
+//
+func (codeClean processCodeClean) Results() processor.ProcessControl {
+	return codeClean.control
 }
 
-func (self *codeClean) Process() error {
+// clean all the code services after a dev deploy; unlike the service clean it
+// doenst clean ones no longer in the box file but instead removes them all.
+func (codeClean *processCodeClean) Process() error {
+
 	// if background do nothing
 	if processor.DefaultConfig.Background {
 		return nil
 	}
 
-	count, _ := counter.Decrement(util.AppName() + "_deploy")
 	// if other deploys are in progress do nothing
+	count, _ := counter.Decrement(util.AppName() + "_deploy")
 	if count != 0 {
 		return nil
 	}
@@ -50,13 +54,14 @@ func (self *codeClean) Process() error {
 		service := models.Service{}
 		data.Get(util.AppName(), key, &key)
 		if service.Type == "code" {
-			self.control.Meta["name"] = key
-			if err := processor.Run("code_destroy", self.control); err != nil {
+			codeClean.control.Meta["name"] = key
+			if err := processor.Run("code_destroy", codeClean.control); err != nil {
 				// we probably dont wnat to break the process just try the rest
 				// and report the errors.
 				// TODO: output
 			}
 		}
 	}
+
 	return nil
 }

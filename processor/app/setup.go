@@ -5,46 +5,51 @@ import (
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/data"
-	"github.com/nanobox-io/nanobox/util/ip_control"
+	"github.com/nanobox-io/nanobox/util/ipControl"
 )
 
-type appSetup struct {
+//
+type processAppSetup struct {
 	control processor.ProcessControl
 	app     models.App
 }
 
+//
 func init() {
-	processor.Register("app_setup", appSetupFunc)
+	processor.Register("app_appSetup", appSetupFunc)
 }
 
+//
 func appSetupFunc(control processor.ProcessControl) (processor.Processor, error) {
-	return &appSetup{control: control}, nil
+	return &processAppSetup{control: control}, nil
 }
 
-func (setup *appSetup) Results() processor.ProcessControl {
-	return setup.control
+//
+func (appSetup *processAppSetup) Results() processor.ProcessControl {
+	return appSetup.control
 }
 
-func (setup *appSetup) Process() error {
+//
+func (appSetup *processAppSetup) Process() error {
 
-	if err := setup.loadApp(); err != nil {
+	if err := appSetup.loadApp(); err != nil {
 		return err
 	}
 
 	// short-circuit if the app is already active
-	if setup.app.State == "active" {
+	if appSetup.app.State == ACTIVE {
 		return nil
 	}
 
-	if err := setup.reserveIPs(); err != nil {
+	if err := appSetup.reserveIPs(); err != nil {
 		return err
 	}
 
-	if err := setup.generateEvars(); err != nil {
+	if err := appSetup.generateEvars(); err != nil {
 		return err
 	}
 
-	if err := setup.persistApp(); err != nil {
+	if err := appSetup.persistApp(); err != nil {
 		return err
 	}
 
@@ -52,46 +57,46 @@ func (setup *appSetup) Process() error {
 }
 
 // loadApp loads the app from the db
-func (setup *appSetup) loadApp() error {
+func (appSetup *processAppSetup) loadApp() error {
 	// the app might not exist yet, so let's not return the error if it fails
-	data.Get("apps", util.AppName(), &setup.app)
+	data.Get("apps", util.AppName(), &appSetup.app)
 
 	// set the default state
-	if setup.app.State == "" {
-		setup.app.State = "initialized"
+	if appSetup.app.State == "" {
+		appSetup.app.State = INITIALIZED
 	}
 
 	return nil
 }
 
 // reserveIPs reserves necessary app-global ip addresses
-func (setup *appSetup) reserveIPs() error {
+func (appSetup *processAppSetup) reserveIPs() error {
 
 	//
-	devIP, err := ip_control.ReserveGlobal()
+	devIP, err := ipControl.ReserveGlobal()
 	if err != nil {
 		return err
 	}
 
 	//
-	setup.app.DevIP = devIP.String()
+	appSetup.app.DevIP = devIP.String()
 
 	return nil
 }
 
 // generateEvars generates the default app evars
-func (setup *appSetup) generateEvars() error {
+func (appSetup *processAppSetup) generateEvars() error {
 	// fetch the app evars model if it exists
 	evars := models.EnvVars{}
 
 	// ignore the error because it's likely to not exist
-	data.Get(util.AppName() + "_meta", "env", &evars)
+	data.Get(util.AppName()+"_meta", "env", &evars)
 
 	if evars["APP_NAME"] == "" {
 		evars["APP_NAME"] = util.AppName()
 	}
 
-	if err := data.Put(util.AppName() + "_meta", "env", evars); err != nil {
+	if err := data.Put(util.AppName()+"_meta", "env", evars); err != nil {
 		return err
 	}
 
@@ -99,13 +104,13 @@ func (setup *appSetup) generateEvars() error {
 }
 
 // persistApp saves the app to the db
-func (setup *appSetup) persistApp() error {
+func (appSetup *processAppSetup) persistApp() error {
 
-	// set the app state to active so we don't setup again
-	setup.app.State = "active"
+	// set the app state to active so we don't appSetup again
+	appSetup.app.State = ACTIVE
 
 	// save the app
-	if err := data.Put("apps", util.AppName(), &setup.app); err != nil {
+	if err := data.Put("apps", util.AppName(), &appSetup.app); err != nil {
 		return err
 	}
 

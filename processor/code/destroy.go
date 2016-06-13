@@ -9,64 +9,69 @@ import (
 	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/data"
-	"github.com/nanobox-io/nanobox/util/ip_control"
+	"github.com/nanobox-io/nanobox/util/ipControl"
 )
 
-type codeDestroy struct {
+// processCodeDestroy ...
+type processCodeDestroy struct {
 	control processor.ProcessControl
 }
 
+//
 func init() {
 	processor.Register("code_destroy", codeDestroyFunc)
 }
 
+//
 func codeDestroyFunc(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 	if control.Meta["name"] == "" {
-		return nil, missingImageOrName
+		return nil, errMissingImageOrName
 	}
-	return &codeDestroy{control: control}, nil
+	return &processCodeDestroy{control: control}, nil
 }
 
-func (self codeDestroy) Results() processor.ProcessControl {
-	return self.control
+//
+func (codeDestroy processCodeDestroy) Results() processor.ProcessControl {
+	return codeDestroy.control
 }
 
-func (self *codeDestroy) Process() error {
+//
+func (codeDestroy *processCodeDestroy) Process() error {
 
 	// get the service from the database
 	service := models.Service{}
-	err := data.Get(util.AppName(), self.control.Meta["name"], &service)
-	if err != nil {
-		// cant find service
+
+	//
+	if err := data.Get(util.AppName(), codeDestroy.control.Meta["name"], &service); err != nil {
 		return err
 	}
 
-	err = docker.ContainerRemove(service.ID)
-	if err != nil {
+	//
+	if err := docker.ContainerRemove(service.ID); err != nil {
 		return err
 	}
 
-	err = provider.RemoveNat(service.ExternalIP, service.InternalIP)
-	if err != nil {
+	//
+	if err := provider.RemoveNat(service.ExternalIP, service.InternalIP); err != nil {
 		return err
 	}
 
-	err = provider.RemoveIP(service.ExternalIP)
-	if err != nil {
+	//
+	if err := provider.RemoveIP(service.ExternalIP); err != nil {
 		return err
 	}
 
-	err = ip_control.ReturnIP(net.ParseIP(service.ExternalIP))
-	if err != nil {
+	//
+	if err := ipControl.ReturnIP(net.ParseIP(service.ExternalIP)); err != nil {
 		return err
 	}
 
-	err = ip_control.ReturnIP(net.ParseIP(service.InternalIP))
-	if err != nil {
+	//
+	if err := ipControl.ReturnIP(net.ParseIP(service.InternalIP)); err != nil {
 		return err
 	}
 
 	// save the service
-	return data.Delete(util.AppName(), self.control.Meta["name"])
+	return data.Delete(util.AppName(), codeDestroy.control.Meta["name"])
 }

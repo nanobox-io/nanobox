@@ -12,10 +12,12 @@ import (
 	_ "github.com/nanobox-io/nanobox/processor/service"
 )
 
+// testProccessor ...
 type testProcessor struct {
 	run bool
 }
 
+// TestMain ...
 func TestMain(m *testing.M) {
 	err := os.Chdir("../testing/")
 	if err != nil {
@@ -31,19 +33,18 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
+// Process ...
 func (self testProcessor) Process() error {
 	self.run = true
 	return nil
 }
 
+// Results ....
 func (self testProcessor) Results() processor.ProcessControl {
 	return processor.ProcessControl{}
 }
 
-func testProcessBuilder(p processor.ProcessControl) (processor.Processor, error) {
-	return testProcessor{}, nil
-}
-
+// TestRegister ...
 func TestRegister(t *testing.T) {
 	processor.Register("test", testProcessBuilder)
 	err := processor.Run("test", processor.DefaultConfig)
@@ -52,6 +53,7 @@ func TestRegister(t *testing.T) {
 	}
 }
 
+// TestBuild ...
 func TestBuild(t *testing.T) {
 	err := processor.Run("build", processor.DefaultConfig)
 	if err != nil {
@@ -59,6 +61,7 @@ func TestBuild(t *testing.T) {
 	}
 }
 
+// TestDevDeploy ...
 func TestDevDeploy(t *testing.T) {
 	err := processor.Run("dev", processor.DefaultConfig)
 	if err != nil {
@@ -66,9 +69,15 @@ func TestDevDeploy(t *testing.T) {
 	}
 }
 
+// TestDevDestroy ...
 func TestDevDestroy(t *testing.T) {
 	err := processor.Run("dev_destroy", processor.DefaultConfig)
 	if err != nil {
 		t.Errorf("error from build run", err)
 	}
+}
+
+// testProcessorBuilder ...
+func testProcessBuilder(p processor.ProcessControl) (processor.Processor, error) {
+	return testProcessor{}, nil
 }

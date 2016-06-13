@@ -15,15 +15,16 @@ func Increment(ID string) (int, error) {
 	}
 
 	counter := models.Counter{}
-
 	data.Get("counters", ID, &counter)
 
+	//
 	if counter.Count < 0 {
 		counter.Count = 0
 	}
 
 	counter.Count = counter.Count + 1
 
+	//
 	if err := data.Put("counters", ID, counter); err != nil {
 		return 0, err
 	}
@@ -36,7 +37,7 @@ func Increment(ID string) (int, error) {
 	return counter.Count, nil
 }
 
-// DecrementCounter will decrement a counter by ID
+// Decrement will decrement a counter by ID
 func Decrement(ID string) (int, error) {
 
 	// aquire a lock to ensure we're atomically updating
@@ -45,15 +46,16 @@ func Decrement(ID string) (int, error) {
 	}
 
 	counter := models.Counter{}
-
 	data.Get("counters", ID, &counter)
 
+	//
 	if counter.Count <= 0 {
 		counter.Count = 0
 	} else {
 		counter.Count = counter.Count - 1
 	}
 
+	//
 	if err := data.Put("counters", ID, counter); err != nil {
 		return 0, err
 	}
@@ -68,8 +70,10 @@ func Decrement(ID string) (int, error) {
 
 // Get returns the current counter value by ID
 func Get(ID string) (int, error) {
+
 	counter := models.Counter{}
 
+	//
 	if err := data.Get("counters", ID, &counter); err != nil {
 		return 0, err
 	}
@@ -77,9 +81,8 @@ func Get(ID string) (int, error) {
 	return counter.Count, nil
 }
 
-// Reset resets a counter by ID
+// Reset resets a counter by ID; we can simply delete the counter model
 func Reset(ID string) error {
-	// we can simply delete the counter model
 
 	// aquire a lock to ensure we're atomically updating
 	if err := locker.GlobalLock(); err != nil {

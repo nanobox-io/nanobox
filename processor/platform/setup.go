@@ -4,32 +4,37 @@ import (
 	"github.com/nanobox-io/nanobox-golang-stylish"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util/data"
-	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/processor"
+	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/data"
 )
 
-type platformSetup struct {
+// processPlatformSetup ...
+type processPlatformSetup struct {
 	control processor.ProcessControl
 }
 
+//
 func init() {
 	processor.Register("platform_setup", platformSetupFunc)
 }
 
+//
 func platformSetupFunc(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 
-	return platformSetup{control}, nil
+	return processPlatformSetup{control}, nil
 }
 
-func (self platformSetup) Results() processor.ProcessControl {
-	return self.control
+//
+func (platformSetup processPlatformSetup) Results() processor.ProcessControl {
+	return platformSetup.control
 }
 
-func (self platformSetup) Process() error {
+//
+func (platformSetup processPlatformSetup) Process() error {
 
-	if err := self.provisionServices(); err != nil {
+	if err := platformSetup.provisionServices(); err != nil {
 		return err
 	}
 
@@ -37,10 +42,10 @@ func (self platformSetup) Process() error {
 }
 
 // provisionServices will provision all the platform services
-func (self platformSetup) provisionServices() error {
-	self.control.Display(stylish.Bullet("Provisioning Platform Services"))
-	for _, service := range PlatformServices {
-		if err := self.provisionService(service); err != nil {
+func (platformSetup processPlatformSetup) provisionServices() error {
+	platformSetup.control.Display(stylish.Bullet("Provisioning Platform Services"))
+	for _, service := range Services {
+		if err := platformSetup.provisionService(service); err != nil {
 			return err
 		}
 	}
@@ -49,12 +54,12 @@ func (self platformSetup) provisionServices() error {
 }
 
 // provisionService will provision an individual service
-func (self platformSetup) provisionService(service PlatformService) error {
+func (platformSetup processPlatformSetup) provisionService(service Service) error {
 
 	config := processor.ProcessControl{
-		DevMode:      self.control.DevMode,
-		Verbose:      self.control.Verbose,
-		DisplayLevel: self.control.DisplayLevel + 1,
+		DevMode:      platformSetup.control.DevMode,
+		Verbose:      platformSetup.control.Verbose,
+		DisplayLevel: platformSetup.control.DisplayLevel + 1,
 		Meta: map[string]string{
 			"label": service.label,
 			"name":  service.name,
@@ -62,7 +67,7 @@ func (self platformSetup) provisionService(service PlatformService) error {
 		},
 	}
 
-	if self.isServiceActive(service.name) {
+	if platformSetup.isServiceActive(service.name) {
 		// start the service if the service is already active
 		return processor.Run("service_start", config)
 	}
@@ -78,7 +83,7 @@ func (self platformSetup) provisionService(service PlatformService) error {
 }
 
 // isServiceActive returns true if a service is already active
-func (self platformSetup) isServiceActive(id string) bool {
+func (platformSetup processPlatformSetup) isServiceActive(id string) bool {
 
 	// service db entry
 	service := models.Service{}

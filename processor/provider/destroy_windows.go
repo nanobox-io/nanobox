@@ -2,12 +2,8 @@
 
 package provider
 
-import (
-)
-
-// TODO: win: write this function for windows.
-
-func (self providerDestroy) RemoveDatabase() error {
+// removeDatabase ...; TODO: win: write this function for windows.
+func (providerDestroy processProviderDestroy) removeDatabase() error {
 	panic("not yet implemented")
-	return nil
+	// return nil
 }

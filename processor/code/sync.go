@@ -11,16 +11,19 @@ import (
 	"github.com/nanobox-io/nanobox/util/locker"
 )
 
-// used by the deploy process to syncronize the code parts from the boxfile
-type codeSync struct {
+// processCodeSync is used by the deploy process to syncronize the code parts
+// from the boxfile
+type processCodeSync struct {
 	control processor.ProcessControl
-	box    boxfile.Boxfile
+	box     boxfile.Boxfile
 }
 
+//
 func init() {
 	processor.Register("code_sync", codeSyncFunc)
 }
 
+//
 func codeSyncFunc(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 	// {"build":"%s","warehouse":"%s","warehouse_token":"123","boxfile":"%s"}
@@ -30,14 +33,17 @@ func codeSyncFunc(control processor.ProcessControl) (processor.Processor, error)
 		control.Meta["warehouse_token"] == "" {
 		return nil, fmt.Errorf("missing boxfile || build_id || warehouse_url || warehouse_token")
 	}
-	return &codeSync{control: control}, nil
+
+	return &processCodeSync{control: control}, nil
 }
 
-func (self codeSync) Results() processor.ProcessControl {
-	return self.control
+//
+func (codeSync processCodeSync) Results() processor.ProcessControl {
+	return codeSync.control
 }
 
-func (self *codeSync) Process() error {
+//
+func (codeSync *processCodeSync) Process() error {
 	// increment the counter so we know how many deploys are waiting
 	counter.Increment(util.AppName() + "_deploy")
 
@@ -46,32 +52,31 @@ func (self *codeSync) Process() error {
 	defer locker.LocalUnlock()
 
 	// set the boxfile and make sure its valid
-	if err := self.setBoxfile(); err != nil {
+	if err := codeSync.setBoxfile(); err != nil {
 		return err
 	}
 
 	// iterate over the code nodes and build containers for each of them
-	for _, codeName := range self.box.Nodes("code") {
-		// pull the image from the boxfile.
-		// default to a reasonable alternative if non is given
-		image := self.box.Node(codeName).StringValue("image")
+	for _, codeName := range codeSync.box.Nodes("code") {
+		// pull the image from the boxfile; default to a reasonable alternative if
+		// none is given
+		image := codeSync.box.Node(codeName).StringValue("image")
 		if image == "" {
 			image = "nanobox/code"
 		}
 
-		// create a new process config for code
-		// ensuring it has access to the warehouse
+		// create a new process config for code ensuring it has access to the warehouse
 		// and the boxfile
 		code := processor.ProcessControl{
-			DevMode: self.control.DevMode,
-			Verbose: self.control.Verbose,
+			DevMode: codeSync.control.DevMode,
+			Verbose: codeSync.control.Verbose,
 			Meta: map[string]string{
 				"name":            codeName,
 				"image":           image,
-				"boxfile":         self.control.Meta["boxfile"],
-				"build_id":        self.control.Meta["build_id"],
-				"warehouse_url":   self.control.Meta["warehouse_url"],
-				"warehouse_token": self.control.Meta["warehouse_token"],
+				"boxfile":         codeSync.control.Meta["boxfile"],
+				"build_id":        codeSync.control.Meta["build_id"],
+				"warehouse_url":   codeSync.control.Meta["warehouse_url"],
+				"warehouse_token": codeSync.control.Meta["warehouse_token"],
 			},
 		}
 
@@ -86,15 +91,17 @@ func (self *codeSync) Process() error {
 		if err != nil {
 			return fmt.Errorf("code_start (%s): %s\n", codeName, err.Error())
 		}
-
 	}
+
 	return nil
 }
 
-func (self *codeSync) setBoxfile() error {
-	self.box = boxfile.New([]byte(self.control.Meta["boxfile"]))
-	if !self.box.Valid {
+// setBoxfile ...
+func (codeSync *processCodeSync) setBoxfile() error {
+	codeSync.box = boxfile.New([]byte(codeSync.control.Meta["boxfile"]))
+	if !codeSync.box.Valid {
 		return fmt.Errorf("Invalid Boxfile")
 	}
+
 	return nil
 }

@@ -10,33 +10,39 @@ import (
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
-type devDeploy struct {
+// processDevDeploy ...
+type processDevDeploy struct {
 	control ProcessControl
-	box    boxfile.Boxfile
+	box     boxfile.Boxfile
 }
 
+//
 func init() {
 	Register("dev_deploy", devDeployFunc)
 }
 
+//
 func devDeployFunc(control ProcessControl) (Processor, error) {
-	// control.Meta["devDeploy-control"]
-	// do some control validation
-	// check on the meta for the flags and make sure they work
+	// control.Meta["processDevDeploy-control"]
 
-	return devDeploy{control: control}, nil
+	// do some control validation check on the meta for the flags and make sure they
+	// work
+
+	return processDevDeploy{control: control}, nil
 }
 
-func (self devDeploy) Results() ProcessControl {
-	return self.control
+//
+func (devDeploy processDevDeploy) Results() ProcessControl {
+	return devDeploy.control
 }
 
-func (self devDeploy) Process() error {
+//
+func (devDeploy processDevDeploy) Process() error {
 
 	// defer the clean up so if we exit early the
 	// cleanup will always happen
 	defer func() {
-		if err := Run("dev_teardown", self.control); err != nil {
+		if err := Run("dev_teardown", devDeploy.control); err != nil {
 			// this is bad, really bad...
 			// we should probably print a pretty message explaining that the app
 			// was left in a bad state and needs to be reset
@@ -44,57 +50,58 @@ func (self devDeploy) Process() error {
 		}
 	}()
 
-	if err := Run("dev_setup", self.control); err != nil {
+	if err := Run("dev_setup", devDeploy.control); err != nil {
 		// todo: how to display this?
 		return err
 	}
 
-	if err := self.publishCode(); err != nil {
+	if err := devDeploy.publishCode(); err != nil {
 		return err
 	}
 
 	// syncronize the services as per the new boxfile
-	if err := Run("service_sync", self.control); err != nil {
+	if err := Run("service_sync", devDeploy.control); err != nil {
 		return err
 	}
 
 	// start code
-	if err := self.startCodeServices(); err != nil {
+	if err := devDeploy.startCodeServices(); err != nil {
 		return err
 	}
 
 	// clean up the code services
 	defer func() {
-		if err := Run("code_clean", self.control); err != nil {
+		if err := Run("code_clean", devDeploy.control); err != nil {
 			// output this error message
 			// it doesnt break anything if the clean fails.
 		}
 	}()
 
 	// update nanoagent portal
-	if err := Run("update_portal", self.control); err != nil {
+	if err := Run("update_portal", devDeploy.control); err != nil {
 		return err
 	}
 
 	// hang and do some logging until they are done
-	if err := Run("mist_log", self.control); err != nil {
+	if err := Run("mist_log", devDeploy.control); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func (self *devDeploy) publishCode() error {
+// publishCode ...
+func (devDeploy *processDevDeploy) publishCode() error {
 
 	// setup the var's required for code_publish
 	hoarder := models.Service{}
 	data.Get(util.AppName(), "hoarder", &hoarder)
-	self.control.Meta["build_id"] = "1234"
-	self.control.Meta["warehouse_url"] = hoarder.InternalIP
-	self.control.Meta["warehouse_token"] = "123"
+	devDeploy.control.Meta["build_id"] = "1234"
+	devDeploy.control.Meta["warehouse_url"] = hoarder.InternalIP
+	devDeploy.control.Meta["warehouse_token"] = "123"
 
 	// publish code
-	publishProcessor, err := Build("code_publish", self.control)
+	publishProcessor, err := Build("code_publish", devDeploy.control)
 	if err != nil {
 		return err
 	}
@@ -106,23 +113,25 @@ func (self *devDeploy) publishCode() error {
 	if publishResult.Meta["boxfile"] == "" {
 		return fmt.Errorf("publishCode: the boxfile was empty")
 	}
-	// store the boxfile on myself
-	self.box = boxfile.New([]byte(publishResult.Meta["boxfile"]))
+	// store the boxfile on mydeploy
+	devDeploy.box = boxfile.New([]byte(publishResult.Meta["boxfile"]))
 
 	// set it in the control file so child process have access to it as well
-	self.control.Meta["boxfile"] = publishResult.Meta["boxfile"]
+	devDeploy.control.Meta["boxfile"] = publishResult.Meta["boxfile"]
+
 	return nil
 }
 
-func (self *devDeploy) startCodeServices() error {
+// startCodeServices ...
+func (devDeploy *processDevDeploy) startCodeServices() error {
 	code := ProcessControl{
-		DevMode: self.control.DevMode,
-		Verbose: self.control.Verbose,
+		DevMode: devDeploy.control.DevMode,
+		Verbose: devDeploy.control.Verbose,
 		Meta: map[string]string{
-			"boxfile":         self.control.Meta["boxfile"],
-			"build_id":        self.control.Meta["build_id"],
-			"warehouse_url":   self.control.Meta["warehouse_url"],
-			"warehouse_token": self.control.Meta["warehouse_token"],
+			"boxfile":         devDeploy.control.Meta["boxfile"],
+			"build_id":        devDeploy.control.Meta["build_id"],
+			"warehouse_url":   devDeploy.control.Meta["warehouse_url"],
+			"warehouse_token": devDeploy.control.Meta["warehouse_token"],
 		},
 	}
 
@@ -130,5 +139,6 @@ func (self *devDeploy) startCodeServices() error {
 	if err := Run("code_sync", code); err != nil {
 		return err
 	}
+
 	return nil
 }

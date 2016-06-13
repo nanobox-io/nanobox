@@ -7,44 +7,50 @@ import (
 	"github.com/nanobox-io/nanobox/validate"
 )
 
-type (
-	Provider interface {
-		HostShareDir() string
-		HostMntDir() string
-		Valid() error
-		Create() error
-		Reboot() error
-		Stop() error
-		Destroy() error
-		Start() error
-		DockerEnv() error
-		AddIP(ip string) error
-		RemoveIP(ip string) error
-		AddNat(host, container string) error
-		RemoveNat(host, container string) error
-		AddShare(local, host string) error
-		RemoveShare(local, host string) error
-		AddMount(local, host string) error
-		RemoveMount(local, host string) error
-	}
+// Provider ...
+type Provider interface {
+	HostShareDir() string
+	HostMntDir() string
+	Valid() error
+	Create() error
+	Reboot() error
+	Stop() error
+	Destroy() error
+	Start() error
+	DockerEnv() error
+	AddIP(ip string) error
+	RemoveIP(ip string) error
+	AddNat(host, container string) error
+	RemoveNat(host, container string) error
+	AddShare(local, host string) error
+	RemoveShare(local, host string) error
+	AddMount(local, host string) error
+	RemoveMount(local, host string) error
+}
+
+var (
+	providers = map[string]Provider{}
+	verbose   = true
 )
 
-var providers = map[string]Provider{}
-var verbose = true
-
+// Register ...
 func Register(name string, p Provider) {
 	providers[name] = p
 }
 
+// init ...
 func init() {
 	validate.Register("provider", Valid)
 }
 
+// Display ...
 func Display(verb bool) {
 	verbose = verb
 }
 
+// Valid ...
 func Valid() error {
+
 	p, err := fetchProvider()
 	if err != nil {
 		return err
@@ -53,7 +59,9 @@ func Valid() error {
 	return p.Valid()
 }
 
+// Create ...
 func Create() error {
+
 	p, err := fetchProvider()
 	if err != nil {
 		return err
@@ -62,7 +70,9 @@ func Create() error {
 	return p.Create()
 }
 
+// Reboot ...
 func Reboot() error {
+
 	p, err := fetchProvider()
 	if err != nil {
 		return err
@@ -71,7 +81,9 @@ func Reboot() error {
 	return p.Reboot()
 }
 
+// Stop ...
 func Stop() error {
+
 	p, err := fetchProvider()
 	if err != nil {
 		return err
@@ -80,7 +92,9 @@ func Stop() error {
 	return p.Stop()
 }
 
+// Destroy ..
 func Destroy() error {
+
 	p, err := fetchProvider()
 	if err != nil {
 		return err
@@ -89,7 +103,9 @@ func Destroy() error {
 	return p.Destroy()
 }
 
+// Start ..
 func Start() error {
+
 	p, err := fetchProvider()
 	if err != nil {
 		return err
@@ -98,23 +114,31 @@ func Start() error {
 	return p.Start()
 }
 
+// HostShareDir ...
 func HostShareDir() string {
+
 	p, err := fetchProvider()
 	if err != nil {
 		return ""
 	}
+
 	return p.HostShareDir()
 }
 
+// HostMntDir ..
 func HostMntDir() string {
+
 	p, err := fetchProvider()
 	if err != nil {
 		return ""
 	}
+
 	return p.HostMntDir()
 }
 
+// DockerEnv ..
 func DockerEnv() error {
+
 	p, err := fetchProvider()
 	if err != nil {
 		return err
@@ -123,7 +147,9 @@ func DockerEnv() error {
 	return p.DockerEnv()
 }
 
+// AddIP ..
 func AddIP(ip string) error {
+
 	p, err := fetchProvider()
 	if err != nil {
 		return err
@@ -132,7 +158,9 @@ func AddIP(ip string) error {
 	return p.AddIP(ip)
 }
 
+// RemoveIP ...
 func RemoveIP(ip string) error {
+
 	p, err := fetchProvider()
 	if err != nil {
 		return err
@@ -141,7 +169,9 @@ func RemoveIP(ip string) error {
 	return p.RemoveIP(ip)
 }
 
+// AddNat ..
 func AddNat(host, container string) error {
+
 	p, err := fetchProvider()
 	if err != nil {
 		return err
@@ -150,7 +180,9 @@ func AddNat(host, container string) error {
 	return p.AddNat(host, container)
 }
 
+// RemoveNat ..
 func RemoveNat(host, container string) error {
+
 	p, err := fetchProvider()
 	if err != nil {
 		return err
@@ -159,7 +191,9 @@ func RemoveNat(host, container string) error {
 	return p.RemoveNat(host, container)
 }
 
+// AddShare ...
 func AddShare(local, host string) error {
+
 	p, err := fetchProvider()
 	if err != nil {
 		return err
@@ -168,7 +202,9 @@ func AddShare(local, host string) error {
 	return p.AddShare(local, host)
 }
 
+// RemoveShare ...
 func RemoveShare(local, host string) error {
+
 	p, err := fetchProvider()
 	if err != nil {
 		return err
@@ -177,7 +213,9 @@ func RemoveShare(local, host string) error {
 	return p.RemoveShare(local, host)
 }
 
+// AddMount ...
 func AddMount(local, host string) error {
+
 	p, err := fetchProvider()
 	if err != nil {
 		return err
@@ -186,7 +224,9 @@ func AddMount(local, host string) error {
 	return p.AddMount(local, host)
 }
 
+// RemoveMount ...
 func RemoveMount(local, host string) error {
+
 	p, err := fetchProvider()
 	if err != nil {
 		return err
@@ -197,6 +237,7 @@ func RemoveMount(local, host string) error {
 
 // fetchProvider fetches the registered provider from the configured name
 func fetchProvider() (Provider, error) {
+
 	p, ok := providers[config.Viper().GetString("provider")]
 	if !ok {
 		return nil, errors.New("invalid provider")

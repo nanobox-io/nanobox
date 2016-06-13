@@ -3,8 +3,8 @@ package docker
 import (
 	// "encoding/json"
 	// "os"
-	"io"
 	"errors"
+	"io"
 	// "fmt"
 
 	dockType "github.com/docker/engine-api/types"

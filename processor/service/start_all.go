@@ -8,26 +8,31 @@ import (
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
-type serviceStartAll struct {
+// processServiceStartAll ...
+type processServiceStartAll struct {
 	control processor.ProcessControl
 }
 
+//
 func init() {
 	processor.Register("service_start_all", serviceStartAllFunc)
 }
 
+//
 func serviceStartAllFunc(control processor.ProcessControl) (processor.Processor, error) {
 	// make sure i was given a name and image
-	return serviceStartAll{control: control}, nil
+	return processServiceStartAll{control: control}, nil
 }
 
-func (self serviceStartAll) Results() processor.ProcessControl {
-	return self.control
+//
+func (serviceStartAll processServiceStartAll) Results() processor.ProcessControl {
+	return serviceStartAll.control
 }
 
-func (self serviceStartAll) Process() error {
+//
+func (serviceStartAll processServiceStartAll) Process() error {
 
-	if err := self.startServices(); err != nil {
+	if err := serviceStartAll.startServices(); err != nil {
 		return err
 	}
 
@@ -35,14 +40,14 @@ func (self serviceStartAll) Process() error {
 }
 
 // startServices starts all of the services saved in the database
-func (self serviceStartAll) startServices() error {
+func (serviceStartAll processServiceStartAll) startServices() error {
 	services, err := data.Keys(util.AppName())
 	if err != nil {
 		return err
 	}
 
 	for _, service := range services {
-		if err := self.startService(service); err != nil {
+		if err := serviceStartAll.startService(service); err != nil {
 			return err
 		}
 	}
@@ -51,11 +56,11 @@ func (self serviceStartAll) startServices() error {
 }
 
 // startService starts a service
-func (self serviceStartAll) startService(uid string) error {
+func (serviceStartAll processServiceStartAll) startService(uid string) error {
 
 	config := processor.ProcessControl{
-		DevMode: self.control.DevMode,
-		Verbose: self.control.Verbose,
+		DevMode: serviceStartAll.control.DevMode,
+		Verbose: serviceStartAll.control.Verbose,
 		Meta: map[string]string{
 			"label": uid,
 			"name":  uid,

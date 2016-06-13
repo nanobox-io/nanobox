@@ -2,26 +2,31 @@ package processor
 
 import (
 	"fmt"
+
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
-type logout struct {
+type processLogout struct {
 	control ProcessControl
 }
 
+//
 func init() {
 	Register("logout", logoutFunc)
 }
 
+//
 func logoutFunc(conf ProcessControl) (Processor, error) {
-	return logout{conf}, nil
+	return processLogout{conf}, nil
 }
 
-func (self logout) Results() ProcessControl {
-	return self.control
+//
+func (logout processLogout) Results() ProcessControl {
+	return logout.control
 }
 
-func (self logout) Process() error {
+//
+func (logout processLogout) Process() error {
 	// remove token from database
 	err := data.Delete("global", "user")
 	if err == nil {

@@ -5,20 +5,23 @@ import (
 	"github.com/nanobox-io/nanobox/provider"
 )
 
-type providerStop struct {
+// processProviderStop ...
+type processProviderStop struct {
 	control processor.ProcessControl
 }
 
+//
 func providerStopFunc(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
-
-	return providerStop{control}, nil
+	return processProviderStop{control}, nil
 }
 
-func (self providerStop) Results() processor.ProcessControl {
-	return self.control
+//
+func (providerStop processProviderStop) Results() processor.ProcessControl {
+	return providerStop.control
 }
 
-func (self providerStop) Process() error {
+//
+func (providerStop processProviderStop) Process() error {
 	return provider.Stop()
 }

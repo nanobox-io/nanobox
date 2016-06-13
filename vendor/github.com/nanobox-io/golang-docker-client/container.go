@@ -1,8 +1,8 @@
 package docker
 
 import (
-	"strings"
 	"golang.org/x/net/context"
+	"strings"
 
 	dockType "github.com/docker/engine-api/types"
 	dockContainer "github.com/docker/engine-api/types/container"
@@ -44,7 +44,7 @@ func CreateContainer(conf ContainerConfig) (dockType.ContainerJSON, error) {
 
 	hostConfig := &dockContainer.HostConfig{
 		Privileged: true,
-		Binds: conf.Binds,
+		Binds:      conf.Binds,
 		// NetworkMode:   "host",
 		CapAdd:        strslice.StrSlice([]string{"NET_ADMIN"}),
 		NetworkMode:   "bridge",

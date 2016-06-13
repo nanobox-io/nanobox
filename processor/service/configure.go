@@ -13,98 +13,111 @@ import (
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
-type serviceConfigure struct {
-	control  	processor.ProcessControl
-	service 	models.Service
-	boxfile 	models.Boxfile
-}
+type (
 
-type member struct {
-	LocalIP string `json:"local_ip"`
-	UID     string `json:"uid"`
-	Role    string `json:"role"`
-}
+	// processServiceConfigure ...
+	processServiceConfigure struct {
+		control processor.ProcessControl
+		service models.Service
+		boxfile models.Boxfile
+	}
 
-type component struct {
-	Name string `json:"name"`
-	UID  string `json:"uid"`
-	ID   string `json:"id"`
-}
+	// member ...
+	member struct {
+		LocalIP string `json:"local_ip"`
+		UID     string `json:"uid"`
+		Role    string `json:"role"`
+	}
 
-type configPayload struct {
-	LogvacHost string                 `json:"logvac_host"`
-	Platform   string                 `json:"platform"`
-	Config     map[string]interface{} `json:"config"`
-	Member     member                 `json:"member"`
-	Component  component              `json:"component"`
-	Users      []models.User          `json:"users"`
-}
+	// component ...
+	component struct {
+		Name string `json:"name"`
+		UID  string `json:"uid"`
+		ID   string `json:"id"`
+	}
 
-type startUpdatePayload struct {
-	Config map[string]interface{} `json:"config"`
-}
+	// configPayload ...
+	configPayload struct {
+		LogvacHost string                 `json:"logvac_host"`
+		Platform   string                 `json:"platform"`
+		Config     map[string]interface{} `json:"config"`
+		Member     member                 `json:"member"`
+		Component  component              `json:"component"`
+		Users      []models.User          `json:"users"`
+	}
 
+	// startUpdatePayload ...
+	startUpdatePayload struct {
+		Config map[string]interface{} `json:"config"`
+	}
+)
+
+//
 func init() {
 	processor.Register("service_configure", serviceConfigureFunc)
 }
 
-func (self serviceConfigure) Results() processor.ProcessControl {
-	return self.control
+//
+func serviceConfigureFunc(control processor.ProcessControl) (processor.Processor, error) {
+	// confirm the provider is an accessable one that we support.
+
+	return processServiceConfigure{control: control}, nil
 }
 
-func (self serviceConfigure) Process() error {
+//
+func (serviceConfigure processServiceConfigure) Results() processor.ProcessControl {
+	return serviceConfigure.control
+}
 
-	if err := self.validateMeta(); err != nil {
+//
+func (serviceConfigure processServiceConfigure) Process() error {
+
+	if err := serviceConfigure.validateMeta(); err != nil {
 		return err
 	}
 
-	if err := self.loadService(); err != nil {
+	if err := serviceConfigure.loadService(); err != nil {
 		return err
 	}
 
 	// short-circuit if the service has already progressed past this point
-	if self.service.State != "planned" {
+	if serviceConfigure.service.State != "planned" {
 		return nil
 	}
 
-	if err := self.loadBoxfile(); err != nil {
+	if err := serviceConfigure.loadBoxfile(); err != nil {
 		return err
 	}
 
-	if err := self.runUpdate(); err != nil {
+	if err := serviceConfigure.runUpdate(); err != nil {
 		return err
 	}
 
-	if err := self.runConfigure(); err != nil {
+	if err := serviceConfigure.runConfigure(); err != nil {
 		return err
 	}
 
-	if err := self.runStart(); err != nil {
+	if err := serviceConfigure.runStart(); err != nil {
 		return err
 	}
 
-	if err := self.persistService(); err != nil {
+	if err := serviceConfigure.persistService(); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func serviceConfigureFunc(control processor.ProcessControl) (processor.Processor, error) {
-	// confirm the provider is an accessable one that we support.
-
-	return serviceConfigure{control: control}, nil
-}
-
-func (self serviceConfigure) configurePayload() string {
+// configurePayload ...
+func (serviceConfigure processServiceConfigure) configurePayload() string {
 	me := models.Service{}
-	data.Get(util.AppName(), self.control.Meta["name"], &me)
+	data.Get(util.AppName(), serviceConfigure.control.Meta["name"], &me)
 
 	logvac := models.Service{}
-	data.Get(util.AppName(), "logvac", &logvac)
+	data.Get(util.AppName(), LOGVAC, &logvac)
 
-	box := boxfile.New([]byte(self.boxfile.Data))
-	boxConfig := box.Node(self.control.Meta["name"]).Node("config")
+	box := boxfile.New([]byte(serviceConfigure.boxfile.Data))
+	boxConfig := box.Node(serviceConfigure.control.Meta["name"]).Node("config")
 
 	pload := configPayload{
 		LogvacHost: logvac.InternalIP,
@@ -117,7 +130,7 @@ func (self serviceConfigure) configurePayload() string {
 		},
 		Component: component{
 			Name: "whydoesthismatter",
-			UID:  self.control.Meta["name"],
+			UID:  serviceConfigure.control.Meta["name"],
 			ID:   me.ID,
 		},
 		Users: me.Plan.Users,
@@ -125,8 +138,8 @@ func (self serviceConfigure) configurePayload() string {
 	if pload.Users == nil {
 		pload.Users = []models.User{}
 	}
-	switch self.control.Meta["name"] {
-	case "portal", "logvac", "hoarder", "mist":
+	switch serviceConfigure.control.Meta["name"] {
+	case PORTAL, LOGVAC, HOARDER, MIST:
 		pload.Config["token"] = "123"
 	}
 	j, err := json.Marshal(pload)
@@ -136,13 +149,14 @@ func (self serviceConfigure) configurePayload() string {
 	return string(j)
 }
 
-func (self serviceConfigure) startUpdatePayload() string {
-	boxfile := boxfile.New([]byte(self.control.Meta["boxfile"]))
-	boxConfig := boxfile.Node(self.control.Meta["name"]).Node("config")
+// startUpdatePayload ...
+func (serviceConfigure processServiceConfigure) startUpdatePayload() string {
+	boxfile := boxfile.New([]byte(serviceConfigure.control.Meta["boxfile"]))
+	boxConfig := boxfile.Node(serviceConfigure.control.Meta["name"]).Node("config")
 
 	pload := startUpdatePayload{boxConfig.Parsed}
-	switch self.control.Meta["name"] {
-	case "portal", "logvac", "hoarder", "mist":
+	switch serviceConfigure.control.Meta["name"] {
+	case PORTAL, LOGVAC, HOARDER, MIST:
 		pload.Config["token"] = "123"
 	}
 	j, err := json.Marshal(pload)
@@ -153,9 +167,9 @@ func (self serviceConfigure) startUpdatePayload() string {
 }
 
 // validateMeta validates that the image is provided
-func (self *serviceConfigure) validateMeta() error {
+func (serviceConfigure *processServiceConfigure) validateMeta() error {
 	// make sure i was given a name and image
-	if self.control.Meta["name"] == "" {
+	if serviceConfigure.control.Meta["name"] == "" {
 		return errors.New("missing name")
 	}
 
@@ -163,11 +177,10 @@ func (self *serviceConfigure) validateMeta() error {
 }
 
 // loadService loads the service from the database
-func (self *serviceConfigure) loadService() error {
-	// get the service from the database
-	err := data.Get(util.AppName(), self.control.Meta["name"], &self.service)
-	if err != nil {
-		// cannot start a service that wasnt setup (ie saved in the database)
+func (serviceConfigure *processServiceConfigure) loadService() error {
+	// get the service from the database; an error means we could not start a service
+	// that wasnt setup (ie saved in the database)
+	if err := data.Get(util.AppName(), serviceConfigure.control.Meta["name"], &serviceConfigure.service); err != nil {
 		return err
 	}
 
@@ -175,46 +188,47 @@ func (self *serviceConfigure) loadService() error {
 }
 
 // loadBoxfile loads the new build boxfile from the database
-func (self *serviceConfigure) loadBoxfile() error {
+func (serviceConfigure *processServiceConfigure) loadBoxfile() error {
 
 	// we won't worry about erroring here, because there may not be
 	// a build_boxfile at this point
-	data.Get(util.AppName()+"_meta", "build_boxfile", &self.boxfile)
+	data.Get(util.AppName()+"_meta", "build_boxfile", &serviceConfigure.boxfile)
 
 	return nil
 }
 
 // runUpdate will run the update hook in the container
-func (self *serviceConfigure) runUpdate() error {
-	self.control.Info(stylish.SubBullet("Updating services..."))
-
+func (serviceConfigure *processServiceConfigure) runUpdate() error {
 	// run update
-	_, err := util.Exec(self.service.ID, "update", self.startUpdatePayload(), nil)
+	serviceConfigure.control.Info(stylish.SubBullet("Updating services..."))
+	_, err := util.Exec(serviceConfigure.service.ID, "update", serviceConfigure.startUpdatePayload(), nil)
+
 	return err
 }
 
 // runConfigure will run the configure hook in the container
-func (self *serviceConfigure) runConfigure() error {
+func (serviceConfigure *processServiceConfigure) runConfigure() error {
 	// run configure
-	self.control.Info(stylish.SubBullet("Configuring services..."))
+	serviceConfigure.control.Info(stylish.SubBullet("Configuring services..."))
+	_, err := util.Exec(serviceConfigure.service.ID, "configure", serviceConfigure.configurePayload(), nil)
 
-	_, err := util.Exec(self.service.ID, "configure", self.configurePayload(), nil)
 	return err
 }
 
 // runStart will run the configure hook in the container
-func (self *serviceConfigure) runStart() error {
-	// run update
-	self.control.Info(stylish.SubBullet("Starting services..."))
-	_, err := util.Exec(self.service.ID, "start", self.startUpdatePayload(), nil)
+func (serviceConfigure *processServiceConfigure) runStart() error {
+	// run start
+	serviceConfigure.control.Info(stylish.SubBullet("Starting services..."))
+	_, err := util.Exec(serviceConfigure.service.ID, "start", serviceConfigure.startUpdatePayload(), nil)
+
 	return err
 }
 
 // persistService saves the service entry to the database
-func (self *serviceConfigure) persistService() error {
-	self.service.State = "active"
-	err := data.Put(util.AppName(), self.control.Meta["name"], &self.service)
-	if err != nil {
+func (serviceConfigure *processServiceConfigure) persistService() error {
+	serviceConfigure.service.State = ACTIVE
+
+	if err := data.Put(util.AppName(), serviceConfigure.control.Meta["name"], &serviceConfigure.service); err != nil {
 		return err
 	}
 

@@ -12,35 +12,40 @@ import (
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
-type serviceClean struct {
+// processServiceClean ...
+type processServiceClean struct {
 	control processor.ProcessControl
 }
 
+//
 func init() {
 	processor.Register("service_clean", serviceCleanFunc)
 }
 
+//
 func serviceCleanFunc(control processor.ProcessControl) (processor.Processor, error) {
-	return serviceClean{control: control}, nil
+	return processServiceClean{control: control}, nil
 }
 
-func (self serviceClean) Results() processor.ProcessControl {
-	return self.control
+//
+func (serviceClean processServiceClean) Results() processor.ProcessControl {
+	return serviceClean.control
 }
 
-func (self serviceClean) Process() error {
+//
+func (serviceClean processServiceClean) Process() error {
 
-	if err := self.cleanServices(); err != nil {
-		self.control.Display(stylish.Warning("there has been an error cleaning a service:\n%s", err.Error()))
+	if err := serviceClean.cleanServices(); err != nil {
+		serviceClean.control.Display(stylish.Warning("there has been an error cleaning a service:\n%s", err.Error()))
 		return nil
 	}
 
 	return nil
 }
 
-// cleanServices will iterate through each registered service and
-// clean them if they were left in a bad state
-func (self serviceClean) cleanServices() error {
+// cleanServices will iterate through each registered service and clean them if
+// they were left in a bad state
+func (serviceClean processServiceClean) cleanServices() error {
 
 	uids, err := data.Keys(util.AppName())
 	if err != nil {
@@ -48,7 +53,7 @@ func (self serviceClean) cleanServices() error {
 	}
 
 	for _, uid := range uids {
-		if err := self.cleanService(uid); err != nil {
+		if err := serviceClean.cleanService(uid); err != nil {
 			return err
 		}
 	}
@@ -57,23 +62,23 @@ func (self serviceClean) cleanServices() error {
 }
 
 // cleanService will clean a service if it was left in a bad state
-func (self serviceClean) cleanService(uid string) error {
+func (serviceClean processServiceClean) cleanService(uid string) error {
 
 	if dirty := isServiceDirty(uid); dirty == true {
-		return self.removeService(uid)
+		return serviceClean.removeService(uid)
 	}
 
 	return nil
 }
 
 // removeService will remove a service from nanobox
-func (self serviceClean) removeService(uid string) error {
-	self.control.Display(stylish.Bullet(fmt.Sprintf("Cleaning %s...", uid)))
+func (serviceClean processServiceClean) removeService(uid string) error {
+	serviceClean.control.Display(stylish.Bullet(fmt.Sprintf("Cleaning %s...", uid)))
 
 	config := processor.ProcessControl{
-		DevMode:      self.control.DevMode,
-		Verbose:      self.control.Verbose,
-		DisplayLevel: self.control.DisplayLevel + 1,
+		DevMode:      serviceClean.control.DevMode,
+		Verbose:      serviceClean.control.Verbose,
+		DisplayLevel: serviceClean.control.DisplayLevel + 1,
 		Meta: map[string]string{
 			"name": uid,
 		},
@@ -99,7 +104,7 @@ func isServiceDirty(uid string) bool {
 	}
 
 	// short-circuit if this service never made it to active
-	if service.State != "active" {
+	if service.State != ACTIVE {
 		return true
 	}
 

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-	// "io"
 
 	dockType "github.com/docker/engine-api/types"
 	"github.com/nanobox-io/golang-docker-client"
@@ -18,59 +17,66 @@ import (
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/counter"
 	"github.com/nanobox-io/nanobox/util/data"
-	"github.com/nanobox-io/nanobox/util/ip_control"
+	"github.com/nanobox-io/nanobox/util/ipControl"
 	"github.com/nanobox-io/nanobox/util/locker"
 	"github.com/nanobox-io/nanobox/util/print"
 )
 
-type codeDev struct {
+// processCodeDev ...
+type processCodeDev struct {
 	control   processor.ProcessControl
-	app				models.App
+	app       models.App
 	boxfile   models.Boxfile
 	localIP   net.IP
 	image     string
 	container dockType.ContainerJSON
 }
 
+//
 func init() {
 	processor.Register("code_dev", codeDevFunc)
 }
 
+//
 func codeDevFunc(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
-
-	return &codeDev{control: control}, nil
+	return &processCodeDev{control: control}, nil
 }
 
-func (self codeDev) Results() processor.ProcessControl {
-	return self.control
+//
+func (codeDev processCodeDev) Results() processor.ProcessControl {
+	return codeDev.control
 }
 
-func (self *codeDev) Process() error {
+//
+func (codeDev *processCodeDev) Process() error {
 
+	// this is bad... we should probably print a pretty message explaining that the
+	// app was left in a bad state and needs to be reset
 	defer func() {
-		if err := self.teardown(); err != nil {
-			// this is bad...
-			// we should probably print a pretty message explaining that the app
-			// was left in a bad state and needs to be reset
+		if err := codeDev.teardown(); err != nil {
 			return
 		}
 	}()
 
-	if err := self.loadApp(); err != nil {
+	//
+	if err := codeDev.loadApp(); err != nil {
 		return err
 	}
 
-	if err := self.setup(); err != nil {
+	//
+	if err := codeDev.setup(); err != nil {
 		// todo: how to display this?
 		return err
 	}
 
-	if err := self.printMOTD(); err != nil {
+	//
+	if err := codeDev.printMOTD(); err != nil {
 		return err
 	}
 
-	if err := self.runConsole(); err != nil {
+	//
+	if err := codeDev.runConsole(); err != nil {
 		// todo: how to display this?
 		return err
 	}
@@ -79,16 +85,17 @@ func (self *codeDev) Process() error {
 }
 
 // loadApp loads the app from the db
-func (self *codeDev) loadApp() error {
+func (codeDev *processCodeDev) loadApp() error {
 
-  if err := data.Get("apps", util.AppName(), &self.app); err != nil {
+	if err := data.Get("apps", util.AppName(), &codeDev.app); err != nil {
 		return err
 	}
 
-  return nil
+	return nil
 }
 
-func (self *codeDev) setup() error {
+// setup ...
+func (codeDev *processCodeDev) setup() error {
 
 	// let anyone else know we're using the provider
 	counter.Increment(util.AppName() + "_dev")
@@ -98,46 +105,55 @@ func (self *codeDev) setup() error {
 	locker.LocalLock()
 	defer locker.LocalUnlock()
 
-	if err := self.loadBoxfile(); err != nil {
+	//
+	if err := codeDev.loadBoxfile(); err != nil {
 		return err
 	}
 
+	//
 	if !isDevRunning() {
 
-		if err := self.setImage(); err != nil {
+		//
+		if err := codeDev.setImage(); err != nil {
 			return err
 		}
 
-		if err := self.downloadImage(); err != nil {
+		//
+		if err := codeDev.downloadImage(); err != nil {
 			return err
 		}
 
-		if err := self.reserveIP(); err != nil {
+		//
+		if err := codeDev.reserveIP(); err != nil {
 			return err
 		}
 
-		if err := self.launchContainer(); err != nil {
+		//
+		if err := codeDev.launchContainer(); err != nil {
 			return err
 		}
 
-		if err := self.attachNetwork(); err != nil {
+		//
+		if err := codeDev.attachNetwork(); err != nil {
 			return err
 		}
 
-		if _, err := util.Exec(self.container.ID, "user", util.UserPayload(), processor.ExecWriter()); err != nil {
+		//
+		if _, err := util.Exec(codeDev.container.ID, "user", util.UserPayload(), processor.ExecWriter()); err != nil {
 			return err
 		}
 
-		if _, err := util.Exec(self.container.ID, "dev", self.devPayload(), processor.ExecWriter()); err != nil {
+		//
+		if _, err := util.Exec(codeDev.container.ID, "dev", codeDev.devPayload(), processor.ExecWriter()); err != nil {
 			return err
 		}
-
 	}
 
 	return nil
 }
 
-func (self *codeDev) teardown() error {
+// teardown ...
+func (codeDev *processCodeDev) teardown() error {
 
 	counter.Decrement(util.AppName() + "_dev")
 
@@ -146,29 +162,32 @@ func (self *codeDev) teardown() error {
 	locker.LocalLock()
 	defer locker.LocalUnlock()
 
+	//
 	if devIsUnused() {
 
-		if err := self.removeContainer(); err != nil {
+		//
+		if err := codeDev.removeContainer(); err != nil {
 			return err
 		}
 
-		if err := self.detachNetwork(); err != nil {
+		//
+		if err := codeDev.detachNetwork(); err != nil {
 			return err
 		}
 
-		if err := self.releaseIP(); err != nil {
+		//
+		if err := codeDev.releaseIP(); err != nil {
 			return err
 		}
-
 	}
 
 	return nil
 }
 
 // loadBoxfile loads the build boxfile from the database
-func (self *codeDev) loadBoxfile() error {
+func (codeDev *processCodeDev) loadBoxfile() error {
 
-	if err := data.Get(util.AppName()+"_meta", "build_boxfile", &self.boxfile); err != nil {
+	if err := data.Get(util.AppName()+"_meta", "build_boxfile", &codeDev.boxfile); err != nil {
 		return err
 	}
 
@@ -176,59 +195,58 @@ func (self *codeDev) loadBoxfile() error {
 }
 
 // setImage sets the image to use for the dev container
-func (self *codeDev) setImage() error {
-	boxfile := boxfile.New(self.boxfile.Data)
+func (codeDev *processCodeDev) setImage() error {
+	boxfile := boxfile.New(codeDev.boxfile.Data)
 
-	self.image = boxfile.Node("build").StringValue("image")
+	codeDev.image = boxfile.Node("build").StringValue("image")
 
-	if self.image == "" {
-		self.image = "nanobox/dev"
+	if codeDev.image == "" {
+		codeDev.image = "nanobox/dev"
 	}
 
 	return nil
 }
 
 // downloadImage downloads the dev docker image
-func (self *codeDev) downloadImage() error {
-	if !docker.ImageExists(self.image) {
-		prefix := fmt.Sprintf("%s+ Pulling %s -", stylish.GenerateNestedPrefix(self.control.DisplayLevel+1), self.image)
-		_, err := docker.ImagePull(self.image, &print.DockerPercentDisplay{Prefix: prefix})
-		if err != nil {
+func (codeDev *processCodeDev) downloadImage() error {
+	if !docker.ImageExists(codeDev.image) {
+		prefix := fmt.Sprintf("%s+ Pulling %s -", stylish.GenerateNestedPrefix(codeDev.control.DisplayLevel+1), codeDev.image)
+		if _, err := docker.ImagePull(codeDev.image, &print.DockerPercentDisplay{Prefix: prefix}); err != nil {
 			return err
 		}
-
 	}
+
 	return nil
 }
 
 // reserveIP reserves a local IP for the build container
-func (self *codeDev) reserveIP() error {
-	IP, err := ip_control.ReserveLocal()
+func (codeDev *processCodeDev) reserveIP() error {
+	IP, err := ipControl.ReserveLocal()
 	if err != nil {
 		return err
 	}
 
-	self.localIP = IP
+	codeDev.localIP = IP
 
 	return nil
 }
 
 // releaseIP releases a local IP back into the pool
-func (self *codeDev) releaseIP() error {
-	return ip_control.ReturnIP(self.localIP)
+func (codeDev *processCodeDev) releaseIP() error {
+	return ipControl.ReturnIP(codeDev.localIP)
 }
 
 // launchContainer starts the dev container
-func (self *codeDev) launchContainer() error {
+func (codeDev *processCodeDev) launchContainer() error {
 	// parse the boxfile data
-	boxfile := boxfile.New(self.boxfile.Data)
+	boxfile := boxfile.New(codeDev.boxfile.Data)
 	appName := util.AppName()
 
 	config := docker.ContainerConfig{
 		Name:    fmt.Sprintf("nanobox-%s-dev", appName),
-		Image:   self.image, // this will need to be configurable some time
+		Image:   codeDev.image, // this will need to be configurable some time
 		Network: "virt",
-		IP:      self.localIP.String(),
+		IP:      codeDev.localIP.String(),
 		Binds: []string{
 			fmt.Sprintf("%s%s/code:/app", provider.HostShareDir(), appName),
 			fmt.Sprintf("%s%s/build:/data", provider.HostMntDir(), appName),
@@ -236,8 +254,9 @@ func (self *codeDev) launchContainer() error {
 		},
 	}
 
-	for _, lib_dir := range boxfile.Node("code.build").StringSliceValue("lib_dirs") {
-		path := fmt.Sprintf("/mnt/sda1/%s/cache/lib_dirs/%s:/app/%s", appName, lib_dir, lib_dir)
+	//
+	for _, libDir := range boxfile.Node("code.build").StringSliceValue("lib_dirs") {
+		path := fmt.Sprintf("/mnt/sda1/%s/cache/lib_dirs/%s:/app/%s", appName, libDir, libDir)
 		config.Binds = append(config.Binds, path)
 	}
 
@@ -248,13 +267,13 @@ func (self *codeDev) launchContainer() error {
 		return err
 	}
 
-	self.container = container
+	codeDev.container = container
 
 	return nil
 }
 
 // removeContainer will lookup the dev container and remove it
-func (self *codeDev) removeContainer() error {
+func (codeDev *processCodeDev) removeContainer() error {
 
 	name := fmt.Sprintf("nanobox-%s-dev", util.AppName())
 
@@ -273,7 +292,7 @@ func (self *codeDev) removeContainer() error {
 }
 
 // runUserHook runs the user hook in the dev container
-func (self *codeDev) devPayload() string {
+func (codeDev *processCodeDev) devPayload() string {
 	rtn := map[string]interface{}{}
 	envVars := models.EnvVars{}
 	data.Get(util.AppName()+"_meta", "env", &envVars)
@@ -283,20 +302,19 @@ func (self *codeDev) devPayload() string {
 }
 
 // runConsole will establish a console within the dev container
-func (self *codeDev) runConsole() error {
+func (codeDev *processCodeDev) runConsole() error {
 
 	config := processor.ProcessControl{
-		DevMode: self.control.DevMode,
-		Verbose: self.control.Verbose,
+		DevMode: codeDev.control.DevMode,
+		Verbose: codeDev.control.Verbose,
 		Meta: map[string]string{
 			"name":        "dev",
-			"working_dir": self.cwd(),
+			"working_dir": codeDev.cwd(),
 			"shell":       "zsh",
 		},
 	}
 
-	err := processor.Run("dev_console", config)
-	if err != nil {
+	if err := processor.Run("dev_console", config); err != nil {
 		fmt.Println("dev_console:", err)
 		return err
 	}
@@ -305,9 +323,9 @@ func (self *codeDev) runConsole() error {
 }
 
 // cwd sets the cwd from the boxfile or provides a sensible default
-func (self *codeDev) cwd() string {
+func (codeDev *processCodeDev) cwd() string {
 	// parse the boxfile data
-	boxfile := boxfile.New(self.boxfile.Data)
+	boxfile := boxfile.New(codeDev.boxfile.Data)
 
 	if boxfile.Node("dev").StringValue("cwd") != "" {
 		return boxfile.Node("dev").StringValue("cwd")
@@ -317,7 +335,7 @@ func (self *codeDev) cwd() string {
 }
 
 // printMOTD prints the motd with information for the user to connect
-func (self *codeDev) printMOTD() error {
+func (codeDev *processCodeDev) printMOTD() error {
 	os.Stderr.WriteString(fmt.Sprintf(`
                                    **
                                 ********
@@ -341,19 +359,21 @@ func (self *codeDev) printMOTD() error {
 + If you run a server, access it at >> %s
 --------------------------------------------------------------------------------
 
-`, self.app.DevIP))
+`, codeDev.app.DevIP))
 
 	return nil
 }
 
 // attachNetwork attaches the container to the host network
-func (self *codeDev) attachNetwork() error {
+func (codeDev *processCodeDev) attachNetwork() error {
 
-	if err := provider.AddIP(self.app.DevIP); err != nil {
+	//
+	if err := provider.AddIP(codeDev.app.DevIP); err != nil {
 		return err
 	}
 
-	if err := provider.AddNat(self.app.DevIP, self.localIP.String()); err != nil {
+	//
+	if err := provider.AddNat(codeDev.app.DevIP, codeDev.localIP.String()); err != nil {
 		return err
 	}
 
@@ -361,13 +381,15 @@ func (self *codeDev) attachNetwork() error {
 }
 
 // detachNetwork detaches the container from the host network
-func (self *codeDev) detachNetwork() error {
+func (codeDev *processCodeDev) detachNetwork() error {
 
-	if err := provider.RemoveNat(self.app.DevIP, self.localIP.String()); err != nil {
+	//
+	if err := provider.RemoveNat(codeDev.app.DevIP, codeDev.localIP.String()); err != nil {
 		return err
 	}
 
-	if err := provider.RemoveIP(self.app.DevIP); err != nil {
+	//
+	if err := provider.RemoveIP(codeDev.app.DevIP); err != nil {
 		return err
 	}
 

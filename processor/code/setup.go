@@ -1,193 +1,214 @@
 package code
 
 import (
-	"errors"
 	"fmt"
 	"net"
 
 	"github.com/jcelliott/lumber"
+	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 
-	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/data"
-	"github.com/nanobox-io/nanobox/util/ip_control"
+	"github.com/nanobox-io/nanobox/util/ipControl"
 	"github.com/nanobox-io/nanobox/util/print"
 )
 
-type codeSetup struct {
-	control  processor.ProcessControl
+// processCodeSetup ...
+type processCodeSetup struct {
+	control processor.ProcessControl
 	service models.Service
 	fail    bool
 }
 
-var missingImageOrName = errors.New("missing image or name")
-
+//
 func init() {
 	processor.Register("code_setup", codeSetupFunc)
 }
 
+//
 func codeSetupFunc(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
-
-	return &codeSetup{control: control}, nil
+	return &processCodeSetup{control: control}, nil
 }
 
-func (self *codeSetup) clean(fn func()) func() {
+//
+func (codeSetup *processCodeSetup) clean(fn func()) func() {
 	return func() {
-		if self.fail {
+		if codeSetup.fail {
 			fn()
 		}
 	}
 }
 
-func (self codeSetup) Results() processor.ProcessControl {
-	return self.control
+//
+func (codeSetup processCodeSetup) Results() processor.ProcessControl {
+	return codeSetup.control
 }
 
-func (self *codeSetup) Process() error {
+//
+func (codeSetup *processCodeSetup) Process() error {
+
 	// make sure i was given a name and image
-	if self.control.Meta["name"] == "" || self.control.Meta["image"] == "" {
-		return missingImageOrName
+	if codeSetup.control.Meta["name"] == "" || codeSetup.control.Meta["image"] == "" {
+		return errMissingImageOrName
 	}
 
-	if self.serviceExists() {
-		// quit early if the service was found in the database as well as docker
+	// quit early if the service was found in the database as well as docker
+	if codeSetup.serviceExists() {
 		return nil
 	}
 
-	if err := self.getLocalIP(); err != nil {
+	//
+	if err := codeSetup.getLocalIP(); err != nil {
 		return err
 	}
-	defer self.clean(self.returnLocalIP)()
+	defer codeSetup.clean(codeSetup.returnLocalIP)()
 
-	if err := self.getGlobalIP(); err != nil {
+	//
+	if err := codeSetup.getGlobalIP(); err != nil {
 		return err
 	}
-	defer self.clean(self.returnGlobalIP)()
+	defer codeSetup.clean(codeSetup.returnGlobalIP)()
 
 	// pull the docker image
-	prefix := fmt.Sprintf("%s+ Pulling %s -", stylish.GenerateNestedPrefix(self.control.DisplayLevel), self.control.Meta["image"])
-
-	if _, err := docker.ImagePull(self.control.Meta["image"], &print.DockerPercentDisplay{Prefix: prefix}); err != nil {
+	prefix := fmt.Sprintf("%s+ Pulling %s -", stylish.GenerateNestedPrefix(codeSetup.control.DisplayLevel), codeSetup.control.Meta["image"])
+	if _, err := docker.ImagePull(codeSetup.control.Meta["image"], &print.DockerPercentDisplay{Prefix: prefix}); err != nil {
 		return err
 	}
 
-	if err := self.createContainer(); err != nil {
+	//
+	if err := codeSetup.createContainer(); err != nil {
 		return err
 	}
-	defer self.clean(self.removeContainer)()
+	defer codeSetup.clean(codeSetup.removeContainer)()
 
-	if err := self.addIPToProvider(); err != nil {
+	//
+	if err := codeSetup.addIPToProvider(); err != nil {
 		return err
 	}
-	defer self.clean(self.removeIPFromProvider)()
+	defer codeSetup.clean(codeSetup.removeIPFromProvider)()
 
 	// save the service
-	if err := data.Put(util.AppName(), self.control.Meta["name"], self.service); err != nil {
-		self.fail = true
+	if err := data.Put(util.AppName(), codeSetup.control.Meta["name"], codeSetup.service); err != nil {
+		codeSetup.fail = true
 		lumber.Error("insert data: ", err)
 		return err
 	}
+
 	return nil
 }
 
-func (self *codeSetup) serviceExists() bool {
+// serviceExists ...
+func (codeSetup *processCodeSetup) serviceExists() bool {
 	service := models.Service{}
-	databaseErr := data.Get(util.AppName(), self.control.Meta["name"], &service)
+	databaseErr := data.Get(util.AppName(), codeSetup.control.Meta["name"], &service)
+
+	// set the service i found so i dont re allocate ips
 	if databaseErr == nil {
-		// set the service i found so i dont re allocate ips
-		self.service = service
+		codeSetup.service = service
 	}
 	_, containerErr := docker.GetContainer(service.ID)
+
 	return databaseErr == nil && containerErr == nil
 }
 
-func (self *codeSetup) getLocalIP() error {
-	if self.service.InternalIP != "" {
-		// if the service already has an ip
+// getLocalIP ...
+func (codeSetup *processCodeSetup) getLocalIP() error {
+
+	// if the service already has an ip
+	if codeSetup.service.InternalIP != "" {
 		return nil
 	}
-	ip, err := ip_control.ReserveLocal()
+	ip, err := ipControl.ReserveLocal()
 	if err != nil {
-		self.fail = true
+		codeSetup.fail = true
 		return err
 	}
-	self.service.InternalIP = ip.String()
+	codeSetup.service.InternalIP = ip.String()
+
 	return nil
 }
 
-func (self *codeSetup) getGlobalIP() error {
-	if self.service.ExternalIP != "" {
+// getGlobalIP ...
+func (codeSetup *processCodeSetup) getGlobalIP() error {
+	if codeSetup.service.ExternalIP != "" {
 		// if the service already has an ip
 		return nil
 	}
-	ip, err := ip_control.ReserveGlobal()
+	ip, err := ipControl.ReserveGlobal()
 	if err != nil {
-		self.fail = true
+		codeSetup.fail = true
 		return err
 	}
-	self.service.ExternalIP = ip.String()
+	codeSetup.service.ExternalIP = ip.String()
+
 	return nil
 }
 
-func (self *codeSetup) returnLocalIP() {
-	ip_control.ReturnIP(net.ParseIP(self.service.InternalIP))
+// returnLocalIP ...
+func (codeSetup *processCodeSetup) returnLocalIP() {
+	ipControl.ReturnIP(net.ParseIP(codeSetup.service.InternalIP))
 }
 
-func (self *codeSetup) returnGlobalIP() {
-	ip_control.ReturnIP(net.ParseIP(self.service.ExternalIP))
+// returnGlobalIP ...
+func (codeSetup *processCodeSetup) returnGlobalIP() {
+	ipControl.ReturnIP(net.ParseIP(codeSetup.service.ExternalIP))
 }
 
-func (self *codeSetup) addIPToProvider() error {
-	if self.service.InternalIP == "" || self.service.ExternalIP == "" {
+// addIPToProvider ...
+func (codeSetup *processCodeSetup) addIPToProvider() error {
+	if codeSetup.service.InternalIP == "" || codeSetup.service.ExternalIP == "" {
 		return fmt.Errorf("im missing an ip to bind to the provider")
 	}
 
-	if err := provider.AddIP(self.service.ExternalIP); err != nil {
-		self.fail = true
+	if err := provider.AddIP(codeSetup.service.ExternalIP); err != nil {
+		codeSetup.fail = true
 		return err
 	}
 
-	if err := provider.AddNat(self.service.ExternalIP, self.service.InternalIP); err != nil {
-		self.fail = true
+	if err := provider.AddNat(codeSetup.service.ExternalIP, codeSetup.service.InternalIP); err != nil {
+		codeSetup.fail = true
 		return err
 	}
 	return nil
 }
 
-func (self *codeSetup) removeIPFromProvider() {
-	provider.RemoveNat(self.service.ExternalIP, self.service.InternalIP)
-	provider.RemoveIP(self.service.ExternalIP)
+// removeIPFromProvider ...
+func (codeSetup *processCodeSetup) removeIPFromProvider() {
+	provider.RemoveNat(codeSetup.service.ExternalIP, codeSetup.service.InternalIP)
+	provider.RemoveIP(codeSetup.service.ExternalIP)
 }
 
-func (self *codeSetup) createContainer() error {
+// createContainer ...
+func (codeSetup *processCodeSetup) createContainer() error {
 	// configure the container
-	fmt.Println("-> building container", self.control.Meta["name"])
+	fmt.Println("-> building container", codeSetup.control.Meta["name"])
 	config := docker.ContainerConfig{
-		Name:    fmt.Sprintf("nanobox-%s-%s", util.AppName(), self.control.Meta["name"]),
-		Image:   self.control.Meta["image"],
+		Name:    fmt.Sprintf("nanobox-%s-%s", util.AppName(), codeSetup.control.Meta["name"]),
+		Image:   codeSetup.control.Meta["image"],
 		Network: "virt",
-		IP:      self.service.InternalIP,
+		IP:      codeSetup.service.InternalIP,
 	}
 
 	// create docker container
 	container, err := docker.CreateContainer(config)
 	if err != nil {
-		self.fail = true
+		codeSetup.fail = true
 		lumber.Error("container: ", err)
 		return err
 	}
-	self.service.ID = container.ID
-	self.service.Name = self.control.Meta["name"]
-	self.service.Type = "code"
+	codeSetup.service.ID = container.ID
+	codeSetup.service.Name = codeSetup.control.Meta["name"]
+	codeSetup.service.Type = "code"
 	return nil
 }
 
-func (self *codeSetup) removeContainer() {
+// removeContainer ...
+func (codeSetup *processCodeSetup) removeContainer() {
 	// catch the error here and display it but dont error out
-	docker.ContainerRemove(self.service.ID)
+	docker.ContainerRemove(codeSetup.service.ID)
 }

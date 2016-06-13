@@ -8,27 +8,32 @@ import (
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
-type serviceStopAll struct {
+// processServiceStopAll ...
+type processServiceStopAll struct {
 	control processor.ProcessControl
 }
 
+//
 func init() {
 	processor.Register("service_stop_all", serviceStopAllFunc)
 }
 
+//
 func serviceStopAllFunc(control processor.ProcessControl) (processor.Processor, error) {
-	return serviceStopAll{control: control}, nil
+	return processServiceStopAll{control: control}, nil
 }
 
-func (self serviceStopAll) Results() processor.ProcessControl {
-	return self.control
+//
+func (serviceStopAll processServiceStopAll) Results() processor.ProcessControl {
+	return serviceStopAll.control
 }
 
-func (self serviceStopAll) Process() error {
+//
+func (serviceStopAll processServiceStopAll) Process() error {
 
-	self.control.Display(stylish.Bullet("Stopping All Services"))
+	serviceStopAll.control.Display(stylish.Bullet("Stopping All Services"))
 
-	if err := self.stopServices(); err != nil {
+	if err := serviceStopAll.stopServices(); err != nil {
 		return err
 	}
 
@@ -36,14 +41,14 @@ func (self serviceStopAll) Process() error {
 }
 
 // stopServices stops all of the services saved in the database
-func (self serviceStopAll) stopServices() error {
+func (serviceStopAll processServiceStopAll) stopServices() error {
 	services, err := data.Keys(util.AppName())
 	if err != nil {
 		return err
 	}
 
 	for _, service := range services {
-		if err := self.stopService(service); err != nil {
+		if err := serviceStopAll.stopService(service); err != nil {
 			return err
 		}
 	}
@@ -52,14 +57,14 @@ func (self serviceStopAll) stopServices() error {
 }
 
 // stopService stops a service
-func (self serviceStopAll) stopService(uid string) error {
+func (serviceStopAll processServiceStopAll) stopService(uid string) error {
 
 	config := processor.ProcessControl{
-		DevMode: self.control.DevMode,
-		Verbose: self.control.Verbose,
-		DisplayLevel: self.control.DisplayLevel+1,
+		DevMode:      serviceStopAll.control.DevMode,
+		Verbose:      serviceStopAll.control.Verbose,
+		DisplayLevel: serviceStopAll.control.DisplayLevel + 1,
 		Meta: map[string]string{
-			"name":  uid,
+			"name": uid,
 		},
 	}
 

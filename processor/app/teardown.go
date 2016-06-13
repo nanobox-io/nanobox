@@ -7,46 +7,51 @@ import (
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/data"
-	"github.com/nanobox-io/nanobox/util/ip_control"
+	"github.com/nanobox-io/nanobox/util/ipControl"
 )
 
-type appTeardown struct {
+// processAppTeardown ...
+type processAppTeardown struct {
 	control processor.ProcessControl
 	app     models.App
 }
 
+//
 func init() {
-	processor.Register("app_teardown", appTeardownFunc)
+	processor.Register("app_appTeardown", appTeardownFunc)
 }
 
+//
 func appTeardownFunc(control processor.ProcessControl) (processor.Processor, error) {
-	return &appTeardown{control: control}, nil
+	return &processAppTeardown{control: control}, nil
 }
 
-func (teardown *appTeardown) Results() processor.ProcessControl {
-	return teardown.control
+//
+func (appTeardown *processAppTeardown) Results() processor.ProcessControl {
+	return appTeardown.control
 }
 
-func (teardown *appTeardown) Process() error {
+//
+func (appTeardown *processAppTeardown) Process() error {
 
-	if err := teardown.loadApp(); err != nil {
+	if err := appTeardown.loadApp(); err != nil {
 		return err
 	}
 
 	// short-circuit if the app isn't active
-	if teardown.app.State == "initialized" {
+	if appTeardown.app.State == "initialized" {
 		return nil
 	}
 
-	if err := teardown.releaseIPs(); err != nil {
+	if err := appTeardown.releaseIPs(); err != nil {
 		return err
 	}
 
-	if err := teardown.deleteEvars(); err != nil {
+	if err := appTeardown.deleteEvars(); err != nil {
 		return err
 	}
 
-	if err := teardown.deleteApp(); err != nil {
+	if err := appTeardown.deleteApp(); err != nil {
 		return err
 	}
 
@@ -54,22 +59,22 @@ func (teardown *appTeardown) Process() error {
 }
 
 // loadApp loads the app from the db
-func (teardown *appTeardown) loadApp() error {
+func (appTeardown *processAppTeardown) loadApp() error {
 	// the app might not exist yet, so let's not return the error if it fails
-	data.Get("apps", util.AppName(), &teardown.app)
+	data.Get("apps", util.AppName(), &appTeardown.app)
 
 	// set the default state
-	if teardown.app.State == "" {
-		teardown.app.State = "initialized"
+	if appTeardown.app.State == "" {
+		appTeardown.app.State = "initialized"
 	}
 
 	return nil
 }
 
 // releaseIPs releases necessary app-global ip addresses
-func (teardown *appTeardown) releaseIPs() error {
+func (appTeardown *processAppTeardown) releaseIPs() error {
 
-	if err := ip_control.ReturnIP(net.ParseIP(teardown.app.DevIP)); err != nil {
+	if err := ipControl.ReturnIP(net.ParseIP(appTeardown.app.DevIP)); err != nil {
 		return err
 	}
 
@@ -77,10 +82,10 @@ func (teardown *appTeardown) releaseIPs() error {
 }
 
 // deleteEvars deletes the evars from the db
-func (teardown *appTeardown) deleteEvars() error {
+func (appTeardown *processAppTeardown) deleteEvars() error {
 
 	// delete the evars model
-	if err := data.Delete(util.AppName() + "_meta", "env"); err != nil {
+	if err := data.Delete(util.AppName()+"_meta", "env"); err != nil {
 		return err
 	}
 
@@ -88,7 +93,7 @@ func (teardown *appTeardown) deleteEvars() error {
 }
 
 // deleteApp deletes the app to the db
-func (teardown *appTeardown) deleteApp() error {
+func (appTeardown *processAppTeardown) deleteApp() error {
 
 	// delete the app model
 	if err := data.Delete("apps", util.AppName()); err != nil {

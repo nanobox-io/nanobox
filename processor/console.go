@@ -11,36 +11,42 @@ import (
 	syscall "github.com/docker/docker/pkg/signal"
 	"github.com/docker/docker/pkg/term"
 
-	"github.com/nanobox-io/nanobox/util/production_api"
+	"github.com/nanobox-io/nanobox/util/productionAPI"
 )
 
-type console struct {
+// processConsole ...
+type processConsole struct {
 	control ProcessControl
 }
 
+//
 var (
 	container string
 	key       string
 	location  string
 )
 
+//
 func init() {
 	Register("console", consoleFunc)
 }
 
+//
 func consoleFunc(control ProcessControl) (Processor, error) {
-	return console{control}, nil
+	return processConsole{control}, nil
 }
 
-func (self console) Results() ProcessControl {
-	return self.control
+//
+func (console processConsole) Results() ProcessControl {
+	return console.control
 }
 
-func (self console) Process() error {
+//
+func (console processConsole) Process() error {
 	var err error
 	// get a key from odin
-	app := getAppID(self.control.Meta["alias"])
-	key, location, container, err = production_api.EstablishConsole(app, self.control.Meta["container"])
+	app := getAppID(console.control.Meta["alias"])
+	key, location, container, err = productionAPI.EstablishConsole(app, console.control.Meta["container"])
 	if err != nil {
 		return err
 	}
@@ -92,7 +98,7 @@ func (self console) Process() error {
 	return nil
 }
 
-// monitor
+// monitor ...
 func monitor(stdOutFD uintptr) {
 	sigs := make(chan os.Signal, 1)
 
@@ -108,12 +114,12 @@ func monitor(stdOutFD uintptr) {
 	}
 }
 
-// getTTYSize
+// getTTYSize ...
 func getTTYSize(fd uintptr) (int, int) {
 
 	ws, err := term.GetWinsize(fd)
 	if err != nil {
-		fmt.Printf("GetWinsize() failed\n", err.Error())
+		fmt.Printf("GetWinsize() failed - %s\n", err.Error())
 		os.Exit(1)
 	}
 
@@ -121,7 +127,7 @@ func getTTYSize(fd uintptr) (int, int) {
 	return int(ws.Width), int(ws.Height)
 }
 
-// resizeTTY
+// resizeTTY ...
 func resizeTTY(w, h int) {
 	//
 	if _, err := http.Post(fmt.Sprintf("https://%s/resizeexec?key=%s&container=%s&w=%d&h=%d", location, key, container, w, h), "plain/text", nil); err != nil {

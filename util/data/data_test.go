@@ -1,14 +1,19 @@
 package data_test
 
-import "testing"
-import "github.com/nanobox-io/nanobox/util/data"
+import (
+	"testing"
 
+	"github.com/nanobox-io/nanobox/util/data"
+)
+
+// Data ...
 type Data struct {
 	Name   string
 	Number int
 	Cows   bool
 }
 
+// TestPut ...
 func TestPut(t *testing.T) {
 	d := Data{
 		"lyon",
@@ -21,6 +26,7 @@ func TestPut(t *testing.T) {
 	}
 }
 
+// TestGet ...
 func TestGet(t *testing.T) {
 	d := Data{}
 	err := data.Get("user", "1", &d)
@@ -32,6 +38,7 @@ func TestGet(t *testing.T) {
 	}
 }
 
+// TestDelete ...
 func TestDelete(t *testing.T) {
 	err := data.Delete("user", "1")
 	if err != nil {
@@ -42,5 +49,4 @@ func TestDelete(t *testing.T) {
 	if err == nil {
 		t.Errorf("removed data should not have been retrievable")
 	}
-
 }

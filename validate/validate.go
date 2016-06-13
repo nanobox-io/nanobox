@@ -4,20 +4,21 @@ import (
 	"fmt"
 )
 
-type (
-	validatorFunc func() error
-
-	validationError []error
-)
-
 var (
 	validators = map[string]validatorFunc{}
 )
 
+type (
+	validatorFunc   func() error
+	validationError []error
+)
+
+// Register ...
 func Register(name string, validator validatorFunc) {
 	validators[name] = validator
 }
 
+// Check ...
 func Check(checks ...string) error {
 	ve := validationError{}
 	for _, check := range checks {
@@ -34,15 +35,19 @@ func Check(checks ...string) error {
 	return nil
 }
 
-func (self *validationError) Add(err error) {
-	tmp := validationError(append([]error(*self), err))
-	self = &tmp
+// Add ...
+func (vError *validationError) Add(err error) {
+	tmp := validationError(append([]error(*vError), err))
+	vError = &tmp
 }
 
-func (self validationError) Error() string {
-	str := ""
-	for _, err := range self {
+// Error ...
+func (vError validationError) Error() (str string) {
+
+	//
+	for _, err := range vError {
 		str += fmt.Sprintf("%s\n", err)
 	}
+
 	return str
 }

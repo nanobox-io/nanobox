@@ -3,11 +3,12 @@ package processor
 import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/data"
-	"github.com/nanobox-io/nanobox/util/print"
-	"github.com/nanobox-io/nanobox/util/production_api"
+	"github.com/nanobox-io/nanobox/util/productionAPI"
+
+	printutil "github.com/sdomino/go-util/print"
 )
 
-type login struct {
+type processLogin struct {
 	control ProcessControl
 }
 
@@ -16,29 +17,31 @@ func init() {
 }
 
 func loginFunc(conf ProcessControl) (Processor, error) {
-	return login{conf}, nil
+	return processLogin{conf}, nil
 }
 
-func (self login) Results() ProcessControl {
-	return self.control
+// Results ...
+func (login processLogin) Results() ProcessControl {
+	return login.control
 }
 
-func (self login) Process() error {
+// Process ...
+func (login processLogin) Process() error {
 	// request username and password
-	if self.control.Meta["username"] == "" {
-		self.control.Meta["username"] = print.Prompt("Username:")
+	if login.control.Meta["username"] == "" {
+		login.control.Meta["username"] = printutil.Prompt("Username:")
 	}
 
-	if self.control.Meta["password"] == "" {
-		self.control.Meta["password"] = print.Password("Password:")
+	if login.control.Meta["password"] == "" {
+		login.control.Meta["password"] = printutil.Password("Password:")
 	}
 	// ask odin to verify
-	token, err := production_api.Auth(self.control.Meta["username"], self.control.Meta["password"])
+	token, err := productionAPI.Auth(login.control.Meta["username"], login.control.Meta["password"])
 	if err != nil {
 		return err
 	}
 
 	// store the auth token
-	auth := models.Auth{token}
+	auth := models.Auth{Key: token}
 	return data.Put("global", "user", auth)
 }

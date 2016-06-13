@@ -1,9 +1,6 @@
 package util
 
 import (
-	"encoding/json"
-	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -13,40 +10,35 @@ import (
 	"github.com/nanobox-io/nanobox-boxfile"
 )
 
-// TODO: win: make sure the folders are in the correct place
-// the go-homedir is supposed to work in both packages
-// and we used filpath.ToSlash which puts the correct slashes in.
+// TODO: win: make sure the folders are in the correct place the go-homedir is
+// supposed to work in both packages and we used filpath.ToSlash which puts the
+// correct slashes in.
 
 // GlobalDir ...
 func GlobalDir() string {
+
 	// set Home based off the users homedir (~)
 	p, err := homedir.Dir()
 	if err != nil {
-		// Log.Fatal("[config/config] homedir.Dir() failed", err.Error())
 		return ""
 	}
+
+	//
 	globalDir := filepath.ToSlash(filepath.Join(p, ".nanobox"))
 	os.MkdirAll(globalDir, 0755)
-	return globalDir
-}
 
-// SSHDir ...
-func SSHDir() string {
-	p, err := homedir.Dir()
-	if err != nil {
-		// Log.Fatal("[config/config] homedir.Dir() failed", err.Error())
-		return ""
-	}
-	return filepath.ToSlash(filepath.Join(p, ".ssh"))
+	return globalDir
 }
 
 // LocalDir ...
 func LocalDir() string {
+
+	//
 	p, err := os.Getwd()
 	if err != nil {
-		// Log.Fatal("[config/config] os.Getwd() failed", err.Error())
 		return ""
 	}
+
 	return filepath.ToSlash(p)
 }
 
@@ -55,61 +47,34 @@ func LocalDirName() string {
 	return filepath.Base(LocalDir())
 }
 
-// BoxfileLocation ...
-func BoxfileLocation() string {
-	return filepath.ToSlash(filepath.Join(LocalDir(), "boxfile.yml"))
-}
+// SSHDir ...
+func SSHDir() string {
 
-// AppName ...
-func AppName() string {
-	// if no name is given use localDirName
-	app := LocalDirName()
-
-	// read boxfile and look for dev->name
-	box := boxfile.NewFromPath(BoxfileLocation())
-	devName := box.Node("dev").StringValue("name")
-	if devName != "" {
-		app = devName
+	//
+	p, err := homedir.Dir()
+	if err != nil {
+		return ""
 	}
-	return app
+
+	return filepath.ToSlash(filepath.Join(p, ".ssh"))
 }
 
 // EngineDir gets the directory of the engine if it is a directory and on the
 // local file system
 func EngineDir() string {
+
 	box := boxfile.NewFromPath(BoxfileLocation())
 	engineName := box.Node("env").StringValue("engine")
+
+	//
 	if engineName != "" {
 		fi, err := os.Stat(engineName)
 		if err == nil && fi.IsDir() {
 			return engineName
 		}
 	}
-	return ""
-}
 
-// UserPayload ...
-func UserPayload() string {
-	sshFiles, err := ioutil.ReadDir(SSHDir())
-	if err != nil {
-		fmt.Println("upserpayload", err)
-		return `{"ssh_files":{}}`
-	}
-	files := map[string]string{}
-	for _, file := range sshFiles {
-		if !file.IsDir() && file.Name() != "authorized_keys" && file.Name() != "config" && file.Name() != "known_hosts" {
-			content, err := ioutil.ReadFile(filepath.Join(SSHDir(), file.Name()))
-			if err == nil {
-				files[file.Name()] = string(content)
-			}
-		}
-	}
-	b, err := json.Marshal(map[string]interface{}{"ssh_files": files})
-	if err != nil {
-		fmt.Println("upserpayload", err)
-		return `{"ssh_files":{}}`
-	}
-	return string(b)
+	return ""
 }
 
 // TmpDir creates a temporary directory where nanobox specific files can be
@@ -124,7 +89,6 @@ func TmpDir() (tmpDir string) {
 		lumber.Fatal("[config/config] os.Mkdir() failed", err.Error())
 	}
 
-	//
 	return
 }
 
@@ -147,6 +111,5 @@ func UpdateFile() (updateFile string) {
 	}
 	defer f.Close()
 
-	//
 	return
 }

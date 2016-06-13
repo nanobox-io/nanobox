@@ -3,25 +3,25 @@
 package netfs
 
 import (
-  "errors"
+	"errors"
 )
 
 // Add exports a cifs share
 func Add(host, path string) error {
-  return errors.New("Adding an export is not yet supported on windows")
+	return errors.New("Adding an export is not yet supported on windows")
 }
 
 // Remove removes a cifs share
 func Remove(host, path string) error {
-  return errors.New("Removing an export is not yet supported on windows")
+	return errors.New("Removing an export is not yet supported on windows")
 }
 
 // Exists checks to see if the share already exists
 func Exists(host, path string) bool {
-  return false
+	return false
 }
 
 // Mount mounts a cifs share on a guest machine
 func Mount(host_path, mount_path string, context []string) error {
-  return errors.New("Mounting a cifs share is not yet supported on windows")
+	return errors.New("Mounting a cifs share is not yet supported on windows")
 }

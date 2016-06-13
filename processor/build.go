@@ -1,39 +1,42 @@
 package processor
 
-import (
-	"github.com/nanobox-io/nanobox/util/locker"
-)
+import "github.com/nanobox-io/nanobox/util/locker"
 
-type build struct {
+// processBuild ...
+type processBuild struct {
 	control ProcessControl
 }
 
+//
 func init() {
 	Register("build", buildFunc)
 }
 
+//
 func buildFunc(control ProcessControl) (Processor, error) {
-	return build{control}, nil
+	return processBuild{control}, nil
 }
 
-func (self build) Results() ProcessControl {
-	return self.control
+//
+func (build processBuild) Results() ProcessControl {
+	return build.control
 }
 
-func (self build) Process() error {
+//
+func (build processBuild) Process() error {
+
 	locker.LocalLock()
 	defer locker.LocalUnlock()
-	self.control.Meta["build"] = "true"
+	build.control.Meta["build"] = "true"
 
-	// setup the environment (boot vm)
-	// but do not run the dev setup because
-	// we dont need any o fthe platform services
-	if err := Run("provider_setup", self.control); err != nil {
+	// setup the environment (boot vm) but do not run the dev setup because we dont
+	// need any o fthe platform services
+	if err := Run("provider_setup", build.control); err != nil {
 		return err
 	}
 
 	// build code
-	if err := Run("code_build", self.control); err != nil {
+	if err := Run("code_build", build.control); err != nil {
 		return err
 	}
 

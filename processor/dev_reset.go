@@ -5,25 +5,30 @@ import (
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
-type devReset struct {
+// processDevReset ...
+type processDevReset struct {
 	control ProcessControl
 }
 
+//
 func init() {
 	Register("dev_reset", devResetFunc)
 }
 
+//
 func devResetFunc(control ProcessControl) (Processor, error) {
-	return devReset{control: control}, nil
+	return processDevReset{control: control}, nil
 }
 
-func (self devReset) Results() ProcessControl {
-	return self.control
+//
+func (devReset processDevReset) Results() ProcessControl {
+	return devReset.control
 }
 
-func (self devReset) Process() error {
+//
+func (devReset processDevReset) Process() error {
 
-	if err := self.resetCounters(); err != nil {
+	if err := devReset.resetCounters(); err != nil {
 		return err
 	}
 
@@ -31,7 +36,7 @@ func (self devReset) Process() error {
 }
 
 // resetCounters resets all the counters associated with all apps
-func (self devReset) resetCounters() error {
+func (devReset processDevReset) resetCounters() error {
 
 	// reset the provider counter
 	counter.Reset("provider")
