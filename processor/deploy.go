@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/nanobox-io/nanobox/util"
-	"github.com/nanobox-io/nanobox/util/productionAPI"
+	"github.com/nanobox-io/nanobox/util/odin"
 )
 
 // processDeploy ...
@@ -49,7 +49,7 @@ func (deploy *processDeploy) Process() error {
 	}
 
 	// tell odin what happened
-	return productionAPI.Deploy(deploy.control.Meta["app_id"], deploy.control.Meta["build_id"], deploy.control.Meta["boxfile"], deploy.control.Meta["message"])
+	return odin.Deploy(deploy.control.Meta["app_id"], deploy.control.Meta["build_id"], deploy.control.Meta["boxfile"], deploy.control.Meta["message"])
 }
 
 // setWarehouseToken ...
@@ -57,7 +57,7 @@ func (deploy *processDeploy) setWarehouseToken() error {
 	// get remote hoarder credentials
 	deploy.control.Meta["app_id"] = getAppID(deploy.control.Meta["alias"])
 	deploy.control.Meta["build_id"] = util.RandomString(30)
-	warehouseToken, warehouseURL, err := productionAPI.GetWarehouse(deploy.control.Meta["app_id"])
+	warehouseToken, warehouseURL, err := odin.GetWarehouse(deploy.control.Meta["app_id"])
 	if err != nil {
 		return err
 	}

@@ -11,7 +11,7 @@ import (
 	syscall "github.com/docker/docker/pkg/signal"
 	"github.com/docker/docker/pkg/term"
 
-	"github.com/nanobox-io/nanobox/util/productionAPI"
+	"github.com/nanobox-io/nanobox/util/odin"
 )
 
 // processConsole ...
@@ -46,7 +46,7 @@ func (console processConsole) Process() error {
 	var err error
 	// get a key from odin
 	app := getAppID(console.control.Meta["alias"])
-	key, location, container, err = productionAPI.EstablishConsole(app, console.control.Meta["container"])
+	key, location, container, err = odin.EstablishConsole(app, console.control.Meta["container"])
 	if err != nil {
 		return err
 	}

@@ -5,7 +5,7 @@ import (
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
-	"github.com/nanobox-io/nanobox/util/ipControl"
+	"github.com/nanobox-io/nanobox/util/dhcp"
 )
 
 //
@@ -73,7 +73,7 @@ func (appSetup *processAppSetup) loadApp() error {
 func (appSetup *processAppSetup) reserveIPs() error {
 
 	//
-	devIP, err := ipControl.ReserveGlobal()
+	devIP, err := dhcp.ReserveGlobal()
 	if err != nil {
 		return err
 	}

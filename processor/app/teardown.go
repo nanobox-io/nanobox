@@ -7,7 +7,7 @@ import (
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
-	"github.com/nanobox-io/nanobox/util/ipControl"
+	"github.com/nanobox-io/nanobox/util/dhcp"
 )
 
 // processAppTeardown ...
@@ -74,7 +74,7 @@ func (appTeardown *processAppTeardown) loadApp() error {
 // releaseIPs releases necessary app-global ip addresses
 func (appTeardown *processAppTeardown) releaseIPs() error {
 
-	if err := ipControl.ReturnIP(net.ParseIP(appTeardown.app.DevIP)); err != nil {
+	if err := dhcp.ReturnIP(net.ParseIP(appTeardown.app.DevIP)); err != nil {
 		return err
 	}
 

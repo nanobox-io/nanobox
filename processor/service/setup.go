@@ -18,7 +18,7 @@ import (
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
-	"github.com/nanobox-io/nanobox/util/ipControl"
+	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/print"
 )
 
@@ -178,22 +178,22 @@ func (serviceSetup *processServiceSetup) downloadImage() error {
 // reserveIps reserves a global and local ip for the container
 func (serviceSetup *processServiceSetup) reserveIps() error {
 	var err error
-	serviceSetup.localIP, err = ipControl.ReserveLocal()
+	serviceSetup.localIP, err = dhcp.ReserveLocal()
 	if err != nil {
 		return err
 	}
 
 	serviceSetup.cleanFuncs = append(serviceSetup.cleanFuncs, func() error {
-		return ipControl.ReturnIP(serviceSetup.localIP)
+		return dhcp.ReturnIP(serviceSetup.localIP)
 	})
 
-	serviceSetup.globalIP, err = ipControl.ReserveGlobal()
+	serviceSetup.globalIP, err = dhcp.ReserveGlobal()
 	if err != nil {
 		return err
 	}
 
 	serviceSetup.cleanFuncs = append(serviceSetup.cleanFuncs, func() error {
-		return ipControl.ReturnIP(serviceSetup.globalIP)
+		return dhcp.ReturnIP(serviceSetup.globalIP)
 	})
 
 	return nil

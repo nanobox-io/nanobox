@@ -15,7 +15,7 @@ import (
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
-	"github.com/nanobox-io/nanobox/util/ipControl"
+	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/print"
 )
 
@@ -164,7 +164,7 @@ func (codeBuild *processCodeBuild) downloadImage() error {
 
 // reserveIP reserves a local IP for the build container
 func (codeBuild *processCodeBuild) reserveIP() error {
-	IP, err := ipControl.ReserveLocal()
+	IP, err := dhcp.ReserveLocal()
 	if err != nil {
 		return err
 	}
@@ -176,7 +176,7 @@ func (codeBuild *processCodeBuild) reserveIP() error {
 
 // releaseIP releases a local IP back into the pool
 func (codeBuild *processCodeBuild) releaseIP() error {
-	return ipControl.ReturnIP(codeBuild.localIP)
+	return dhcp.ReturnIP(codeBuild.localIP)
 }
 
 // startContainer starts a build container

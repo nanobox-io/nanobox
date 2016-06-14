@@ -6,7 +6,7 @@ import (
 	"net"
 	"net/http"
 
-	"github.com/nanobox-io/nanobox/util/productionAPI"
+	"github.com/nanobox-io/nanobox/util/odin"
 )
 
 // processTunnel ...
@@ -33,7 +33,7 @@ func (tunnel processTunnel) Results() ProcessControl {
 func (tunnel processTunnel) Process() error {
 	var err error
 	app := getAppID(tunnel.control.Meta["alias"])
-	key, location, container, err = productionAPI.EstablishTunnel(app, tunnel.control.Meta["container"])
+	key, location, container, err = odin.EstablishTunnel(app, tunnel.control.Meta["container"])
 	if err != nil {
 		return err
 	}

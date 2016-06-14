@@ -13,7 +13,7 @@ import (
 	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
-	"github.com/nanobox-io/nanobox/util/ipControl"
+	"github.com/nanobox-io/nanobox/util/dhcp"
 )
 
 // processServiceDestroy ...
@@ -68,12 +68,12 @@ func (servicedestroy processServiceDestroy) Process() error {
 		return err
 	}
 
-	err = ipControl.ReturnIP(net.ParseIP(service.ExternalIP))
+	err = dhcp.ReturnIP(net.ParseIP(service.ExternalIP))
 	if err != nil {
 		return err
 	}
 
-	err = ipControl.ReturnIP(net.ParseIP(service.InternalIP))
+	err = dhcp.ReturnIP(net.ParseIP(service.InternalIP))
 	if err != nil {
 		return err
 	}

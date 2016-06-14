@@ -3,7 +3,7 @@ package processor
 import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/data"
-	"github.com/nanobox-io/nanobox/util/productionAPI"
+	"github.com/nanobox-io/nanobox/util/odin"
 
 	printutil "github.com/sdomino/go-util/print"
 )
@@ -36,7 +36,7 @@ func (login processLogin) Process() error {
 		login.control.Meta["password"] = printutil.Password("Password:")
 	}
 	// ask odin to verify
-	token, err := productionAPI.Auth(login.control.Meta["username"], login.control.Meta["password"])
+	token, err := odin.Auth(login.control.Meta["username"], login.control.Meta["password"])
 	if err != nil {
 		return err
 	}

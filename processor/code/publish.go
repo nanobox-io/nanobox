@@ -15,7 +15,7 @@ import (
 	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/ipControl"
+	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/print"
 )
 
@@ -58,11 +58,11 @@ func (codePublish *processCodePublish) Process() error {
 	}
 
 	// create build container
-	localIP, err := ipControl.ReserveLocal()
+	localIP, err := dhcp.ReserveLocal()
 	if err != nil {
 		return err
 	}
-	defer ipControl.ReturnIP(localIP)
+	defer dhcp.ReturnIP(localIP)
 
 	codePublish.service.InternalIP = localIP.String()
 

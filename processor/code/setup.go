@@ -13,7 +13,7 @@ import (
 	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
-	"github.com/nanobox-io/nanobox/util/ipControl"
+	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/print"
 )
 
@@ -123,7 +123,7 @@ func (codeSetup *processCodeSetup) getLocalIP() error {
 	if codeSetup.service.InternalIP != "" {
 		return nil
 	}
-	ip, err := ipControl.ReserveLocal()
+	ip, err := dhcp.ReserveLocal()
 	if err != nil {
 		codeSetup.fail = true
 		return err
@@ -139,7 +139,7 @@ func (codeSetup *processCodeSetup) getGlobalIP() error {
 		// if the service already has an ip
 		return nil
 	}
-	ip, err := ipControl.ReserveGlobal()
+	ip, err := dhcp.ReserveGlobal()
 	if err != nil {
 		codeSetup.fail = true
 		return err
@@ -151,12 +151,12 @@ func (codeSetup *processCodeSetup) getGlobalIP() error {
 
 // returnLocalIP ...
 func (codeSetup *processCodeSetup) returnLocalIP() {
-	ipControl.ReturnIP(net.ParseIP(codeSetup.service.InternalIP))
+	dhcp.ReturnIP(net.ParseIP(codeSetup.service.InternalIP))
 }
 
 // returnGlobalIP ...
 func (codeSetup *processCodeSetup) returnGlobalIP() {
-	ipControl.ReturnIP(net.ParseIP(codeSetup.service.ExternalIP))
+	dhcp.ReturnIP(net.ParseIP(codeSetup.service.ExternalIP))
 }
 
 // addIPToProvider ...

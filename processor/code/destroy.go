@@ -9,7 +9,7 @@ import (
 	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
-	"github.com/nanobox-io/nanobox/util/ipControl"
+	"github.com/nanobox-io/nanobox/util/dhcp"
 )
 
 // processCodeDestroy ...
@@ -63,12 +63,12 @@ func (codeDestroy *processCodeDestroy) Process() error {
 	}
 
 	//
-	if err := ipControl.ReturnIP(net.ParseIP(service.ExternalIP)); err != nil {
+	if err := dhcp.ReturnIP(net.ParseIP(service.ExternalIP)); err != nil {
 		return err
 	}
 
 	//
-	if err := ipControl.ReturnIP(net.ParseIP(service.InternalIP)); err != nil {
+	if err := dhcp.ReturnIP(net.ParseIP(service.InternalIP)); err != nil {
 		return err
 	}
 

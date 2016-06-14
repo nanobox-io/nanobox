@@ -1,5 +1,5 @@
-// Package productionAPI ...
-package productionAPI
+// Package odin ...
+package odin
 
 import (
 	"bytes"

@@ -1,4 +1,4 @@
-package ipControl
+package dhcp
 
 import (
 	"errors"

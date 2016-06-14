@@ -7,7 +7,7 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
-	"github.com/nanobox-io/nanobox/util/productionAPI"
+	"github.com/nanobox-io/nanobox/util/odin"
 )
 
 // processLinkAdd
@@ -39,7 +39,7 @@ func (linkAdd processLinkAdd) Process() error {
 	}
 
 	// get app id
-	app, err := productionAPI.App(linkAdd.control.Meta["name"])
+	app, err := odin.App(linkAdd.control.Meta["name"])
 	if err != nil {
 		return err
 	}

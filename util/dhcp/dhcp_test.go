@@ -1,30 +1,30 @@
-package ipControl_test
+package dhcp_test
 
 import (
 	"net"
 	"os"
 	"testing"
 
-	"github.com/nanobox-io/nanobox/util/ipControl"
+	"github.com/nanobox-io/nanobox/util/dhcp"
 )
 
 // TestMain ...
 func TestMain(m *testing.M) {
-	ipControl.Flush()
+	dhcp.Flush()
 	os.Exit(m.Run())
 }
 
 // TestReservingIps ...
 func TestReservingIps(t *testing.T) {
-	ipOne, err := ipControl.ReserveGlobal()
+	ipOne, err := dhcp.ReserveGlobal()
 	if err != nil {
 		t.Errorf("unable to reserve ip", err)
 	}
-	ipTwo, err := ipControl.ReserveGlobal()
+	ipTwo, err := dhcp.ReserveGlobal()
 	if err != nil {
 		t.Errorf("unable to reserve ip", err)
 	}
-	ipThree, err := ipControl.ReserveLocal()
+	ipThree, err := dhcp.ReserveLocal()
 	if err != nil {
 		t.Errorf("unable to reserve ip", err)
 	}
@@ -35,15 +35,15 @@ func TestReservingIps(t *testing.T) {
 
 // TestReturnIP ...
 func TestReturnIP(t *testing.T) {
-	err := ipControl.ReturnIP(net.ParseIP("192.168.99.50"))
+	err := dhcp.ReturnIP(net.ParseIP("192.168.99.50"))
 	if err != nil {
 		t.Errorf("unable to return ip", err)
 	}
-	err = ipControl.ReturnIP(net.ParseIP("192.168.99.51"))
+	err = dhcp.ReturnIP(net.ParseIP("192.168.99.51"))
 	if err != nil {
 		t.Errorf("unable to return ip", err)
 	}
-	err = ipControl.ReturnIP(net.ParseIP("192.168.0.50"))
+	err = dhcp.ReturnIP(net.ParseIP("192.168.0.50"))
 	if err != nil {
 		t.Errorf("unable to return ip", err)
 	}
@@ -51,29 +51,29 @@ func TestReturnIP(t *testing.T) {
 
 // TestReuseIP ...
 func TestReuseIP(t *testing.T) {
-	one, err := ipControl.ReserveGlobal()
+	one, err := dhcp.ReserveGlobal()
 	if err != nil {
 		t.Errorf("unable to reserve ip", err)
 	}
-	ipTwo, err := ipControl.ReserveGlobal()
+	ipTwo, err := dhcp.ReserveGlobal()
 	if err != nil {
 		t.Errorf("unable to reserve ip", err)
 	}
-	three, err := ipControl.ReserveLocal()
+	three, err := dhcp.ReserveLocal()
 	if err != nil {
 		t.Errorf("unable to reserve ip", err)
 	}
-	err = ipControl.ReturnIP(ipTwo)
+	err = dhcp.ReturnIP(ipTwo)
 	if err != nil {
 		t.Errorf("unable to return ip", err)
 	}
-	ipTwoAgain, err := ipControl.ReserveGlobal()
+	ipTwoAgain, err := dhcp.ReserveGlobal()
 	if err != nil {
 		t.Errorf("unable to reserve ip", err)
 	}
 	if !ipTwo.Equal(ipTwoAgain) {
 		t.Errorf("i should ahve recieved a repeat of %s but i got %s", ipTwo.String(), ipTwoAgain.String())
 	}
-	ipControl.ReturnIP(one)
-	ipControl.ReturnIP(three)
+	dhcp.ReturnIP(one)
+	dhcp.ReturnIP(three)
 }

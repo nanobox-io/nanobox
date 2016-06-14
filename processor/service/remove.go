@@ -10,7 +10,7 @@ import (
 	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
-	"github.com/nanobox-io/nanobox/util/ipControl"
+	"github.com/nanobox-io/nanobox/util/dhcp"
 )
 
 // processServiceRemove ...
@@ -115,11 +115,11 @@ func (serviceRemove *processServiceRemove) releaseIPs() error {
 	extIP := net.ParseIP(serviceRemove.service.ExternalIP)
 	intIP := net.ParseIP(serviceRemove.service.InternalIP)
 
-	if err := ipControl.ReturnIP(intIP); err != nil {
+	if err := dhcp.ReturnIP(intIP); err != nil {
 		return err
 	}
 
-	if err := ipControl.ReturnIP(extIP); err != nil {
+	if err := dhcp.ReturnIP(extIP); err != nil {
 		return err
 	}
 
