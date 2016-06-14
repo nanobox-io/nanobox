@@ -37,6 +37,18 @@ func (devDNSAdd processDevDNSAdd) Process() error {
 
 	name := devDNSAdd.control.Meta["name"]
 
+	//
+	app := models.App{}
+	data.Get("apps", config.AppName(), &app)
+
+	//
+	entry := dns.Entry(app.DevIP, name, domain)
+
+	// if the entry doesnt exist just return
+	if !dns.Exists(entry) {
+		return nil
+	}
+
 	// This process requires root, check to see if we're the root user. If not, we
 	// need to run a hidden command as sudo that will just call this function again.
 	// Thus, the subprocess will be running as root
@@ -59,42 +71,12 @@ func (devDNSAdd processDevDNSAdd) Process() error {
 	}
 
 	// add the 'preview' DNS entry into the /etc/hosts file
-	if err := devDNSAdd.addEntry(name, "preview"); err != nil {
+	if err := dns.Add(name, "preview"); err != nil {
 		return err
 	}
 
 	// add the 'dev' DNS entry into the /etc/hosts file
-	if err := devDNSAdd.addEntry(name, "dev"); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// addEntry ...
-func (devDNSAdd processDevDNSAdd) addEntry(name, domain string) error {
-
-	//
-	app := models.App{}
-	data.Get("apps", config.AppName(), &app)
-
-	//
-	entry := dns.Entry(app.DevIP, name, domain)
-
-	// if the entry already exists just return
-	if dns.Exists(entry) {
-		return nil
-	}
-
-	// open hosts file
-	f, err := os.OpenFile(dns.HOSTSFILE, os.O_RDWR|os.O_APPEND, 0644)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	// write the DNS entry to the file
-	if _, err := f.WriteString(fmt.Sprintf("%s\n", entry)); err != nil {
+	if err := dns.Add(name, "dev"); err != nil {
 		return err
 	}
 
