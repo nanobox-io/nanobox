@@ -1,3 +1,4 @@
+// Package counter ...
 package counter
 
 import (

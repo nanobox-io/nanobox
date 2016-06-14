@@ -3,6 +3,7 @@ package commands
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/nanobox-io/nanobox/commands/dev"
 	"github.com/nanobox-io/nanobox/processor"
 )
 
@@ -12,7 +13,7 @@ var (
 	DevCmd = &cobra.Command{
 		Use:   "dev",
 		Short: "Starts the Nanobox VM, provisions app, & opens an interactive terminal.",
-		Long:  `
+		Long: `
 Starts the Nanobox VM, provisions app, & opens an interactive
 terminal. This is the primary command for managing local dev
 apps and interacting with your Nanobox VM.
@@ -31,6 +32,7 @@ func init() {
 	// public subcommands
 	DevCmd.AddCommand(DevDeployCmd)
 	DevCmd.AddCommand(DevDestroyCmd)
+	DevCmd.AddCommand(dev.DNSCmd)
 	DevCmd.AddCommand(DevInfoCmd)
 	DevCmd.AddCommand(DevExecCmd)
 	DevCmd.AddCommand(DevConsoleCmd)

@@ -20,7 +20,7 @@ var (
 	LinkAddCmd = &cobra.Command{
 		Use:   "add",
 		Short: "Adds a new link between a dev & production app.",
-		Long:  `
+		Long: `
 Adds a new link between a dev and production app. A dev app can
 be linked to multiple production apps. Each link needs an alias.
 If no alias is provided, 'default' is assumed.
@@ -65,5 +65,4 @@ func init() {
 	LinkCmd.AddCommand(LinkAddCmd)
 	LinkCmd.AddCommand(LinkListCmd)
 	LinkCmd.AddCommand(LinkRemoveCmd)
-
 }

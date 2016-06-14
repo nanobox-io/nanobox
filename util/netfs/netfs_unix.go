@@ -22,7 +22,6 @@ func Add(host, path string) error {
 	// This process requires root, check to see if we're the root user.
 	// If not, we need to run a hidden command as sudo that will just call this
 	// function again. Thus, the subprocess will be running as root
-	// todo: sudo re-run thing
 	if os.Geteuid() != 0 {
 
 		// get the original nanobox executable
@@ -64,7 +63,6 @@ func Remove(host, path string) error {
 	// This process requires root, check to see if we're the root user.
 	// If not, we need to run a hidden command as sudo that will just call this
 	// function again. Thus, the subprocess will be running as root
-	// todo: sudo re-run thing
 	if os.Geteuid() != 0 {
 
 		// get the original nanobox executable
@@ -147,8 +145,7 @@ func Mount(hostPath, mountPath string, context []string) error {
 		return err
 	}
 
-	// TODO: this IP shouldn't be hardcoded, needs to be figured out
-	// mount!
+	// TODO: this IP shouldn't be hardcoded, needs to be figured out mount!
 	source := fmt.Sprintf("192.168.99.1:%s", hostPath)
 	run = append(context, []string{"/bin/mount", "-t", "nfs", source, mountPath}...)
 	cmd = exec.Command(run[0], run[1:]...)

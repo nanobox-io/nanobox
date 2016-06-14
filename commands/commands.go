@@ -14,6 +14,7 @@ import (
 	"github.com/nanobox-io/nanobox/processor"
 	_ "github.com/nanobox-io/nanobox/processor/app"
 	_ "github.com/nanobox-io/nanobox/processor/code"
+	_ "github.com/nanobox-io/nanobox/processor/dev/dns"
 	_ "github.com/nanobox-io/nanobox/processor/platform"
 	_ "github.com/nanobox-io/nanobox/processor/provider"
 	_ "github.com/nanobox-io/nanobox/processor/service"
