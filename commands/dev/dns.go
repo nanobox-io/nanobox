@@ -20,42 +20,34 @@ var (
 		Use:   "add",
 		Short: "",
 		Long:  ``,
-
-		// nanobox dev dns add <name>
-		Run: func(ccmd *cobra.Command, args []string) {
-			processor.DefaultConfig.Meta["name"] = args[0]
-			processor.Run("dev_dns_add", processor.DefaultConfig)
-		},
+		Run:   dnsAddFunc,
 	}
-
-	// // DNSListCmd ...
-	// DNSListCmd = &cobra.Command{
-	// 	Use:   "ls",
-	// 	Short: "",
-	// 	Long:  ``,
-	//
-	// 	Run: func(ccmd *cobra.Command, args []string) {
-	// 		processor.Run("dev_dns_list", processor.DefaultConfig)
-	// 	},
-	// }
 
 	// DNSRemoveCmd ...
 	DNSRemoveCmd = &cobra.Command{
 		Use:   "rm",
 		Short: "",
 		Long:  ``,
-
-		// nanobox dev dns remove <name>
-		Run: func(ccmd *cobra.Command, args []string) {
-			processor.DefaultConfig.Meta["name"] = args[0]
-			processor.Run("dev_dns_remove", processor.DefaultConfig)
-		},
+		Run:   dnsRmFunc,
 	}
 )
 
 //
 func init() {
 	DNSCmd.AddCommand(DNSAddCmd)
-	// DNSCmd.AddCommand(DNSListCmd)
 	DNSCmd.AddCommand(DNSRemoveCmd)
+}
+
+// dnsAddFunc will run the DNS processor for adding DNS entires to the "hosts"
+// file
+func dnsAddFunc(ccmd *cobra.Command, args []string) {
+	processor.DefaultConfig.Meta["name"] = args[0]
+	processor.Run("dev_dns_add", processor.DefaultConfig)
+}
+
+// dnsRmFunc will run the DNS processor for removing DNS entries from the "hosts"
+// file
+func dnsRmFunc(ccmd *cobra.Command, args []string) {
+	processor.DefaultConfig.Meta["name"] = args[0]
+	processor.Run("dev_dns_remove", processor.DefaultConfig)
 }

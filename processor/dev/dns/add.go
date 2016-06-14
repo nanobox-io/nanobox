@@ -15,7 +15,8 @@ import (
 // processDevDNSAdd ...
 type processDevDNSAdd struct {
 	control processor.ProcessControl
-	app			models.App
+	app     models.App
+	name    string
 }
 
 //
@@ -36,15 +37,19 @@ func (devDNSAdd processDevDNSAdd) Results() processor.ProcessControl {
 //
 func (devDNSAdd processDevDNSAdd) Process() error {
 
+	// validate we have all meta information needed and set "name"
 	if err := devDNSAdd.validateMeta(); err != nil {
 		return err
 	}
 
+	// load the current "app"
 	if err := devDNSAdd.loadApp(); err != nil {
 		return err
 	}
 
-	// short-circuit if the entries already exist
+	// short-circuit if the entries already exist; we do this after we validate meta
+	// and load the app because both of those are needed to determin the entry we're
+	// looking for
 	if devDNSAdd.entriesExist() {
 		return nil
 	}
@@ -59,6 +64,7 @@ func (devDNSAdd processDevDNSAdd) Process() error {
 		return nil
 	}
 
+	// add the DNS entries
 	if err := devDNSAdd.addEntries(); err != nil {
 		return err
 	}
@@ -69,9 +75,12 @@ func (devDNSAdd processDevDNSAdd) Process() error {
 // validateMeta validates that the required metadata exists
 func (devDNSAdd processDevDNSAdd) validateMeta() error {
 
+	// set the name
+	devDNSAdd.name = devDNSAdd.control.Meta["name"]
+
 	// ensure name is provided
-	if devDNSAdd.control.Meta["name"] == "" {
-		return errors.New("Name is required")
+	if devDNSAdd.name == "" {
+		return fmt.Errorf("Name is required")
 	}
 
 	return nil
@@ -80,6 +89,7 @@ func (devDNSAdd processDevDNSAdd) validateMeta() error {
 // loadApp loads the app from the db
 func (devDNSAdd processDevDNSAdd) loadApp() error {
 
+	//
 	if err := data.Get("apps", config.AppName(), &devDNSAdd.app); err != nil {
 		return err
 	}
@@ -90,13 +100,11 @@ func (devDNSAdd processDevDNSAdd) loadApp() error {
 // entriesExist returns true if both entries already exist
 func (devDNSAdd processDevDNSAdd) entriesExist() bool {
 
-	name := devDNSAdd.control.Meta["name"]
-
 	// generate the entries
-	preview := dns.Entry(devDNSAdd.app.DevIP, name, "preview")
-	dev := dns.Entry(devDNSAdd.app.DevIP, name, "dev")
+	preview := dns.Entry(devDNSAdd.app.DevIP, devDNSAdd.name, "preview")
+	dev := dns.Entry(devDNSAdd.app.DevIP, devDNSAdd.name, "dev")
 
-	// if the entry doesnt exist just return
+	// if the entries dont exist just return
 	if dns.Exists(preview) && dns.Exists(dev) {
 		return true
 	}
@@ -106,11 +114,10 @@ func (devDNSAdd processDevDNSAdd) entriesExist() bool {
 
 // addEntries adds the dev and preview entries into the host dns
 func (devDNSAdd processDevDNSAdd) addEntries() error {
-	name := devDNSAdd.control.Meta["name"]
 
 	// generate the entries
-	preview := dns.Entry(devDNSAdd.app.DevIP, name, "preview")
-	dev := dns.Entry(devDNSAdd.app.DevIP, name, "dev")
+	preview := dns.Entry(devDNSAdd.app.DevIP, devDNSAdd.name, "preview")
+	dev := dns.Entry(devDNSAdd.app.DevIP, devDNSAdd.name, "dev")
 
 	// add the 'preview' DNS entry into the /etc/hosts file
 	if err := dns.Add(preview); err != nil {
@@ -127,13 +134,11 @@ func (devDNSAdd processDevDNSAdd) addEntries() error {
 
 // reExecPrivilege re-execs the current process with a privileged user
 func (devDNSAdd processDevDNSAdd) reExecPrivilege() error {
-	name := devDNSAdd.control.Meta["name"]
 
-	// get the original nanobox executable
-	nanobox := os.Args[0]
-
-	// call 'dev dns add' with the original path (ultimately leads right back here)
-	cmd := fmt.Sprintf("%s dev dns add %s", nanobox, name)
+	// call 'dev dns add' with the original path and args; os.Args[0] will be the
+	// currently executing program, so this command will ultimately lead right back
+	// here
+	cmd := fmt.Sprintf("%s dev dns add %s", os.Args[0], devDNSAdd.name)
 
 	// if the sudo'ed subprocess fails, we need to return error to stop the process
 	fmt.Println("Admin privileges are required to add DNS entries to your hosts file, your password may be requested...")

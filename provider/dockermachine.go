@@ -447,7 +447,9 @@ func (machine DockerMachine) addNetfsShare(local, host string) error {
 			return err
 		}
 
-		if err := netfs.Add(ip, local); err != nil {
+		//
+		entry := netfs.Entry(ip, local)
+		if err := netfs.Add(entry); err != nil {
 			return err
 		}
 	}
@@ -529,7 +531,9 @@ func (machine DockerMachine) removeNetfsShare(local, host string) error {
 			return err
 		}
 
-		if err := netfs.Remove(host, local); err != nil {
+		//
+		entry := netfs.Entry(host, local)
+		if err := netfs.Remove(entry); err != nil {
 			return err
 		}
 	}
@@ -578,7 +582,9 @@ func (machine DockerMachine) hasNetfsShare(mount string) bool {
 		return false
 	}
 
-	return netfs.Exists(host, mount)
+	//
+	entry := netfs.Entry(host, mount)
+	return netfs.Exists(entry)
 }
 
 // isCreated ...

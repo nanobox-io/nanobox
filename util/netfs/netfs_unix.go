@@ -12,107 +12,25 @@ import (
 	"strings"
 
 	"github.com/jcelliott/lumber"
-
-	"github.com/nanobox-io/nanobox/util"
 )
 
-// Add will export an nfs share
-func Add(host, path string) error {
+// EXPORTSFILE ...
+const EXPORTSFILE = "/etc/exports"
 
-	// This process requires root, check to see if we're the root user.
-	// If not, we need to run a hidden command as sudo that will just call this
-	// function again. Thus, the subprocess will be running as root
-	if os.Geteuid() != 0 {
-
-		// get the original nanobox executable
-		nanobox := os.Args[0]
-
-		// call dev netfs add with the original path (ultimately leads right back here)
-		cmd := fmt.Sprintf("%s dev netfs add %s %s", nanobox, host, path)
-
-		// if the sudo'ed subprocess fails, we need to return error to stop the process
-		fmt.Println("Admin privileges are required to export an nfs share, your password may be requested...")
-		if err := util.PrivilegeExec(cmd); err != nil {
-			return err
-		}
-
-		// the subprocess exited successfully, so we can short-circuit here
-		return nil
-	}
-
-	//
-	if !Exists(host, path) {
-
-		// add entry into the /etc/exports file
-		if err := addEntry(host, path); err != nil {
-			return err
-		}
-
-		// reload nfsd
-		if err := reloadServer(); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// Remove will remove an nfs share
-func Remove(host, path string) error {
-
-	// This process requires root, check to see if we're the root user.
-	// If not, we need to run a hidden command as sudo that will just call this
-	// function again. Thus, the subprocess will be running as root
-	if os.Geteuid() != 0 {
-
-		// get the original nanobox executable
-		nanobox := os.Args[0]
-
-		// call dev netfs add with the original path (ultimately leads right back here)
-		cmd := fmt.Sprintf("%s dev netfs rm %s %s", nanobox, host, path)
-
-		// if the sudo'ed subprocess fails, we need to return error to stop the process
-		fmt.Println("Admin privileges are required to remove an nfs share, your password may be requested...")
-		if err := util.PrivilegeExec(cmd); err != nil {
-			return err
-		}
-
-		// the subprocess exited successfully, so we can short-circuit here
-		return nil
-	}
-
-	//
-	if Exists(host, path) {
-
-		// add entry into the /etc/exports file
-		if err := removeEntry(host, path); err != nil {
-			return err
-		}
-
-		// reload nfsd
-		if err := reloadServer(); err != nil {
-			return err
-		}
-	}
-
-	return nil
+// Entry generates the mount entry for the exports file
+func Entry(host, path string) string {
+	return fmt.Sprintf("\"%s\" %s -alldirs -mapall=%v:%v", path, host, uid(), gid())
 }
 
 // Exists checks to see if the mount already exists
-func Exists(host, path string) bool {
+func Exists(entry string) bool {
 
 	// open the /etc/exports file for scanning...
-	f, err := os.Open("/etc/exports")
+	f, err := os.Open(EXPORTSFILE)
 	if err != nil {
 		return false
 	}
 	defer f.Close()
-
-	// generate the exports entry
-	entry, err := entry(host, path)
-	if err != nil {
-		return false
-	}
 
 	// scan exports file looking for an entry for this path...
 	scanner := bufio.NewScanner(f)
@@ -124,6 +42,37 @@ func Exists(host, path string) bool {
 	}
 
 	return false
+}
+
+// Add will export an nfs share
+func Add(entry string) error {
+
+	// add entry into the /etc/exports file
+	if err := addEntry(entry); err != nil {
+		return err
+	}
+
+	// reload nfsd
+	if err := reloadServer(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Remove will remove an nfs share
+func Remove(entry string) error {
+
+	if err := removeEntry(entry); err != nil {
+		return err
+	}
+
+	// reload nfsd
+	if err := reloadServer(); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // Mount mounts a share on a guest machine
@@ -158,20 +107,14 @@ func Mount(hostPath, mountPath string, context []string) error {
 }
 
 // addEntry will add the entry into the /etc/exports file
-func addEntry(host, path string) error {
+func addEntry(entry string) error {
 
 	// open exports file
-	f, err := os.OpenFile("/etc/exports", os.O_RDWR|os.O_APPEND, 0644)
+	f, err := os.OpenFile(EXPORTSFILE, os.O_RDWR|os.O_APPEND, 0644)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
-
-	// generate the entry
-	entry, err := entry(host, path)
-	if err != nil {
-		return err
-	}
 
 	// write the entry to the file
 	if _, err := f.WriteString(fmt.Sprintf("%s\n", entry)); err != nil {
@@ -182,26 +125,20 @@ func addEntry(host, path string) error {
 }
 
 // removeEntry will remove the entry from the /etc/exports file
-func removeEntry(host, path string) error {
+func removeEntry(entry string) error {
 
 	// contents will end up storing the entire contents of the file excluding the
 	// entry that is trying to be removed
 	var contents string
 
 	// open exports file
-	f, err := os.OpenFile("/etc/exports", os.O_RDWR, 0644)
+	f, err := os.OpenFile(EXPORTSFILE, os.O_RDWR, 0644)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
-	// generate the entry
-	entry, err := entry(host, path)
-	if err != nil {
-		return err
-	}
-
-	// remove entry from /etc/hosts
+	// remove entry from /etc/exports
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
 
@@ -220,25 +157,12 @@ func removeEntry(host, path string) error {
 	// add a single newline for completeness
 	contents += "\n"
 
-	// write back the contents of the hosts file minus the removed entry
-	if err := ioutil.WriteFile("/etc/exports", []byte(contents), 0644); err != nil {
+	// write back the contents of the exports file minus the removed entry
+	if err := ioutil.WriteFile(EXPORTSFILE, []byte(contents), 0644); err != nil {
 		return err
 	}
 
 	return nil
-}
-
-// entry generates the mount entry for the exports file
-func entry(host, path string) (string, error) {
-
-	// fetch the uid/gid for the export statement
-	uid := uid()
-	gid := gid()
-
-	message := "\"%s\" %s -alldirs -mapall=%v:%v"
-	entry := fmt.Sprintf(message, path, host, uid, gid)
-
-	return entry, nil
 }
 
 // uid will grab the original uid that called sudo if set

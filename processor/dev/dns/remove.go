@@ -12,9 +12,11 @@ import (
 	"github.com/nanobox-io/nanobox/util/dns"
 )
 
-// processDevDNSRemove
+// processDevDNSRemove ...
 type processDevDNSRemove struct {
 	control processor.ProcessControl
+	app     models.App
+	name    string
 }
 
 //
@@ -35,50 +37,112 @@ func (devDNSRemove processDevDNSRemove) Results() processor.ProcessControl {
 //
 func (devDNSRemove processDevDNSRemove) Process() error {
 
-	//
-	name := devDNSRemove.control.Meta["name"]
+	// validate we have all meta information needed and set "name"
+	if err := devDNSRemove.validateMeta(); err != nil {
+		return err
+	}
 
-	//
-	app := models.App{}
-	data.Get("apps", config.AppName(), &app)
+	// load the current "app"
+	if err := devDNSRemove.loadApp(); err != nil {
+		return err
+	}
 
-	//
-	preview := dns.Entry(app.DevIP, name, "preview")
-	dev := dns.Entry(app.DevIP, name, "dev")
-
-	// if the entry already exists just return
-	if dns.Exists(preview) && dns.Exists(dev) {
+	// short-circuit if the entries dont exist; we do this after we validate meta
+	// and load the app because both of those are needed to determin the entry we're
+	// looking for
+	if !devDNSRemove.entriesExist() {
 		return nil
 	}
 
-	// This process requires root, check to see if we're the root user. If not, we
-	// need to run a hidden command as sudo that will just call this function again.
-	// Thus, the subprocess will be running as root
-	if os.Geteuid() != 0 {
+	// if we're not running as the privileged user, we need to re-exec with privilege
+	if !util.IsPrivileged() {
 
-		// get the original nanobox executable
-		nanobox := os.Args[0]
-
-		// call dev netfs add with the original path (ultimately leads right back here)
-		cmd := fmt.Sprintf("%s dev dns rm %s", nanobox, name)
-
-		// if the sudo'ed subprocess fails, we need to return error to stop the process
-		fmt.Println("Admin privileges are required to remove DNS entries from your hosts file, your password may be requested...")
-		if err := util.PrivilegeExec(cmd); err != nil {
+		if err := devDNSRemove.reExecPrivilege(); err != nil {
 			return err
 		}
 
-		// the subprocess exited successfully, so we can short-circuit here
 		return nil
 	}
 
-	// remove the 'preview' DNS entry from the /etc/hosts file
+	// remove the DNS entries
+	if err := devDNSRemove.removeEntries(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateMeta validates that the required metadata exists
+func (devDNSRemove processDevDNSRemove) validateMeta() error {
+
+	// set the name
+	devDNSRemove.name = devDNSRemove.control.Meta["name"]
+
+	// ensure name is provided
+	if devDNSRemove.name == "" {
+		return fmt.Errorf("Name is required")
+	}
+
+	return nil
+}
+
+// loadApp loads the app from the db
+func (devDNSRemove processDevDNSRemove) loadApp() error {
+
+	//
+	if err := data.Get("apps", config.AppName(), &devDNSRemove.app); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// entriesExist returns true if both entries already exist
+func (devDNSRemove processDevDNSRemove) entriesExist() bool {
+
+	// generate the entries
+	preview := dns.Entry(devDNSRemove.app.DevIP, devDNSRemove.name, "preview")
+	dev := dns.Entry(devDNSRemove.app.DevIP, devDNSRemove.name, "dev")
+
+	// if the entry doesnt exist just return
+	if dns.Exists(preview) && dns.Exists(dev) {
+		return true
+	}
+
+	return false
+}
+
+// removeEntries removes the "dev" and "preview" entries into the host dns
+func (devDNSRemove processDevDNSRemove) removeEntries() error {
+
+	// generate the entries
+	preview := dns.Entry(devDNSRemove.app.DevIP, devDNSRemove.name, "preview")
+	dev := dns.Entry(devDNSRemove.app.DevIP, devDNSRemove.name, "dev")
+
+	// remove the 'preview' DNS entry into the /etc/hosts file
 	if err := dns.Remove(preview); err != nil {
 		return err
 	}
 
-	// remove the 'dev' DNS entry from the /etc/hosts file
+	// remove the 'dev' DNS entry into the /etc/hosts file
 	if err := dns.Remove(dev); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// reExecPrivilege re-execs the current process with a privileged user
+func (devDNSRemove processDevDNSRemove) reExecPrivilege() error {
+
+	// call 'dev dns rm' with the original path and args; os.Args[0] will be the
+	// currently executing program, so this command will ultimately lead right back
+	// here
+	cmd := fmt.Sprintf("%s dev dns rm %s", os.Args[0], devDNSRemove.name)
+
+	// if the sudo'ed subprocess fails, we need to return error to stop the process
+	fmt.Println("Admin privileges are required to remove DNS entries from your hosts file, your password may be requested...")
+	if err := util.PrivilegeExec(cmd); err != nil {
 		return err
 	}
 

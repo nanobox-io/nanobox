@@ -29,6 +29,7 @@ apps and interacting with your Nanobox VM.
 
 //
 func init() {
+
 	// public subcommands
 	DevCmd.AddCommand(DevDeployCmd)
 	DevCmd.AddCommand(DevDestroyCmd)
@@ -40,5 +41,5 @@ func init() {
 	DevCmd.AddCommand(DevResetCmd)
 
 	// hidden subcommands
-	DevCmd.AddCommand(DevNetfsCmd)
+	DevCmd.AddCommand(dev.NetfsCmd)
 }
