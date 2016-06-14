@@ -43,10 +43,11 @@ func (devDNSRemove processDevDNSRemove) Process() error {
 	data.Get("apps", config.AppName(), &app)
 
 	//
-	entry := dns.Entry(app.DevIP, name, domain)
+	preview := dns.Entry(app.DevIP, name, "preview")
+	dev := dns.Entry(app.DevIP, name, "dev")
 
 	// if the entry already exists just return
-	if dns.Exists(entry) {
+	if dns.Exists(preview) && dns.Exists(dev) {
 		return nil
 	}
 
@@ -72,12 +73,12 @@ func (devDNSRemove processDevDNSRemove) Process() error {
 	}
 
 	// remove the 'preview' DNS entry from the /etc/hosts file
-	if err := dns.Remove(name, "preview"); err != nil {
+	if err := dns.Remove(preview); err != nil {
 		return err
 	}
 
 	// remove the 'dev' DNS entry from the /etc/hosts file
-	if err := dns.Remove(name, "dev"); err != nil {
+	if err := dns.Remove(dev); err != nil {
 		return err
 	}
 

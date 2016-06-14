@@ -35,6 +35,7 @@ func (devDNSAdd processDevDNSAdd) Results() processor.ProcessControl {
 //
 func (devDNSAdd processDevDNSAdd) Process() error {
 
+	//
 	name := devDNSAdd.control.Meta["name"]
 
 	//
@@ -42,10 +43,11 @@ func (devDNSAdd processDevDNSAdd) Process() error {
 	data.Get("apps", config.AppName(), &app)
 
 	//
-	entry := dns.Entry(app.DevIP, name, domain)
+	preview := dns.Entry(app.DevIP, name, "preview")
+	dev := dns.Entry(app.DevIP, name, "dev")
 
 	// if the entry doesnt exist just return
-	if !dns.Exists(entry) {
+	if !dns.Exists(preview) && !dns.Exists(dev) {
 		return nil
 	}
 
@@ -71,12 +73,12 @@ func (devDNSAdd processDevDNSAdd) Process() error {
 	}
 
 	// add the 'preview' DNS entry into the /etc/hosts file
-	if err := dns.Add(name, "preview"); err != nil {
+	if err := dns.Add(preview); err != nil {
 		return err
 	}
 
 	// add the 'dev' DNS entry into the /etc/hosts file
-	if err := dns.Add(name, "dev"); err != nil {
+	if err := dns.Add(dev); err != nil {
 		return err
 	}
 

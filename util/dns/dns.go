@@ -7,12 +7,15 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
-
-	"github.com/nanobox-io/nanobox/util/dns"
 )
 
 // HOSTSFILE ...
 const HOSTSFILE = "/etc/hosts"
+
+// Entry generate the DNS entry to be added
+func Entry(ip, name, domain string) string {
+	return fmt.Sprintf("%s     %s.%s # '%s' added by running 'nanobox dev dns add <name>'", ip, name, domain, name)
+}
 
 // Exists ...
 func Exists(entry string) bool {
@@ -36,16 +39,11 @@ func Exists(entry string) bool {
 	return false
 }
 
-// Entry generate the DNS entry to be added
-func Entry(ip, name, domain string) string {
-	return fmt.Sprintf("%s     %s.%s # '%s' added by running 'nanobox dev dns add <name>'", ip, name, domain, name)
-}
-
 // Add ...
-func Add(name, domain string) error {
+func Add(entry string) error {
 
 	// open hosts file
-	f, err := os.OpenFile(dns.HOSTSFILE, os.O_RDWR|os.O_APPEND, 0644)
+	f, err := os.OpenFile(HOSTSFILE, os.O_RDWR|os.O_APPEND, 0644)
 	if err != nil {
 		return err
 	}
@@ -60,14 +58,14 @@ func Add(name, domain string) error {
 }
 
 // Remove ...
-func Remove(name, domain string) error {
+func Remove(entry string) error {
 
 	// "contents" will end up storing the entire contents of the file excluding the
 	// entry that is trying to be removed
 	var contents string
 
 	// open hosts file
-	f, err := os.OpenFile(dns.HOSTSFILE, os.O_RDWR, 0644)
+	f, err := os.OpenFile(HOSTSFILE, os.O_RDWR, 0644)
 	if err != nil {
 		return err
 	}
@@ -93,7 +91,7 @@ func Remove(name, domain string) error {
 	contents += "\n"
 
 	// write back the contents of the hosts file minus the removed entry
-	if err := ioutil.WriteFile(dns.HOSTSFILE, []byte(contents), 0644); err != nil {
+	if err := ioutil.WriteFile(HOSTSFILE, []byte(contents), 0644); err != nil {
 		return err
 	}
 
