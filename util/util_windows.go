@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-// PrivilegeExec will run the requested command
+// PrivilegeExec will run the requested command in a powershell as the Administrative user
 func PrivilegeExec(command string) error {
 
 	// Windows is tricky. Unfortunately we can't just prefix the command with sudo
@@ -55,4 +55,14 @@ func PrivilegeExec(command string) error {
 	}
 
 	return nil
+}
+
+// PowerShell will run a specified command in a powershell and return the result
+func PowerShell(command string) ([]byte, error) {
+
+	process := fmt.Sprintf("\"& {%s}\"", command)
+	cmd := exec.Command("PowerShell.exe", "-NoProfile", "-Command", process)
+
+	return cmd.CombinedOutput()
+
 }
