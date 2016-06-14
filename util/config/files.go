@@ -1,6 +1,7 @@
 package config
 
 import (
+	"io"
 	"os"
 	"path/filepath"
 
@@ -30,6 +31,46 @@ func UpdateFile() (updateFile string) {
 		lumber.Fatal("[config/config] os.Create() failed", err.Error())
 	}
 	defer f.Close()
+
+	return
+}
+
+// configFile creates a config.yml file (if one doesn't already exist) populated
+// with resonable defaults
+func configFile() (file string) {
+
+	//
+	file = filepath.ToSlash(filepath.Join(GlobalDir(), "config.yml"))
+
+	// return the filepath if it's already created...
+	if _, err := os.Stat(file); err == nil {
+		return
+	}
+
+	// ...otherwise create the file
+	f, err := os.Create(file)
+	if err != nil {
+		lumber.Fatal("[config/config] os.Create() failed", err.Error())
+	}
+	defer f.Close()
+
+	//
+	contents := `
+# provider configuration options
+provider: "docker_machine" # the name of the provider to use
+
+# virtual machine (VM) configuration options
+vm:
+  cpus: 2         # number of cpus VM is allowed access to
+  cpu-cap: 50     # maximum allowed percentage of cpus
+  ram: 1024       # amount of ram VM is allowed access to
+  mount: "native" # either "native" or "netfs":
+                  # "native" -
+                  # "netfs" -
+  `
+
+	// populate the config.yml with reasonable defaults
+	io.WriteString(f, contents)
 
 	return
 }

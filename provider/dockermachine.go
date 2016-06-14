@@ -32,7 +32,7 @@ func (machine DockerMachine) Valid() error {
 
 	//
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("I could not run 'docker-machine' please make sure it is in your path")
+		return fmt.Errorf("Nanobox could not run 'docker-machine' please make sure it is in your path")
 	}
 
 	return nil

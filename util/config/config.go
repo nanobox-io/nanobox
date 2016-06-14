@@ -1,11 +1,6 @@
 package config
 
-import (
-	"os"
-	"path/filepath"
-
-	"github.com/spf13/viper"
-)
+import "github.com/spf13/viper"
 
 //
 var config *viper.Viper
@@ -47,41 +42,16 @@ func parseConfig() error {
 	config.SetDefault("external-network-space", "192.168.99.50/24")
 	config.SetDefault("internal-network-space", "192.168.0.50/16")
 
-	// default provider
-	config.SetDefault("provider", "docker_machine")
-
-	// vm properties for vm providers
-	config.SetDefault("vm.cpus", 2)
-	config.SetDefault("vm.cpu-cap", 50)
-	config.SetDefault("vm.ram", 1024)
-	config.SetDefault("vm.mount", "native")
-
 	// odin access
 	config.SetDefault("production_host", "api.nanobox.io/v1/")
 
-	// no sense parsing the config file if it doesn't exist
-	if configExists() {
+	// parse config file
+	config.SetConfigFile(configFile())
 
-		// parse config file
-		configFile := filepath.Join(GlobalDir(), "config.yml")
-		config.SetConfigFile(configFile)
-
-		// merge with defaults
-		if err := config.MergeInConfig(); err != nil {
-			return err
-		}
+	// merge with defaults
+	if err := config.MergeInConfig(); err != nil {
+		return err
 	}
 
 	return nil
-}
-
-// configExists checks to see if the config file actually exists
-func configExists() bool {
-
-	// we simply stat the file and if there are no errors the file exists
-	if _, err := os.Stat(filepath.Join(GlobalDir(), "config.yml")); err == nil {
-		return true
-	}
-
-	return false
 }
