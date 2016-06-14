@@ -38,14 +38,25 @@ func parseConfig() error {
 	config = viper.New()
 
 	// set sensible defaults
-	// network space
-	config.SetDefault("external-network-space", "192.168.99.50/24")
-	config.SetDefault("internal-network-space", "192.168.0.50/16")
 
 	// odin access
 	config.SetDefault("production_host", "api.nanobox.io/v1/")
 
-	// parse config file
+	// network space
+	config.SetDefault("external-network-space", "192.168.99.50/24")
+	config.SetDefault("internal-network-space", "192.168.0.50/16")
+
+	// configurable options (via ~.nanobox/config.yml); these defaults are set here
+	// incase for some reason an incomplete or invalid config.yml is parsed, nanobox
+	// will have values to fall back on
+	config.SetDefault("provider", "docker_machine")
+	config.SetDefault("vm.cpus", 2)
+	config.SetDefault("vm.cpu-cap", 50)
+	config.SetDefault("vm.ram", 1024)
+	config.SetDefault("vm.mount", "native")
+
+	// parse config file; we attempt to parse the config.yml and pull out any values
+	// that the user has provided (or one is generated with defaults; see ./files.go)
 	config.SetConfigFile(configFile())
 
 	// merge with defaults

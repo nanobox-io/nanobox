@@ -36,7 +36,9 @@ func UpdateFile() (updateFile string) {
 }
 
 // configFile creates a config.yml file (if one doesn't already exist) populated
-// with resonable defaults
+// with resonable defaults; this is mainly used as an example for users to see
+// what a config file can look like. once they create their own we'll use that
+// with any remaining defaults pulled from viper (see ./config.go)
 func configFile() (file string) {
 
 	//
