@@ -64,5 +64,4 @@ func PowerShell(command string) ([]byte, error) {
 	cmd := exec.Command("PowerShell.exe", "-NoProfile", "-Command", process)
 
 	return cmd.CombinedOutput()
-
 }
