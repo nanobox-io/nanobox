@@ -37,5 +37,5 @@ func execFn(ccmd *cobra.Command, args []string) {
 	}
 
 	//
-	print.OutputCmdErr(processor.Run("dev_console", processor.DefaultConfig))
+	print.OutputCommandErr(processor.Run("dev_console", processor.DefaultConfig))
 }

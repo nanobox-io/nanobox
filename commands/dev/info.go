@@ -26,5 +26,5 @@ func infoFn(ccmd *cobra.Command, args []string) {
 	processor.DefaultConfig.Meta["name"] = args[0]
 
 	//
-	print.OutputCmdErr(processor.Run("dev_info", processor.DefaultConfig))
+	print.OutputCommandErr(processor.Run("dev_info", processor.DefaultConfig))
 }

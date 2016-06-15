@@ -18,7 +18,6 @@ func init() {
 
 //
 func platformStopFn(control processor.ProcessControl) (processor.Processor, error) {
-	// confirm the provider is an accessable one that we support.
 	return processPlatformStop{control}, nil
 }
 
@@ -29,17 +28,14 @@ func (platformStop processPlatformStop) Results() processor.ProcessControl {
 
 //
 func (platformStop processPlatformStop) Process() error {
-
-	if err := platformStop.stopServices(); err != nil {
-		return err
-	}
-
-	return nil
+	return platformStop.stopServices()
 }
 
 // stopServices will stop all the platform services
 func (platformStop *processPlatformStop) stopServices() error {
-	platformStop.control.Display(stylish.Bullet("Stopping Platform Services"))
+
+	//
+	platformStop.control.Display(stylish.Bullet("Stopping Platform Services..."))
 	for _, service := range Services {
 		if err := platformStop.stopService(service); err != nil {
 			return err
@@ -52,20 +48,14 @@ func (platformStop *processPlatformStop) stopServices() error {
 // stopService will stop an individual service
 func (platformStop *processPlatformStop) stopService(service Service) error {
 
+	//
 	config := processor.ProcessControl{
 		DevMode:      platformStop.control.DevMode,
 		Verbose:      platformStop.control.Verbose,
 		DisplayLevel: platformStop.control.DisplayLevel + 1,
-		Meta: map[string]string{
-			"label": service.label,
-			"name":  service.name,
-		},
+		Meta:         map[string]string{"label": service.label, "name": service.name},
 	}
 
-	// stop
-	if err := processor.Run("service_stop", config); err != nil {
-		return err
-	}
-
-	return nil
+	//
+	return processor.Run("service_stop", config)
 }

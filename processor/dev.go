@@ -24,13 +24,10 @@ func init() {
 	Register("dev", devFn)
 }
 
+// TODO: do some control validation check on the meta for the flags and make sure
+// they work
 //
 func devFn(control ProcessControl) (Processor, error) {
-	// control.Meta["dev-control"]
-
-	// do some control validation check on the meta for the flags and make sure they
-	// work
-
 	return processDev{control: control}, nil
 }
 

@@ -18,7 +18,6 @@ func init() {
 
 //
 func providerDestroyFn(control processor.ProcessControl) (processor.Processor, error) {
-	// confirm the provider is an accessable one that we support.
 	return processProviderDestroy{control}, nil
 }
 

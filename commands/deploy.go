@@ -26,5 +26,5 @@ func deployFn(ccmd *cobra.Command, args []string) {
 	}
 
 	//
-	print.OutputCmdErr(processor.Run("deploy", processor.DefaultConfig))
+	print.OutputCommandErr(processor.Run("deploy", processor.DefaultConfig))
 }

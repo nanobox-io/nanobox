@@ -21,8 +21,6 @@ func init() {
 
 //
 func providerSetupFn(control processor.ProcessControl) (processor.Processor, error) {
-	// confirm the provider is an accessable one that we support.
-
 	return processProviderSetup{control}, nil
 }
 
@@ -33,6 +31,7 @@ func (providerSetup processProviderSetup) Results() processor.ProcessControl {
 
 //
 func (providerSetup processProviderSetup) Process() error {
+
 	// set the provider display level
 	provider.Display(!processor.DefaultConfig.Quiet)
 

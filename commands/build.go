@@ -25,5 +25,5 @@ deployed into a dev or production app.
 
 // buildFn ...
 func buildFn(ccmd *cobra.Command, args []string) {
-	print.OutputCmdErr(processor.Run("build", processor.DefaultConfig))
+	print.OutputCommandErr(processor.Run("build", processor.DefaultConfig))
 }

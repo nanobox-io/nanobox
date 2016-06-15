@@ -44,5 +44,5 @@ func tunnelFn(ccmd *cobra.Command, args []string) {
 	processor.DefaultConfig.Meta["alias"] = app
 	processor.DefaultConfig.Meta["container"] = args[0]
 	processor.DefaultConfig.Meta["port"] = port
-	print.OutputCmdErr(processor.Run("tunnel", processor.DefaultConfig))
+	print.OutputCommandErr(processor.Run("tunnel", processor.DefaultConfig))
 }

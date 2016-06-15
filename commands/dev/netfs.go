@@ -46,12 +46,12 @@ func init() {
 func netfsAddFn(ccmd *cobra.Command, args []string) {
 	processor.DefaultConfig.Meta["host"] = args[0]
 	processor.DefaultConfig.Meta["path"] = args[1]
-	print.OutputCmdErr(processor.Run("dev_netfs_add", processor.DefaultConfig))
+	print.OutputCommandErr(processor.Run("dev_netfs_add", processor.DefaultConfig))
 }
 
 // netfsRmFn will run the netfs processor for removing a netfs export
 func netfsRmFn(ccmd *cobra.Command, args []string) {
 	processor.DefaultConfig.Meta["host"] = args[0]
 	processor.DefaultConfig.Meta["path"] = args[1]
-	print.OutputCmdErr(processor.Run("dev_netfs_remove", processor.DefaultConfig))
+	print.OutputCommandErr(processor.Run("dev_netfs_remove", processor.DefaultConfig))
 }

@@ -37,5 +37,5 @@ func consoleFn(ccmd *cobra.Command, args []string) {
 	//
 	processor.DefaultConfig.Meta["alias"] = app
 	processor.DefaultConfig.Meta["container"] = args[0]
-	print.OutputCmdErr(processor.Run("console", processor.DefaultConfig))
+	print.OutputCommandErr(processor.Run("console", processor.DefaultConfig))
 }

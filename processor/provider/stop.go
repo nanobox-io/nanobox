@@ -17,7 +17,6 @@ func init() {
 
 //
 func providerStopFn(control processor.ProcessControl) (processor.Processor, error) {
-	// confirm the provider is an accessable one that we support.
 	return processProviderStop{control}, nil
 }
 

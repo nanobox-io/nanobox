@@ -14,7 +14,6 @@ func init() {
 
 //
 func platformDestroyFn(control processor.ProcessControl) (processor.Processor, error) {
-	// confirm the provider is an accessable one that we support.
 	return processPlatformDestroy{control}, nil
 }
 
@@ -23,8 +22,7 @@ func (platformDestroy processPlatformDestroy) Results() processor.ProcessControl
 	return platformDestroy.control
 }
 
-//
+// TODO: destroy nanoagent services
 func (platformDestroy processPlatformDestroy) Process() error {
-	// TODO: destroy nanoagent services
 	return nil
 }

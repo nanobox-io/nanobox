@@ -34,6 +34,7 @@ func (devTeardown processDevTeardown) Results() processor.ProcessControl {
 
 //
 func (devTeardown *processDevTeardown) Process() error {
+
 	// dont shut anything down if we are supposed to background
 	if processor.DefaultConfig.Background {
 		return nil
@@ -59,11 +60,12 @@ func (devTeardown *processDevTeardown) teardownApp() error {
 
 	counter.Decrement(config.AppName())
 
-	// establish a local app lock to ensure we're the only ones bringing
-	// down the app platform. Also ensure that we release it even if we error
+	// establish a local app lock to ensure we're the only ones bringing down the
+	// app platform. Also ensure that we release it even if we error
 	locker.LocalLock()
 	defer locker.LocalUnlock()
 
+	//
 	if appIsUnused() {
 
 		// Stop the platform services
@@ -95,6 +97,8 @@ func (devTeardown *processDevTeardown) teardownMounts() error {
 
 	// unmount the engine if it's a local directory
 	if config.EngineDir() != "" {
+
+		//
 		src := config.EngineDir()
 		dst := fmt.Sprintf("%s%s/engine", provider.HostShareDir(), config.AppName())
 
@@ -119,6 +123,7 @@ func (devTeardown *processDevTeardown) teardownMounts() error {
 // teardownProvider tears down the provider when it's not being used
 func (devTeardown *processDevTeardown) teardownProvider() error {
 
+	//
 	count, err := counter.Decrement("provider")
 	if err != nil {
 		return err
@@ -130,11 +135,14 @@ func (devTeardown *processDevTeardown) teardownProvider() error {
 	locker.GlobalLock()
 	defer locker.GlobalUnlock()
 
+	// stop the provider
 	if providerIsUnused() {
-		// stop the provider
 		return processor.Run("provider_stop", devTeardown.control)
 	}
+
+	//
 	devTeardown.control.Display(stylish.Bullet("%d dev's still running so leaving the provider up", count))
+
 	return nil
 }
 

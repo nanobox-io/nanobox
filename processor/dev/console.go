@@ -33,9 +33,9 @@ func (devConsole processDevConsole) Results() processor.ProcessControl {
 
 //
 func (devConsole processDevConsole) Process() error {
+
 	// setup the environment (boot vm)
-	err := processor.Run("provider_setup", devConsole.control)
-	if err != nil {
+	if err := processor.Run("provider_setup", devConsole.control); err != nil {
 		fmt.Println("provider_setup:", err)
 		lumber.Close()
 		os.Exit(1)

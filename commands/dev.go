@@ -28,6 +28,9 @@ apps and interacting with your Nanobox VM.
 //
 func init() {
 
+	// hidden subcommands
+	DevCmd.AddCommand(dev.NetfsCmd)
+
 	// public subcommands
 	DevCmd.AddCommand(dev.DeployCmd)
 	DevCmd.AddCommand(dev.DestroyCmd)
@@ -37,12 +40,9 @@ func init() {
 	DevCmd.AddCommand(dev.ConsoleCmd)
 	DevCmd.AddCommand(dev.EnvCmd)
 	DevCmd.AddCommand(dev.ResetCmd)
-
-	// hidden subcommands
-	DevCmd.AddCommand(dev.NetfsCmd)
 }
 
 // devFn ...
 func devFn(ccmd *cobra.Command, args []string) {
-	print.OutputCmdErr(processor.Run("dev", processor.DefaultConfig))
+	print.OutputCommandErr(processor.Run("dev", processor.DefaultConfig))
 }

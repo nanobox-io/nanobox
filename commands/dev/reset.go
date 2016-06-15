@@ -25,5 +25,5 @@ func resetFn(ccmd *cobra.Command, args []string) {
 	// TODO: Take an extra arguement and decide what we want to reset
 
 	//
-	print.OutputCmdErr(processor.Run("dev_reset", processor.DefaultConfig))
+	print.OutputCommandErr(processor.Run("dev_reset", processor.DefaultConfig))
 }

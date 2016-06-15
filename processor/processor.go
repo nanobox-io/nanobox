@@ -104,7 +104,7 @@ func (bcp BreadCrumbProcessor) Results() ProcessControl {
 	return bcp.proc.Results()
 }
 
-// Display displays all of the possible
+// Display ...
 func (control ProcessControl) Display(msg string) {
 	fmt.Print(stylish.Nest(control.DisplayLevel, msg))
 }

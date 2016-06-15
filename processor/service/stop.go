@@ -1,23 +1,24 @@
 package service
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/nanobox-io/golang-docker-client"
-	"github.com/nanobox-io/nanobox-golang-stylish"
-
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
+	"github.com/nanobox-io/nanobox/util/print"
+	"github.com/pagodabox/nanobox-golang-stylish"
 )
 
 // processServiceStop ...
 type processServiceStop struct {
 	control processor.ProcessControl
 	service models.Service
+	label   string
+	name    string
 }
 
 //
@@ -27,13 +28,6 @@ func init() {
 
 //
 func serviceStopFn(control processor.ProcessControl) (processor.Processor, error) {
-	if control.Meta["name"] == "" {
-		return nil, errors.New("missing service name")
-	}
-	if control.Meta["label"] == "" {
-		control.Meta["label"] = control.Meta["name"]
-	}
-
 	return processServiceStop{control: control}, nil
 }
 
@@ -44,23 +38,28 @@ func (serviceStop processServiceStop) Results() processor.ProcessControl {
 
 //
 func (serviceStop processServiceStop) Process() error {
+
+	// validate meta
+	if err := serviceStop.validateMeta(); err != nil {
+		return err
+	}
+
+	// short-circuit if the process is already stopped
 	if !serviceStop.isServiceRunning() {
-		// short-circuit, this is already stopped
 		return nil
 	}
 
+	// attempt to load the service
 	if err := serviceStop.loadService(); err != nil {
 		return err
 	}
 
-	if serviceStop.service.ID == "" {
-		return errors.New("the service has not been created")
-	}
-
+	// attempt to stop the container
 	if err := serviceStop.stopContainer(); err != nil {
 		return err
 	}
 
+	// attempt to detach the network
 	if err := serviceStop.detachNetwork(); err != nil {
 		return err
 	}
@@ -68,22 +67,58 @@ func (serviceStop processServiceStop) Process() error {
 	return nil
 }
 
+// validateMeta validates that the required metadata exists
+func (serviceStop processServiceStop) validateMeta() error {
+
+	// set meta values
+	serviceStop.name = serviceStop.control.Meta["name"]
+	serviceStop.label = serviceStop.control.Meta["label"]
+
+	// ensure name is provided
+	if serviceStop.name == "" {
+		return fmt.Errorf("Missing meta data 'name'")
+	}
+
+	// if no label is provided, just use the name
+	if serviceStop.label == "" {
+		serviceStop.label = serviceStop.name
+	}
+
+	return nil
+}
+
 // isServiceRunning returns true if a service is already running
 func (serviceStop processServiceStop) isServiceRunning() bool {
-	uid := serviceStop.control.Meta["name"]
 
-	container, err := docker.GetContainer(fmt.Sprintf("nanobox-%s-%s", config.AppName(), uid))
+	// get the container
+	container, err := docker.GetContainer(fmt.Sprintf("nanobox-%s-%s", config.AppName(), serviceStop.name))
 
 	return err == nil && container.State.Status == "running"
 }
 
-// loadService loads the service from the database
+// loadService loads the service from the database; an error here means we cannot
+// find a service in the database
 func (serviceStop *processServiceStop) loadService() error {
-	// get the service from the database
-	err := data.Get(config.AppName(), serviceStop.control.Meta["name"], &serviceStop.service)
-	if err != nil {
-		// cannot stop a service that wasnt setup (ie saved in the database)
+
+	//
+	if err := data.Get(config.AppName(), serviceStop.name, &serviceStop.service); err != nil {
+		print.OutputProcessorErr("service not found", fmt.Sprintf(`
+Nanobox was unable to find the service '%s' in the database, please try shutting
+down again.
+
+(%s)
+		`, serviceStop.name, err.Error()))
+
 		return err
+	}
+
+	//
+	if serviceStop.service.ID == "" {
+		print.OutputProcessorErr("service not created", fmt.Sprintf(`
+Nanobox was unable to stop '%s' because it has not yet been created
+		`, serviceStop.name))
+
+		return fmt.Errorf("Service not created")
 	}
 
 	return nil
@@ -91,24 +126,43 @@ func (serviceStop *processServiceStop) loadService() error {
 
 // stopContainer stops a docker container
 func (serviceStop *processServiceStop) stopContainer() error {
-	serviceStop.control.Display(stylish.Bullet("Stopping %s...", serviceStop.control.Meta["label"]))
 
-	err := docker.ContainerStop(serviceStop.service.ID)
-	if err != nil {
-		return err
+	serviceStop.control.Display(stylish.Bullet("Stopping %s...", serviceStop.label))
+
+	//
+	if err := docker.ContainerStop(serviceStop.service.ID); err != nil {
+		print.OutputProcessorErr("failed to stop container", fmt.Sprintf(`
+Nanobox failed to stop the container '%s', please try shutting down again.
+
+(%s)
+		`, serviceStop.service.ID, err.Error()))
 	}
 
 	return nil
 }
 
-// detachNetwork detaches the container to the host network
+// detachNetwork detaches the container from the host network
 func (serviceStop *processServiceStop) detachNetwork() error {
 
+	//
 	if err := provider.RemoveNat(serviceStop.service.ExternalIP, serviceStop.service.InternalIP); err != nil {
+		print.OutputProcessorErr("failed to remove nat", fmt.Sprintf(`
+Nanobox failed to remove the NAT, please try shutting down again.
+
+(%s)
+		`, err.Error()))
+
 		return err
 	}
 
+	//
 	if err := provider.RemoveIP(serviceStop.service.ExternalIP); err != nil {
+		print.OutputProcessorErr("failed to remove ip", fmt.Sprintf(`
+Nanobox failed to remove the external IP, please try shutting down again.
+
+(%s)
+		`, err.Error()))
+
 		return err
 	}
 

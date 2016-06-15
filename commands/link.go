@@ -60,16 +60,16 @@ func init() {
 func linkAddFn(ccmd *cobra.Command, args []string) {
 	processor.DefaultConfig.Meta["name"] = app
 	processor.DefaultConfig.Meta["alias"] = alias
-	print.OutputCmdErr(processor.Run("link_add", processor.DefaultConfig))
+	print.OutputCommandErr(processor.Run("link_add", processor.DefaultConfig))
 }
 
 // linkListFn ...
 func linkListFn(ccmd *cobra.Command, args []string) {
-	print.OutputCmdErr(processor.Run("link_list", processor.DefaultConfig))
+	print.OutputCommandErr(processor.Run("link_list", processor.DefaultConfig))
 }
 
 // linkRemoveFn ...
 func linkRemoveFn(ccmd *cobra.Command, args []string) {
 	processor.DefaultConfig.Meta["alias"] = alias
-	print.OutputCmdErr(processor.Run("link_remove", processor.DefaultConfig))
+	print.OutputCommandErr(processor.Run("link_remove", processor.DefaultConfig))
 }

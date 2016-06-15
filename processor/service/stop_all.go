@@ -30,23 +30,20 @@ func (serviceStopAll processServiceStopAll) Results() processor.ProcessControl {
 
 //
 func (serviceStopAll processServiceStopAll) Process() error {
-
-	serviceStopAll.control.Display(stylish.Bullet("Stopping All Services"))
-
-	if err := serviceStopAll.stopServices(); err != nil {
-		return err
-	}
-
-	return nil
+	return serviceStopAll.stopServices()
 }
 
 // stopServices stops all of the services saved in the database
 func (serviceStopAll processServiceStopAll) stopServices() error {
+
+	//
 	services, err := data.Keys(config.AppName())
 	if err != nil {
 		return err
 	}
 
+	//
+	serviceStopAll.control.Display(stylish.Bullet("Stopping All Services..."))
 	for _, service := range services {
 		if err := serviceStopAll.stopService(service); err != nil {
 			return err
@@ -59,19 +56,14 @@ func (serviceStopAll processServiceStopAll) stopServices() error {
 // stopService stops a service
 func (serviceStopAll processServiceStopAll) stopService(uid string) error {
 
+	//
 	config := processor.ProcessControl{
 		DevMode:      serviceStopAll.control.DevMode,
 		Verbose:      serviceStopAll.control.Verbose,
 		DisplayLevel: serviceStopAll.control.DisplayLevel + 1,
-		Meta: map[string]string{
-			"name": uid,
-		},
+		Meta:         map[string]string{"name": uid},
 	}
 
-	// provision
-	if err := processor.Run("service_stop", config); err != nil {
-		return err
-	}
-
-	return nil
+	//
+	return processor.Run("service_stop", config)
 }

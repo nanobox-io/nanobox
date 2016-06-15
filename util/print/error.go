@@ -1,17 +1,21 @@
 package print
 
-import "fmt"
+import (
+	"fmt"
 
-// OutputCmdErr ...
+	"github.com/pagodabox/nanobox-golang-stylish"
+)
+
+// OutputCommandErr ...
 //
 // We hit a minor bump, which can be quickly resolved following the instructions above.
 // If not, come talk and we'll walk you through the resolution.
-func OutputCmdErr(err error) {
+func OutputCommandErr(err error) {
 	if err != nil {
 		fmt.Printf(`
 
-We hit a minor bump, which should be quickly resolved following the instructions
-above.
+Whoops, looks like there was a minor bump. Following the instructions above should
+help resolve it quickly.
 
 If the instructions aren't helping, please come talk with us and we can work it
 out together.
@@ -22,4 +26,9 @@ email : help@nanobox.io
 (%s)
 `, err.Error())
 	}
+}
+
+// OutputProcessorErr ...
+func OutputProcessorErr(heading, message string) {
+	fmt.Printf(stylish.Error(heading, message))
 }

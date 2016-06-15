@@ -43,12 +43,12 @@ func init() {
 // file
 func dnsAddFn(ccmd *cobra.Command, args []string) {
 	processor.DefaultConfig.Meta["name"] = args[0]
-	print.OutputCmdErr(processor.Run("dev_dns_add", processor.DefaultConfig))
+	print.OutputCommandErr(processor.Run("dev_dns_add", processor.DefaultConfig))
 }
 
 // dnsRmFn will run the DNS processor for removing DNS entries from the "hosts"
 // file
 func dnsRmFn(ccmd *cobra.Command, args []string) {
 	processor.DefaultConfig.Meta["name"] = args[0]
-	print.OutputCmdErr(processor.Run("dev_dns_remove", processor.DefaultConfig))
+	print.OutputCommandErr(processor.Run("dev_dns_remove", processor.DefaultConfig))
 }
