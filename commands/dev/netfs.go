@@ -22,7 +22,7 @@ var (
 		Use:    "add",
 		Short:  "Add a netfs export.",
 		Long:   ``,
-		Run:    netfsAddFunc,
+		Run:    netfsAddFn,
 	}
 
 	// NetfsRmCmd ...
@@ -31,7 +31,7 @@ var (
 		Use:    "rm",
 		Short:  "Remove a netfs export.",
 		Long:   ``,
-		Run:    netfsRmFunc,
+		Run:    netfsRmFn,
 	}
 )
 
@@ -41,16 +41,24 @@ func init() {
 	NetfsCmd.AddCommand(NetfsRmCmd)
 }
 
-// netfsAddFunc will run the netfs processor for adding a netfs export
-func netfsAddFunc(ccmd *cobra.Command, args []string) {
+// netfsAddFn will run the netfs processor for adding a netfs export
+func netfsAddFn(ccmd *cobra.Command, args []string) {
 	processor.DefaultConfig.Meta["host"] = args[0]
 	processor.DefaultConfig.Meta["path"] = args[1]
-	processor.Run("dev_netfs_add", processor.DefaultConfig)
+
+	//
+	if err := processor.Run("dev_netfs_add", processor.DefaultConfig); err != nil {
+
+	}
 }
 
-// netfsRmFunc will run the netfs processor for removing a netfs export
-func netfsRmFunc(ccmd *cobra.Command, args []string) {
+// netfsRmFn will run the netfs processor for removing a netfs export
+func netfsRmFn(ccmd *cobra.Command, args []string) {
 	processor.DefaultConfig.Meta["host"] = args[0]
 	processor.DefaultConfig.Meta["path"] = args[1]
-	processor.Run("dev_netfs_remove", processor.DefaultConfig)
+
+	//
+	if err := processor.Run("dev_netfs_remove", processor.DefaultConfig); err != nil {
+
+	}
 }

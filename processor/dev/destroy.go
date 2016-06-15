@@ -1,10 +1,11 @@
-package processor
+package dev
 
 import (
 	"fmt"
 
 	"github.com/nanobox-io/nanobox-golang-stylish"
 
+	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
@@ -12,28 +13,28 @@ import (
 
 // processDevDestroy ...
 type processDevDestroy struct {
-	control ProcessControl
+	control processor.ProcessControl
 }
 
 //
 func init() {
-	Register("dev_destroy", devDestroyFunc)
+	processor.Register("dev_destroy", devDestroyFunc)
 }
 
 //
-func devDestroyFunc(control ProcessControl) (Processor, error) {
+func devDestroyFunc(control processor.ProcessControl) (processor.Processor, error) {
 	return processDevDestroy{control}, nil
 }
 
 //
-func (devDestroy processDevDestroy) Results() ProcessControl {
+func (devDestroy processDevDestroy) Results() processor.ProcessControl {
 	return devDestroy.control
 }
 
 //
 func (devDestroy processDevDestroy) Process() error {
 
-	if err := Run("dev_setup", devDestroy.control); err != nil {
+	if err := processor.Run("dev_setup", devDestroy.control); err != nil {
 		return err
 	}
 
@@ -43,7 +44,7 @@ func (devDestroy processDevDestroy) Process() error {
 	}
 
 	// teardown the app
-	if err := Run("app_teardown", devDestroy.control); err != nil {
+	if err := processor.Run("app_teardown", devDestroy.control); err != nil {
 		return err
 	}
 
@@ -72,7 +73,7 @@ func (devDestroy processDevDestroy) removeServices() error {
 			// svc := models.Service{}
 			// data.Get(config.AppName(), service, &svc)
 			devDestroy.control.Meta["name"] = service
-			err := Run("service_destroy", devDestroy.control)
+			err := processor.Run("service_destroy", devDestroy.control)
 			if err != nil {
 				devDestroy.control.Display(stylish.Warning("one of the services did not uninstall:\n%s", err.Error()))
 				// continue on to the next one.
@@ -130,7 +131,7 @@ func (devDestroy processDevDestroy) destroyProvider() error {
 
 	if len(keys) == 0 {
 		// if no other apps exist in container
-		if err := Run("provider_destroy", devDestroy.control); err != nil {
+		if err := processor.Run("provider_destroy", devDestroy.control); err != nil {
 			return err
 		}
 	}

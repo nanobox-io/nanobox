@@ -1,10 +1,11 @@
-package processor
+package dev
 
 import (
 	"fmt"
 
 	"github.com/nanobox-io/nanobox-golang-stylish"
 
+	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/counter"
@@ -13,28 +14,28 @@ import (
 
 // processDevTeardown ...
 type processDevTeardown struct {
-	control ProcessControl
+	control processor.ProcessControl
 }
 
 //
 func init() {
-	Register("dev_teardown", devTeardownFunc)
+	processor.Register("dev_teardown", devTeardownFunc)
 }
 
 //
-func devTeardownFunc(control ProcessControl) (Processor, error) {
+func devTeardownFunc(control processor.ProcessControl) (processor.Processor, error) {
 	return &processDevTeardown{control}, nil
 }
 
 //
-func (devTeardown processDevTeardown) Results() ProcessControl {
+func (devTeardown processDevTeardown) Results() processor.ProcessControl {
 	return devTeardown.control
 }
 
 //
 func (devTeardown *processDevTeardown) Process() error {
 	// dont shut anything down if we are supposed to background
-	if DefaultConfig.Background {
+	if processor.DefaultConfig.Background {
 		return nil
 	}
 
@@ -66,12 +67,12 @@ func (devTeardown *processDevTeardown) teardownApp() error {
 	if appIsUnused() {
 
 		// Stop the platform services
-		if err := Run("platform_stop", devTeardown.control); err != nil {
+		if err := processor.Run("platform_stop", devTeardown.control); err != nil {
 			return err
 		}
 
 		// stop all data services
-		if err := Run("service_stop_all", devTeardown.control); err != nil {
+		if err := processor.Run("service_stop_all", devTeardown.control); err != nil {
 			return err
 		}
 	}
@@ -131,7 +132,7 @@ func (devTeardown *processDevTeardown) teardownProvider() error {
 
 	if providerIsUnused() {
 		// stop the provider
-		return Run("provider_stop", devTeardown.control)
+		return processor.Run("provider_stop", devTeardown.control)
 	}
 	devTeardown.control.Display(stylish.Bullet("%d dev's still running so leaving the provider up", count))
 	return nil

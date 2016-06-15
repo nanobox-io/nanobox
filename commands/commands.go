@@ -20,7 +20,6 @@ import (
 	_ "github.com/nanobox-io/nanobox/processor/service"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/validate"
 )
 
 //
@@ -133,21 +132,4 @@ func init() {
 	NanoboxCmd.AddCommand(LogoutCmd)
 	NanoboxCmd.AddCommand(BuildCmd)
 	NanoboxCmd.AddCommand(DevCmd)
-}
-
-// validCheck ...
-func validCheck(checks ...string) func(ccmd *cobra.Command, args []string) {
-	return func(ccmd *cobra.Command, args []string) {
-		if err := validate.Check(checks...); err != nil {
-			fmt.Printf("Validation Failed:\n%s\n", err.Error())
-			os.Exit(1)
-		}
-	}
-}
-
-// handleError ...
-func handleError(err error) {
-	if err != nil {
-		fmt.Printf("It appears you have encountered error:\n%s\n", err.Error())
-	}
 }

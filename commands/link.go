@@ -25,35 +25,23 @@ Adds a new link between a dev and production app. A dev app can
 be linked to multiple production apps. Each link needs an alias.
 If no alias is provided, 'default' is assumed.
 		`,
-
-		Run: func(ccmd *cobra.Command, args []string) {
-			processor.DefaultConfig.Meta["name"] = app
-			processor.DefaultConfig.Meta["alias"] = alias
-			handleError(processor.Run("link_add", processor.DefaultConfig))
-		},
+		Run: linkAddFn,
 	}
 
 	// LinkListCmd ...
 	LinkListCmd = &cobra.Command{
-		Use:   "list",
+		Use:   "ls",
 		Short: "Lists all links for the current dev app.",
 		Long:  ``,
-
-		Run: func(ccmd *cobra.Command, args []string) {
-			handleError(processor.Run("link_list", processor.DefaultConfig))
-		},
+		Run:   linkListFn,
 	}
 
 	// LinkRemoveCmd ...
 	LinkRemoveCmd = &cobra.Command{
-		Use:   "remove",
+		Use:   "rm",
 		Short: "Removes a link between a dev & production app.",
 		Long:  ``,
-
-		Run: func(ccmd *cobra.Command, args []string) {
-			processor.DefaultConfig.Meta["alias"] = alias
-			handleError(processor.Run("link_remove", processor.DefaultConfig))
-		},
+		Run:   linkRemoveFn,
 	}
 )
 
@@ -65,4 +53,34 @@ func init() {
 	LinkCmd.AddCommand(LinkAddCmd)
 	LinkCmd.AddCommand(LinkListCmd)
 	LinkCmd.AddCommand(LinkRemoveCmd)
+}
+
+// linkAddFn ...
+func linkAddFn(ccmd *cobra.Command, args []string) {
+	processor.DefaultConfig.Meta["name"] = app
+	processor.DefaultConfig.Meta["alias"] = alias
+
+	//
+	if err := processor.Run("link_add", processor.DefaultConfig); err != nil {
+
+	}
+}
+
+// linkListFn ...
+func linkListFn(ccmd *cobra.Command, args []string) {
+
+	//
+	if err := processor.Run("link_list", processor.DefaultConfig); err != nil {
+
+	}
+}
+
+// linkRemoveFn ...
+func linkRemoveFn(ccmd *cobra.Command, args []string) {
+	processor.DefaultConfig.Meta["alias"] = alias
+
+	//
+	if err := processor.Run("link_remove", processor.DefaultConfig); err != nil {
+
+	}
 }

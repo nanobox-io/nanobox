@@ -1,28 +1,29 @@
-package processor
+package link
 
 import (
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
 // processLinkRemove ...
 type processLinkRemove struct {
-	control ProcessControl
+	control processor.ProcessControl
 }
 
 //
 func init() {
-	Register("link_remove", linkRemoveFunc)
+	processor.Register("link_remove", linkRemoveFunc)
 }
 
 //
-func linkRemoveFunc(conf ProcessControl) (Processor, error) {
+func linkRemoveFunc(conf processor.ProcessControl) (processor.Processor, error) {
 	return processLinkRemove{conf}, nil
 }
 
 //
-func (linkRemove processLinkRemove) Results() ProcessControl {
+func (linkRemove processLinkRemove) Results() processor.ProcessControl {
 	return linkRemove.control
 }
 

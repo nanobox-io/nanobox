@@ -1,27 +1,28 @@
-package processor
+package dev
 
 import (
+	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util/counter"
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
 // processDevReset ...
 type processDevReset struct {
-	control ProcessControl
+	control processor.ProcessControl
 }
 
 //
 func init() {
-	Register("dev_reset", devResetFunc)
+	processor.Register("dev_reset", devResetFunc)
 }
 
 //
-func devResetFunc(control ProcessControl) (Processor, error) {
+func devResetFunc(control processor.ProcessControl) (processor.Processor, error) {
 	return processDevReset{control: control}, nil
 }
 
 //
-func (devReset processDevReset) Results() ProcessControl {
+func (devReset processDevReset) Results() processor.ProcessControl {
 	return devReset.control
 }
 

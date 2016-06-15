@@ -1,8 +1,9 @@
-package processor
+package dev
 
 import (
 	"fmt"
 
+	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/counter"
@@ -11,16 +12,16 @@ import (
 
 // processDevSetup ...
 type processDevSetup struct {
-	control ProcessControl
+	control processor.ProcessControl
 }
 
 //
 func init() {
-	Register("dev_setup", devSetupFunc)
+	processor.Register("dev_setup", devSetupFunc)
 }
 
 //
-func devSetupFunc(control ProcessControl) (Processor, error) {
+func devSetupFunc(control processor.ProcessControl) (processor.Processor, error) {
 	// control.Meta["processDevSetup-control"]
 
 	// do some control validation check on the meta for the flags and make sure they
@@ -30,7 +31,7 @@ func devSetupFunc(control ProcessControl) (Processor, error) {
 }
 
 //
-func (devSetup processDevSetup) Results() ProcessControl {
+func (devSetup processDevSetup) Results() processor.ProcessControl {
 	return devSetup.control
 }
 
@@ -63,7 +64,7 @@ func (devSetup *processDevSetup) setupProvider() error {
 	locker.GlobalLock()
 	defer locker.GlobalUnlock()
 
-	if err := Run("provider_setup", devSetup.control); err != nil {
+	if err := processor.Run("provider_setup", devSetup.control); err != nil {
 		return err
 	}
 
@@ -118,15 +119,15 @@ func (devSetup *processDevSetup) setupApp() error {
 	defer locker.LocalUnlock()
 
 	// setup the app
-	if err := Run("app_setup", devSetup.control); err != nil {
+	if err := processor.Run("app_setup", devSetup.control); err != nil {
 		return err
 	}
 
 	// clean up after any possible failures in a previous deploy
-	if err := Run("service_clean", devSetup.control); err != nil {
+	if err := processor.Run("service_clean", devSetup.control); err != nil {
 		return err
 	}
 
 	// setup the platform services
-	return Run("platform_setup", devSetup.control)
+	return processor.Run("platform_setup", devSetup.control)
 }

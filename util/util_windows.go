@@ -22,7 +22,6 @@ func PrivilegeExec(command string) error {
 	// http://ss64.com/ps/start-process.html
 	// http://www.howtogeek.com/204088/how-to-use-a-batch-file-to-make-powershell-scripts-easier-to-run/
 
-
 	// The process is constructed by passing the executable as a single argument
 	// and the argument list as a space-delimited string in a single argument.
 	//

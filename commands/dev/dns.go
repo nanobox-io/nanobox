@@ -20,7 +20,7 @@ var (
 		Use:   "add",
 		Short: "",
 		Long:  ``,
-		Run:   dnsAddFunc,
+		Run:   dnsAddFn,
 	}
 
 	// DNSRemoveCmd ...
@@ -28,7 +28,7 @@ var (
 		Use:   "rm",
 		Short: "",
 		Long:  ``,
-		Run:   dnsRmFunc,
+		Run:   dnsRmFn,
 	}
 )
 
@@ -38,16 +38,24 @@ func init() {
 	DNSCmd.AddCommand(DNSRemoveCmd)
 }
 
-// dnsAddFunc will run the DNS processor for adding DNS entires to the "hosts"
+// dnsAddFn will run the DNS processor for adding DNS entires to the "hosts"
 // file
-func dnsAddFunc(ccmd *cobra.Command, args []string) {
+func dnsAddFn(ccmd *cobra.Command, args []string) {
 	processor.DefaultConfig.Meta["name"] = args[0]
-	processor.Run("dev_dns_add", processor.DefaultConfig)
+
+	//
+	if err := processor.Run("dev_dns_add", processor.DefaultConfig); err != nil {
+
+	}
 }
 
-// dnsRmFunc will run the DNS processor for removing DNS entries from the "hosts"
+// dnsRmFn will run the DNS processor for removing DNS entries from the "hosts"
 // file
-func dnsRmFunc(ccmd *cobra.Command, args []string) {
+func dnsRmFn(ccmd *cobra.Command, args []string) {
 	processor.DefaultConfig.Meta["name"] = args[0]
-	processor.Run("dev_dns_remove", processor.DefaultConfig)
+
+	//
+	if err := processor.Run("dev_dns_remove", processor.DefaultConfig); err != nil {
+
+	}
 }

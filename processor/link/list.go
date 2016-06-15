@@ -1,30 +1,31 @@
-package processor
+package link
 
 import (
 	"fmt"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
 // processLinkList ...
 type processLinkList struct {
-	control ProcessControl
+	control processor.ProcessControl
 }
 
 //
 func init() {
-	Register("link_list", linkFunc)
+	processor.Register("link_list", linkFunc)
 }
 
 //
-func linkFunc(conf ProcessControl) (Processor, error) {
+func linkFunc(conf processor.ProcessControl) (processor.Processor, error) {
 	return processLinkList{conf}, nil
 }
 
 //
-func (linkList processLinkList) Results() ProcessControl {
+func (linkList processLinkList) Results() processor.ProcessControl {
 	return linkList.control
 }
 

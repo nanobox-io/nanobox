@@ -13,9 +13,15 @@ var (
 		Use:   "logout",
 		Short: "Removes your nanobox.io api token from your local nanobox client.",
 		Long:  ``,
-
-		Run: func(ccmd *cobra.Command, args []string) {
-			handleError(processor.Run("logout", processor.DefaultConfig))
-		},
+		Run:   logoutFn,
 	}
 )
+
+// logoutFn ...
+func logoutFn(ccmd *cobra.Command, args []string) {
+
+	//
+	if err := processor.Run("logout", processor.DefaultConfig); err != nil {
+
+	}
+}

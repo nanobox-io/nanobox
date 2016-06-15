@@ -1,4 +1,4 @@
-package processor
+package dev
 
 import (
 	"fmt"
@@ -7,33 +7,34 @@ import (
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
+	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util/config"
 )
 
 // processDevConsole ...
 type processDevConsole struct {
-	control ProcessControl
+	control processor.ProcessControl
 }
 
 //
 func init() {
-	Register("dev_console", devConsoleFunc)
+	processor.Register("dev_console", devConsoleFunc)
 }
 
 //
-func devConsoleFunc(conf ProcessControl) (Processor, error) {
+func devConsoleFunc(conf processor.ProcessControl) (processor.Processor, error) {
 	return processDevConsole{conf}, nil
 }
 
 //
-func (devConsole processDevConsole) Results() ProcessControl {
+func (devConsole processDevConsole) Results() processor.ProcessControl {
 	return devConsole.control
 }
 
 //
 func (devConsole processDevConsole) Process() error {
 	// setup the environment (boot vm)
-	err := Run("provider_setup", devConsole.control)
+	err := processor.Run("provider_setup", devConsole.control)
 	if err != nil {
 		fmt.Println("provider_setup:", err)
 		lumber.Close()

@@ -1,4 +1,4 @@
-package processor
+package dev
 
 import (
 	"fmt"
@@ -6,23 +6,24 @@ import (
 
 	"github.com/nanobox-io/nanobox-boxfile"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
 // processDevDeploy ...
 type processDevDeploy struct {
-	control ProcessControl
+	control processor.ProcessControl
 	box     boxfile.Boxfile
 }
 
 //
 func init() {
-	Register("dev_deploy", devDeployFunc)
+	processor.Register("dev_deploy", devDeployFunc)
 }
 
 //
-func devDeployFunc(control ProcessControl) (Processor, error) {
+func devDeployFunc(control processor.ProcessControl) (processor.Processor, error) {
 	// control.Meta["processDevDeploy-control"]
 
 	// do some control validation check on the meta for the flags and make sure they
@@ -32,7 +33,7 @@ func devDeployFunc(control ProcessControl) (Processor, error) {
 }
 
 //
-func (devDeploy processDevDeploy) Results() ProcessControl {
+func (devDeploy processDevDeploy) Results() processor.ProcessControl {
 	return devDeploy.control
 }
 
@@ -42,7 +43,7 @@ func (devDeploy processDevDeploy) Process() error {
 	// defer the clean up so if we exit early the
 	// cleanup will always happen
 	defer func() {
-		if err := Run("dev_teardown", devDeploy.control); err != nil {
+		if err := processor.Run("dev_teardown", devDeploy.control); err != nil {
 			// this is bad, really bad...
 			// we should probably print a pretty message explaining that the app
 			// was left in a bad state and needs to be reset
@@ -50,7 +51,7 @@ func (devDeploy processDevDeploy) Process() error {
 		}
 	}()
 
-	if err := Run("dev_setup", devDeploy.control); err != nil {
+	if err := processor.Run("dev_setup", devDeploy.control); err != nil {
 		// todo: how to display this?
 		return err
 	}
@@ -60,7 +61,7 @@ func (devDeploy processDevDeploy) Process() error {
 	}
 
 	// syncronize the services as per the new boxfile
-	if err := Run("service_sync", devDeploy.control); err != nil {
+	if err := processor.Run("service_sync", devDeploy.control); err != nil {
 		return err
 	}
 
@@ -71,19 +72,19 @@ func (devDeploy processDevDeploy) Process() error {
 
 	// clean up the code services
 	defer func() {
-		if err := Run("code_clean", devDeploy.control); err != nil {
+		if err := processor.Run("code_clean", devDeploy.control); err != nil {
 			// output this error message
 			// it doesnt break anything if the clean fails.
 		}
 	}()
 
 	// update nanoagent portal
-	if err := Run("update_portal", devDeploy.control); err != nil {
+	if err := processor.Run("update_portal", devDeploy.control); err != nil {
 		return err
 	}
 
 	// hang and do some logging until they are done
-	if err := Run("mist_log", devDeploy.control); err != nil {
+	if err := processor.Run("mist_log", devDeploy.control); err != nil {
 		return err
 	}
 
@@ -101,7 +102,7 @@ func (devDeploy *processDevDeploy) publishCode() error {
 	devDeploy.control.Meta["warehouse_token"] = "123"
 
 	// publish code
-	publishProcessor, err := Build("code_publish", devDeploy.control)
+	publishProcessor, err := processor.Build("code_publish", devDeploy.control)
 	if err != nil {
 		return err
 	}
@@ -124,7 +125,7 @@ func (devDeploy *processDevDeploy) publishCode() error {
 
 // startCodeServices ...
 func (devDeploy *processDevDeploy) startCodeServices() error {
-	code := ProcessControl{
+	code := processor.ProcessControl{
 		DevMode: devDeploy.control.DevMode,
 		Verbose: devDeploy.control.Verbose,
 		Meta: map[string]string{
@@ -136,7 +137,7 @@ func (devDeploy *processDevDeploy) startCodeServices() error {
 	}
 
 	// synchronize my code services
-	if err := Run("code_sync", code); err != nil {
+	if err := processor.Run("code_sync", code); err != nil {
 		return err
 	}
 
