@@ -81,12 +81,12 @@ func (devSetup *processDevSetup) setupMounts() error {
 		dst := fmt.Sprintf("%s%s/engine", provider.HostShareDir(), config.AppName())
 
 		// first export the share on the workstation
-		if err := addShare(src, dst); err != nil {
+		if err := devSetup.addShare(src, dst); err != nil {
 			return err
 		}
 
 		// mount the share on the provider
-		if err := addMount(src, dst); err != nil {
+		if err := devSetup.addMount(src, dst); err != nil {
 			return err
 		}
 	}
@@ -96,12 +96,12 @@ func (devSetup *processDevSetup) setupMounts() error {
 	dst := fmt.Sprintf("%s%s/code", provider.HostShareDir(), config.AppName())
 
 	// first export the share on the workstation
-	if err := addShare(src, dst); err != nil {
+	if err := devSetup.addShare(src, dst); err != nil {
 		return err
 	}
 
 	// then mount the share on the provider
-	if err := addMount(src, dst); err != nil {
+	if err := devSetup.addMount(src, dst); err != nil {
 		return err
 	}
 
@@ -134,7 +134,7 @@ func (devSetup *processDevSetup) setupApp() error {
 }
 
 // addShare will add a filesystem share on the host machine
-func addShare(src, dst string) error {
+func (devSetup *processDevSetup) addShare(src, dst string) error {
 
 	// the mount type is configurable by the user
 	mountType := config.Viper().GetString("mount-type")
@@ -152,13 +152,16 @@ func addShare(src, dst string) error {
 		if netfs.Exists(src) {
 			// netfs was used prior. So we need to tear it down.
 
-			control := ProcessControl{
+			control := processor.ProcessControl{
+				DevMode:      devSetup.control.DevMode,
+				Verbose:      devSetup.control.Verbose,
+				DisplayLevel: devSetup.control.DisplayLevel,
 				Meta: map[string]string{
 					"path": src,
 				},
 			}
 
-			if err := Run("dev_netfs_remove", control); err != nil {
+			if err := processor.Run("dev_netfs_remove", control); err != nil {
 				return err
 			}
 		}
@@ -171,20 +174,23 @@ func addShare(src, dst string) error {
 	// check to see if native shares are currently exported. If so,
 	// tear down the native share and build the netfs share
 	case "netfs":
-		if provider.HasShare(src) {
+		if provider.HasShare(src, dst) {
 			// native was used prior. So we need to tear it down
 			if err := provider.RemoveShare(src, dst); err != nil {
 				return err
 			}
 		}
 
-		control := ProcessControl{
+		control := processor.ProcessControl{
+			DevMode:      devSetup.control.DevMode,
+			Verbose:      devSetup.control.Verbose,
+			DisplayLevel: devSetup.control.DisplayLevel,
 			Meta: map[string]string{
 				"path": src,
 			},
 		}
 
-		if err := Run("dev_netfs_add", control); err != nil {
+		if err := processor.Run("dev_netfs_add", control); err != nil {
 			return err
 		}
 	}
@@ -193,10 +199,10 @@ func addShare(src, dst string) error {
 }
 
 // addMount will mount a share in the nanobox guest context
-func addMount(src, dst, string) error {
+func (devSetup *processDevSetup) addMount(src, dst string) error {
 
 		// the mount type is configurable by the user
-		mountType := config.Viper().GetString("vm.mount")
+		mountType := config.Viper().GetString("mount-type")
 
 		switch mountType {
 

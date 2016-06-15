@@ -20,7 +20,7 @@ func IsPrivileged() bool {
 
 	// Execute a syscall to return the user id. If the user id is 0 then we're
 	// running with root escalation.
-	if os.Geteuid() != 0 {
+	if os.Geteuid() == 0 {
 		return true
 	}
 

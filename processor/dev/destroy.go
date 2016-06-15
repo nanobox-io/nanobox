@@ -100,7 +100,7 @@ func (devDestroy processDevDestroy) removeMounts() error {
 		}
 
 		// remove the share on the workstation
-		if err := removeShare(src, dst); err != nil {
+		if err := devDestroy.removeShare(src, dst); err != nil {
 			return err
 		}
 	}
@@ -115,7 +115,7 @@ func (devDestroy processDevDestroy) removeMounts() error {
 	}
 
 	// remove the share on the workstation
-	if err := removeShare(src, dst); err != nil {
+	if err := devDestroy.removeShare(src, dst); err != nil {
 		return err
 	}
 
@@ -140,20 +140,23 @@ func (devDestroy processDevDestroy) destroyProvider() error {
 }
 
 // removeShare removes a previously exported share
-func removeShare(src, dst string) error {
+func (devDestroy processDevDestroy) removeShare(src, dst string) error {
 
 	// we don't really care what mount-type the user has configured, we need
 	// to remove any shares
 
 	// first we check netfs
 	if netfs.Exists(src) {
-		control := ProcessControl{
+		control := processor.ProcessControl{
+			DevMode:      devDestroy.control.DevMode,
+			Verbose:      devDestroy.control.Verbose,
+			DisplayLevel: devDestroy.control.DisplayLevel,
 			Meta: map[string]string{
 				"path": src,
 			},
 		}
 
-		if err := Run("dev_netfs_remove", control); err != nil {
+		if err := processor.Run("dev_netfs_remove", control); err != nil {
 			return err
 		}
 	}
@@ -165,5 +168,5 @@ func removeShare(src, dst string) error {
 		}
 	}
 
-	return err
+	return nil
 }

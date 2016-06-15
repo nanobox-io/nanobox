@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/netfs"
@@ -64,7 +63,7 @@ func (devNetFSAdd processDevNetFSAdd) Process() error {
 }
 
 // validateMeta validates that the required metadata exists
-func (devNetFSAdd processDevNetFSAdd) validateMeta() error {
+func (devNetFSAdd *processDevNetFSAdd) validateMeta() error {
 
 	// set the host and path
 	devNetFSAdd.path = devNetFSAdd.control.Meta["path"]
@@ -90,7 +89,6 @@ func (devNetFSAdd processDevNetFSAdd) entryExists() bool {
 // addEntry adds the netfs entry into the /etc/exports
 func (devNetFSAdd processDevNetFSAdd) addEntry() error {
 
-	// add the entry into the /etc/exports file
 	if err := netfs.Add(devNetFSAdd.path); err != nil {
 		return err
 	}

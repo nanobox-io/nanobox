@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/netfs"
@@ -64,7 +63,7 @@ func (devNetFSRemove processDevNetFSRemove) Process() error {
 }
 
 // validateMeta validates that the required metadata exists
-func (devNetFSRemove processDevNetFSRemove) validateMeta() error {
+func (devNetFSRemove *processDevNetFSRemove) validateMeta() error {
 
 	// set the host and path
 	devNetFSRemove.path = devNetFSRemove.control.Meta["path"]

@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"strings"
+	"strconv"
 
 	"github.com/jcelliott/lumber"
 
@@ -24,11 +24,11 @@ func Exists(path string) bool {
 	// generate the entry
 	entry, err := entry(path)
 	if err != nil {
-		return err
+		return false
 	}
 
 	// open the /etc/exports file for scanning...
-	var f os.File
+	var f *os.File
 	f, err = os.Open(EXPORTSFILE)
 	if err != nil {
 		return false
@@ -94,7 +94,7 @@ func Remove(path string) error {
 func Mount(hostPath, mountPath string) error {
 
 	// ensure portmap is running
-	cmd := []{"/usr/local/sbin/portmap"}
+	cmd := []string{"/usr/local/sbin/portmap"}
 	if b, err := provider.Run(cmd); err != nil {
 		lumber.Debug("output: %s", b)
 		return err
@@ -109,7 +109,7 @@ func Mount(hostPath, mountPath string) error {
 
 	// TODO: this IP shouldn't be hardcoded, needs to be figured out!
 	source := fmt.Sprintf("192.168.99.1:%s", hostPath)
-	cmd = []string{"/bin/mount", "-t", "nfs", source, mountPath}]
+	cmd = []string{"/bin/mount", "-t", "nfs", source, mountPath}
 	if b, err := provider.Run(cmd); err != nil {
 		lumber.Debug("output: %s", b)
 		return err
