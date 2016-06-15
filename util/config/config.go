@@ -51,10 +51,7 @@ func parseConfig() error {
 	// incase for some reason an incomplete or invalid config.yml is parsed, nanobox
 	// will have values to fall back on
 	config.SetDefault("provider", "docker_machine")
-	config.SetDefault("vm.cpus", 2)
-	config.SetDefault("vm.cpu-cap", 50)
-	config.SetDefault("vm.ram", 1024)
-	config.SetDefault("vm.mount", "native")
+	config.SetDefault("mount-type", "native")
 
 	// parse config file; we attempt to parse the config.yml and pull out any values
 	// that the user has provided (or one is generated with defaults; see ./files.go)

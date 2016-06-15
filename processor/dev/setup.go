@@ -8,6 +8,7 @@ import (
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/counter"
 	"github.com/nanobox-io/nanobox/util/locker"
+	"github.com/nanobox-io/nanobox/util/netfs"
 )
 
 // processDevSetup ...
@@ -80,12 +81,12 @@ func (devSetup *processDevSetup) setupMounts() error {
 		dst := fmt.Sprintf("%s%s/engine", provider.HostShareDir(), config.AppName())
 
 		// first export the share on the workstation
-		if err := provider.AddShare(src, dst); err != nil {
+		if err := addShare(src, dst); err != nil {
 			return err
 		}
 
 		// mount the share on the provider
-		if err := provider.AddMount(src, dst); err != nil {
+		if err := addMount(src, dst); err != nil {
 			return err
 		}
 	}
@@ -95,12 +96,12 @@ func (devSetup *processDevSetup) setupMounts() error {
 	dst := fmt.Sprintf("%s%s/code", provider.HostShareDir(), config.AppName())
 
 	// first export the share on the workstation
-	if err := provider.AddShare(src, dst); err != nil {
+	if err := addShare(src, dst); err != nil {
 		return err
 	}
 
 	// then mount the share on the provider
-	if err := provider.AddMount(src, dst); err != nil {
+	if err := addMount(src, dst); err != nil {
 		return err
 	}
 
@@ -130,4 +131,87 @@ func (devSetup *processDevSetup) setupApp() error {
 
 	// setup the platform services
 	return processor.Run("platform_setup", devSetup.control)
+}
+
+// addShare will add a filesystem share on the host machine
+func addShare(src, dst string) error {
+
+	// the mount type is configurable by the user
+	mountType := config.Viper().GetString("mount-type")
+
+	// todo: we should display a warning when using native about performance
+
+	// since vm.mount is configurable, it's possible and even likely that a
+	// machine may already have mounts configured. For each mount type we'll
+	// need to check if an existing mount needs to be undone before continuing
+	switch mountType {
+
+	// check to see if netfs is currently configured. If it is then tear it down
+	// and build the native share
+	case "native":
+		if netfs.Exists(src) {
+			// netfs was used prior. So we need to tear it down.
+
+			control := ProcessControl{
+				Meta: map[string]string{
+					"path": src,
+				},
+			}
+
+			if err := Run("dev_netfs_remove", control); err != nil {
+				return err
+			}
+		}
+
+		// now we let the provider add it's native share
+		if err := provider.AddShare(src, dst); err != nil {
+			return err
+		}
+
+	// check to see if native shares are currently exported. If so,
+	// tear down the native share and build the netfs share
+	case "netfs":
+		if provider.HasShare(src) {
+			// native was used prior. So we need to tear it down
+			if err := provider.RemoveShare(src, dst); err != nil {
+				return err
+			}
+		}
+
+		control := ProcessControl{
+			Meta: map[string]string{
+				"path": src,
+			},
+		}
+
+		if err := Run("dev_netfs_add", control); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// addMount will mount a share in the nanobox guest context
+func addMount(src, dst, string) error {
+
+		// the mount type is configurable by the user
+		mountType := config.Viper().GetString("vm.mount")
+
+		switch mountType {
+
+		// build the native mount
+		case "native":
+			if err := provider.AddMount(src, dst); err != nil {
+				return err
+			}
+
+		// build the netfs mount
+		case "netfs":
+			if err := netfs.Mount(src, dst); err != nil {
+				return err
+			}
+		}
+
+		return nil
 }

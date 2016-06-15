@@ -11,6 +11,7 @@ import (
 type Provider interface {
 	HostShareDir() string
 	HostMntDir() string
+	HostIP() (string, error)
 	Valid() error
 	Create() error
 	Reboot() error
@@ -22,10 +23,13 @@ type Provider interface {
 	RemoveIP(ip string) error
 	AddNat(host, container string) error
 	RemoveNat(host, container string) error
+	HasShare(local, host string) bool
 	AddShare(local, host string) error
 	RemoveShare(local, host string) error
+	HasMount(mount string) bool
 	AddMount(local, host string) error
 	RemoveMount(local, host string) error
+	Run(command []string) ([]byte, error)
 }
 
 var (
@@ -136,6 +140,17 @@ func HostMntDir() string {
 	return p.HostMntDir()
 }
 
+// HostIP ..
+func HostIP() (string, error) {
+
+	p, err := fetchProvider()
+	if err != nil {
+		return "", err
+	}
+
+	return p.HostIP()
+}
+
 // DockerEnv ..
 func DockerEnv() error {
 
@@ -233,6 +248,17 @@ func RemoveMount(local, host string) error {
 	}
 
 	return p.RemoveMount(local, host)
+}
+
+// Run a command inside of the provider context
+func Run(command []string) ([]byte, error) {
+
+	p, err := fetchProvider()
+	if err != nil {
+		return nil, err
+	}
+
+	return p.Run(command)
 }
 
 // fetchProvider fetches the registered provider from the configured name

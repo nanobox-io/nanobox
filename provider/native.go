@@ -114,6 +114,11 @@ func (native Native) HostMntDir() string {
 	return dir + "/"
 }
 
+// HostIP returns the loopback ip
+func (native Native) HostIP() (string, error) {
+	return "127.0.0.1", nil
+}
+
 // DockerEnv docker env should already be configured if docker is installed
 func (native Native) DockerEnv() error {
 	// ensure setup??
@@ -144,6 +149,11 @@ func (native Native) RemoveNat(ip, containerIP string) error {
 	return nil
 }
 
+// HasShare is not applicable for the native adapter, so will return false
+func (native Native) HasShare(_, _ string) bool {
+	return false
+}
+
 // AddShare is not applicable for the native adapter, so will return nil
 func (native Native) AddShare(_, _ string) error {
 	return nil
@@ -154,11 +164,30 @@ func (native Native) RemoveShare(_, _ string) error {
 	return nil
 }
 
+// HasMount will return true if the mount already exists
+func (native Native) HasMount(path string) bool {
+	//
+	fi, err := os.Lstat(path)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false
+		}
+		lumber.Debug("Error checking mount: %s", err)
+	}
+
+	//
+	if (fi.Mode() & os.ModeSymlink) > 0 {
+		return true
+	}
+
+	return false
+}
+
 // AddMount adds a mount into the docker-machine vm
 func (native Native) AddMount(local, host string) error {
 
 	// TODO: ???
-	if !native.hasMount(host) {
+	if !native.HasMount(host) {
 		if err := os.MkdirAll(filepath.Dir(host), 0755); err != nil {
 			return err
 		}
@@ -173,11 +202,20 @@ func (native Native) AddMount(local, host string) error {
 func (native Native) RemoveMount(_, host string) error {
 
 	// TODO: ???
-	if native.hasMount(host) {
+	if native.HasMount(host) {
 		return os.Remove(host)
 	}
 
 	return nil
+}
+
+// Run will run a command on the local machine (pass-through)
+func (native Native) Run(command []string) ([]byte, error) {
+	// when we actually run the command, we need to pop off the first item
+	cmd := exec.Command(command[0], command[1:]...)
+
+	// run the command and return the output
+	return cmd.CombinedOutput()
 }
 
 // hasNetwork ...
@@ -194,24 +232,4 @@ func (native Native) hasNetwork() bool {
 	}
 
 	return true
-}
-
-// hasMount ...
-func (native Native) hasMount(mount string) bool {
-
-	//
-	fi, err := os.Lstat(mount)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return false
-		}
-		lumber.Debug("Error checking mount: %s", err)
-	}
-
-	//
-	if (fi.Mode() & os.ModeSymlink) > 0 {
-		return true
-	}
-
-	return false
 }

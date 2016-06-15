@@ -9,6 +9,7 @@ import (
 	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
+	"github.com/nanobox-io/nanobox/util/netfs"
 )
 
 // processDevDestroy ...
@@ -99,7 +100,7 @@ func (devDestroy processDevDestroy) removeMounts() error {
 		}
 
 		// remove the share on the workstation
-		if err := provider.RemoveShare(src, dst); err != nil {
+		if err := removeShare(src, dst); err != nil {
 			return err
 		}
 	}
@@ -114,7 +115,7 @@ func (devDestroy processDevDestroy) removeMounts() error {
 	}
 
 	// remove the share on the workstation
-	if err := provider.RemoveShare(src, dst); err != nil {
+	if err := removeShare(src, dst); err != nil {
 		return err
 	}
 
@@ -136,4 +137,33 @@ func (devDestroy processDevDestroy) destroyProvider() error {
 		}
 	}
 	return nil
+}
+
+// removeShare removes a previously exported share
+func removeShare(src, dst string) error {
+
+	// we don't really care what mount-type the user has configured, we need
+	// to remove any shares
+
+	// first we check netfs
+	if netfs.Exists(src) {
+		control := ProcessControl{
+			Meta: map[string]string{
+				"path": src,
+			},
+		}
+
+		if err := Run("dev_netfs_remove", control); err != nil {
+			return err
+		}
+	}
+
+	// now provider native
+	if provider.HasMount(src) {
+		if err := provider.RemoveMount(src, dst); err != nil {
+			return err
+		}
+	}
+
+	return err
 }

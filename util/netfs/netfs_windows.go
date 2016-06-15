@@ -6,9 +6,6 @@ import (
 	"errors"
 )
 
-// EXPORTSFILE ...
-const EXPORTSFILE = "/etc/exports"
-
 // Exists checks to see if the share already exists
 func Exists(entry string) bool {
 	return false
@@ -25,6 +22,6 @@ func Remove(entry string) error {
 }
 
 // Mount mounts a cifs share on a guest machine
-func Mount(host_path, mount_path string, context []string) error {
+func Mount(host_path, mount_path string) error {
 	return errors.New("Mounting a cifs share is not yet supported on windows")
 }

@@ -61,14 +61,9 @@ func configFile() (file string) {
 # provider configuration options
 provider: "docker_machine" # the name of the provider to use
 
-# virtual machine (VM) configuration options
-vm:
-  cpus: 2         # number of cpus VM is allowed access to
-  cpu-cap: 50     # maximum allowed percentage of cpus
-  ram: 1024       # amount of ram VM is allowed access to
-  mount: "native" # either "native" or "netfs":
-                  # "native" -
-                  # "netfs" -
+# mount type (native|netfs)
+mount-type: native
+
   `
 
 	// populate the config.yml with reasonable defaults

@@ -12,8 +12,6 @@ import (
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 
-	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/netfs"
 	"github.com/nanobox-io/nanobox/util/print"
 )
 
@@ -315,117 +313,31 @@ func (machine DockerMachine) RemoveNat(ip, containerIP string) error {
 	return nil
 }
 
+// HasShare checks to see if the share exists
+func (machine DockerMachine) HasShare(local, _ string) bool {
+	// VBoxManage showvminfo nanobox --machinereadable
+	cmd := exec.Command("VBoxManage", "showvminfo", "nanobox", "--machinereadable")
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return false
+	}
+
+	matched, regerr := regexp.Match(local, output)
+	if regerr != nil {
+		return false
+	}
+
+	return matched
+}
+
 // AddShare adds the provided path as a shareable filesystem
 func (machine DockerMachine) AddShare(local, host string) error {
-
-	// the mount type is configurable by the user
-	mountType := config.Viper().GetString("vm.mount")
-
-	// todo: we should display a warning when using native about performance
-
-	// since vm.mount is configurable, it's possible and even likely that a
-	// machine may already have mounts configured. For each mount type we'll
-	// need to check if an existing mount needs to be undone before continuing
-	switch mountType {
-
-	// check to see if netfs is currently configured. If it is then tear it down
-	// and build the native share
-	case "native":
-		if machine.hasNetfsShare(local) {
-			if err := machine.removeNetfsShare(local, host); err != nil {
-				return err
-			}
-		}
-		if err := machine.addNativeShare(local, host); err != nil {
-			return err
-		}
-
-	// check to see if virtual box shared folders are currently configured. If so,
-	// tear down the shared mount and build the netfs mount
-	case "netfs":
-		if machine.hasNativeShare(local) {
-			if err := machine.removeNativeShare(local, host); err != nil {
-				return err
-			}
-		}
-		if err := machine.addNetfsShare(local, host); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// RemoveShare removes the provided path as a shareable filesystem; we don't care
-// what the user has configured, we need to remove any shares that may have been
-// setup previously
-func (machine DockerMachine) RemoveShare(local, host string) error {
-
-	//
-	if machine.hasNativeShare(local) {
-		if err := machine.removeNativeShare(local, host); err != nil {
-			return err
-		}
-	}
-
-	//
-	if machine.hasNetfsShare(local) {
-		if err := machine.removeNetfsShare(local, host); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// AddMount adds a mount into the docker-machine vm
-func (machine DockerMachine) AddMount(local, host string) error {
-
-	// the mount type is configurable by the user
-	mountType := config.Viper().GetString("vm.mount")
-
-	switch mountType {
-
-	// build the native mount
-	case "native":
-		if err := machine.addNativeMount(local, host); err != nil {
-			return err
-		}
-
-	// build the netfs mount
-	case "netfs":
-		if err := machine.addNetfsMount(local, host); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// RemoveMount removes a mount from the docker-machine vm
-func (machine DockerMachine) RemoveMount(_, host string) error {
-
-	if machine.hasMount(host) {
-		// docker-machine ssh nanobox sudo umount ${host}
-		cmd := exec.Command("docker-machine", "ssh", "nanobox", "sudo", "umount", host)
-		b, err := cmd.CombinedOutput()
-		if err != nil {
-			lumber.Debug("output: %s", b)
-			return err
-		}
-	}
-
-	return nil
-}
-
-// addNativeShare adds a virtualbox shared folder to the vm
-func (machine DockerMachine) addNativeShare(local, host string) error {
 	h := sha256.New()
 	h.Write([]byte(local))
 	h.Write([]byte(host))
 	name := hex.EncodeToString(h.Sum(nil))
 
-	if !machine.hasNativeShare(local) {
+	if !machine.HasShare(local, host) {
 		// VBoxManage sharedfolder add nanobox --name <name> --hostpath ${local} --transient
 		cmd := exec.Command("VBoxManage", "sharedfolder", "add", "nanobox", "--name", name, "--hostpath", local, "--transient")
 		b, err := cmd.CombinedOutput()
@@ -438,18 +350,22 @@ func (machine DockerMachine) addNativeShare(local, host string) error {
 	return nil
 }
 
-// addNetfsShare will add a nfs or cifs share into the vm
-func (machine DockerMachine) addNetfsShare(local, host string) error {
+// RemoveShare removes the provided path as a shareable filesystem; we don't care
+// what the user has configured, we need to remove any shares that may have been
+// setup previously
+func (machine DockerMachine) RemoveShare(local, host string) error {
+	h := sha256.New()
+	h.Write([]byte(local))
+	h.Write([]byte(host))
+	name := hex.EncodeToString(h.Sum(nil))
 
-	if !machine.hasNetfsShare(local) {
-		ip, err := machine.hostIP()
+	if machine.HasShare(local, host) {
+
+		// VBoxManage sharedfolder remove nanobox --name <name> --transient
+		cmd := exec.Command("VBoxManage", "sharedfolder", "remove", "nanobox", "--name", name, "--transient")
+		b, err := cmd.CombinedOutput()
 		if err != nil {
-			return err
-		}
-
-		//
-		entry := netfs.Entry(ip, local)
-		if err := netfs.Add(entry); err != nil {
+			lumber.Debug("output: %s", b)
 			return err
 		}
 	}
@@ -457,15 +373,31 @@ func (machine DockerMachine) addNetfsShare(local, host string) error {
 	return nil
 }
 
-// addNativeMount adds a virtualbox shared folder to the vm
-func (machine DockerMachine) addNativeMount(local, host string) error {
+// HasMount checks to see if the mount exists in the vm
+func (machine DockerMachine) HasMount(mount string) bool {
+	// docker-machine ssh nanobox sudo cat /proc/mounts
+	cmd := exec.Command("docker-machine", "ssh", "nanobox", "sudo", "cat", "/proc/mounts")
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return false
+	}
 
+	matched, regerr := regexp.Match(mount, output)
+	if regerr != nil {
+		return false
+	}
+
+	return matched
+}
+
+// AddMount adds a virtualbox mount into the docker-machine vm
+func (machine DockerMachine) AddMount(local, host string) error {
 	h := sha256.New()
 	h.Write([]byte(local))
 	h.Write([]byte(host))
 	name := hex.EncodeToString(h.Sum(nil))
 
-	if !machine.hasMount(host) {
+	if !machine.HasMount(host) {
 
 		// create folder
 		cmd := exec.Command("docker-machine", "ssh", "nanobox", "sudo", "mkdir", "-p", host)
@@ -487,31 +419,12 @@ func (machine DockerMachine) addNativeMount(local, host string) error {
 	return nil
 }
 
-// addNetfsMount will add a nfs or cifs share into the vm
-func (machine DockerMachine) addNetfsMount(local, host string) error {
+// RemoveMount removes a mount from the docker-machine vm
+func (machine DockerMachine) RemoveMount(_, host string) error {
 
-	if !machine.hasMount(host) {
-		prefix := []string{"docker-machine", "ssh", "nanobox", "sudo"}
-		if err := netfs.Mount(local, host, prefix); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// removeNativeShare will remove a virtualbox shared folder
-func (machine DockerMachine) removeNativeShare(local, host string) error {
-
-	h := sha256.New()
-	h.Write([]byte(local))
-	h.Write([]byte(host))
-	name := hex.EncodeToString(h.Sum(nil))
-
-	if machine.hasNativeShare(local) {
-
-		// VBoxManage sharedfolder remove nanobox --name <name> --transient
-		cmd := exec.Command("VBoxManage", "sharedfolder", "remove", "nanobox", "--name", name, "--transient")
+	if machine.HasMount(host) {
+		// docker-machine ssh nanobox sudo umount ${host}
+		cmd := exec.Command("docker-machine", "ssh", "nanobox", "sudo", "umount", host)
 		b, err := cmd.CombinedOutput()
 		if err != nil {
 			lumber.Debug("output: %s", b)
@@ -522,69 +435,47 @@ func (machine DockerMachine) removeNativeShare(local, host string) error {
 	return nil
 }
 
-// removeNetfsShare will remove a nfs or cifs share
-func (machine DockerMachine) removeNetfsShare(local, host string) error {
-
-	if machine.hasNetfsShare(local) {
-		host, err := machine.hostIP()
-		if err != nil {
-			return err
+// HostIP inspects docker-machine to return the IP address of the vm
+func (machine DockerMachine) HostIP() (string, error) {
+	// create an anonymous struct that we will populate after running inspect
+	inspect := struct {
+		Driver struct {
+			IPAddress string
 		}
+	}{}
 
-		//
-		entry := netfs.Entry(host, local)
-		if err := netfs.Remove(entry); err != nil {
-			return err
-		}
+	// fetch the docker-machine endpoint information
+	cmd := exec.Command("docker-machine", "inspect", "nanobox")
+	b, err := cmd.CombinedOutput()
+	if err != nil {
+		lumber.Debug("output: %s", b)
+		return "", err
 	}
 
-	return nil
+	// marshal the json output into the anonymous struct as defined above
+	err = json.Unmarshal(b, &inspect)
+	if err != nil {
+		lumber.Debug("marshal: %s", b)
+		return "", err
+	}
+
+	return inspect.Driver.IPAddress, nil
 }
 
-func (machine DockerMachine) hasMount(mount string) bool {
-	// docker-machine ssh nanobox sudo cat /proc/mounts
-	cmd := exec.Command("docker-machine", "ssh", "nanobox", "sudo", "cat", "/proc/mounts")
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return false
-	}
+// Run a command in the vm
+func (machine DockerMachine) Run(command []string) ([]byte, error) {
 
-	matched, regerr := regexp.Match(mount, output)
-	if regerr != nil {
-		return false
-	}
+	// All commands need to be run in the docker machine, so we create a prefix
+	context := []string{"docker-machine", "ssh", "nanobox", "sudo"}
 
-	return matched
-}
+	// now we can generate a run command combining the context with the command
+	run := append(context, command...)
 
-// hasNativeShare will return true if the virtualbox shared folder is setup
-func (machine DockerMachine) hasNativeShare(mount string) bool {
+	// when we actually run the command, we need to pop off the first item
+	cmd := exec.Command(run[0], run[1:]...)
 
-	// VBoxManage showvminfo nanobox --machinereadable
-	cmd := exec.Command("VBoxManage", "showvminfo", "nanobox", "--machinereadable")
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return false
-	}
-
-	matched, regerr := regexp.Match(mount, output)
-	if regerr != nil {
-		return false
-	}
-
-	return matched
-}
-
-// hasNetfsShare will return true if the netfs mount is already exported
-func (machine DockerMachine) hasNetfsShare(mount string) bool {
-	host, err := machine.hostIP()
-	if err != nil {
-		return false
-	}
-
-	//
-	entry := netfs.Entry(host, mount)
-	return netfs.Exists(entry)
+	// run the command and return the output
+	return cmd.CombinedOutput()
 }
 
 // isCreated ...
@@ -670,31 +561,4 @@ func (machine DockerMachine) hasNatPostroute(hostIP, containerIP string) bool {
 	}
 
 	return true
-}
-
-// hostIP inspects docker-machine to return the IP address of the vm
-func (machine DockerMachine) hostIP() (string, error) {
-	// create an anonymous struct that we will populate after running inspect
-	inspect := struct {
-		Driver struct {
-			IPAddress string
-		}
-	}{}
-
-	// fetch the docker-machine endpoint information
-	cmd := exec.Command("docker-machine", "inspect", "nanobox")
-	b, err := cmd.CombinedOutput()
-	if err != nil {
-		lumber.Debug("output: %s", b)
-		return "", err
-	}
-
-	// marshal the json output into the anonymous struct as defined above
-	err = json.Unmarshal(b, &inspect)
-	if err != nil {
-		lumber.Debug("marshal: %s", b)
-		return "", err
-	}
-
-	return inspect.Driver.IPAddress, nil
 }

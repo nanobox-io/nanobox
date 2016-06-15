@@ -11,16 +11,25 @@ import (
 	"strings"
 
 	"github.com/jcelliott/lumber"
+
+	"github.com/nanobox-io/nanobox/provider"
 )
 
 // EXPORTSFILE ...
 const EXPORTSFILE = "/etc/exports"
 
 // Exists checks to see if the mount already exists
-func Exists(entry string) bool {
+func Exists(path string) bool {
+
+	// generate the entry
+	entry, err := entry(path)
+	if err != nil {
+		return err
+	}
 
 	// open the /etc/exports file for scanning...
-	f, err := os.Open(EXPORTSFILE)
+	var f os.File
+	f, err = os.Open(EXPORTSFILE)
 	if err != nil {
 		return false
 	}
@@ -39,7 +48,13 @@ func Exists(entry string) bool {
 }
 
 // Add will export an nfs share
-func Add(entry string) error {
+func Add(path string) error {
+
+	// generate the entry
+	entry, err := entry(path)
+	if err != nil {
+		return err
+	}
 
 	// add entry into the /etc/exports file
 	if err := addEntry(entry); err != nil {
@@ -55,7 +70,13 @@ func Add(entry string) error {
 }
 
 // Remove will remove an nfs share
-func Remove(entry string) error {
+func Remove(path string) error {
+
+	// generate the entry
+	entry, err := entry(path)
+	if err != nil {
+		return err
+	}
 
 	if err := removeEntry(entry); err != nil {
 		return err
@@ -70,34 +91,47 @@ func Remove(entry string) error {
 }
 
 // Mount mounts a share on a guest machine
-func Mount(hostPath, mountPath string, context []string) error {
+func Mount(hostPath, mountPath string) error {
 
 	// ensure portmap is running
-	run := append(context, "/usr/local/sbin/portmap")
-	cmd := exec.Command(run[0], run[1:]...)
-	if b, err := cmd.CombinedOutput(); err != nil {
+	cmd := []{"/usr/local/sbin/portmap"}
+	if b, err := provider.Run(cmd); err != nil {
 		lumber.Debug("output: %s", b)
 		return err
 	}
 
 	// ensure the destination directory exists
-	run = append(context, []string{"/bin/mkdir", "-p", mountPath}...)
-	cmd = exec.Command(run[0], run[1:]...)
-	if b, err := cmd.CombinedOutput(); err != nil {
+	cmd = []string{"/bin/mkdir", "-p", mountPath}
+	if b, err := provider.Run(cmd); err != nil {
 		lumber.Debug("output: %s", b)
 		return err
 	}
 
-	// TODO: this IP shouldn't be hardcoded, needs to be figured out mount!
+	// TODO: this IP shouldn't be hardcoded, needs to be figured out!
 	source := fmt.Sprintf("192.168.99.1:%s", hostPath)
-	run = append(context, []string{"/bin/mount", "-t", "nfs", source, mountPath}...)
-	cmd = exec.Command(run[0], run[1:]...)
-	if b, err := cmd.CombinedOutput(); err != nil {
+	cmd = []string{"/bin/mount", "-t", "nfs", source, mountPath}]
+	if b, err := provider.Run(cmd); err != nil {
 		lumber.Debug("output: %s", b)
 		return err
 	}
 
 	return nil
+}
+
+// entry generates the mount entry for the exports file
+func entry(path string) (string, error) {
+
+	// todo: this can change, and is highly unstable.
+	// 				we need to reserve a global IP for mounting
+	// 				and us it instead
+	host, err := provider.HostIP()
+	if err != nil {
+		return "", err
+	}
+
+	entry := fmt.Sprintf("\"%s\" %s -alldirs -mapall=%v:%v", path, host, uid(), gid())
+
+	return entry, nil
 }
 
 // addEntry will add the entry into the /etc/exports file
@@ -157,4 +191,46 @@ func removeEntry(entry string) error {
 	}
 
 	return nil
+}
+
+// uid will grab the original uid that called sudo if set
+func uid() (uid int) {
+
+	//
+	uid = os.Geteuid()
+
+	// if this process was started with sudo, sudo is nice enough to set
+	// environment variables to inform us about the user that executed sudo
+	//
+	// let's see if this is the case
+	if sudoUID := os.Getenv("SUDO_UID"); sudoUID != "" {
+
+		// SUDO_UID was set, so we need to cast the string to an int
+		if s, err := strconv.Atoi(sudoUID); err == nil {
+			uid = s
+		}
+	}
+
+	return
+}
+
+// gid will grab the original gid that called sudo if set
+func gid() (gid int) {
+
+	//
+	gid = os.Getgid()
+
+	// if this process was started with sudo, sudo is nice enough to set
+	// environment variables to inform us about the user that executed sudo
+	//
+	// let's see if this is the case
+	if sudoGid := os.Getenv("SUDO_GID"); sudoGid != "" {
+
+		// SUDO_UID was set, so we need to cast the string to an int
+		if s, err := strconv.Atoi(sudoGid); err == nil {
+			gid = s
+		}
+	}
+
+	return
 }

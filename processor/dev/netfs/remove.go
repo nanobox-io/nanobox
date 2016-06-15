@@ -13,8 +13,6 @@ import (
 // processDevNetFSRemove ...
 type processDevNetFSRemove struct {
 	control processor.ProcessControl
-	app     models.App
-	host    string
 	path    string
 }
 
@@ -36,14 +34,14 @@ func (devNetFSRemove processDevNetFSRemove) Results() processor.ProcessControl {
 //
 func (devNetFSRemove processDevNetFSRemove) Process() error {
 
-	// validate we have all meta information needed and set "host" and "path"
+	// validate we have all meta information needed and set path
 	if err := devNetFSRemove.validateMeta(); err != nil {
 		return err
 	}
 
-	// short-circuit if the entry doesnt exist; we do this after we validate meta
+	// short-circuit if the entry already exist; we do this after we validate meta
 	// because the meta is needed to determin the entry we're looking for
-	if !devNetFSRemove.entryExists() {
+	if devNetFSRemove.entryExists() {
 		return nil
 	}
 
@@ -57,8 +55,8 @@ func (devNetFSRemove processDevNetFSRemove) Process() error {
 		return nil
 	}
 
-	// remove the netfs entry
-	if err := devNetFSRemove.removeEntry(); err != nil {
+	// rm the netfs entry
+	if err := devNetFSRemove.rmEntry(); err != nil {
 		return err
 	}
 
@@ -69,14 +67,9 @@ func (devNetFSRemove processDevNetFSRemove) Process() error {
 func (devNetFSRemove processDevNetFSRemove) validateMeta() error {
 
 	// set the host and path
-	devNetFSRemove.host = devNetFSRemove.control.Meta["host"]
 	devNetFSRemove.path = devNetFSRemove.control.Meta["path"]
 
-	// ensure host and path are provided
-	switch {
-	case devNetFSRemove.host == "":
-		return fmt.Errorf("Host is required")
-	case devNetFSRemove.path == "":
+	if devNetFSRemove.path == "" {
 		return fmt.Errorf("Path is required")
 	}
 
@@ -86,25 +79,19 @@ func (devNetFSRemove processDevNetFSRemove) validateMeta() error {
 // entryExists returns true if the entry already exists
 func (devNetFSRemove processDevNetFSRemove) entryExists() bool {
 
-	// generate the entry
-	entry := netfs.Entry(devNetFSRemove.host, devNetFSRemove.path)
-
 	// if the entry exists just return
-	if netfs.Exists(entry) {
+	if netfs.Exists(devNetFSRemove.path) {
 		return true
 	}
 
 	return false
 }
 
-// removeEntry removes the netfs entry from the /etc/exports
-func (devNetFSRemove processDevNetFSRemove) removeEntry() error {
+// rmEntry rms the netfs entry into the /etc/exports
+func (devNetFSRemove processDevNetFSRemove) rmEntry() error {
 
-	// generate the entry
-	entry := netfs.Entry(devNetFSRemove.host, devNetFSRemove.path)
-
-	// remove the entry from the /etc/exports file
-	if err := netfs.Remove(entry); err != nil {
+	// rm the entry into the /etc/exports file
+	if err := netfs.Remove(devNetFSRemove.path); err != nil {
 		return err
 	}
 
@@ -117,7 +104,7 @@ func (devNetFSRemove processDevNetFSRemove) reExecPrivilege() error {
 	// call 'dev netfs rm' with the original path and args; os.Args[0] will be the
 	// currently executing program, so this command will ultimately lead right back
 	// here
-	cmd := fmt.Sprintf("%s dev netfs rm %s %s", os.Args[0], devNetFSRemove.host, devNetFSRemove.path)
+	cmd := fmt.Sprintf("%s dev netfs rm %s", os.Args[0], devNetFSRemove.path)
 
 	// if the sudo'ed subprocess fails, we need to return error to stop the process
 	fmt.Println("Admin privileges are required to remove entries from your exports file, your password may be requested...")

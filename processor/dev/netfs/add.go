@@ -13,8 +13,6 @@ import (
 // processDevNetFSAdd ...
 type processDevNetFSAdd struct {
 	control processor.ProcessControl
-	app     models.App
-	host    string
 	path    string
 }
 
@@ -36,7 +34,7 @@ func (devNetFSAdd processDevNetFSAdd) Results() processor.ProcessControl {
 //
 func (devNetFSAdd processDevNetFSAdd) Process() error {
 
-	// validate we have all meta information needed and set "host" and "path"
+	// validate we have all meta information needed and set path
 	if err := devNetFSAdd.validateMeta(); err != nil {
 		return err
 	}
@@ -69,14 +67,9 @@ func (devNetFSAdd processDevNetFSAdd) Process() error {
 func (devNetFSAdd processDevNetFSAdd) validateMeta() error {
 
 	// set the host and path
-	devNetFSAdd.host = devNetFSAdd.control.Meta["host"]
 	devNetFSAdd.path = devNetFSAdd.control.Meta["path"]
 
-	// ensure host and path are provided
-	switch {
-	case devNetFSAdd.host == "":
-		return fmt.Errorf("Host is required")
-	case devNetFSAdd.path == "":
+	if devNetFSAdd.path == "" {
 		return fmt.Errorf("Path is required")
 	}
 
@@ -86,11 +79,8 @@ func (devNetFSAdd processDevNetFSAdd) validateMeta() error {
 // entryExists returns true if the entry already exists
 func (devNetFSAdd processDevNetFSAdd) entryExists() bool {
 
-	// generate the entry
-	entry := netfs.Entry(devNetFSAdd.host, devNetFSAdd.path)
-
 	// if the entry exists just return
-	if netfs.Exists(entry) {
+	if netfs.Exists(devNetFSAdd.path) {
 		return true
 	}
 
@@ -100,11 +90,8 @@ func (devNetFSAdd processDevNetFSAdd) entryExists() bool {
 // addEntry adds the netfs entry into the /etc/exports
 func (devNetFSAdd processDevNetFSAdd) addEntry() error {
 
-	// generate the entry
-	entry := netfs.Entry(devNetFSAdd.host, devNetFSAdd.path)
-
 	// add the entry into the /etc/exports file
-	if err := netfs.Add(entry); err != nil {
+	if err := netfs.Add(devNetFSAdd.path); err != nil {
 		return err
 	}
 
@@ -117,7 +104,7 @@ func (devNetFSAdd processDevNetFSAdd) reExecPrivilege() error {
 	// call 'dev netfs add' with the original path and args; os.Args[0] will be the
 	// currently executing program, so this command will ultimately lead right back
 	// here
-	cmd := fmt.Sprintf("%s dev netfs add %s %s", os.Args[0], devNetFSAdd.host, devNetFSAdd.path)
+	cmd := fmt.Sprintf("%s dev netfs add %s", os.Args[0], devNetFSAdd.path)
 
 	// if the sudo'ed subprocess fails, we need to return error to stop the process
 	fmt.Println("Admin privileges are required to add entries to your exports file, your password may be requested...")
