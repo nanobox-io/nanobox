@@ -2,40 +2,14 @@
 package netfs
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"strconv"
 )
 
-// EXPORTSFILE ...
-const EXPORTSFILE = "/etc/exports"
-
 // Entry generates the mount entry for the exports file
 func Entry(host, path string) string {
 	return fmt.Sprintf("\"%s\" %s -alldirs -mapall=%v:%v", path, host, uid(), gid())
-}
-
-// Exists checks to see if the mount already exists
-func Exists(entry string) bool {
-
-	// open the /etc/exports file for scanning...
-	f, err := os.Open(EXPORTSFILE)
-	if err != nil {
-		return false
-	}
-	defer f.Close()
-
-	// scan exports file looking for an entry for this path...
-	scanner := bufio.NewScanner(f)
-	for scanner.Scan() {
-		// scan each line to see if we have a match​
-		if scanner.Text() == entry {
-			return true
-		}
-	}
-
-	return false
 }
 
 // uid will grab the original uid that called sudo if set

@@ -13,6 +13,31 @@ import (
 	"github.com/jcelliott/lumber"
 )
 
+// EXPORTSFILE ...
+const EXPORTSFILE = "/etc/exports"
+
+// Exists checks to see if the mount already exists
+func Exists(entry string) bool {
+
+	// open the /etc/exports file for scanning...
+	f, err := os.Open(EXPORTSFILE)
+	if err != nil {
+		return false
+	}
+	defer f.Close()
+
+	// scan exports file looking for an entry for this path...
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		// scan each line to see if we have a match​
+		if scanner.Text() == entry {
+			return true
+		}
+	}
+
+	return false
+}
+
 // Add will export an nfs share
 func Add(entry string) error {
 
