@@ -22,11 +22,11 @@ type processServiceStop struct {
 
 //
 func init() {
-	processor.Register("service_stop", serviceStopFunc)
+	processor.Register("service_stop", serviceStopFn)
 }
 
 //
-func serviceStopFunc(control processor.ProcessControl) (processor.Processor, error) {
+func serviceStopFn(control processor.ProcessControl) (processor.Processor, error) {
 	if control.Meta["name"] == "" {
 		return nil, errors.New("missing service name")
 	}

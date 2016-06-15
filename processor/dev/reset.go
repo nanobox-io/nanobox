@@ -13,11 +13,11 @@ type processDevReset struct {
 
 //
 func init() {
-	processor.Register("dev_reset", devResetFunc)
+	processor.Register("dev_reset", devResetFn)
 }
 
 //
-func devResetFunc(control processor.ProcessControl) (processor.Processor, error) {
+func devResetFn(control processor.ProcessControl) (processor.Processor, error) {
 	return processDevReset{control: control}, nil
 }
 

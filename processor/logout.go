@@ -12,11 +12,11 @@ type processLogout struct {
 
 //
 func init() {
-	Register("logout", logoutFunc)
+	Register("logout", logoutFn)
 }
 
 //
-func logoutFunc(conf ProcessControl) (Processor, error) {
+func logoutFn(conf ProcessControl) (Processor, error) {
 	return processLogout{conf}, nil
 }
 

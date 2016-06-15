@@ -35,11 +35,11 @@ type processCodeDev struct {
 
 //
 func init() {
-	processor.Register("code_dev", codeDevFunc)
+	processor.Register("code_dev", codeDevFn)
 }
 
 //
-func codeDevFunc(control processor.ProcessControl) (processor.Processor, error) {
+func codeDevFn(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 	return &processCodeDev{control: control}, nil
 }

@@ -14,11 +14,11 @@ type processLinkRemove struct {
 
 //
 func init() {
-	processor.Register("link_remove", linkRemoveFunc)
+	processor.Register("link_remove", linkRemoveFn)
 }
 
 //
-func linkRemoveFunc(conf processor.ProcessControl) (processor.Processor, error) {
+func linkRemoveFn(conf processor.ProcessControl) (processor.Processor, error) {
 	return processLinkRemove{conf}, nil
 }
 

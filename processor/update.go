@@ -28,11 +28,11 @@ type processUpdate struct {
 
 //
 func init() {
-	Register("update", updateFunc)
+	Register("update", updateFn)
 }
 
 //
-func updateFunc(control ProcessControl) (Processor, error) {
+func updateFn(control ProcessControl) (Processor, error) {
 	return &processUpdate{control}, nil
 }
 

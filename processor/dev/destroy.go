@@ -18,11 +18,11 @@ type processDevDestroy struct {
 
 //
 func init() {
-	processor.Register("dev_destroy", devDestroyFunc)
+	processor.Register("dev_destroy", devDestroyFn)
 }
 
 //
-func devDestroyFunc(control processor.ProcessControl) (processor.Processor, error) {
+func devDestroyFn(control processor.ProcessControl) (processor.Processor, error) {
 	return processDevDestroy{control}, nil
 }
 

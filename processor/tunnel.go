@@ -16,11 +16,11 @@ type processTunnel struct {
 
 //
 func init() {
-	Register("tunnel", tunnelFunc)
+	Register("tunnel", tunnelFn)
 }
 
 //
-func tunnelFunc(control ProcessControl) (Processor, error) {
+func tunnelFn(control ProcessControl) (Processor, error) {
 	return processTunnel{control}, nil
 }
 

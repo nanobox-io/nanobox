@@ -20,11 +20,11 @@ type processDevNetFSRemove struct {
 
 //
 func init() {
-	processor.Register("dev_netfs_remove", devNetFSRemoveFunc)
+	processor.Register("dev_netfs_remove", devNetFSRemoveFn)
 }
 
 //
-func devNetFSRemoveFunc(control processor.ProcessControl) (processor.Processor, error) {
+func devNetFSRemoveFn(control processor.ProcessControl) (processor.Processor, error) {
 	return processDevNetFSRemove{control: control}, nil
 }
 

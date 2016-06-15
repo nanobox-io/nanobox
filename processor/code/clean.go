@@ -15,11 +15,11 @@ type processCodeClean struct {
 
 //
 func init() {
-	processor.Register("code_clean", codeCleanFunc)
+	processor.Register("code_clean", codeCleanFn)
 }
 
 //
-func codeCleanFunc(control processor.ProcessControl) (processor.Processor, error) {
+func codeCleanFn(control processor.ProcessControl) (processor.Processor, error) {
 	return &processCodeClean{control: control}, nil
 }
 

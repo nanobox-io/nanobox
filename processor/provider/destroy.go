@@ -13,11 +13,11 @@ type processProviderDestroy struct {
 
 //
 func init() {
-	processor.Register("provider_destroy", providerDestroyFunc)
+	processor.Register("provider_destroy", providerDestroyFn)
 }
 
 //
-func providerDestroyFunc(control processor.ProcessControl) (processor.Processor, error) {
+func providerDestroyFn(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 	return processProviderDestroy{control}, nil
 }

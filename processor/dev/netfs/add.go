@@ -20,11 +20,11 @@ type processDevNetFSAdd struct {
 
 //
 func init() {
-	processor.Register("dev_netfs_add", devNetFSAddFunc)
+	processor.Register("dev_netfs_add", devNetFSAddFn)
 }
 
 //
-func devNetFSAddFunc(control processor.ProcessControl) (processor.Processor, error) {
+func devNetFSAddFn(control processor.ProcessControl) (processor.Processor, error) {
 	return processDevNetFSAdd{control: control}, nil
 }
 

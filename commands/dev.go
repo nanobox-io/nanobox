@@ -5,7 +5,8 @@ import (
 
 	"github.com/nanobox-io/nanobox/commands/dev"
 	"github.com/nanobox-io/nanobox/processor"
-	cmdutil "github.com/nanobox-io/nanobox/validate/commands"
+	"github.com/nanobox-io/nanobox/util/print"
+	"github.com/nanobox-io/nanobox/validate"
 )
 
 var (
@@ -19,7 +20,7 @@ Starts the Nanobox VM, provisions app, & opens an interactive
 terminal. This is the primary command for managing local dev
 apps and interacting with your Nanobox VM.
 		`,
-		PreRun: cmdutil.Validate("provider"),
+		PreRun: validate.Requires("provider"),
 		Run:    devFn,
 	}
 )
@@ -43,9 +44,5 @@ func init() {
 
 // devFn ...
 func devFn(ccmd *cobra.Command, args []string) {
-
-	//
-	if err := processor.Run("dev", processor.DefaultConfig); err != nil {
-
-	}
+	print.OutputCmdErr(processor.Run("dev", processor.DefaultConfig))
 }

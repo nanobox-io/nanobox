@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/processor"
+	"github.com/nanobox-io/nanobox/util/print"
 )
 
 var (
@@ -59,28 +60,16 @@ func init() {
 func linkAddFn(ccmd *cobra.Command, args []string) {
 	processor.DefaultConfig.Meta["name"] = app
 	processor.DefaultConfig.Meta["alias"] = alias
-
-	//
-	if err := processor.Run("link_add", processor.DefaultConfig); err != nil {
-
-	}
+	print.OutputCmdErr(processor.Run("link_add", processor.DefaultConfig))
 }
 
 // linkListFn ...
 func linkListFn(ccmd *cobra.Command, args []string) {
-
-	//
-	if err := processor.Run("link_list", processor.DefaultConfig); err != nil {
-
-	}
+	print.OutputCmdErr(processor.Run("link_list", processor.DefaultConfig))
 }
 
 // linkRemoveFn ...
 func linkRemoveFn(ccmd *cobra.Command, args []string) {
 	processor.DefaultConfig.Meta["alias"] = alias
-
-	//
-	if err := processor.Run("link_remove", processor.DefaultConfig); err != nil {
-
-	}
+	print.OutputCmdErr(processor.Run("link_remove", processor.DefaultConfig))
 }

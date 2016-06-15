@@ -15,11 +15,11 @@ type processServiceStartAll struct {
 
 //
 func init() {
-	processor.Register("service_start_all", serviceStartAllFunc)
+	processor.Register("service_start_all", serviceStartAllFn)
 }
 
 //
-func serviceStartAllFunc(control processor.ProcessControl) (processor.Processor, error) {
+func serviceStartAllFn(control processor.ProcessControl) (processor.Processor, error) {
 	// make sure i was given a name and image
 	return processServiceStartAll{control: control}, nil
 }

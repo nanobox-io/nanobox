@@ -15,11 +15,11 @@ type processServiceStopAll struct {
 
 //
 func init() {
-	processor.Register("service_stop_all", serviceStopAllFunc)
+	processor.Register("service_stop_all", serviceStopAllFn)
 }
 
 //
-func serviceStopAllFunc(control processor.ProcessControl) (processor.Processor, error) {
+func serviceStopAllFn(control processor.ProcessControl) (processor.Processor, error) {
 	return processServiceStopAll{control: control}, nil
 }
 

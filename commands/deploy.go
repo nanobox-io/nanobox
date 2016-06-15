@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/processor"
+	"github.com/nanobox-io/nanobox/util/print"
 )
 
 var (
@@ -25,7 +26,5 @@ func deployFn(ccmd *cobra.Command, args []string) {
 	}
 
 	//
-	if err := processor.Run("deploy", processor.DefaultConfig); err != nil {
-
-	}
+	print.OutputCmdErr(processor.Run("deploy", processor.DefaultConfig))
 }

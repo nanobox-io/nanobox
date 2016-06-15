@@ -31,11 +31,11 @@ type (
 
 //
 func init() {
-	processor.Register("service_sync", serviceSyncFunc)
+	processor.Register("service_sync", serviceSyncFn)
 }
 
 //
-func serviceSyncFunc(control processor.ProcessControl) (processor.Processor, error) {
+func serviceSyncFn(control processor.ProcessControl) (processor.Processor, error) {
 	return &processServiceSync{control: control}, nil
 }
 

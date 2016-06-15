@@ -21,11 +21,11 @@ type processDev struct {
 
 //
 func init() {
-	Register("dev", devFunc)
+	Register("dev", devFn)
 }
 
 //
-func devFunc(control ProcessControl) (Processor, error) {
+func devFn(control ProcessControl) (Processor, error) {
 	// control.Meta["dev-control"]
 
 	// do some control validation check on the meta for the flags and make sure they

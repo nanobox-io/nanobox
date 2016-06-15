@@ -21,11 +21,11 @@ type processUpdatePortal struct {
 
 //
 func init() {
-	processor.Register("update_portal", updatePortalFunc)
+	processor.Register("update_portal", updatePortalFn)
 }
 
 //
-func updatePortalFunc(control processor.ProcessControl) (processor.Processor, error) {
+func updatePortalFn(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 	return processUpdatePortal{control}, nil
 }

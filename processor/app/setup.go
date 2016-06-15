@@ -16,11 +16,11 @@ type processAppSetup struct {
 
 //
 func init() {
-	processor.Register("app_setup", appSetupFunc)
+	processor.Register("app_setup", appSetupFn)
 }
 
 //
-func appSetupFunc(control processor.ProcessControl) (processor.Processor, error) {
+func appSetupFn(control processor.ProcessControl) (processor.Processor, error) {
 	return &processAppSetup{control: control}, nil
 }
 

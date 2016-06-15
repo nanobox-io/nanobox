@@ -28,11 +28,11 @@ type processCodePublish struct {
 
 //
 func init() {
-	processor.Register("code_publish", codePublishFunc)
+	processor.Register("code_publish", codePublishFn)
 }
 
 //
-func codePublishFunc(control processor.ProcessControl) (processor.Processor, error) {
+func codePublishFn(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 	// {BUILD:"%s","warehouse":"%s","warehouse_token":"123","boxfile":"%s"}
 	if control.Meta["build_id"] == "" ||

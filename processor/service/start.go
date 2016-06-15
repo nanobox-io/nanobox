@@ -22,11 +22,11 @@ type processServiceStart struct {
 
 //
 func init() {
-	processor.Register("service_start", serviceStartFunc)
+	processor.Register("service_start", serviceStartFn)
 }
 
 //
-func serviceStartFunc(control processor.ProcessControl) (processor.Processor, error) {
+func serviceStartFn(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 
 	// make sure i have a name to start

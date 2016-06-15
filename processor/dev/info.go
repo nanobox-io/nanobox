@@ -20,11 +20,11 @@ type processDevInfo struct {
 
 //
 func init() {
-	processor.Register("dev_info", devInfoFunc)
+	processor.Register("dev_info", devInfoFn)
 }
 
 //
-func devInfoFunc(control processor.ProcessControl) (processor.Processor, error) {
+func devInfoFn(control processor.ProcessControl) (processor.Processor, error) {
 	return processDevInfo{control}, nil
 }
 

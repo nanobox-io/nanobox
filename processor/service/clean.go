@@ -19,11 +19,11 @@ type processServiceClean struct {
 
 //
 func init() {
-	processor.Register("service_clean", serviceCleanFunc)
+	processor.Register("service_clean", serviceCleanFn)
 }
 
 //
-func serviceCleanFunc(control processor.ProcessControl) (processor.Processor, error) {
+func serviceCleanFn(control processor.ProcessControl) (processor.Processor, error) {
 	return processServiceClean{control: control}, nil
 }
 

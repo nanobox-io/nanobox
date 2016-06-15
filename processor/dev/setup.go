@@ -17,11 +17,11 @@ type processDevSetup struct {
 
 //
 func init() {
-	processor.Register("dev_setup", devSetupFunc)
+	processor.Register("dev_setup", devSetupFn)
 }
 
 //
-func devSetupFunc(control processor.ProcessControl) (processor.Processor, error) {
+func devSetupFn(control processor.ProcessControl) (processor.Processor, error) {
 	// control.Meta["processDevSetup-control"]
 
 	// do some control validation check on the meta for the flags and make sure they

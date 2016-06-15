@@ -42,11 +42,11 @@ type (
 
 //
 func init() {
-	processor.Register("service_setup", serviceSetupFunc)
+	processor.Register("service_setup", serviceSetupFn)
 }
 
 //
-func serviceSetupFunc(control processor.ProcessControl) (processor.Processor, error) {
+func serviceSetupFn(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 	// ensure we have a name and immage
 	if control.Meta["name"] == "" || control.Meta["image"] == "" {

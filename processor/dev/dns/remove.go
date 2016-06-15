@@ -21,11 +21,11 @@ type processDevDNSRemove struct {
 
 //
 func init() {
-	processor.Register("dev_dns_remove", devDNSRemoveFunc)
+	processor.Register("dev_dns_remove", devDNSRemoveFn)
 }
 
 //
-func devDNSRemoveFunc(control processor.ProcessControl) (processor.Processor, error) {
+func devDNSRemoveFn(control processor.ProcessControl) (processor.Processor, error) {
 	return processDevDNSRemove{control: control}, nil
 }
 

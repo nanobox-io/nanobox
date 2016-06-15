@@ -18,11 +18,11 @@ type processAppTeardown struct {
 
 //
 func init() {
-	processor.Register("app_teardown", appTeardownFunc)
+	processor.Register("app_teardown", appTeardownFn)
 }
 
 //
-func appTeardownFunc(control processor.ProcessControl) (processor.Processor, error) {
+func appTeardownFn(control processor.ProcessControl) (processor.Processor, error) {
 	return &processAppTeardown{control: control}, nil
 }
 

@@ -18,11 +18,11 @@ type processLinkAdd struct {
 
 //
 func init() {
-	processor.Register("link_add", linkAddFunc)
+	processor.Register("link_add", linkAddFn)
 }
 
 //
-func linkAddFunc(conf processor.ProcessControl) (processor.Processor, error) {
+func linkAddFn(conf processor.ProcessControl) (processor.Processor, error) {
 	return processLinkAdd{conf}, nil
 }
 

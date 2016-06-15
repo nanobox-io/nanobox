@@ -21,11 +21,11 @@ type processDevDNSAdd struct {
 
 //
 func init() {
-	processor.Register("dev_dns_add", devDNSAddFunc)
+	processor.Register("dev_dns_add", devDNSAddFn)
 }
 
 //
-func devDNSAddFunc(control processor.ProcessControl) (processor.Processor, error) {
+func devDNSAddFn(control processor.ProcessControl) (processor.Processor, error) {
 	return processDevDNSAdd{control: control}, nil
 }
 

@@ -16,11 +16,11 @@ type processPlatformSetup struct {
 
 //
 func init() {
-	processor.Register("platform_setup", platformSetupFunc)
+	processor.Register("platform_setup", platformSetupFn)
 }
 
 //
-func platformSetupFunc(control processor.ProcessControl) (processor.Processor, error) {
+func platformSetupFn(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 
 	return processPlatformSetup{control}, nil

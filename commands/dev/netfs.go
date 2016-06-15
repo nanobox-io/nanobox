@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/processor"
+	"github.com/nanobox-io/nanobox/util/print"
 )
 
 var (
@@ -45,20 +46,12 @@ func init() {
 func netfsAddFn(ccmd *cobra.Command, args []string) {
 	processor.DefaultConfig.Meta["host"] = args[0]
 	processor.DefaultConfig.Meta["path"] = args[1]
-
-	//
-	if err := processor.Run("dev_netfs_add", processor.DefaultConfig); err != nil {
-
-	}
+	print.OutputCmdErr(processor.Run("dev_netfs_add", processor.DefaultConfig))
 }
 
 // netfsRmFn will run the netfs processor for removing a netfs export
 func netfsRmFn(ccmd *cobra.Command, args []string) {
 	processor.DefaultConfig.Meta["host"] = args[0]
 	processor.DefaultConfig.Meta["path"] = args[1]
-
-	//
-	if err := processor.Run("dev_netfs_remove", processor.DefaultConfig); err != nil {
-
-	}
+	print.OutputCmdErr(processor.Run("dev_netfs_remove", processor.DefaultConfig))
 }

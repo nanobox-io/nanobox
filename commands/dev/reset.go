@@ -4,7 +4,8 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/processor"
-	cmdutil "github.com/nanobox-io/nanobox/validate/commands"
+	"github.com/nanobox-io/nanobox/util/print"
+	"github.com/nanobox-io/nanobox/validate"
 )
 
 var (
@@ -14,7 +15,7 @@ var (
 		Use:    "reset",
 		Short:  "Resets the dev VM registry.",
 		Long:   ``,
-		PreRun: cmdutil.Validate("provider"),
+		PreRun: validate.Requires("provider"),
 		Run:    resetFn,
 	}
 )
@@ -24,7 +25,5 @@ func resetFn(ccmd *cobra.Command, args []string) {
 	// TODO: Take an extra arguement and decide what we want to reset
 
 	//
-	if err := processor.Run("dev_reset", processor.DefaultConfig); err != nil {
-
-	}
+	print.OutputCmdErr(processor.Run("dev_reset", processor.DefaultConfig))
 }

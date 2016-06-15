@@ -20,11 +20,11 @@ type processCodeSync struct {
 
 //
 func init() {
-	processor.Register("code_sync", codeSyncFunc)
+	processor.Register("code_sync", codeSyncFn)
 }
 
 //
-func codeSyncFunc(control processor.ProcessControl) (processor.Processor, error) {
+func codeSyncFn(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 	// {"build":"%s","warehouse":"%s","warehouse_token":"123","boxfile":"%s"}
 	if control.Meta["build_id"] == "" ||

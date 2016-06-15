@@ -19,11 +19,11 @@ type processDevTeardown struct {
 
 //
 func init() {
-	processor.Register("dev_teardown", devTeardownFunc)
+	processor.Register("dev_teardown", devTeardownFn)
 }
 
 //
-func devTeardownFunc(control processor.ProcessControl) (processor.Processor, error) {
+func devTeardownFn(control processor.ProcessControl) (processor.Processor, error) {
 	return &processDevTeardown{control}, nil
 }
 

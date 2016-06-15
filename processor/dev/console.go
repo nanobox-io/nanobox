@@ -18,11 +18,11 @@ type processDevConsole struct {
 
 //
 func init() {
-	processor.Register("dev_console", devConsoleFunc)
+	processor.Register("dev_console", devConsoleFn)
 }
 
 //
-func devConsoleFunc(conf processor.ProcessControl) (processor.Processor, error) {
+func devConsoleFn(conf processor.ProcessControl) (processor.Processor, error) {
 	return processDevConsole{conf}, nil
 }
 

@@ -55,11 +55,11 @@ type (
 
 //
 func init() {
-	processor.Register("service_configure", serviceConfigureFunc)
+	processor.Register("service_configure", serviceConfigureFn)
 }
 
 //
-func serviceConfigureFunc(control processor.ProcessControl) (processor.Processor, error) {
+func serviceConfigureFn(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 
 	return processServiceConfigure{control: control}, nil

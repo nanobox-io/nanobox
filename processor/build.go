@@ -9,11 +9,11 @@ type processBuild struct {
 
 //
 func init() {
-	Register("build", buildFunc)
+	Register("build", buildFn)
 }
 
 //
-func buildFunc(control ProcessControl) (Processor, error) {
+func buildFn(control ProcessControl) (Processor, error) {
 	return processBuild{control}, nil
 }
 

@@ -1,3 +1,4 @@
+// Package validate ...
 package validate
 
 import (
@@ -18,6 +19,12 @@ func Register(name string, validator validatorFunc) {
 	validators[name] = validator
 }
 
+// Add ...
+func (vError *validationError) Add(err error) {
+	tmp := validationError(append([]error(*vError), err))
+	vError = &tmp
+}
+
 // Check ...
 func Check(checks ...string) error {
 	ve := validationError{}
@@ -33,12 +40,6 @@ func Check(checks ...string) error {
 		return ve
 	}
 	return nil
-}
-
-// Add ...
-func (vError *validationError) Add(err error) {
-	tmp := validationError(append([]error(*vError), err))
-	vError = &tmp
 }
 
 // Error ...

@@ -16,11 +16,11 @@ type processLinkList struct {
 
 //
 func init() {
-	processor.Register("link_list", linkFunc)
+	processor.Register("link_list", linkListFn)
 }
 
 //
-func linkFunc(conf processor.ProcessControl) (processor.Processor, error) {
+func linkListFn(conf processor.ProcessControl) (processor.Processor, error) {
 	return processLinkList{conf}, nil
 }
 

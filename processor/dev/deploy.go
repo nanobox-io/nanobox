@@ -19,11 +19,11 @@ type processDevDeploy struct {
 
 //
 func init() {
-	processor.Register("dev_deploy", devDeployFunc)
+	processor.Register("dev_deploy", devDeployFn)
 }
 
 //
-func devDeployFunc(control processor.ProcessControl) (processor.Processor, error) {
+func devDeployFn(control processor.ProcessControl) (processor.Processor, error) {
 	// control.Meta["processDevDeploy-control"]
 
 	// do some control validation check on the meta for the flags and make sure they
@@ -40,8 +40,7 @@ func (devDeploy processDevDeploy) Results() processor.ProcessControl {
 //
 func (devDeploy processDevDeploy) Process() error {
 
-	// defer the clean up so if we exit early the
-	// cleanup will always happen
+	// defer the clean up so if we exit early the cleanup will always happen
 	defer func() {
 		if err := processor.Run("dev_teardown", devDeploy.control); err != nil {
 			// this is bad, really bad...

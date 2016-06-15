@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/processor"
+	"github.com/nanobox-io/nanobox/util/print"
 )
 
 var (
@@ -29,9 +30,5 @@ func init() {
 func loginFn(ccmd *cobra.Command, args []string) {
 	processor.DefaultConfig.Meta["username"] = username
 	processor.DefaultConfig.Meta["password"] = password
-
-	//
-	if err := processor.Run("login", processor.DefaultConfig); err != nil {
-
-	}
+	print.OutputCmdErr(processor.Run("login", processor.DefaultConfig))
 }

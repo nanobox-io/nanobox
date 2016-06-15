@@ -22,11 +22,11 @@ type processServiceRemove struct {
 
 //
 func init() {
-	processor.Register("service_remove", serviceRemoveFunc)
+	processor.Register("service_remove", serviceRemoveFn)
 }
 
 //
-func serviceRemoveFunc(control processor.ProcessControl) (processor.Processor, error) {
+func serviceRemoveFn(control processor.ProcessControl) (processor.Processor, error) {
 	return &processServiceRemove{control: control}, nil
 }
 

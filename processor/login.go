@@ -13,10 +13,10 @@ type processLogin struct {
 }
 
 func init() {
-	Register("login", loginFunc)
+	Register("login", loginFn)
 }
 
-func loginFunc(conf ProcessControl) (Processor, error) {
+func loginFn(conf ProcessControl) (Processor, error) {
 	return processLogin{conf}, nil
 }
 

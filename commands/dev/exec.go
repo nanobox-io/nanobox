@@ -7,7 +7,8 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/processor"
-	cmdutil "github.com/nanobox-io/nanobox/validate/commands"
+	"github.com/nanobox-io/nanobox/util/print"
+	"github.com/nanobox-io/nanobox/validate"
 )
 
 var (
@@ -17,7 +18,7 @@ var (
 		Use:    "exec",
 		Short:  "Executes a command inside your local dev app.",
 		Long:   ``,
-		PreRun: cmdutil.Validate("provider"),
+		PreRun: validate.Requires("provider"),
 		Run:    execFn,
 	}
 )
@@ -36,7 +37,5 @@ func execFn(ccmd *cobra.Command, args []string) {
 	}
 
 	//
-	if err := processor.Run("dev_console", processor.DefaultConfig); err != nil {
-
-	}
+	print.OutputCmdErr(processor.Run("dev_console", processor.DefaultConfig))
 }

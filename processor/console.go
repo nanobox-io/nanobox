@@ -28,11 +28,11 @@ var (
 
 //
 func init() {
-	Register("console", consoleFunc)
+	Register("console", consoleFn)
 }
 
 //
-func consoleFunc(control ProcessControl) (Processor, error) {
+func consoleFn(control ProcessControl) (Processor, error) {
 	return processConsole{control}, nil
 }
 

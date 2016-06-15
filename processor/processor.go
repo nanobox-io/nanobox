@@ -54,10 +54,11 @@ var (
 
 // Register ...
 func Register(name string, sb ProcessBuilder) {
-	_, ok := processors[name]
-	if !DefaultConfig.Force && ok {
+	if _, ok := processors[name]; !DefaultConfig.Force && ok {
 		panic("Duplicate Registration - " + name)
 	}
+
+	//
 	processors[name] = sb
 }
 

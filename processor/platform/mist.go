@@ -19,11 +19,11 @@ type processMistListen struct {
 
 //
 func init() {
-	processor.Register("mist_log", mistListenFunc)
+	processor.Register("mist_log", mistListenFn)
 }
 
 //
-func mistListenFunc(control processor.ProcessControl) (processor.Processor, error) {
+func mistListenFn(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 	return processMistListen{control}, nil
 }

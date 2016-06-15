@@ -31,11 +31,11 @@ type processCodeBuild struct {
 
 //
 func init() {
-	processor.Register("code_build", codeBuildFunc)
+	processor.Register("code_build", codeBuildFn)
 }
 
 //
-func codeBuildFunc(control processor.ProcessControl) (processor.Processor, error) {
+func codeBuildFn(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 	return &processCodeBuild{control: control}, nil
 }

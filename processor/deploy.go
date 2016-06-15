@@ -14,11 +14,11 @@ type processDeploy struct {
 
 //
 func init() {
-	Register("deploy", deployFunc)
+	Register("deploy", deployFn)
 }
 
 //
-func deployFunc(control ProcessControl) (Processor, error) {
+func deployFn(control ProcessControl) (Processor, error) {
 	// control.Meta["deploy-control"]
 
 	// do some control validation check on the meta for the flags and make sure they

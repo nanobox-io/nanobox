@@ -9,11 +9,11 @@ type processPlatformDestroy struct {
 
 //
 func init() {
-	processor.Register("nanopack_destroy", platformDestroyFunc)
+	processor.Register("nanopack_destroy", platformDestroyFn)
 }
 
 //
-func platformDestroyFunc(control processor.ProcessControl) (processor.Processor, error) {
+func platformDestroyFn(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 	return processPlatformDestroy{control}, nil
 }

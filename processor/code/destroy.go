@@ -19,11 +19,11 @@ type processCodeDestroy struct {
 
 //
 func init() {
-	processor.Register("code_destroy", codeDestroyFunc)
+	processor.Register("code_destroy", codeDestroyFn)
 }
 
 //
-func codeDestroyFunc(control processor.ProcessControl) (processor.Processor, error) {
+func codeDestroyFn(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 	if control.Meta["name"] == "" {
 		return nil, errMissingImageOrName

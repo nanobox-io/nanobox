@@ -13,11 +13,11 @@ type processPlatformStop struct {
 
 //
 func init() {
-	processor.Register("platform_stop", platformStopFunc)
+	processor.Register("platform_stop", platformStopFn)
 }
 
 //
-func platformStopFunc(control processor.ProcessControl) (processor.Processor, error) {
+func platformStopFn(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 	return processPlatformStop{control}, nil
 }

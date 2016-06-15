@@ -50,11 +50,11 @@ type (
 
 //
 func init() {
-	processor.Register("code_configure", codeConfigureFunc)
+	processor.Register("code_configure", codeConfigureFn)
 }
 
 //
-func codeConfigureFunc(control processor.ProcessControl) (processor.Processor, error) {
+func codeConfigureFn(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 	// make sure i was given a name and image
 	if control.Meta["name"] == "" || control.Meta["boxfile"] == "" {

@@ -23,11 +23,11 @@ type processServiceDestroy struct {
 
 //
 func init() {
-	processor.Register("service_destroy", serviceDestroyFunc)
+	processor.Register("service_destroy", serviceDestroyFn)
 }
 
 //
-func serviceDestroyFunc(control processor.ProcessControl) (processor.Processor, error) {
+func serviceDestroyFn(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 	// if control.Meta["name"] == "" {
 	// 	return nil, errors.New("missing image or name")

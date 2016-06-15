@@ -26,11 +26,11 @@ type processCodeSetup struct {
 
 //
 func init() {
-	processor.Register("code_setup", codeSetupFunc)
+	processor.Register("code_setup", codeSetupFn)
 }
 
 //
-func codeSetupFunc(control processor.ProcessControl) (processor.Processor, error) {
+func codeSetupFn(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
 	return &processCodeSetup{control: control}, nil
 }

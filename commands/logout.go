@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/processor"
+	"github.com/nanobox-io/nanobox/util/print"
 )
 
 var (
@@ -19,9 +20,5 @@ var (
 
 // logoutFn ...
 func logoutFn(ccmd *cobra.Command, args []string) {
-
-	//
-	if err := processor.Run("logout", processor.DefaultConfig); err != nil {
-
-	}
+	print.OutputCmdErr(processor.Run("logout", processor.DefaultConfig))
 }
