@@ -12,7 +12,6 @@ import (
 // processDevNetFSAdd ...
 type processDevNetFSAdd struct {
 	control processor.ProcessControl
-	path    string
 }
 
 //
@@ -61,10 +60,7 @@ func (devNetFSAdd processDevNetFSAdd) Process() error {
 // validateMeta validates that the required metadata exists
 func (devNetFSAdd *processDevNetFSAdd) validateMeta() error {
 
-	// set the host and path
-	devNetFSAdd.path = devNetFSAdd.control.Meta["path"]
-
-	if devNetFSAdd.path == "" {
+	if devNetFSAdd.control.Meta["path"] == "" {
 		return fmt.Errorf("Path is required")
 	}
 
@@ -74,8 +70,10 @@ func (devNetFSAdd *processDevNetFSAdd) validateMeta() error {
 // entryExists returns true if the entry already exists
 func (devNetFSAdd *processDevNetFSAdd) entryExists() bool {
 
+	path := devNetFSAdd.control.Meta["path"]
+
 	// if the entry exists just return
-	if netfs.Exists(devNetFSAdd.path) {
+	if netfs.Exists(path) {
 		return true
 	}
 
@@ -85,7 +83,9 @@ func (devNetFSAdd *processDevNetFSAdd) entryExists() bool {
 // addEntry adds the netfs entry into the /etc/exports
 func (devNetFSAdd *processDevNetFSAdd) addEntry() error {
 
-	if err := netfs.Add(devNetFSAdd.path); err != nil {
+	path := devNetFSAdd.control.Meta["path"]
+
+	if err := netfs.Add(path); err != nil {
 		return err
 	}
 
@@ -95,10 +95,12 @@ func (devNetFSAdd *processDevNetFSAdd) addEntry() error {
 // reExecPrivilege re-execs the current process with a privileged user
 func (devNetFSAdd *processDevNetFSAdd) reExecPrivilege() error {
 
+	path := devNetFSAdd.control.Meta["path"]
+
 	// call 'dev netfs add' with the original path and args; os.Args[0] will be the
 	// currently executing program, so this command will ultimately lead right back
 	// here
-	cmd := fmt.Sprintf("%s dev netfs add %s", os.Args[0], devNetFSAdd.path)
+	cmd := fmt.Sprintf("%s dev netfs add %s", os.Args[0], path)
 
 	// if the sudo'ed subprocess fails, we need to return error to stop the process
 	fmt.Println("Admin privileges are required to add entries to your exports file, your password may be requested...")

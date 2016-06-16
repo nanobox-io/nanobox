@@ -97,12 +97,12 @@ func (devDNSRemove *processDevDNSRemove) loadApp() error {
 func (devDNSRemove *processDevDNSRemove) entriesExist() bool {
 
 	// fetch the IPs
-	previewIP := devDNSAdd.app.GlobalIPs["preview"]
-	devIP     := devDNSAdd.app.GlobalIPs["dev"]
+	previewIP := devDNSRemove.app.GlobalIPs["preview"]
+	devIP     := devDNSRemove.app.GlobalIPs["dev"]
 
 	// generate the entries
-	preview := dns.Entry(previewIP, devDNSAdd.name, "preview")
-	dev     := dns.Entry(devIP, devDNSAdd.name, "dev")
+	preview := dns.Entry(previewIP, devDNSRemove.name, "preview")
+	dev     := dns.Entry(devIP, devDNSRemove.name, "dev")
 
 	// if the entry doesnt exist just return
 	if dns.Exists(preview) && dns.Exists(dev) {
@@ -116,12 +116,12 @@ func (devDNSRemove *processDevDNSRemove) entriesExist() bool {
 func (devDNSRemove *processDevDNSRemove) removeEntries() error {
 
 	// fetch the IPs
-	previewIP := devDNSAdd.app.GlobalIPs["preview"]
-	devIP     := devDNSAdd.app.GlobalIPs["dev"]
+	previewIP := devDNSRemove.app.GlobalIPs["preview"]
+	devIP     := devDNSRemove.app.GlobalIPs["dev"]
 
 	// generate the entries
-	preview := dns.Entry(previewIP, devDNSAdd.name, "preview")
-	dev     := dns.Entry(devIP, devDNSAdd.name, "dev")
+	preview := dns.Entry(previewIP, devDNSRemove.name, "preview")
+	dev     := dns.Entry(devIP, devDNSRemove.name, "dev")
 
 	// remove the 'preview' DNS entry into the /etc/hosts file
 	if err := dns.Remove(preview); err != nil {

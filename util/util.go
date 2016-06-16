@@ -3,7 +3,6 @@ package util
 
 import (
 	"math/rand"
-	"os"
 )
 
 const (

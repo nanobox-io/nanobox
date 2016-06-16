@@ -77,7 +77,7 @@ func (serviceDestroy processServiceDestroy) Process() error {
 }
 
 // loadApp loads the app from the database
-func (serviceDestroy *processServiceSetup) loadApp() error {
+func (serviceDestroy *processServiceDestroy) loadApp() error {
 
 	// load the app from the database
 	if err := data.Get("apps", config.AppName(), &serviceDestroy.app); err != nil {
@@ -125,22 +125,20 @@ func (serviceDestroy *processServiceDestroy) removeContainer() error {
 // detachNetwork detaches the virtual network from the host
 func (serviceDestroy *processServiceDestroy) detachNetwork() error {
 
-	name := serviceDestroy.control.Meta["name"]
+	name    := serviceDestroy.control.Meta["name"]
+	service := serviceDestroy.service
 
-	err = provider.RemoveNat(service.ExternalIP, service.InternalIP)
-	if err != nil {
+	if err := provider.RemoveNat(service.ExternalIP, service.InternalIP); err != nil {
 		return err
 	}
 
-	err = provider.RemoveIP(service.ExternalIP)
-	if err != nil {
+	if err := provider.RemoveIP(service.ExternalIP); err != nil {
 		return err
 	}
 
 	// don't return the external IP if this is portal
 	if name != "portal" {
-		err = dhcp.ReturnIP(net.ParseIP(service.ExternalIP))
-		if err != nil {
+		if err := dhcp.ReturnIP(net.ParseIP(service.ExternalIP)); err != nil {
 			return err
 		}
 	}
@@ -148,8 +146,7 @@ func (serviceDestroy *processServiceDestroy) detachNetwork() error {
 
 	// don't return the internal IP if it's an app-level cache
 	if serviceDestroy.app.LocalIPs[name] != "" {
-		err = dhcp.ReturnIP(net.ParseIP(service.InternalIP))
-		if err != nil {
+		if err := dhcp.ReturnIP(net.ParseIP(service.InternalIP)); err != nil {
 			return err
 		}
 	}

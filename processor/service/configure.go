@@ -124,7 +124,7 @@ func (serviceConfigure processServiceConfigure) configurePayload() string {
 
 	payload := configPayload{
 		LogvacHost: app.LocalIPs["logvac"],
-		MistHost: 	app.GlobalIPs["mist"],
+		MistHost: 	app.LocalIPs["mist"],
 		Platform:   "local",
 		Config:     config,
 		Member: 		member{
@@ -191,7 +191,7 @@ func (serviceConfigure *processServiceConfigure) validateMeta() error {
 }
 
 // loadApp loads the app from the database
-func (serviceConfigure *processAppConfigure) loadApp() error {
+func (serviceConfigure *processServiceConfigure) loadApp() error {
 
 	// load the app from the database
 	if err := data.Get("apps", config.AppName(), &serviceConfigure.app); err != nil {

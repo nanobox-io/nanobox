@@ -337,6 +337,10 @@ func (codeDev *processCodeDev) cwd() string {
 
 // printMOTD prints the motd with information for the user to connect
 func (codeDev *processCodeDev) printMOTD() error {
+
+	// fetch the dev ip
+	devIP := codeDev.app.GlobalIPs["dev"]
+
 	os.Stderr.WriteString(fmt.Sprintf(`
                                    **
                                 ********
@@ -360,7 +364,7 @@ func (codeDev *processCodeDev) printMOTD() error {
 + If you run a server, access it at >> %s
 --------------------------------------------------------------------------------
 
-`, codeDev.app.DevIP))
+`, devIP))
 
 	return nil
 }

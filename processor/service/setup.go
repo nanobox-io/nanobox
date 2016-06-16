@@ -143,7 +143,7 @@ func (serviceSetup *processServiceSetup) clean() error {
 func (serviceSetup *processServiceSetup) validateMeta() error {
 	// confirm the provider is an accessable one that we support.
 	// ensure we have a name and immage
-	if serviceSetup.control.Meta["name"] == "" || 
+	if serviceSetup.control.Meta["name"] == "" ||
 		 serviceSetup.control.Meta["image"] == "" {
 		return errors.New("missing image or name")
 	}
@@ -195,7 +195,6 @@ func (serviceSetup *processServiceSetup) downloadImage() error {
 
 // reserveIps reserves a global and local ip for the container
 func (serviceSetup *processServiceSetup) reserveIps() error {
-	var err error
 
 	name := serviceSetup.control.Meta["name"]
 	app := serviceSetup.app
@@ -207,10 +206,12 @@ func (serviceSetup *processServiceSetup) reserveIps() error {
 		serviceSetup.localIP = app.LocalIPs[name]
 	} else {
 
-		serviceSetup.localIP, err = dhcp.ReserveLocal().String()
+		localIP, err := dhcp.ReserveLocal()
 		if err != nil {
 			return err
 		}
+
+		serviceSetup.localIP = localIP.String()
 
 		serviceSetup.cleanFuncs = append(serviceSetup.cleanFuncs, func() error {
 			return dhcp.ReturnIP(net.ParseIP(serviceSetup.localIP))
@@ -223,10 +224,12 @@ func (serviceSetup *processServiceSetup) reserveIps() error {
 		serviceSetup.globalIP = app.GlobalIPs["preview"]
 	} else {
 
-		serviceSetup.globalIP, err = dhcp.ReserveGlobal().String()
+		globalIP, err := dhcp.ReserveGlobal()
 		if err != nil {
 			return err
 		}
+
+		serviceSetup.globalIP = globalIP.String()
 
 		serviceSetup.cleanFuncs = append(serviceSetup.cleanFuncs, func() error {
 			return dhcp.ReturnIP(net.ParseIP(serviceSetup.globalIP))
