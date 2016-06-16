@@ -64,22 +64,52 @@ func (appSetup *processAppSetup) loadApp() error {
 	// set the default state
 	if appSetup.app.State == "" {
 		appSetup.app.State = INITIALIZED
+		appSetup.app.GlobalIPs = map[string]string{}
+		appSetup.app.LocalIPs = map[string]string{}
 	}
 
 	return nil
 }
 
-// reserveIPs reserves necessary app-global ip addresses
+// reserveIPs reserves necessary app global and local ip addresses
 func (appSetup *processAppSetup) reserveIPs() error {
 
-	//
-	devIP, err := dhcp.ReserveGlobal()
+	var err error
+
+	// reserve a dev ip
+	var devIP net.IP
+	devIP, err = dhcp.ReserveGlobal()
 	if err != nil {
 		return err
 	}
 
-	//
-	appSetup.app.DevIP = devIP.String()
+	// reserve a preview ip
+	var previewIP net.IP
+	previewIP, err = dhcp.ReserveGlobal()
+	if err != nil {
+		return err
+	}
+
+	// reserve a logvac ip
+	var logvacIP net.IP
+	logvacIP, err = dhcp.ReserveLocal()
+	if err != nil {
+		return err
+	}
+
+	// reserve a mist ip
+	var mistIP net.IP
+	mistIP, err = dhcp.ReserveLocal()
+	if err != nil {
+		return err
+	}
+
+	// now let's assign them onto the app
+	appSetup.app.GlobalIPs["dev"] 		= devIP.String()
+	appSetup.app.GlobalIPs["preview"] = previewIP.String()
+
+	appSetup.app.LocalIPs["logvac"] = logvacIP.String()
+	appSetup.app.LocalIPs["mist"]   = mistIP.String()
 
 	return nil
 }

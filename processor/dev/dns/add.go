@@ -96,9 +96,13 @@ func (devDNSAdd *processDevDNSAdd) loadApp() error {
 // entriesExist returns true if both entries already exist
 func (devDNSAdd *processDevDNSAdd) entriesExist() bool {
 
+	// fetch the IPs
+	previewIP := devDNSAdd.app.GlobalIPs["preview"]
+	devIP     := devDNSAdd.app.GlobalIPs["dev"]
+
 	// generate the entries
-	preview := dns.Entry(devDNSAdd.app.DevIP, devDNSAdd.name, "preview")
-	dev := dns.Entry(devDNSAdd.app.DevIP, devDNSAdd.name, "dev")
+	preview := dns.Entry(previewIP, devDNSAdd.name, "preview")
+	dev     := dns.Entry(devIP, devDNSAdd.name, "dev")
 
 	// if the entries dont exist just return
 	if dns.Exists(preview) && dns.Exists(dev) {
@@ -111,9 +115,13 @@ func (devDNSAdd *processDevDNSAdd) entriesExist() bool {
 // addEntries adds the dev and preview entries into the host dns
 func (devDNSAdd *processDevDNSAdd) addEntries() error {
 
+	// fetch the IPs
+	previewIP := devDNSAdd.app.GlobalIPs["preview"]
+	devIP     := devDNSAdd.app.GlobalIPs["dev"]
+
 	// generate the entries
-	preview := dns.Entry(devDNSAdd.app.DevIP, devDNSAdd.name, "preview")
-	dev := dns.Entry(devDNSAdd.app.DevIP, devDNSAdd.name, "dev")
+	preview := dns.Entry(previewIP, devDNSAdd.name, "preview")
+	dev     := dns.Entry(devIP, devDNSAdd.name, "dev")
 
 	// add the 'preview' DNS entry into the /etc/hosts file
 	if err := dns.Add(preview); err != nil {

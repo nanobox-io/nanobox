@@ -368,13 +368,16 @@ func (codeDev *processCodeDev) printMOTD() error {
 // attachNetwork attaches the container to the host network
 func (codeDev *processCodeDev) attachNetwork() error {
 
+	// fetch the devIP
+	devIP := codeDev.app.GlobalIPs["dev"]
+
 	//
-	if err := provider.AddIP(codeDev.app.DevIP); err != nil {
+	if err := provider.AddIP(devIP); err != nil {
 		return err
 	}
 
 	//
-	if err := provider.AddNat(codeDev.app.DevIP, codeDev.localIP.String()); err != nil {
+	if err := provider.AddNat(devIP, codeDev.localIP.String()); err != nil {
 		return err
 	}
 
@@ -384,13 +387,16 @@ func (codeDev *processCodeDev) attachNetwork() error {
 // detachNetwork detaches the container from the host network
 func (codeDev *processCodeDev) detachNetwork() error {
 
+	// fetch the devIP
+	devIP := codeDev.app.GlobalIPs["dev"]
+
 	//
-	if err := provider.RemoveNat(codeDev.app.DevIP, codeDev.localIP.String()); err != nil {
+	if err := provider.RemoveNat(devIP, codeDev.localIP.String()); err != nil {
 		return err
 	}
 
 	//
-	if err := provider.RemoveIP(codeDev.app.DevIP); err != nil {
+	if err := provider.RemoveIP(devIP); err != nil {
 		return err
 	}
 

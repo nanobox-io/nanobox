@@ -18,9 +18,10 @@ type (
 
 	// processServiceConfigure ...
 	processServiceConfigure struct {
-		control processor.ProcessControl
-		service models.Service
-		boxfile models.Boxfile
+		control 	processor.ProcessControl
+		app 			models.App
+		service 	models.Service
+		boxfile 	models.Boxfile
 	}
 
 	// member ...
@@ -40,6 +41,7 @@ type (
 	// configPayload ...
 	configPayload struct {
 		LogvacHost string                 `json:"logvac_host"`
+		MistHost	 string									`json:"mist_host"`
 		Platform   string                 `json:"platform"`
 		Config     map[string]interface{} `json:"config"`
 		Member     member                 `json:"member"`
@@ -71,6 +73,10 @@ func (serviceConfigure processServiceConfigure) Results() processor.ProcessContr
 
 //
 func (serviceConfigure processServiceConfigure) Process() error {
+
+	if err := serviceConfigure.loadApp(); err != nil {
+		return err
+	}
 
 	if err := serviceConfigure.loadService(); err != nil {
 		return err
@@ -106,59 +112,71 @@ func (serviceConfigure processServiceConfigure) Process() error {
 
 // configurePayload ...
 func (serviceConfigure processServiceConfigure) configurePayload() string {
-	me := models.Service{}
-	data.Get(config.AppName(), serviceConfigure.control.Meta["name"], &me)
 
-	logvac := models.Service{}
-	data.Get(config.AppName(), LOGVAC, &logvac)
+	// create some variables for convenience
+	name    := serviceConfigure.control.Meta["name"]
+	app     := serviceConfigure.app
+	service := serviceConfigure.service
 
+	// parse the boxfile to fetch the config node
 	box := boxfile.New([]byte(serviceConfigure.boxfile.Data))
-	boxConfig := box.Node(serviceConfigure.control.Meta["name"]).Node("config")
+	config := box.Node(name).Node("config").Parsed
 
-	pload := configPayload{
-		LogvacHost: logvac.InternalIP,
+	payload := configPayload{
+		LogvacHost: app.LocalIPs["logvac"],
+		MistHost: 	app.GlobalIPs["mist"],
 		Platform:   "local",
-		Config:     boxConfig.Parsed,
-		Member: member{
-			LocalIP: me.InternalIP,
+		Config:     config,
+		Member: 		member{
+			LocalIP: service.InternalIP,
 			UID:     "1",
 			Role:    "primary",
 		},
 		Component: component{
-			Name: "whydoesthismatter",
-			UID:  serviceConfigure.control.Meta["name"],
-			ID:   me.ID,
+			Name: name,
+			UID:  name,
+			ID:   service.ID,
 		},
-		Users: me.Plan.Users,
+		Users: service.Plan.Users,
 	}
-	if pload.Users == nil {
-		pload.Users = []models.User{}
+
+	if payload.Users == nil {
+		payload.Users = []models.User{}
 	}
-	switch serviceConfigure.control.Meta["name"] {
+
+	switch name {
 	case PORTAL, LOGVAC, HOARDER, MIST:
-		pload.Config["token"] = "123"
+		payload.Config["token"] = "123"
 	}
-	j, err := json.Marshal(pload)
+
+	j, err := json.Marshal(payload)
 	if err != nil {
 		return "{}"
 	}
+
 	return string(j)
 }
 
 // startUpdatePayload ...
 func (serviceConfigure processServiceConfigure) startUpdatePayload() string {
+
+	// parse the boxfile to fetch the config node
 	boxfile := boxfile.New([]byte(serviceConfigure.control.Meta["boxfile"]))
 	boxConfig := boxfile.Node(serviceConfigure.control.Meta["name"]).Node("config")
 
-	pload := startUpdatePayload{boxConfig.Parsed}
+	payload := startUpdatePayload{boxConfig.Parsed}
+
 	switch serviceConfigure.control.Meta["name"] {
 	case PORTAL, LOGVAC, HOARDER, MIST:
-		pload.Config["token"] = "123"
+		payload.Config["token"] = "123"
 	}
-	j, err := json.Marshal(pload)
+
+
+	j, err := json.Marshal(payload)
 	if err != nil {
 		return "{}"
 	}
+
 	return string(j)
 }
 
@@ -172,11 +190,25 @@ func (serviceConfigure *processServiceConfigure) validateMeta() error {
 	return nil
 }
 
+// loadApp loads the app from the database
+func (serviceConfigure *processAppConfigure) loadApp() error {
+
+	// load the app from the database
+	if err := data.Get("apps", config.AppName(), &serviceConfigure.app); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // loadService loads the service from the database
 func (serviceConfigure *processServiceConfigure) loadService() error {
+
+	name := serviceConfigure.control.Meta["name"]
+
 	// get the service from the database; an error means we could not start a service
 	// that wasnt setup (ie saved in the database)
-	if err := data.Get(config.AppName(), serviceConfigure.control.Meta["name"], &serviceConfigure.service); err != nil {
+	if err := data.Get(config.AppName(), name, &serviceConfigure.service); err != nil {
 		return err
 	}
 
@@ -224,7 +256,9 @@ func (serviceConfigure *processServiceConfigure) runStart() error {
 func (serviceConfigure *processServiceConfigure) persistService() error {
 	serviceConfigure.service.State = ACTIVE
 
-	if err := data.Put(config.AppName(), serviceConfigure.control.Meta["name"], &serviceConfigure.service); err != nil {
+	name := serviceConfigure.control.Meta["name"]
+
+	if err := data.Put(config.AppName(), name, &serviceConfigure.service); err != nil {
 		return err
 	}
 

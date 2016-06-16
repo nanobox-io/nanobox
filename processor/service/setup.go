@@ -27,9 +27,10 @@ type (
 	// processServiceSetup
 	processServiceSetup struct {
 		control    processor.ProcessControl
+		app				 models.App
 		service    models.Service
-		localIP    net.IP
-		globalIP   net.IP
+		localIP    string
+		globalIP   string
 		container  dockType.ContainerJSON
 		plan       string
 		fail       bool
@@ -67,6 +68,10 @@ func (serviceSetup *processServiceSetup) Process() error {
 
 	// call the cleanup function to ensure we don't leave any bad state
 	defer serviceSetup.clean()
+
+	if err := serviceSetup.loadApp(); err != nil {
+		return err
+	}
 
 	if err := serviceSetup.loadService(); err != nil {
 		serviceSetup.fail = true
@@ -151,6 +156,17 @@ func (serviceSetup *processServiceSetup) validateMeta() error {
 	return nil
 }
 
+// loadApp loads the app from the database
+func (serviceSetup *processServiceSetup) loadApp() error {
+
+	// load the app from the database
+	if err := data.Get("apps", config.AppName(), &serviceSetup.app); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // loadService fetches the service from the database
 func (serviceSetup *processServiceSetup) loadService() error {
 	// the service really shouldn't exist yet, so let's not return the error if it fails
@@ -180,23 +196,42 @@ func (serviceSetup *processServiceSetup) downloadImage() error {
 // reserveIps reserves a global and local ip for the container
 func (serviceSetup *processServiceSetup) reserveIps() error {
 	var err error
-	serviceSetup.localIP, err = dhcp.ReserveLocal()
-	if err != nil {
-		return err
+
+	name := serviceSetup.control.Meta["name"]
+	app := serviceSetup.app
+
+	// first let's see if our local IP was reserved during app creation
+	if app.LocalIPs[name] != "" {
+
+		// assign the localIP from the pre-generated app cache
+		serviceSetup.localIP = app.LocalIPs[name]
+	} else {
+
+		serviceSetup.localIP, err = dhcp.ReserveLocal().String()
+		if err != nil {
+			return err
+		}
+
+		serviceSetup.cleanFuncs = append(serviceSetup.cleanFuncs, func() error {
+			return dhcp.ReturnIP(net.ParseIP(serviceSetup.localIP))
+		})
 	}
 
-	serviceSetup.cleanFuncs = append(serviceSetup.cleanFuncs, func() error {
-		return dhcp.ReturnIP(serviceSetup.localIP)
-	})
+	// only if this service is portal, we need to use the preview IP
+	if name == "portal" {
+		// portal's global ip is the preview ip
+		serviceSetup.globalIP = app.GlobalIPs["preview"]
+	} else {
 
-	serviceSetup.globalIP, err = dhcp.ReserveGlobal()
-	if err != nil {
-		return err
+		serviceSetup.globalIP, err = dhcp.ReserveGlobal().String()
+		if err != nil {
+			return err
+		}
+
+		serviceSetup.cleanFuncs = append(serviceSetup.cleanFuncs, func() error {
+			return dhcp.ReturnIP(net.ParseIP(serviceSetup.globalIP))
+		})
 	}
-
-	serviceSetup.cleanFuncs = append(serviceSetup.cleanFuncs, func() error {
-		return dhcp.ReturnIP(serviceSetup.globalIP)
-	})
 
 	return nil
 }
@@ -207,7 +242,7 @@ func (serviceSetup *processServiceSetup) launchContainer() error {
 		Name:    fmt.Sprintf("nanobox-%s-%s", config.AppName(), serviceSetup.control.Meta["name"]),
 		Image:   serviceSetup.control.Meta["image"],
 		Network: "virt",
-		IP:      serviceSetup.localIP.String(),
+		IP:      serviceSetup.localIP,
 	}
 
 	serviceSetup.control.Info(stylish.SubBullet("Starting container..."))
@@ -230,22 +265,22 @@ func (serviceSetup *processServiceSetup) attachNetwork() error {
 	label := "Bridging container to host network..."
 	serviceSetup.control.Info(stylish.SubBullet(label))
 
-	err := provider.AddIP(serviceSetup.globalIP.String())
+	err := provider.AddIP(serviceSetup.globalIP)
 	if err != nil {
 		return err
 	}
 
 	serviceSetup.cleanFuncs = append(serviceSetup.cleanFuncs, func() error {
-		return provider.RemoveIP(serviceSetup.globalIP.String())
+		return provider.RemoveIP(serviceSetup.globalIP)
 	})
 
-	err = provider.AddNat(serviceSetup.globalIP.String(), serviceSetup.localIP.String())
+	err = provider.AddNat(serviceSetup.globalIP, serviceSetup.localIP)
 	if err != nil {
 		return err
 	}
 
 	serviceSetup.cleanFuncs = append(serviceSetup.cleanFuncs, func() error {
-		return provider.RemoveNat(serviceSetup.globalIP.String(), serviceSetup.localIP.String())
+		return provider.RemoveNat(serviceSetup.globalIP, serviceSetup.localIP)
 	})
 
 	return nil
@@ -255,9 +290,9 @@ func (serviceSetup *processServiceSetup) attachNetwork() error {
 func (serviceSetup *processServiceSetup) planService() error {
 	serviceSetup.control.Info(stylish.SubBullet("Gathering service requirements..."))
 
-	boxfile := boxfile.New([]byte(serviceSetup.control.Meta["boxfile"]))
-	boxConfig := boxfile.Node(serviceSetup.control.Meta["name"]).Node("config")
-	planPayload := map[string]interface{}{"config": boxConfig.Parsed}
+	boxfile        := boxfile.New([]byte(serviceSetup.control.Meta["boxfile"]))
+	boxConfig      := boxfile.Node(serviceSetup.control.Meta["name"]).Node("config")
+	planPayload    := map[string]interface{}{"config": boxConfig.Parsed}
 	jsonPayload, _ := json.Marshal(planPayload)
 
 	p, err := util.Exec(serviceSetup.container.ID, "plan", string(jsonPayload), processor.ExecWriter())
@@ -272,12 +307,12 @@ func (serviceSetup *processServiceSetup) planService() error {
 // persistService saves the service in the database
 func (serviceSetup *processServiceSetup) persistService() error {
 	// save service in DB
-	serviceSetup.service.ID = serviceSetup.container.ID
-	serviceSetup.service.Name = serviceSetup.control.Meta["name"]
-	serviceSetup.service.ExternalIP = serviceSetup.globalIP.String()
-	serviceSetup.service.InternalIP = serviceSetup.localIP.String()
-	serviceSetup.service.State = "planned"
-	serviceSetup.service.Type = "data"
+	serviceSetup.service.ID         = serviceSetup.container.ID
+	serviceSetup.service.Name       = serviceSetup.control.Meta["name"]
+	serviceSetup.service.ExternalIP = serviceSetup.globalIP
+	serviceSetup.service.InternalIP = serviceSetup.localIP
+	serviceSetup.service.State      = "planned"
+	serviceSetup.service.Type       = "data"
 
 	err := json.Unmarshal([]byte(serviceSetup.plan), &serviceSetup.service.Plan)
 	if err != nil {

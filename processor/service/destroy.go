@@ -18,7 +18,9 @@ import (
 
 // processServiceDestroy ...
 type processServiceDestroy struct {
-	control processor.ProcessControl
+	control 	processor.ProcessControl
+	app				models.App
+	service		models.Service
 }
 
 //
@@ -36,27 +38,94 @@ func serviceDestroyFn(control processor.ProcessControl) (processor.Processor, er
 }
 
 //
-func (servicedestroy processServiceDestroy) Results() processor.ProcessControl {
-	return servicedestroy.control
+func (serviceDestroy processServiceDestroy) Results() processor.ProcessControl {
+	return serviceDestroy.control
 }
 
 //
-func (servicedestroy processServiceDestroy) Process() error {
+func (serviceDestroy processServiceDestroy) Process() error {
 
-	// get the service from the database
-	service := models.Service{}
-	err := data.Get(config.AppName(), servicedestroy.control.Meta["name"], &service)
-	if err != nil {
-		// cant find service
+	if err := serviceDestroy.loadApp(); err != nil {
 		return err
 	}
 
-	servicedestroy.control.Display(stylish.Bullet("Destroying %s", servicedestroy.control.Meta["name"]))
-
-	err = docker.ContainerRemove(fmt.Sprintf("nanobox-%s-%s", config.AppName(), servicedestroy.control.Meta["name"]))
-	if err != nil {
+	if err := serviceDestroy.loadService(); err != nil {
 		return err
 	}
+
+	if err := serviceDestroy.printDisplay(); err != nil {
+		return err
+	}
+
+	if err := serviceDestroy.removeContainer(); err != nil {
+		return err
+	}
+
+	if err := serviceDestroy.detachNetwork(); err != nil {
+		return err
+	}
+
+	if err := serviceDestroy.removeEnvVars(); err != nil {
+		return err
+	}
+
+	if err := serviceDestroy.deleteService(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// loadApp loads the app from the database
+func (serviceDestroy *processServiceSetup) loadApp() error {
+
+	// load the app from the database
+	if err := data.Get("apps", config.AppName(), &serviceDestroy.app); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// loadService fetches the service from the database
+func (serviceDestroy *processServiceDestroy) loadService() error {
+	name := serviceDestroy.control.Meta["name"]
+
+	// the service really shouldn't exist yet, so let's not return the error if it fails
+	data.Get(config.AppName(), name, &serviceDestroy.service)
+
+	return nil
+}
+
+// printDisplay prints the user display for progress
+func (serviceDestroy *processServiceDestroy) printDisplay() error {
+
+	name    := serviceDestroy.control.Meta["name"]
+	message := stylish.Bullet("Destroying %s", name)
+
+	// print!
+	serviceDestroy.control.Display(message)
+
+	return nil
+}
+
+// removeContainer destroys the docker container
+func (serviceDestroy *processServiceDestroy) removeContainer() error {
+
+	name := serviceDestroy.control.Meta["name"]
+	container := fmt.Sprintf("nanobox-%s-%s", config.AppName(), name)
+
+	if err := docker.ContainerRemove(container); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// detachNetwork detaches the virtual network from the host
+func (serviceDestroy *processServiceDestroy) detachNetwork() error {
+
+	name := serviceDestroy.control.Meta["name"]
 
 	err = provider.RemoveNat(service.ExternalIP, service.InternalIP)
 	if err != nil {
@@ -68,26 +137,28 @@ func (servicedestroy processServiceDestroy) Process() error {
 		return err
 	}
 
-	err = dhcp.ReturnIP(net.ParseIP(service.ExternalIP))
-	if err != nil {
-		return err
+	// don't return the external IP if this is portal
+	if name != "portal" {
+		err = dhcp.ReturnIP(net.ParseIP(service.ExternalIP))
+		if err != nil {
+			return err
+		}
 	}
 
-	err = dhcp.ReturnIP(net.ParseIP(service.InternalIP))
-	if err != nil {
-		return err
+
+	// don't return the internal IP if it's an app-level cache
+	if serviceDestroy.app.LocalIPs[name] != "" {
+		err = dhcp.ReturnIP(net.ParseIP(service.InternalIP))
+		if err != nil {
+			return err
+		}
 	}
 
-	if err := servicedestroy.removeEnvVars(); err != nil {
-		return err
-	}
-
-	// save the service
-	return data.Delete(config.AppName(), servicedestroy.control.Meta["name"])
+	return nil
 }
 
 // removeEnvVars removes any env vars associated with this service
-func (servicedestroy processServiceDestroy) removeEnvVars() error {
+func (serviceDestroy processServiceDestroy) removeEnvVars() error {
 	// fetch the environment variables model
 	envVars := models.EnvVars{}
 	data.Get(config.AppName()+"_meta", "env", &envVars)
@@ -96,7 +167,7 @@ func (servicedestroy processServiceDestroy) removeEnvVars() error {
 	// for example, if the service is 'data.db' the prefix
 	// would be DATA_DB. Dots are replaced with underscores,
 	// and characters are uppercased.
-	name := servicedestroy.control.Meta["name"]
+	name := serviceDestroy.control.Meta["name"]
 	prefix := strings.ToUpper(strings.Replace(name, ".", "_", -1))
 
 	// we loop over all environment variables and see if the key contains
@@ -109,6 +180,18 @@ func (servicedestroy processServiceDestroy) removeEnvVars() error {
 
 	// persist the evars
 	if err := data.Put(config.AppName()+"_meta", "env", envVars); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// deleteService deletes the service record from the db
+func (serviceDestroy processServiceDestroy) deleteService() error {
+
+	name := serviceDestroy.control.Meta["name"]
+
+	if err := data.Delete(config.AppName(), name); err != nil {
 		return err
 	}
 

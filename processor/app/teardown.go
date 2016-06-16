@@ -74,8 +74,20 @@ func (appTeardown *processAppTeardown) loadApp() error {
 // releaseIPs releases necessary app-global ip addresses
 func (appTeardown *processAppTeardown) releaseIPs() error {
 
-	if err := dhcp.ReturnIP(net.ParseIP(appTeardown.app.DevIP)); err != nil {
-		return err
+	// release all of the external IPs
+	for _, ip := range appTeardown.app.GlobalIPs {
+		// release the IP
+		if err := dhcp.ReturnIP(net.ParseIP(ip)); err != nil {
+			return err
+		}
+	}
+
+	// release all of the local IPs
+	for _, ip := range appTeardown.app.LocalIPs {
+		// release the IP
+		if err := dhcp.ReturnIP(net.ParseIP(ip)); err != nil {
+			return err
+		}
 	}
 
 	return nil
