@@ -28,7 +28,8 @@ func init() {
 
 //
 func serviceStopFn(control processor.ProcessControl) (processor.Processor, error) {
-	return processServiceStop{control: control}, nil
+	serviceStop := processServiceStop{control: control}
+	return serviceStop, serviceStop.validateMeta()
 }
 
 //

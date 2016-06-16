@@ -24,9 +24,10 @@ func init() {
 	processor.Register("dev_dns_add", devDNSAddFn)
 }
 
-//
+// devDNSAddFn creates a processDevDNSAdd and validates the meta data in the control
 func devDNSAddFn(control processor.ProcessControl) (processor.Processor, error) {
-	return processDevDNSAdd{control: control}, nil
+	devDNSAdd := processDevDNSAdd{control: control}
+	return devDNSAdd, devDNSAdd.validateMeta()
 }
 
 //
@@ -36,11 +37,6 @@ func (devDNSAdd processDevDNSAdd) Results() processor.ProcessControl {
 
 //
 func (devDNSAdd processDevDNSAdd) Process() error {
-
-	// validate we have all meta information needed and set "name"
-	if err := devDNSAdd.validateMeta(); err != nil {
-		return err
-	}
 
 	// load the current "app"
 	if err := devDNSAdd.loadApp(); err != nil {

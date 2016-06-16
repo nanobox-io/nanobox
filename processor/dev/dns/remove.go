@@ -24,9 +24,10 @@ func init() {
 	processor.Register("dev_dns_remove", devDNSRemoveFn)
 }
 
-//
+// devDNSRemveFn creates a processDevDNSRemove and validates the meta in the control
 func devDNSRemoveFn(control processor.ProcessControl) (processor.Processor, error) {
-	return processDevDNSRemove{control: control}, nil
+	devDNSRemove := processDevDNSRemove{control: control}
+	return devDNSRemove, devDNSRemove.validateMeta()
 }
 
 //
@@ -36,11 +37,6 @@ func (devDNSRemove processDevDNSRemove) Results() processor.ProcessControl {
 
 //
 func (devDNSRemove processDevDNSRemove) Process() error {
-
-	// validate we have all meta information needed and set "name"
-	if err := devDNSRemove.validateMeta(); err != nil {
-		return err
-	}
 
 	// load the current "app"
 	if err := devDNSRemove.loadApp(); err != nil {

@@ -22,7 +22,8 @@ func init() {
 
 //
 func devNetFSRemoveFn(control processor.ProcessControl) (processor.Processor, error) {
-	return processDevNetFSRemove{control: control}, nil
+	devNetFSRemove := processDevNetFSRemove{control: control}
+	return devNetFSRemove, devNetFSRemove.validateMeta()
 }
 
 //
@@ -32,11 +33,6 @@ func (devNetFSRemove processDevNetFSRemove) Results() processor.ProcessControl {
 
 //
 func (devNetFSRemove processDevNetFSRemove) Process() error {
-
-	// validate we have all meta information needed and set path
-	if err := devNetFSRemove.validateMeta(); err != nil {
-		return err
-	}
 
 	// short-circuit if the entry already exist; we do this after we validate meta
 	// because the meta is needed to determin the entry we're looking for

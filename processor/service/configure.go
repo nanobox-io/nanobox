@@ -58,11 +58,10 @@ func init() {
 	processor.Register("service_configure", serviceConfigureFn)
 }
 
-//
+// create a service configure and validate the meta
 func serviceConfigureFn(control processor.ProcessControl) (processor.Processor, error) {
-	// confirm the provider is an accessable one that we support.
-
-	return processServiceConfigure{control: control}, nil
+	serviceConfigure := processServiceConfigure{control: control}
+	return serviceConfigure, serviceConfigure.validateMeta()
 }
 
 //
@@ -72,10 +71,6 @@ func (serviceConfigure processServiceConfigure) Results() processor.ProcessContr
 
 //
 func (serviceConfigure processServiceConfigure) Process() error {
-
-	if err := serviceConfigure.validateMeta(); err != nil {
-		return err
-	}
 
 	if err := serviceConfigure.loadService(); err != nil {
 		return err

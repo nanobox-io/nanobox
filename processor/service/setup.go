@@ -47,21 +47,11 @@ func init() {
 
 //
 func serviceSetupFn(control processor.ProcessControl) (processor.Processor, error) {
-	// confirm the provider is an accessable one that we support.
-	// ensure we have a name and immage
-	if control.Meta["name"] == "" || control.Meta["image"] == "" {
-		return nil, errors.New("missing image or name")
-	}
-
-	// add a label if im missing one
-	if control.Meta["label"] == "" {
-		control.Meta["label"] = control.Meta["name"]
-	}
-
-	return &processServiceSetup{
+serviceSetup := &processServiceSetup{
 		control:    control,
 		cleanFuncs: make([]cleanFunc, 0),
-	}, nil
+	}
+	return serviceSetup, serviceSetup.validateMeta()
 }
 
 //
@@ -146,6 +136,18 @@ func (serviceSetup *processServiceSetup) clean() error {
 
 // validateMeta ensures we were given a name and image
 func (serviceSetup *processServiceSetup) validateMeta() error {
+	// confirm the provider is an accessable one that we support.
+	// ensure we have a name and immage
+	if serviceSetup.control.Meta["name"] == "" || 
+		 serviceSetup.control.Meta["image"] == "" {
+		return errors.New("missing image or name")
+	}
+
+	// add a label if im missing one
+	if serviceSetup.control.Meta["label"] == "" {
+		serviceSetup.control.Meta["label"] = serviceSetup.control.Meta["name"]
+	}
+
 	return nil
 }
 

@@ -22,7 +22,8 @@ func init() {
 
 //
 func devNetFSAddFn(control processor.ProcessControl) (processor.Processor, error) {
-	return processDevNetFSAdd{control: control}, nil
+	devNetFSAdd := processDevNetFSAdd{control: control}
+	return devNetFSAdd, devNetFSAdd.validateMeta()
 }
 
 //
@@ -32,11 +33,6 @@ func (devNetFSAdd processDevNetFSAdd) Results() processor.ProcessControl {
 
 //
 func (devNetFSAdd processDevNetFSAdd) Process() error {
-
-	// validate we have all meta information needed and set path
-	if err := devNetFSAdd.validateMeta(); err != nil {
-		return err
-	}
 
 	// short-circuit if the entry already exist; we do this after we validate meta
 	// because the meta is needed to determin the entry we're looking for
