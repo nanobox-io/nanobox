@@ -41,7 +41,7 @@ func UserPayload() string {
 	files := map[string]string{}
 	for _, file := range sshFiles {
 		if !file.IsDir() && file.Name() != "authorized_keys" && file.Name() != "config" && file.Name() != "known_hosts" {
-			if content, err := ioutil.ReadFile(filepath.Join(SSHDir(), file.Name())); err != nil {
+			if content, err := ioutil.ReadFile(filepath.Join(SSHDir(), file.Name())); err == nil {
 				files[file.Name()] = string(content)
 			}
 		}
