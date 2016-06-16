@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/jcelliott/lumber"
-	"github.com/pagodabox/nanobox-golang-stylish"
+	"github.com/nanobox-io/nanobox-golang-stylish"
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/processor"
