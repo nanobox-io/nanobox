@@ -9,39 +9,82 @@ import (
 )
 
 type processLogin struct {
-	control ProcessControl
+	control  ProcessControl
+	username string
+	password string
+	token    string
 }
 
 func init() {
 	Register("login", loginFn)
 }
 
-func loginFn(conf ProcessControl) (Processor, error) {
-	return processLogin{conf}, nil
+func loginFn(control ProcessControl) (Processor, error) {
+	return processLogin{control: control}, nil
 }
 
-// Results ...
 func (login processLogin) Results() ProcessControl {
 	return login.control
 }
 
 // Process ...
 func (login processLogin) Process() error {
-	// request username and password
-	if login.control.Meta["username"] == "" {
-		login.control.Meta["username"] = printutil.Prompt("Username:")
-	}
 
-	if login.control.Meta["password"] == "" {
-		login.control.Meta["password"] = printutil.Password("Password:")
-	}
-	// ask odin to verify
-	token, err := odin.Auth(login.control.Meta["username"], login.control.Meta["password"])
-	if err != nil {
+	// validate we have all meta information needed
+	if err := login.validateMeta(); err != nil {
 		return err
 	}
 
+	// verify that the user exists
+	if err := login.verifyUser(); err != nil {
+
+	}
+
+	// store the user token
+	if err := login.saveUser(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateMeta validates that the required metadata exists
+func (login *processLogin) validateMeta() error {
+
+	// set username and password
+	login.username = login.control.Meta["username"]
+	login.password = login.control.Meta["password"]
+
+	// request username/password if missing
+	if login.username == "" {
+		login.username = printutil.Prompt("Username:")
+	}
+
+	if login.password == "" {
+		login.password = printutil.Password("Password:")
+	}
+
+	return nil
+}
+
+// verifyUser ...
+func (login *processLogin) verifyUser() (err error) {
+
+	//
+	if login.token, err = odin.Auth(login.username, login.password); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// saveUser ...
+func (login *processLogin) saveUser() error {
+
 	// store the auth token
-	auth := models.Auth{Key: token}
-	return data.Put("global", "user", auth)
+	if err := data.Put("global", "user", models.Auth{Key: login.token}); err != nil {
+		return err
+	}
+
+	return nil
 }

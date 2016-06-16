@@ -73,7 +73,7 @@ func (devDNSRemove processDevDNSRemove) Process() error {
 }
 
 // validateMeta validates that the required metadata exists
-func (devDNSRemove processDevDNSRemove) validateMeta() error {
+func (devDNSRemove *processDevDNSRemove) validateMeta() error {
 
 	// set the name
 	devDNSRemove.name = devDNSRemove.control.Meta["name"]
@@ -87,7 +87,7 @@ func (devDNSRemove processDevDNSRemove) validateMeta() error {
 }
 
 // loadApp loads the app from the db
-func (devDNSRemove processDevDNSRemove) loadApp() error {
+func (devDNSRemove *processDevDNSRemove) loadApp() error {
 
 	//
 	if err := data.Get("apps", config.AppName(), &devDNSRemove.app); err != nil {
@@ -98,7 +98,7 @@ func (devDNSRemove processDevDNSRemove) loadApp() error {
 }
 
 // entriesExist returns true if both entries already exist
-func (devDNSRemove processDevDNSRemove) entriesExist() bool {
+func (devDNSRemove *processDevDNSRemove) entriesExist() bool {
 
 	// generate the entries
 	preview := dns.Entry(devDNSRemove.app.DevIP, devDNSRemove.name, "preview")
@@ -113,7 +113,7 @@ func (devDNSRemove processDevDNSRemove) entriesExist() bool {
 }
 
 // removeEntries removes the "dev" and "preview" entries into the host dns
-func (devDNSRemove processDevDNSRemove) removeEntries() error {
+func (devDNSRemove *processDevDNSRemove) removeEntries() error {
 
 	// generate the entries
 	preview := dns.Entry(devDNSRemove.app.DevIP, devDNSRemove.name, "preview")
@@ -133,7 +133,7 @@ func (devDNSRemove processDevDNSRemove) removeEntries() error {
 }
 
 // reExecPrivilege re-execs the current process with a privileged user
-func (devDNSRemove processDevDNSRemove) reExecPrivilege() error {
+func (devDNSRemove *processDevDNSRemove) reExecPrivilege() error {
 
 	// call 'dev dns rm' with the original path and args; os.Args[0] will be the
 	// currently executing program, so this command will ultimately lead right back

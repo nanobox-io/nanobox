@@ -76,7 +76,7 @@ func (devNetFSRemove *processDevNetFSRemove) validateMeta() error {
 }
 
 // entryExists returns true if the entry already exists
-func (devNetFSRemove processDevNetFSRemove) entryExists() bool {
+func (devNetFSRemove *processDevNetFSRemove) entryExists() bool {
 
 	// if the entry exists just return
 	if netfs.Exists(devNetFSRemove.path) {
@@ -87,7 +87,7 @@ func (devNetFSRemove processDevNetFSRemove) entryExists() bool {
 }
 
 // rmEntry rms the netfs entry into the /etc/exports
-func (devNetFSRemove processDevNetFSRemove) rmEntry() error {
+func (devNetFSRemove *processDevNetFSRemove) rmEntry() error {
 
 	// rm the entry into the /etc/exports file
 	if err := netfs.Remove(devNetFSRemove.path); err != nil {
@@ -98,7 +98,7 @@ func (devNetFSRemove processDevNetFSRemove) rmEntry() error {
 }
 
 // reExecPrivilege re-execs the current process with a privileged user
-func (devNetFSRemove processDevNetFSRemove) reExecPrivilege() error {
+func (devNetFSRemove *processDevNetFSRemove) reExecPrivilege() error {
 
 	// call 'dev netfs rm' with the original path and args; os.Args[0] will be the
 	// currently executing program, so this command will ultimately lead right back

@@ -76,7 +76,7 @@ func (devNetFSAdd *processDevNetFSAdd) validateMeta() error {
 }
 
 // entryExists returns true if the entry already exists
-func (devNetFSAdd processDevNetFSAdd) entryExists() bool {
+func (devNetFSAdd *processDevNetFSAdd) entryExists() bool {
 
 	// if the entry exists just return
 	if netfs.Exists(devNetFSAdd.path) {
@@ -87,7 +87,7 @@ func (devNetFSAdd processDevNetFSAdd) entryExists() bool {
 }
 
 // addEntry adds the netfs entry into the /etc/exports
-func (devNetFSAdd processDevNetFSAdd) addEntry() error {
+func (devNetFSAdd *processDevNetFSAdd) addEntry() error {
 
 	if err := netfs.Add(devNetFSAdd.path); err != nil {
 		return err
@@ -97,7 +97,7 @@ func (devNetFSAdd processDevNetFSAdd) addEntry() error {
 }
 
 // reExecPrivilege re-execs the current process with a privileged user
-func (devNetFSAdd processDevNetFSAdd) reExecPrivilege() error {
+func (devNetFSAdd *processDevNetFSAdd) reExecPrivilege() error {
 
 	// call 'dev netfs add' with the original path and args; os.Args[0] will be the
 	// currently executing program, so this command will ultimately lead right back

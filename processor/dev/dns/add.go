@@ -73,7 +73,7 @@ func (devDNSAdd processDevDNSAdd) Process() error {
 }
 
 // validateMeta validates that the required metadata exists
-func (devDNSAdd processDevDNSAdd) validateMeta() error {
+func (devDNSAdd *processDevDNSAdd) validateMeta() error {
 
 	// set the name
 	devDNSAdd.name = devDNSAdd.control.Meta["name"]
@@ -87,7 +87,7 @@ func (devDNSAdd processDevDNSAdd) validateMeta() error {
 }
 
 // loadApp loads the app from the db
-func (devDNSAdd processDevDNSAdd) loadApp() error {
+func (devDNSAdd *processDevDNSAdd) loadApp() error {
 
 	//
 	if err := data.Get("apps", config.AppName(), &devDNSAdd.app); err != nil {
@@ -98,7 +98,7 @@ func (devDNSAdd processDevDNSAdd) loadApp() error {
 }
 
 // entriesExist returns true if both entries already exist
-func (devDNSAdd processDevDNSAdd) entriesExist() bool {
+func (devDNSAdd *processDevDNSAdd) entriesExist() bool {
 
 	// generate the entries
 	preview := dns.Entry(devDNSAdd.app.DevIP, devDNSAdd.name, "preview")
@@ -113,7 +113,7 @@ func (devDNSAdd processDevDNSAdd) entriesExist() bool {
 }
 
 // addEntries adds the dev and preview entries into the host dns
-func (devDNSAdd processDevDNSAdd) addEntries() error {
+func (devDNSAdd *processDevDNSAdd) addEntries() error {
 
 	// generate the entries
 	preview := dns.Entry(devDNSAdd.app.DevIP, devDNSAdd.name, "preview")
@@ -133,7 +133,7 @@ func (devDNSAdd processDevDNSAdd) addEntries() error {
 }
 
 // reExecPrivilege re-execs the current process with a privileged user
-func (devDNSAdd processDevDNSAdd) reExecPrivilege() error {
+func (devDNSAdd *processDevDNSAdd) reExecPrivilege() error {
 
 	// call 'dev dns add' with the original path and args; os.Args[0] will be the
 	// currently executing program, so this command will ultimately lead right back
