@@ -55,7 +55,7 @@ func (deploy *processDeploy) Process() error {
 // setWarehouseToken ...
 func (deploy *processDeploy) setWarehouseToken() error {
 	// get remote hoarder credentials
-	deploy.control.Meta["app_id"] = getAppID(deploy.control.Meta["alias"])
+	deploy.control.Meta["app_id"] = getAppID(deploy.control.Meta["app_name"])
 	deploy.control.Meta["build_id"] = util.RandomString(30)
 	warehouseToken, warehouseURL, err := odin.GetWarehouse(deploy.control.Meta["app_id"])
 	if err != nil {

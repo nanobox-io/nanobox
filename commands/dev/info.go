@@ -23,8 +23,5 @@ var (
 // infoFn will run the DNS processor for adding DNS entires to the "hosts"
 // file
 func infoFn(ccmd *cobra.Command, args []string) {
-	processor.DefaultConfig.Meta["name"] = args[0]
-
-	//
 	print.OutputCommandErr(processor.Run("dev_info", processor.DefaultConfig))
 }

@@ -41,7 +41,7 @@ func (devConsole processDevConsole) Process() error {
 		os.Exit(1)
 	}
 
-	name := devConsole.control.Meta["name"]
+	name := devConsole.control.Meta["container"]
 	if name == "" {
 		name = "build"
 	}

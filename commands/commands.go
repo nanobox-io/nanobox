@@ -28,6 +28,10 @@ import (
 //
 var (
 
+	//
+	version bool // display the version of nanobox
+	app     string
+
 	// NanoboxCmd ...
 	NanoboxCmd = &cobra.Command{
 		Use:   "nanobox",
@@ -103,10 +107,6 @@ var (
 			ccmd.HelpFunc()(ccmd, args)
 		},
 	}
-
-	//
-	version bool // display the version of nanobox
-	app     string
 )
 
 // init creates the list of available nanobox commands and sub commands
