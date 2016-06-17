@@ -1,6 +1,8 @@
 package link
 
 import (
+	"fmt"
+
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util/config"
@@ -10,6 +12,7 @@ import (
 // processLinkRemove ...
 type processLinkRemove struct {
 	control processor.ProcessControl
+	alias   string
 }
 
 //
@@ -18,8 +21,9 @@ func init() {
 }
 
 //
-func linkRemoveFn(conf processor.ProcessControl) (processor.Processor, error) {
-	return processLinkRemove{conf}, nil
+func linkRemoveFn(control processor.ProcessControl) (processor.Processor, error) {
+	linkRemove := &processLinkRemove{control: control}
+	return linkRemove, linkRemove.validateMeta()
 }
 
 //
@@ -29,8 +33,27 @@ func (linkRemove processLinkRemove) Results() processor.ProcessControl {
 
 //
 func (linkRemove processLinkRemove) Process() error {
+
+	//
 	links := models.AppLinks{}
-	data.Get(config.AppName()+"_meta", "links", &links)
-	delete(links, linkRemove.control.Meta["alias"])
+	if err := data.Get(config.AppName()+"_meta", "links", &links); err != nil {
+		//
+	}
+
+	//
+	delete(links, linkRemove.alias)
+
 	return data.Put(config.AppName()+"_meta", "links", links)
+}
+
+// validateMeta validates that the required metadata exists
+func (linkRemove *processLinkRemove) validateMeta() error {
+
+	// set alias (required) and ensure it's provided
+	linkRemove.alias = linkRemove.control.Meta["alias"]
+	if linkRemove.alias == "" {
+		return fmt.Errorf("Missing required meta value 'alias'")
+	}
+
+	return nil
 }

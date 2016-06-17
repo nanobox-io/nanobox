@@ -11,7 +11,10 @@ import (
 
 // processTunnel ...
 type processTunnel struct {
-	control ProcessControl
+	control   ProcessControl
+	app       string
+	port      string
+	container string
 }
 
 //
@@ -21,7 +24,8 @@ func init() {
 
 //
 func tunnelFn(control ProcessControl) (Processor, error) {
-	return processTunnel{control}, nil
+	tunnel := &processTunnel{control: control}
+	return tunnel, tunnel.validateMeta()
 }
 
 //
@@ -31,9 +35,10 @@ func (tunnel processTunnel) Results() ProcessControl {
 
 //
 func (tunnel processTunnel) Process() error {
+
 	var err error
-	app := getAppID(tunnel.control.Meta["app"])
-	key, location, container, err = odin.EstablishTunnel(app, tunnel.control.Meta["container"])
+
+	key, location, container, err = odin.EstablishTunnel(getAppID(tunnel.app), tunnel.container)
 	if err != nil {
 		return err
 	}
@@ -44,6 +49,7 @@ func (tunnel processTunnel) Process() error {
 		fmt.Println(err)
 		return err
 	}
+
 	// set noproxy because this connection allows more multiple connections
 	// to use the tunnel
 	req.Header.Set("X-NOPROXY", "true")
@@ -54,12 +60,14 @@ func (tunnel processTunnel) Process() error {
 	}
 	defer conn.Close()
 
-	serv, err := net.Listen("tcp4", fmt.Sprintf(":%v", tunnel.control.Meta["port"]))
+	//
+	serv, err := net.Listen("tcp4", fmt.Sprintf(":%v", tunnel.port))
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
 
+	//
 	for {
 		conn, err := serv.Accept()
 		if err != nil {
@@ -67,6 +75,27 @@ func (tunnel processTunnel) Process() error {
 		}
 		go handleConnection(conn)
 	}
+}
+
+// validateMeta validates that the required metadata exists
+func (tunnel *processTunnel) validateMeta() error {
+
+	// set optional meta values
+	tunnel.app = tunnel.control.Meta["app"]
+
+	// set container (required) and ensure it's provided
+	tunnel.container = tunnel.control.Meta["container"]
+	if tunnel.container == "" {
+		return fmt.Errorf("Missing required meta value 'container'")
+	}
+
+	// set port (required) and ensure it's provided
+	tunnel.port = tunnel.control.Meta["port"]
+	if tunnel.port == "" {
+		return fmt.Errorf("Missing required meta value 'port'")
+	}
+
+	return nil
 }
 
 // handleConnection ...

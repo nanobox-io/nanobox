@@ -69,12 +69,10 @@ func (devDNSRemove processDevDNSRemove) Process() error {
 // validateMeta validates that the required metadata exists
 func (devDNSRemove *processDevDNSRemove) validateMeta() error {
 
-	// set the name
+	// set name (required) and ensure it's provided
 	devDNSRemove.name = devDNSRemove.control.Meta["name"]
-
-	// ensure name is provided
 	if devDNSRemove.name == "" {
-		return fmt.Errorf("Name is required")
+		return fmt.Errorf("Missing required meta value 'name'")
 	}
 
 	return nil

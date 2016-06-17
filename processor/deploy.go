@@ -10,6 +10,7 @@ import (
 // processDeploy ...
 type processDeploy struct {
 	control ProcessControl
+	app     string
 }
 
 //
@@ -19,12 +20,8 @@ func init() {
 
 //
 func deployFn(control ProcessControl) (Processor, error) {
-	// control.Meta["deploy-control"]
-
-	// do some control validation check on the meta for the flags and make sure they
-	// work
-
-	return &processDeploy{control}, nil
+	deploy := &processDeploy{control: control}
+	return deploy, deploy.validateMeta()
 }
 
 //
@@ -52,10 +49,23 @@ func (deploy *processDeploy) Process() error {
 	return odin.Deploy(deploy.control.Meta["app_id"], deploy.control.Meta["build_id"], deploy.control.Meta["boxfile"], deploy.control.Meta["message"])
 }
 
+// validateMeta validates that the required metadata exists
+func (deploy *processDeploy) validateMeta() error {
+
+	// set app (required) and ensure it's provided
+	deploy.app = deploy.control.Meta["app"]
+	if deploy.app == "" {
+		return fmt.Errorf("Missing required meta value 'app'")
+	}
+
+	return nil
+}
+
 // setWarehouseToken ...
 func (deploy *processDeploy) setWarehouseToken() error {
+
 	// get remote hoarder credentials
-	deploy.control.Meta["app_id"] = getAppID(deploy.control.Meta["app"])
+	deploy.control.Meta["app_id"] = getAppID(deploy.app)
 	deploy.control.Meta["build_id"] = util.RandomString(30)
 	warehouseToken, warehouseURL, err := odin.GetWarehouse(deploy.control.Meta["app_id"])
 	if err != nil {

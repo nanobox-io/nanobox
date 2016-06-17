@@ -14,16 +14,16 @@ func OutputCommandErr(err error) {
 	if err != nil {
 		fmt.Printf(`
 
-Whoops, looks like there was a minor bump. Following the instructions above should
-help resolve it quickly.
+Whoops, looks like we encountered a small error:
 
-If the instructions aren't helping, please come talk with us and we can work it
-out together.
+%s
+
+Following the instructions above should help resolve it quickly. If you're still
+experiencing issues, please come talk with us and we'll work it out together.
 
 irc   : #nanobox
 email : help@nanobox.io
 
-(%s)
 `, err.Error())
 	}
 }

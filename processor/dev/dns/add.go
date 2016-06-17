@@ -69,12 +69,10 @@ func (devDNSAdd processDevDNSAdd) Process() error {
 // validateMeta validates that the required metadata exists
 func (devDNSAdd *processDevDNSAdd) validateMeta() error {
 
-	// set the name
+	// set name (required) and ensure it's provided
 	devDNSAdd.name = devDNSAdd.control.Meta["name"]
-
-	// ensure name is provided
 	if devDNSAdd.name == "" {
-		return fmt.Errorf("Name is required")
+		return fmt.Errorf("Missing required meta value 'name'")
 	}
 
 	return nil

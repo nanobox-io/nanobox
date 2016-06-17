@@ -13,20 +13,24 @@ import (
 
 // processDevConsole ...
 type processDevConsole struct {
-	control processor.ProcessControl
+	control   processor.ProcessControl
+	name      string
+	container string
+	command   string
+	cwd       string
+	shell     string
 }
 
-//
 func init() {
 	processor.Register("dev_console", devConsoleFn)
 }
 
 //
-func devConsoleFn(conf processor.ProcessControl) (processor.Processor, error) {
-	return processDevConsole{conf}, nil
+func devConsoleFn(control processor.ProcessControl) (processor.Processor, error) {
+	devConsole := &processDevConsole{control: control}
+	return devConsole, devConsole.validateMeta()
 }
 
-//
 func (devConsole processDevConsole) Results() processor.ProcessControl {
 	return devConsole.control
 }
@@ -41,40 +45,57 @@ func (devConsole processDevConsole) Process() error {
 		os.Exit(1)
 	}
 
-	name := devConsole.control.Meta["container"]
-	if name == "" {
-		name = "build"
+	//
+	if container, err := docker.GetContainer(fmt.Sprintf("nanobox-%s-%s", config.AppName(), devConsole.container)); err == nil {
+		devConsole.container = container.ID
 	}
 
-	container, err := docker.GetContainer(fmt.Sprintf("nanobox-%s-%s", config.AppName(), name))
-	if err == nil {
-		name = container.ID
-	}
+	// this is the default command to run in the container
+	command := []string{"exec", "-u", "gonano", "-it", devConsole.container, "/bin/bash"}
 
-	shell := devConsole.control.Meta["shell"]
-	if shell == "" {
-		shell = "bash"
-	}
-
-	command := []string{"exec", "-u", "gonano", "-it", name, "/bin/bash"}
-
+	// check to see if there are any optional meta arguments that need to be handled
 	switch {
 
-	//
-	case devConsole.control.Meta["working_dir"] != "":
-		cd := fmt.Sprintf("cd %s; exec \"%s\"", devConsole.control.Meta["working_dir"], shell)
-		command = append(command, "-c", cd)
+	// if a current working directory (cwd) is provided then modify the command to
+	// change into that directory before executing
+	case devConsole.cwd != "":
+		command = append(command, "-c", fmt.Sprintf("cd %s; exec \"%s\"", devConsole.cwd, devConsole.shell))
 
-		//
-	case devConsole.control.Meta["command"] != "":
-		command = append(command, "-c", devConsole.control.Meta["command"])
+	// if a command is provided then modify the command to exec that command after
+	// running the base command
+	case devConsole.command != "":
+		command = append(command, "-c", devConsole.command)
 	}
 
+	//
 	cmd := exec.Command("docker", command...)
 
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
+	//
 	return cmd.Run()
+}
+
+// validateMeta validates that the required metadata exists
+func (devConsole *processDevConsole) validateMeta() error {
+
+	// set optional meta values
+	devConsole.command = devConsole.control.Meta["command"]
+	devConsole.cwd = devConsole.control.Meta["cwd"]
+
+	// set container; if no container is provided default to "build"
+	devConsole.container = devConsole.control.Meta["container"]
+	if devConsole.container == "" {
+		devConsole.container = "build"
+	}
+
+	// set shell; if no shell is provided default to "bash"
+	devConsole.shell = devConsole.control.Meta["shell"]
+	if devConsole.shell == "" {
+		devConsole.shell = "bash"
+	}
+
+	return nil
 }

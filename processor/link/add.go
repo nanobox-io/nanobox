@@ -2,7 +2,6 @@ package link
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
@@ -14,46 +13,59 @@ import (
 // processLinkAdd
 type processLinkAdd struct {
 	control processor.ProcessControl
+	app     string
+	alias   string
 }
 
-//
 func init() {
 	processor.Register("link_add", linkAddFn)
 }
 
 //
-func linkAddFn(conf processor.ProcessControl) (processor.Processor, error) {
-	return processLinkAdd{conf}, nil
+func linkAddFn(control processor.ProcessControl) (processor.Processor, error) {
+	linkAdd := &processLinkAdd{control: control}
+	return linkAdd, linkAdd.validateMeta()
 }
 
-//
 func (linkAdd processLinkAdd) Results() processor.ProcessControl {
 	return linkAdd.control
 }
 
 //
 func (linkAdd processLinkAdd) Process() error {
-	if linkAdd.control.Meta["app"] == "" {
-
-		fmt.Println("you need to provide a app name to link to")
-		os.Exit(1)
-	}
 
 	// get app id
-	app, err := odin.App(linkAdd.control.Meta["app"])
+	app, err := odin.App(linkAdd.app)
 	if err != nil {
 		return err
 	}
 
-	//
-	if linkAdd.control.Meta["alias"] == "" {
-		linkAdd.control.Meta["alias"] = "default"
-	}
-
 	// store the auth token
 	link := models.AppLinks{}
-	data.Get(config.AppName()+"_meta", "links", &link)
-	link[linkAdd.control.Meta["alias"]] = app.ID
+	if err := data.Get(config.AppName()+"_meta", "links", &link); err != nil {
+		//
+	}
+
+	//
+	link[linkAdd.alias] = app.ID
 
 	return data.Put(config.AppName()+"_meta", "links", link)
+}
+
+// validateMeta validates that the required metadata exists
+func (linkAdd *processLinkAdd) validateMeta() error {
+
+	// set app (required) and ensure it's provided
+	linkAdd.app = linkAdd.control.Meta["app"]
+	if linkAdd.app == "" {
+		return fmt.Errorf("Missing required meta value 'app'")
+	}
+
+	// set alias; if it's not provided set the alias to "default"
+	linkAdd.alias = linkAdd.control.Meta["alias"]
+	if linkAdd.alias == "" {
+		linkAdd.alias = "default"
+	}
+
+	return nil
 }

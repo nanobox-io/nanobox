@@ -59,11 +59,10 @@ func (devNetFSRemove processDevNetFSRemove) Process() error {
 // validateMeta validates that the required metadata exists
 func (devNetFSRemove *processDevNetFSRemove) validateMeta() error {
 
-	//
+	// set path (required) and ensure it's provided
 	devNetFSRemove.path = devNetFSRemove.control.Meta["path"]
-
 	if devNetFSRemove.path == "" {
-		return fmt.Errorf("Path is required")
+		return fmt.Errorf("Missing required meta value 'path'")
 	}
 
 	return nil

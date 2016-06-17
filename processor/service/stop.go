@@ -69,7 +69,7 @@ func (serviceStop processServiceStop) Process() error {
 }
 
 // validateMeta validates that the required metadata exists
-func (serviceStop processServiceStop) validateMeta() error {
+func (serviceStop *processServiceStop) validateMeta() error {
 
 	// set meta values
 	serviceStop.name = serviceStop.control.Meta["name"]
@@ -89,7 +89,7 @@ func (serviceStop processServiceStop) validateMeta() error {
 }
 
 // isServiceRunning returns true if a service is already running
-func (serviceStop processServiceStop) isServiceRunning() bool {
+func (serviceStop *processServiceStop) isServiceRunning() bool {
 
 	// get the container
 	container, err := docker.GetContainer(fmt.Sprintf("nanobox-%s-%s", config.AppName(), serviceStop.name))
@@ -111,9 +111,7 @@ func (serviceStop *processServiceStop) loadService() error {
 		print.OutputProcessorErr("service not found", fmt.Sprintf(`
 Nanobox was unable to find the service '%s' in the database, try shutting
 down again.
-
-(%s)
-		`, serviceStop.name, err.Error()))
+		`, serviceStop.name))
 
 		return err
 	}
@@ -139,9 +137,7 @@ func (serviceStop *processServiceStop) stopContainer() error {
 	if err := docker.ContainerStop(serviceStop.service.ID); err != nil {
 		print.OutputProcessorErr("failed to stop container", fmt.Sprintf(`
 Nanobox failed to stop the container '%s', try shutting down again.
-
-(%s)
-		`, serviceStop.service.ID, err.Error()))
+		`, serviceStop.service.ID))
 	}
 
 	return nil
@@ -154,9 +150,7 @@ func (serviceStop *processServiceStop) detachNetwork() error {
 	if err := provider.RemoveNat(serviceStop.service.ExternalIP, serviceStop.service.InternalIP); err != nil {
 		print.OutputProcessorErr("failed to remove nat", fmt.Sprintf(`
 Nanobox failed to remove the NAT, try shutting down again.
-
-(%s)
-		`, err.Error()))
+		`))
 
 		return err
 	}
@@ -165,9 +159,7 @@ Nanobox failed to remove the NAT, try shutting down again.
 	if err := provider.RemoveIP(serviceStop.service.ExternalIP); err != nil {
 		print.OutputProcessorErr("failed to remove ip", fmt.Sprintf(`
 Nanobox failed to remove the external IP, try shutting down again.
-
-(%s)
-		`, err.Error()))
+		`))
 
 		return err
 	}

@@ -309,9 +309,9 @@ func (codeDev *processCodeDev) runConsole() error {
 		DevMode: codeDev.control.DevMode,
 		Verbose: codeDev.control.Verbose,
 		Meta: map[string]string{
-			"container":   "dev",
-			"working_dir": codeDev.cwd(),
-			"shell":       "zsh",
+			"container": "dev",
+			"cwd":       codeDev.cwd(),
+			"shell":     "zsh",
 		},
 	}
 

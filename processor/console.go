@@ -16,7 +16,9 @@ import (
 
 // processConsole ...
 type processConsole struct {
-	control ProcessControl
+	control   ProcessControl
+	container string
+	app       string
 }
 
 //
@@ -33,7 +35,8 @@ func init() {
 
 //
 func consoleFn(control ProcessControl) (Processor, error) {
-	return processConsole{control}, nil
+	console := &processConsole{control: control}
+	return console, console.validateMeta()
 }
 
 //
@@ -43,10 +46,11 @@ func (console processConsole) Results() ProcessControl {
 
 //
 func (console processConsole) Process() error {
+
 	var err error
+
 	// get a key from odin
-	app := getAppID(console.control.Meta["app"])
-	key, location, container, err = odin.EstablishConsole(app, console.control.Meta["container"])
+	key, location, container, err = odin.EstablishConsole(getAppID(console.app), console.container)
 	if err != nil {
 		return err
 	}
@@ -95,6 +99,21 @@ func (console processConsole) Process() error {
 		io.Copy(stdOut, remoteConn)
 		remoteConn.(*tls.Conn).Close()
 	}
+	return nil
+}
+
+// validateMeta validates that the required metadata exists
+func (console *processConsole) validateMeta() error {
+
+	// set optional meta values
+	console.app = console.control.Meta["app"]
+
+	// set container (required) and ensure it's provided
+	console.container = console.control.Meta["container"]
+	if console.container == "" {
+		return fmt.Errorf("Missing required meta value 'container'")
+	}
+
 	return nil
 }
 
