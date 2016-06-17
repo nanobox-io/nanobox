@@ -1,8 +1,8 @@
 package docker
 
 import (
-	"golang.org/x/net/context"
 	"strings"
+	"golang.org/x/net/context"
 
 	dockType "github.com/docker/engine-api/types"
 	dockContainer "github.com/docker/engine-api/types/container"
@@ -44,11 +44,11 @@ func CreateContainer(conf ContainerConfig) (dockType.ContainerJSON, error) {
 
 	hostConfig := &dockContainer.HostConfig{
 		Privileged: true,
-		Binds:      conf.Binds,
+		Binds: conf.Binds,
 		// NetworkMode:   "host",
 		CapAdd:        strslice.StrSlice([]string{"NET_ADMIN"}),
 		NetworkMode:   "bridge",
-		RestartPolicy: dockContainer.RestartPolicy{Name: "always"},
+		RestartPolicy: dockContainer.RestartPolicy{Name: "unless-stopped"},
 		Resources: dockContainer.Resources{
 			Memory:     conf.Memory,
 			MemorySwap: conf.MemorySwap,
