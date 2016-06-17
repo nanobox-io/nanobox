@@ -23,7 +23,7 @@ var ConsoleCmd = &cobra.Command{
 func consoleFn(ccmd *cobra.Command, args []string) {
 
 	// validate we have args required to set the meta we'll need; if we don't have
-	// the required args this will os.Exit(1) with instructions
+	// the required args this will return with instructions
 	if len(args) != 1 {
 		fmt.Printf(`
 Wrong number of arguments (expecting 1 got %v). Run the command again with the
@@ -32,6 +32,7 @@ name of the container you wish to console into:
 ex: nanobox dev console <container>
 
 `, len(args))
+
 		return
 	}
 

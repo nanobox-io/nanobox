@@ -20,11 +20,16 @@ var (
 		PreRun: validate.Requires("provider"),
 		Run:    consoleFn,
 	}
+
+	// consoleCmdFlags ...
+	consoleCmdFlags = struct {
+		app string
+	}{}
 )
 
 //
 func init() {
-	ConsoleCmd.Flags().StringVarP(&app, "app", "a", "", "app-name or alias")
+	ConsoleCmd.Flags().StringVarP(&consoleCmdFlags.app, "app", "a", "", "app name or alias")
 }
 
 // consoleFn ...
@@ -44,7 +49,7 @@ ex: nanobox console <container>
 	}
 
 	// set the meta arguments to be used in the processor and run the processor
-	processor.DefaultConfig.Meta["alias"] = app
 	processor.DefaultConfig.Meta["container"] = args[0]
+	processor.DefaultConfig.Meta["app"] = consoleCmdFlags.app
 	print.OutputCommandErr(processor.Run("console", processor.DefaultConfig))
 }

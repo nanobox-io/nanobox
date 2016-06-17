@@ -33,14 +33,14 @@ func (linkAdd processLinkAdd) Results() processor.ProcessControl {
 
 //
 func (linkAdd processLinkAdd) Process() error {
-	if linkAdd.control.Meta["name"] == "" {
+	if linkAdd.control.Meta["app"] == "" {
 
 		fmt.Println("you need to provide a app name to link to")
 		os.Exit(1)
 	}
 
 	// get app id
-	app, err := odin.App(linkAdd.control.Meta["name"])
+	app, err := odin.App(linkAdd.control.Meta["app"])
 	if err != nil {
 		return err
 	}

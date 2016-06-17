@@ -8,7 +8,6 @@ import (
 )
 
 var (
-	alias string
 
 	// LinkCmd ...
 	LinkCmd = &cobra.Command{
@@ -44,12 +43,18 @@ If no alias is provided, 'default' is assumed.
 		Long:  ``,
 		Run:   linkRemoveFn,
 	}
+
+	// linkCmdFlags ...
+	linkCmdFlags = struct {
+		app   string
+		alias string
+	}{}
 )
 
 //
 func init() {
-	LinkAddCmd.Flags().StringVarP(&app, "app_name", "n", "", "app name")
-	LinkCmd.PersistentFlags().StringVarP(&alias, "alias", "a", "", "alias")
+	LinkAddCmd.Flags().StringVarP(&linkCmdFlags.app, "app", "n", "", "app name")
+	LinkCmd.PersistentFlags().StringVarP(&linkCmdFlags.alias, "alias", "a", "", "alias")
 
 	LinkCmd.AddCommand(LinkAddCmd)
 	LinkCmd.AddCommand(LinkListCmd)
@@ -60,8 +65,8 @@ func init() {
 func linkAddFn(ccmd *cobra.Command, args []string) {
 
 	// set the meta arguments to be used in the processor and run the processor
-	processor.DefaultConfig.Meta["name"] = app
-	processor.DefaultConfig.Meta["alias"] = alias
+	processor.DefaultConfig.Meta["app"] = linkCmdFlags.app
+	processor.DefaultConfig.Meta["alias"] = linkCmdFlags.alias
 	print.OutputCommandErr(processor.Run("link_add", processor.DefaultConfig))
 }
 
@@ -74,6 +79,6 @@ func linkListFn(ccmd *cobra.Command, args []string) {
 func linkRemoveFn(ccmd *cobra.Command, args []string) {
 
 	// set the meta arguments to be used in the processor and run the processor
-	processor.DefaultConfig.Meta["alias"] = alias
+	processor.DefaultConfig.Meta["alias"] = linkCmdFlags.alias
 	print.OutputCommandErr(processor.Run("link_remove", processor.DefaultConfig))
 }

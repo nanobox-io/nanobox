@@ -8,8 +8,6 @@ import (
 )
 
 var (
-	username string
-	password string
 
 	// LoginCmd ...
 	LoginCmd = &cobra.Command{
@@ -18,19 +16,25 @@ var (
 		Long:  ``,
 		Run:   loginFn,
 	}
+
+	// loginCmdFlags ...
+	loginCmdFlags = struct {
+		username string
+		password string
+	}{}
 )
 
 //
 func init() {
-	LoginCmd.Flags().StringVarP(&username, "username", "u", "", "username")
-	LoginCmd.Flags().StringVarP(&password, "password", "p", "", "password")
+	LoginCmd.Flags().StringVarP(&loginCmdFlags.username, "username", "u", "", "username")
+	LoginCmd.Flags().StringVarP(&loginCmdFlags.password, "password", "p", "", "password")
 }
 
 // loginFn ...
 func loginFn(ccmd *cobra.Command, args []string) {
 
 	// set the meta arguments to be used in the processor and run the processor
-	processor.DefaultConfig.Meta["username"] = username
-	processor.DefaultConfig.Meta["password"] = password
+	processor.DefaultConfig.Meta["username"] = loginCmdFlags.username
+	processor.DefaultConfig.Meta["password"] = loginCmdFlags.password
 	print.OutputCommandErr(processor.Run("login", processor.DefaultConfig))
 }

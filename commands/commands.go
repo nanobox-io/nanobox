@@ -30,7 +30,6 @@ var (
 
 	//
 	version bool // display the version of nanobox
-	app     string
 
 	// NanoboxCmd ...
 	NanoboxCmd = &cobra.Command{

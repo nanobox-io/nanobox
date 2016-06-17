@@ -19,18 +19,16 @@ type processDevDNSRemove struct {
 	name    string
 }
 
-//
 func init() {
 	processor.Register("dev_dns_remove", devDNSRemoveFn)
 }
 
 // devDNSRemveFn creates a processDevDNSRemove and validates the meta in the control
 func devDNSRemoveFn(control processor.ProcessControl) (processor.Processor, error) {
-	devDNSRemove := processDevDNSRemove{control: control}
+	devDNSRemove := &processDevDNSRemove{control: control}
 	return devDNSRemove, devDNSRemove.validateMeta()
 }
 
-//
 func (devDNSRemove processDevDNSRemove) Results() processor.ProcessControl {
 	return devDNSRemove.control
 }
@@ -98,11 +96,11 @@ func (devDNSRemove *processDevDNSRemove) entriesExist() bool {
 
 	// fetch the IPs
 	previewIP := devDNSRemove.app.GlobalIPs["preview"]
-	devIP     := devDNSRemove.app.GlobalIPs["dev"]
+	devIP := devDNSRemove.app.GlobalIPs["dev"]
 
 	// generate the entries
 	preview := dns.Entry(previewIP, devDNSRemove.name, "preview")
-	dev     := dns.Entry(devIP, devDNSRemove.name, "dev")
+	dev := dns.Entry(devIP, devDNSRemove.name, "dev")
 
 	// if the entry doesnt exist just return
 	if dns.Exists(preview) && dns.Exists(dev) {
@@ -117,11 +115,11 @@ func (devDNSRemove *processDevDNSRemove) removeEntries() error {
 
 	// fetch the IPs
 	previewIP := devDNSRemove.app.GlobalIPs["preview"]
-	devIP     := devDNSRemove.app.GlobalIPs["dev"]
+	devIP := devDNSRemove.app.GlobalIPs["dev"]
 
 	// generate the entries
 	preview := dns.Entry(previewIP, devDNSRemove.name, "preview")
-	dev     := dns.Entry(devIP, devDNSRemove.name, "dev")
+	dev := dns.Entry(devIP, devDNSRemove.name, "dev")
 
 	// remove the 'preview' DNS entry into the /etc/hosts file
 	if err := dns.Remove(preview); err != nil {

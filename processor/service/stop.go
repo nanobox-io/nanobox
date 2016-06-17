@@ -104,7 +104,7 @@ func (serviceStop *processServiceStop) loadService() error {
 	//
 	if err := data.Get(config.AppName(), serviceStop.name, &serviceStop.service); err != nil {
 		print.OutputProcessorErr("service not found", fmt.Sprintf(`
-Nanobox was unable to find the service '%s' in the database, please try shutting
+Nanobox was unable to find the service '%s' in the database, try shutting
 down again.
 
 (%s)
@@ -133,7 +133,7 @@ func (serviceStop *processServiceStop) stopContainer() error {
 	//
 	if err := docker.ContainerStop(serviceStop.service.ID); err != nil {
 		print.OutputProcessorErr("failed to stop container", fmt.Sprintf(`
-Nanobox failed to stop the container '%s', please try shutting down again.
+Nanobox failed to stop the container '%s', try shutting down again.
 
 (%s)
 		`, serviceStop.service.ID, err.Error()))
@@ -148,7 +148,7 @@ func (serviceStop *processServiceStop) detachNetwork() error {
 	//
 	if err := provider.RemoveNat(serviceStop.service.ExternalIP, serviceStop.service.InternalIP); err != nil {
 		print.OutputProcessorErr("failed to remove nat", fmt.Sprintf(`
-Nanobox failed to remove the NAT, please try shutting down again.
+Nanobox failed to remove the NAT, try shutting down again.
 
 (%s)
 		`, err.Error()))
@@ -159,7 +159,7 @@ Nanobox failed to remove the NAT, please try shutting down again.
 	//
 	if err := provider.RemoveIP(serviceStop.service.ExternalIP); err != nil {
 		print.OutputProcessorErr("failed to remove ip", fmt.Sprintf(`
-Nanobox failed to remove the external IP, please try shutting down again.
+Nanobox failed to remove the external IP, try shutting down again.
 
 (%s)
 		`, err.Error()))

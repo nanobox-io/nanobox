@@ -20,7 +20,7 @@ var (
 	}
 )
 
-// TODO: Take an extra arguement and decide what we want to reset
+// TODO: Take an extra arguement and decide what we want to reset?
 // resetFn ...
 func resetFn(ccmd *cobra.Command, args []string) {
 	print.OutputCommandErr(processor.Run("dev_reset", processor.DefaultConfig))

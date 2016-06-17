@@ -32,7 +32,7 @@ func (tunnel processTunnel) Results() ProcessControl {
 //
 func (tunnel processTunnel) Process() error {
 	var err error
-	app := getAppID(tunnel.control.Meta["alias"])
+	app := getAppID(tunnel.control.Meta["app"])
 	key, location, container, err = odin.EstablishTunnel(app, tunnel.control.Meta["container"])
 	if err != nil {
 		return err

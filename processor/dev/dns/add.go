@@ -19,18 +19,16 @@ type processDevDNSAdd struct {
 	name    string
 }
 
-//
 func init() {
 	processor.Register("dev_dns_add", devDNSAddFn)
 }
 
 // devDNSAddFn creates a processDevDNSAdd and validates the meta data in the control
 func devDNSAddFn(control processor.ProcessControl) (processor.Processor, error) {
-	devDNSAdd := processDevDNSAdd{control: control}
+	devDNSAdd := &processDevDNSAdd{control: control}
 	return devDNSAdd, devDNSAdd.validateMeta()
 }
 
-//
 func (devDNSAdd processDevDNSAdd) Results() processor.ProcessControl {
 	return devDNSAdd.control
 }
@@ -98,11 +96,11 @@ func (devDNSAdd *processDevDNSAdd) entriesExist() bool {
 
 	// fetch the IPs
 	previewIP := devDNSAdd.app.GlobalIPs["preview"]
-	devIP     := devDNSAdd.app.GlobalIPs["dev"]
+	devIP := devDNSAdd.app.GlobalIPs["dev"]
 
 	// generate the entries
 	preview := dns.Entry(previewIP, devDNSAdd.name, "preview")
-	dev     := dns.Entry(devIP, devDNSAdd.name, "dev")
+	dev := dns.Entry(devIP, devDNSAdd.name, "dev")
 
 	// if the entries dont exist just return
 	if dns.Exists(preview) && dns.Exists(dev) {
@@ -117,11 +115,11 @@ func (devDNSAdd *processDevDNSAdd) addEntries() error {
 
 	// fetch the IPs
 	previewIP := devDNSAdd.app.GlobalIPs["preview"]
-	devIP     := devDNSAdd.app.GlobalIPs["dev"]
+	devIP := devDNSAdd.app.GlobalIPs["dev"]
 
 	// generate the entries
 	preview := dns.Entry(previewIP, devDNSAdd.name, "preview")
-	dev     := dns.Entry(devIP, devDNSAdd.name, "dev")
+	dev := dns.Entry(devIP, devDNSAdd.name, "dev")
 
 	// add the 'preview' DNS entry into the /etc/hosts file
 	if err := dns.Add(preview); err != nil {

@@ -15,18 +15,16 @@ type processDevNetFSRemove struct {
 	path    string
 }
 
-//
 func init() {
 	processor.Register("dev_netfs_remove", devNetFSRemoveFn)
 }
 
 //
 func devNetFSRemoveFn(control processor.ProcessControl) (processor.Processor, error) {
-	devNetFSRemove := processDevNetFSRemove{control: control}
+	devNetFSRemove := &processDevNetFSRemove{control: control}
 	return devNetFSRemove, devNetFSRemove.validateMeta()
 }
 
-//
 func (devNetFSRemove processDevNetFSRemove) Results() processor.ProcessControl {
 	return devNetFSRemove.control
 }
@@ -61,7 +59,10 @@ func (devNetFSRemove processDevNetFSRemove) Process() error {
 // validateMeta validates that the required metadata exists
 func (devNetFSRemove *processDevNetFSRemove) validateMeta() error {
 
-	if devNetFSRemove.control.Meta["path"] == "" {
+	//
+	devNetFSRemove.path = devNetFSRemove.control.Meta["path"]
+
+	if devNetFSRemove.path == "" {
 		return fmt.Errorf("Path is required")
 	}
 
@@ -71,10 +72,8 @@ func (devNetFSRemove *processDevNetFSRemove) validateMeta() error {
 // entryExists returns true if the entry already exists
 func (devNetFSRemove *processDevNetFSRemove) entryExists() bool {
 
-	path := devNetFSRemove.control.Meta["path"]
-
 	// if the entry exists just return
-	if netfs.Exists(path) {
+	if netfs.Exists(devNetFSRemove.path) {
 		return true
 	}
 
@@ -84,10 +83,8 @@ func (devNetFSRemove *processDevNetFSRemove) entryExists() bool {
 // rmEntry rms the netfs entry into the /etc/exports
 func (devNetFSRemove *processDevNetFSRemove) rmEntry() error {
 
-	path := devNetFSRemove.control.Meta["path"]
-
 	// rm the entry into the /etc/exports file
-	if err := netfs.Remove(path); err != nil {
+	if err := netfs.Remove(devNetFSRemove.path); err != nil {
 		return err
 	}
 
@@ -97,12 +94,10 @@ func (devNetFSRemove *processDevNetFSRemove) rmEntry() error {
 // reExecPrivilege re-execs the current process with a privileged user
 func (devNetFSRemove *processDevNetFSRemove) reExecPrivilege() error {
 
-	path := devNetFSRemove.control.Meta["path"]
-
 	// call 'dev netfs rm' with the original path and args; os.Args[0] will be the
 	// currently executing program, so this command will ultimately lead right back
 	// here
-	cmd := fmt.Sprintf("%s dev netfs rm %s", os.Args[0], path)
+	cmd := fmt.Sprintf("%s dev netfs rm %s", os.Args[0], devNetFSRemove.path)
 
 	// if the sudo'ed subprocess fails, we need to return error to stop the process
 	fmt.Println("Admin privileges are required to remove entries from your exports file, your password may be requested...")

@@ -45,7 +45,7 @@ func (console processConsole) Results() ProcessControl {
 func (console processConsole) Process() error {
 	var err error
 	// get a key from odin
-	app := getAppID(console.control.Meta["alias"])
+	app := getAppID(console.control.Meta["app"])
 	key, location, container, err = odin.EstablishConsole(app, console.control.Meta["container"])
 	if err != nil {
 		return err

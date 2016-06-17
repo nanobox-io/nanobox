@@ -48,7 +48,7 @@ func init() {
 func netfsAddFn(ccmd *cobra.Command, args []string) {
 
 	// validate we have args required to set the meta we'll need; if we don't have
-	// the required args this will os.Exit(1) with an error message
+	// the required args this will return with instructions
 	if len(args) != 1 {
 		fmt.Printf(`
 Wrong number of arguments (expecting 1 got %v). Run the command again with the
@@ -57,6 +57,7 @@ path of the exports entry you would like to add:
 ex: nanobox dev netfs add <path>
 
 `, len(args))
+
 		return
 	}
 
@@ -68,7 +69,7 @@ ex: nanobox dev netfs add <path>
 func netfsRmFn(ccmd *cobra.Command, args []string) {
 
 	// validate we have args required to set the meta we'll need; if we don't have
-	// the required args this will os.Exit(1) with an error message
+	// the required args this will return with instructions
 	if len(args) != 1 {
 		fmt.Printf(`
 Wrong number of arguments (expecting 1 got %v). Run the command again with the
@@ -77,6 +78,7 @@ path of the exports entry you would like to remove:
 ex: nanobox dev netfs rm <path>
 
 `, len(args))
+
 		return
 	}
 
