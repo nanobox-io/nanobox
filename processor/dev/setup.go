@@ -201,6 +201,11 @@ func (devSetup *processDevSetup) addShare(src, dst string) error {
 // addMount will mount a share in the nanobox guest context
 func (devSetup *processDevSetup) addMount(src, dst string) error {
 
+		// short-circuit if the mount already exists
+		if provider.HasMount(dst) {
+			return nil
+		}
+
 		// the mount type is configurable by the user
 		mountType := config.Viper().GetString("mount-type")
 
