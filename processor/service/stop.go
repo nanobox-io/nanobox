@@ -94,7 +94,12 @@ func (serviceStop processServiceStop) isServiceRunning() bool {
 	// get the container
 	container, err := docker.GetContainer(fmt.Sprintf("nanobox-%s-%s", config.AppName(), serviceStop.name))
 
-	return err == nil && container.State.Status == "running"
+	if err != nil {
+		// todo: display a message
+		return false
+	}
+
+	return container.State.Status == "running"
 }
 
 // loadService loads the service from the database; an error here means we cannot
