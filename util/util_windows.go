@@ -9,6 +9,14 @@ import (
 	"strings"
 )
 
+// IsPrivileged will return true if the current process is running under a
+// privileged user, like root
+func IsPrivileged() bool {
+	// TODO: win: make this work!!!
+	return true
+}
+
+
 // PrivilegeExec will run the requested command in a powershell as the Administrative user
 func PrivilegeExec(command string) error {
 
