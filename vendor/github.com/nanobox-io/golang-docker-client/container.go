@@ -2,6 +2,7 @@ package docker
 
 import (
 	"strings"
+	"time"
 	"golang.org/x/net/context"
 
 	dockType "github.com/docker/engine-api/types"
@@ -93,12 +94,13 @@ func createContainer(config *dockContainer.Config, hostConfig *dockContainer.Hos
 
 // Start a container. If the container is already running this will error.
 func ContainerStart(id string) error {
-	return client.ContainerStart(context.Background(), id)
+	return client.ContainerStart(context.Background(), id, dockType.ContainerStartOptions{})
 }
 
 // give them 5 seconds.. todo maybe make it adjustable
 func ContainerStop(id string) error {
-	return client.ContainerStop(context.Background(), id, 5)
+	timeout := 5*time.Second
+	return client.ContainerStop(context.Background(), id, &timeout)
 }
 
 // ContainerRemove
@@ -108,7 +110,8 @@ func ContainerRemove(id string) error {
 		return err
 	}
 
-	if err := client.ContainerStop(context.Background(), id, 0); err != nil {
+	timeout := 0*time.Second
+	if err := client.ContainerStop(context.Background(), id, &timeout); err != nil {
 		// return err
 	}
 

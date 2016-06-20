@@ -7,6 +7,10 @@ import (
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util/locker"
+	"github.com/nanobox-io/nanobox/util/dhcp"
+	"github.com/nanobox-io/nanobox/util/data"
+	"github.com/nanobox-io/nanobox/models"
+
 )
 
 // processProviderSetup ...
@@ -48,6 +52,11 @@ func (providerSetup processProviderSetup) Process() error {
 		return err
 	}
 
+	if err := providerSetup.saveProvider(); err != nil {
+		lumber.Error("saveProvider()", err)
+		return err
+	}
+
 	if err := provider.DockerEnv(); err != nil {
 		lumber.Error("DockerEnv()", err)
 		return err
@@ -59,4 +68,22 @@ func (providerSetup processProviderSetup) Process() error {
 	}
 
 	return nil
+}
+
+func (providerSetup processProviderSetup) saveProvider() error {
+	provider := models.Provider{}
+	data.Get("global", "provider", &provider)
+	
+	// if it has already been saved the exit early
+	if provider.HostIP != "" {
+		return nil
+	}
+
+	ip, err := dhcp.ReserveGlobal()
+	if err != nil {
+		return err
+	}
+	provider.MountIP = ip.String()
+	
+	return data.Put("global", "provider", provider)
 }

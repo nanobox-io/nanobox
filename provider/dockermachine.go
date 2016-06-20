@@ -13,6 +13,8 @@ import (
 	"github.com/nanobox-io/nanobox-golang-stylish"
 
 	"github.com/nanobox-io/nanobox/util/print"
+	"github.com/nanobox-io/nanobox/util/data"
+	"github.com/nanobox-io/nanobox/models"
 )
 
 // DockerMachine ...
@@ -162,7 +164,15 @@ func (machine DockerMachine) Start() error {
 	}
 
 	// fmt.Print(stylish.Bullet("Ensure kernel modules are loaded..."))
-	return cmd.Run()
+	if err := cmd.Run(); err != nil {
+		return err
+	}
+
+	if machine.changedIP() {
+		return machine.regenerateCert()
+	}
+
+	return nil
 }
 
 // HostShareDir ...
@@ -478,6 +488,21 @@ func (machine DockerMachine) Run(command []string) ([]byte, error) {
 	return cmd.CombinedOutput()
 }
 
+// regenerate the certificates 
+// this should be used when the machine starts up with an ip that
+// is different then last time
+func (machine DockerMachine) regenerateCert() error {
+	// fetch the docker-machine endpoint information
+	cmd := exec.Command("docker-machine", "regenerate-certs", "-f", "nanobox")
+	b, err := cmd.CombinedOutput()
+	if err != nil {
+		lumber.Debug("output: %s", b)
+		return err
+	}
+	return nil
+}
+
+
 // isCreated ...
 func (machine DockerMachine) isCreated() bool {
 	// docker-machine status nanobox
@@ -561,4 +586,24 @@ func (machine DockerMachine) hasNatPostroute(hostIP, containerIP string) bool {
 	}
 
 	return true
+}
+
+func (machine DockerMachine) changedIP() bool {
+	// get the previous host ip
+	provider := models.Provider{}
+	if err := data.Get("global", "provider", &provider); err != nil {
+		return true
+	}
+	// if it was never set the it cant have changed
+	if provider.HostIP == "" {
+		return false
+	}
+
+	// get the new host ip
+	newIP, err := machine.HostIP()
+	if err != nil {
+		return true
+	}
+
+	return provider.HostIP != newIP
 }

@@ -13,6 +13,9 @@ import (
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/provider"
+	"github.com/nanobox-io/nanobox/util/data"
+	"github.com/nanobox-io/nanobox/models"
+	
 )
 
 // EXPORTSFILE ...
@@ -121,15 +124,16 @@ func Mount(hostPath, mountPath string) error {
 // entry generates the mount entry for the exports file
 func entry(path string) (string, error) {
 
-	// todo: this can change, and is highly unstable.
-	// 				we need to reserve a global IP for mounting
-	// 				and us it instead
-	host, err := provider.HostIP()
-	if err != nil {
+	// use the mountIP saved on the provider in the database
+	provider := models.Provider{}
+	if err := data.Get("global", "provider", &provider); err != nil {
 		return "", err
 	}
+	if provider.MountIP == "" {
+		return "", fmt.Errorf("there is no mount ip on the provider")
+	}
 
-	entry := fmt.Sprintf("\"%s\" %s -alldirs -mapall=%v:%v", path, host, uid(), gid())
+	entry := fmt.Sprintf("\"%s\" %s -alldirs -mapall=%v:%v", path, provider.MountIP, uid(), gid())
 
 	return entry, nil
 }

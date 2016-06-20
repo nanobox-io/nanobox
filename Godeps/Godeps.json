@@ -68,68 +68,73 @@
 		},
 		{
 			"ImportPath": "github.com/docker/engine-api/client",
-			"Comment": "v0.3.1-75-gfd7f99d",
-			"Rev": "fd7f99d354831e7e809386087e7ec3129fdb1520"
+			"Comment": "v0.3.1-206-gf90ecdb",
+			"Rev": "f90ecdb1e989f834dabbd91807e891094aa069fe"
 		},
 		{
 			"ImportPath": "github.com/docker/engine-api/client/transport",
-			"Comment": "v0.3.1-75-gfd7f99d",
-			"Rev": "fd7f99d354831e7e809386087e7ec3129fdb1520"
+			"Comment": "v0.3.1-206-gf90ecdb",
+			"Rev": "f90ecdb1e989f834dabbd91807e891094aa069fe"
 		},
 		{
 			"ImportPath": "github.com/docker/engine-api/client/transport/cancellable",
-			"Comment": "v0.3.1-75-gfd7f99d",
-			"Rev": "fd7f99d354831e7e809386087e7ec3129fdb1520"
+			"Comment": "v0.3.1-206-gf90ecdb",
+			"Rev": "f90ecdb1e989f834dabbd91807e891094aa069fe"
 		},
 		{
 			"ImportPath": "github.com/docker/engine-api/types",
-			"Comment": "v0.3.1-75-gfd7f99d",
-			"Rev": "fd7f99d354831e7e809386087e7ec3129fdb1520"
+			"Comment": "v0.3.1-206-gf90ecdb",
+			"Rev": "f90ecdb1e989f834dabbd91807e891094aa069fe"
 		},
 		{
 			"ImportPath": "github.com/docker/engine-api/types/blkiodev",
-			"Comment": "v0.3.1-75-gfd7f99d",
-			"Rev": "fd7f99d354831e7e809386087e7ec3129fdb1520"
+			"Comment": "v0.3.1-206-gf90ecdb",
+			"Rev": "f90ecdb1e989f834dabbd91807e891094aa069fe"
 		},
 		{
 			"ImportPath": "github.com/docker/engine-api/types/container",
-			"Comment": "v0.3.1-75-gfd7f99d",
-			"Rev": "fd7f99d354831e7e809386087e7ec3129fdb1520"
+			"Comment": "v0.3.1-206-gf90ecdb",
+			"Rev": "f90ecdb1e989f834dabbd91807e891094aa069fe"
 		},
 		{
 			"ImportPath": "github.com/docker/engine-api/types/filters",
-			"Comment": "v0.3.1-75-gfd7f99d",
-			"Rev": "fd7f99d354831e7e809386087e7ec3129fdb1520"
+			"Comment": "v0.3.1-206-gf90ecdb",
+			"Rev": "f90ecdb1e989f834dabbd91807e891094aa069fe"
 		},
 		{
 			"ImportPath": "github.com/docker/engine-api/types/network",
-			"Comment": "v0.3.1-75-gfd7f99d",
-			"Rev": "fd7f99d354831e7e809386087e7ec3129fdb1520"
+			"Comment": "v0.3.1-206-gf90ecdb",
+			"Rev": "f90ecdb1e989f834dabbd91807e891094aa069fe"
 		},
 		{
 			"ImportPath": "github.com/docker/engine-api/types/reference",
-			"Comment": "v0.3.1-75-gfd7f99d",
-			"Rev": "fd7f99d354831e7e809386087e7ec3129fdb1520"
+			"Comment": "v0.3.1-206-gf90ecdb",
+			"Rev": "f90ecdb1e989f834dabbd91807e891094aa069fe"
 		},
 		{
 			"ImportPath": "github.com/docker/engine-api/types/registry",
-			"Comment": "v0.3.1-75-gfd7f99d",
-			"Rev": "fd7f99d354831e7e809386087e7ec3129fdb1520"
+			"Comment": "v0.3.1-206-gf90ecdb",
+			"Rev": "f90ecdb1e989f834dabbd91807e891094aa069fe"
 		},
 		{
 			"ImportPath": "github.com/docker/engine-api/types/strslice",
-			"Comment": "v0.3.1-75-gfd7f99d",
-			"Rev": "fd7f99d354831e7e809386087e7ec3129fdb1520"
+			"Comment": "v0.3.1-206-gf90ecdb",
+			"Rev": "f90ecdb1e989f834dabbd91807e891094aa069fe"
+		},
+		{
+			"ImportPath": "github.com/docker/engine-api/types/swarm",
+			"Comment": "v0.3.1-206-gf90ecdb",
+			"Rev": "f90ecdb1e989f834dabbd91807e891094aa069fe"
 		},
 		{
 			"ImportPath": "github.com/docker/engine-api/types/time",
-			"Comment": "v0.3.1-75-gfd7f99d",
-			"Rev": "fd7f99d354831e7e809386087e7ec3129fdb1520"
+			"Comment": "v0.3.1-206-gf90ecdb",
+			"Rev": "f90ecdb1e989f834dabbd91807e891094aa069fe"
 		},
 		{
 			"ImportPath": "github.com/docker/engine-api/types/versions",
-			"Comment": "v0.3.1-75-gfd7f99d",
-			"Rev": "fd7f99d354831e7e809386087e7ec3129fdb1520"
+			"Comment": "v0.3.1-206-gf90ecdb",
+			"Rev": "f90ecdb1e989f834dabbd91807e891094aa069fe"
 		},
 		{
 			"ImportPath": "github.com/docker/go-connections/nat",
@@ -189,7 +194,7 @@
 		},
 		{
 			"ImportPath": "github.com/howeyc/gopass",
-			"Rev": "10b54de414cc9693221d5ff2ae14fd2fbf1b0ac1"
+			"Rev": "66487b23f2880ba32e185121d2cd51a338ea069a"
 		},
 		{
 			"ImportPath": "github.com/inconshreveable/mousetrap",
@@ -235,7 +240,7 @@
 		},
 		{
 			"ImportPath": "github.com/nanobox-io/golang-docker-client",
-			"Rev": "2394ffe416683befc7d8ae150ce349ed20252750"
+			"Rev": "08cb154c3aa1a222cf41269b585eb5c053e669c2"
 		},
 		{
 			"ImportPath": "github.com/nanobox-io/golang-portal-client",
@@ -270,15 +275,15 @@
 		},
 		{
 			"ImportPath": "github.com/sdomino/go-util/crypto",
-			"Rev": "efe84ef5b001d07fa025fd0b9c9848c53d1e280c"
+			"Rev": "1ca3b1e3b179725f7683700e6829aea136d6b084"
 		},
 		{
 			"ImportPath": "github.com/sdomino/go-util/file",
-			"Rev": "efe84ef5b001d07fa025fd0b9c9848c53d1e280c"
+			"Rev": "1ca3b1e3b179725f7683700e6829aea136d6b084"
 		},
 		{
 			"ImportPath": "github.com/sdomino/go-util/print",
-			"Rev": "efe84ef5b001d07fa025fd0b9c9848c53d1e280c"
+			"Rev": "1ca3b1e3b179725f7683700e6829aea136d6b084"
 		},
 		{
 			"ImportPath": "github.com/spf13/cast",
