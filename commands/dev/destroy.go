@@ -22,5 +22,5 @@ If no other apps are running, it will destroy the Nanobox VM.
 
 // destroyFn ...
 func destroyFn(ccmd *cobra.Command, args []string) {
-	print.OutputCommandErr(processor.Run("dev_destroy", processor.DefaultConfig))
+	print.OutputCommandErr(processor.Run("dev_destroy", processor.DefaultControl))
 }

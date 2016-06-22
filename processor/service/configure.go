@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"encoding/json"
 	"errors"
 
@@ -208,7 +209,8 @@ func (serviceConfigure *processServiceConfigure) loadService() error {
 
 	// get the service from the database; an error means we could not start a service
 	// that wasnt setup (ie saved in the database)
-	if err := data.Get(config.AppName(), name, &serviceConfigure.service); err != nil {
+	bucket := fmt.Sprintf("%s_%s", config.AppName(), serviceConfigure.control.Env)
+	if err := data.Get(bucket, name, &serviceConfigure.service); err != nil {
 		return err
 	}
 
@@ -258,7 +260,8 @@ func (serviceConfigure *processServiceConfigure) persistService() error {
 
 	name := serviceConfigure.control.Meta["name"]
 
-	if err := data.Put(config.AppName(), name, &serviceConfigure.service); err != nil {
+	bucket := fmt.Sprintf("%s_%s", config.AppName(), serviceConfigure.control.Env)
+	if err := data.Put(bucket, name, &serviceConfigure.service); err != nil {
 		return err
 	}
 

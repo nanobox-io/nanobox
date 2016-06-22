@@ -40,11 +40,6 @@ func (serviceStop processServiceStop) Results() processor.ProcessControl {
 //
 func (serviceStop processServiceStop) Process() error {
 
-	// validate meta
-	if err := serviceStop.validateMeta(); err != nil {
-		return err
-	}
-
 	// short-circuit if the process is already stopped
 	if !serviceStop.isServiceRunning() {
 		return nil
@@ -92,7 +87,7 @@ func (serviceStop *processServiceStop) validateMeta() error {
 func (serviceStop *processServiceStop) isServiceRunning() bool {
 
 	// get the container
-	container, err := docker.GetContainer(fmt.Sprintf("nanobox-%s-%s", config.AppName(), serviceStop.name))
+	container, err := docker.GetContainer(fmt.Sprintf("nanobox-%s-%s-%s", config.AppName(), serviceStop.control.Env, serviceStop.name))
 
 	if err != nil {
 		// todo: display a message

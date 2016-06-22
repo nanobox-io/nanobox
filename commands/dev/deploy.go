@@ -23,5 +23,5 @@ deploy locally, before deploying into production.
 
 // deployFn ...
 func deployFn(ccmd *cobra.Command, args []string) {
-	print.OutputCommandErr(processor.Run("dev_deploy", processor.DefaultConfig))
+	print.OutputCommandErr(processor.Run("dev_deploy", processor.DefaultControl))
 }

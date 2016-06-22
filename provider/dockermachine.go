@@ -605,5 +605,13 @@ func (machine DockerMachine) changedIP() bool {
 		return true
 	}
 
+	// if the host ip has changed i need to update the database
+	defer func() {
+		if provider.HostIP != newIP {
+			provider.HostIP = newIP
+			data.Put("global", "provider", provider)
+		}
+	}()
+
 	return provider.HostIP != newIP
 }

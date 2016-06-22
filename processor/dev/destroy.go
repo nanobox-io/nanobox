@@ -34,8 +34,9 @@ func (devDestroy processDevDestroy) Results() processor.ProcessControl {
 
 //
 func (devDestroy processDevDestroy) Process() error {
-
-	if err := processor.Run("dev_setup", devDestroy.control); err != nil {
+	devDestroy.control.Env = "dev"
+	
+	if err := processor.Run("share_setup", devDestroy.control); err != nil {
 		return err
 	}
 
@@ -63,7 +64,8 @@ func (devDestroy processDevDestroy) Process() error {
 
 // removeServices gets all the services in the app and remove them
 func (devDestroy processDevDestroy) removeServices() error {
-	services, err := data.Keys(config.AppName())
+	bucket := fmt.Sprintf("%s_%s", config.AppName(), devDestroy.control.Env)
+	services, err := data.Keys(bucket)
 	if err != nil {
 		return fmt.Errorf("data keys: %s", err.Error())
 	}
@@ -148,7 +150,7 @@ func (devDestroy processDevDestroy) removeShare(src, dst string) error {
 	// first we check netfs
 	if netfs.Exists(src) {
 		control := processor.ProcessControl{
-			DevMode:      devDestroy.control.DevMode,
+			Env:      devDestroy.control.Env,
 			Verbose:      devDestroy.control.Verbose,
 			DisplayLevel: devDestroy.control.DisplayLevel,
 			Meta: map[string]string{

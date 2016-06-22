@@ -68,7 +68,7 @@ func (codeSync *processCodeSync) Process() error {
 		// create a new process config for code ensuring it has access to the warehouse
 		// and the boxfile
 		code := processor.ProcessControl{
-			DevMode: codeSync.control.DevMode,
+			Env: codeSync.control.Env,
 			Verbose: codeSync.control.Verbose,
 			Meta: map[string]string{
 				"name":            codeName,

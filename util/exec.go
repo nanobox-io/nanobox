@@ -51,7 +51,7 @@ func (cmd *Cmd) Run() error {
 	if data.ExitCode != 0 {
 		// if so use the buffer that may have been assigned to the
 		// streams to give message better error handling
-		return fmt.Errorf("bad exit code: %s", buff.String())
+		return fmt.Errorf("bad exit code(%d): %s", data.ExitCode, buff.String())
 	}
 
 	return nil
@@ -67,6 +67,9 @@ func (cmd *Cmd) Output() (string, error) {
 	var buffer bytes.Buffer
 	cmd.Stdout = &buffer
 	err := cmd.Run()
+	if err != nil {
+		err = fmt.Errorf("%s: %s", cmd.Path, err.Error())
+	}
 	return buffer.String(), err
 }
 

@@ -1,8 +1,6 @@
 package dev
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/processor"
@@ -21,22 +19,17 @@ var ConsoleCmd = &cobra.Command{
 
 // consoleFn ...
 func consoleFn(ccmd *cobra.Command, args []string) {
+	processor.DefaultControl.Env = "dev"
 
-	// validate we have args required to set the meta we'll need; if we don't have
-	// the required args this will return with instructions
-	if len(args) != 1 {
-		fmt.Printf(`
-Wrong number of arguments (expecting 1 got %v). Run the command again with the
-name of the container you wish to console into:
-
-ex: nanobox dev console <container>
-
-`, len(args))
-
+	// if given an arguement they wanted to run a console into a container
+	// if no arguement is provided they wanted to run a dev console 
+	// and be dropped into a dev environment
+	if len(args) > 0 {
+		processor.DefaultControl.Meta["container"] = args[0]
+		print.OutputCommandErr(processor.Run("share_console", processor.DefaultControl))
 		return
 	}
 
 	// set the meta arguments to be used in the processor and run the processor
-	processor.DefaultConfig.Meta["container"] = args[0]
-	print.OutputCommandErr(processor.Run("dev_console", processor.DefaultConfig))
+	print.OutputCommandErr(processor.Run("dev_console", processor.DefaultControl))
 }

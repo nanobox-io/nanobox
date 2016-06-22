@@ -82,7 +82,8 @@ func (codeBuild *processCodeBuild) Process() error {
 	}
 
 	// run the fetch hook in the build container
-	if _, err := util.Exec(codeBuild.container.ID, "fetch", "{}", processor.ExecWriter()); err != nil {
+	if out, err := util.Exec(codeBuild.container.ID, "fetch", "{}", processor.ExecWriter()); err != nil {
+		fmt.Println("output:", out)
 		return codeBuild.runDebugSession(err)
 	}
 
@@ -233,12 +234,12 @@ func (codeBuild *processCodeBuild) runBoxfileHook() error {
 // runDebugSession drops the user in the build container to debug
 func (codeBuild *processCodeBuild) runDebugSession(err error) error {
 	fmt.Println("there has been a failure")
-	if codeBuild.control.Verbose {
+	if codeBuild.control.Debug {
 		fmt.Println(err)
 		fmt.Println("we will be dropping you into the failed build container")
 		fmt.Println("GOOD LUCK!")
 		codeBuild.control.Meta["name"] = "build"
-		err := processor.Run("dev_console", codeBuild.control)
+		err := processor.Run("share_console", codeBuild.control)
 		if err != nil {
 			fmt.Println("unable to enter console", err)
 		}

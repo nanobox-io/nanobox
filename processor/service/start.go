@@ -75,8 +75,10 @@ func (serviceStart *processServiceStart) Process() error {
 
 // loadService loads the service from the database
 func (serviceStart *processServiceStart) loadService() error {
+	bucket := fmt.Sprintf("%s_%s", config.AppName(), serviceStart.control.Env)
+
 	// get the service from the database
-	err := data.Get(config.AppName(), serviceStart.control.Meta["name"], &serviceStart.service)
+	err := data.Get(bucket, serviceStart.control.Meta["name"], &serviceStart.service)
 	if err != nil {
 		// cannot start a service that wasnt setup (ie saved in the database)
 		return err
@@ -120,7 +122,7 @@ func (serviceStart *processServiceStart) attachNetwork() error {
 func (serviceStart processServiceStart) isServiceRunning() bool {
 	uid := serviceStart.control.Meta["name"]
 
-	container, err := docker.GetContainer(fmt.Sprintf("nanobox-%s-%s", config.AppName(), uid))
+	container, err := docker.GetContainer(fmt.Sprintf("nanobox-%s-%s-%s", config.AppName(), serviceStart.control.Env, uid))
 
 	// if the container doesn't exist then just return false
 	return err == nil && container.State.Status == "running"

@@ -61,8 +61,8 @@ ex: nanobox dev netfs add <path>
 		return
 	}
 
-	processor.DefaultConfig.Meta["path"] = args[0]
-	print.OutputCommandErr(processor.Run("dev_netfs_add", processor.DefaultConfig))
+	processor.DefaultControl.Meta["path"] = args[0]
+	print.OutputCommandErr(processor.Run("dev_netfs_add", processor.DefaultControl))
 }
 
 // netfsRmFn will run the netfs processor for removing a netfs export
@@ -83,6 +83,6 @@ ex: nanobox dev netfs rm <path>
 	}
 
 	// set the meta arguments to be used in the processor and run the processor
-	processor.DefaultConfig.Meta["path"] = args[0]
-	print.OutputCommandErr(processor.Run("dev_netfs_remove", processor.DefaultConfig))
+	processor.DefaultControl.Meta["path"] = args[0]
+	print.OutputCommandErr(processor.Run("dev_netfs_remove", processor.DefaultControl))
 }

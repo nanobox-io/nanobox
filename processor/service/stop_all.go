@@ -58,7 +58,7 @@ func (serviceStopAll processServiceStopAll) stopService(uid string) error {
 
 	//
 	config := processor.ProcessControl{
-		DevMode:      serviceStopAll.control.DevMode,
+		Env:      serviceStopAll.control.Env,
 		Verbose:      serviceStopAll.control.Verbose,
 		DisplayLevel: serviceStopAll.control.DisplayLevel + 1,
 		Meta:         map[string]string{"name": uid},

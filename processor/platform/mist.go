@@ -35,25 +35,28 @@ func (mistListen processMistListen) Results() processor.ProcessControl {
 //
 func (mistListen processMistListen) Process() error {
 	mist := models.Service{}
-	data.Get(config.AppName(), "mist", &mist)
+	bucket := fmt.Sprintf("%s_%s", config.AppName(), mistListen.control.Env)
+	data.Get(bucket, "mist", &mist)
 
-	//
+	// connect to the mist server
 	client, err := clients.New(mist.ExternalIP+":1445", "123")
 	if err != nil {
 		return err
 	}
 
-	//
+	// subscribe to all logs
 	if err := client.Subscribe([]string{"log"}); err != nil {
 		return err
 	}
 
+	// catch kill signals
 	sigChan := make(chan os.Signal, 1)
-
 	signal.Notify(sigChan, os.Interrupt)
 	signal.Notify(sigChan, os.Kill)
 
-	//
+	// loop waiting for messages or signals
+	// if we recieve a kill signal quit
+	// messages will be displayed 
 	for {
 		select {
 		case msg := <-client.Messages():

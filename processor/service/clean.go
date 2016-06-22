@@ -47,6 +47,8 @@ func (serviceClean processServiceClean) Process() error {
 // they were left in a bad state
 func (serviceClean processServiceClean) cleanServices() error {
 
+	// collect all the services that have failed along the way
+	// this includes <appname>, <appname>_dev, and <appname>_more
 	uids, err := data.Keys(config.AppName())
 	if err != nil {
 		return err
@@ -64,7 +66,7 @@ func (serviceClean processServiceClean) cleanServices() error {
 // cleanService will clean a service if it was left in a bad state
 func (serviceClean processServiceClean) cleanService(uid string) error {
 
-	if dirty := isServiceDirty(uid); dirty == true {
+	if dirty := serviceClean.isServiceDirty(uid); dirty == true {
 		return serviceClean.removeService(uid)
 	}
 
@@ -76,7 +78,7 @@ func (serviceClean processServiceClean) removeService(uid string) error {
 	serviceClean.control.Display(stylish.Bullet(fmt.Sprintf("Cleaning %s...", uid)))
 
 	config := processor.ProcessControl{
-		DevMode:      serviceClean.control.DevMode,
+		Env:      serviceClean.control.Env,
 		Verbose:      serviceClean.control.Verbose,
 		DisplayLevel: serviceClean.control.DisplayLevel + 1,
 		Meta: map[string]string{
@@ -94,7 +96,7 @@ func (serviceClean processServiceClean) removeService(uid string) error {
 }
 
 // isServiceDirty will return true if the service is not active and available
-func isServiceDirty(uid string) bool {
+func (serviceClean processServiceClean) isServiceDirty(uid string) bool {
 	// service db entry
 	service := models.Service{}
 
@@ -108,11 +110,11 @@ func isServiceDirty(uid string) bool {
 		return true
 	}
 
-	return !containerExists(uid)
+	return !serviceClean.containerExists(uid)
 }
 
 // containerExists will check to see if a docker container exists on the provider
-func containerExists(uid string) bool {
-	_, err := docker.GetContainer(fmt.Sprintf("nanobox-%s-%s", config.AppName(), uid))
+func (serviceClean processServiceClean) containerExists(uid string) bool {
+	_, err := docker.GetContainer(fmt.Sprintf("nanobox-%s-%s-%s", config.AppName(), serviceClean.control.Env, uid))
 	return err == nil
 }

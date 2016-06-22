@@ -50,7 +50,7 @@ ex: nanobox dev exec <command>
 	}
 
 	// set the meta arguments to be used in the processor and run the processor
-	processor.DefaultConfig.Meta["command"] = strings.Join(args[0:], " ")
-	processor.DefaultConfig.Meta["container"] = execCmdFlags.container
-	print.OutputCommandErr(processor.Run("dev_console", processor.DefaultConfig))
+	processor.DefaultControl.Meta["command"] = strings.Join(args[0:], " ")
+	processor.DefaultControl.Meta["container"] = execCmdFlags.container
+	print.OutputCommandErr(processor.Run("dev_console", processor.DefaultControl))
 }

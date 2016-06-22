@@ -24,8 +24,8 @@ func TestMain(m *testing.M) {
 		fmt.Println(err)
 		return
 	}
-	processor.DefaultConfig.Force = true
-	processor.DefaultConfig.Quiet = true
+	processor.DefaultControl.Force = true
+	processor.DefaultControl.Quiet = true
 	// for testing we dont want to drop into a console
 	// or hang on mist logging
 	processor.Register("dev_console", testProcessBuilder)
@@ -47,7 +47,7 @@ func (self testProcessor) Results() processor.ProcessControl {
 // TestRegister ...
 func TestRegister(t *testing.T) {
 	processor.Register("test", testProcessBuilder)
-	err := processor.Run("test", processor.DefaultConfig)
+	err := processor.Run("test", processor.DefaultControl)
 	if err != nil {
 		t.Errorf("error from processor run", err)
 	}
@@ -55,7 +55,7 @@ func TestRegister(t *testing.T) {
 
 // TestBuild ...
 func TestBuild(t *testing.T) {
-	err := processor.Run("build", processor.DefaultConfig)
+	err := processor.Run("build", processor.DefaultControl)
 	if err != nil {
 		t.Errorf("error from build run", err)
 	}
@@ -63,7 +63,7 @@ func TestBuild(t *testing.T) {
 
 // TestDevDeploy ...
 func TestDevDeploy(t *testing.T) {
-	err := processor.Run("dev", processor.DefaultConfig)
+	err := processor.Run("dev", processor.DefaultControl)
 	if err != nil {
 		t.Errorf("error from dev run", err)
 	}
@@ -71,7 +71,7 @@ func TestDevDeploy(t *testing.T) {
 
 // TestDevDestroy ...
 func TestDevDestroy(t *testing.T) {
-	err := processor.Run("dev_destroy", processor.DefaultConfig)
+	err := processor.Run("dev_destroy", processor.DefaultControl)
 	if err != nil {
 		t.Errorf("error from build run", err)
 	}

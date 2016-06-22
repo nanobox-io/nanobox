@@ -218,7 +218,7 @@ func SaveState(fd uintptr) (*State, error) {
 		return nil, e
 	}
 
-	return &State{outMode: mode}, nil
+	return &State{outEnv: mode}, nil
 }
 
 // DisableEcho disables echo for the terminal connected to the given file descriptor.

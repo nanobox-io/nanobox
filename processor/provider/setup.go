@@ -37,7 +37,7 @@ func (providerSetup processProviderSetup) Results() processor.ProcessControl {
 func (providerSetup processProviderSetup) Process() error {
 
 	// set the provider display level
-	provider.Display(!processor.DefaultConfig.Quiet)
+	provider.Display(!processor.DefaultControl.Quiet)
 
 	locker.GlobalLock()
 	defer locker.GlobalUnlock()
@@ -71,19 +71,27 @@ func (providerSetup processProviderSetup) Process() error {
 }
 
 func (providerSetup processProviderSetup) saveProvider() error {
-	provider := models.Provider{}
-	data.Get("global", "provider", &provider)
+	mProvider := models.Provider{}
+	data.Get("global", "provider", &mProvider)
 	
 	// if it has already been saved the exit early
-	if provider.HostIP != "" {
+	if mProvider.HostIP != "" {
 		return nil
 	}
 
+	// get a new ip we will use for mounting
 	ip, err := dhcp.ReserveGlobal()
 	if err != nil {
 		return err
 	}
-	provider.MountIP = ip.String()
+
+	// retrieve the Hosts known ip
+	hIP, err := provider.HostIP()
+	if err != nil {
+		return err
+	}
+	mProvider.HostIP = hIP
+	mProvider.MountIP = ip.String()
 	
-	return data.Put("global", "provider", provider)
+	return data.Put("global", "provider", mProvider)
 }

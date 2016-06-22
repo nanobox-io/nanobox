@@ -188,7 +188,7 @@ func (codeSetup *processCodeSetup) createContainer() error {
 	// configure the container
 	fmt.Println("-> building container", codeSetup.control.Meta["name"])
 	config := docker.ContainerConfig{
-		Name:    fmt.Sprintf("nanobox-%s-%s", config.AppName(), codeSetup.control.Meta["name"]),
+		Name:    fmt.Sprintf("nanobox-%s-%s-%s", config.AppName(), codeSetup.control.Env, codeSetup.control.Meta["name"]),
 		Image:   codeSetup.control.Meta["image"],
 		Network: "virt",
 		IP:      codeSetup.service.InternalIP,

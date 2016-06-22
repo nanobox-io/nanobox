@@ -79,7 +79,7 @@ func (updatePortal processUpdatePortal) Process() error {
 	// if i have a web and no services i need to add a default one
 	if len(boxfile.Nodes("web")) != 0 && len(services) == 0 {
 
-		//
+		// possibly remove
 		services = append(services, portal.Service{
 			Interface: "eth0",
 			Port:      80,
@@ -95,7 +95,7 @@ func (updatePortal processUpdatePortal) Process() error {
 			},
 		})
 
-		//
+		// possibly remove
 		services = append(services, portal.Service{
 			Interface: "eth0",
 			Port:      443,

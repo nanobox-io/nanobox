@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"net"
 
 	"github.com/nanobox-io/nanobox/models"
@@ -118,17 +119,20 @@ func (appSetup *processAppSetup) reserveIPs() error {
 
 // generateEvars generates the default app evars
 func (appSetup *processAppSetup) generateEvars() error {
+	// create the bucket name one time
+	bucket := fmt.Sprintf("%s_meta", config.AppName())
+
 	// fetch the app evars model if it exists
 	evars := models.EnvVars{}
 
 	// ignore the error because it's likely to not exist
-	data.Get(config.AppName()+"_meta", "env", &evars)
+	data.Get(bucket, appSetup.control.Env+"_env", &evars)
 
 	if evars["APP_NAME"] == "" {
 		evars["APP_NAME"] = config.AppName()
 	}
 
-	if err := data.Put(config.AppName()+"_meta", "env", evars); err != nil {
+	if err := data.Put(bucket, appSetup.control.Env+"_env", evars); err != nil {
 		return err
 	}
 

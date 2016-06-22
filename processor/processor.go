@@ -26,7 +26,8 @@ type (
 
 	// ProcessControl ...
 	ProcessControl struct {
-		DevMode      bool
+		Env          string
+		Debug        bool
 		Quiet        bool
 		Verbose      bool
 		Background   bool
@@ -46,15 +47,15 @@ type (
 )
 
 var (
-	// DefaultConfig ...
-	DefaultConfig = ProcessControl{Meta: map[string]string{}}
+	// DefaultControl ...
+	DefaultControl = ProcessControl{Meta: map[string]string{}}
 
 	processors = map[string]ProcessBuilder{}
 )
 
 // Register ...
 func Register(name string, sb ProcessBuilder) {
-	if _, ok := processors[name]; !DefaultConfig.Force && ok {
+	if _, ok := processors[name]; !DefaultControl.Force && ok {
 		panic("Duplicate Registration - " + name)
 	}
 
@@ -84,7 +85,7 @@ func Run(name string, pc ProcessControl) error {
 
 // ExecWriter ...
 func ExecWriter() io.Writer {
-	if DefaultConfig.Quiet {
+	if DefaultControl.Quiet {
 		return nil
 	}
 	return os.Stdout
@@ -111,14 +112,14 @@ func (control ProcessControl) Display(msg string) {
 
 // Info ...
 func (control ProcessControl) Info(msg string) {
-	if !DefaultConfig.Quiet {
+	if !DefaultControl.Quiet {
 		fmt.Print(stylish.Nest(control.DisplayLevel, msg))
 	}
 }
 
 // Trace ...
 func (control ProcessControl) Trace(msg string) {
-	if DefaultConfig.Verbose {
+	if DefaultControl.Verbose {
 		fmt.Print(stylish.Nest(control.DisplayLevel, msg))
 	}
 }

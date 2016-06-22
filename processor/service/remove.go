@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"errors"
 	"net"
 
@@ -82,7 +83,9 @@ func (serviceRemove *processServiceRemove) validateName() error {
 // loadService loads the service from the database
 func (serviceRemove *processServiceRemove) loadService() error {
 	name := serviceRemove.control.Meta["name"]
-	if err := data.Get(config.AppName(), name, &serviceRemove.service); err != nil {
+	bucket := fmt.Sprintf("%s_%s", config.AppName(), serviceRemove.control.Env)
+
+	if err := data.Get(bucket, name, &serviceRemove.service); err != nil {
 		return err
 	}
 
@@ -129,10 +132,12 @@ func (serviceRemove *processServiceRemove) releaseIPs() error {
 // removeContainer removes a container from the provider
 func (serviceRemove *processServiceRemove) removeContainer() error {
 
-	if exists := serviceRemove.containerExists(serviceRemove.service.ID); exists != true {
+	// if the container doesnt exist.. return gracefully
+	if !serviceRemove.containerExists(serviceRemove.service.ID) {
 		return nil
 	}
 
+	// remove the docker container
 	if err := docker.ContainerRemove(serviceRemove.service.ID); err != nil {
 		return err
 	}
@@ -144,7 +149,9 @@ func (serviceRemove *processServiceRemove) removeContainer() error {
 func (serviceRemove *processServiceRemove) deleteService() error {
 
 	name := serviceRemove.control.Meta["name"]
-	if err := data.Delete(config.AppName(), name); err != nil {
+	bucket := fmt.Sprintf("%s_%s", config.AppName(), serviceRemove.control.Env)
+
+	if err := data.Delete(bucket, name); err != nil {
 		return err
 	}
 
@@ -154,10 +161,9 @@ func (serviceRemove *processServiceRemove) deleteService() error {
 // TODO: this should be a general helper in the docker library
 // containerExists checks to see if a container exists
 func (serviceRemove *processServiceRemove) containerExists(id string) bool {
+	// get the container
+	_, err := docker.GetContainer(id)
 
-	if _, err := docker.GetContainer(id); err == nil {
-		return true
-	}
-
-	return false
+	// it exists if we could get the container successfully
+	return err == nil
 }

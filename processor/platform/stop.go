@@ -34,9 +34,10 @@ func (platformStop processPlatformStop) Process() error {
 // stopServices will stop all the platform services
 func (platformStop *processPlatformStop) stopServices() error {
 
-	//
+	// stop all the platform services weather they have been created
+	// or not. (some may not be created in all instances)
 	platformStop.control.Display(stylish.Bullet("Stopping Platform Services..."))
-	for _, service := range Services {
+	for _, service := range append(SetupServices, DeployServices...) {
 		if err := platformStop.stopService(service); err != nil {
 			return err
 		}
@@ -50,7 +51,7 @@ func (platformStop *processPlatformStop) stopService(service Service) error {
 
 	//
 	config := processor.ProcessControl{
-		DevMode:      platformStop.control.DevMode,
+		Env:      platformStop.control.Env,
 		Verbose:      platformStop.control.Verbose,
 		DisplayLevel: platformStop.control.DisplayLevel + 1,
 		Meta:         map[string]string{"label": service.label, "name": service.name},

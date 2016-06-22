@@ -22,21 +22,25 @@ type Service struct {
 }
 
 // Services ...
-var Services = []Service{
+var SetupServices = []Service{
 	{
 		label: "Logger",
 		name:  "logvac",
 		image: "nanobox/logvac",
 	},
 	{
-		label: "Router",
-		name:  "portal",
-		image: "nanobox/portal",
-	},
-	{
 		label: "Message Bus",
 		name:  "mist",
 		image: "nanobox/mist",
+	},
+}
+
+// Services ...
+var DeployServices = []Service{
+	{
+		label: "Router",
+		name:  "portal",
+		image: "nanobox/portal",
 	},
 	{
 		label: "Storage",

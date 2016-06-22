@@ -33,7 +33,7 @@ func (codeClean processCodeClean) Results() processor.ProcessControl {
 func (codeClean *processCodeClean) Process() error {
 
 	// if background do nothing
-	if processor.DefaultConfig.Background {
+	if processor.DefaultControl.Background {
 		return nil
 	}
 

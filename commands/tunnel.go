@@ -56,8 +56,8 @@ ex: nanobox tunnel <container>
 	}
 
 	// set the meta arguments to be used in the processor and run the processor
-	processor.DefaultConfig.Meta["container"] = args[0]
-	processor.DefaultConfig.Meta["app"] = tunnelCmdFlags.app
-	processor.DefaultConfig.Meta["port"] = tunnelCmdFlags.port
-	print.OutputCommandErr(processor.Run("tunnel", processor.DefaultConfig))
+	processor.DefaultControl.Meta["container"] = args[0]
+	processor.DefaultControl.Meta["app"] = tunnelCmdFlags.app
+	processor.DefaultControl.Meta["port"] = tunnelCmdFlags.port
+	print.OutputCommandErr(processor.Run("tunnel", processor.DefaultControl))
 }

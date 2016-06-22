@@ -21,6 +21,7 @@ import (
 	_ "github.com/nanobox-io/nanobox/processor/platform"
 	_ "github.com/nanobox-io/nanobox/processor/provider"
 	_ "github.com/nanobox-io/nanobox/processor/service"
+	_ "github.com/nanobox-io/nanobox/processor/share"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 )
@@ -62,19 +63,19 @@ var (
 			// version of nanobox, or are using nanobox for the first time
 			case lastUpdated.Seconds() <= 1:
 				fmt.Printf(stylish.Bullet("First time running nanobox - checking for updates..."))
-				processor.DefaultConfig.Force = true
+				processor.DefaultControl.Force = true
 				UpdateCmd.Run(nil, nil)
 
 			// if lastUpdated is more than [14 days] ago, then we'll run the auto-update
 			// process, prompting the user if they want to update
 			case lastUpdated.Hours()/24 >= 14.0:
 				fmt.Printf(stylish.Bullet("14 days since last update - checking for updates ..."))
-				processor.DefaultConfig.Force = true
+				processor.DefaultControl.Force = true
 				UpdateCmd.Run(nil, nil)
 			}
 
 			// set verbose
-			if processor.DefaultConfig.Verbose {
+			if processor.DefaultControl.Verbose {
 				// close the existing loggers
 				lumber.Close()
 				// create a new multi logger
@@ -97,7 +98,7 @@ var (
 
 			// hijack the verbose flag (-v), and use it to display the version of the
 			// CLI
-			if version || processor.DefaultConfig.Verbose {
+			if version || processor.DefaultControl.Verbose {
 				fmt.Printf("nanobox v%v\n", util.VERSION)
 				return
 			}
@@ -111,15 +112,12 @@ var (
 // init creates the list of available nanobox commands and sub commands
 func init() {
 
-	// internal flags
-	NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultConfig.DevMode, "dev", "", false, "")
-	NanoboxCmd.PersistentFlags().MarkHidden("dev")
-
 	// persistent flags
-	NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultConfig.Background, "background", "", false, "Stops nanobox from auto-suspending.")
-	NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultConfig.Force, "force", "f", false, "Forces a command to run (effects vary per command).")
-	NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultConfig.Verbose, "verbose", "v", false, "Increases display output.")
-	NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultConfig.Quiet, "quiet", "q", false, "Decreases display output.")
+	NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultControl.Debug, "debug", "", false, "run nanobox in debug mode")
+	NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultControl.Background, "background", "", false, "Stops nanobox from auto-suspending.")
+	NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultControl.Force, "force", "f", false, "Forces a command to run (effects vary per command).")
+	NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultControl.Verbose, "verbose", "v", false, "Increases display output.")
+	NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultControl.Quiet, "quiet", "q", false, "Decreases display output.")
 
 	// local flags
 	NanoboxCmd.Flags().BoolVarP(&version, "version", "", false, "Displays the current version of this CLI.")
@@ -128,6 +126,7 @@ func init() {
 	NanoboxCmd.AddCommand(UpdateCmd)
 
 	// subcommands
+	NanoboxCmd.AddCommand(DataCmd)
 	NanoboxCmd.AddCommand(DeployCmd)
 	NanoboxCmd.AddCommand(LinkCmd)
 	NanoboxCmd.AddCommand(LoginCmd)

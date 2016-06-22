@@ -1,4 +1,4 @@
-package dev
+package share
 
 import (
 	"fmt"
@@ -12,43 +12,43 @@ import (
 	"github.com/nanobox-io/nanobox/util/locker"
 )
 
-// processDevTeardown ...
-type processDevTeardown struct {
+// processTeardown ...
+type processTeardown struct {
 	control processor.ProcessControl
 }
 
 //
 func init() {
-	processor.Register("dev_teardown", devTeardownFn)
+	processor.Register("share_teardown", teardownFn)
 }
 
 //
-func devTeardownFn(control processor.ProcessControl) (processor.Processor, error) {
-	return &processDevTeardown{control}, nil
+func teardownFn(control processor.ProcessControl) (processor.Processor, error) {
+	return &processTeardown{control}, nil
 }
 
 //
-func (devTeardown processDevTeardown) Results() processor.ProcessControl {
-	return devTeardown.control
+func (teardown processTeardown) Results() processor.ProcessControl {
+	return teardown.control
 }
 
 //
-func (devTeardown *processDevTeardown) Process() error {
+func (teardown *processTeardown) Process() error {
 
 	// dont shut anything down if we are supposed to background
-	if processor.DefaultConfig.Background {
+	if processor.DefaultControl.Background {
 		return nil
 	}
 
-	if err := devTeardown.teardownApp(); err != nil {
+	if err := teardown.teardownApp(); err != nil {
 		return err
 	}
 
-	if err := devTeardown.teardownMounts(); err != nil {
+	if err := teardown.teardownMounts(); err != nil {
 		return err
 	}
 
-	if err := devTeardown.teardownProvider(); err != nil {
+	if err := teardown.teardownProvider(); err != nil {
 		return err
 	}
 
@@ -56,7 +56,7 @@ func (devTeardown *processDevTeardown) Process() error {
 }
 
 // teardownApp tears down the app when it's not being used
-func (devTeardown *processDevTeardown) teardownApp() error {
+func (teardown *processTeardown) teardownApp() error {
 
 	counter.Decrement(config.AppName())
 
@@ -65,25 +65,26 @@ func (devTeardown *processDevTeardown) teardownApp() error {
 	locker.LocalLock()
 	defer locker.LocalUnlock()
 
-	//
-	if appIsUnused() {
+	// short-circuit if the app is still in use
+	if !appInUse() {
+		return nil
+	}
 
-		// Stop the platform services
-		if err := processor.Run("platform_stop", devTeardown.control); err != nil {
-			return err
-		}
+	// Stop the platform services
+	if err := processor.Run("platform_stop", teardown.control); err != nil {
+		return err
+	}
 
-		// stop all data services
-		if err := processor.Run("service_stop_all", devTeardown.control); err != nil {
-			return err
-		}
+	// stop all data services
+	if err := processor.Run("service_stop_all", teardown.control); err != nil {
+		return err
 	}
 
 	return nil
 }
 
 // teardownMounts removes the unused mounts from the provider
-func (devTeardown *processDevTeardown) teardownMounts() error {
+func (teardown *processTeardown) teardownMounts() error {
 
 	// establish a local app lock to ensure we're the only ones bringing
 	// down the app platform. Also ensure that we release it even if we error
@@ -91,7 +92,7 @@ func (devTeardown *processDevTeardown) teardownMounts() error {
 	defer locker.LocalUnlock()
 
 	// short-circuit if the app is still in use
-	if !appIsUnused() {
+	if appInUse() {
 		return nil
 	}
 
@@ -121,7 +122,7 @@ func (devTeardown *processDevTeardown) teardownMounts() error {
 }
 
 // teardownProvider tears down the provider when it's not being used
-func (devTeardown *processDevTeardown) teardownProvider() error {
+func (teardown *processTeardown) teardownProvider() error {
 
 	//
 	count, err := counter.Decrement("provider")
@@ -137,19 +138,19 @@ func (devTeardown *processDevTeardown) teardownProvider() error {
 
 	// stop the provider
 	if providerIsUnused() {
-		return processor.Run("provider_stop", devTeardown.control)
+		return processor.Run("provider_stop", teardown.control)
 	}
 
 	//
-	devTeardown.control.Display(stylish.Bullet("%d dev's still running so leaving the provider up", count))
+	teardown.control.Display(stylish.Bullet("%d dev's still running so leaving the provider up", count))
 
 	return nil
 }
 
-// appIsUnused returns true if the app isn't being used by any other session
-func appIsUnused() bool {
+// appInUse returns true if the app is being used by any other session
+func appInUse() bool {
 	count, err := counter.Get(config.AppName())
-	return err == nil && count == 0
+	return err != nil || count != 0
 }
 
 // providerIsUnused returns true if the provider is currently not being used

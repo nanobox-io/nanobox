@@ -29,11 +29,11 @@ func deployFn(ccmd *cobra.Command, args []string) {
 
 	// if no arguments are passed we'll deploy to the "default" app...
 	case len(args) == 0:
-		processor.DefaultConfig.Meta["app"] = "default"
+		processor.DefaultControl.Meta["app"] = "default"
 
 	// if one argument is passed we'll assume it's the name of the app to deploy to
 	case len(args) == 1:
-		processor.DefaultConfig.Meta["app"] = args[0]
+		processor.DefaultControl.Meta["app"] = args[0]
 
 	// if more than one argument is passed we'll let the user know they are using
 	// the command wrong
@@ -50,5 +50,5 @@ ex: nanobox deploy <name>
 	}
 
 	// set the meta arguments to be used in the processor and run the processor
-	print.OutputCommandErr(processor.Run("deploy", processor.DefaultConfig))
+	print.OutputCommandErr(processor.Run("deploy", processor.DefaultControl))
 }

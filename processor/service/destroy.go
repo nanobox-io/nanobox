@@ -113,7 +113,7 @@ func (serviceDestroy *processServiceDestroy) printDisplay() error {
 func (serviceDestroy *processServiceDestroy) removeContainer() error {
 
 	name := serviceDestroy.control.Meta["name"]
-	container := fmt.Sprintf("nanobox-%s-%s", config.AppName(), name)
+	container := fmt.Sprintf("nanobox-%s-%s-%s", config.AppName(), serviceDestroy.control.Env, name)
 
 	if err := docker.ContainerRemove(container); err != nil {
 		return err
