@@ -136,14 +136,17 @@ func (self PortalClient) do(method, path string, requestBody, responseBody inter
 		rbodyReader = bytes.NewBuffer(jsonBytes)
 	}
 
-	req, err := http.NewRequest(method, fmt.Sprintf("https://%s/%s", self.host, path), rbodyReader)
+	req, err := http.NewRequest(method, fmt.Sprintf("https://%s%s", self.host, path), rbodyReader)
 	if err != nil {
 		return err
 	}
-	req.Header.Add("X-NANOBOX-TOKEN", self.token)
+	req.Header.Add("X-AUTH-TOKEN", self.token)
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
+	}
+	if res.StatusCode < 200 || res.StatusCode >= 300 {
+		return fmt.Errorf("Bad exit code (%d)", res.StatusCode)
 	}
 
 	if responseBody != nil {

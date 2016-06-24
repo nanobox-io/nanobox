@@ -3,7 +3,6 @@ package dev
 import (
 	"encoding/json"
 	"fmt"
-	"os"
 
 	"github.com/jcelliott/lumber"
 
@@ -37,18 +36,19 @@ func (devInfo processDevInfo) Results() processor.ProcessControl {
 func (devInfo processDevInfo) Process() error {
 
 	//
-	services, err := data.Keys(config.AppName())
+	bucket := fmt.Sprintf("%s_dev", config.AppName())
+	services, err := data.Keys(bucket)
 	if err != nil {
 		fmt.Println("data keys:", err)
 		lumber.Close()
-		os.Exit(1)
+		return err
 	}
 
 	//
 	for _, service := range services {
 		if service != "builds" {
 			svc := models.Service{}
-			data.Get(config.AppName(), service, &svc)
+			data.Get(bucket, service, &svc)
 			bytes, _ := json.MarshalIndent(svc, "", "  ")
 			fmt.Printf("%s\n", bytes)
 		}
@@ -56,7 +56,7 @@ func (devInfo processDevInfo) Process() error {
 
 	//
 	envVars := models.EnvVars{}
-	data.Get(config.AppName()+"_meta", "env", &envVars)
+	data.Get(config.AppName()+"_meta", "dev_env", &envVars)
 	bytes, _ := json.MarshalIndent(envVars, "", "  ")
 	fmt.Printf("%s\n", bytes)
 

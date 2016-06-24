@@ -36,7 +36,7 @@ func (devDestroy processDevDestroy) Results() processor.ProcessControl {
 func (devDestroy processDevDestroy) Process() error {
 	devDestroy.control.Env = "dev"
 	
-	if err := processor.Run("share_setup", devDestroy.control); err != nil {
+	if err := processor.Run("provider_setup", devDestroy.control); err != nil {
 		return err
 	}
 
@@ -158,7 +158,7 @@ func (devDestroy processDevDestroy) removeShare(src, dst string) error {
 			},
 		}
 
-		if err := processor.Run("dev_netfs_remove", control); err != nil {
+		if err := processor.Run("share_netfs_remove", control); err != nil {
 			return err
 		}
 	}

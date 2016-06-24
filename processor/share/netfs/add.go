@@ -9,39 +9,39 @@ import (
 	"github.com/nanobox-io/nanobox/util/netfs"
 )
 
-// processDevNetFSAdd ...
-type processDevNetFSAdd struct {
+// processShareNetFSAdd ...
+type processShareNetFSAdd struct {
 	control processor.ProcessControl
 	path    string
 }
 
 func init() {
-	processor.Register("dev_netfs_add", devNetFSAddFn)
+	processor.Register("share_netfs_add", shareNetFSAddFn)
 }
 
 //
-func devNetFSAddFn(control processor.ProcessControl) (processor.Processor, error) {
-	devNetFSAdd := &processDevNetFSAdd{control: control}
-	return devNetFSAdd, devNetFSAdd.validateMeta()
+func shareNetFSAddFn(control processor.ProcessControl) (processor.Processor, error) {
+	shareNetFSAdd := &processShareNetFSAdd{control: control}
+	return shareNetFSAdd, shareNetFSAdd.validateMeta()
 }
 
-func (devNetFSAdd processDevNetFSAdd) Results() processor.ProcessControl {
-	return devNetFSAdd.control
+func (shareNetFSAdd processShareNetFSAdd) Results() processor.ProcessControl {
+	return shareNetFSAdd.control
 }
 
 //
-func (devNetFSAdd processDevNetFSAdd) Process() error {
+func (shareNetFSAdd processShareNetFSAdd) Process() error {
 
 	// short-circuit if the entry already exist; we do this after we validate meta
 	// because the meta is needed to determin the entry we're looking for
-	if devNetFSAdd.entryExists() {
+	if shareNetFSAdd.entryExists() {
 		return nil
 	}
 
 	// if we're not running as the privileged user, we need to re-exec with privilege
 	if !util.IsPrivileged() {
 
-		if err := devNetFSAdd.reExecPrivilege(); err != nil {
+		if err := shareNetFSAdd.reExecPrivilege(); err != nil {
 			return err
 		}
 
@@ -49,7 +49,7 @@ func (devNetFSAdd processDevNetFSAdd) Process() error {
 	}
 
 	// add the netfs entry
-	if err := devNetFSAdd.addEntry(); err != nil {
+	if err := shareNetFSAdd.addEntry(); err != nil {
 		return err
 	}
 
@@ -57,11 +57,11 @@ func (devNetFSAdd processDevNetFSAdd) Process() error {
 }
 
 // validateMeta validates that the required metadata exists
-func (devNetFSAdd *processDevNetFSAdd) validateMeta() error {
+func (shareNetFSAdd *processShareNetFSAdd) validateMeta() error {
 
 	// set path (required) and ensure it's provided
-	devNetFSAdd.path = devNetFSAdd.control.Meta["path"]
-	if devNetFSAdd.path == "" {
+	shareNetFSAdd.path = shareNetFSAdd.control.Meta["path"]
+	if shareNetFSAdd.path == "" {
 		return fmt.Errorf("Missing required meta value 'path'")
 	}
 
@@ -69,10 +69,10 @@ func (devNetFSAdd *processDevNetFSAdd) validateMeta() error {
 }
 
 // entryExists returns true if the entry already exists
-func (devNetFSAdd *processDevNetFSAdd) entryExists() bool {
+func (shareNetFSAdd *processShareNetFSAdd) entryExists() bool {
 
 	// if the entry exists just return
-	if netfs.Exists(devNetFSAdd.path) {
+	if netfs.Exists(shareNetFSAdd.path) {
 		return true
 	}
 
@@ -80,9 +80,9 @@ func (devNetFSAdd *processDevNetFSAdd) entryExists() bool {
 }
 
 // addEntry adds the netfs entry into the /etc/exports
-func (devNetFSAdd *processDevNetFSAdd) addEntry() error {
+func (shareNetFSAdd *processShareNetFSAdd) addEntry() error {
 
-	if err := netfs.Add(devNetFSAdd.path); err != nil {
+	if err := netfs.Add(shareNetFSAdd.path); err != nil {
 		return err
 	}
 
@@ -90,12 +90,12 @@ func (devNetFSAdd *processDevNetFSAdd) addEntry() error {
 }
 
 // reExecPrivilege re-execs the current process with a privileged user
-func (devNetFSAdd *processDevNetFSAdd) reExecPrivilege() error {
+func (shareNetFSAdd *processShareNetFSAdd) reExecPrivilege() error {
 
 	// call 'dev netfs add' with the original path and args; os.Args[0] will be the
 	// currently executing program, so this command will ultimately lead right back
 	// here
-	cmd := fmt.Sprintf("%s dev netfs add %s", os.Args[0], devNetFSAdd.path)
+	cmd := fmt.Sprintf("%s dev netfs add %s", os.Args[0], shareNetFSAdd.path)
 
 	// if the sudo'ed subprocess fails, we need to return error to stop the process
 	fmt.Println("Admin privileges are required to add entries to your exports file, your password may be requested...")

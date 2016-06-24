@@ -102,7 +102,7 @@ func (serviceStart *processServiceStart) startContainer() error {
 
 // attachNetwork attaches the container to the host network
 func (serviceStart *processServiceStart) attachNetwork() error {
-
+	fmt.Println("service start setting up network")
 	// todo: add these to a cleanup process in case of failure
 
 	err := provider.AddIP(serviceStart.service.ExternalIP)

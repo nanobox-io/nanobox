@@ -195,7 +195,8 @@ func (serviceConfigure *processServiceConfigure) validateMeta() error {
 func (serviceConfigure *processServiceConfigure) loadApp() error {
 
 	// load the app from the database
-	if err := data.Get("apps", config.AppName(), &serviceConfigure.app); err != nil {
+	key := fmt.Sprintf("%s_%s", config.AppName(), serviceConfigure.control.Env)
+	if err := data.Get("apps", key, &serviceConfigure.app); err != nil {
 		return err
 	}
 

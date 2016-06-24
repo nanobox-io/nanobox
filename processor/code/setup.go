@@ -93,7 +93,8 @@ func (codeSetup *processCodeSetup) Process() error {
 	defer codeSetup.clean(codeSetup.removeIPFromProvider)()
 
 	// save the service
-	if err := data.Put(config.AppName(), codeSetup.control.Meta["name"], codeSetup.service); err != nil {
+	bucket := fmt.Sprintf("%s_%s", config.AppName(), codeSetup.control.Env)
+	if err := data.Put(bucket, codeSetup.control.Meta["name"], codeSetup.service); err != nil {
 		codeSetup.fail = true
 		lumber.Error("insert data: ", err)
 		return err
@@ -105,7 +106,8 @@ func (codeSetup *processCodeSetup) Process() error {
 // serviceExists ...
 func (codeSetup *processCodeSetup) serviceExists() bool {
 	service := models.Service{}
-	databaseErr := data.Get(config.AppName(), codeSetup.control.Meta["name"], &service)
+	bucket := fmt.Sprintf("%s_%s", config.AppName(), codeSetup.control.Env)
+	databaseErr := data.Get(bucket, codeSetup.control.Meta["name"], &service)
 
 	// set the service i found so i dont re allocate ips
 	if databaseErr == nil {

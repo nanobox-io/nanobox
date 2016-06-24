@@ -1,6 +1,8 @@
 package platform
 
 import (
+	"fmt"
+	
 	"github.com/nanobox-io/nanobox-golang-stylish"
 
 	"github.com/nanobox-io/nanobox/models"
@@ -89,7 +91,8 @@ func (platformDeploy processPlatformDeploy) isServiceActive(id string) bool {
 
 	// fetch the entry from the database, ignoring any errors as the service
 	// might not exist yet
-	data.Get(config.AppName(), id, &service)
+	bucket := fmt.Sprintf("%s_%s", config.AppName(), platformDeploy.control.Env)
+	data.Get(bucket, id, &service)
 
 	return service.State == "active"
 }

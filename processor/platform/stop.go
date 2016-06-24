@@ -48,7 +48,6 @@ func (platformStop *processPlatformStop) stopServices() error {
 
 // stopService will stop an individual service
 func (platformStop *processPlatformStop) stopService(service Service) error {
-
 	//
 	config := processor.ProcessControl{
 		Env:      platformStop.control.Env,

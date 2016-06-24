@@ -60,7 +60,8 @@ nanobox dev dns add <name>
 
 	// set the meta arguments to be used in the processor and run the processor
 	processor.DefaultControl.Meta["name"] = args[0]
-	print.OutputCommandErr(processor.Run("dev_dns_add", processor.DefaultControl))
+	processor.DefaultControl.Env = "dev"
+	print.OutputCommandErr(processor.Run("share_dns_add", processor.DefaultControl))
 }
 
 // dnsRmFn will run the DNS processor for removing DNS entries from the "hosts"
@@ -83,5 +84,6 @@ ex: nanobox dev dns rm <name>
 
 	// set the meta arguments to be used in the processor and run the processor
 	processor.DefaultControl.Meta["name"] = args[0]
-	print.OutputCommandErr(processor.Run("dev_dns_remove", processor.DefaultControl))
+	processor.DefaultControl.Env = "dev"
+	print.OutputCommandErr(processor.Run("share_dns_remove", processor.DefaultControl))
 }

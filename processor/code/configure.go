@@ -25,6 +25,7 @@ type (
 		LogvacHost   string            `json:"logvac_host,omitempty"`
 		Config       interface{}       `json:"config,omitempty"`
 		Component    component         `json:"component,omitempty"`
+		Member       map[string]string `json:"member,omitempty"`	
 		Mounts       []mount           `json:"mounts,omitempty"`
 		WritableDirs interface{}       `json:"writable_dirs,omitempty"`
 		Transform    interface{}       `json:"transform,omitempty"`
@@ -45,6 +46,16 @@ type (
 		Host     string   `json:"host"`
 		Protocol string   `json:"protocol"`
 		Shares   []string `json:"shares"`
+	}
+
+	// fmt.Sprintf(`{"build":"%s","warehouse":"%s","warehouse_token":"%s"}`, codeConfigure.control.Meta["build_id"], codeConfigure.control.Meta["warehouse_url"], codeConfigure.control.Meta["warehouse_token"])
+	fetchPayload struct {
+		Component      component         `json:"component,omitempty"`
+		LogvacHost     string            `json:"logvac_host,omitempty"`
+		Member         map[string]string `json:"member,omitempty"`	
+		Build          string            `json:"build,omitempty"`
+		Warehouse      string            `json:"warehouse,omitempty"`
+		WarehouseToken string            `json:"warehouse_token,omitempty"`
 	}
 )
 
@@ -76,7 +87,9 @@ func (codeConfigure *processCodeConfigure) Process() error {
 	service := models.Service{}
 
 	//
-	if err := data.Get(config.AppName(), codeConfigure.control.Meta["name"], &service); err != nil {
+	bucket := fmt.Sprintf("%s_%s", config.AppName(), codeConfigure.control.Env)
+	if err := data.Get(bucket, codeConfigure.control.Meta["name"], &service); err != nil {
+		fmt.Println("what!!!", bucket, codeConfigure.control.Meta["name"])
 		return err
 	}
 
@@ -88,7 +101,12 @@ func (codeConfigure *processCodeConfigure) Process() error {
 	}
 
 	// run fetch build command
-	if _, err := util.Exec(service.ID, "fetch", fmt.Sprintf(`{"build":"%s","warehouse":"%s","warehouse_token":"%s"}`, codeConfigure.control.Meta["build_id"], codeConfigure.control.Meta["warehouse_url"], codeConfigure.control.Meta["warehouse_token"]), processor.ExecWriter()); err != nil {
+	fetchPayload, err := codeConfigure.fetchPayload()
+	if err != nil {
+		return err
+	}
+	if out, err := util.Exec(service.ID, "fetch", fetchPayload, processor.ExecWriter()); err != nil {
+		fmt.Println("out", out)
 		return err
 	}
 
@@ -104,13 +122,13 @@ func (codeConfigure *processCodeConfigure) Process() error {
 	}
 
 	// run start command
-	if _, err = util.Exec(service.ID, "start", codeConfigure.startPayload(), nil); err != nil {
+	if _, err = util.Exec(service.ID, "start", payload, nil); err != nil {
 		return err
 	}
 
 	//
 	service.State = ACTIVE
-	if err := data.Put(config.AppName(), codeConfigure.control.Meta["name"], service); err != nil {
+	if err := data.Put(bucket, codeConfigure.control.Meta["name"], service); err != nil {
 		return err
 	}
 
@@ -137,11 +155,12 @@ func (codeConfigure processCodeConfigure) startPayload() string {
 func (codeConfigure *processCodeConfigure) configurePayload() (string, error) {
 
 	me := models.Service{}
-	err := data.Get(config.AppName(), codeConfigure.control.Meta["name"], &me)
+	bucket := fmt.Sprintf("%s_%s", config.AppName(), codeConfigure.control.Env)
+	err := data.Get(bucket, codeConfigure.control.Meta["name"], &me)
 	boxfile := boxfile.New([]byte(codeConfigure.control.Meta["boxfile"]))
 
 	logvac := models.Service{}
-	data.Get(config.AppName(), "logvac", &logvac)
+	data.Get(bucket, "logvac", &logvac)
 
 	pload := payload{
 		LogvacHost: logvac.InternalIP,
@@ -151,6 +170,7 @@ func (codeConfigure *processCodeConfigure) configurePayload() (string, error) {
 			UID:  codeConfigure.control.Meta["name"],
 			ID:   me.ID,
 		},
+		Member: map[string]string{"uid": "1"},
 		Mounts:       codeConfigure.mounts(),
 		WritableDirs: boxfile.Node(codeConfigure.control.Meta["name"]).Value("writable_dirs"),
 		Transform:    boxfile.Node("code.deploy").Value("transform"),
@@ -163,17 +183,45 @@ func (codeConfigure *processCodeConfigure) configurePayload() (string, error) {
 	return string(bytes), err
 }
 
+// fetch payload
+func (codeConfigure *processCodeConfigure) fetchPayload() (string, error) {
+
+	me := models.Service{}
+	bucket := fmt.Sprintf("%s_%s", config.AppName(), codeConfigure.control.Env)
+	err := data.Get(bucket, codeConfigure.control.Meta["name"], &me)
+
+	logvac := models.Service{}
+	data.Get(config.AppName(), "logvac", &logvac)
+
+	pload := fetchPayload{
+		LogvacHost: logvac.InternalIP,
+		Component: component{
+			Name: "whydoesthismatter",
+			UID:  codeConfigure.control.Meta["name"],
+			ID:   me.ID,
+		},
+		Member: map[string]string{"uid": "1"},
+		Build: codeConfigure.control.Meta["build_id"],
+		Warehouse: codeConfigure.control.Meta["warehouse_url"],
+		WarehouseToken: codeConfigure.control.Meta["warehouse_token"],
+	}
+
+	bytes, err := json.Marshal(pload)
+	return string(bytes), err
+}
+
 // mounts ...
 func (codeConfigure *processCodeConfigure) mounts() []mount {
 	boxfile := boxfile.New([]byte(codeConfigure.control.Meta["boxfile"]))
 	boxNetworkDirs := boxfile.Node(codeConfigure.control.Meta["name"]).Node("network_dirs")
 
+	bucket := fmt.Sprintf("%s_%s", config.AppName(), codeConfigure.control.Env)
 	m := []mount{}
 	for _, node := range boxNetworkDirs.Nodes() {
 		// i think i store these as data.name
 		// cleanNode := regexp.MustCompile(`.+\.`).ReplaceAllString(node, "")
 		service := models.Service{}
-		err := data.Get(config.AppName(), node, &service)
+		err := data.Get(bucket, node, &service)
 		if err != nil {
 			// skip because of problems
 			fmt.Println("cant get service:", err)
@@ -194,7 +242,7 @@ func (codeConfigure *processCodeConfigure) mounts() []mount {
 // env ...
 func (codeConfigure *processCodeConfigure) env() map[string]string {
 	envVars := models.EnvVars{}
-	data.Get(config.AppName()+"_meta", "env", &envVars)
+	data.Get(config.AppName()+"_meta", codeConfigure.control.Env+"_env", &envVars)
 
 	return envVars
 }

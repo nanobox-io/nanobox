@@ -80,19 +80,16 @@ func (serviceDestroy processServiceDestroy) Process() error {
 func (serviceDestroy *processServiceDestroy) loadApp() error {
 
 	// load the app from the database
-	if err := data.Get("apps", config.AppName(), &serviceDestroy.app); err != nil {
-		return err
-	}
-
-	return nil
+	key := fmt.Sprintf("%s_%s", config.AppName(), serviceDestroy.control.Env)
+	return data.Get("apps", key, &serviceDestroy.app)
 }
 
 // loadService fetches the service from the database
 func (serviceDestroy *processServiceDestroy) loadService() error {
 	name := serviceDestroy.control.Meta["name"]
+	bucket := fmt.Sprintf("%s_%s", config.AppName(), serviceDestroy.control.Env)
 
-	// the service really shouldn't exist yet, so let's not return the error if it fails
-	data.Get(config.AppName(), name, &serviceDestroy.service)
+	data.Get(bucket, name, &serviceDestroy.service)
 
 	return nil
 }

@@ -36,12 +36,17 @@ func (teardown processTeardown) Results() processor.ProcessControl {
 func (teardown *processTeardown) Process() error {
 
 	// dont shut anything down if we are supposed to background
-	if processor.DefaultControl.Background {
+	if processor.DefaultControl.Background || processor.DefaultControl.Debug {
+		fmt.Println("leaving running because ", processor.DefaultControl.Background, processor.DefaultControl.Debug)
 		return nil
 	}
 
-	if err := teardown.teardownApp(); err != nil {
-		return err
+	// if im given a environment to teardown i will tear the app down 
+	// in the env. If not (in the case of a build) no app is teardownable.
+	if teardown.control.Env != "" {
+		if err := teardown.teardownApp(); err != nil {
+			return err
+		}
 	}
 
 	if err := teardown.teardownMounts(); err != nil {
@@ -66,7 +71,7 @@ func (teardown *processTeardown) teardownApp() error {
 	defer locker.LocalUnlock()
 
 	// short-circuit if the app is still in use
-	if !appInUse() {
+	if appInUse() {
 		return nil
 	}
 
@@ -142,7 +147,7 @@ func (teardown *processTeardown) teardownProvider() error {
 	}
 
 	//
-	teardown.control.Display(stylish.Bullet("%d dev's still running so leaving the provider up", count))
+	teardown.control.Display(stylish.Bullet("the provider is needed for %d more thing(s)", count))
 
 	return nil
 }

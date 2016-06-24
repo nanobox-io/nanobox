@@ -2,6 +2,7 @@ package code
 
 import (
 	"net"
+	"fmt"
 
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox/models"
@@ -43,7 +44,8 @@ func (codeDestroy *processCodeDestroy) Process() error {
 	service := models.Service{}
 
 	//
-	if err := data.Get(config.AppName(), codeDestroy.control.Meta["name"], &service); err != nil {
+	bucket := fmt.Sprintf("%s_%s", config.AppName(), codeDestroy.control.Env)
+	if err := data.Get(bucket, codeDestroy.control.Meta["name"], &service); err != nil {
 		return err
 	}
 

@@ -15,13 +15,14 @@ import (
 	_ "github.com/nanobox-io/nanobox/processor/app"
 	_ "github.com/nanobox-io/nanobox/processor/code"
 	_ "github.com/nanobox-io/nanobox/processor/dev"
-	_ "github.com/nanobox-io/nanobox/processor/dev/dns"
-	_ "github.com/nanobox-io/nanobox/processor/dev/netfs"
 	_ "github.com/nanobox-io/nanobox/processor/link"
 	_ "github.com/nanobox-io/nanobox/processor/platform"
 	_ "github.com/nanobox-io/nanobox/processor/provider"
 	_ "github.com/nanobox-io/nanobox/processor/service"
 	_ "github.com/nanobox-io/nanobox/processor/share"
+	_ "github.com/nanobox-io/nanobox/processor/share/dns"
+	_ "github.com/nanobox-io/nanobox/processor/share/netfs"
+	_ "github.com/nanobox-io/nanobox/processor/sim"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 )
@@ -133,4 +134,5 @@ func init() {
 	NanoboxCmd.AddCommand(LogoutCmd)
 	NanoboxCmd.AddCommand(BuildCmd)
 	NanoboxCmd.AddCommand(DevCmd)
+	NanoboxCmd.AddCommand(SimCmd)
 }

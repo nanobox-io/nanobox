@@ -1,6 +1,8 @@
 package code
 
 import (
+	"fmt"
+	
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util/config"
@@ -43,8 +45,10 @@ func (codeClean *processCodeClean) Process() error {
 		return nil
 	}
 
+	bucket := fmt.Sprintf("%s_%s", config.AppName(), codeClean.control.Env)
+
 	// remove all the existing code services
-	keys, err := data.Keys(config.AppName())
+	keys, err := data.Keys(bucket)
 	if err != nil {
 		return err
 	}
@@ -52,7 +56,7 @@ func (codeClean *processCodeClean) Process() error {
 	// get all the code services and remove them
 	for _, key := range keys {
 		service := models.Service{}
-		data.Get(config.AppName(), key, &key)
+		data.Get(bucket, key, &key)
 		if service.Type == "code" {
 			codeClean.control.Meta["name"] = key
 			if err := processor.Run("code_destroy", codeClean.control); err != nil {

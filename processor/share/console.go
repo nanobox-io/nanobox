@@ -42,7 +42,7 @@ func (shareConsole processShareConsole) Process() error {
 	if err := processor.Run("provider_setup", shareConsole.control); err != nil {
 		fmt.Println("provider_setup:", err)
 		lumber.Close()
-		os.Exit(1)
+		return err
 	}
 
 	//

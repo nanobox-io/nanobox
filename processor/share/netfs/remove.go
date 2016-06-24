@@ -16,7 +16,7 @@ type processDevNetFSRemove struct {
 }
 
 func init() {
-	processor.Register("dev_netfs_remove", devNetFSRemoveFn)
+	processor.Register("share_netfs_remove", devNetFSRemoveFn)
 }
 
 //

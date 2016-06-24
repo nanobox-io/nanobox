@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"net"
 
 	"github.com/nanobox-io/nanobox/models"
@@ -61,7 +62,8 @@ func (appTeardown *processAppTeardown) Process() error {
 // loadApp loads the app from the db
 func (appTeardown *processAppTeardown) loadApp() error {
 	// the app might not exist yet, so let's not return the error if it fails
-	data.Get("apps", config.AppName(), &appTeardown.app)
+	key := fmt.Sprintf("%s_%s", config.AppName(), appTeardown.control.Env)
+	data.Get("apps", key, &appTeardown.app)
 
 	// set the default state
 	if appTeardown.app.State == "" {
@@ -108,7 +110,8 @@ func (appTeardown *processAppTeardown) deleteEvars() error {
 func (appTeardown *processAppTeardown) deleteApp() error {
 
 	// delete the app model
-	if err := data.Delete("apps", config.AppName()); err != nil {
+	key := fmt.Sprintf("%s_%s", config.AppName(), appTeardown.control.Env)
+	if err := data.Delete("apps", key); err != nil {
 		return err
 	}
 

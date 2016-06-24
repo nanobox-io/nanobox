@@ -2,7 +2,6 @@ package sim
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/nanobox-io/nanobox-boxfile"
 	"github.com/nanobox-io/nanobox/models"
@@ -45,6 +44,11 @@ func (simDeploy processSimDeploy) Process() error {
 	// this allows the dev and the deploy to be isolated
 	simDeploy.control.Env = "sim"
 
+  // run the share init which gives access to docker
+  if err := processor.Run("share_init", simDeploy.control); err != nil {
+    return err
+  }
+
 	// get the platform deploy ready
 	if err := processor.Run("platform_deploy", simDeploy.control); err != nil {
 		return err
@@ -75,6 +79,7 @@ func (simDeploy processSimDeploy) Process() error {
 	}
 
 	// complete message
+	fmt.Println("The deploy completed successfully!")
 
 	return nil
 }
@@ -84,7 +89,7 @@ func (simDeploy *processSimDeploy) publishCode() error {
 
 	// setup the var's required for code_publish
 	hoarder := models.Service{}
-	bucket := fmt.Sprintf("%s_%s", config.AppName(), serviceStart.control.Env)
+	bucket := fmt.Sprintf("%s_%s", config.AppName(), simDeploy.control.Env)
 	data.Get(bucket, "hoarder", &hoarder)
 	simDeploy.control.Meta["build_id"] = "1234"
 	simDeploy.control.Meta["warehouse_url"] = hoarder.InternalIP

@@ -2,7 +2,6 @@ package app
 
 import (
 	"fmt"
-	"net"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
@@ -62,7 +61,8 @@ func (appSetup *processAppSetup) Process() error {
 // loadApp loads the app from the db
 func (appSetup *processAppSetup) loadApp() error {
 	// the app might not exist yet, so let's not return the error if it fails
-	data.Get("apps", config.AppName(), &appSetup.app)
+	key := fmt.Sprintf("%s_%s", config.AppName(), appSetup.control.Env)
+	data.Get("apps", key, &appSetup.app)
 
 	// set the default state
 	if appSetup.app.State == "" {
@@ -80,36 +80,25 @@ func (appSetup *processAppSetup) reserveIPs() error {
 	var err error
 
 	// reserve a dev ip
-	var devIP net.IP
-	devIP, err = dhcp.ReserveGlobal()
-	if err != nil {
-		return err
-	}
-
-	// reserve a preview ip
-	var previewIP net.IP
-	previewIP, err = dhcp.ReserveGlobal()
+	envIP, err := dhcp.ReserveGlobal()
 	if err != nil {
 		return err
 	}
 
 	// reserve a logvac ip
-	var logvacIP net.IP
-	logvacIP, err = dhcp.ReserveLocal()
+	logvacIP, err := dhcp.ReserveLocal()
 	if err != nil {
 		return err
 	}
 
 	// reserve a mist ip
-	var mistIP net.IP
-	mistIP, err = dhcp.ReserveLocal()
+	mistIP, err := dhcp.ReserveLocal()
 	if err != nil {
 		return err
 	}
 
 	// now let's assign them onto the app
-	appSetup.app.GlobalIPs["dev"] 		= devIP.String()
-	appSetup.app.GlobalIPs["preview"] = previewIP.String()
+	appSetup.app.GlobalIPs["env"] = envIP.String()
 
 	appSetup.app.LocalIPs["logvac"] = logvacIP.String()
 	appSetup.app.LocalIPs["mist"]   = mistIP.String()
@@ -146,7 +135,8 @@ func (appSetup *processAppSetup) persistApp() error {
 	appSetup.app.State = ACTIVE
 
 	// save the app
-	if err := data.Put("apps", config.AppName(), &appSetup.app); err != nil {
+	key := fmt.Sprintf("%s_%s", config.AppName(), appSetup.control.Env)
+	if err := data.Put("apps", key, &appSetup.app); err != nil {
 		return err
 	}
 

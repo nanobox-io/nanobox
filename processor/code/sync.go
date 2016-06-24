@@ -55,6 +55,7 @@ func (codeSync *processCodeSync) Process() error {
 	if err := codeSync.setBoxfile(); err != nil {
 		return err
 	}
+	fmt.Printf("%+v\n", codeSync.box)
 
 	// iterate over the code nodes and build containers for each of them
 	for _, codeName := range codeSync.box.Nodes("code") {
@@ -62,7 +63,7 @@ func (codeSync *processCodeSync) Process() error {
 		// none is given
 		image := codeSync.box.Node(codeName).StringValue("image")
 		if image == "" {
-			image = "nanobox/code"
+			image = "nanobox/code:v1"
 		}
 
 		// create a new process config for code ensuring it has access to the warehouse
@@ -89,7 +90,7 @@ func (codeSync *processCodeSync) Process() error {
 		// configure this code container
 		err = processor.Run("code_configure", code)
 		if err != nil {
-			return fmt.Errorf("code_start (%s): %s\n", codeName, err.Error())
+			return fmt.Errorf("code_configure (%s): %s\n", codeName, err.Error())
 		}
 	}
 

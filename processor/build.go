@@ -1,6 +1,10 @@
 package processor
 
-import "github.com/nanobox-io/nanobox/util/locker"
+import (
+	"fmt"
+
+	"github.com/nanobox-io/nanobox/util/locker"
+) 
 
 // processBuild ...
 type processBuild struct {
@@ -25,13 +29,23 @@ func (build processBuild) Results() ProcessControl {
 //
 func (build processBuild) Process() error {
 
+	// by aquiring a local lock we are only allowing
+	// one build to happen at a time
 	locker.LocalLock()
 	defer locker.LocalUnlock()
-	build.control.Meta["build"] = "true"
 
-	// setup the environment (boot vm) but do not run the dev setup because we dont
-	// need any o fthe platform services
-	if err := Run("provider_setup", build.control); err != nil {
+	// defer the clean up so if we exit early the cleanup will always happen
+	defer func() {
+		if err := Run("share_teardown", build.control); err != nil {
+			fmt.Println("teardown broke")
+			fmt.Println(err)
+
+			return 
+		}
+	}()
+
+	// get the vm and app up.
+	if err := Run("share_setup", build.control); err != nil {
 		return err
 	}
 

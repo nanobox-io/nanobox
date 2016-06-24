@@ -21,9 +21,6 @@ The development environment all starts below this subcommand.
 //
 func init() {
 
-	// hidden subcommands
-	DevCmd.AddCommand(dev.NetfsCmd)
-
 	// public subcommands
 	DevCmd.AddCommand(dev.StartCmd)
 	DevCmd.AddCommand(dev.DeployCmd)

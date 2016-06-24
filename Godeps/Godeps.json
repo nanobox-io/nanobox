@@ -244,7 +244,7 @@
 		},
 		{
 			"ImportPath": "github.com/nanobox-io/golang-portal-client",
-			"Rev": "a8e7fc9304838092925a280c1debd54050bf032b"
+			"Rev": "552531bd5ea2289c042c0c4836affb9313ed84a0"
 		},
 		{
 			"ImportPath": "github.com/nanobox-io/nanobox-boxfile",

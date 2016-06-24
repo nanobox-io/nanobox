@@ -28,17 +28,17 @@ func init() {
 
 //
 func serviceStopFn(control processor.ProcessControl) (processor.Processor, error) {
-	serviceStop := processServiceStop{control: control}
+	serviceStop := &processServiceStop{control: control}
 	return serviceStop, serviceStop.validateMeta()
 }
 
 //
-func (serviceStop processServiceStop) Results() processor.ProcessControl {
+func (serviceStop *processServiceStop) Results() processor.ProcessControl {
 	return serviceStop.control
 }
 
 //
-func (serviceStop processServiceStop) Process() error {
+func (serviceStop *processServiceStop) Process() error {
 
 	// short-circuit if the process is already stopped
 	if !serviceStop.isServiceRunning() {
@@ -90,6 +90,7 @@ func (serviceStop *processServiceStop) isServiceRunning() bool {
 	container, err := docker.GetContainer(fmt.Sprintf("nanobox-%s-%s-%s", config.AppName(), serviceStop.control.Env, serviceStop.name))
 
 	if err != nil {
+		// fmt.Printf("name of the thing i tried stopping nanobox-%s-%s-%s\n", config.AppName(), serviceStop.control.Env, serviceStop.name)
 		// todo: display a message
 		return false
 	}
@@ -102,7 +103,8 @@ func (serviceStop *processServiceStop) isServiceRunning() bool {
 func (serviceStop *processServiceStop) loadService() error {
 
 	//
-	if err := data.Get(config.AppName(), serviceStop.name, &serviceStop.service); err != nil {
+	bucket := fmt.Sprintf("%s_%s", config.AppName(), serviceStop.control.Env)
+	if err := data.Get(bucket, serviceStop.name, &serviceStop.service); err != nil {
 		print.OutputProcessorErr("service not found", fmt.Sprintf(`
 Nanobox was unable to find the service '%s' in the database, try shutting
 down again.

@@ -1,6 +1,8 @@
 package service
 
 import (
+	"fmt"
+
 	"github.com/nanobox-io/nanobox-golang-stylish"
 
 	"github.com/nanobox-io/nanobox/processor"
@@ -37,7 +39,8 @@ func (serviceStopAll processServiceStopAll) Process() error {
 func (serviceStopAll processServiceStopAll) stopServices() error {
 
 	//
-	services, err := data.Keys(config.AppName())
+	bucket := fmt.Sprintf("%s_%s", config.AppName(), serviceStopAll.control.Env)
+	services, err := data.Keys(bucket)
 	if err != nil {
 		return err
 	}

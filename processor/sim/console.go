@@ -1,14 +1,7 @@
-package share
+package sim
 
 import (
-	"fmt"
-	"os"
-	"os/exec"
-
-	"github.com/jcelliott/lumber"
-	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox/processor"
-	"github.com/nanobox-io/nanobox/util/config"
 )
 
 // processSimConsole ...
@@ -18,12 +11,12 @@ type processSimConsole struct {
 
 // the sim console is the same as the share console
 func init() {
-	processor.Register("share_console", simConsoleFn)
+	processor.Register("sim_console", simConsoleFn)
 }
 
 //
 func simConsoleFn(control processor.ProcessControl) (processor.Processor, error) {
-	simConsole := &processShareSim{control: control}
+	simConsole := &processSimConsole{control: control}
 	return simConsole, nil
 }
 

@@ -72,7 +72,6 @@ func (devConsole *processDevConsole) Process() error {
 
   //
   if err := devConsole.setup(); err != nil {
-    // todo: how to display this?
     return err
   }
 
@@ -83,7 +82,6 @@ func (devConsole *processDevConsole) Process() error {
 
   //
   if err := devConsole.runConsole(); err != nil {
-    // todo: how to display this?
     return err
   }
 
@@ -93,7 +91,8 @@ func (devConsole *processDevConsole) Process() error {
 // loadApp loads the app from the db
 func (devConsole *processDevConsole) loadApp() error {
 
-  if err := data.Get("apps", config.AppName(), &devConsole.app); err != nil {
+  key := fmt.Sprintf("%s_%s", config.AppName(), devConsole.control.Env)
+  if err := data.Get("apps", key, &devConsole.app); err != nil {
     return err
   }
 
@@ -113,6 +112,7 @@ func (devConsole *processDevConsole) setup() error {
 
   //
   if err := devConsole.loadBoxfile(); err != nil {
+    devConsole.control.Display(stylish.Error("Build Boxfile", "I was unable to load a build boxfile, Did you run a build before console?"))
     return err
   }
 
@@ -343,7 +343,7 @@ func (devConsole *processDevConsole) cwd() string {
 func (devConsole *processDevConsole) printMOTD() error {
 
   // fetch the dev ip
-  devIP := devConsole.app.GlobalIPs["dev"]
+  devIP := devConsole.app.GlobalIPs["env"]
 
   os.Stderr.WriteString(fmt.Sprintf(`
                                    **
@@ -377,7 +377,7 @@ func (devConsole *processDevConsole) printMOTD() error {
 func (devConsole *processDevConsole) attachNetwork() error {
 
   // fetch the devIP
-  devIP := devConsole.app.GlobalIPs["dev"]
+  devIP := devConsole.app.GlobalIPs["env"]
 
   //
   if err := provider.AddIP(devIP); err != nil {
@@ -396,7 +396,7 @@ func (devConsole *processDevConsole) attachNetwork() error {
 func (devConsole *processDevConsole) detachNetwork() error {
 
   // fetch the devIP
-  devIP := devConsole.app.GlobalIPs["dev"]
+  devIP := devConsole.app.GlobalIPs["env"]
 
   //
   if err := provider.RemoveNat(devIP, devConsole.localIP.String()); err != nil {

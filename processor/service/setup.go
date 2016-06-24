@@ -63,8 +63,7 @@ func (serviceSetup processServiceSetup) Results() processor.ProcessControl {
 //
 func (serviceSetup *processServiceSetup) Process() error {
 
-	header := fmt.Sprintf("Launching %s...", serviceSetup.control.Meta["label"])
-	serviceSetup.control.Display(stylish.Bullet(header))
+	serviceSetup.control.Display(stylish.Bullet("Launching %s...", serviceSetup.control.Meta["label"]))
 
 	// call the cleanup function to ensure we don't leave any bad state
 	defer serviceSetup.clean()
@@ -160,7 +159,8 @@ func (serviceSetup *processServiceSetup) validateMeta() error {
 func (serviceSetup *processServiceSetup) loadApp() error {
 
 	// load the app from the database
-	if err := data.Get("apps", config.AppName(), &serviceSetup.app); err != nil {
+	key := fmt.Sprintf("%s_%s", config.AppName(), serviceSetup.control.Env)
+	if err := data.Get("apps", key, &serviceSetup.app); err != nil {
 		return err
 	}
 
@@ -220,9 +220,12 @@ func (serviceSetup *processServiceSetup) reserveIps() error {
 	}
 
 	// only if this service is portal, we need to use the preview IP
+	// in a dev environment there will be no portal installed
+	// so the env ip should be available
+	// in dev the env ip is used for the dev container
 	if name == "portal" {
 		// portal's global ip is the preview ip
-		serviceSetup.globalIP = app.GlobalIPs["preview"]
+		serviceSetup.globalIP = app.GlobalIPs["env"]
 	} else {
 
 		globalIP, err := dhcp.ReserveGlobal()

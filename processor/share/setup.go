@@ -47,8 +47,12 @@ func (shareSetup *processShareSetup) Process() error {
     return err
   }
 
-  if err := shareSetup.setupApp(); err != nil {
-    return err
+  // if there is an environment then we should set up app
+  // if not (in the case of a build) no app setup is necessary
+  if shareSetup.control.Env != "" {
+    if err := shareSetup.setupApp(); err != nil {
+      return err
+    }
   }
 
   return nil
@@ -131,6 +135,8 @@ func (shareSetup *processShareSetup) setupApp() error {
 
   // setup the platform services
   return processor.Run("platform_setup", shareSetup.control)
+  
+  return nil
 }
 
 // addShare will add a filesystem share on the host machine
@@ -161,7 +167,7 @@ func (shareSetup *processShareSetup) addShare(src, dst string) error {
         },
       }
 
-      if err := processor.Run("dev_netfs_remove", control); err != nil {
+      if err := processor.Run("share_netfs_remove", control); err != nil {
         return err
       }
     }

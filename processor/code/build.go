@@ -82,8 +82,7 @@ func (codeBuild *processCodeBuild) Process() error {
 	}
 
 	// run the fetch hook in the build container
-	if out, err := util.Exec(codeBuild.container.ID, "fetch", "{}", processor.ExecWriter()); err != nil {
-		fmt.Println("output:", out)
+	if _, err := util.Exec(codeBuild.container.ID, "fetch", "{}", processor.ExecWriter()); err != nil {
 		return codeBuild.runDebugSession(err)
 	}
 
@@ -103,18 +102,14 @@ func (codeBuild *processCodeBuild) Process() error {
 		return codeBuild.runDebugSession(err)
 	}
 
-	//
-	if codeBuild.control.Meta["build"] == "true" {
+	// run the compile hook in the build container
+	if _, err := util.Exec(codeBuild.container.ID, "compile", "{}", processor.ExecWriter()); err != nil {
+		return codeBuild.runDebugSession(err)
+	}
 
-		// run the compile hook in the build container
-		if _, err := util.Exec(codeBuild.container.ID, "compile", "{}", processor.ExecWriter()); err != nil {
-			return codeBuild.runDebugSession(err)
-		}
-
-		// run the pack-app hook in the build container
-		if _, err := util.Exec(codeBuild.container.ID, "pack-app", "{}", processor.ExecWriter()); err != nil {
-			return codeBuild.runDebugSession(err)
-		}
+	// run the pack-app hook in the build container
+	if _, err := util.Exec(codeBuild.container.ID, "pack-app", "{}", processor.ExecWriter()); err != nil {
+		return codeBuild.runDebugSession(err)
 	}
 
 	// run the pack-build hook in the build container
@@ -122,18 +117,14 @@ func (codeBuild *processCodeBuild) Process() error {
 		return codeBuild.runDebugSession(err)
 	}
 
-	//
-	if codeBuild.control.Meta["build"] == "true" {
+	// run the clean hook in the build container
+	if _, err := util.Exec(codeBuild.container.ID, "clean", "{}", processor.ExecWriter()); err != nil {
+		return codeBuild.runDebugSession(err)
+	}
 
-		// run the clean hook in the build container
-		if _, err := util.Exec(codeBuild.container.ID, "clean", "{}", processor.ExecWriter()); err != nil {
-			return codeBuild.runDebugSession(err)
-		}
-
-		// run the pack-deploy hook in the build container
-		if _, err := util.Exec(codeBuild.container.ID, "pack-deploy", "{}", processor.ExecWriter()); err != nil {
-			return codeBuild.runDebugSession(err)
-		}
+	// run the pack-deploy hook in the build container
+	if _, err := util.Exec(codeBuild.container.ID, "pack-deploy", "{}", processor.ExecWriter()); err != nil {
+		return codeBuild.runDebugSession(err)
 	}
 
 	return nil

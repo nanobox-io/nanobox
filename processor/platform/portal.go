@@ -39,7 +39,8 @@ func (updatePortal processUpdatePortal) Process() error {
 	port := models.Service{}
 
 	//
-	if err := data.Get(config.AppName(), "portal", &port); err != nil {
+	bucket := fmt.Sprintf("%s_%s", config.AppName(), updatePortal.control.Env)
+	if err := data.Get(bucket, "portal", &port); err != nil {
 		return err
 	}
 
@@ -51,12 +52,13 @@ func (updatePortal processUpdatePortal) Process() error {
 	//
 	for _, node := range boxfile.Nodes("code") {
 		service := models.Service{}
-		if err := data.Get(config.AppName(), node, &service); err != nil {
+		if err := data.Get(bucket, node, &service); err != nil {
 			continue // unable to get the service
 		}
 
 		//
 		for _, service := range updatePortal.buildService(boxfile.Node(node), service) {
+			fmt.Println("service", service)
 			if duplicateService(services, service) {
 				if service.Port != 80 && service.Port != 443 {
 					fmt.Println("duplicate port:", service.Port)
@@ -68,6 +70,7 @@ func (updatePortal processUpdatePortal) Process() error {
 
 		//
 		for _, route := range updatePortal.buildRoutes(boxfile.Node(node), service) {
+			fmt.Println("route", route)
 			if duplciateRoute(routes, route) {
 				fmt.Println("duplicate route:", route.SubDomain, route.Path)
 			} else {
@@ -76,47 +79,11 @@ func (updatePortal processUpdatePortal) Process() error {
 		}
 	}
 
-	// if i have a web and no services i need to add a default one
-	if len(boxfile.Nodes("web")) != 0 && len(services) == 0 {
-
-		// possibly remove
-		services = append(services, portal.Service{
-			Interface: "eth0",
-			Port:      80,
-			Type:      TCP,
-			Scheduler: "rr",
-			Servers: []portal.Server{
-				portal.Server{
-					Host:      "127.0.0.1",
-					Port:      80,
-					Forwarder: "m",
-					Weight:    1,
-				},
-			},
-		})
-
-		// possibly remove
-		services = append(services, portal.Service{
-			Interface: "eth0",
-			Port:      443,
-			Type:      TCP,
-			Scheduler: "rr",
-			Servers: []portal.Server{
-				portal.Server{
-					Host:      "127.0.0.1",
-					Port:      443,
-					Forwarder: "m",
-					Weight:    1,
-				},
-			},
-		})
-	}
-
 	// if i have a web and no routes i need to add a default one
 	if len(boxfile.Nodes("web")) != 0 && len(routes) == 0 {
 		webNode := boxfile.Nodes("web")[0]
 		service := models.Service{}
-		data.Get(config.AppName(), webNode, &service)
+		data.Get(bucket, webNode, &service)
 		routes = append(routes, portal.Route{
 			Path:    "/",
 			Targets: []string{fmt.Sprintf("http://%s:%s", service.InternalIP, "80")},

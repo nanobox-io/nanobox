@@ -39,9 +39,6 @@ func (dev processDevStart) Process() error {
 			fmt.Println("teardown broke")
 			fmt.Println(err)
 
-			// this is bad, really bad...
-			// we should probably print a pretty message explaining that the app
-			// was left in a bad state and needs to be reset
 			return 
 		}
 	}()
@@ -56,19 +53,21 @@ func (dev processDevStart) Process() error {
 		return err
 	}
 
-	if err := dev.watchMist(); err != nil {
-		return err
-	}
-
-	return nil
+	return dev.watchMist()
 }
 
 func (dev *processDevStart) watchMist() error {
 	// output some message
+	dev.control.Display("             _  _ ____ _  _ ____ ___  ____ _  _")
+	dev.control.Display(`             |\ | |__| |\ | |  | |__) |  |  \/`)
+	dev.control.Display(`             | \| |  | | \| |__| |__) |__| _/\_`)
+	dev.control.Display("")
+	dev.control.Display("----------------------------------------------------------------")
 	dev.control.Display("while this console is open your dev env will be available")
 	dev.control.Display("attempting to connect to live streaming logs")
 	dev.control.Display("Next: run a build 'nanobox build'")
 	dev.control.Display("Then: open a console and start coding 'nanobox dev console'")
+	dev.control.Display("----------------------------------------------------------------")
 	
 	// tail the mist logs
 	return processor.Run("mist_log", dev.control)
