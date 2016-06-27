@@ -240,7 +240,7 @@
 		},
 		{
 			"ImportPath": "github.com/nanobox-io/golang-docker-client",
-			"Rev": "08cb154c3aa1a222cf41269b585eb5c053e669c2"
+			"Rev": "d6a6b07ff43ff4c4afd2d66e9afb1186fa7e7b6b"
 		},
 		{
 			"ImportPath": "github.com/nanobox-io/golang-portal-client",
