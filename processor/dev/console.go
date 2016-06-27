@@ -61,7 +61,7 @@ func (devConsole *processDevConsole) Process() error {
   }()
 
   // run the share init which gives access to docker
-  if err := processor.Run("share_init", devConsole.control); err != nil {
+  if err := processor.Run("env_init", devConsole.control); err != nil {
     return err
   }
 
@@ -301,7 +301,7 @@ func (devConsole *processDevConsole) removeContainer() error {
 func (devConsole *processDevConsole) devPayload() string {
   rtn := map[string]interface{}{}
   envVars := models.Evars{}
-  data.Get(config.AppName()+"_meta", "env", &envVars)
+  data.Get(config.AppName()+"_meta", "dev_env", &envVars)
   rtn["env"] = envVars
   bytes, _ := json.Marshal(rtn)
   return string(bytes)

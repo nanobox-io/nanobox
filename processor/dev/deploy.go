@@ -40,7 +40,7 @@ func (devDeploy processDevDeploy) Process() error {
 	devDeploy.control.Env = "dev"
 
   // run the share init which gives access to docker
-  if err := processor.Run("share_init", devDeploy.control); err != nil {
+  if err := processor.Run("env_init", devDeploy.control); err != nil {
     return err
   }
 

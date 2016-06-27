@@ -45,7 +45,7 @@ func (simDeploy processSimDeploy) Process() error {
 	simDeploy.control.Env = "sim"
 
   // run the share init which gives access to docker
-  if err := processor.Run("share_init", simDeploy.control); err != nil {
+  if err := processor.Run("env_init", simDeploy.control); err != nil {
     return err
   }
 

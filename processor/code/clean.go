@@ -34,11 +34,6 @@ func (codeClean processCodeClean) Results() processor.ProcessControl {
 // doenst clean ones no longer in the box file but instead removes them all.
 func (codeClean *processCodeClean) Process() error {
 
-	// if background do nothing
-	if processor.DefaultControl.Background {
-		return nil
-	}
-
 	// if other deploys are in progress do nothing
 	count, _ := counter.Decrement(config.AppName() + "_deploy")
 	if count != 0 {

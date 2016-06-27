@@ -99,7 +99,8 @@ func (appTeardown *processAppTeardown) releaseIPs() error {
 func (appTeardown *processAppTeardown) deleteEvars() error {
 
 	// delete the evars model
-	if err := data.Delete(config.AppName()+"_meta", "env"); err != nil {
+
+	if err := data.Delete(config.AppName()+"_meta", appTeardown.control.Env+"_env"); err != nil {
 		return err
 	}
 

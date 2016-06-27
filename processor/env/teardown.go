@@ -36,8 +36,8 @@ func (teardown processTeardown) Results() processor.ProcessControl {
 func (teardown *processTeardown) Process() error {
 
 	// dont shut anything down if we are supposed to background
-	if processor.DefaultControl.Background || processor.DefaultControl.Debug {
-		fmt.Println("leaving running because ", processor.DefaultControl.Background, processor.DefaultControl.Debug)
+	if processor.DefaultControl.Debug {
+		fmt.Println("leaving running because your running in debug mode")
 		return nil
 	}
 

@@ -115,7 +115,6 @@ func init() {
 
 	// persistent flags
 	NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultControl.Debug, "debug", "", false, "run nanobox in debug mode")
-	NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultControl.Background, "background", "", false, "Stops nanobox from auto-suspending.")
 	NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultControl.Force, "force", "f", false, "Forces a command to run (effects vary per command).")
 	NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultControl.Verbose, "verbose", "v", false, "Increases display output.")
 	NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultControl.Quiet, "quiet", "q", false, "Decreases display output.")
@@ -127,7 +126,7 @@ func init() {
 	NanoboxCmd.AddCommand(UpdateCmd)
 
 	// subcommands
-	NanoboxCmd.AddCommand(DataCmd)
+	NanoboxCmd.AddCommand(InspectCmd)
 	NanoboxCmd.AddCommand(DeployCmd)
 	NanoboxCmd.AddCommand(LinkCmd)
 	NanoboxCmd.AddCommand(LoginCmd)

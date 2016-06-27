@@ -30,7 +30,6 @@ type (
 		Debug        bool
 		Quiet        bool
 		Verbose      bool
-		Background   bool
 		Force        bool
 		DisplayLevel int
 		Meta         map[string]string

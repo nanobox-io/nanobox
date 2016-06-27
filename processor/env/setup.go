@@ -196,7 +196,7 @@ func (envSetup *processEnvSetup) addShare(src, dst string) error {
       },
     }
 
-    if err := processor.Run("dev_netfs_add", control); err != nil {
+    if err := processor.Run("env_netfs_add", control); err != nil {
       return err
     }
   }

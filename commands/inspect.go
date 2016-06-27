@@ -15,18 +15,18 @@ type (
 )
 	
 var (
-	// DataCmd ...
-	DataCmd = &cobra.Command{
-		Use:   "data",
+	// InspectCmd ...
+	InspectCmd = &cobra.Command{
+		Use:   "inspect",
 		Short: "show element from the nanobox database",
 		Long:  ``,
-		Run:   dataFunc,
+		Run:   inspectFunc,
 		Hidden: true,
 	}
 )
 
-// dataFunc ...
-func dataFunc(ccmd *cobra.Command, args []string) {
+// inspectFunc ...
+func inspectFunc(ccmd *cobra.Command, args []string) {
 	switch {
 	default:
 		fmt.Println("I need to know some data starting point")
