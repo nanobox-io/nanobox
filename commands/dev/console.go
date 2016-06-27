@@ -21,7 +21,7 @@ var ConsoleCmd = &cobra.Command{
 func consoleFn(ccmd *cobra.Command, args []string) {
 	processor.DefaultControl.Env = "dev"
 
-	// if given an arguement they wanted to run a console into a container
+	// if given an argument they wanted to run a console into a container
 	// if no arguement is provided they wanted to run a dev console 
 	// and be dropped into a dev environment
 	if len(args) > 0 {
