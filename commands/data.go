@@ -15,8 +15,6 @@ type (
 )
 	
 var (
-
-
 	// DataCmd ...
 	DataCmd = &cobra.Command{
 		Use:   "data",

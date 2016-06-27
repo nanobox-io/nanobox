@@ -9,39 +9,39 @@ import (
 	"github.com/nanobox-io/nanobox/util/netfs"
 )
 
-// processDevNetFSRemove ...
-type processDevNetFSRemove struct {
+// processEnvNetFSRemove ...
+type processEnvNetFSRemove struct {
 	control processor.ProcessControl
 	path    string
 }
 
 func init() {
-	processor.Register("share_netfs_remove", devNetFSRemoveFn)
+	processor.Register("env_netfs_remove", envNetFSRemoveFn)
 }
 
 //
-func devNetFSRemoveFn(control processor.ProcessControl) (processor.Processor, error) {
-	devNetFSRemove := &processDevNetFSRemove{control: control}
-	return devNetFSRemove, devNetFSRemove.validateMeta()
+func envNetFSRemoveFn(control processor.ProcessControl) (processor.Processor, error) {
+	envNetFSRemove := &processEnvNetFSRemove{control: control}
+	return envNetFSRemove, envNetFSRemove.validateMeta()
 }
 
-func (devNetFSRemove processDevNetFSRemove) Results() processor.ProcessControl {
-	return devNetFSRemove.control
+func (envNetFSRemove processEnvNetFSRemove) Results() processor.ProcessControl {
+	return envNetFSRemove.control
 }
 
 //
-func (devNetFSRemove processDevNetFSRemove) Process() error {
+func (envNetFSRemove processEnvNetFSRemove) Process() error {
 
 	// short-circuit if the entry already exist; we do this after we validate meta
 	// because the meta is needed to determin the entry we're looking for
-	if devNetFSRemove.entryExists() {
+	if envNetFSRemove.entryExists() {
 		return nil
 	}
 
 	// if we're not running as the privileged user, we need to re-exec with privilege
 	if !util.IsPrivileged() {
 
-		if err := devNetFSRemove.reExecPrivilege(); err != nil {
+		if err := envNetFSRemove.reExecPrivilege(); err != nil {
 			return err
 		}
 
@@ -49,7 +49,7 @@ func (devNetFSRemove processDevNetFSRemove) Process() error {
 	}
 
 	// rm the netfs entry
-	if err := devNetFSRemove.rmEntry(); err != nil {
+	if err := envNetFSRemove.rmEntry(); err != nil {
 		return err
 	}
 
@@ -57,11 +57,11 @@ func (devNetFSRemove processDevNetFSRemove) Process() error {
 }
 
 // validateMeta validates that the required metadata exists
-func (devNetFSRemove *processDevNetFSRemove) validateMeta() error {
+func (envNetFSRemove *processEnvNetFSRemove) validateMeta() error {
 
 	// set path (required) and ensure it's provided
-	devNetFSRemove.path = devNetFSRemove.control.Meta["path"]
-	if devNetFSRemove.path == "" {
+	envNetFSRemove.path = envNetFSRemove.control.Meta["path"]
+	if envNetFSRemove.path == "" {
 		return fmt.Errorf("Missing required meta value 'path'")
 	}
 
@@ -69,10 +69,10 @@ func (devNetFSRemove *processDevNetFSRemove) validateMeta() error {
 }
 
 // entryExists returns true if the entry already exists
-func (devNetFSRemove *processDevNetFSRemove) entryExists() bool {
+func (envNetFSRemove *processEnvNetFSRemove) entryExists() bool {
 
 	// if the entry exists just return
-	if netfs.Exists(devNetFSRemove.path) {
+	if netfs.Exists(envNetFSRemove.path) {
 		return true
 	}
 
@@ -80,10 +80,10 @@ func (devNetFSRemove *processDevNetFSRemove) entryExists() bool {
 }
 
 // rmEntry rms the netfs entry into the /etc/exports
-func (devNetFSRemove *processDevNetFSRemove) rmEntry() error {
+func (envNetFSRemove *processEnvNetFSRemove) rmEntry() error {
 
 	// rm the entry into the /etc/exports file
-	if err := netfs.Remove(devNetFSRemove.path); err != nil {
+	if err := netfs.Remove(envNetFSRemove.path); err != nil {
 		return err
 	}
 
@@ -91,12 +91,12 @@ func (devNetFSRemove *processDevNetFSRemove) rmEntry() error {
 }
 
 // reExecPrivilege re-execs the current process with a privileged user
-func (devNetFSRemove *processDevNetFSRemove) reExecPrivilege() error {
+func (envNetFSRemove *processEnvNetFSRemove) reExecPrivilege() error {
 
-	// call 'dev netfs rm' with the original path and args; os.Args[0] will be the
+	// call 'env netfs rm' with the original path and args; os.Args[0] will be the
 	// currently executing program, so this command will ultimately lead right back
 	// here
-	cmd := fmt.Sprintf("%s dev netfs rm %s", os.Args[0], devNetFSRemove.path)
+	cmd := fmt.Sprintf("%s env netfs rm %s", os.Args[0], envNetFSRemove.path)
 
 	// if the sudo'ed subprocess fails, we need to return error to stop the process
 	fmt.Println("Admin privileges are required to remove entries from your exports file, your password may be requested...")

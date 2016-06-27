@@ -12,57 +12,57 @@ import (
 	"github.com/nanobox-io/nanobox/util/dns"
 )
 
-// processShareDNSRemove ...
-type processShareDNSRemove struct {
+// processEnvDNSRemove ...
+type processEnvDNSRemove struct {
 	control processor.ProcessControl
 	app     models.App
 	name    string
 }
 
 func init() {
-	processor.Register("share_dns_remove", shareDNSRemoveFn)
+	processor.Register("env_dns_remove", envDNSRemoveFn)
 }
 
-// devDNSRemveFn creates a processShareDNSRemove and validates the meta in the control
-func shareDNSRemoveFn(control processor.ProcessControl) (processor.Processor, error) {
-	shareDNSRemove := &processShareDNSRemove{control: control}
-	return shareDNSRemove, shareDNSRemove.validateMeta()
+// devDNSRemveFn creates a processEnvDNSRemove and validates the meta in the control
+func envDNSRemoveFn(control processor.ProcessControl) (processor.Processor, error) {
+	envDNSRemove := &processEnvDNSRemove{control: control}
+	return envDNSRemove, envDNSRemove.validateMeta()
 }
 
-func (shareDNSRemove processShareDNSRemove) Results() processor.ProcessControl {
-	return shareDNSRemove.control
+func (envDNSRemove processEnvDNSRemove) Results() processor.ProcessControl {
+	return envDNSRemove.control
 }
 
 //
-func (shareDNSRemove processShareDNSRemove) Process() error {
+func (envDNSRemove processEnvDNSRemove) Process() error {
 
 	// load the current "app"
-	if err := shareDNSRemove.loadApp(); err != nil {
+	if err := envDNSRemove.loadApp(); err != nil {
 		return err
 	}
 
 	// short-circuit if the entries dont exist; we do this after we validate meta
 	// and load the app because both of those are needed to determin the entry we're
 	// looking for
-	if !shareDNSRemove.entriesExist() {
+	if !envDNSRemove.entriesExist() {
 		return nil
 	}
 
 	// if we're not running as the privileged user, we need to re-exec with privilege
 	if !util.IsPrivileged() {
-		return shareDNSRemove.reExecPrivilege()
+		return envDNSRemove.reExecPrivilege()
 	}
 
 	// remove the DNS entries
-	return shareDNSRemove.removeEntries()
+	return envDNSRemove.removeEntries()
 }
 
 // validateMeta validates that the required metadata exists
-func (shareDNSRemove *processShareDNSRemove) validateMeta() error {
+func (envDNSRemove *processEnvDNSRemove) validateMeta() error {
 
 	// set name (required) and ensure it's provided
-	shareDNSRemove.name = shareDNSRemove.control.Meta["name"]
-	if shareDNSRemove.name == "" {
+	envDNSRemove.name = envDNSRemove.control.Meta["name"]
+	if envDNSRemove.name == "" {
 		return fmt.Errorf("Missing required meta value 'name'")
 	}
 
@@ -70,45 +70,45 @@ func (shareDNSRemove *processShareDNSRemove) validateMeta() error {
 }
 
 // loadApp loads the app from the db
-func (shareDNSRemove *processShareDNSRemove) loadApp() error {
+func (envDNSRemove *processEnvDNSRemove) loadApp() error {
 
 	//
-	key := fmt.Sprintf("%s_%s", config.AppName(), shareDNSRemove.control.Env)
-	return data.Get("apps", key, &shareDNSRemove.app)
+	key := fmt.Sprintf("%s_%s", config.AppName(), envDNSRemove.control.Env)
+	return data.Get("apps", key, &envDNSRemove.app)
 }
 
 // entriesExist returns true if both entries already exist
-func (shareDNSRemove *processShareDNSRemove) entriesExist() bool {
+func (envDNSRemove *processEnvDNSRemove) entriesExist() bool {
 
 	// fetch the IPs
-	envIP := shareDNSRemove.app.GlobalIPs["env"]
+	envIP := envDNSRemove.app.GlobalIPs["env"]
 
 	// generate the entries
-	env := dns.Entry(envIP, shareDNSRemove.name, shareDNSRemove.control.Env)
+	env := dns.Entry(envIP, envDNSRemove.name, envDNSRemove.control.Env)
 
 	return dns.Exists(env)
 }
 
 // removeEntries removes the "dev" and "env" entries into the host dns
-func (shareDNSRemove *processShareDNSRemove) removeEntries() error {
+func (envDNSRemove *processEnvDNSRemove) removeEntries() error {
 
 	// fetch the IPs
-	envIP := shareDNSRemove.app.GlobalIPs["env"]
+	envIP := envDNSRemove.app.GlobalIPs["env"]
 
 	// generate the entries
-	env := dns.Entry(envIP, shareDNSRemove.name, shareDNSRemove.control.Env)
+	env := dns.Entry(envIP, envDNSRemove.name, envDNSRemove.control.Env)
 
 	// remove the DNS entry from the /etc/hosts file
 	return dns.Remove(env)
 }
 
 // reExecPrivilege re-execs the current process with a privileged user
-func (shareDNSRemove *processShareDNSRemove) reExecPrivilege() error {
+func (envDNSRemove *processEnvDNSRemove) reExecPrivilege() error {
 
 	// call 'dev dns rm' with the original path and args; os.Args[0] will be the
 	// currently executing program, so this command will ultimately lead right back
 	// here
-	cmd := fmt.Sprintf("%s %s dns rm %s", os.Args[0], shareDNSRemove.control.Env, shareDNSRemove.name)
+	cmd := fmt.Sprintf("%s %s dns rm %s", os.Args[0], envDNSRemove.control.Env, envDNSRemove.name)
 
 	// if the sudo'ed subprocess fails, we need to return error to stop the process
 	fmt.Println("Admin privileges are required to remove DNS entries from your hosts file, your password may be requested...")

@@ -1,4 +1,4 @@
-package share
+package env
 
 import (
 	"fmt"
@@ -19,7 +19,7 @@ type processTeardown struct {
 
 //
 func init() {
-	processor.Register("share_teardown", teardownFn)
+	processor.Register("env_teardown", teardownFn)
 }
 
 //
@@ -108,7 +108,7 @@ func (teardown *processTeardown) teardownMounts() error {
 		src := config.EngineDir()
 		dst := fmt.Sprintf("%s%s/engine", provider.HostShareDir(), config.AppName())
 
-		// unmount the share on the provider
+		// unmount the env on the provider
 		if err := provider.RemoveMount(src, dst); err != nil {
 			return err
 		}
@@ -118,7 +118,7 @@ func (teardown *processTeardown) teardownMounts() error {
 	src := config.LocalDir()
 	dst := fmt.Sprintf("%s%s/code", provider.HostShareDir(), config.AppName())
 
-	// unmount the share on the provider
+	// unmount the env on the provider
 	if err := provider.RemoveMount(src, dst); err != nil {
 		return err
 	}

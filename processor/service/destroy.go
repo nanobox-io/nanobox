@@ -65,7 +65,7 @@ func (serviceDestroy processServiceDestroy) Process() error {
 		return err
 	}
 
-	if err := serviceDestroy.removeEnvVars(); err != nil {
+	if err := serviceDestroy.removeEvars(); err != nil {
 		return err
 	}
 
@@ -151,10 +151,10 @@ func (serviceDestroy *processServiceDestroy) detachNetwork() error {
 	return nil
 }
 
-// removeEnvVars removes any env vars associated with this service
-func (serviceDestroy processServiceDestroy) removeEnvVars() error {
+// removeEvars removes any env vars associated with this service
+func (serviceDestroy processServiceDestroy) removeEvars() error {
 	// fetch the environment variables model
-	envVars := models.EnvVars{}
+	envVars := models.Evars{}
 	data.Get(config.AppName()+"_meta", "env", &envVars)
 
 	// create a prefix for each of the environment variables.

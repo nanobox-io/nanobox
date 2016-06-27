@@ -300,7 +300,7 @@ func (devConsole *processDevConsole) removeContainer() error {
 // runUserHook runs the user hook in the dev container
 func (devConsole *processDevConsole) devPayload() string {
   rtn := map[string]interface{}{}
-  envVars := models.EnvVars{}
+  envVars := models.Evars{}
   data.Get(config.AppName()+"_meta", "env", &envVars)
   rtn["env"] = envVars
   bytes, _ := json.Marshal(rtn)
@@ -320,7 +320,7 @@ func (devConsole *processDevConsole) runConsole() error {
     },
   }
 
-  if err := processor.Run("share_console", config); err != nil {
+  if err := processor.Run("env_console", config); err != nil {
     return err
   }
 

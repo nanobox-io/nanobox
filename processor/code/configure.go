@@ -241,7 +241,7 @@ func (codeConfigure *processCodeConfigure) mounts() []mount {
 
 // env ...
 func (codeConfigure *processCodeConfigure) env() map[string]string {
-	envVars := models.EnvVars{}
+	envVars := models.Evars{}
 	data.Get(config.AppName()+"_meta", codeConfigure.control.Env+"_env", &envVars)
 
 	return envVars

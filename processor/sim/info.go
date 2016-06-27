@@ -55,7 +55,7 @@ func (simInfo processDevInfo) Process() error {
 	}
 
 	//
-	envVars := models.EnvVars{}
+	envVars := models.Evars{}
 	data.Get(config.AppName()+"_meta", "sim_env", &envVars)
 	bytes, _ := json.MarshalIndent(envVars, "", "  ")
 	fmt.Printf("%s\n", bytes)

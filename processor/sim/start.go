@@ -35,7 +35,7 @@ func (sim processSimStart) Process() error {
 
 	// defer the clean up so if we exit early the cleanup will always happen
 	defer func() {
-		if err := processor.Run("share_teardown", sim.control); err != nil {
+		if err := processor.Run("env_teardown", sim.control); err != nil {
 			fmt.Println("teardown broke")
 			fmt.Println(err)
 
@@ -44,7 +44,7 @@ func (sim processSimStart) Process() error {
 	}()
 
 	// get the vm and app up.
-	if err := processor.Run("share_setup", sim.control); err != nil {
+	if err := processor.Run("env_setup", sim.control); err != nil {
 		return err
 	}
 

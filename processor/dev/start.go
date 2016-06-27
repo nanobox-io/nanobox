@@ -35,7 +35,7 @@ func (dev processDevStart) Process() error {
 
 	// defer the clean up so if we exit early the cleanup will always happen
 	defer func() {
-		if err := processor.Run("share_teardown", dev.control); err != nil {
+		if err := processor.Run("env_teardown", dev.control); err != nil {
 			fmt.Println("teardown broke")
 			fmt.Println(err)
 
@@ -44,7 +44,7 @@ func (dev processDevStart) Process() error {
 	}()
 
 	// get the vm and app up.
-	if err := processor.Run("share_setup", dev.control); err != nil {
+	if err := processor.Run("env_setup", dev.control); err != nil {
 		return err
 	}
 
@@ -58,7 +58,7 @@ func (dev processDevStart) Process() error {
 
 func (dev *processDevStart) watchMist() error {
 	// output some message
-	dev.control.Display("             _  _ ____ _  _ ____ ___  ____ _  _")
+	dev.control.Display("             _  _  __  _  _  __   __   __  _  _")
 	dev.control.Display(`             |\ | |__| |\ | |  | |__) |  |  \/`)
 	dev.control.Display(`             | \| |  | | \| |__| |__) |__| _/\_`)
 	dev.control.Display("")

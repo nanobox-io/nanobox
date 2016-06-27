@@ -45,9 +45,8 @@ func (codeClean *processCodeClean) Process() error {
 		return nil
 	}
 
-	bucket := fmt.Sprintf("%s_%s", config.AppName(), codeClean.control.Env)
-
 	// remove all the existing code services
+	bucket := fmt.Sprintf("%s_%s", config.AppName(), codeClean.control.Env)
 	keys, err := data.Keys(bucket)
 	if err != nil {
 		return err

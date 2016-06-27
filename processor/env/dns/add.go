@@ -12,57 +12,57 @@ import (
 	"github.com/nanobox-io/nanobox/util/dns"
 )
 
-// processShareDNSAdd ...
-type processShareDNSAdd struct {
+// processEnvDNSAdd ...
+type processEnvDNSAdd struct {
 	control processor.ProcessControl
 	app     models.App
 	name    string
 }
 
 func init() {
-	processor.Register("share_dns_add", shareDNSAddFn)
+	processor.Register("env_dns_add", envDNSAddFn)
 }
 
-// shareDNSAddFn creates a processShareDNSAdd and validates the meta data in the control
-func shareDNSAddFn(control processor.ProcessControl) (processor.Processor, error) {
-	shareDNSAdd := &processShareDNSAdd{control: control}
-	return shareDNSAdd, shareDNSAdd.validateMeta()
+// envDNSAddFn creates a processEnvDNSAdd and validates the meta data in the control
+func envDNSAddFn(control processor.ProcessControl) (processor.Processor, error) {
+	envDNSAdd := &processEnvDNSAdd{control: control}
+	return envDNSAdd, envDNSAdd.validateMeta()
 }
 
-func (shareDNSAdd processShareDNSAdd) Results() processor.ProcessControl {
-	return shareDNSAdd.control
+func (envDNSAdd processEnvDNSAdd) Results() processor.ProcessControl {
+	return envDNSAdd.control
 }
 
 //
-func (shareDNSAdd processShareDNSAdd) Process() error {
+func (envDNSAdd processEnvDNSAdd) Process() error {
 
 	// load the current "app"
-	if err := shareDNSAdd.loadApp(); err != nil {
+	if err := envDNSAdd.loadApp(); err != nil {
 		return err
 	}
 
 	// short-circuit if the entries already exist; we do this after we validate meta
 	// and load the app because both of those are needed to determin the entry we're
 	// looking for
-	if shareDNSAdd.entriesExist() {
+	if envDNSAdd.entriesExist() {
 		return nil
 	}
 
 	// if we're not running as the privileged user, we need to re-exec with privilege
 	if !util.IsPrivileged() {
-		return shareDNSAdd.reExecPrivilege()
+		return envDNSAdd.reExecPrivilege()
 	}
 
 	// add the DNS entries
-	return shareDNSAdd.addEntries()
+	return envDNSAdd.addEntries()
 }
 
 // validateMeta validates that the required metadata exists
-func (shareDNSAdd *processShareDNSAdd) validateMeta() error {
+func (envDNSAdd *processEnvDNSAdd) validateMeta() error {
 
 	// set name (required) and ensure it's provided
-	shareDNSAdd.name = shareDNSAdd.control.Meta["name"]
-	if shareDNSAdd.name == "" {
+	envDNSAdd.name = envDNSAdd.control.Meta["name"]
+	if envDNSAdd.name == "" {
 		return fmt.Errorf("Missing required meta value 'name'")
 	}
 
@@ -70,48 +70,48 @@ func (shareDNSAdd *processShareDNSAdd) validateMeta() error {
 }
 
 // loadApp loads the app from the db
-func (shareDNSAdd *processShareDNSAdd) loadApp() error {
+func (envDNSAdd *processEnvDNSAdd) loadApp() error {
 
 	//
-	key := fmt.Sprintf("%s_%s", config.AppName(), shareDNSAdd.control.Env)
-	return data.Get("apps", key, &shareDNSAdd.app)
+	key := fmt.Sprintf("%s_%s", config.AppName(), envDNSAdd.control.Env)
+	return data.Get("apps", key, &envDNSAdd.app)
 }
 
 // entriesExist returns true if both entries already exist
-func (shareDNSAdd *processShareDNSAdd) entriesExist() bool {
+func (envDNSAdd *processEnvDNSAdd) entriesExist() bool {
 
 	// fetch the IP 
 	// env in dev is used in the dev container
 	// env in sim is used for portal
-	envIP := shareDNSAdd.app.GlobalIPs["env"]
+	envIP := envDNSAdd.app.GlobalIPs["env"]
 
 	// generate the entries
-	env := dns.Entry(envIP, shareDNSAdd.name, shareDNSAdd.control.Env)
+	env := dns.Entry(envIP, envDNSAdd.name, envDNSAdd.control.Env)
 
 	// if the entries dont exist just return
 	return dns.Exists(env)
 }
 
 // addEntries adds the dev and sim entries into the host dns
-func (shareDNSAdd *processShareDNSAdd) addEntries() error {
+func (envDNSAdd *processEnvDNSAdd) addEntries() error {
 
 	// fetch the IPs
-	envIP := shareDNSAdd.app.GlobalIPs["env"]
+	envIP := envDNSAdd.app.GlobalIPs["env"]
 
 	// generate the entries
-	env := dns.Entry(envIP, shareDNSAdd.name, shareDNSAdd.control.Env)
+	env := dns.Entry(envIP, envDNSAdd.name, envDNSAdd.control.Env)
 
 	// add the 'sim' DNS entry into the /etc/hosts file
 	return dns.Add(env)
 }
 
 // reExecPrivilege re-execs the current process with a privileged user
-func (shareDNSAdd *processShareDNSAdd) reExecPrivilege() error {
+func (envDNSAdd *processEnvDNSAdd) reExecPrivilege() error {
 
 	// call 'dev dns add' with the original path and args; os.Args[0] will be the
 	// currently executing program, so this command will ultimately lead right back
 	// here
-	cmd := fmt.Sprintf("%s %s dns add %s", os.Args[0], shareDNSAdd.control.Env, shareDNSAdd.name)
+	cmd := fmt.Sprintf("%s %s dns add %s", os.Args[0], envDNSAdd.control.Env, envDNSAdd.name)
 
 	// if the sudo'ed subprocess fails, we need to return error to stop the process
 	fmt.Println("Admin privileges are required to add DNS entries to your hosts file, your password may be requested...")

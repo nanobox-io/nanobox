@@ -36,7 +36,7 @@ func (build processBuild) Process() error {
 
 	// defer the clean up so if we exit early the cleanup will always happen
 	defer func() {
-		if err := Run("share_teardown", build.control); err != nil {
+		if err := Run("env_teardown", build.control); err != nil {
 			fmt.Println("teardown broke")
 			fmt.Println(err)
 
@@ -45,7 +45,7 @@ func (build processBuild) Process() error {
 	}()
 
 	// get the vm and app up.
-	if err := Run("share_setup", build.control); err != nil {
+	if err := Run("env_setup", build.control); err != nil {
 		return err
 	}
 

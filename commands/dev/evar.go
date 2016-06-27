@@ -60,7 +60,7 @@ func init() {
 
 // envAddFn ...
 func envAddFn(ccmd *cobra.Command, args []string) {
-	evars := models.EnvVars{}
+	evars := models.Evars{}
 	data.Get(config.AppName()+"_meta", "dev_env", &evars)
 	for _, arg := range args {
 		for _, pair := range strings.Split(arg, ",") {
@@ -76,14 +76,14 @@ func envAddFn(ccmd *cobra.Command, args []string) {
 
 // envListFn ...
 func envListFn(ccmd *cobra.Command, args []string) {
-	evars := models.EnvVars{}
+	evars := models.Evars{}
 	data.Get(config.AppName()+"_meta", "dev_env", &evars)
 	fmt.Println(evars)
 }
 
 // envRemoveFn ...
 func envRemoveFn(ccmd *cobra.Command, args []string) {
-	evars := models.EnvVars{}
+	evars := models.Evars{}
 	data.Get(config.AppName()+"_meta", "dev_env", &evars)
 	for _, arg := range args {
 		for _, key := range strings.Split(arg, ",") {

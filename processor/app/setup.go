@@ -112,7 +112,7 @@ func (appSetup *processAppSetup) generateEvars() error {
 	bucket := fmt.Sprintf("%s_meta", config.AppName())
 
 	// fetch the app evars model if it exists
-	evars := models.EnvVars{}
+	evars := models.Evars{}
 
 	// ignore the error because it's likely to not exist
 	data.Get(bucket, appSetup.control.Env+"_env", &evars)

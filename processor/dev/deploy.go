@@ -1,6 +1,8 @@
 package dev
 
 import (
+	"github.com/nanobox-io/nanobox-golang-stylish"
+	
 	"github.com/nanobox-io/nanobox-boxfile"
 	"github.com/nanobox-io/nanobox/processor"
 )
@@ -48,6 +50,7 @@ func (devDeploy processDevDeploy) Process() error {
 	}
 
 	// complete message
+	devDeploy.control.Display(stylish.Bullet("Deploy complete!"))
 
 	return nil
 }

@@ -28,6 +28,5 @@ func (simConsole processSimConsole) Results() processor.ProcessControl {
 // stuff. Which currently there is nothing other tuen running
 // the share console.
 func (simConsole processSimConsole) Process() error {
-	return processor.Run("share_console", simConsole.control)
+	return processor.Run("env_console", simConsole.control)
 }
-

@@ -230,7 +230,7 @@ func (codeBuild *processCodeBuild) runDebugSession(err error) error {
 		fmt.Println("we will be dropping you into the failed build container")
 		fmt.Println("GOOD LUCK!")
 		codeBuild.control.Meta["name"] = "build"
-		err := processor.Run("share_console", codeBuild.control)
+		err := processor.Run("env_console", codeBuild.control)
 		if err != nil {
 			fmt.Println("unable to enter console", err)
 		}

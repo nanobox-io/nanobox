@@ -26,7 +26,7 @@ func consoleFn(ccmd *cobra.Command, args []string) {
 	// and be dropped into a dev environment
 	if len(args) > 0 {
 		processor.DefaultControl.Meta["container"] = args[0]
-		print.OutputCommandErr(processor.Run("share_console", processor.DefaultControl))
+		print.OutputCommandErr(processor.Run("env_console", processor.DefaultControl))
 		return
 	}
 

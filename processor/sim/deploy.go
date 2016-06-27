@@ -91,6 +91,7 @@ func (simDeploy *processSimDeploy) publishCode() error {
 	hoarder := models.Service{}
 	bucket := fmt.Sprintf("%s_%s", config.AppName(), simDeploy.control.Env)
 	data.Get(bucket, "hoarder", &hoarder)
+
 	simDeploy.control.Meta["build_id"] = "1234"
 	simDeploy.control.Meta["warehouse_url"] = hoarder.InternalIP
 	simDeploy.control.Meta["warehouse_token"] = "123"
@@ -100,14 +101,17 @@ func (simDeploy *processSimDeploy) publishCode() error {
 	if err != nil {
 		return err
 	}
+
 	err = publishProcessor.Process()
 	if err != nil {
 		return err
 	}
+
 	publishResult := publishProcessor.Results()
 	if publishResult.Meta["boxfile"] == "" {
 		return fmt.Errorf("publishCode: the boxfile was empty")
 	}
+
 	// store the boxfile on mydeploy
 	simDeploy.box = boxfile.New([]byte(publishResult.Meta["boxfile"]))
 

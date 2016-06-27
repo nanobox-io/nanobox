@@ -112,7 +112,7 @@ func (serviceSetup *processServiceSetup) Process() error {
 		return err
 	}
 
-	if err := serviceSetup.addEnvVars(); err != nil {
+	if err := serviceSetup.addEvars(); err != nil {
 		serviceSetup.fail = true
 		return err
 	}
@@ -342,12 +342,12 @@ func (serviceSetup *processServiceSetup) persistService() error {
 	return nil
 }
 
-// updateEnvVars will generate environment variables from the plan
-func (serviceSetup *processServiceSetup) addEnvVars() error {
+// updateEvars will generate environment variables from the plan
+func (serviceSetup *processServiceSetup) addEvars() error {
 	bucket := fmt.Sprintf("%s_meta", config.AppName())
 
 	// fetch the environment variables model
-	envVars := models.EnvVars{}
+	envVars := models.Evars{}
 	data.Get(bucket, serviceSetup.control.Env+"_env", &envVars)
 
 	// create a prefix for each of the environment variables.

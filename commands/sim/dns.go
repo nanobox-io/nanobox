@@ -61,7 +61,7 @@ nanobox dev dns add <name>
   // set the meta arguments to be used in the processor and run the processor
   processor.DefaultControl.Meta["name"] = args[0]
   processor.DefaultControl.Env = "sim"
-  print.OutputCommandErr(processor.Run("share_dns_add", processor.DefaultControl))
+  print.OutputCommandErr(processor.Run("env_dns_add", processor.DefaultControl))
 }
 
 // dnsRmFn will run the DNS processor for removing DNS entries from the "hosts"

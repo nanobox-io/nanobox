@@ -1,4 +1,4 @@
-package share
+package env
 
 import (
   "fmt"
@@ -11,46 +11,46 @@ import (
   "github.com/nanobox-io/nanobox/util/netfs"
 )
 
-// processShareSetup ...
-type processShareSetup struct {
+// processEnvSetup ...
+type processEnvSetup struct {
   control processor.ProcessControl
 }
 
 //
 func init() {
-  processor.Register("share_setup", shareSetupFn)
+  processor.Register("env_setup", envSetupFn)
 }
 
 //
-func shareSetupFn(control processor.ProcessControl) (processor.Processor, error) {
-  // control.Meta["processShareSetup-control"]
+func envSetupFn(control processor.ProcessControl) (processor.Processor, error) {
+  // control.Meta["processEnvSetup-control"]
 
   // do some control validation check on the meta for the flags and make sure they
   // work
 
-  return &processShareSetup{control: control}, nil
+  return &processEnvSetup{control: control}, nil
 }
 
 //
-func (shareSetup processShareSetup) Results() processor.ProcessControl {
-  return shareSetup.control
+func (envSetup processEnvSetup) Results() processor.ProcessControl {
+  return envSetup.control
 }
 
 //
-func (shareSetup *processShareSetup) Process() error {
+func (envSetup *processEnvSetup) Process() error {
 
-  if err := shareSetup.setupProvider(); err != nil {
+  if err := envSetup.setupProvider(); err != nil {
     return err
   }
 
-  if err := shareSetup.setupMounts(); err != nil {
+  if err := envSetup.setupMounts(); err != nil {
     return err
   }
 
   // if there is an environment then we should set up app
   // if not (in the case of a build) no app setup is necessary
-  if shareSetup.control.Env != "" {
-    if err := shareSetup.setupApp(); err != nil {
+  if envSetup.control.Env != "" {
+    if err := envSetup.setupApp(); err != nil {
       return err
     }
   }
@@ -59,7 +59,7 @@ func (shareSetup *processShareSetup) Process() error {
 }
 
 // setupProvider sets up the provider
-func (shareSetup *processShareSetup) setupProvider() error {
+func (envSetup *processEnvSetup) setupProvider() error {
 
   // let anyone else know we're using the provider
   counter.Increment("provider")
@@ -69,28 +69,28 @@ func (shareSetup *processShareSetup) setupProvider() error {
   locker.GlobalLock()
   defer locker.GlobalUnlock()
 
-  if err := processor.Run("provider_setup", shareSetup.control); err != nil {
+  if err := processor.Run("provider_setup", envSetup.control); err != nil {
     return err
   }
 
   return nil
 }
 
-// setupMounts will add the shares and mounts for this app
-func (shareSetup *processShareSetup) setupMounts() error {
+// setupMounts will add the envs and mounts for this app
+func (envSetup *processEnvSetup) setupMounts() error {
 
   // mount the engine if it's a local directory
   if config.EngineDir() != "" {
     src := config.EngineDir()
     dst := fmt.Sprintf("%s%s/engine", provider.HostShareDir(), config.AppName())
 
-    // first export the share on the workstation
-    if err := shareSetup.addShare(src, dst); err != nil {
+    // first export the env on the workstation
+    if err := envSetup.addShare(src, dst); err != nil {
       return err
     }
 
-    // mount the share on the provider
-    if err := shareSetup.addMount(src, dst); err != nil {
+    // mount the env on the provider
+    if err := envSetup.addMount(src, dst); err != nil {
       return err
     }
   }
@@ -99,13 +99,13 @@ func (shareSetup *processShareSetup) setupMounts() error {
   src := config.LocalDir()
   dst := fmt.Sprintf("%s%s/code", provider.HostShareDir(), config.AppName())
 
-  // first export the share on the workstation
-  if err := shareSetup.addShare(src, dst); err != nil {
+  // first export the env on the workstation
+  if err := envSetup.addShare(src, dst); err != nil {
     return err
   }
 
-  // then mount the share on the provider
-  if err := shareSetup.addMount(src, dst); err != nil {
+  // then mount the env on the provider
+  if err := envSetup.addMount(src, dst); err != nil {
     return err
   }
 
@@ -113,7 +113,7 @@ func (shareSetup *processShareSetup) setupMounts() error {
 }
 
 // setupApp sets up the app plaftorm and data services
-func (shareSetup *processShareSetup) setupApp() error {
+func (envSetup *processEnvSetup) setupApp() error {
 
   // let anyone else know we're using the app
   counter.Increment(config.AppName())
@@ -124,23 +124,23 @@ func (shareSetup *processShareSetup) setupApp() error {
   defer locker.LocalUnlock()
 
   // setup the app
-  if err := processor.Run("app_setup", shareSetup.control); err != nil {
+  if err := processor.Run("app_setup", envSetup.control); err != nil {
     return err
   }
 
   // clean up after any possible failures in a previous deploy
-  if err := processor.Run("service_clean", shareSetup.control); err != nil {
+  if err := processor.Run("service_clean", envSetup.control); err != nil {
     return err
   }
 
   // setup the platform services
-  return processor.Run("platform_setup", shareSetup.control)
+  return processor.Run("platform_setup", envSetup.control)
   
   return nil
 }
 
-// addShare will add a filesystem share on the host machine
-func (shareSetup *processShareSetup) addShare(src, dst string) error {
+// addShare will add a filesystem env on the host machine
+func (envSetup *processEnvSetup) addShare(src, dst string) error {
 
   // the mount type is configurable by the user
   mountType := config.Viper().GetString("mount-type")
@@ -153,32 +153,32 @@ func (shareSetup *processShareSetup) addShare(src, dst string) error {
   switch mountType {
 
   // check to see if netfs is currently configured. If it is then tear it down
-  // and build the native share
+  // and build the native env
   case "native":
     if netfs.Exists(src) {
       // netfs was used prior. So we need to tear it down.
 
       control := processor.ProcessControl{
-        Env:          shareSetup.control.Env,
-        Verbose:      shareSetup.control.Verbose,
-        DisplayLevel: shareSetup.control.DisplayLevel,
+        Env:          envSetup.control.Env,
+        Verbose:      envSetup.control.Verbose,
+        DisplayLevel: envSetup.control.DisplayLevel,
         Meta: map[string]string{
           "path": src,
         },
       }
 
-      if err := processor.Run("share_netfs_remove", control); err != nil {
+      if err := processor.Run("env_netfs_remove", control); err != nil {
         return err
       }
     }
 
-    // now we let the provider add it's native share
+    // now we let the provider add it's native env
     if err := provider.AddShare(src, dst); err != nil {
       return err
     }
 
-  // check to see if native shares are currently exported. If so,
-  // tear down the native share and build the netfs share
+  // check to see if native envs are currently exported. If so,
+  // tear down the native env and build the netfs env
   case "netfs":
     if provider.HasShare(src, dst) {
       // native was used prior. So we need to tear it down
@@ -188,9 +188,9 @@ func (shareSetup *processShareSetup) addShare(src, dst string) error {
     }
 
     control := processor.ProcessControl{
-      Env:      shareSetup.control.Env,
-      Verbose:      shareSetup.control.Verbose,
-      DisplayLevel: shareSetup.control.DisplayLevel,
+      Env:      envSetup.control.Env,
+      Verbose:      envSetup.control.Verbose,
+      DisplayLevel: envSetup.control.DisplayLevel,
       Meta: map[string]string{
         "path": src,
       },
@@ -204,8 +204,8 @@ func (shareSetup *processShareSetup) addShare(src, dst string) error {
   return nil
 }
 
-// addMount will mount a share in the nanobox guest context
-func (shareSetup *processShareSetup) addMount(src, dst string) error {
+// addMount will mount a env in the nanobox guest context
+func (envSetup *processEnvSetup) addMount(src, dst string) error {
 
     // short-circuit if the mount already exists
     if provider.HasMount(dst) {
