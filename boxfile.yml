@@ -2,6 +2,3 @@ code.build:
   engine: "golang#refactor/v1"
   config:
     package: "github.com/nanobox-io/nanobox"
-
-web.stanley:
-  exec: "sleep 1000"

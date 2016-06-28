@@ -1,4 +1,4 @@
-package app
+package env
 
 import (
 	"fmt"
@@ -54,7 +54,7 @@ func netfsAddFn(ccmd *cobra.Command, args []string) {
 Wrong number of arguments (expecting 1 got %v). Run the command again with the
 path of the exports entry you would like to add:
 
-ex: nanobox dev netfs add <path>
+ex: nanobox env netfs add <path>
 
 `, len(args))
 
@@ -62,7 +62,7 @@ ex: nanobox dev netfs add <path>
 	}
 
 	processor.DefaultControl.Meta["path"] = args[0]
-	print.OutputCommandErr(processor.Run("share_netfs_add", processor.DefaultControl))
+	print.OutputCommandErr(processor.Run("env_netfs_add", processor.DefaultControl))
 }
 
 // netfsRmFn will run the netfs processor for removing a netfs export
@@ -75,7 +75,7 @@ func netfsRmFn(ccmd *cobra.Command, args []string) {
 Wrong number of arguments (expecting 1 got %v). Run the command again with the
 path of the exports entry you would like to remove:
 
-ex: nanobox dev netfs rm <path>
+ex: nanobox env netfs rm <path>
 
 `, len(args))
 
@@ -84,5 +84,5 @@ ex: nanobox dev netfs rm <path>
 
 	// set the meta arguments to be used in the processor and run the processor
 	processor.DefaultControl.Meta["path"] = args[0]
-	print.OutputCommandErr(processor.Run("share_netfs_remove", processor.DefaultControl))
+	print.OutputCommandErr(processor.Run("env_netfs_remove", processor.DefaultControl))
 }

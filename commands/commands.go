@@ -134,4 +134,6 @@ func init() {
 	NanoboxCmd.AddCommand(BuildCmd)
 	NanoboxCmd.AddCommand(DevCmd)
 	NanoboxCmd.AddCommand(SimCmd)
+	NanoboxCmd.AddCommand(EnvCmd)
+	
 }
