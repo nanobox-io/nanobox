@@ -77,7 +77,7 @@ func (machine DockerMachine) Reboot() error {
 func (machine DockerMachine) Stop() error {
 
 	//
-	if !machine.isStarted() {
+	if !machine.IsReady() {
 		return nil
 	}
 
@@ -124,7 +124,7 @@ func (machine DockerMachine) Destroy() error {
 func (machine DockerMachine) Start() error {
 
 	// start the docker-machine vm
-	if !machine.isStarted() {
+	if !machine.IsReady() {
 
 		cmd := exec.Command("docker-machine", "start", "nanobox")
 
@@ -502,7 +502,6 @@ func (machine DockerMachine) regenerateCert() error {
 	return nil
 }
 
-
 // isCreated ...
 func (machine DockerMachine) isCreated() bool {
 	// docker-machine status nanobox
@@ -528,8 +527,8 @@ func (machine DockerMachine) hasNetwork() bool {
 	return true
 }
 
-// isStarted ...
-func (machine DockerMachine) isStarted() bool {
+// IsReady ...
+func (machine DockerMachine) IsReady() bool {
 	// docker-machine status nanobox
 	cmd := exec.Command("docker-machine", "status", "nanobox")
 	output, err := cmd.CombinedOutput()

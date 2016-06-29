@@ -11,7 +11,9 @@ var (
 
 type (
 	validatorFunc   func() error
-	validationError []error
+	validationError struct {
+		errors []error
+	}
 )
 
 // Register ...
@@ -21,8 +23,7 @@ func Register(name string, validator validatorFunc) {
 
 // Add ...
 func (vError *validationError) Add(err error) {
-	tmp := validationError(append([]error(*vError), err))
-	vError = &tmp
+	vError.errors = append(vError.errors, err)
 }
 
 // Check ...
@@ -36,7 +37,7 @@ func Check(checks ...string) error {
 			}
 		}
 	}
-	if len(ve) != 0 {
+	if len(ve.errors) != 0 {
 		return ve
 	}
 	return nil
@@ -46,7 +47,7 @@ func Check(checks ...string) error {
 func (vError validationError) Error() (str string) {
 
 	//
-	for _, err := range vError {
+	for _, err := range vError.errors {
 		str += fmt.Sprintf("%s\n", err)
 	}
 

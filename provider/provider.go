@@ -9,6 +9,7 @@ import (
 
 // Provider ...
 type Provider interface {
+	IsReady() bool
 	HostShareDir() string
 	HostMntDir() string
 	HostIP() (string, error)
@@ -45,6 +46,7 @@ func Register(name string, p Provider) {
 // init ...
 func init() {
 	validate.Register("provider", Valid)
+	validate.Register("provider_up", ValidReady)
 }
 
 // Display ...
@@ -61,6 +63,13 @@ func Valid() error {
 	}
 
 	return p.Valid()
+}
+
+func ValidReady() error {
+	if !IsReady() {
+		return errors.New("the provider is not ready")
+	}
+	return nil
 }
 
 // Create ...
@@ -282,6 +291,17 @@ func Run(command []string) ([]byte, error) {
 	return p.Run(command)
 }
 
+// Run a command inside of the provider context
+func IsReady() bool {
+
+	p, err := fetchProvider()
+	if err != nil {
+		return false
+	}
+
+	return p.IsReady()
+}
+
 // fetchProvider fetches the registered provider from the configured name
 func fetchProvider() (Provider, error) {
 
@@ -292,3 +312,5 @@ func fetchProvider() (Provider, error) {
 
 	return p, nil
 }
+
+

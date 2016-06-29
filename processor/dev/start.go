@@ -1,8 +1,6 @@
 package dev
 
 import (
-	"fmt"
-
 	"github.com/nanobox-io/nanobox/processor"
 )
 
@@ -30,45 +28,13 @@ func (dev processDevStart) Results() processor.ProcessControl {
 //
 func (dev processDevStart) Process() error {
 	// set the process mode to dev
-	// which will allow isolation of containers
 	dev.control.Env = "dev"
 
-	// defer the clean up so if we exit early the cleanup will always happen
-	defer func() {
-		if err := processor.Run("env_teardown", dev.control); err != nil {
-			fmt.Println("teardown broke")
-			fmt.Println(err)
-
-			return 
-		}
-	}()
-
-	// get the vm and app up.
-	if err := processor.Run("env_setup", dev.control); err != nil {
+	if err := processor.Run("app_start", dev.control); err != nil {
 		return err
 	}
 
-	// startDataServices will start all data services
-	if err := processor.Run("service_start_all", dev.control); err != nil {
-		return err
-	}
+	// messaging about what happened and next steps
 
-	return dev.watchMist()
-}
-
-func (dev *processDevStart) watchMist() error {
-	// output some message
-	dev.control.Display("             _  _  __  _  _  __   __   __  _  _")
-	dev.control.Display(`             |\ | |__| |\ | |  | |__) |  |  \/`)
-	dev.control.Display(`             | \| |  | | \| |__| |__) |__| _/\_`)
-	dev.control.Display("")
-	dev.control.Display("----------------------------------------------------------------")
-	dev.control.Display("while this console is open your dev env will be available")
-	dev.control.Display("attempting to connect to live streaming logs")
-	dev.control.Display("Next: run a build 'nanobox build'")
-	dev.control.Display("Then: open a console and start coding 'nanobox dev console'")
-	dev.control.Display("----------------------------------------------------------------")
-	
-	// tail the mist logs
-	return processor.Run("mist_log", dev.control)
+	return nil
 }

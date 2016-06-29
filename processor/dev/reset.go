@@ -39,9 +39,6 @@ func (devReset processDevReset) Process() error {
 // resetCounters resets all the counters associated with all apps
 func (devReset processDevReset) resetCounters() error {
 
-	// reset the provider counter
-	counter.Reset("provider")
-
 	apps, err := data.Keys("apps")
 
 	if err != nil {
@@ -49,14 +46,8 @@ func (devReset processDevReset) resetCounters() error {
 	}
 
 	for _, app := range apps {
-		// reset the general app usage counter
-		counter.Reset(app)
-
 		// reset the app dev usage counter
 		counter.Reset(app + "_dev")
-
-		// reset the app deploy usage counter
-		counter.Reset(app + "_deploy")
 	}
 
 	return nil

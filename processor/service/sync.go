@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"regexp"
 
 	"github.com/nanobox-io/nanobox-boxfile"
@@ -84,7 +83,7 @@ func (serviceSync *processServiceSync) loadNewBoxfile() error {
 func (serviceSync *processServiceSync) loadOldBoxfile() error {
 
 	// we don't care about the error here because this could be the first build
-	data.Get(config.AppName()+"_meta", "old_build_boxfile", &serviceSync.oldBoxfile)
+	data.Get(config.AppName()+"_meta", serviceSync.control.Env+"_build_boxfile", &serviceSync.oldBoxfile)
 
 	return nil
 }
@@ -92,7 +91,7 @@ func (serviceSync *processServiceSync) loadOldBoxfile() error {
 // replaceOldBoxfile replaces the old boxfile in the database with the new boxfile
 func (serviceSync *processServiceSync) replaceOldBoxfile() error {
 
-	if err := data.Put(config.AppName()+"_meta", "old_build_boxfile", &serviceSync.newBoxfile); err != nil {
+	if err := data.Put(config.AppName()+"_meta", serviceSync.control.Env+"_build_boxfile", &serviceSync.newBoxfile); err != nil {
 		return err
 	}
 
@@ -147,8 +146,7 @@ func (serviceSync *processServiceSync) purgeService(uid string) error {
 		},
 	}
 
-	if err := processor.Run("service_remove", service); err != nil {
-		fmt.Printf("service_remove (%s): %s\n", uid, err.Error())
+	if err := processor.Run("service_destroy", service); err != nil {
 		return err
 	}
 

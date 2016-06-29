@@ -30,10 +30,13 @@ func init() {
 
 //
 func serviceDestroyFn(control processor.ProcessControl) (processor.Processor, error) {
-	// confirm the provider is an accessable one that we support.
-	// if control.Meta["name"] == "" {
-	// 	return nil, errors.New("missing image or name")
-	// }
+	// make sure we have the name of the service before we continue
+	if control.Meta["name"] == "" {
+		return nil, fmt.Errorf("missing image or name")
+	}
+	if control.Meta["app_name"] == "" {
+		control.Meta["app_name"] = fmt.Sprintf("%s_%s", config.AppName(), control.Env)
+	}
 	return processServiceDestroy{control: control}, nil
 }
 
@@ -80,16 +83,14 @@ func (serviceDestroy processServiceDestroy) Process() error {
 func (serviceDestroy *processServiceDestroy) loadApp() error {
 
 	// load the app from the database
-	key := fmt.Sprintf("%s_%s", config.AppName(), serviceDestroy.control.Env)
-	return data.Get("apps", key, &serviceDestroy.app)
+	return data.Get("apps", serviceDestroy.control.Meta["app_name"], &serviceDestroy.app)
 }
 
 // loadService fetches the service from the database
 func (serviceDestroy *processServiceDestroy) loadService() error {
 	name := serviceDestroy.control.Meta["name"]
-	bucket := fmt.Sprintf("%s_%s", config.AppName(), serviceDestroy.control.Env)
 
-	data.Get(bucket, name, &serviceDestroy.service)
+	data.Get(serviceDestroy.control.Meta["app_name"], name, &serviceDestroy.service)
 
 	return nil
 }
@@ -185,7 +186,7 @@ func (serviceDestroy processServiceDestroy) deleteService() error {
 
 	name := serviceDestroy.control.Meta["name"]
 
-	if err := data.Delete(config.AppName(), name); err != nil {
+	if err := data.Delete(serviceDestroy.control.Meta["app_name"], name); err != nil {
 		return err
 	}
 

@@ -17,7 +17,7 @@ Deploys your build package into your Nanobox VM and
 starts all services. This is used to simulate a full
 deploy locally, before deploying into production.
 		`,
-	PreRun: validate.Requires("provider"),
+	PreRun: validate.Requires("provider", "provider_up", "built"),
 	Run:    deployFn,
 }
 

@@ -23,6 +23,7 @@ func init() {
 
 	// public subcommands
 	DevCmd.AddCommand(dev.StartCmd)
+	DevCmd.AddCommand(dev.StopCmd)
 	DevCmd.AddCommand(dev.DeployCmd)
 	DevCmd.AddCommand(dev.DestroyCmd)
 	DevCmd.AddCommand(dev.DNSCmd)

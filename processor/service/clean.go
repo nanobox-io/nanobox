@@ -87,7 +87,7 @@ func (serviceClean processServiceClean) removeService(uid string) error {
 		},
 	}
 
-	err := processor.Run("service_remove", config)
+	err := processor.Run("service_destroy", config)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("%s_remove:", uid), err)
 		return err

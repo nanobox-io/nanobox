@@ -7,6 +7,7 @@ import (
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
+	"github.com/nanobox-io/nanobox/util/locker"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 )
 
@@ -33,6 +34,11 @@ func (appSetup *processAppSetup) Results() processor.ProcessControl {
 
 //
 func (appSetup *processAppSetup) Process() error {
+
+  // establish an app-level lock to ensure we're the only ones setting up an app
+  // also, we need to ensure that the lock is released even if we error out.
+  locker.LocalLock()
+  defer locker.LocalUnlock()
 
 	if err := appSetup.loadApp(); err != nil {
 		return err
@@ -66,6 +72,7 @@ func (appSetup *processAppSetup) loadApp() error {
 
 	// set the default state
 	if appSetup.app.State == "" {
+		appSetup.app.Name = key
 		appSetup.app.State = INITIALIZED
 		appSetup.app.GlobalIPs = map[string]string{}
 		appSetup.app.LocalIPs = map[string]string{}

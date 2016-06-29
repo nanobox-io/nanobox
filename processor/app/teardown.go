@@ -7,6 +7,7 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util/locker"
 	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 )
@@ -34,6 +35,11 @@ func (appTeardown *processAppTeardown) Results() processor.ProcessControl {
 
 //
 func (appTeardown *processAppTeardown) Process() error {
+
+  // establish an app-level lock to ensure we're the only ones setting up an app
+  // also, we need to ensure that the lock is released even if we error out.
+  locker.LocalLock()
+  defer locker.LocalUnlock()
 
 	if err := appTeardown.loadApp(); err != nil {
 		return err

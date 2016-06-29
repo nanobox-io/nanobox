@@ -3,6 +3,7 @@ package code
 import (
 	"fmt"
 	"net"
+	"os"
 
 	dockType "github.com/docker/engine-api/types"
 	"github.com/nanobox-io/golang-docker-client"
@@ -233,6 +234,7 @@ func (codeBuild *processCodeBuild) runDebugSession(err error) error {
 		err := processor.Run("env_console", codeBuild.control)
 		if err != nil {
 			fmt.Println("unable to enter console", err)
+			os.Exit(1)
 		}
 	} else {
 		return err

@@ -21,7 +21,8 @@ func init() {
 //
 func serviceStartAllFn(control processor.ProcessControl) (processor.Processor, error) {
 	// make sure i was given a name and image
-	return processServiceStartAll{control: control}, nil
+	serviceStartAll := &processServiceStartAll{control: control}
+	return serviceStartAll, serviceStartAll.validateMeta()
 }
 
 //
@@ -30,24 +31,15 @@ func (serviceStartAll processServiceStartAll) Results() processor.ProcessControl
 }
 
 //
-func (serviceStartAll processServiceStartAll) Process() error {
+func (serviceStartAll *processServiceStartAll) Process() error {
 
-	if err := serviceStartAll.startServices(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// startServices starts all of the services saved in the database
-func (serviceStartAll processServiceStartAll) startServices() error {
-	bucket := fmt.Sprintf("%s_%s", config.AppName(), serviceStartAll.control.Env)
-	
-	services, err := data.Keys(bucket)
+	// get the service keys
+	services, err := data.Keys(serviceStartAll.control.Meta["name"])
 	if err != nil {
 		return err
 	}
 
+	// start each service
 	for _, service := range services {
 		if err := serviceStartAll.startService(service); err != nil {
 			return err
@@ -64,6 +56,7 @@ func (serviceStartAll processServiceStartAll) startService(uid string) error {
 		Env: serviceStartAll.control.Env,
 		Verbose: serviceStartAll.control.Verbose,
 		Meta: map[string]string{
+			"app_name": serviceStartAll.control.Meta["app_name"],
 			"label": uid,
 			"name":  uid,
 		},
@@ -71,8 +64,20 @@ func (serviceStartAll processServiceStartAll) startService(uid string) error {
 
 	// provision
 	if err := processor.Run("service_start", config); err != nil {
-		fmt.Println(fmt.Sprintf("%s_start:", uid), err)
+		// serviceStartAll.control.Display(fmt.Sprintf("%s_start: %+v", uid, err))
 		return err
+	}
+
+	return nil
+}
+
+// validateMeta validates the meta data
+// it also sets a default for the name of the app
+func (serviceStartAll *processServiceStartAll) validateMeta() error {
+
+	// set the name of the app if we are not given one
+	if serviceStartAll.control.Meta["app_name"] == "" {
+		serviceStartAll.control.Meta["app_name"] = fmt.Sprintf("%s_%s", config.AppName(), serviceStartAll.control.Env)
 	}
 
 	return nil

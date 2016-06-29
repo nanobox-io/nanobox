@@ -3,12 +3,11 @@ package env
 import (
 	"fmt"
 
-	"github.com/nanobox-io/nanobox-golang-stylish"
-
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/counter"
+	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
 
@@ -49,31 +48,17 @@ func (teardown *processTeardown) Process() error {
 		}
 	}
 
-	if err := teardown.teardownMounts(); err != nil {
-		return err
-	}
-
-	if err := teardown.teardownProvider(); err != nil {
-		return err
-	}
-
-	return nil
+	// teardown the mounts
+	return teardown.teardownMounts()
 }
 
 // teardownApp tears down the app when it's not being used
 func (teardown *processTeardown) teardownApp() error {
 
-	counter.Decrement(config.AppName())
-
 	// establish a local app lock to ensure we're the only ones bringing down the
 	// app platform. Also ensure that we release it even if we error
 	locker.LocalLock()
 	defer locker.LocalUnlock()
-
-	// short-circuit if the app is still in use
-	if appInUse() {
-		return nil
-	}
 
 	// Stop the platform services
 	if err := processor.Run("platform_stop", teardown.control); err != nil {
@@ -81,25 +66,26 @@ func (teardown *processTeardown) teardownApp() error {
 	}
 
 	// stop all data services
-	if err := processor.Run("service_stop_all", teardown.control); err != nil {
+	if err := processor.Run("app_teardown", teardown.control); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-// teardownMounts removes the unused mounts from the provider
+// teardownMounts removes the environments mounts from the provider
 func (teardown *processTeardown) teardownMounts() error {
+
+	// break early if there is still an environemnt using 
+	// the mounts
+	if teardown.usedMounts() {
+		return nil
+	}
 
 	// establish a local app lock to ensure we're the only ones bringing
 	// down the app platform. Also ensure that we release it even if we error
 	locker.LocalLock()
 	defer locker.LocalUnlock()
-
-	// short-circuit if the app is still in use
-	if appInUse() {
-		return nil
-	}
 
 	// unmount the engine if it's a local directory
 	if config.EngineDir() != "" {
@@ -109,7 +95,11 @@ func (teardown *processTeardown) teardownMounts() error {
 		dst := fmt.Sprintf("%s%s/engine", provider.HostShareDir(), config.AppName())
 
 		// unmount the env on the provider
-		if err := provider.RemoveMount(src, dst); err != nil {
+		if err := teardown.removeMount(src, dst); err != nil {
+			return err
+		}
+
+		if err := teardown.removeShare(src, dst); err != nil {
 			return err
 		}
 	}
@@ -119,47 +109,64 @@ func (teardown *processTeardown) teardownMounts() error {
 	dst := fmt.Sprintf("%s%s/code", provider.HostShareDir(), config.AppName())
 
 	// unmount the env on the provider
-	if err := provider.RemoveMount(src, dst); err != nil {
+	if err := teardown.removeMount(src, dst); err != nil {
+		return err
+	}
+
+	// remove the share from the provider
+	if err := teardown.removeShare(src, dst); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-// teardownProvider tears down the provider when it's not being used
-func (teardown *processTeardown) teardownProvider() error {
-
-	//
-	count, err := counter.Decrement("provider")
-	if err != nil {
-		return err
-	}
-
-	// establish a global lock to ensure we're the only ones bringing down
-	// the provider. Also we need to ensure that we release the lock even
-	// if we error out.
-	locker.GlobalLock()
-	defer locker.GlobalUnlock()
-
-	// stop the provider
-	if providerIsUnused() {
-		return processor.Run("provider_stop", teardown.control)
-	}
-
-	//
-	teardown.control.Display(stylish.Bullet("the provider is needed for %d more thing(s)", count))
-
-	return nil
+func (teardown *processTeardown) usedMounts() bool {
+	app := models.App{}
+	devErr := data.Get("apps", config.AppName()+"_dev", &app)
+	simErr := data.Get("apps", config.AppName()+"_sim", &app)
+	return devErr == nil || simErr == nil
 }
 
-// appInUse returns true if the app is being used by any other session
-func appInUse() bool {
-	count, err := counter.Get(config.AppName())
-	return err != nil || count != 0
+// addMount will mount a env in the nanobox guest context
+func (teardown *processTeardown) removeMount(src, dst string) error {
+
+    // short-circuit if the mount doesnt exist
+    if !provider.HasMount(dst) {
+      return nil
+    }
+
+    return provider.RemoveMount(src, dst)
 }
 
-// providerIsUnused returns true if the provider is currently not being used
-func providerIsUnused() bool {
-	count, err := counter.Get("provider")
-	return err == nil && count == 0
+// addShare will add a filesystem env on the host machine
+func (teardown *processTeardown) removeShare(src, dst string) error {
+
+  // the mount type is configurable by the user
+  mountType := config.Viper().GetString("mount-type")
+
+  switch mountType {
+  case "native":
+    // remove the providers native share
+    if err := provider.RemoveShare(src, dst); err != nil {
+      return err
+    }
+
+  case "netfs":
+    control := processor.ProcessControl{
+      Env:      teardown.control.Env,
+      Verbose:      teardown.control.Verbose,
+      DisplayLevel: teardown.control.DisplayLevel,
+      Meta: map[string]string{
+        "path": src,
+      },
+    }
+
+    if err := processor.Run("env_netfs_remove", control); err != nil {
+      return err
+    }
+  }
+
+  return nil
 }
+

@@ -2,10 +2,11 @@ package models
 
 // App ...
 type App struct {
-	ID    					string `json:"id"`    //
-	Name  					string `json:"name"`  //
+	ID    					string
+	Name  					string
 	// State is used to ensure we don't setup the app multiple times
-	State 					string `json:"state"`
+	State 					string
+	Status          string
 	// There are certain global ips that need to be reserved across container
 	// lifetimes. The dev ip and preview ip are examples. We'll store those here.
 	GlobalIPs				map[string]string

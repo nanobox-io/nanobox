@@ -6,8 +6,6 @@ import (
   "github.com/nanobox-io/nanobox/processor"
   "github.com/nanobox-io/nanobox/provider"
   "github.com/nanobox-io/nanobox/util/config"
-  "github.com/nanobox-io/nanobox/util/counter"
-  "github.com/nanobox-io/nanobox/util/locker"
   "github.com/nanobox-io/nanobox/util/netfs"
 )
 
@@ -60,20 +58,7 @@ func (envSetup *processEnvSetup) Process() error {
 
 // setupProvider sets up the provider
 func (envSetup *processEnvSetup) setupProvider() error {
-
-  // let anyone else know we're using the provider
-  counter.Increment("provider")
-
-  // establish a global lock to ensure we're the only ones setting up a provider
-  // also, we need to ensure the lock is released even if we error
-  locker.GlobalLock()
-  defer locker.GlobalUnlock()
-
-  if err := processor.Run("provider_setup", envSetup.control); err != nil {
-    return err
-  }
-
-  return nil
+  return processor.Run("provider_setup", envSetup.control)
 }
 
 // setupMounts will add the envs and mounts for this app
@@ -115,14 +100,6 @@ func (envSetup *processEnvSetup) setupMounts() error {
 // setupApp sets up the app plaftorm and data services
 func (envSetup *processEnvSetup) setupApp() error {
 
-  // let anyone else know we're using the app
-  counter.Increment(config.AppName())
-
-  // establish an app-level lock to ensure we're the only ones setting up an app
-  // also, we need to ensure that the lock is released even if we error out.
-  locker.LocalLock()
-  defer locker.LocalUnlock()
-
   // setup the app
   if err := processor.Run("app_setup", envSetup.control); err != nil {
     return err
@@ -135,8 +112,6 @@ func (envSetup *processEnvSetup) setupApp() error {
 
   // setup the platform services
   return processor.Run("platform_setup", envSetup.control)
-  
-  return nil
 }
 
 // addShare will add a filesystem env on the host machine

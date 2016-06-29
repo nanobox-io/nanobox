@@ -28,17 +28,8 @@ func init() {
 //
 func serviceStartFn(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
-
-	// make sure i have a name to start
-	if control.Meta["name"] == "" {
-		return nil, errors.New("missing service name")
-	}
-	// set the label if it is missing
-	if control.Meta["label"] == "" {
-		control.Meta["label"] = control.Meta["name"]
-	}
-
-	return &processServiceStart{control: control}, nil
+	serviceStart := &processServiceStart{control: control}
+	return serviceStart, serviceStart.validateMeta()
 }
 
 //
@@ -49,8 +40,8 @@ func (serviceStart processServiceStart) Results() processor.ProcessControl {
 //
 func (serviceStart *processServiceStart) Process() error {
 
-	if running := serviceStart.isServiceRunning(); running == true {
-		// short-circuit, this is already running
+	// short-circuit if the service is running
+	if serviceStart.isServiceRunning() {
 		return nil
 	}
 
@@ -58,6 +49,7 @@ func (serviceStart *processServiceStart) Process() error {
 		return err
 	}
 
+	fmt.Println(serviceStart.service)
 	if serviceStart.service.State != ACTIVE {
 		return errors.New("the service has not been created")
 	}
@@ -75,10 +67,9 @@ func (serviceStart *processServiceStart) Process() error {
 
 // loadService loads the service from the database
 func (serviceStart *processServiceStart) loadService() error {
-	bucket := fmt.Sprintf("%s_%s", config.AppName(), serviceStart.control.Env)
 
 	// get the service from the database
-	err := data.Get(bucket, serviceStart.control.Meta["name"], &serviceStart.service)
+	err := data.Get(serviceStart.control.Meta["app_name"], serviceStart.control.Meta["name"], &serviceStart.service)
 	if err != nil {
 		// cannot start a service that wasnt setup (ie saved in the database)
 		return err
@@ -126,4 +117,25 @@ func (serviceStart processServiceStart) isServiceRunning() bool {
 
 	// if the container doesn't exist then just return false
 	return err == nil && container.State.Status == "running"
+}
+
+// validateMeta validates the meta data
+// it also sets a default for the name of the app
+func (serviceStart *processServiceStart) validateMeta() error {
+
+	// make sure i have a name to start
+	if serviceStart.control.Meta["name"] == "" {
+		return errors.New("missing service name")
+	}
+	// set the label if it is missing
+	if serviceStart.control.Meta["label"] == "" {
+		serviceStart.control.Meta["label"] = serviceStart.control.Meta["name"]
+	}
+
+	// set the name of the app if we are not given one
+	if serviceStart.control.Meta["app_name"] == "" {
+		serviceStart.control.Meta["app_name"] = fmt.Sprintf("%s_%s", config.AppName(), serviceStart.control.Env)
+	}
+
+	return nil
 }

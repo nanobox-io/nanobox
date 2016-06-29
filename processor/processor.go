@@ -165,3 +165,23 @@ func connect(req *http.Request) (net.Conn, []byte, error) {
 
 	return conn, b, nil
 }
+
+// get a list of the apps in the database that believe they are up and running
+func upApps() []models.App {
+	apps := []models.App{}
+
+	appNames, err := data.Keys("apps")
+	if err != nil {
+		return apps
+	}
+
+	for _, appName := range appNames {
+		app := models.App{}
+		data.Get("apps", appName, &app)
+		if app.Status == "up" {
+			apps = append(apps, app)
+		}
+	}
+
+	return apps
+}

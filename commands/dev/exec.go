@@ -18,7 +18,7 @@ var (
 		Use:    "exec",
 		Short:  "Executes a command inside your local dev app.",
 		Long:   ``,
-		PreRun: validate.Requires("provider"),
+		PreRun: validate.Requires("provider", "provider_up", "built", "dev_deployed"),
 		Run:    execFn,
 	}
 

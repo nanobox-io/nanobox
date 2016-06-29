@@ -1,8 +1,6 @@
 package processor
 
 import (
-	"fmt"
-
 	"github.com/nanobox-io/nanobox/util/locker"
 ) 
 
@@ -33,16 +31,6 @@ func (build processBuild) Process() error {
 	// one build to happen at a time
 	locker.LocalLock()
 	defer locker.LocalUnlock()
-
-	// defer the clean up so if we exit early the cleanup will always happen
-	defer func() {
-		if err := Run("env_teardown", build.control); err != nil {
-			fmt.Println("teardown broke")
-			fmt.Println(err)
-
-			return 
-		}
-	}()
 
 	// get the vm and app up.
 	if err := Run("env_setup", build.control); err != nil {
