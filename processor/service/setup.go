@@ -246,7 +246,7 @@ func (serviceSetup *processServiceSetup) reserveIps() error {
 // launchContainer launches and starts a docker container
 func (serviceSetup *processServiceSetup) launchContainer() error {
 
-	name := fmt.Sprintf("nanobox-%s-%s-%s", config.AppName(), serviceSetup.control.Env, serviceSetup.control.Meta["name"])
+	name := fmt.Sprintf("nanobox_%s_%s_%s", config.AppName(), serviceSetup.control.Env, serviceSetup.control.Meta["name"])
 
 	config := docker.ContainerConfig{
 		Name:    name,

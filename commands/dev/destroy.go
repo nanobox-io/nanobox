@@ -16,7 +16,7 @@ var DestroyCmd = &cobra.Command{
 Destroys the docker machines associated with the current app.
 If no other apps are running, it will destroy the Nanobox VM.
 		`,
-	PreRun: validate.Requires("provider"),
+	PreRun: validate.Requires("provider", "provider_up"),
 	Run:    destroyFn,
 }
 

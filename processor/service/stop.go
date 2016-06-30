@@ -80,6 +80,11 @@ func (serviceStop *processServiceStop) validateMeta() error {
 		serviceStop.label = serviceStop.name
 	}
 
+	// set the name of the app if we are not given one
+	if serviceStop.control.Meta["app_name"] == "" {
+		serviceStop.control.Meta["app_name"] = fmt.Sprintf("%s_%s", config.AppName(), serviceStop.control.Env)
+	}
+
 	return nil
 }
 
@@ -87,10 +92,10 @@ func (serviceStop *processServiceStop) validateMeta() error {
 func (serviceStop *processServiceStop) isServiceRunning() bool {
 
 	// get the container
-	container, err := docker.GetContainer(fmt.Sprintf("nanobox-%s-%s-%s", config.AppName(), serviceStop.control.Env, serviceStop.name))
+	container, err := docker.GetContainer(fmt.Sprintf("nanobox_%s_%s", serviceStop.control.Meta["app_name"], serviceStop.name))
 
 	if err != nil {
-		// fmt.Printf("name of the thing i tried stopping nanobox-%s-%s-%s\n", config.AppName(), serviceStop.control.Env, serviceStop.name)
+		// fmt.Printf("name of the thing i tried stopping nanobox_%s_%s_%s\n", config.AppName(), serviceStop.control.Env, serviceStop.name)
 		// todo: display a message
 		return false
 	}
@@ -103,8 +108,7 @@ func (serviceStop *processServiceStop) isServiceRunning() bool {
 func (serviceStop *processServiceStop) loadService() error {
 
 	//
-	bucket := fmt.Sprintf("%s_%s", config.AppName(), serviceStop.control.Env)
-	if err := data.Get(bucket, serviceStop.name, &serviceStop.service); err != nil {
+	if err := data.Get(serviceStop.control.Meta["app_name"], serviceStop.name, &serviceStop.service); err != nil {
 		print.OutputProcessorErr("service not found", fmt.Sprintf(`
 Nanobox was unable to find the service '%s' in the database, try shutting
 down again.

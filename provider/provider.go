@@ -67,7 +67,7 @@ func Valid() error {
 
 func ValidReady() error {
 	if !IsReady() {
-		return errors.New("the provider is not ready")
+		return errors.New("the provider is not ready try running 'nanobox start' first")
 	}
 	return nil
 }

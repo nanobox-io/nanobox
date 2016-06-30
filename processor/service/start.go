@@ -49,7 +49,6 @@ func (serviceStart *processServiceStart) Process() error {
 		return err
 	}
 
-	fmt.Println(serviceStart.service)
 	if serviceStart.service.State != ACTIVE {
 		return errors.New("the service has not been created")
 	}
@@ -93,7 +92,7 @@ func (serviceStart *processServiceStart) startContainer() error {
 
 // attachNetwork attaches the container to the host network
 func (serviceStart *processServiceStart) attachNetwork() error {
-	fmt.Println("service start setting up network")
+	serviceStart.control.Info(stylish.SubBullet("service start setting up network"))
 	// todo: add these to a cleanup process in case of failure
 
 	err := provider.AddIP(serviceStart.service.ExternalIP)
@@ -113,7 +112,7 @@ func (serviceStart *processServiceStart) attachNetwork() error {
 func (serviceStart processServiceStart) isServiceRunning() bool {
 	uid := serviceStart.control.Meta["name"]
 
-	container, err := docker.GetContainer(fmt.Sprintf("nanobox-%s-%s-%s", config.AppName(), serviceStart.control.Env, uid))
+	container, err := docker.GetContainer(fmt.Sprintf("nanobox_%s_%s_%s", config.AppName(), serviceStart.control.Env, uid))
 
 	// if the container doesn't exist then just return false
 	return err == nil && container.State.Status == "running"

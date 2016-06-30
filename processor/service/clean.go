@@ -117,6 +117,6 @@ func (serviceClean processServiceClean) isServiceDirty(uid string) bool {
 
 // containerExists will check to see if a docker container exists on the provider
 func (serviceClean processServiceClean) containerExists(uid string) bool {
-	_, err := docker.GetContainer(fmt.Sprintf("nanobox-%s-%s-%s", config.AppName(), serviceClean.control.Env, uid))
+	_, err := docker.GetContainer(fmt.Sprintf("nanobox_%s_%s_%s", config.AppName(), serviceClean.control.Env, uid))
 	return err == nil
 }

@@ -22,25 +22,25 @@ func init() {
 
 //
 func serviceStopAllFn(control processor.ProcessControl) (processor.Processor, error) {
-	return processServiceStopAll{control: control}, nil
+	serviceStopAll := &processServiceStopAll{control: control}
+	return serviceStopAll, serviceStopAll.validateMeta()
 }
 
 //
-func (serviceStopAll processServiceStopAll) Results() processor.ProcessControl {
+func (serviceStopAll *processServiceStopAll) Results() processor.ProcessControl {
 	return serviceStopAll.control
 }
 
 //
-func (serviceStopAll processServiceStopAll) Process() error {
+func (serviceStopAll *processServiceStopAll) Process() error {
 	return serviceStopAll.stopServices()
 }
 
 // stopServices stops all of the services saved in the database
-func (serviceStopAll processServiceStopAll) stopServices() error {
+func (serviceStopAll *processServiceStopAll) stopServices() error {
 
 	//
-	bucket := fmt.Sprintf("%s_%s", config.AppName(), serviceStopAll.control.Env)
-	services, err := data.Keys(bucket)
+	services, err := data.Keys(serviceStopAll.control.Meta["app_name"])
 	if err != nil {
 		return err
 	}
@@ -57,16 +57,31 @@ func (serviceStopAll processServiceStopAll) stopServices() error {
 }
 
 // stopService stops a service
-func (serviceStopAll processServiceStopAll) stopService(uid string) error {
+func (serviceStopAll *processServiceStopAll) stopService(uid string) error {
 
 	//
 	config := processor.ProcessControl{
 		Env:      serviceStopAll.control.Env,
 		Verbose:      serviceStopAll.control.Verbose,
 		DisplayLevel: serviceStopAll.control.DisplayLevel + 1,
-		Meta:         map[string]string{"name": uid},
+		Meta:         map[string]string{
+			"name": uid,
+			"app_name": serviceStopAll.control.Meta["app_name"],
+		},
 	}
 
 	//
 	return processor.Run("service_stop", config)
 }
+
+// validateMeta validates the meta data
+// it also sets a default for the name of the app
+func (serviceStopAll *processServiceStopAll) validateMeta() error {
+	// set the name of the app if we are not given one
+	if serviceStopAll.control.Meta["app_name"] == "" {
+		serviceStopAll.control.Meta["app_name"] = fmt.Sprintf("%s_%s", config.AppName(), serviceStopAll.control.Env)
+	}
+
+	return nil
+}
+

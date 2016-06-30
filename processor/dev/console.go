@@ -249,7 +249,7 @@ func (devConsole *processDevConsole) launchContainer() error {
   appName := config.AppName()
 
   config := docker.ContainerConfig{
-    Name:    fmt.Sprintf("nanobox-%s_dev", appName),
+    Name:    fmt.Sprintf("nanobox_%s_dev", appName),
     Image:   devConsole.image, // this will need to be configurable some time
     Network: "virt",
     IP:      devConsole.localIP.String(),
@@ -281,7 +281,7 @@ func (devConsole *processDevConsole) launchContainer() error {
 // removeContainer will lookup the dev container and remove it
 func (devConsole *processDevConsole) removeContainer() error {
 
-  name := fmt.Sprintf("nanobox-%s_dev", config.AppName())
+  name := fmt.Sprintf("nanobox_%s_dev", config.AppName())
 
   // grab the container info
   container, err := docker.GetContainer(name)
@@ -313,7 +313,7 @@ func (devConsole *processDevConsole) runConsole() error {
     Env: devConsole.control.Env,
     Verbose: devConsole.control.Verbose,
     Meta: map[string]string{
-      "container": fmt.Sprintf("nanobox-%s_dev", config.AppName()),
+      "container": fmt.Sprintf("nanobox_%s_dev", config.AppName()),
       "cwd":       devConsole.cwd(),
       "shell":     "zsh",
     },
@@ -418,7 +418,7 @@ func devIsUnused() bool {
 
 // isDevRunning returns true if a service is already running
 func isDevRunning() bool {
-  name := fmt.Sprintf("nanobox-%s_dev", config.AppName())
+  name := fmt.Sprintf("nanobox_%s_dev", config.AppName())
 
   container, err := docker.GetContainer(name)
 

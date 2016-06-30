@@ -13,7 +13,7 @@ var ConsoleCmd = &cobra.Command{
 	Use:    "console",
 	Short:  "Opens an interactive console inside your Nanobox VM.",
 	Long:   ``,
-	PreRun: validate.Requires("provider", "provider_up", "built", "dev_deployed"),
+	PreRun: validate.Requires("provider", "provider_up"),
 	Run:    consoleFn,
 }
 

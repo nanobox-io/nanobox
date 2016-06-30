@@ -78,7 +78,7 @@ func (appStop *processAppStop) loadApp() error {
 // remove the development container if one exists
 // if not dont complain
 func (appStop *processAppStop) removeDev() {
-  name := fmt.Sprintf("nanobox-%s", appStop.control.Meta["name"])
+  name := fmt.Sprintf("nanobox_%s", appStop.control.Meta["name"])
 
   docker.ContainerRemove(name)
 }

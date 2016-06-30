@@ -110,7 +110,7 @@ func (codePublish *processCodePublish) pullImage() error {
 func (codePublish *processCodePublish) createContainer() error {
 	appName := config.AppName()
 	config := docker.ContainerConfig{
-		Name:    fmt.Sprintf("nanobox-%s-build", config.AppName()),
+		Name:    fmt.Sprintf("nanobox_%s_build", config.AppName()),
 		Image:   codePublish.image, // this will need to be configurable some time
 		Network: "virt",
 		IP:      codePublish.service.InternalIP,

@@ -87,7 +87,7 @@ func (devDestroy processDevDestroy) removeServices() error {
 // remove the development container if one exists
 // if not dont complain
 func (devDestroy processDevDestroy) removeDev() {
-  name := fmt.Sprintf("nanobox-%s_dev", config.AppName())
+  name := fmt.Sprintf("nanobox_%s_dev", config.AppName())
 
   docker.ContainerRemove(name)
 }
