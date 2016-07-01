@@ -60,11 +60,6 @@ func (teardown *processTeardown) teardownApp() error {
 	locker.LocalLock()
 	defer locker.LocalUnlock()
 
-	// Stop the platform services
-	if err := processor.Run("platform_stop", teardown.control); err != nil {
-		return err
-	}
-
 	// stop all data services
 	if err := processor.Run("app_teardown", teardown.control); err != nil {
 		return err

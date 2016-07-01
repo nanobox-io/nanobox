@@ -3,7 +3,6 @@ package app
 import (
 	"fmt"
 	
-	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util/locker"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
@@ -41,34 +40,29 @@ func (appStart *processAppStart) Process() error {
 	locker.LocalLock()
 	defer locker.LocalUnlock()
 
-	// if the app doesnt exist
-	if !appStart.appExists() {
-		// there was no app record so we need to run the env setup
-		appStart.control.Display("the environment wasnt created yet")
-		appStart.control.Display("We will get that for you.")
-
-		if err := processor.Run("env_setup", appStart.control); err != nil {
-			return err
-		}
+	// the env setup is idempotent and will not output anything 
+	// unless it actually does something
+	if err := processor.Run("env_setup", appStart.control); err != nil {
+		return err
 	}
 
 	if err := appStart.loadApp(); err != nil {
 		return err
 	}
 
-	// if the app has not been setup yet we probably need to run 
-	// the env setup
-	if appStart.app.State != ACTIVE || !provider.IsReady() {
+	// // if the app has not been setup yet we probably need to run 
+	// // the env setup
+	// if appStart.app.State != ACTIVE || !provider.IsReady() {
 
-		// output message
-		appStart.control.Display("it appears the environment wasnt up to run this command")
-		appStart.control.Display("We will get that for you.")
+	// 	// output message
+	// 	appStart.control.Display("it appears the environment wasnt up to run this command")
+	// 	appStart.control.Display("We will get that for you.")
 
-		// run env_setup
-		if err := processor.Run("env_setup", appStart.control); err != nil {
-			return err
-		}
-	}
+	// 	// run env_setup
+	// 	if err := processor.Run("env_setup", appStart.control); err != nil {
+	// 		return err
+	// 	}
+	// }
 
 	// in the service package 'name' represents the name of the service
 	// so we need to add a app_name to its control

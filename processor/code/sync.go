@@ -52,7 +52,6 @@ func (codeSync *processCodeSync) Process() error {
 	if err := codeSync.setBoxfile(); err != nil {
 		return err
 	}
-	fmt.Printf("%+v\n", codeSync.box)
 
 	// iterate over the code nodes and build containers for each of them
 	for _, codeName := range codeSync.box.Nodes("code") {
