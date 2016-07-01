@@ -44,12 +44,7 @@ func (appTeardown *processAppTeardown) Process() error {
 	if err := appTeardown.loadApp(); err != nil {
 		return err
 	}
-
-	// short-circuit if the app isn't active
-	if appTeardown.app.State == "initialized" {
-		return nil
-	}
-
+ 
 	if err := appTeardown.releaseIPs(); err != nil {
 		return err
 	}

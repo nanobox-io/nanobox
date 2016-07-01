@@ -175,7 +175,6 @@ func (codeBuild *processCodeBuild) releaseIP() error {
 // startContainer starts a build container
 func (codeBuild *processCodeBuild) startContainer() error {
 
-	fmt.Println("ip:", codeBuild.localIP.String())
 	appName := config.AppName()
 	config := docker.ContainerConfig{
 		Name:    fmt.Sprintf("nanobox_%s_build", config.AppName()),

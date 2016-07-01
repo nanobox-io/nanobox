@@ -41,9 +41,8 @@ func (appStart *processAppStart) Process() error {
 	locker.LocalLock()
 	defer locker.LocalUnlock()
 
-	// load the app and if there is a problem loading
-	// we may need to setup the app first.
-	if err := appStart.loadApp(); err != nil {
+	// if the app doesnt exist
+	if !appStart.appExists() {
 		// there was no app record so we need to run the env setup
 		appStart.control.Display("the environment wasnt created yet")
 		appStart.control.Display("We will get that for you.")
@@ -51,6 +50,10 @@ func (appStart *processAppStart) Process() error {
 		if err := processor.Run("env_setup", appStart.control); err != nil {
 			return err
 		}
+	}
+
+	if err := appStart.loadApp(); err != nil {
+		return err
 	}
 
 	// if the app has not been setup yet we probably need to run 
@@ -78,6 +81,13 @@ func (appStart *processAppStart) Process() error {
 
 	// set the app status to up
 	return appStart.upApp()
+}
+
+// appExists checks to see if the app is in the database
+func (appStart *processAppStart) appExists() bool {
+	app := models.App{}
+	err := data.Get("apps", appStart.control.Meta["name"], &app)
+	return err == nil
 }
 
 // loadApp loads the app from the db

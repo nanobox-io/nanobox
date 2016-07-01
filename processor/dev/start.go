@@ -17,16 +17,16 @@ func init() {
 // TODO: do some control validation check on the meta for the flags and make sure
 // they work
 func startFn(control processor.ProcessControl) (processor.Processor, error) {
-	return processDevStart{control: control}, nil
+	return &processDevStart{control: control}, nil
 }
 
 //
-func (dev processDevStart) Results() processor.ProcessControl {
+func (dev *processDevStart) Results() processor.ProcessControl {
 	return dev.control
 }
 
 //
-func (dev processDevStart) Process() error {
+func (dev *processDevStart) Process() error {
 	// set the process mode to dev
 	dev.control.Env = "dev"
 

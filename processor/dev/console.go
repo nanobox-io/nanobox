@@ -161,6 +161,11 @@ func (devConsole *processDevConsole) setup() error {
 // teardown ...
 func (devConsole *processDevConsole) teardown() error {
 
+  // if you want to debug a problem do not teardown the container
+  if devConsole.control.Debug {
+    return nil
+  }
+
   // establish a local app lock to ensure we're the only ones bringing
   // down the app platform. Also ensure that we release it even if we error
   locker.LocalLock()
@@ -380,12 +385,12 @@ func (devConsole *processDevConsole) attachNetwork() error {
 
   //
   if err := provider.AddIP(devIP); err != nil {
-    return err
+    return fmt.Errorf("provider:add_ip: %s", err.Error())
   }
 
   //
   if err := provider.AddNat(devIP, devConsole.localIP.String()); err != nil {
-    return err
+    return fmt.Errorf("provider:add_nat: %s", err.Error())
   }
 
   return nil

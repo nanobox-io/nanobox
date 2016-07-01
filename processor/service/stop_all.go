@@ -46,7 +46,7 @@ func (serviceStopAll *processServiceStopAll) stopServices() error {
 	}
 
 	//
-	serviceStopAll.control.Display(stylish.Bullet("Stopping All Services..."))
+	serviceStopAll.control.Display(stylish.Bullet("Stopping All Services for %s...", serviceStopAll.control.Meta["app_name"]))
 	for _, service := range services {
 		if err := serviceStopAll.stopService(service); err != nil {
 			return err
