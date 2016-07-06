@@ -73,7 +73,7 @@ func (teardown *processTeardown) teardownMounts() error {
 
 	// break early if there is still an environemnt using 
 	// the mounts
-	if teardown.usedMounts() {
+	if teardown.mountsInUse() {
 		return nil
 	}
 
@@ -116,7 +116,7 @@ func (teardown *processTeardown) teardownMounts() error {
 	return nil
 }
 
-func (teardown *processTeardown) usedMounts() bool {
+func (teardown *processTeardown) mountsInUse() bool {
 	app := models.App{}
 	devErr := data.Get("apps", config.AppName()+"_dev", &app)
 	simErr := data.Get("apps", config.AppName()+"_sim", &app)

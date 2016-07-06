@@ -106,7 +106,6 @@ func ReserveLocal() (net.IP, error) {
 
 // ReturnIP ...
 func ReturnIP(ip net.IP) error {
-
 	locker.GlobalLock()
 	defer locker.GlobalUnlock()
 	mutex.Lock()

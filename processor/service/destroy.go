@@ -135,15 +135,14 @@ func (serviceDestroy *processServiceDestroy) detachNetwork() error {
 	}
 
 	// don't return the external IP if this is portal
-	if name != "portal" {
+	if name != "portal" && serviceDestroy.app.GlobalIPs[name] == ""{
 		if err := dhcp.ReturnIP(net.ParseIP(service.ExternalIP)); err != nil {
 			return err
 		}
 	}
 
-
 	// don't return the internal IP if it's an app-level cache
-	if serviceDestroy.app.LocalIPs[name] != "" {
+	if serviceDestroy.app.LocalIPs[name] == "" {
 		if err := dhcp.ReturnIP(net.ParseIP(service.InternalIP)); err != nil {
 			return err
 		}

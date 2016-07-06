@@ -23,6 +23,7 @@ func init() {
 
 	// public subcommands
 	SimCmd.AddCommand(sim.StartCmd)
+	SimCmd.AddCommand(sim.StopCmd)
 	SimCmd.AddCommand(sim.DeployCmd)
 	SimCmd.AddCommand(sim.DestroyCmd)
 	SimCmd.AddCommand(sim.InfoCmd)

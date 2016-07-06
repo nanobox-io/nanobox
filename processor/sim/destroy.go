@@ -45,7 +45,7 @@ func (simDestroy processDevDestroy) Process() error {
 	}
 
 	// teardown the app
-	return processor.Run("app_teardown", simDestroy.control)
+	return processor.Run("env_teardown", simDestroy.control)
 }
 
 // removeServices gets all the services in the app and remove them
