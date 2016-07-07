@@ -22,13 +22,13 @@ func LocalLock() error {
 		if success, _ := LocalTryLock(); success {
 			break
 		}
-		lumber.Debug("local lock waiting...")
+		lumber.Trace("local lock waiting...")
 		<-time.After(time.Second)
 	}
 
 	mutex.Lock()
 	lCount++
-	lumber.Debug("local lock aquired (%d)", lCount)
+	lumber.Trace("local lock aquired (%d)", lCount)
 	mutex.Unlock()
 
 	return nil
@@ -64,7 +64,7 @@ func LocalUnlock() (err error) {
 
 	mutex.Lock()
 	lCount--
-	lumber.Debug("local lock released (%d)", lCount)
+	lumber.Trace("local lock released (%d)", lCount)
 	mutex.Unlock()
 
 	// if im not the last guy to release my lock quit immidiately instead of closing

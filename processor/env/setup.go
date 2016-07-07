@@ -86,12 +86,12 @@ func (envSetup *processEnvSetup) setupMounts() error {
 
   // first export the env on the workstation
   if err := envSetup.addShare(src, dst); err != nil {
-    return err
+    return fmt.Errorf("addShare:%s", err.Error())
   }
 
   // then mount the env on the provider
   if err := envSetup.addMount(src, dst); err != nil {
-    return err
+    return fmt.Errorf("addMount:%s", err.Error())
   }
 
   return nil

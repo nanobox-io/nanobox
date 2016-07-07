@@ -19,20 +19,20 @@ var (
 
 // GlobalLock locks on port
 func GlobalLock() error {
-	lumber.Debug("global locking")
+	lumber.Trace("global locking")
 
 	//
 	for {
 		if success, _ := GlobalTryLock(); success {
 			break
 		}
-		lumber.Debug("global lock waiting...")
+		lumber.Trace("global lock waiting...")
 		<-time.After(time.Second)
 	}
 
 	mutex.Lock()
 	gCount++
-	lumber.Debug("global lock aqquired (%d)", gCount)
+	lumber.Trace("global lock aqquired (%d)", gCount)
 	mutex.Unlock()
 
 	return nil
@@ -68,7 +68,7 @@ func GlobalUnlock() error {
 
 	mutex.Lock()
 	gCount--
-	lumber.Debug("global lock released (%d)", gCount)
+	lumber.Trace("global lock released (%d)", gCount)
 	mutex.Unlock()
 
 	//

@@ -100,14 +100,14 @@ func Mount(hostPath, mountPath string) error {
 	cmd := []string{"/usr/local/sbin/portmap"}
 	if b, err := provider.Run(cmd); err != nil {
 		lumber.Debug("output: %s", b)
-		return err
+		return fmt.Errorf("portmap:%s", err.Error())
 	}
 
 	// ensure the destination directory exists
 	cmd = []string{"/bin/mkdir", "-p", mountPath}
 	if b, err := provider.Run(cmd); err != nil {
 		lumber.Debug("output: %s", b)
-		return err
+		return fmt.Errorf("mkdir:%s", err.Error())
 	}
 
 	// TODO: this IP shouldn't be hardcoded, needs to be figured out!
@@ -115,7 +115,7 @@ func Mount(hostPath, mountPath string) error {
 	cmd = []string{"/bin/mount", "-t", "nfs", source, mountPath}
 	if b, err := provider.Run(cmd); err != nil {
 		lumber.Debug("output: %s", b)
-		return err
+		return fmt.Errorf("mount: output: %s err:%s", b, err.Error())
 	}
 
 	return nil
@@ -133,7 +133,7 @@ func entry(path string) (string, error) {
 		return "", fmt.Errorf("there is no mount ip on the provider")
 	}
 
-	entry := fmt.Sprintf("\"%s\" %s -alldirs -mapall=%v:%v", path, provider.MountIP, uid(), gid())
+	entry := fmt.Sprintf("\"%s\" %s -alldirs -mapall=%v:%v", path, provider.HostIP, uid(), gid())
 
 	return entry, nil
 }
