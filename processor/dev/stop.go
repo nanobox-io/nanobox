@@ -14,8 +14,8 @@ func init() {
 	processor.Register("dev_stop", stopFn)
 }
 
-// TODO: do some control validation check on the meta for the flags and make sure
-// they work
+// stopFn gives back the process dev stop but does not do any validation
+// because there is no validation required.
 func stopFn(control processor.ProcessControl) (processor.Processor, error) {
 	return processDevStop{control: control}, nil
 }

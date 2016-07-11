@@ -13,9 +13,9 @@ var (
 	// DestroyCmd ...
 	DestroyCmd = &cobra.Command{
 		Use:   "destroy",
-		Short: "Start the virtual machine",
+		Short: "Remove the virtual machine",
 		Long: `
-Start the virtual machine.
+Remove the virtual machine.
 		`,
 		PreRun: validate.Requires("provider"),
 		Run:    destroyFn,
