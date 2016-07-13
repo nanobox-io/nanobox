@@ -3,6 +3,7 @@ package models
 // App ...
 type App struct {
 	ID    					string
+	Directory       string
 	Name  					string
 	// State is used to ensure we don't setup the app multiple times
 	State 					string

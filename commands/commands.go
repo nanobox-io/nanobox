@@ -128,6 +128,7 @@ func init() {
 	// subcommands
 	NanoboxCmd.AddCommand(InspectCmd)
 	NanoboxCmd.AddCommand(DeployCmd)
+	NanoboxCmd.AddCommand(ConsoleCmd)
 	NanoboxCmd.AddCommand(LinkCmd)
 	NanoboxCmd.AddCommand(LoginCmd)
 	NanoboxCmd.AddCommand(LogoutCmd)

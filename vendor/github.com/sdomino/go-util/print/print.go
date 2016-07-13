@@ -41,10 +41,12 @@ func Prompt(p string, v ...interface{}) string {
 
 	//
 	input, err := reader.ReadString('\n')
+	fmt.Printf("prompt input: '%s'\n", input)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "[util/print] reader.ReadString() failed - %v", err.Error())
 	}
 
+	fmt.Printf("after trim: '%s'\n", strings.TrimSpace(input))
 	//
 	return strings.TrimSpace(input)
 }

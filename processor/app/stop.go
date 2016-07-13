@@ -67,7 +67,13 @@ func (appStop *processAppStop) Process() error {
 	}
 
 	// set the app status to down
-	return appStop.downApp()
+	if err := appStop.downApp(); err != nil {
+		return err
+	}
+
+	// unmount the environment
+	appStop.control.Meta["directory"] = appStop.app.Directory	
+	return processor.Run("env_unmount", appStop.control)
 }
 
 // loadApp loads the app from the db

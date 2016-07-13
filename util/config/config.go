@@ -41,7 +41,7 @@ func parseConfig() error {
 	// set sensible defaults
 
 	// odin access
-	config.SetDefault("production_host", "api.nanobox.io/v1/")
+	config.SetDefault("production_url", "https://api.nanobox.io/v1/")
 
 	// network space
 	config.SetDefault("external-network-space", "192.168.99.50/24")

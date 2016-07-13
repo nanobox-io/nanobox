@@ -70,6 +70,12 @@ func Build(name string, pc ProcessControl) (Processor, error) {
 		return nil, fmt.Errorf("Invalid Processor %s", name)
 	}
 	proc, err := procFunc(pc)
+
+	// include the breadcrumb even when errors happen in proc functions
+	if err != nil {
+		return nil, fmt.Errorf("%s:%s", name, err)
+	}
+
 	return BreadCrumbProcessor{name, proc}, err
 }
 

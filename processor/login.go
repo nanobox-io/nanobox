@@ -1,6 +1,8 @@
 package processor
 
 import (
+	"fmt"
+
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/odin"
@@ -37,7 +39,7 @@ func (login processLogin) Process() error {
 
 	// verify that the user exists
 	if err := login.verifyUser(); err != nil {
-
+		return err
 	}
 
 	// store the user token
@@ -58,10 +60,12 @@ func (login *processLogin) validateMeta() error {
 	// request username/password if missing
 	if login.username == "" {
 		login.username = printutil.Prompt("Username:")
+		fmt.Println("username: ", login.username)
 	}
 
 	if login.password == "" {
 		login.password = printutil.Password("Password:")
+		fmt.Println("password: ", login.password)
 	}
 
 	return nil

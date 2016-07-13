@@ -73,6 +73,7 @@ func (appSetup *processAppSetup) loadApp() error {
 	// set the default state
 	if appSetup.app.State == "" {
 		appSetup.app.Name = key
+		appSetup.app.Directory = config.LocalDir()
 		appSetup.app.State = INITIALIZED
 		appSetup.app.GlobalIPs = map[string]string{}
 		appSetup.app.LocalIPs = map[string]string{}

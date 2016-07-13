@@ -2,7 +2,10 @@
 package app
 
 import (
+	"fmt"
+
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/validate"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 )
@@ -18,8 +21,25 @@ const (
 	DOWN = "down"
 )
 
-func isUp() bool {
+func init() {
+	validate.Register("dev_isup", devIsUp)
+	validate.Register("sim_isup", simIsUp)
+}
+
+func devIsUp() error {
 	app := models.App{}
 	data.Get("apps", config.AppName()+"_dev", &app)
-	return app.Status == UP
+	if !(app.Status == UP) {
+		return fmt.Errorf("the environment has not been started. Please run the start command")
+	}
+	return nil
+}
+
+func simIsUp() error {
+	app := models.App{}
+	data.Get("apps", config.AppName()+"_dev", &app)
+	if !(app.Status == UP) {
+		return fmt.Errorf("the environment has not been started. Please run the start command")
+	}
+	return nil
 }

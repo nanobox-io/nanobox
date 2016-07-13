@@ -85,5 +85,5 @@ ex: nanobox dev dns rm <name>
 	// set the meta arguments to be used in the processor and run the processor
 	processor.DefaultControl.Meta["name"] = args[0]
 	processor.DefaultControl.Env = "dev"
-	print.OutputCommandErr(processor.Run("share_dns_remove", processor.DefaultControl))
+	print.OutputCommandErr(processor.Run("env_dns_remove", processor.DefaultControl))
 }
