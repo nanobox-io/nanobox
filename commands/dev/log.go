@@ -15,7 +15,7 @@ var (
 		Use:    "log",
 		Short:  "Displays logs from the running app and its components.",
 		Long:   ``,
-		PreRun: validate.Requires("provider", "provider_up", "built"),
+		PreRun: validate.Requires("provider", "provider_up", "built", "dev_isup"),
 		Run:    logFn,
 	}
 )

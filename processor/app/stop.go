@@ -48,7 +48,7 @@ func (appStop *processAppStop) Process() error {
 	}
 
 	// short-circuit if the app isn't up
-	if appStop.app.Status != UP {
+	if !appStop.isUp() {
 		return nil
 	}
 	
@@ -106,3 +106,17 @@ func (appStop *processAppStop) validateMeta() error {
 
 	return nil
 }
+
+// the app is concidered up if its status is up
+// or if any of its containers are up and running
+func (appStop *processAppStop) isUp() bool {
+	// if the app says its up.. its up
+	if appStop.app.Status == UP {
+		return true
+	}
+
+	// if any of the apps services are running
+	// the app is concidered running
+	return appServicesRunning(appStop.control.Meta["name"])
+}
+
