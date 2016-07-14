@@ -18,9 +18,9 @@ import (
 
 // processServiceDestroy ...
 type processServiceDestroy struct {
-	control 	processor.ProcessControl
-	app				models.App
-	service		models.Service
+	control processor.ProcessControl
+	app     models.App
+	service models.Service
 }
 
 //
@@ -98,7 +98,7 @@ func (serviceDestroy *processServiceDestroy) loadService() error {
 // printDisplay prints the user display for progress
 func (serviceDestroy *processServiceDestroy) printDisplay() error {
 
-	name    := serviceDestroy.control.Meta["name"]
+	name := serviceDestroy.control.Meta["name"]
 	message := stylish.Bullet("Destroying %s", name)
 
 	// print!
@@ -123,7 +123,7 @@ func (serviceDestroy *processServiceDestroy) removeContainer() error {
 // detachNetwork detaches the virtual network from the host
 func (serviceDestroy *processServiceDestroy) detachNetwork() error {
 
-	name    := serviceDestroy.control.Meta["name"]
+	name := serviceDestroy.control.Meta["name"]
 	service := serviceDestroy.service
 
 	if err := provider.RemoveNat(service.ExternalIP, service.InternalIP); err != nil {
@@ -135,7 +135,7 @@ func (serviceDestroy *processServiceDestroy) detachNetwork() error {
 	}
 
 	// don't return the external IP if this is portal
-	if name != "portal" && serviceDestroy.app.GlobalIPs[name] == ""{
+	if name != "portal" && serviceDestroy.app.GlobalIPs[name] == "" {
 		if err := dhcp.ReturnIP(net.ParseIP(service.ExternalIP)); err != nil {
 			return err
 		}

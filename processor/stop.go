@@ -1,7 +1,6 @@
 package processor
 
-import (
-) 
+import ()
 
 // processStop ...
 type processStop struct {
@@ -39,22 +38,20 @@ func (stop processStop) Process() error {
 func (stop processStop) stopAllApps() error {
 	// create a control for the child processes
 	control := ProcessControl{
-		Env: stop.control.Env,
+		Env:     stop.control.Env,
 		Verbose: stop.control.Verbose,
-		Meta: map[string]string{},
+		Meta:    map[string]string{},
 	}
 
 	// run the app stop on all running apps
 	for _, app := range upApps() {
 		control.Meta["name"] = app.Name
 
-
 		err := Run("app_stop", control)
 		if err != nil {
 			return err
 		}
-		
+
 	}
 	return nil
 }
-

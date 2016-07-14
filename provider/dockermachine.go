@@ -12,9 +12,9 @@ import (
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 
-	"github.com/nanobox-io/nanobox/util/print"
-	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util/data"
+	"github.com/nanobox-io/nanobox/util/print"
 )
 
 // DockerMachine ...
@@ -488,7 +488,7 @@ func (machine DockerMachine) Run(command []string) ([]byte, error) {
 	return cmd.CombinedOutput()
 }
 
-// regenerate the certificates 
+// regenerate the certificates
 // this should be used when the machine starts up with an ip that
 // is different then last time
 func (machine DockerMachine) regenerateCert() error {

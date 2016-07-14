@@ -2,12 +2,12 @@ package app
 
 import (
 	"fmt"
-	
-	"github.com/nanobox-io/nanobox/util/locker"
+
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
+	"github.com/nanobox-io/nanobox/util/locker"
 )
 
 // processAppStart start all services associated with an app
@@ -40,7 +40,7 @@ func (appStart *processAppStart) Process() error {
 	locker.LocalLock()
 	defer locker.LocalUnlock()
 
-	// the env setup is idempotent and will not output anything 
+	// the env setup is idempotent and will not output anything
 	// unless it actually does something
 	if err := processor.Run("env_setup", appStart.control); err != nil {
 		return err
@@ -50,7 +50,7 @@ func (appStart *processAppStart) Process() error {
 		return err
 	}
 
-	// // if the app has not been setup yet we probably need to run 
+	// // if the app has not been setup yet we probably need to run
 	// // the env setup
 	// if appStart.app.State != ACTIVE || !provider.IsReady() {
 

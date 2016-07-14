@@ -33,7 +33,7 @@ func (simDestroy processDevDestroy) Results() processor.ProcessControl {
 //
 func (simDestroy processDevDestroy) Process() error {
 	simDestroy.control.Env = "sim"
-	
+
 	// we need the vm to be up and running
 	if err := processor.Run("provider_setup", simDestroy.control); err != nil {
 		return err

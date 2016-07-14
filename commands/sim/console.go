@@ -24,7 +24,7 @@ func consoleFn(ccmd *cobra.Command, args []string) {
 
 	if len(args) == 0 {
 		fmt.Println("you need to provide a container to console into")
-		
+
 		return
 	}
 

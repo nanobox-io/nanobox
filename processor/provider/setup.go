@@ -4,13 +4,12 @@ import (
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/golang-docker-client"
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
-	"github.com/nanobox-io/nanobox/util/locker"
-	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/data"
-	"github.com/nanobox-io/nanobox/models"
-
+	"github.com/nanobox-io/nanobox/util/dhcp"
+	"github.com/nanobox-io/nanobox/util/locker"
 )
 
 // processProviderSetup ...
@@ -73,7 +72,7 @@ func (providerSetup processProviderSetup) Process() error {
 func (providerSetup processProviderSetup) saveProvider() error {
 	mProvider := models.Provider{}
 	data.Get("global", "provider", &mProvider)
-	
+
 	// if it has already been saved the exit early
 	if mProvider.HostIP != "" {
 		return nil
@@ -92,6 +91,6 @@ func (providerSetup processProviderSetup) saveProvider() error {
 	}
 	mProvider.HostIP = hIP
 	mProvider.MountIP = ip.String()
-	
+
 	return data.Put("global", "provider", mProvider)
 }

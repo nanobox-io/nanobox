@@ -79,7 +79,7 @@ func (serviceClean processServiceClean) removeService(uid string) error {
 	serviceClean.control.Display(stylish.Bullet(fmt.Sprintf("Cleaning %s...", uid)))
 
 	config := processor.ProcessControl{
-		Env:      serviceClean.control.Env,
+		Env:          serviceClean.control.Env,
 		Verbose:      serviceClean.control.Verbose,
 		DisplayLevel: serviceClean.control.DisplayLevel + 1,
 		Meta: map[string]string{

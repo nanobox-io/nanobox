@@ -1,7 +1,6 @@
 package processor
 
-import (
-) 
+import ()
 
 // processStart ...
 type processStart struct {

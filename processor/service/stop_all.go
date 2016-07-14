@@ -61,11 +61,11 @@ func (serviceStopAll *processServiceStopAll) stopService(uid string) error {
 
 	//
 	config := processor.ProcessControl{
-		Env:      serviceStopAll.control.Env,
+		Env:          serviceStopAll.control.Env,
 		Verbose:      serviceStopAll.control.Verbose,
 		DisplayLevel: serviceStopAll.control.DisplayLevel + 1,
-		Meta:         map[string]string{
-			"name": uid,
+		Meta: map[string]string{
+			"name":     uid,
 			"app_name": serviceStopAll.control.Meta["app_name"],
 		},
 	}
@@ -84,4 +84,3 @@ func (serviceStopAll *processServiceStopAll) validateMeta() error {
 
 	return nil
 }
-

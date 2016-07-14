@@ -44,10 +44,10 @@ func (simDeploy processSimDeploy) Process() error {
 	// this allows the dev and the deploy to be isolated
 	simDeploy.control.Env = "sim"
 
-  // run the share init which gives access to docker
-  if err := processor.Run("env_init", simDeploy.control); err != nil {
-    return err
-  }
+	// run the share init which gives access to docker
+	if err := processor.Run("env_init", simDeploy.control); err != nil {
+		return err
+	}
 
 	// get the platform deploy ready
 	if err := processor.Run("platform_deploy", simDeploy.control); err != nil {
@@ -124,7 +124,7 @@ func (simDeploy *processSimDeploy) publishCode() error {
 // startCodeServices ...
 func (simDeploy *processSimDeploy) startCodeServices() error {
 	code := processor.ProcessControl{
-		Env: simDeploy.control.Env,
+		Env:     simDeploy.control.Env,
 		Verbose: simDeploy.control.Verbose,
 		Meta: map[string]string{
 			"boxfile":         simDeploy.control.Meta["boxfile"],

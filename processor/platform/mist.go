@@ -56,7 +56,7 @@ func (mistListen processMistListen) Process() error {
 
 	// loop waiting for messages or signals
 	// if we recieve a kill signal quit
-	// messages will be displayed 
+	// messages will be displayed
 	for {
 		select {
 		case msg := <-client.Messages():

@@ -4,12 +4,12 @@ import (
 	"fmt"
 
 	"github.com/nanobox-io/golang-docker-client"
-	
-	"github.com/nanobox-io/nanobox/util/locker"
+
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
+	"github.com/nanobox-io/nanobox/util/locker"
 )
 
 // processAppStop stop all services associated with an app
@@ -51,7 +51,7 @@ func (appStop *processAppStop) Process() error {
 	if !appStop.isUp() {
 		return nil
 	}
-	
+
 	// in the service package 'name' represents the name of the service
 	// so we need to add a app_name to its control
 	appStop.control.Meta["app_name"] = appStop.control.Meta["name"]
@@ -72,7 +72,7 @@ func (appStop *processAppStop) Process() error {
 	}
 
 	// unmount the environment
-	appStop.control.Meta["directory"] = appStop.app.Directory	
+	appStop.control.Meta["directory"] = appStop.app.Directory
 	return processor.Run("env_unmount", appStop.control)
 }
 
@@ -84,9 +84,9 @@ func (appStop *processAppStop) loadApp() error {
 // remove the development container if one exists
 // if not dont complain
 func (appStop *processAppStop) removeDev() {
-  name := fmt.Sprintf("nanobox_%s", appStop.control.Meta["name"])
+	name := fmt.Sprintf("nanobox_%s", appStop.control.Meta["name"])
 
-  docker.ContainerRemove(name)
+	docker.ContainerRemove(name)
 }
 
 // downApp sets the app status to down
@@ -119,4 +119,3 @@ func (appStop *processAppStop) isUp() bool {
 	// the app is concidered running
 	return appServicesRunning(appStop.control.Meta["name"])
 }
-

@@ -6,7 +6,7 @@ import (
 
 // processSimStop ...
 type processSimStop struct {
-	control      processor.ProcessControl
+	control processor.ProcessControl
 }
 
 //

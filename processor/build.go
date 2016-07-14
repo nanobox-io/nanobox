@@ -2,7 +2,7 @@ package processor
 
 import (
 	"github.com/nanobox-io/nanobox/util/locker"
-) 
+)
 
 // processBuild ...
 type processBuild struct {

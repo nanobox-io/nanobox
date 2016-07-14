@@ -6,7 +6,7 @@ import (
 
 // processSimStart ...
 type processSimStart struct {
-	control      processor.ProcessControl
+	control processor.ProcessControl
 }
 
 //

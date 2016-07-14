@@ -43,7 +43,7 @@ func (codeSync processCodeSync) Results() processor.ProcessControl {
 //
 func (codeSync *processCodeSync) Process() error {
 
-	// do not allow more then one process to run the 
+	// do not allow more then one process to run the
 	// code sync or code clean at the same time
 	locker.LocalLock()
 	defer locker.LocalUnlock()
@@ -65,7 +65,7 @@ func (codeSync *processCodeSync) Process() error {
 		// create a new process config for code ensuring it has access to the warehouse
 		// and the boxfile
 		code := processor.ProcessControl{
-			Env: codeSync.control.Env,
+			Env:     codeSync.control.Env,
 			Verbose: codeSync.control.Verbose,
 			Meta: map[string]string{
 				"name":            codeName,

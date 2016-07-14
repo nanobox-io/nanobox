@@ -102,7 +102,6 @@ func (native Native) IsReady() bool {
 	return true
 }
 
-
 // HostShareDir ...
 func (native Native) HostShareDir() string {
 	dir := filepath.ToSlash(filepath.Join(config.GlobalDir(), "share"))

@@ -7,15 +7,14 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"strings"
 	"strconv"
+	"strings"
 
 	"github.com/jcelliott/lumber"
 
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util/data"
-	"github.com/nanobox-io/nanobox/models"
-	
 )
 
 // EXPORTSFILE ...

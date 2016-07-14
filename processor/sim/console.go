@@ -6,7 +6,7 @@ import (
 
 // processSimConsole ...
 type processSimConsole struct {
-	control   processor.ProcessControl
+	control processor.ProcessControl
 }
 
 // the sim console is the same as the share console

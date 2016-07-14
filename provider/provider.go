@@ -312,5 +312,3 @@ func fetchProvider() (Provider, error) {
 
 	return p, nil
 }
-
-

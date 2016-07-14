@@ -80,7 +80,7 @@ func (envDNSAdd *processEnvDNSAdd) loadApp() error {
 // entriesExist returns true if both entries already exist
 func (envDNSAdd *processEnvDNSAdd) entriesExist() bool {
 
-	// fetch the IP 
+	// fetch the IP
 	// env in dev is used in the dev container
 	// env in sim is used for portal
 	envIP := envDNSAdd.app.GlobalIPs["env"]

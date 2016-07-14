@@ -139,7 +139,7 @@ func (serviceSync *processServiceSync) purgeDeltaServices() error {
 // purgeService will purge a service from the nanobox
 func (serviceSync *processServiceSync) purgeService(uid string) error {
 	service := processor.ProcessControl{
-		Env: serviceSync.control.Env,
+		Env:     serviceSync.control.Env,
 		Verbose: serviceSync.control.Verbose,
 		Meta: map[string]string{
 			"name": uid,
@@ -172,7 +172,7 @@ func (serviceSync *processServiceSync) provisionDataServices() error {
 		}
 
 		config := processor.ProcessControl{
-			Env:      serviceSync.control.Env,
+			Env:          serviceSync.control.Env,
 			Verbose:      serviceSync.control.Verbose,
 			DisplayLevel: serviceSync.control.DisplayLevel + 1,
 			Meta: map[string]string{

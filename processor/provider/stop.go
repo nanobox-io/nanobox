@@ -33,6 +33,6 @@ func (providerStop processProviderStop) Process() error {
 	// if we error out.
 	locker.GlobalLock()
 	defer locker.GlobalUnlock()
-	
+
 	return provider.Stop()
 }

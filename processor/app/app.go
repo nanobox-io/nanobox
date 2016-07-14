@@ -8,9 +8,9 @@ import (
 	"github.com/nanobox-io/golang-docker-client"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/validate"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
+	"github.com/nanobox-io/nanobox/validate"
 )
 
 // these constants represent different potential states an app can end up in
@@ -35,7 +35,7 @@ func devIsUp() error {
 	if !(app.Status == UP) {
 		return fmt.Errorf("the environment has not been started. Please run the start command")
 	}
-	if appServicesRunning(config.AppName()+"_dev") {
+	if appServicesRunning(config.AppName() + "_dev") {
 		return fmt.Errorf("the app is not up but some services are still running. Try running stop then start to clean this anomaly. if the problem persists please contact nanobox")
 	}
 	return nil
@@ -48,13 +48,12 @@ func simIsUp() error {
 		return fmt.Errorf("the environment has not been started. Please run the start command")
 	}
 
-	if appServicesRunning(config.AppName()+"_dev") {
+	if appServicesRunning(config.AppName() + "_dev") {
 		return fmt.Errorf("the app is not up but some services are still running. Try running stop then start to clean this anomaly. if the problem persists please contact nanobox")
 	}
 
 	return nil
 }
-
 
 func appServicesRunning(app string) bool {
 
@@ -90,6 +89,3 @@ func isServiceRunning(app, name string) bool {
 
 	return container.State.Status == "running"
 }
-
-
-

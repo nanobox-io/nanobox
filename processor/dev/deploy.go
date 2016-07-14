@@ -2,7 +2,7 @@ package dev
 
 import (
 	"github.com/nanobox-io/nanobox-golang-stylish"
-	
+
 	"github.com/nanobox-io/nanobox-boxfile"
 	"github.com/nanobox-io/nanobox/processor"
 )
@@ -39,10 +39,10 @@ func (devDeploy processDevDeploy) Process() error {
 	// this allows the dev and the deploy to be isolated
 	devDeploy.control.Env = "dev"
 
-  // run the share init which gives access to docker
-  if err := processor.Run("env_init", devDeploy.control); err != nil {
-    return err
-  }
+	// run the share init which gives access to docker
+	if err := processor.Run("env_init", devDeploy.control); err != nil {
+		return err
+	}
 
 	// syncronize the services as per the new boxfile
 	if err := processor.Run("service_sync", devDeploy.control); err != nil {

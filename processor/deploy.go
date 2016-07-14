@@ -71,7 +71,7 @@ func (deploy *processDeploy) setWarehouseToken() error {
 	if err != nil {
 		return err
 	}
-	
+
 	deploy.control.Meta["warehouse_token"] = warehouseToken
 	deploy.control.Meta["warehouse_url"] = warehouseURL
 	return nil

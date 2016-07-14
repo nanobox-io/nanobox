@@ -16,7 +16,6 @@ func IsPrivileged() bool {
 	return true
 }
 
-
 // PrivilegeExec will run the requested command in a powershell as the Administrative user
 func PrivilegeExec(command string) error {
 

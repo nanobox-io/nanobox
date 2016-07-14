@@ -34,13 +34,13 @@ func (devDestroy processDevDestroy) Results() processor.ProcessControl {
 //
 func (devDestroy processDevDestroy) Process() error {
 	devDestroy.control.Env = "dev"
-	
+
 	if err := processor.Run("provider_setup", devDestroy.control); err != nil {
 		return err
 	}
 
 	// remove the dev container if there is one
-	// but dont catch any errors because there 
+	// but dont catch any errors because there
 	// may not be a container
 	devDestroy.removeDev()
 
@@ -87,7 +87,7 @@ func (devDestroy processDevDestroy) removeServices() error {
 // remove the development container if one exists
 // if not dont complain
 func (devDestroy processDevDestroy) removeDev() {
-  name := fmt.Sprintf("nanobox_%s_dev", config.AppName())
+	name := fmt.Sprintf("nanobox_%s_dev", config.AppName())
 
-  docker.ContainerRemove(name)
+	docker.ContainerRemove(name)
 }

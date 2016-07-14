@@ -25,7 +25,7 @@ type (
 		LogvacHost   string            `json:"logvac_host,omitempty"`
 		Config       interface{}       `json:"config,omitempty"`
 		Component    component         `json:"component,omitempty"`
-		Member       map[string]string `json:"member,omitempty"`	
+		Member       map[string]string `json:"member,omitempty"`
 		Mounts       []mount           `json:"mounts,omitempty"`
 		WritableDirs interface{}       `json:"writable_dirs,omitempty"`
 		Transform    interface{}       `json:"transform,omitempty"`
@@ -52,7 +52,7 @@ type (
 	fetchPayload struct {
 		Component      component         `json:"component,omitempty"`
 		LogvacHost     string            `json:"logvac_host,omitempty"`
-		Member         map[string]string `json:"member,omitempty"`	
+		Member         map[string]string `json:"member,omitempty"`
 		Build          string            `json:"build,omitempty"`
 		Warehouse      string            `json:"warehouse,omitempty"`
 		WarehouseToken string            `json:"warehouse_token,omitempty"`
@@ -170,7 +170,7 @@ func (codeConfigure *processCodeConfigure) configurePayload() (string, error) {
 			UID:  codeConfigure.control.Meta["name"],
 			ID:   me.ID,
 		},
-		Member: map[string]string{"uid": "1"},
+		Member:       map[string]string{"uid": "1"},
 		Mounts:       codeConfigure.mounts(),
 		WritableDirs: boxfile.Node(codeConfigure.control.Meta["name"]).Value("writable_dirs"),
 		Transform:    boxfile.Node("code.deploy").Value("transform"),
@@ -200,9 +200,9 @@ func (codeConfigure *processCodeConfigure) fetchPayload() (string, error) {
 			UID:  codeConfigure.control.Meta["name"],
 			ID:   me.ID,
 		},
-		Member: map[string]string{"uid": "1"},
-		Build: codeConfigure.control.Meta["build_id"],
-		Warehouse: codeConfigure.control.Meta["warehouse_url"],
+		Member:         map[string]string{"uid": "1"},
+		Build:          codeConfigure.control.Meta["build_id"],
+		Warehouse:      codeConfigure.control.Meta["warehouse_url"],
 		WarehouseToken: codeConfigure.control.Meta["warehouse_token"],
 	}
 

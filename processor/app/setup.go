@@ -7,8 +7,8 @@ import (
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
-	"github.com/nanobox-io/nanobox/util/locker"
 	"github.com/nanobox-io/nanobox/util/dhcp"
+	"github.com/nanobox-io/nanobox/util/locker"
 )
 
 //
@@ -35,10 +35,10 @@ func (appSetup *processAppSetup) Results() processor.ProcessControl {
 //
 func (appSetup *processAppSetup) Process() error {
 
-  // establish an app-level lock to ensure we're the only ones setting up an app
-  // also, we need to ensure that the lock is released even if we error out.
-  locker.LocalLock()
-  defer locker.LocalUnlock()
+	// establish an app-level lock to ensure we're the only ones setting up an app
+	// also, we need to ensure that the lock is released even if we error out.
+	locker.LocalLock()
+	defer locker.LocalUnlock()
 
 	if err := appSetup.loadApp(); err != nil {
 		return err
@@ -109,7 +109,7 @@ func (appSetup *processAppSetup) reserveIPs() error {
 	appSetup.app.GlobalIPs["env"] = envIP.String()
 
 	appSetup.app.LocalIPs["logvac"] = logvacIP.String()
-	appSetup.app.LocalIPs["mist"]   = mistIP.String()
+	appSetup.app.LocalIPs["mist"] = mistIP.String()
 
 	return nil
 }

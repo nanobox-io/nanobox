@@ -9,18 +9,17 @@ import (
 )
 
 type (
-	anything interface{
-
+	anything interface {
 	}
 )
-	
+
 var (
 	// InspectCmd ...
 	InspectCmd = &cobra.Command{
-		Use:   "inspect",
-		Short: "show element from the nanobox database",
-		Long:  ``,
-		Run:   inspectFunc,
+		Use:    "inspect",
+		Short:  "show element from the nanobox database",
+		Long:   ``,
+		Run:    inspectFunc,
 		Hidden: true,
 	}
 )

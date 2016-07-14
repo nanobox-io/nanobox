@@ -27,7 +27,7 @@ type (
 	// processServiceSetup
 	processServiceSetup struct {
 		control    processor.ProcessControl
-		app				 models.App
+		app        models.App
 		service    models.Service
 		localIP    string
 		globalIP   string
@@ -48,7 +48,7 @@ func init() {
 
 //
 func serviceSetupFn(control processor.ProcessControl) (processor.Processor, error) {
-serviceSetup := &processServiceSetup{
+	serviceSetup := &processServiceSetup{
 		control:    control,
 		cleanFuncs: make([]cleanFunc, 0),
 	}
@@ -143,7 +143,7 @@ func (serviceSetup *processServiceSetup) validateMeta() error {
 	// confirm the provider is an accessable one that we support.
 	// ensure we have a name and immage
 	if serviceSetup.control.Meta["name"] == "" ||
-		 serviceSetup.control.Meta["image"] == "" {
+		serviceSetup.control.Meta["image"] == "" {
 		return errors.New("missing image or name")
 	}
 
@@ -300,9 +300,9 @@ func (serviceSetup *processServiceSetup) attachNetwork() error {
 func (serviceSetup *processServiceSetup) planService() error {
 	serviceSetup.control.Info(stylish.SubBullet("Gathering service requirements..."))
 
-	boxfile        := boxfile.New([]byte(serviceSetup.control.Meta["boxfile"]))
-	boxConfig      := boxfile.Node(serviceSetup.control.Meta["name"]).Node("config")
-	planPayload    := map[string]interface{}{"config": boxConfig.Parsed}
+	boxfile := boxfile.New([]byte(serviceSetup.control.Meta["boxfile"]))
+	boxConfig := boxfile.Node(serviceSetup.control.Meta["name"]).Node("config")
+	planPayload := map[string]interface{}{"config": boxConfig.Parsed}
 	jsonPayload, _ := json.Marshal(planPayload)
 
 	p, err := util.Exec(serviceSetup.container.ID, "plan", string(jsonPayload), processor.ExecWriter())
@@ -317,12 +317,12 @@ func (serviceSetup *processServiceSetup) planService() error {
 // persistService saves the service in the database
 func (serviceSetup *processServiceSetup) persistService() error {
 	// save service in DB
-	serviceSetup.service.ID         = serviceSetup.container.ID
-	serviceSetup.service.Name       = serviceSetup.control.Meta["name"]
+	serviceSetup.service.ID = serviceSetup.container.ID
+	serviceSetup.service.Name = serviceSetup.control.Meta["name"]
 	serviceSetup.service.ExternalIP = serviceSetup.globalIP
 	serviceSetup.service.InternalIP = serviceSetup.localIP
-	serviceSetup.service.State      = "planned"
-	serviceSetup.service.Type       = "data"
+	serviceSetup.service.State = "planned"
+	serviceSetup.service.Type = "data"
 
 	err := json.Unmarshal([]byte(serviceSetup.plan), &serviceSetup.service.Plan)
 	if err != nil {

@@ -1,9 +1,9 @@
 package service
 
 import (
-	"fmt"
 	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/nanobox-io/nanobox-boxfile"
 	"github.com/nanobox-io/nanobox-golang-stylish"
@@ -19,10 +19,10 @@ type (
 
 	// processServiceConfigure ...
 	processServiceConfigure struct {
-		control 	processor.ProcessControl
-		app 			models.App
-		service 	models.Service
-		boxfile 	models.Boxfile
+		control processor.ProcessControl
+		app     models.App
+		service models.Service
+		boxfile models.Boxfile
 	}
 
 	// member ...
@@ -42,7 +42,7 @@ type (
 	// configPayload ...
 	configPayload struct {
 		LogvacHost string                 `json:"logvac_host"`
-		MistHost	 string									`json:"mist_host"`
+		MistHost   string                 `json:"mist_host"`
 		Platform   string                 `json:"platform"`
 		Config     map[string]interface{} `json:"config"`
 		Member     member                 `json:"member"`
@@ -115,8 +115,8 @@ func (serviceConfigure processServiceConfigure) Process() error {
 func (serviceConfigure processServiceConfigure) configurePayload() string {
 
 	// create some variables for convenience
-	name    := serviceConfigure.control.Meta["name"]
-	app     := serviceConfigure.app
+	name := serviceConfigure.control.Meta["name"]
+	app := serviceConfigure.app
 	service := serviceConfigure.service
 
 	// parse the boxfile to fetch the config node
@@ -125,10 +125,10 @@ func (serviceConfigure processServiceConfigure) configurePayload() string {
 
 	payload := configPayload{
 		LogvacHost: app.LocalIPs["logvac"],
-		MistHost: 	app.LocalIPs["mist"],
+		MistHost:   app.LocalIPs["mist"],
 		Platform:   "local",
 		Config:     config,
-		Member: 		member{
+		Member: member{
 			LocalIP: service.InternalIP,
 			UID:     "1",
 			Role:    "primary",
@@ -171,7 +171,6 @@ func (serviceConfigure processServiceConfigure) startUpdatePayload() string {
 	case PORTAL, LOGVAC, HOARDER, MIST:
 		payload.Config["token"] = "123"
 	}
-
 
 	j, err := json.Marshal(payload)
 	if err != nil {

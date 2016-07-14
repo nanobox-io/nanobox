@@ -21,7 +21,7 @@ var (
 
 	// deployCmdFlags ...
 	deployCmdFlags = struct {
-		message   string
+		message string
 	}{}
 )
 

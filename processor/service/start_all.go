@@ -53,12 +53,12 @@ func (serviceStartAll *processServiceStartAll) Process() error {
 func (serviceStartAll processServiceStartAll) startService(uid string) error {
 
 	config := processor.ProcessControl{
-		Env: serviceStartAll.control.Env,
+		Env:     serviceStartAll.control.Env,
 		Verbose: serviceStartAll.control.Verbose,
 		Meta: map[string]string{
 			"app_name": serviceStartAll.control.Meta["app_name"],
-			"label": uid,
-			"name":  uid,
+			"label":    uid,
+			"name":     uid,
 		},
 	}
 

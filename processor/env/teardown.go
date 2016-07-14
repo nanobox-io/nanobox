@@ -3,9 +3,9 @@ package env
 import (
 	"fmt"
 
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
-	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/locker"
@@ -40,7 +40,7 @@ func (teardown *processTeardown) Process() error {
 		return nil
 	}
 
-	// if im given a environment to teardown i will tear the app down 
+	// if im given a environment to teardown i will tear the app down
 	// in the env. If not (in the case of a build) no app is teardownable.
 	if teardown.control.Env != "" {
 		if err := teardown.teardownApp(); err != nil {
@@ -71,7 +71,7 @@ func (teardown *processTeardown) teardownApp() error {
 // teardownMounts removes the environments mounts from the provider
 func (teardown *processTeardown) teardownMounts() error {
 
-	// break early if there is still an environemnt using 
+	// break early if there is still an environemnt using
 	// the mounts
 	if teardown.mountsInUse() {
 		return nil
@@ -126,42 +126,41 @@ func (teardown *processTeardown) mountsInUse() bool {
 // addMount will mount a env in the nanobox guest context
 func (teardown *processTeardown) removeMount(src, dst string) error {
 
-    // short-circuit if the mount doesnt exist
-    if !provider.HasMount(dst) {
-      return nil
-    }
+	// short-circuit if the mount doesnt exist
+	if !provider.HasMount(dst) {
+		return nil
+	}
 
-    return provider.RemoveMount(src, dst)
+	return provider.RemoveMount(src, dst)
 }
 
 // addShare will add a filesystem env on the host machine
 func (teardown *processTeardown) removeShare(src, dst string) error {
 
-  // the mount type is configurable by the user
-  mountType := config.Viper().GetString("mount-type")
+	// the mount type is configurable by the user
+	mountType := config.Viper().GetString("mount-type")
 
-  switch mountType {
-  case "native":
-    // remove the providers native share
-    if err := provider.RemoveShare(src, dst); err != nil {
-      return err
-    }
+	switch mountType {
+	case "native":
+		// remove the providers native share
+		if err := provider.RemoveShare(src, dst); err != nil {
+			return err
+		}
 
-  case "netfs":
-    control := processor.ProcessControl{
-      Env:      teardown.control.Env,
-      Verbose:      teardown.control.Verbose,
-      DisplayLevel: teardown.control.DisplayLevel,
-      Meta: map[string]string{
-        "path": src,
-      },
-    }
+	case "netfs":
+		control := processor.ProcessControl{
+			Env:          teardown.control.Env,
+			Verbose:      teardown.control.Verbose,
+			DisplayLevel: teardown.control.DisplayLevel,
+			Meta: map[string]string{
+				"path": src,
+			},
+		}
 
-    if err := processor.Run("env_netfs_remove", control); err != nil {
-      return err
-    }
-  }
+		if err := processor.Run("env_netfs_remove", control); err != nil {
+			return err
+		}
+	}
 
-  return nil
+	return nil
 }
-

@@ -50,7 +50,7 @@ func (platformStop *processPlatformStop) stopServices() error {
 func (platformStop *processPlatformStop) stopService(service Service) error {
 	//
 	config := processor.ProcessControl{
-		Env:      platformStop.control.Env,
+		Env:          platformStop.control.Env,
 		Verbose:      platformStop.control.Verbose,
 		DisplayLevel: platformStop.control.DisplayLevel + 1,
 		Meta:         map[string]string{"label": service.label, "name": service.name},

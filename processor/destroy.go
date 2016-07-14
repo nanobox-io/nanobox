@@ -1,7 +1,6 @@
 package processor
 
-import (
-) 
+import ()
 
 // processDestroy ...
 type processDestroy struct {

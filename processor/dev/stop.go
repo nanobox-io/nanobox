@@ -6,7 +6,7 @@ import (
 
 // processDevStop ...
 type processDevStop struct {
-	control      processor.ProcessControl
+	control processor.ProcessControl
 }
 
 //

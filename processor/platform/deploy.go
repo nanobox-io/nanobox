@@ -2,7 +2,7 @@ package platform
 
 import (
 	"fmt"
-	
+
 	"github.com/nanobox-io/nanobox-golang-stylish"
 
 	"github.com/nanobox-io/nanobox/models"
@@ -58,7 +58,7 @@ func (platformDeploy processPlatformDeploy) provisionServices() error {
 func (platformDeploy processPlatformDeploy) provisionService(service Service) error {
 
 	config := processor.ProcessControl{
-		Env:      platformDeploy.control.Env,
+		Env:          platformDeploy.control.Env,
 		Verbose:      platformDeploy.control.Verbose,
 		DisplayLevel: platformDeploy.control.DisplayLevel + 1,
 		Meta: map[string]string{

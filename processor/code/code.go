@@ -5,9 +5,9 @@ import (
 	"errors"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/validate"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
+	"github.com/nanobox-io/nanobox/validate"
 )
 
 // these constants represent different potential names a service can have
@@ -28,7 +28,6 @@ func init() {
 	validate.Register("sim_deployed", validSimDeployed)
 }
 
-
 func validBuilt() error {
 	boxfile := models.Boxfile{}
 	if err := data.Get(config.AppName()+"_meta", "build_boxfile", &boxfile); err != nil {
@@ -39,7 +38,7 @@ func validBuilt() error {
 
 func validDevDeployed() error {
 	boxfile := models.Boxfile{}
-	if err := data.Get(config.AppName()+"_meta", "dev_build_boxfile", &boxfile); err != nil  {
+	if err := data.Get(config.AppName()+"_meta", "dev_build_boxfile", &boxfile); err != nil {
 		return errors.New("Deploy has not been run for this application environment")
 	}
 	return nil
@@ -47,7 +46,7 @@ func validDevDeployed() error {
 
 func validSimDeployed() error {
 	boxfile := models.Boxfile{}
-	if err := data.Get(config.AppName()+"_meta", "sim_build_boxfile", &boxfile); err != nil  {
+	if err := data.Get(config.AppName()+"_meta", "sim_build_boxfile", &boxfile); err != nil {
 		return errors.New("Deploy has not been run for this application environment")
 	}
 	return nil

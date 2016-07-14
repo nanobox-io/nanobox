@@ -1,8 +1,8 @@
 package code
 
 import (
-	"net"
 	"fmt"
+	"net"
 
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox/models"
