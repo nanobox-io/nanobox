@@ -74,6 +74,13 @@ func (deploy *processDeploy) setWarehouseToken() error {
 
 	deploy.control.Meta["warehouse_token"] = warehouseToken
 	deploy.control.Meta["warehouse_url"] = warehouseURL
+
+	// get the previous build if there was one
+	prevBuild, err := odin.GetPreviousBuild(deploy.control.Meta["app_id"])
+	if err != nil {
+		return err
+	}
+	deploy.control.Meta["previous_build"] = prevBuild
 	return nil
 }
 

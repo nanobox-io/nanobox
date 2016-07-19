@@ -3,6 +3,8 @@ package service
 import (
 	"fmt"
 
+	"github.com/jcelliott/lumber"
+	
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
@@ -95,8 +97,8 @@ func (serviceStop *processServiceStop) isServiceRunning() bool {
 	container, err := docker.GetContainer(fmt.Sprintf("nanobox_%s_%s", serviceStop.control.Meta["app_name"], serviceStop.name))
 
 	if err != nil {
-		// fmt.Printf("name of the thing i tried stopping nanobox_%s_%s_%s\n", config.AppName(), serviceStop.control.Env, serviceStop.name)
-		// todo: display a message
+		// we cant return an error but we can definatly log what happened
+		lumber.Error("Service Stop I failed to retrieve nanobox_%s_%s_%s\n%s", config.AppName(), serviceStop.control.Env, serviceStop.name, err.Error())
 		return false
 	}
 

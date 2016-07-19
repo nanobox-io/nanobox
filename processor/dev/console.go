@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 
+	"github.com/jcelliott/lumber"
 	dockType "github.com/docker/engine-api/types"
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox-boxfile"
@@ -178,17 +179,17 @@ func (devConsole *processDevConsole) teardown() error {
 
 		//
 		if err := devConsole.removeContainer(); err != nil {
-			return err
+			lumber.Error("An error occurred durring dev console teadown:%s", err.Error())
 		}
 
 		//
 		if err := devConsole.detachNetwork(); err != nil {
-			return err
+			lumber.Error("An error occurred durring dev console teadown:%s", err.Error())
 		}
 
 		//
 		if err := devConsole.releaseIP(); err != nil {
-			return err
+			lumber.Error("An error occurred durring dev console teadown:%s", err.Error())
 		}
 	}
 
@@ -291,10 +292,14 @@ func (devConsole *processDevConsole) removeContainer() error {
 	// grab the container info
 	container, err := docker.GetContainer(name)
 	if err != nil {
-		return err
+		// if we cant get the container it may have been removed by someone else
+		// just return here
+		return nil
 	}
 
 	if err := docker.ContainerRemove(container.ID); err != nil {
+		// but if the container exists and we cant remove it for some other reason
+		// we need to report that error
 		return err
 	}
 

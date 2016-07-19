@@ -98,3 +98,4 @@ func (platformSetup processPlatformSetup) isServiceActive(id string) bool {
 
 	return service.State == "active"
 }
+

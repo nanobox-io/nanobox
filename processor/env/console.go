@@ -76,7 +76,11 @@ func (envConsole processEnvConsole) Process() error {
 	cmd.Stderr = os.Stderr
 
 	//
-	return cmd.Run()
+	
+	if err := cmd.Run(); err != nil && err.Error() != "exit status 137" {
+		return err
+	}
+	return nil
 }
 
 // validateMeta validates that the required metadata exists

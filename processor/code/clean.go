@@ -3,6 +3,8 @@ package code
 import (
 	"fmt"
 
+	"github.com/nanobox-io/nanobox-golang-stylish"
+
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util/config"
@@ -48,14 +50,19 @@ func (codeClean *processCodeClean) Process() error {
 
 	// get all the code services and remove them
 	for _, key := range keys {
+		// get service
 		service := models.Service{}
-		data.Get(bucket, key, &key)
+		data.Get(bucket, key, &service)
+
+		// only destroy code type containers
 		if service.Type == "code" {
+
+			// run a code destroy
 			codeClean.control.Meta["name"] = key
 			if err := processor.Run("code_destroy", codeClean.control); err != nil {
 				// we probably dont wnat to break the process just try the rest
 				// and report the errors.
-				// TODO: output
+				codeClean.control.Display(stylish.Warning("an old code was not removed:\n%s", err.Error()))
 			}
 		}
 	}

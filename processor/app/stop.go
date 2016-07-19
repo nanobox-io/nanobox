@@ -52,6 +52,9 @@ func (appStop *processAppStop) Process() error {
 		return nil
 	}
 
+	// intitialize the environment
+	processor.Run("env_init", processor.DefaultControl)
+
 	// in the service package 'name' represents the name of the service
 	// so we need to add a app_name to its control
 	appStop.control.Meta["app_name"] = appStop.control.Meta["name"]

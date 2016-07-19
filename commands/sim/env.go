@@ -64,7 +64,7 @@ func envAddFn(ccmd *cobra.Command, args []string) {
 	data.Get(config.AppName()+"_meta", "sim_env", &evars)
 	for _, arg := range args {
 		for _, pair := range strings.Split(arg, ",") {
-			parts := strings.Split(pair, ":")
+			parts := strings.Split(pair, "=")
 			if len(parts) == 2 {
 				evars[strings.ToUpper(parts[0])] = parts[1]
 			}

@@ -72,14 +72,16 @@ func (codePublish *processCodePublish) Process() error {
 	// shutdown container
 	defer codePublish.destroyContainer()
 
+	// run user hook
+	if _, err := util.Exec(codePublish.service.ID, "user", config.UserPayload(), processor.ExecWriter()); err != nil {
+		return codePublish.runDebugSession(err)
+	}
+
 	if err := codePublish.runBoxfileHook(); err != nil {
 		return codePublish.runDebugSession(err)
 	}
 
 	if err := codePublish.runPublishHook(); err != nil {
-
-	}
-	if err != nil {
 		return codePublish.runDebugSession(err)
 	}
 
@@ -154,6 +156,9 @@ func (codePublish *processCodePublish) runBoxfileHook() error {
 func (codePublish *processCodePublish) runPublishHook() error {
 	// run build hooks
 	pload := map[string]interface{}{}
+	if codePublish.control.Meta["previous_build"] != "" {
+		pload["previous_build"] = codePublish.control.Meta["previous_build"]
+	} 
 	pload[BUILD] = codePublish.control.Meta["build_id"]
 	pload["warehouse"] = codePublish.control.Meta["warehouse_url"]
 	pload["warehouse_token"] = codePublish.control.Meta["warehouse_token"]

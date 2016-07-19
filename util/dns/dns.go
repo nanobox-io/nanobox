@@ -13,8 +13,8 @@ import (
 const HOSTSFILE = "/etc/hosts"
 
 // Entry generate the DNS entry to be added
-func Entry(ip, name, domain string) string {
-	return fmt.Sprintf("%s     %s.%s # '%s' added by running 'nanobox %s dns add <name>'", ip, name, domain, name, domain)
+func Entry(ip, name, env string) string {
+	return fmt.Sprintf("%s     %s # '%s' added by running 'nanobox %s dns add <name>'", ip, name, name, env)
 }
 
 // Exists ...

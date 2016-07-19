@@ -15,7 +15,7 @@ func Requires(checks ...string) func(ccmd *cobra.Command, args []string) {
 
 		//
 		if err := Check(checks...); err != nil {
-			fmt.Printf("Missing dependancies:\n%s", err.Error())
+			fmt.Printf("Missing dependencies:\n%s", err.Error())
 			os.Exit(1)
 		}
 	}

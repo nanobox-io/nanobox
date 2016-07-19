@@ -7,6 +7,7 @@ import (
 
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox-golang-stylish"
+	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
@@ -61,18 +62,23 @@ func (serviceDestroy processServiceDestroy) Process() error {
 	}
 
 	if err := serviceDestroy.removeContainer(); err != nil {
-		return err
+		// if im unable to remove the container (especially if it doesnt exist)
+		// we shouldnt fail
+		lumber.Error("unable to removeContainer: %s", err.Error())
 	}
 
 	if err := serviceDestroy.detachNetwork(); err != nil {
+		lumber.Error("unable to detachNetwork: %s", err.Error())
 		return err
 	}
 
 	if err := serviceDestroy.removeEvars(); err != nil {
+		lumber.Error("unable to removeEvars: %s", err.Error())
 		return err
 	}
 
 	if err := serviceDestroy.deleteService(); err != nil {
+		lumber.Error("unable to deleteService: %s", err.Error())
 		return err
 	}
 

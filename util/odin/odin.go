@@ -84,6 +84,20 @@ func GetWarehouse(appID string) (string, string, error) {
 	return r["token"], r["url"], err
 }
 
+func GetPreviousBuild(appID string) (string, error) {
+	r := []map[string]string{}
+	err := doRequest("GET", fmt.Sprintf("apps/%s/deploys", appID), nil, nil, &r)
+	if err != nil {
+		return "", err
+	}
+
+	if len(r) > 0 {
+		return r[1]["build_id"], nil
+	}
+
+	return "", nil
+}
+
 // doRequest ...
 func doRequest(method, path string, params url.Values, requestBody, responseBody interface{}) error {
 
@@ -128,7 +142,7 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 	//
 	if responseBody != nil {
 		b, err := ioutil.ReadAll(res.Body)
-		fmt.Printf("response body: '%s'\n", b)
+		lumber.Debug("response body: '%s'\n", b)
 		err = json.Unmarshal(b, responseBody)
 		if err != nil {
 			return err

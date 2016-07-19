@@ -105,7 +105,7 @@ func (codeConfigure *processCodeConfigure) Process() error {
 	if err != nil {
 		return err
 	}
-	if out, err := util.Exec(service.ID, "fetch", fetchPayload, processor.ExecWriter()); err != nil {
+	if out, err := util.Exec(service.ID, "fetch", fetchPayload, nil); err != nil {
 		fmt.Println("out", out)
 		return err
 	}
@@ -158,6 +158,8 @@ func (codeConfigure *processCodeConfigure) configurePayload() (string, error) {
 	bucket := fmt.Sprintf("%s_%s", config.AppName(), codeConfigure.control.Env)
 	err := data.Get(bucket, codeConfigure.control.Meta["name"], &me)
 	boxfile := boxfile.New([]byte(codeConfigure.control.Meta["boxfile"]))
+
+	codeConfigure.control.Trace(fmt.Sprintf("Configuring code: boxfile: %+v", codeConfigure.control.Meta["boxfile"]))
 
 	logvac := models.Service{}
 	data.Get(bucket, "logvac", &logvac)

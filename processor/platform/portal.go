@@ -5,6 +5,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-portal-client"
 	"github.com/nanobox-io/nanobox-boxfile"
 
@@ -17,6 +18,8 @@ import (
 // processUpdatePortal ...
 type processUpdatePortal struct {
 	control processor.ProcessControl
+	boxfile boxfile.Boxfile
+	portal models.Service
 }
 
 //
@@ -26,7 +29,15 @@ func init() {
 
 //
 func updatePortalFn(control processor.ProcessControl) (processor.Processor, error) {
-	return processUpdatePortal{control}, nil
+	updatePortal := &processUpdatePortal{control: control}
+	return updatePortal, updatePortal.ValidateMeta()
+}
+
+func (updatePortal *processUpdatePortal) ValidateMeta() error {
+	if updatePortal.control.Meta["app_name"] == "" {
+		updatePortal.control.Meta["app_name"] = fmt.Sprintf("%s_%s", config.AppName(), updatePortal.control.Env)
+	}
+	return nil
 }
 
 //
@@ -35,98 +46,118 @@ func (updatePortal processUpdatePortal) Results() processor.ProcessControl {
 }
 
 //
-func (updatePortal processUpdatePortal) Process() error {
-	port := models.Service{}
+func (updatePortal *processUpdatePortal) Process() error {
 
-	//
-	bucket := fmt.Sprintf("%s_%s", config.AppName(), updatePortal.control.Env)
-	if err := data.Get(bucket, "portal", &port); err != nil {
+	// load portal
+	if err := updatePortal.loadPortal(); err != nil {
 		return err
 	}
 
-	pClient := portal.New(port.ExternalIP+":8443", "123")
-	boxfile := boxfile.New([]byte(updatePortal.control.Meta["boxfile"]))
-	services := []portal.Service{}
+	// load boxfile
+	if err := updatePortal.loadBoxfile(); err != nil {
+		return err
+	}
+
+	// update routes
+	if err := updatePortal.updateRoutes(); err != nil {
+		return err
+	}
+
+	// update ports
+	return updatePortal.updatePorts()
+}
+
+// 
+func (updatePortal *processUpdatePortal) loadPortal() error {
+	return data.Get(updatePortal.control.Meta["app_name"], "portal", &updatePortal.portal)
+}
+
+// 
+func (updatePortal *processUpdatePortal) loadBoxfile() error {
+	updatePortal.boxfile = boxfile.New([]byte(updatePortal.control.Meta["boxfile"]))
+	if !updatePortal.boxfile.Valid {
+		return fmt.Errorf("invalid boxfile")
+	}
+	return nil
+}
+
+// update all the web routes that protal knows about
+// updating the routes assumes the web servers are listening on
+// 80 and 443 and in the container we assume the clients web server
+// is listening on 8080
+func (updatePortal *processUpdatePortal) updateRoutes() error {
 	routes := []portal.Route{}
 
-	//
-	for _, node := range boxfile.Nodes("code") {
+	// build the routes for all web containers
+	for _, node := range updatePortal.boxfile.Nodes("web") {
 		service := models.Service{}
-		if err := data.Get(bucket, node, &service); err != nil {
+		if err := data.Get(updatePortal.control.Meta["app_name"], node, &service); err != nil {
 			continue // unable to get the service
 		}
 
-		//
-		for _, service := range updatePortal.buildService(boxfile.Node(node), service) {
-			fmt.Println("service", service)
-			if duplicateService(services, service) {
-				if service.Port != 80 && service.Port != 443 {
-					fmt.Println("duplicate port:", service.Port)
-				}
-			} else {
-				services = append(services, service)
-			}
-		}
-
-		//
-		for _, route := range updatePortal.buildRoutes(boxfile.Node(node), service) {
-			fmt.Println("route", route)
+		for _, route := range updatePortal.buildRoutes(updatePortal.boxfile.Node(node), service) {
+			lumber.Trace("route: %+v", route)
 			if duplciateRoute(routes, route) {
 				fmt.Println("duplicate route:", route.SubDomain, route.Path)
-			} else {
-				routes = append(routes, route)
 			}
+
+			// append the new route to the routes we will register with portal
+			routes = append(routes, route)
 		}
 	}
 
 	// if i have a web and no routes i need to add a default one
-	if len(boxfile.Nodes("web")) != 0 && len(routes) == 0 {
-		webNode := boxfile.Nodes("web")[0]
+	if len(updatePortal.boxfile.Nodes("web")) != 0 && len(routes) == 0 {
+		webNode := updatePortal.boxfile.Nodes("web")[0]
 		service := models.Service{}
-		data.Get(bucket, webNode, &service)
+		data.Get(updatePortal.control.Meta["app_name"], webNode, &service)
 		routes = append(routes, portal.Route{
 			Path:    "/",
-			Targets: []string{fmt.Sprintf("http://%s:%s", service.InternalIP, "80")},
+			Targets: []string{fmt.Sprintf("http://%s:%s", service.InternalIP, "8080")},
 		})
 	}
 
-	// send to pulse
-	if err := pClient.UpdateServices(services); err != nil {
-		return err
-	}
+	// send to portal
+	lumber.Trace("new routes: %+v", routes)
+	portalClient := portal.New(updatePortal.portal.ExternalIP+":8443", "123")
+	return portalClient.UpdateRoutes(routes)
+}
+
+// Update the ports that portal knows about.
+func (updatePortal *processUpdatePortal) updatePorts() error {
+	services := []portal.Service{}
 
 	//
-	if err := pClient.UpdateRoutes(routes); err != nil {
-		return err
-	}
+	for _, node := range updatePortal.boxfile.Nodes("code") {
+		service := models.Service{}
+		if err := data.Get(updatePortal.control.Meta["app_name"], node, &service); err != nil {
+			continue // unable to get the service
+		}
 
-	return nil
-}
+		//
+		for _, service := range updatePortal.buildService(updatePortal.boxfile.Node(node), service) {
+			lumber.Trace("service: %+v", service)
 
-// duplicateService ...
-func duplicateService(services []portal.Service, service portal.Service) bool {
-	if service.Port == 80 || service.Port == 443 {
-		return false
-	}
-	for _, existingService := range services {
-		if existingService.Port == service.Port {
-			return true
+			if duplicateService(services, service) {
+				// if there is a duplicate port we will just contine and log
+				fmt.Println("duplicate port: %+v", service.Port)
+				continue
+			}
+
+			// add the new service to the list of services
+			services = append(services, service)
 		}
 	}
-	return false
+
+
+	// send to portal
+	lumber.Trace("new services: %+v", services)
+	portalClient := portal.New(updatePortal.portal.ExternalIP+":8443", "123")
+	return portalClient.UpdateServices(services)
 }
 
-// duplicateRoute ...
-func duplciateRoute(services []portal.Route, service portal.Route) bool {
-	for _, existingRoute := range services {
-		if existingRoute.SubDomain == service.SubDomain && existingRoute.Path == service.Path {
-			return true
-		}
-	}
-	return false
-}
-
-// buildService ...
+// buildService builds all the tcp and udp port forwarding services
+// it does not take into account any routing or information
 func (updatePortal processUpdatePortal) buildService(boxfile boxfile.Boxfile, service models.Service) []portal.Service {
 
 	portServices := []portal.Service{}
@@ -151,16 +182,6 @@ func (updatePortal processUpdatePortal) buildService(boxfile boxfile.Boxfile, se
 				},
 			}
 
-			//
-			if portService.Type == HTTP || portService.Type == HTTPS {
-				portService.Servers[0].Host = "127.0.0.1"
-				if portService.Type == HTTP {
-					portService.Servers[0].Port = 80
-				} else {
-					portService.Servers[0].Port = 443
-				}
-				portService.Type = TCP
-			}
 			portServices = append(portServices, portService)
 		}
 	}
@@ -206,19 +227,31 @@ func (updatePortal processUpdatePortal) buildRoutes(boxfile boxfile.Boxfile, ser
 			Path:      path,
 		}
 
-		for _, to := range ports(boxfile)[HTTP] {
-			portalRoute.Targets = append(portalRoute.Targets, fmt.Sprintf("http://%s:%s", service.InternalIP, to))
-		}
-		for _, to := range ports(boxfile)[HTTPS] {
-			portalRoute.Targets = append(portalRoute.Targets, fmt.Sprintf("http://%s:%s", service.InternalIP, to))
-		}
-		if len(portalRoute.Targets) == 0 {
-			portalRoute.Targets = append(portalRoute.Targets, fmt.Sprintf("http://%s:%s", service.InternalIP, "80"))
-		}
+		portalRoute.Targets = append(portalRoute.Targets, fmt.Sprintf("http://%s:%s", service.InternalIP, "8080"))
 		portalRoutes = append(portalRoutes, portalRoute)
 	}
 
 	return portalRoutes
+}
+
+// duplicateService ...
+func duplicateService(services []portal.Service, service portal.Service) bool {
+	for _, existingService := range services {
+		if existingService.Port == service.Port {
+			return true
+		}
+	}
+	return false
+}
+
+// duplicateRoute ...
+func duplciateRoute(services []portal.Route, service portal.Route) bool {
+	for _, existingRoute := range services {
+		if existingRoute.SubDomain == service.SubDomain && existingRoute.Path == service.Path {
+			return true
+		}
+	}
+	return false
 }
 
 // parseRoute ...
@@ -236,31 +269,34 @@ func parseRoute(route string) (subdomain, path string) {
 
 // ports ...
 func ports(box boxfile.Boxfile) map[string]map[string]string {
+	// we allow tcp and udp ports
 	rtn := map[string]map[string]string{
-		"http":  map[string]string{},
-		"https": map[string]string{},
 		"tcp":   map[string]string{},
 		"udp":   map[string]string{},
 	}
 
+	// get the boxfiles ports section
 	ports, ok := box.Value("ports").([]interface{})
 	if !ok {
 		return rtn
 	}
 
-	//
+	// loop through the given ports and create hash data
+	// for each one.
 	for _, port := range ports {
 		p, ok := port.(string)
 		if ok {
 			portParts := strings.Split(p, ":")
 			switch len(portParts) {
 			case 1:
-				rtn[HTTP][portParts[0]] = portParts[0]
+				rtn[TCP][portParts[0]] = portParts[0]
 			case 2:
-				rtn[HTTP][portParts[0]] = portParts[1]
+				rtn[TCP][portParts[0]] = portParts[1]
 			case 3:
+				// the first part needs to be tcp or udp
+				// if it is neither we just assume tcp
 				switch portParts[0] {
-				case HTTP, HTTPS, UDP:
+				case UDP:
 					rtn[portParts[0]][portParts[1]] = portParts[2]
 				default:
 					rtn[TCP][portParts[1]] = portParts[2]
@@ -268,6 +304,7 @@ func ports(box boxfile.Boxfile) map[string]map[string]string {
 
 			}
 		}
+		// if only a number is provided we assume tcp:num:num
 		portInt, ok := port.(int)
 		if ok {
 			rtn[TCP][strconv.Itoa(portInt)] = strconv.Itoa(portInt)

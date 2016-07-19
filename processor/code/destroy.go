@@ -74,6 +74,6 @@ func (codeDestroy *processCodeDestroy) Process() error {
 		return err
 	}
 
-	// save the service
-	return data.Delete(config.AppName(), codeDestroy.control.Meta["name"])
+	// remove the service from the database
+	return data.Delete(bucket, codeDestroy.control.Meta["name"])
 }

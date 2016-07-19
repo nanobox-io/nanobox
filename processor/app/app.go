@@ -8,6 +8,7 @@ import (
 	"github.com/nanobox-io/golang-docker-client"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/validate"
@@ -25,31 +26,33 @@ const (
 )
 
 func init() {
-	validate.Register("dev_isup", devIsUp)
-	validate.Register("sim_isup", simIsUp)
+	validate.Register("dev_isup", validateDevUp)
+	validate.Register("sim_isup", validatSimUp)
 }
 
-func devIsUp() error {
+func validateDevUp() error {
+	processor.Run("env_init", processor.DefaultControl)
 	app := models.App{}
 	data.Get("apps", config.AppName()+"_dev", &app)
 	if !(app.Status == UP) {
 		return fmt.Errorf("the environment has not been started. Please run the start command")
 	}
-	if appServicesRunning(config.AppName() + "_dev") {
-		return fmt.Errorf("the app is not up but some services are still running. Try running stop then start to clean this anomaly. if the problem persists please contact nanobox")
+	if !appServicesRunning(config.AppName() + "_dev") {
+		return fmt.Errorf("The app is running but some services are not. Try running stop then start to clean this anomaly. if the problem persists please contact nanobox")
 	}
 	return nil
 }
 
-func simIsUp() error {
+func validatSimUp() error {
+	processor.Run("env_init", processor.DefaultControl)
 	app := models.App{}
-	data.Get("apps", config.AppName()+"_dev", &app)
+	data.Get("apps", config.AppName()+"_sim", &app)
 	if !(app.Status == UP) {
 		return fmt.Errorf("the environment has not been started. Please run the start command")
 	}
 
-	if appServicesRunning(config.AppName() + "_dev") {
-		return fmt.Errorf("the app is not up but some services are still running. Try running stop then start to clean this anomaly. if the problem persists please contact nanobox")
+	if !appServicesRunning(config.AppName() + "_sim") {
+		return fmt.Errorf("The app is running but some services are not. Try running stop then start to clean this anomaly. if the problem persists please contact nanobox")
 	}
 
 	return nil
@@ -67,13 +70,14 @@ func appServicesRunning(app string) bool {
 	}
 
 	for _, serviceName := range serviceNames {
-		// if any service is running the app is up
-		if isServiceRunning(app, serviceName) {
-			return true
+		// if any service are not running the app is not up
+		if !isServiceRunning(app, serviceName) {
+			return false
 		}
 	}
 
-	return false
+	// all app services are running
+	return true
 }
 
 // isServiceRunning returns true if a service is already running

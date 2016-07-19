@@ -4,7 +4,7 @@ package commands
 import (
 	"fmt"
 	"os"
-	"path/filepath"
+	// "path/filepath"
 	"time"
 
 	"github.com/jcelliott/lumber"
@@ -77,20 +77,20 @@ var (
 
 			// set verbose
 			if processor.DefaultControl.Verbose {
-				// close the existing loggers
-				lumber.Close()
-				// create a new multi logger
-				multiLogger := lumber.NewMultiLogger()
+				// // close the existing loggers
+				// lumber.Close()
+				// // create a new multi logger
+				// multiLogger := lumber.NewMultiLogger()
 
-				fileLogger, err := lumber.NewTruncateLogger(filepath.ToSlash(filepath.Join(config.GlobalDir(), "nanobox.log")))
-				if err != nil {
-					fmt.Println("logging error:", err)
-				}
+				// fileLogger, err := lumber.NewTruncateLogger(filepath.ToSlash(filepath.Join(config.GlobalDir(), "nanobox.log")))
+				// if err != nil {
+				// 	fmt.Println("logging error:", err)
+				// }
 
-				// now logs go to the console as well as a file
-				multiLogger.AddLoggers(fileLogger, lumber.NewConsoleLogger(lumber.DEBUG))
-				lumber.SetLogger(multiLogger)
-				lumber.Level(lumber.DEBUG)
+				// // now logs go to the console as well as a file
+				// multiLogger.AddLoggers(fileLogger, lumber.NewConsoleLogger(lumber.TRACE))
+				// lumber.SetLogger(multiLogger)
+				lumber.Level(lumber.TRACE)
 			}
 		},
 

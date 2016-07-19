@@ -29,8 +29,6 @@ type (
 		control    processor.ProcessControl
 		app        models.App
 		service    models.Service
-		localIP    string
-		globalIP   string
 		container  dockType.ContainerJSON
 		plan       string
 		fail       bool
@@ -200,44 +198,52 @@ func (serviceSetup *processServiceSetup) reserveIps() error {
 	name := serviceSetup.control.Meta["name"]
 	app := serviceSetup.app
 
-	// first let's see if our local IP was reserved during app creation
-	if app.LocalIPs[name] != "" {
 
-		// assign the localIP from the pre-generated app cache
-		serviceSetup.localIP = app.LocalIPs[name]
-	} else {
+	// dont reserve a new one if we already have this one
+	if serviceSetup.service.InternalIP == "" {
+		// first let's see if our local IP was reserved during app creation
+		if app.LocalIPs[name] != "" {
 
-		localIP, err := dhcp.ReserveLocal()
-		if err != nil {
-			return err
-		}
+			// assign the localIP from the pre-generated app cache
+			serviceSetup.service.InternalIP = app.LocalIPs[name]
+		} else {
 
-		serviceSetup.localIP = localIP.String()
+			localIP, err := dhcp.ReserveLocal()
+			if err != nil {
+				return err
+			}
 
-		serviceSetup.cleanFuncs = append(serviceSetup.cleanFuncs, func() error {
-			return dhcp.ReturnIP(net.ParseIP(serviceSetup.localIP))
-		})
+			serviceSetup.service.InternalIP = localIP.String()
+
+			serviceSetup.cleanFuncs = append(serviceSetup.cleanFuncs, func() error {
+				return dhcp.ReturnIP(net.ParseIP(serviceSetup.service.InternalIP))
+			})
+		}		
 	}
 
-	// only if this service is portal, we need to use the preview IP
-	// in a dev environment there will be no portal installed
-	// so the env ip should be available
-	// in dev the env ip is used for the dev container
-	if name == "portal" {
-		// portal's global ip is the preview ip
-		serviceSetup.globalIP = app.GlobalIPs["env"]
-	} else {
 
-		globalIP, err := dhcp.ReserveGlobal()
-		if err != nil {
-			return err
+	// dont reserve a new global ip if i already have on
+	if serviceSetup.service.ExternalIP == "" {
+		// only if this service is portal, we need to use the preview IP
+		// in a dev environment there will be no portal installed
+		// so the env ip should be available
+		// in dev the env ip is used for the dev container
+		if name == "portal" {
+			// portal's global ip is the preview ip
+			serviceSetup.service.ExternalIP = app.GlobalIPs["env"]
+		} else {
+
+			globalIP, err := dhcp.ReserveGlobal()
+			if err != nil {
+				return err
+			}
+
+			serviceSetup.service.ExternalIP = globalIP.String()
+
+			serviceSetup.cleanFuncs = append(serviceSetup.cleanFuncs, func() error {
+				return dhcp.ReturnIP(net.ParseIP(serviceSetup.service.ExternalIP))
+			})
 		}
-
-		serviceSetup.globalIP = globalIP.String()
-
-		serviceSetup.cleanFuncs = append(serviceSetup.cleanFuncs, func() error {
-			return dhcp.ReturnIP(net.ParseIP(serviceSetup.globalIP))
-		})
 	}
 
 	return nil
@@ -252,7 +258,7 @@ func (serviceSetup *processServiceSetup) launchContainer() error {
 		Name:    name,
 		Image:   serviceSetup.control.Meta["image"],
 		Network: "virt",
-		IP:      serviceSetup.localIP,
+		IP:      serviceSetup.service.InternalIP,
 	}
 
 	serviceSetup.control.Info(stylish.SubBullet("Starting container..."))
@@ -275,22 +281,22 @@ func (serviceSetup *processServiceSetup) attachNetwork() error {
 	label := "Bridging container to host network..."
 	serviceSetup.control.Info(stylish.SubBullet(label))
 
-	err := provider.AddIP(serviceSetup.globalIP)
+	err := provider.AddIP(serviceSetup.service.ExternalIP)
 	if err != nil {
 		return err
 	}
 
 	serviceSetup.cleanFuncs = append(serviceSetup.cleanFuncs, func() error {
-		return provider.RemoveIP(serviceSetup.globalIP)
+		return provider.RemoveIP(serviceSetup.service.ExternalIP)
 	})
 
-	err = provider.AddNat(serviceSetup.globalIP, serviceSetup.localIP)
+	err = provider.AddNat(serviceSetup.service.ExternalIP, serviceSetup.service.InternalIP)
 	if err != nil {
 		return err
 	}
 
 	serviceSetup.cleanFuncs = append(serviceSetup.cleanFuncs, func() error {
-		return provider.RemoveNat(serviceSetup.globalIP, serviceSetup.localIP)
+		return provider.RemoveNat(serviceSetup.service.ExternalIP, serviceSetup.service.InternalIP)
 	})
 
 	return nil
@@ -319,8 +325,6 @@ func (serviceSetup *processServiceSetup) persistService() error {
 	// save service in DB
 	serviceSetup.service.ID = serviceSetup.container.ID
 	serviceSetup.service.Name = serviceSetup.control.Meta["name"]
-	serviceSetup.service.ExternalIP = serviceSetup.globalIP
-	serviceSetup.service.InternalIP = serviceSetup.localIP
 	serviceSetup.service.State = "planned"
 	serviceSetup.service.Type = "data"
 
