@@ -4,6 +4,7 @@ package netfs
 
 import (
 	"os/exec"
+	"fmt"
 
 	"github.com/jcelliott/lumber"
 )
@@ -17,15 +18,15 @@ func reloadServer() error {
 	// clear message for a direction to fix
 	cmd := exec.Command("nfsd", "checkexports")
 	if b, err := cmd.CombinedOutput(); err != nil {
-		lumber.Debug("output: %s", b)
-		return err
+		lumber.Debug("checkexports: %s", b)
+		return fmt.Errorf("checkexports: %s %s", b, err.Error())
 	}
 
 	// update exports; TODO: provide a clear error message for a direction to fix
 	cmd = exec.Command("nfsd", "update")
 	if b, err := cmd.CombinedOutput(); err != nil {
-		lumber.Debug("output: %s", b)
-		return err
+		lumber.Debug("update: %s", b)
+		return fmt.Errorf("update: %s %s", b, err.Error())
 	}
 
 	return nil

@@ -2,6 +2,7 @@ package print
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/pagodabox/nanobox-golang-stylish"
 )
@@ -25,6 +26,7 @@ irc   : #nanobox
 email : help@nanobox.io
 
 `, err.Error())
+		os.Exit(1)
 	}
 }
 
