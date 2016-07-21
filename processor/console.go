@@ -1,3 +1,5 @@
+// +build !windows
+
 package processor
 
 import (
@@ -20,13 +22,6 @@ type processConsole struct {
 	container string
 	app       string
 }
-
-//
-var (
-	container string
-	key       string
-	location  string
-)
 
 //
 func init() {

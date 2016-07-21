@@ -73,8 +73,16 @@ func (simDeploy processSimDeploy) Process() error {
 		return err
 	}
 
+	if err := simDeploy.runDeployHook("before_deploy"); err != nil {
+		return err
+	}
+
 	// update nanoagent portal
 	if err := processor.Run("update_portal", simDeploy.control); err != nil {
+		return err
+	}
+
+	if err := simDeploy.runDeployHook("after_deploy"); err != nil {
 		return err
 	}
 
@@ -137,6 +145,23 @@ func (simDeploy *processSimDeploy) startCodeServices() error {
 	// synchronize my code services
 	if err := processor.Run("code_sync", code); err != nil {
 		return err
+	}
+
+	return nil
+}
+
+// run the before/after hooks and populate the necessary data
+func (simDeploy *processSimDeploy) runDeployHook(hookType string) error {
+
+	control := simDeploy.control
+	control.Meta["hook_type"] = hookType
+
+	// run the hooks for each service in the boxfile
+	for _, serviceName := range simDeploy.box.Nodes("code") {
+		control.Meta["service_name"] = serviceName
+		if err := processor.Run("sim_deploy_hook", control); err != nil {
+			return err
+		}
 	}
 
 	return nil

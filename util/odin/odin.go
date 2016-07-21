@@ -92,7 +92,7 @@ func GetPreviousBuild(appID string) (string, error) {
 	}
 
 	if len(r) > 0 {
-		return r[1]["build_id"], nil
+		return r[0]["build_id"], nil
 	}
 
 	return "", nil

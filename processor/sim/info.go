@@ -12,8 +12,8 @@ import (
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
-// processDevInfo ...
-type processDevInfo struct {
+// processSimInfo ...
+type processSimInfo struct {
 	control processor.ProcessControl
 }
 
@@ -24,16 +24,16 @@ func init() {
 
 //
 func simInfoFn(control processor.ProcessControl) (processor.Processor, error) {
-	return processDevInfo{control}, nil
+	return processSimInfo{control}, nil
 }
 
 //
-func (simInfo processDevInfo) Results() processor.ProcessControl {
+func (simInfo processSimInfo) Results() processor.ProcessControl {
 	return simInfo.control
 }
 
 //
-func (simInfo processDevInfo) Process() error {
+func (simInfo processSimInfo) Process() error {
 
 	//
 	bucket := fmt.Sprintf("%s_sim", config.AppName())

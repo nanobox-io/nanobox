@@ -43,6 +43,7 @@ type (
 		Process() error
 		Results() ProcessControl
 	}
+
 )
 
 var (
@@ -50,6 +51,11 @@ var (
 	DefaultControl = ProcessControl{Meta: map[string]string{}}
 
 	processors = map[string]ProcessBuilder{}
+
+	// used for console and tunnel
+	container string
+	key       string
+	location  string
 )
 
 // Register ...
