@@ -15,6 +15,11 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/print"
+	"github.com/nanobox-io/nanobox/util/vbox"
+)
+
+var (
+	vboxManageCmd = vbox.DetectVBoxManageCmd()
 )
 
 // DockerMachine ...
@@ -326,7 +331,7 @@ func (machine DockerMachine) RemoveNat(ip, containerIP string) error {
 // HasShare checks to see if the share exists
 func (machine DockerMachine) HasShare(local, _ string) bool {
 	// VBoxManage showvminfo nanobox --machinereadable
-	cmd := exec.Command("VBoxManage", "showvminfo", "nanobox", "--machinereadable")
+	cmd := exec.Command(vboxManageCmd, "showvminfo", "nanobox", "--machinereadable")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return false
@@ -349,7 +354,7 @@ func (machine DockerMachine) AddShare(local, host string) error {
 
 	if !machine.HasShare(local, host) {
 		// VBoxManage sharedfolder add nanobox --name <name> --hostpath ${local} --transient
-		cmd := exec.Command("VBoxManage", "sharedfolder", "add", "nanobox", "--name", name, "--hostpath", local, "--transient")
+		cmd := exec.Command(vboxManageCmd, "sharedfolder", "add", "nanobox", "--name", name, "--hostpath", local, "--transient")
 		b, err := cmd.CombinedOutput()
 		if err != nil {
 			lumber.Debug("output: %s", b)
@@ -372,7 +377,7 @@ func (machine DockerMachine) RemoveShare(local, host string) error {
 	if machine.HasShare(local, host) {
 
 		// VBoxManage sharedfolder remove nanobox --name <name> --transient
-		cmd := exec.Command("VBoxManage", "sharedfolder", "remove", "nanobox", "--name", name, "--transient")
+		cmd := exec.Command(vboxManageCmd, "sharedfolder", "remove", "nanobox", "--name", name, "--transient")
 		b, err := cmd.CombinedOutput()
 		if err != nil {
 			lumber.Debug("output: %s", b)
