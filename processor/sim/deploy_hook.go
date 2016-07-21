@@ -24,7 +24,7 @@ type (
 	}
 	// member ...
 	member struct {
-		UID     string `json:"uid,omitempty"`
+		UID     int `json:"uid,omitempty"`
 	}
 
 	// component ...
@@ -132,7 +132,7 @@ func (simDeployHook processSimDeployHook) hookPayload() string {
 		LogvacHost: app.LocalIPs["logvac"],
 		Platform:   "local",
 		Member: member{
-			UID:     "1",
+			UID:     1,
 		},
 		Component: component{
 			UID:  serviceName,

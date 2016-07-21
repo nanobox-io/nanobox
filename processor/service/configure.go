@@ -28,7 +28,7 @@ type (
 	// member ...
 	member struct {
 		LocalIP string `json:"local_ip"`
-		UID     string `json:"uid"`
+		UID     int `json:"uid"`
 		Role    string `json:"role"`
 	}
 
@@ -130,7 +130,7 @@ func (serviceConfigure processServiceConfigure) configurePayload() string {
 		Config:     config,
 		Member: member{
 			LocalIP: service.InternalIP,
-			UID:     "1",
+			UID:     1,
 			Role:    "primary",
 		},
 		Component: component{
