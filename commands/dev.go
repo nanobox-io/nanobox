@@ -29,7 +29,6 @@ func init() {
 	DevCmd.AddCommand(dev.DNSCmd)
 	DevCmd.AddCommand(dev.InfoCmd)
 	DevCmd.AddCommand(dev.LogCmd)
-	DevCmd.AddCommand(dev.ExecCmd)
 	DevCmd.AddCommand(dev.ConsoleCmd)
 	DevCmd.AddCommand(dev.EnvCmd)
 	DevCmd.AddCommand(dev.ResetCmd)

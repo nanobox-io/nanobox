@@ -48,6 +48,10 @@ func (codeBuild processCodeBuild) Results() processor.ProcessControl {
 
 //
 func (codeBuild *processCodeBuild) Process() error {
+
+	// remove any leftover build containers that may exist
+	docker.ContainerRemove(fmt.Sprintf("nanobox_%s_build", config.AppName()))
+
 	codeBuild.control.Display(stylish.Bullet("Building Code"))
 
 	//

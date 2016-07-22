@@ -14,7 +14,7 @@ const HOSTSFILE = "/etc/hosts"
 
 // Entry generate the DNS entry to be added
 func Entry(ip, name, env string) string {
-	return fmt.Sprintf("%s     %s # '%s' added by running 'nanobox %s dns add <name>'", ip, name, name, env)
+	return fmt.Sprintf("%s     %s # dns added for '%s' by nanobox", ip, name, env)
 }
 
 // Exists ...
@@ -76,7 +76,11 @@ func Remove(entry string) error {
 	for scanner.Scan() {
 
 		// if the line contain the entry skip it
-		if scanner.Text() == entry {
+		// make it do a loose string check
+		// if its exactly the entry then remove it.
+		// if it contains the same environment 
+		// also remove it
+		if strings.Contains(scanner.Text(), entry) {
 			continue
 		}
 

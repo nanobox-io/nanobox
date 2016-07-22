@@ -66,5 +66,8 @@ func (teardown *processTeardown) teardownApp() error {
 
 // teardownMounts removes the environments mounts from the provider
 func (teardown *processTeardown) teardownMounts() error {
-	return processor.Run("app_unmount", teardown.control)
+	// we will not be tearing down the mounts currently
+	// this is because they are required for production builds
+	return nil
+	// return processor.Run("app_unmount", teardown.control)
 }

@@ -84,7 +84,7 @@ func (envDNSRemove *processEnvDNSRemove) entriesExist() bool {
 	envIP := envDNSRemove.app.GlobalIPs["env"]
 
 	// generate the entries
-	env := dns.Entry(envIP, envDNSRemove.name, envDNSRemove.control.Env)
+	env := dns.Entry(envIP, envDNSRemove.name, fmt.Sprintf("%s_%s", config.AppName(), envDNSRemove.control.Env))
 
 	return dns.Exists(env)
 }
@@ -96,7 +96,7 @@ func (envDNSRemove *processEnvDNSRemove) removeEntries() error {
 	envIP := envDNSRemove.app.GlobalIPs["env"]
 
 	// generate the entries
-	env := dns.Entry(envIP, envDNSRemove.name, envDNSRemove.control.Env)
+	env := dns.Entry(envIP, envDNSRemove.name, fmt.Sprintf("%s_%s", config.AppName(), envDNSRemove.control.Env))
 
 	// remove the DNS entry from the /etc/hosts file
 	return dns.Remove(env)
