@@ -31,3 +31,5 @@ nanobox-updater
 updater/updater
 build
 rsrc.syso
+Icon
+.sync
