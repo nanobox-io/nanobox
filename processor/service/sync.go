@@ -91,7 +91,7 @@ func (serviceSync *processServiceSync) loadOldBoxfile() error {
 // replaceOldBoxfile replaces the old boxfile in the database with the new boxfile
 func (serviceSync *processServiceSync) replaceOldBoxfile() error {
 
-	if err := data.Put(config.AppName()+"_meta", serviceSync.control.Env+"_build_boxfile", &serviceSync.newBoxfile); err != nil {
+	if err := data.Put(config.AppName()+"_meta", serviceSync.control.Env+"_build_boxfile", serviceSync.newBoxfile); err != nil {
 		return err
 	}
 

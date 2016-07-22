@@ -44,6 +44,11 @@ func (teardown *processTeardown) Process() error {
 		}
 	}
 
+	// remove all dns entries for this app
+	if err := processor.Run("env_dns_remove_all", teardown.control); err != nil {
+		return err		
+	}
+
 	// teardown the mounts
 	return teardown.teardownMounts()
 }
