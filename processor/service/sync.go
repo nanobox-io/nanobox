@@ -2,6 +2,9 @@ package service
 
 import (
 	"regexp"
+	"fmt"
+
+	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox-boxfile"
 	"github.com/nanobox-io/nanobox/models"
@@ -45,14 +48,19 @@ func (serviceSync processServiceSync) Results() processor.ProcessControl {
 
 //
 func (serviceSync *processServiceSync) Process() error {
+	lumber.Trace("serviceSync")
 
 	if err := serviceSync.loadNewBoxfile(); err != nil {
 		return err
 	}
 
+	lumber.Trace("serviceSync: NewBoxfile: %s", serviceSync.newBoxfile.Data)
+
 	if err := serviceSync.loadOldBoxfile(); err != nil {
 		return err
 	}
+
+	lumber.Trace("serviceSync: OldBoxfile: %s", serviceSync.oldBoxfile.Data)
 
 	if err := serviceSync.purgeDeltaServices(); err != nil {
 		return err
@@ -106,7 +114,7 @@ func (serviceSync *processServiceSync) purgeDeltaServices() error {
 	newBoxfile := boxfile.New(serviceSync.newBoxfile.Data)
 
 	// fetch the services
-	uids, err := data.Keys(config.AppName())
+	uids, err := data.Keys(fmt.Sprintf("%s_%s", config.AppName(), serviceSync.control.Env))
 	if err != nil {
 		return err
 	}
@@ -122,8 +130,11 @@ func (serviceSync *processServiceSync) purgeDeltaServices() error {
 		newNode := newBoxfile.Node(uid)
 		oldNode := oldBoxfile.Node(uid)
 
-		// skip if the nodes are the same
-		if newNode.Equal(oldNode) {
+		lumber.Trace("newboxNode: %+v", newNode)
+		lumber.Trace("oldboxNode: %+v", oldNode)
+
+		// skip if the new node is valid and they are the same
+		if newNode.Valid && newNode.Equal(oldNode) {
 			continue
 		}
 

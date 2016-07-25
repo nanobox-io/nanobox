@@ -61,8 +61,6 @@ func (serviceSetup processServiceSetup) Results() processor.ProcessControl {
 //
 func (serviceSetup *processServiceSetup) Process() error {
 
-	serviceSetup.control.Display(stylish.Bullet("Launching %s...", serviceSetup.control.Meta["label"]))
-
 	// call the cleanup function to ensure we don't leave any bad state
 	defer serviceSetup.clean()
 
@@ -80,6 +78,8 @@ func (serviceSetup *processServiceSetup) Process() error {
 		return nil
 	}
 
+	serviceSetup.control.Display(stylish.Bullet("Launching %s...", serviceSetup.control.Meta["label"]))
+	
 	if err := serviceSetup.downloadImage(); err != nil {
 		serviceSetup.fail = true
 		return err
