@@ -111,6 +111,6 @@ func (envDNSRemove *processEnvDNSRemove) reExecPrivilege() error {
 	cmd := fmt.Sprintf("%s %s dns rm %s", os.Args[0], envDNSRemove.control.Env, envDNSRemove.name)
 
 	// if the sudo'ed subprocess fails, we need to return error to stop the process
-	fmt.Println("Admin privileges are required to remove DNS entries from your hosts file, your password may be requested...")
+	fmt.Println("Admin privileges are required to remove DNS entries from your hosts file...")
 	return util.PrivilegeExec(cmd)
 }

@@ -6,6 +6,12 @@ import (
 	"errors"
 )
 
+
+// https://gist.github.com/notxarb/ebe664d693710ddb2b110d1251800e67
+
+// maybe a way to mount without the password:
+// 	https://ubuntuforums.org/showthread.php?t=1589669
+
 // Exists checks to see if the share already exists
 func Exists(entry string) bool {
 	return false

@@ -99,7 +99,7 @@ func (envNetFSRemove *processEnvNetFSRemove) reExecPrivilege() error {
 	cmd := fmt.Sprintf("%s env netfs rm %s", os.Args[0], envNetFSRemove.path)
 
 	// if the sudo'ed subprocess fails, we need to return error to stop the process
-	fmt.Println("Admin privileges are required to remove entries from your exports file, your password may be requested...")
+	fmt.Println("Admin privileges are required to remove entries from your exports file...")
 	if err := util.PrivilegeExec(cmd); err != nil {
 		return err
 	}

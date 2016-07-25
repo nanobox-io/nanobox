@@ -98,7 +98,7 @@ func (envNetFSAdd *processEnvNetFSAdd) reExecPrivilege() error {
 	cmd := fmt.Sprintf("%s env netfs add %s", os.Args[0], envNetFSAdd.path)
 
 	// if the sudo'ed subprocess fails, we need to return error to stop the process
-	fmt.Println("Admin privileges are required to add entries to your exports file, your password may be requested...")
+	fmt.Println("Admin privileges are required to add entries to your exports file...")
 	if err := util.PrivilegeExec(cmd); err != nil {
 		return err
 	}
