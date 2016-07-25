@@ -9,8 +9,10 @@ import (
 	"strings"
 )
 
-// HOSTSFILE ...
-const HOSTSFILE = "/etc/hosts"
+var (
+	hostsFile = detectHostsFile()
+	newline   = detectNewlineChar()
+)
 
 // Entry generate the DNS entry to be added
 func Entry(ip, name, env string) string {
@@ -20,14 +22,14 @@ func Entry(ip, name, env string) string {
 // Exists ...
 func Exists(entry string) bool {
 
-	// open the /etc/hosts file for scanning...
-	f, err := os.Open(HOSTSFILE)
+	// open the hosts file for scanning...
+	f, err := os.Open(hostsFile)
 	if err != nil {
 		return false
 	}
 	defer f.Close()
 
-	// scan each line of the /etc/hosts file to see if there is a match for this
+	// scan each line of the hosts file to see if there is a match for this
 	// entry
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
@@ -43,14 +45,14 @@ func Exists(entry string) bool {
 func Add(entry string) error {
 
 	// open hosts file
-	f, err := os.OpenFile(HOSTSFILE, os.O_RDWR|os.O_APPEND, 0644)
+	f, err := os.OpenFile(hostsFile, os.O_RDWR|os.O_APPEND, 0644)
 	if err != nil {
 		return err
 	}
 	defer f.Close()
 
 	// write the DNS entry to the file
-	if _, err := f.WriteString(fmt.Sprintf("%s\n", entry)); err != nil {
+	if _, err := f.WriteString(fmt.Sprintf("%s%s", entry, newline)); err != nil {
 		return err
 	}
 
@@ -65,7 +67,7 @@ func Remove(entry string) error {
 	var contents string
 
 	// open hosts file
-	f, err := os.OpenFile(HOSTSFILE, os.O_RDWR, 0644)
+	f, err := os.OpenFile(hostsFile, os.O_RDWR, 0644)
 	if err != nil {
 		return err
 	}
@@ -85,17 +87,17 @@ func Remove(entry string) error {
 		}
 
 		// add each line back into the file
-		contents += fmt.Sprintf("%s\n", scanner.Text())
+		contents += fmt.Sprintf("%s%s", scanner.Text(), newline)
 	}
 
 	// trim the contents to avoid any extra newlines
 	contents = strings.TrimSpace(contents)
 
 	// add a single newline for completeness
-	contents += "\n"
+	contents += newline
 
 	// write back the contents of the hosts file minus the removed entry
-	if err := ioutil.WriteFile(HOSTSFILE, []byte(contents), 0644); err != nil {
+	if err := ioutil.WriteFile(hostsFile, []byte(contents), 0644); err != nil {
 		return err
 	}
 

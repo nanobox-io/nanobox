@@ -3,16 +3,32 @@
 package util
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
 	"strings"
 )
 
-// IsPrivileged will return true if the current process is running under a
-// privileged user, like root
+// IsPrivileged will return true if the current process is running as the
+// Administrator
 func IsPrivileged() bool {
-	// TODO: win: make this work!!!
+	// Running "net session" will return "Access is denied." if the terminal
+	// process was not run as Administrator
+	cmd := exec.Command("net", "session")
+	output, err := cmd.CombinedOutput()
+	
+	// if there was an error, we'll short-circuit and return false
+	if err != nil {
+		return false
+	}
+
+	// return false if we find Access is denied in the output
+	if bytes.Contains(output, []byte("Access is denied.")) {
+		return false
+	}
+	
+	// if the previous checks didn't fail, then we must be the Administrator
 	return true
 }
 
@@ -46,7 +62,7 @@ func PrivilegeExec(command string) error {
 	arguments := strings.Join(parts[1:], " ")
 
 	// generate the powershell process
-	process := fmt.Sprintf("\"& {Start-Process %s -ArgumentList '%s' -Verb RunAs}\"", executable, arguments)
+	process := fmt.Sprintf("& {Start-Process %s -ArgumentList '%s' -Verb RunAs}", executable, arguments)
 
 	// now we can generate a command to exec
 	cmd := exec.Command("PowerShell.exe", "-NoProfile", "-Command", process)
@@ -66,7 +82,8 @@ func PrivilegeExec(command string) error {
 // PowerShell will run a specified command in a powershell and return the result
 func PowerShell(command string) ([]byte, error) {
 
-	process := fmt.Sprintf("\"& {%s}\"", command)
+	process := fmt.Sprintf("& {%s}", command)
+	
 	cmd := exec.Command("PowerShell.exe", "-NoProfile", "-Command", process)
 
 	return cmd.CombinedOutput()
