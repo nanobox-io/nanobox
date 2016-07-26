@@ -43,9 +43,10 @@ match an DNS entry in your to your local hosts file.
 	// DNSRemoveCmd ...
 	DNSRemoveAllCmd = &cobra.Command{
 		Use:   "rm-all",
-		Short: "Removes all hostname mappings associated with your dev app",
+		Short: "Removes all hostname mappings associated with your dev app.",
 		Long:  ``,
 		Run:   dnsRmAllFn,
+		Hidden: true,
 	}
 )
 

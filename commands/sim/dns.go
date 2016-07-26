@@ -14,7 +14,7 @@ var (
 	// DNSCmd ...
 	DNSCmd = &cobra.Command{
 		Use:   "dns",
-		Short: "Manages hostname mappings for your sim app",
+		Short: "Manages hostname mappings for your sim app.",
 		Long:  ``,
 	}
 
