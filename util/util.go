@@ -3,6 +3,7 @@ package util
 
 import (
 	"math/rand"
+	"time"
 )
 
 const (
@@ -16,10 +17,13 @@ const (
 // RandomString ...
 func RandomString(size int) string {
 
+	// create a new randomizer with a unique seed
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+
 	//
 	b := make([]byte, size)
 	for i := range b {
-		b[i] = letterBytes[rand.Intn(len(letterBytes))]
+		b[i] = letterBytes[r.Intn(len(letterBytes))]
 	}
 
 	return string(b)
