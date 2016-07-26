@@ -13,10 +13,10 @@ var (
 	// StopCmd ...
 	StopCmd = &cobra.Command{
 		Use:   "stop",
-		Short: "Stops the Nanobox VM and provisions app",
+		Short: "Stops your sim platform.",
 		Long: `
-Stops the Nanobox VM and provisions app. This is the primary command stoping
-the VM and preparing the application.
+Stops your sim platform. All data and code
+will be preserved in its current state.
 		`,
 		PreRun: validate.Requires("provider"),
 		Run:    stopFn,

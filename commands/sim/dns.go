@@ -14,23 +14,29 @@ var (
 	// DNSCmd ...
 	DNSCmd = &cobra.Command{
 		Use:   "dns",
-		Short: "",
+		Short: "Manages hostname mappings for your sim app",
 		Long:  ``,
 	}
 
 	// DNSAddCmd ...
 	DNSAddCmd = &cobra.Command{
 		Use:   "add",
-		Short: "",
-		Long:  ``,
+		Short: "Adds a hostname map to your sim app.",
+		Long:  `
+Adds a hostname map to your sim app. The domain provided is added
+to your local hosts file pointing the the IP of your sim app.
+		`,
 		Run:   dnsAddFn,
 	}
 
 	// DNSRemoveCmd ...
 	DNSRemoveCmd = &cobra.Command{
 		Use:   "rm",
-		Short: "",
-		Long:  ``,
+		Short: "Removes a hostname map from your sim app.",
+		Long:  `
+Removes a hostname map from your sim app. The domain must perfectly
+match an DNS entry in your to your local hosts file.
+		`,
 		Run:   dnsRmFn,
 	}
 )
@@ -52,7 +58,7 @@ func dnsAddFn(ccmd *cobra.Command, args []string) {
 Wrong number of arguments (expecting 1 got %v). Run the command again with the
 name of the DNS entry you would like to add:
 
-nanobox dev dns add <name>
+nanobox sim dns add <name>
 `, len(args))
 
 		return
@@ -75,7 +81,7 @@ func dnsRmFn(ccmd *cobra.Command, args []string) {
 Wrong number of arguments (expecting 1 got %v). Run the command again with the
 name of the DNS entry you would like to remove:
 
-ex: nanobox dev dns rm <name>
+ex: nanobox sim dns rm <name>
 
 `, len(args))
 

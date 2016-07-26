@@ -33,7 +33,7 @@ pairs can be added simultaneously using a comma-delimited list.
 
 	// EnvListCmd ...
 	EnvListCmd = &cobra.Command{
-		Use:   "list",
+		Use:   "ls",
 		Short: "Lists all environment variables registered in your dev app.",
 		Long:  ``,
 		Run:   envListFn,
@@ -41,7 +41,7 @@ pairs can be added simultaneously using a comma-delimited list.
 
 	// EnvRemoveCmd ...
 	EnvRemoveCmd = &cobra.Command{
-		Use:   "remove",
+		Use:   "rm",
 		Short: "Removes environment variable(s) from your dev app.",
 		Long: `
 Removes environment variable(s) from your dev app. Multiple keys

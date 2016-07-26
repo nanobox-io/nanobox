@@ -13,7 +13,7 @@ var (
 	// LogCmd ...
 	LogCmd = &cobra.Command{
 		Use:    "log",
-		Short:  "Displays logs from the running app and its components.",
+		Short:  "Displays logs from the running sim app and its components.",
 		Long:   ``,
 		PreRun: validate.Requires("provider", "provider_up", "built"),
 		Run:    logFn,

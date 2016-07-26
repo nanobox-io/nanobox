@@ -12,18 +12,18 @@ var (
 	// LinkCmd ...
 	LinkCmd = &cobra.Command{
 		Use:   "link",
-		Short: "Manages links between dev & production apps.",
+		Short: "Manages links between local & production apps.",
 		Long:  ``,
 	}
 
 	// LinkAddCmd ...
 	LinkAddCmd = &cobra.Command{
 		Use:   "add",
-		Short: "Adds a new link between a dev & production app.",
+		Short: "Adds a new link between a local & production app.",
 		Long: `
-Adds a new link between a dev and production app. A dev app can
-be linked to multiple production apps. Each link needs an alias.
-If no alias is provided, 'default' is assumed.
+Adds a new link between a local and production app. A local
+app can be linked to multiple production apps. Each link needs
+an alias. If no alias is provided, 'default' is assumed.
 		`,
 		Run: linkAddFn,
 	}
@@ -31,7 +31,7 @@ If no alias is provided, 'default' is assumed.
 	// LinkListCmd ...
 	LinkListCmd = &cobra.Command{
 		Use:   "ls",
-		Short: "Lists all links for the current dev app.",
+		Short: "Lists all links for the current local app.",
 		Long:  ``,
 		Run:   linkListFn,
 	}
@@ -39,7 +39,7 @@ If no alias is provided, 'default' is assumed.
 	// LinkRemoveCmd ...
 	LinkRemoveCmd = &cobra.Command{
 		Use:   "rm",
-		Short: "Removes a link between a dev & production app.",
+		Short: "Removes a link between a local & production app.",
 		Long:  ``,
 		Run:   linkRemoveFn,
 	}

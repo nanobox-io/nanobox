@@ -13,7 +13,7 @@ var (
 	// LogCmd ...
 	LogCmd = &cobra.Command{
 		Use:    "log",
-		Short:  "Displays logs from the running app and its components.",
+		Short:  "Displays logs from the running dev app and its components.",
 		Long:   ``,
 		PreRun: validate.Requires("provider", "provider_up", "built", "dev_isup"),
 		Run:    logFn,

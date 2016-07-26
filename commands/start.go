@@ -13,10 +13,8 @@ var (
 	// StartCmd ...
 	StartCmd = &cobra.Command{
 		Use:   "start",
-		Short: "Start the virtual machine",
-		Long: `
-Start the virtual machine.
-		`,
+		Short: "Starts the Nanobox virtual machine.",
+		Long: ``,
 		PreRun: validate.Requires("provider"),
 		Run:    startFn,
 	}

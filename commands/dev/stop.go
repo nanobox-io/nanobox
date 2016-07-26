@@ -13,9 +13,9 @@ var (
 	// StopCmd ...
 	StopCmd = &cobra.Command{
 		Use:   "stop",
-		Short: "Stops the Nanobox app",
+		Short: "Stops your dev platform.",
 		Long: `
-Stops the Nanobox app.
+Stops your dev platform. All data will be preserved in its current state.
 		`,
 		PreRun: validate.Requires("provider"),
 		Run:    devStop,

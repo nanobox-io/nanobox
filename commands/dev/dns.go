@@ -14,30 +14,36 @@ var (
 	// DNSCmd ...
 	DNSCmd = &cobra.Command{
 		Use:   "dns",
-		Short: "",
+		Short: "Manages hostname mappings for your dev app.",
 		Long:  ``,
 	}
 
 	// DNSAddCmd ...
 	DNSAddCmd = &cobra.Command{
 		Use:   "add",
-		Short: "",
-		Long:  ``,
+		Short: "Adds a hostname map to your dev app.",
+		Long:  `
+Adds a hostname map to your dev app. The domain provided is added
+to your local hosts file pointing the the IP of your dev app.
+		`,
 		Run:   dnsAddFn,
 	}
 
 	// DNSRemoveCmd ...
 	DNSRemoveCmd = &cobra.Command{
 		Use:   "rm",
-		Short: "",
-		Long:  ``,
+		Short: "Removes a hostname map from your dev app.",
+		Long:  `
+Removes a hostname map from your dev app. The domain must perfectly
+match an DNS entry in your to your local hosts file.
+		`,
 		Run:   dnsRmFn,
 	}
 
 	// DNSRemoveCmd ...
 	DNSRemoveAllCmd = &cobra.Command{
 		Use:   "rm-all",
-		Short: "",
+		Short: "Removes all hostname mappings associated with your dev app",
 		Long:  ``,
 		Run:   dnsRmAllFn,
 	}

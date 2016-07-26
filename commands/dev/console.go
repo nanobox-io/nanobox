@@ -11,7 +11,7 @@ import (
 // ConsoleCmd ...
 var ConsoleCmd = &cobra.Command{
 	Use:    "console",
-	Short:  "Opens an interactive console inside your Nanobox VM.",
+	Short:  "Opens an interactive console inside your dev platform.",
 	Long:   ``,
 	PreRun: validate.Requires("provider", "provider_up", "dev_isup"),
 	Run:    consoleFn,

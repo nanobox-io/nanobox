@@ -11,10 +11,8 @@ var (
 	// SimCmd ...
 	SimCmd = &cobra.Command{
 		Use:   "sim",
-		Short: "The simulated environment ",
-		Long: `
-The simulated environment all starts below this subcommand.
-		`,
+		Short: "Manages your 'simulated' environment.",
+		Long: ``,
 	}
 )
 

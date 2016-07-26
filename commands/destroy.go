@@ -13,10 +13,8 @@ var (
 	// DestroyCmd ...
 	DestroyCmd = &cobra.Command{
 		Use:   "destroy",
-		Short: "Remove the virtual machine",
-		Long: `
-Remove the virtual machine.
-		`,
+		Short: "Destroys the Nanobox virtual machine.",
+		Long: ``,
 		PreRun: validate.Requires("provider"),
 		Run:    destroyFn,
 	}

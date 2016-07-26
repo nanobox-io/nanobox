@@ -11,10 +11,8 @@ var (
 	// DevCmd ...
 	DevCmd = &cobra.Command{
 		Use:   "dev",
-		Short: "The development environment ",
-		Long: `
-The development environment all starts below this subcommand.
-		`,
+		Short: "Manages your 'development' environment.",
+		Long: ``,
 	}
 )
 

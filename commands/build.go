@@ -16,7 +16,7 @@ var (
 		Short: "Generates a deployable build package.",
 		Long: `
 Generates a deployable build package that can be
-deployed into a dev or production app.
+deployed into dev, sim, or production platforms.
 		`,
 		PreRun: validate.Requires("provider"),
 		Run:    buildFn,

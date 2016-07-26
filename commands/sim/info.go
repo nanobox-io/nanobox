@@ -13,7 +13,7 @@ var (
 	// InfoCmd ...
 	InfoCmd = &cobra.Command{
 		Use:    "info",
-		Short:  "Displays information about the running app and its components.",
+		Short:  "Displays information about the running sim app and its components.",
 		Long:   ``,
 		PreRun: validate.Requires("provider"),
 		Run:    infoFn,

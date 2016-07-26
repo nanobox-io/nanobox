@@ -13,10 +13,11 @@ var (
 	// StartCmd ...
 	StartCmd = &cobra.Command{
 		Use:   "start",
-		Short: "Starts the Nanobox VM and provisions app",
+		Short: "Starts your dev platform.",
 		Long: `
-Starts the Nanobox VM and provisions app. This is the primary command starting
-the VM and preparing the application.
+Starts your dev platform from its previous state. If starting for
+the first time, you should also generate a build (nanobox build)
+and deploy it into your dev platform (nanobox dev deploy).
 		`,
 		PreRun: validate.Requires("provider"),
 		Run:    devStart,

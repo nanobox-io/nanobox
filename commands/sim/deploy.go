@@ -11,9 +11,9 @@ import (
 // DeployCmd ...
 var DeployCmd = &cobra.Command{
 	Use:   "deploy",
-	Short: "Deploys your build package into your Nanobox VM and starts all services.",
+	Short: "Deploys a build package into your sim platform and starts all services.",
 	Long: `
-Deploys your build package into your Nanobox VM and
+Deploys a build package into your sim platform and
 starts all services. This is used to simulate a full
 deploy locally, before deploying into production.
 		`,

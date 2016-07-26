@@ -13,10 +13,11 @@ var (
 	// StartCmd ...
 	StartCmd = &cobra.Command{
 		Use:   "start",
-		Short: "Starts the Nanobox VM and provisions app",
+		Short: "Starts your sim platform.",
 		Long: `
-Starts the Nanobox VM and provisions app. This is the primary command starting
-the VM and preparing the application.
+Starts the sim platform from its previous state. If starting for
+the first time, you should also generate a build (nanobox build)
+and deploy it into your sim platform (nanobox sim deploy).
 		`,
 		PreRun: validate.Requires("provider"),
 		Run:    startFn,

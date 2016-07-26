@@ -13,9 +13,10 @@ var (
 	// StopCmd ...
 	StopCmd = &cobra.Command{
 		Use:   "stop",
-		Short: "Stop the virtual machine",
+		Short: "Stop the Nanobox virtual machine.",
 		Long: `
-Stop the virtual machine.
+Stops the Nanobox virtual machine as well as any running
+dev and sim platforms.
 		`,
 		PreRun: validate.Requires("provider"),
 		Run:    stopFn,
