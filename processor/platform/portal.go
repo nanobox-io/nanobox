@@ -35,7 +35,7 @@ func updatePortalFn(control processor.ProcessControl) (processor.Processor, erro
 
 func (updatePortal *processUpdatePortal) ValidateMeta() error {
 	if updatePortal.control.Meta["app_name"] == "" {
-		updatePortal.control.Meta["app_name"] = fmt.Sprintf("%s_%s", config.AppName(), updatePortal.control.Env)
+		updatePortal.control.Meta["app_name"] = fmt.Sprintf("%s_%s", config.AppID(), updatePortal.control.Env)
 	}
 	return nil
 }

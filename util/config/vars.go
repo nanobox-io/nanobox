@@ -1,6 +1,7 @@
 package config
 
 import (
+	"crypto/md5"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -25,6 +26,14 @@ func AppName() string {
 	}
 
 	return app
+}
+
+// AppID is the id of the app we will use based
+// on the name as well as the folder
+// this should help us keep a unique name for apps that 
+// happen to have the same folder base name
+func AppID() string {
+	return fmt.Sprintf("%x", md5.Sum([]byte(LocalDir())))
 }
 
 // UserPayload ...

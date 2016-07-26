@@ -90,7 +90,7 @@ func (platformSetup processPlatformSetup) isServiceActive(id string) bool {
 
 	// fetch the entry from the database, ignoring any errors as the service
 	// might not exist yet
-	bucket := fmt.Sprintf("%s_%s", config.AppName(), platformSetup.control.Env)
+	bucket := fmt.Sprintf("%s_%s", config.AppID(), platformSetup.control.Env)
 	err := data.Get(bucket, id, &service)
 	if err != nil {
 		// fmt.Println("isServiceActive", bucket, id, err)

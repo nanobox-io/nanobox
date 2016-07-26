@@ -73,7 +73,7 @@ func (envDNSAdd *processEnvDNSAdd) validateMeta() error {
 func (envDNSAdd *processEnvDNSAdd) loadApp() error {
 
 	//
-	key := fmt.Sprintf("%s_%s", config.AppName(), envDNSAdd.control.Env)
+	key := fmt.Sprintf("%s_%s", config.AppID(), envDNSAdd.control.Env)
 	return data.Get("apps", key, &envDNSAdd.app)
 }
 
@@ -86,7 +86,7 @@ func (envDNSAdd *processEnvDNSAdd) entriesExist() bool {
 	envIP := envDNSAdd.app.GlobalIPs["env"]
 
 	// generate the entries
-	env := dns.Entry(envIP, envDNSAdd.name, fmt.Sprintf("%s_%s", config.AppName(), envDNSAdd.control.Env))
+	env := dns.Entry(envIP, envDNSAdd.name, fmt.Sprintf("%s_%s", config.AppID(), envDNSAdd.control.Env))
 
 	// if the entries dont exist just return
 	return dns.Exists(env)
@@ -99,7 +99,7 @@ func (envDNSAdd *processEnvDNSAdd) addEntries() error {
 	envIP := envDNSAdd.app.GlobalIPs["env"]
 
 	// generate the entries
-	env := dns.Entry(envIP, envDNSAdd.name, fmt.Sprintf("%s_%s", config.AppName(), envDNSAdd.control.Env))
+	env := dns.Entry(envIP, envDNSAdd.name, fmt.Sprintf("%s_%s", config.AppID(), envDNSAdd.control.Env))
 
 	// add the 'sim' DNS entry into the /etc/hosts file
 	return dns.Add(env)

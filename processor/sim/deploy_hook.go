@@ -104,19 +104,19 @@ func (simDeployHook *processSimDeployHook) Process() error {
 
 // loadApp loads the app from the database
 func (simDeployHook *processSimDeployHook) loadApp() error {
-	key := fmt.Sprintf("%s_%s", config.AppName(), simDeployHook.control.Env)
+	key := fmt.Sprintf("%s_%s", config.AppID(), simDeployHook.control.Env)
 	return data.Get("apps", key, &simDeployHook.app)
 }
 
 // loadService loads the service from the database
 func (simDeployHook *processSimDeployHook) loadService() error {
-	bucket := fmt.Sprintf("%s_%s", config.AppName(), simDeployHook.control.Env)
+	bucket := fmt.Sprintf("%s_%s", config.AppID(), simDeployHook.control.Env)
 	return data.Get(bucket, simDeployHook.control.Meta["service_name"], &simDeployHook.service)
 }
 
 // hookPayload ...
 func (simDeployHook processSimDeployHook) hookPayload() string {
-	key := fmt.Sprintf("%s_%s", config.AppName(), simDeployHook.control.Env)
+	key := fmt.Sprintf("%s_%s", config.AppID(), simDeployHook.control.Env)
 
 	// load the app
 	app := models.App{}

@@ -44,7 +44,7 @@ func (codeDestroy *processCodeDestroy) Process() error {
 	service := models.Service{}
 
 	//
-	bucket := fmt.Sprintf("%s_%s", config.AppName(), codeDestroy.control.Env)
+	bucket := fmt.Sprintf("%s_%s", config.AppID(), codeDestroy.control.Env)
 	if err := data.Get(bucket, codeDestroy.control.Meta["name"], &service); err != nil {
 		return err
 	}

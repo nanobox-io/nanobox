@@ -35,7 +35,7 @@ func (mistListen processMistListen) Results() processor.ProcessControl {
 //
 func (mistListen processMistListen) Process() error {
 	mist := models.Service{}
-	bucket := fmt.Sprintf("%s_%s", config.AppName(), mistListen.control.Env)
+	bucket := fmt.Sprintf("%s_%s", config.AppID(), mistListen.control.Env)
 	data.Get(bucket, "mist", &mist)
 
 	// connect to the mist server

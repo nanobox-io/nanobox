@@ -87,7 +87,7 @@ func (codeConfigure *processCodeConfigure) Process() error {
 	service := models.Service{}
 
 	//
-	bucket := fmt.Sprintf("%s_%s", config.AppName(), codeConfigure.control.Env)
+	bucket := fmt.Sprintf("%s_%s", config.AppID(), codeConfigure.control.Env)
 	if err := data.Get(bucket, codeConfigure.control.Meta["name"], &service); err != nil {
 		fmt.Println("what!!!", bucket, codeConfigure.control.Meta["name"])
 		return err
@@ -155,7 +155,7 @@ func (codeConfigure processCodeConfigure) startPayload() string {
 func (codeConfigure *processCodeConfigure) configurePayload() (string, error) {
 
 	me := models.Service{}
-	bucket := fmt.Sprintf("%s_%s", config.AppName(), codeConfigure.control.Env)
+	bucket := fmt.Sprintf("%s_%s", config.AppID(), codeConfigure.control.Env)
 	err := data.Get(bucket, codeConfigure.control.Meta["name"], &me)
 	boxfile := boxfile.New([]byte(codeConfigure.control.Meta["boxfile"]))
 
@@ -189,11 +189,11 @@ func (codeConfigure *processCodeConfigure) configurePayload() (string, error) {
 func (codeConfigure *processCodeConfigure) fetchPayload() (string, error) {
 
 	me := models.Service{}
-	bucket := fmt.Sprintf("%s_%s", config.AppName(), codeConfigure.control.Env)
+	bucket := fmt.Sprintf("%s_%s", config.AppID(), codeConfigure.control.Env)
 	err := data.Get(bucket, codeConfigure.control.Meta["name"], &me)
 
 	logvac := models.Service{}
-	data.Get(config.AppName(), "logvac", &logvac)
+	data.Get(config.AppID(), "logvac", &logvac)
 
 	pload := fetchPayload{
 		LogvacHost: logvac.InternalIP,
@@ -217,7 +217,7 @@ func (codeConfigure *processCodeConfigure) mounts() []mount {
 	boxfile := boxfile.New([]byte(codeConfigure.control.Meta["boxfile"]))
 	boxNetworkDirs := boxfile.Node(codeConfigure.control.Meta["name"]).Node("network_dirs")
 
-	bucket := fmt.Sprintf("%s_%s", config.AppName(), codeConfigure.control.Env)
+	bucket := fmt.Sprintf("%s_%s", config.AppID(), codeConfigure.control.Env)
 	m := []mount{}
 	for _, node := range boxNetworkDirs.Nodes() {
 		// i think i store these as data.name
@@ -244,7 +244,7 @@ func (codeConfigure *processCodeConfigure) mounts() []mount {
 // env ...
 func (codeConfigure *processCodeConfigure) env() map[string]string {
 	envVars := models.Evars{}
-	data.Get(config.AppName()+"_meta", codeConfigure.control.Env+"_env", &envVars)
+	data.Get(config.AppID()+"_meta", codeConfigure.control.Env+"_env", &envVars)
 
 	return envVars
 }

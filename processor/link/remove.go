@@ -36,14 +36,14 @@ func (linkRemove processLinkRemove) Process() error {
 
 	//
 	links := models.AppLinks{}
-	if err := data.Get(config.AppName()+"_meta", "links", &links); err != nil {
+	if err := data.Get(config.AppID()+"_meta", "links", &links); err != nil {
 		//
 	}
 
 	//
 	delete(links, linkRemove.alias)
 
-	return data.Put(config.AppName()+"_meta", "links", links)
+	return data.Put(config.AppID()+"_meta", "links", links)
 }
 
 // validateMeta validates that the required metadata exists

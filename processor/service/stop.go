@@ -84,7 +84,7 @@ func (serviceStop *processServiceStop) validateMeta() error {
 
 	// set the name of the app if we are not given one
 	if serviceStop.control.Meta["app_name"] == "" {
-		serviceStop.control.Meta["app_name"] = fmt.Sprintf("%s_%s", config.AppName(), serviceStop.control.Env)
+		serviceStop.control.Meta["app_name"] = fmt.Sprintf("%s_%s", config.AppID(), serviceStop.control.Env)
 	}
 
 	return nil
@@ -98,7 +98,7 @@ func (serviceStop *processServiceStop) isServiceRunning() bool {
 
 	if err != nil {
 		// we cant return an error but we can definatly log what happened
-		lumber.Error("Service Stop I failed to retrieve nanobox_%s_%s_%s\n%s", config.AppName(), serviceStop.control.Env, serviceStop.name, err.Error())
+		lumber.Error("Service Stop I failed to retrieve nanobox_%s_%s_%s\n%s", config.AppID(), serviceStop.control.Env, serviceStop.name, err.Error())
 		return false
 	}
 

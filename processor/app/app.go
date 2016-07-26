@@ -33,11 +33,11 @@ func init() {
 func validateDevUp() error {
 	processor.Run("env_init", processor.DefaultControl)
 	app := models.App{}
-	data.Get("apps", config.AppName()+"_dev", &app)
+	data.Get("apps", config.AppID()+"_dev", &app)
 	if !(app.Status == UP) {
 		return fmt.Errorf("the environment has not been started. Please run the start command")
 	}
-	if !appServicesRunning(config.AppName() + "_dev") {
+	if !appServicesRunning(config.AppID() + "_dev") {
 		return fmt.Errorf("The app is running but some services are not. Try running stop then start to clean this anomaly. if the problem persists please contact nanobox")
 	}
 	return nil
@@ -46,12 +46,12 @@ func validateDevUp() error {
 func validatSimUp() error {
 	processor.Run("env_init", processor.DefaultControl)
 	app := models.App{}
-	data.Get("apps", config.AppName()+"_sim", &app)
+	data.Get("apps", config.AppID()+"_sim", &app)
 	if !(app.Status == UP) {
 		return fmt.Errorf("the environment has not been started. Please run the start command")
 	}
 
-	if !appServicesRunning(config.AppName() + "_sim") {
+	if !appServicesRunning(config.AppID() + "_sim") {
 		return fmt.Errorf("The app is running but some services are not. Try running stop then start to clean this anomaly. if the problem persists please contact nanobox")
 	}
 

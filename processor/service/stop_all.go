@@ -79,7 +79,7 @@ func (serviceStopAll *processServiceStopAll) stopService(uid string) error {
 func (serviceStopAll *processServiceStopAll) validateMeta() error {
 	// set the name of the app if we are not given one
 	if serviceStopAll.control.Meta["app_name"] == "" {
-		serviceStopAll.control.Meta["app_name"] = fmt.Sprintf("%s_%s", config.AppName(), serviceStopAll.control.Env)
+		serviceStopAll.control.Meta["app_name"] = fmt.Sprintf("%s_%s", config.AppID(), serviceStopAll.control.Env)
 	}
 
 	return nil

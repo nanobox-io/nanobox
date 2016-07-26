@@ -45,7 +45,7 @@ func (envDNSRemoveAll processEnvDNSRemoveAll) Process() error {
 func (envDNSRemoveAll *processEnvDNSRemoveAll) validateMeta() error {
 
 	if envDNSRemoveAll.control.Meta["app_name"] == "" {
-		envDNSRemoveAll.control.Meta["app_name"] = fmt.Sprintf("%s_%s", config.AppName(), envDNSRemoveAll.control.Env)
+		envDNSRemoveAll.control.Meta["app_name"] = fmt.Sprintf("%s_%s", config.AppID(), envDNSRemoveAll.control.Env)
 	}
 
 	return nil

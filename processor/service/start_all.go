@@ -77,7 +77,7 @@ func (serviceStartAll *processServiceStartAll) validateMeta() error {
 
 	// set the name of the app if we are not given one
 	if serviceStartAll.control.Meta["app_name"] == "" {
-		serviceStartAll.control.Meta["app_name"] = fmt.Sprintf("%s_%s", config.AppName(), serviceStartAll.control.Env)
+		serviceStartAll.control.Meta["app_name"] = fmt.Sprintf("%s_%s", config.AppID(), serviceStartAll.control.Env)
 	}
 
 	return nil

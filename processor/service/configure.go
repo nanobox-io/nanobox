@@ -194,7 +194,7 @@ func (serviceConfigure *processServiceConfigure) validateMeta() error {
 func (serviceConfigure *processServiceConfigure) loadApp() error {
 
 	// load the app from the database
-	key := fmt.Sprintf("%s_%s", config.AppName(), serviceConfigure.control.Env)
+	key := fmt.Sprintf("%s_%s", config.AppID(), serviceConfigure.control.Env)
 	if err := data.Get("apps", key, &serviceConfigure.app); err != nil {
 		return err
 	}
@@ -209,7 +209,7 @@ func (serviceConfigure *processServiceConfigure) loadService() error {
 
 	// get the service from the database; an error means we could not start a service
 	// that wasnt setup (ie saved in the database)
-	bucket := fmt.Sprintf("%s_%s", config.AppName(), serviceConfigure.control.Env)
+	bucket := fmt.Sprintf("%s_%s", config.AppID(), serviceConfigure.control.Env)
 	if err := data.Get(bucket, name, &serviceConfigure.service); err != nil {
 		return err
 	}
@@ -222,7 +222,7 @@ func (serviceConfigure *processServiceConfigure) loadBoxfile() error {
 
 	// we won't worry about erroring here, because there may not be
 	// a build_boxfile at this point
-	data.Get(config.AppName()+"_meta", "build_boxfile", &serviceConfigure.boxfile)
+	data.Get(config.AppID()+"_meta", "build_boxfile", &serviceConfigure.boxfile)
 
 	return nil
 }
@@ -260,7 +260,7 @@ func (serviceConfigure *processServiceConfigure) persistService() error {
 
 	name := serviceConfigure.control.Meta["name"]
 
-	bucket := fmt.Sprintf("%s_%s", config.AppName(), serviceConfigure.control.Env)
+	bucket := fmt.Sprintf("%s_%s", config.AppID(), serviceConfigure.control.Env)
 	if err := data.Put(bucket, name, &serviceConfigure.service); err != nil {
 		return err
 	}

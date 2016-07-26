@@ -157,7 +157,7 @@ func (serviceSetup *processServiceSetup) validateMeta() error {
 func (serviceSetup *processServiceSetup) loadApp() error {
 
 	// load the app from the database
-	key := fmt.Sprintf("%s_%s", config.AppName(), serviceSetup.control.Env)
+	key := fmt.Sprintf("%s_%s", config.AppID(), serviceSetup.control.Env)
 	if err := data.Get("apps", key, &serviceSetup.app); err != nil {
 		return err
 	}
@@ -168,7 +168,7 @@ func (serviceSetup *processServiceSetup) loadApp() error {
 // loadService fetches the service from the database
 func (serviceSetup *processServiceSetup) loadService() error {
 	// the service really shouldn't exist yet, so let's not return the error if it fails
-	bucket := fmt.Sprintf("%s_%s", config.AppName(), serviceSetup.control.Env)
+	bucket := fmt.Sprintf("%s_%s", config.AppID(), serviceSetup.control.Env)
 	data.Get(bucket, serviceSetup.control.Meta["name"], &serviceSetup.service)
 
 	// set the default state
@@ -252,7 +252,7 @@ func (serviceSetup *processServiceSetup) reserveIps() error {
 // launchContainer launches and starts a docker container
 func (serviceSetup *processServiceSetup) launchContainer() error {
 
-	name := fmt.Sprintf("nanobox_%s_%s_%s", config.AppName(), serviceSetup.control.Env, serviceSetup.control.Meta["name"])
+	name := fmt.Sprintf("nanobox_%s_%s_%s", config.AppID(), serviceSetup.control.Env, serviceSetup.control.Meta["name"])
 
 	config := docker.ContainerConfig{
 		Name:    name,
@@ -337,7 +337,7 @@ func (serviceSetup *processServiceSetup) persistService() error {
 	}
 
 	// save the service
-	bucket := fmt.Sprintf("%s_%s", config.AppName(), serviceSetup.control.Env)
+	bucket := fmt.Sprintf("%s_%s", config.AppID(), serviceSetup.control.Env)
 	err = data.Put(bucket, serviceSetup.control.Meta["name"], &serviceSetup.service)
 	if err != nil {
 		return err
@@ -348,7 +348,7 @@ func (serviceSetup *processServiceSetup) persistService() error {
 
 // updateEvars will generate environment variables from the plan
 func (serviceSetup *processServiceSetup) addEvars() error {
-	bucket := fmt.Sprintf("%s_meta", config.AppName())
+	bucket := fmt.Sprintf("%s_meta", config.AppID())
 
 	// fetch the environment variables model
 	envVars := models.Evars{}

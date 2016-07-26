@@ -36,7 +36,7 @@ func (simInfo processSimInfo) Results() processor.ProcessControl {
 func (simInfo processSimInfo) Process() error {
 
 	//
-	bucket := fmt.Sprintf("%s_sim", config.AppName())
+	bucket := fmt.Sprintf("%s_sim", config.AppID())
 	services, err := data.Keys(bucket)
 	if err != nil {
 		fmt.Println("data keys:", err)
@@ -56,7 +56,7 @@ func (simInfo processSimInfo) Process() error {
 
 	//
 	envVars := models.Evars{}
-	data.Get(config.AppName()+"_meta", "sim_env", &envVars)
+	data.Get(config.AppID()+"_meta", "sim_env", &envVars)
 	bytes, _ := json.MarshalIndent(envVars, "", "  ")
 	fmt.Printf("%s\n", bytes)
 

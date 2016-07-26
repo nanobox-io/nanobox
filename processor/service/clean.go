@@ -49,7 +49,7 @@ func (serviceClean processServiceClean) cleanServices() error {
 
 	// collect all the services that have failed along the way
 	// this includes <appname>, <appname>_dev, and <appname>_more
-	bucket := fmt.Sprintf("%s_%s", config.AppName(), serviceClean.control.Env)
+	bucket := fmt.Sprintf("%s_%s", config.AppID(), serviceClean.control.Env)
 	uids, err := data.Keys(bucket)
 	if err != nil {
 		return err
@@ -102,7 +102,7 @@ func (serviceClean processServiceClean) isServiceDirty(uid string) bool {
 	service := models.Service{}
 
 	// fetch the entry from the database
-	bucket := fmt.Sprintf("%s_%s", config.AppName(), serviceClean.control.Env)
+	bucket := fmt.Sprintf("%s_%s", config.AppID(), serviceClean.control.Env)
 	if err := data.Get(bucket, uid, &service); err != nil {
 		return true
 	}
@@ -117,6 +117,6 @@ func (serviceClean processServiceClean) isServiceDirty(uid string) bool {
 
 // containerExists will check to see if a docker container exists on the provider
 func (serviceClean processServiceClean) containerExists(uid string) bool {
-	_, err := docker.GetContainer(fmt.Sprintf("nanobox_%s_%s_%s", config.AppName(), serviceClean.control.Env, uid))
+	_, err := docker.GetContainer(fmt.Sprintf("nanobox_%s_%s_%s", config.AppID(), serviceClean.control.Env, uid))
 	return err == nil
 }

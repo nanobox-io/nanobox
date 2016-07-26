@@ -61,7 +61,7 @@ func init() {
 // envAddFn ...
 func envAddFn(ccmd *cobra.Command, args []string) {
 	evars := models.Evars{}
-	data.Get(config.AppName()+"_meta", "sim_env", &evars)
+	data.Get(config.AppID()+"_meta", "sim_env", &evars)
 	for _, arg := range args {
 		for _, pair := range strings.Split(arg, ",") {
 			parts := strings.Split(pair, "=")
@@ -71,24 +71,24 @@ func envAddFn(ccmd *cobra.Command, args []string) {
 		}
 	}
 
-	data.Put(config.AppName()+"_meta", "sim_env", evars)
+	data.Put(config.AppID()+"_meta", "sim_env", evars)
 }
 
 // envListFn ...
 func envListFn(ccmd *cobra.Command, args []string) {
 	evars := models.Evars{}
-	data.Get(config.AppName()+"_meta", "sim_env", &evars)
+	data.Get(config.AppID()+"_meta", "sim_env", &evars)
 	fmt.Println(evars)
 }
 
 // envRemoveFn ...
 func envRemoveFn(ccmd *cobra.Command, args []string) {
 	evars := models.Evars{}
-	data.Get(config.AppName()+"_meta", "sim_env", &evars)
+	data.Get(config.AppID()+"_meta", "sim_env", &evars)
 	for _, arg := range args {
 		for _, key := range strings.Split(arg, ",") {
 			delete(evars, strings.ToUpper(key))
 		}
 	}
-	data.Put(config.AppName()+"_meta", "sim_env", evars)
+	data.Put(config.AppID()+"_meta", "sim_env", evars)
 }

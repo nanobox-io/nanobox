@@ -67,13 +67,14 @@ func (appSetup *processAppSetup) Process() error {
 // loadApp loads the app from the db
 func (appSetup *processAppSetup) loadApp() error {
 	// the app might not exist yet, so let's not return the error if it fails
-	key := fmt.Sprintf("%s_%s", config.AppName(), appSetup.control.Env)
+	key := fmt.Sprintf("%s_%s", config.AppID(), appSetup.control.Env)
 	data.Get("apps", key, &appSetup.app)
 
 	// set the default state
 	if appSetup.app.State == "" {
-		appSetup.app.Name = key
+		appSetup.app.ID = key
 		appSetup.app.Directory = config.LocalDir()
+		appSetup.app.Name = config.AppName()
 		appSetup.app.State = INITIALIZED
 		appSetup.app.GlobalIPs = map[string]string{}
 		appSetup.app.LocalIPs = map[string]string{}
@@ -117,7 +118,7 @@ func (appSetup *processAppSetup) reserveIPs() error {
 // generateEvars generates the default app evars
 func (appSetup *processAppSetup) generateEvars() error {
 	// create the bucket name one time
-	bucket := fmt.Sprintf("%s_meta", config.AppName())
+	bucket := fmt.Sprintf("%s_meta", config.AppID())
 
 	// fetch the app evars model if it exists
 	evars := models.Evars{}
@@ -143,7 +144,7 @@ func (appSetup *processAppSetup) persistApp() error {
 	appSetup.app.State = ACTIVE
 
 	// save the app
-	key := fmt.Sprintf("%s_%s", config.AppName(), appSetup.control.Env)
+	key := fmt.Sprintf("%s_%s", config.AppID(), appSetup.control.Env)
 	if err := data.Put("apps", key, &appSetup.app); err != nil {
 		return err
 	}

@@ -64,7 +64,7 @@ func (appTeardown *processAppTeardown) Process() error {
 func (appTeardown *processAppTeardown) loadApp() error {
 
 	// durring the app teardown it should absolutely exist
-	key := fmt.Sprintf("%s_%s", config.AppName(), appTeardown.control.Env)
+	key := fmt.Sprintf("%s_%s", config.AppID(), appTeardown.control.Env)
 	return data.Get("apps", key, &appTeardown.app)
 }
 
@@ -94,18 +94,18 @@ func (appTeardown *processAppTeardown) releaseIPs() error {
 func (appTeardown *processAppTeardown) deleteMeta() error {
 
 	// remove the boxfile information
-	data.Delete(config.AppName()+"_meta", "build_boxfile")
-	data.Delete(config.AppName()+"_meta", "dev_build_boxfile")
+	data.Delete(config.AppID()+"_meta", "build_boxfile")
+	data.Delete(config.AppID()+"_meta", "dev_build_boxfile")
 
 	// delete the evars model
-	return data.Delete(config.AppName()+"_meta", appTeardown.control.Env+"_env")
+	return data.Delete(config.AppID()+"_meta", appTeardown.control.Env+"_env")
 }
 
 // deleteApp deletes the app to the db
 func (appTeardown *processAppTeardown) deleteApp() error {
 
 	// delete the app model
-	key := fmt.Sprintf("%s_%s", config.AppName(), appTeardown.control.Env)
+	key := fmt.Sprintf("%s_%s", config.AppID(), appTeardown.control.Env)
 	if err := data.Delete("apps", key); err != nil {
 		return err
 	}

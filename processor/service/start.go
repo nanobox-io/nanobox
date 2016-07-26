@@ -112,7 +112,7 @@ func (serviceStart *processServiceStart) attachNetwork() error {
 func (serviceStart processServiceStart) isServiceRunning() bool {
 	uid := serviceStart.control.Meta["name"]
 
-	container, err := docker.GetContainer(fmt.Sprintf("nanobox_%s_%s_%s", config.AppName(), serviceStart.control.Env, uid))
+	container, err := docker.GetContainer(fmt.Sprintf("nanobox_%s_%s_%s", config.AppID(), serviceStart.control.Env, uid))
 
 	// if the container doesn't exist then just return false
 	return err == nil && container.State.Status == "running"
@@ -133,7 +133,7 @@ func (serviceStart *processServiceStart) validateMeta() error {
 
 	// set the name of the app if we are not given one
 	if serviceStart.control.Meta["app_name"] == "" {
-		serviceStart.control.Meta["app_name"] = fmt.Sprintf("%s_%s", config.AppName(), serviceStart.control.Env)
+		serviceStart.control.Meta["app_name"] = fmt.Sprintf("%s_%s", config.AppID(), serviceStart.control.Env)
 	}
 
 	return nil

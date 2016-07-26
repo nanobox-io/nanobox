@@ -93,7 +93,7 @@ func (codeSetup *processCodeSetup) Process() error {
 	defer codeSetup.clean(codeSetup.removeIPFromProvider)()
 
 	// save the service
-	bucket := fmt.Sprintf("%s_%s", config.AppName(), codeSetup.control.Env)
+	bucket := fmt.Sprintf("%s_%s", config.AppID(), codeSetup.control.Env)
 	if err := data.Put(bucket, codeSetup.control.Meta["name"], codeSetup.service); err != nil {
 		codeSetup.fail = true
 		lumber.Error("insert data: ", err)
@@ -106,7 +106,7 @@ func (codeSetup *processCodeSetup) Process() error {
 // serviceExists ...
 func (codeSetup *processCodeSetup) serviceExists() bool {
 	service := models.Service{}
-	bucket := fmt.Sprintf("%s_%s", config.AppName(), codeSetup.control.Env)
+	bucket := fmt.Sprintf("%s_%s", config.AppID(), codeSetup.control.Env)
 	databaseErr := data.Get(bucket, codeSetup.control.Meta["name"], &service)
 
 	// set the service i found so i dont re allocate ips
@@ -190,7 +190,7 @@ func (codeSetup *processCodeSetup) createContainer() error {
 	// configure the container
 	fmt.Println("-> building container", codeSetup.control.Meta["name"])
 	config := docker.ContainerConfig{
-		Name:    fmt.Sprintf("nanobox_%s_%s_%s", config.AppName(), codeSetup.control.Env, codeSetup.control.Meta["name"]),
+		Name:    fmt.Sprintf("nanobox_%s_%s_%s", config.AppID(), codeSetup.control.Env, codeSetup.control.Meta["name"]),
 		Image:   codeSetup.control.Meta["image"],
 		Network: "virt",
 		IP:      codeSetup.service.InternalIP,

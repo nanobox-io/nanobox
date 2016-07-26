@@ -56,7 +56,7 @@ func (devDestroy processDevDestroy) Process() error {
 // removeServices gets all the services in the app and remove them
 func (devDestroy processDevDestroy) removeServices() error {
 
-	bucket := fmt.Sprintf("%s_dev", config.AppName())
+	bucket := fmt.Sprintf("%s_dev", config.AppID())
 	services, err := data.Keys(bucket)
 	if err != nil {
 		return fmt.Errorf("data keys: %s", err.Error())
@@ -68,7 +68,7 @@ func (devDestroy processDevDestroy) removeServices() error {
 	for _, service := range services {
 		if service != "build" {
 			// svc := models.Service{}
-			// data.Get(config.AppName(), service, &svc)
+			// data.Get(config.AppID(), service, &svc)
 			devDestroy.control.Meta["name"] = service
 			err := processor.Run("service_destroy", devDestroy.control)
 			if err != nil {
@@ -87,7 +87,7 @@ func (devDestroy processDevDestroy) removeServices() error {
 // remove the development container if one exists
 // if not dont complain
 func (devDestroy processDevDestroy) removeDev() {
-	name := fmt.Sprintf("nanobox_%s_dev", config.AppName())
+	name := fmt.Sprintf("nanobox_%s_dev", config.AppID())
 
 	docker.ContainerRemove(name)
 }

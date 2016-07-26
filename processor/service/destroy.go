@@ -36,7 +36,7 @@ func serviceDestroyFn(control processor.ProcessControl) (processor.Processor, er
 		return nil, fmt.Errorf("missing image or name")
 	}
 	if control.Meta["app_name"] == "" {
-		control.Meta["app_name"] = fmt.Sprintf("%s_%s", config.AppName(), control.Env)
+		control.Meta["app_name"] = fmt.Sprintf("%s_%s", config.AppID(), control.Env)
 	}
 	return processServiceDestroy{control: control}, nil
 }
@@ -117,7 +117,7 @@ func (serviceDestroy *processServiceDestroy) printDisplay() error {
 func (serviceDestroy *processServiceDestroy) removeContainer() error {
 
 	name := serviceDestroy.control.Meta["name"]
-	container := fmt.Sprintf("nanobox_%s_%s_%s", config.AppName(), serviceDestroy.control.Env, name)
+	container := fmt.Sprintf("nanobox_%s_%s_%s", config.AppID(), serviceDestroy.control.Env, name)
 
 	if err := docker.ContainerRemove(container); err != nil {
 		return err
@@ -161,7 +161,7 @@ func (serviceDestroy *processServiceDestroy) detachNetwork() error {
 func (serviceDestroy processServiceDestroy) removeEvars() error {
 	// fetch the environment variables model
 	envVars := models.Evars{}
-	data.Get(config.AppName()+"_meta", "env", &envVars)
+	data.Get(config.AppID()+"_meta", "env", &envVars)
 
 	// create a prefix for each of the environment variables.
 	// for example, if the service is 'data.db' the prefix
@@ -179,7 +179,7 @@ func (serviceDestroy processServiceDestroy) removeEvars() error {
 	}
 
 	// persist the evars
-	if err := data.Put(config.AppName()+"_meta", "env", envVars); err != nil {
+	if err := data.Put(config.AppID()+"_meta", "env", envVars); err != nil {
 		return err
 	}
 

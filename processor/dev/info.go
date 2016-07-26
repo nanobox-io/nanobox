@@ -36,7 +36,7 @@ func (devInfo processDevInfo) Results() processor.ProcessControl {
 func (devInfo processDevInfo) Process() error {
 
 	//
-	bucket := fmt.Sprintf("%s_dev", config.AppName())
+	bucket := fmt.Sprintf("%s_dev", config.AppID())
 	services, err := data.Keys(bucket)
 	if err != nil {
 		fmt.Println("data keys:", err)
@@ -56,7 +56,7 @@ func (devInfo processDevInfo) Process() error {
 
 	//
 	envVars := models.Evars{}
-	data.Get(config.AppName()+"_meta", "dev_env", &envVars)
+	data.Get(config.AppID()+"_meta", "dev_env", &envVars)
 	bytes, _ := json.MarshalIndent(envVars, "", "  ")
 	fmt.Printf("%s\n", bytes)
 

@@ -138,7 +138,7 @@ func (control ProcessControl) Trace(msg string) {
 // getAppID ...
 func getAppID(alias string) string {
 	link := models.AppLinks{}
-	data.Get(config.AppName()+"_meta", "links", &link)
+	data.Get(config.AppID()+"_meta", "links", &link)
 	if alias == "" {
 		alias = "default"
 	}

@@ -46,7 +46,7 @@ func (envConsole processEnvConsole) Process() error {
 	}
 
 	//
-	id := fmt.Sprintf("nanobox_%s_%s_%s", config.AppName(), envConsole.control.Env, envConsole.container)
+	id := fmt.Sprintf("nanobox_%s_%s_%s", config.AppID(), envConsole.control.Env, envConsole.container)
 	if container, err := docker.GetContainer(id); err == nil {
 		envConsole.container = container.ID
 	}
@@ -93,7 +93,7 @@ func (envConsole *processEnvConsole) validateMeta() error {
 	// set container; if no container is provided default to "build"
 	envConsole.container = envConsole.control.Meta["container"]
 	if envConsole.container == "" {
-		envConsole.container = fmt.Sprintf("nanobox_%s_build", config.AppName())
+		envConsole.container = fmt.Sprintf("nanobox_%s_build", config.AppID())
 	}
 
 	// set shell; if no shell is provided default to "bash"

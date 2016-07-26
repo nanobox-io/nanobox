@@ -92,7 +92,7 @@ func (devConsole *processDevConsole) Process() error {
 // loadApp loads the app from the db
 func (devConsole *processDevConsole) loadApp() error {
 
-	key := fmt.Sprintf("%s_%s", config.AppName(), devConsole.control.Env)
+	key := fmt.Sprintf("%s_%s", config.AppID(), devConsole.control.Env)
 	if err := data.Get("apps", key, &devConsole.app); err != nil {
 		return err
 	}
@@ -109,7 +109,7 @@ func (devConsole *processDevConsole) setup() error {
 	defer locker.LocalUnlock()
 
 	// let anyone else know we're using the dev container
-	counter.Increment(config.AppName() + "_dev")
+	counter.Increment(config.AppID() + "_dev")
 
 	//
 	if err := devConsole.loadBoxfile(); err != nil {
@@ -172,7 +172,7 @@ func (devConsole *processDevConsole) teardown() error {
 	locker.LocalLock()
 	defer locker.LocalUnlock()
 
-	counter.Decrement(config.AppName() + "_dev")
+	counter.Decrement(config.AppID() + "_dev")
 
 	//
 	if devIsUnused() {
@@ -199,7 +199,7 @@ func (devConsole *processDevConsole) teardown() error {
 // loadBoxfile loads the build boxfile from the database
 func (devConsole *processDevConsole) loadBoxfile() error {
 
-	if err := data.Get(config.AppName()+"_meta", "build_boxfile", &devConsole.boxfile); err != nil {
+	if err := data.Get(config.AppID()+"_meta", "build_boxfile", &devConsole.boxfile); err != nil {
 		return err
 	}
 
@@ -252,7 +252,7 @@ func (devConsole *processDevConsole) releaseIP() error {
 func (devConsole *processDevConsole) launchContainer() error {
 	// parse the boxfile data
 	boxfile := boxfile.New(devConsole.boxfile.Data)
-	appName := config.AppName()
+	appName := config.AppID()
 
 	config := docker.ContainerConfig{
 		Name:    fmt.Sprintf("nanobox_%s_dev", appName),
@@ -287,7 +287,7 @@ func (devConsole *processDevConsole) launchContainer() error {
 // removeContainer will lookup the dev container and remove it
 func (devConsole *processDevConsole) removeContainer() error {
 
-	name := fmt.Sprintf("nanobox_%s_dev", config.AppName())
+	name := fmt.Sprintf("nanobox_%s_dev", config.AppID())
 
 	// grab the container info
 	container, err := docker.GetContainer(name)
@@ -310,7 +310,7 @@ func (devConsole *processDevConsole) removeContainer() error {
 func (devConsole *processDevConsole) devPayload() string {
 	rtn := map[string]interface{}{}
 	envVars := models.Evars{}
-	data.Get(config.AppName()+"_meta", "dev_env", &envVars)
+	data.Get(config.AppID()+"_meta", "dev_env", &envVars)
 	rtn["env"] = envVars
 	bytes, _ := json.Marshal(rtn)
 	return string(bytes)
@@ -323,7 +323,7 @@ func (devConsole *processDevConsole) runConsole() error {
 		Env:     devConsole.control.Env,
 		Verbose: devConsole.control.Verbose,
 		Meta: map[string]string{
-			"container": fmt.Sprintf("nanobox_%s_dev", config.AppName()),
+			"container": fmt.Sprintf("nanobox_%s_dev", config.AppID()),
 			"cwd":       devConsole.cwd(),
 			"shell":     "zsh",
 		},
@@ -422,13 +422,13 @@ func (devConsole *processDevConsole) detachNetwork() error {
 
 // devIsUnused returns true if the dev isn't being used by any other session
 func devIsUnused() bool {
-	count, err := counter.Get(config.AppName() + "_dev")
+	count, err := counter.Get(config.AppID() + "_dev")
 	return count == 0 && err == nil
 }
 
 // isDevRunning returns true if a service is already running
 func isDevRunning() bool {
-	name := fmt.Sprintf("nanobox_%s_dev", config.AppName())
+	name := fmt.Sprintf("nanobox_%s_dev", config.AppID())
 
 	container, err := docker.GetContainer(name)
 

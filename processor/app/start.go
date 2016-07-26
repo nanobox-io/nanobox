@@ -101,7 +101,7 @@ func (appStart *processAppStart) validateMeta() error {
 
 	// set the name of the app if we are not given one
 	if appStart.control.Meta["name"] == "" {
-		appStart.control.Meta["name"] = fmt.Sprintf("%s_%s", config.AppName(), appStart.control.Env)
+		appStart.control.Meta["name"] = fmt.Sprintf("%s_%s", config.AppID(), appStart.control.Env)
 	}
 
 	return nil

@@ -91,7 +91,7 @@ func (platformDeploy processPlatformDeploy) isServiceActive(id string) bool {
 
 	// fetch the entry from the database, ignoring any errors as the service
 	// might not exist yet
-	bucket := fmt.Sprintf("%s_%s", config.AppName(), platformDeploy.control.Env)
+	bucket := fmt.Sprintf("%s_%s", config.AppID(), platformDeploy.control.Env)
 	data.Get(bucket, id, &service)
 
 	return service.State == "active"

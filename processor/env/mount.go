@@ -40,7 +40,7 @@ func (envMount *processEnvMount) Process() error {
 	// mount the engine if it's a local directory
 	if config.EngineDir() != "" {
 		src := config.EngineDir()
-		dst := fmt.Sprintf("%s%s/engine", provider.HostShareDir(), config.AppName())
+		dst := fmt.Sprintf("%s%s/engine", provider.HostShareDir(), config.AppID())
 
 		// first export the env on the workstation
 		if err := envMount.addShare(src, dst); err != nil {
@@ -55,7 +55,7 @@ func (envMount *processEnvMount) Process() error {
 
 	// mount the app src
 	src := config.LocalDir()
-	dst := fmt.Sprintf("%s%s/code", provider.HostShareDir(), config.AppName())
+	dst := fmt.Sprintf("%s%s/code", provider.HostShareDir(), config.AppID())
 
 	// first export the env on the workstation
 	if err := envMount.addShare(src, dst); err != nil {

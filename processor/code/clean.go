@@ -42,7 +42,7 @@ func (codeClean *processCodeClean) Process() error {
 	defer locker.LocalUnlock()
 
 	// remove all the existing code services
-	bucket := fmt.Sprintf("%s_%s", config.AppName(), codeClean.control.Env)
+	bucket := fmt.Sprintf("%s_%s", config.AppID(), codeClean.control.Env)
 	keys, err := data.Keys(bucket)
 	if err != nil {
 		return err

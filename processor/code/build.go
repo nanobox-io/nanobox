@@ -50,7 +50,7 @@ func (codeBuild processCodeBuild) Results() processor.ProcessControl {
 func (codeBuild *processCodeBuild) Process() error {
 
 	// remove any leftover build containers that may exist
-	docker.ContainerRemove(fmt.Sprintf("nanobox_%s_build", config.AppName()))
+	docker.ContainerRemove(fmt.Sprintf("nanobox_%s_build", config.AppID()))
 
 	codeBuild.control.Display(stylish.Bullet("Building Code"))
 
@@ -179,9 +179,9 @@ func (codeBuild *processCodeBuild) releaseIP() error {
 // startContainer starts a build container
 func (codeBuild *processCodeBuild) startContainer() error {
 
-	appName := config.AppName()
+	appName := config.AppID()
 	config := docker.ContainerConfig{
-		Name:    fmt.Sprintf("nanobox_%s_build", config.AppName()),
+		Name:    fmt.Sprintf("nanobox_%s_build", config.AppID()),
 		Image:   codeBuild.image, // this will need to be controlurable some time
 		Network: "virt",
 		IP:      codeBuild.localIP.String(),
@@ -224,7 +224,7 @@ func (codeBuild *processCodeBuild) runBoxfileHook() error {
 	// store it in the database as well
 	codeBuild.buildBoxfile.Data = []byte(output)
 
-	return data.Put(config.AppName()+"_meta", "build_boxfile", codeBuild.buildBoxfile)
+	return data.Put(config.AppID()+"_meta", "build_boxfile", codeBuild.buildBoxfile)
 }
 
 // runDebugSession drops the user in the build container to debug

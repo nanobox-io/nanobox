@@ -97,7 +97,7 @@ func (simDeploy *processSimDeploy) publishCode() error {
 
 	// setup the var's required for code_publish
 	hoarder := models.Service{}
-	bucket := fmt.Sprintf("%s_%s", config.AppName(), simDeploy.control.Env)
+	bucket := fmt.Sprintf("%s_%s", config.AppID(), simDeploy.control.Env)
 	data.Get(bucket, "hoarder", &hoarder)
 
 	simDeploy.control.Meta["build_id"] = "1234"

@@ -43,7 +43,7 @@ func (envUnmount *processEnvUnmount) validateMeta() error {
 
 	// set the name of the app if we are not given one
 	if envUnmount.control.Meta["app_name"] == "" {
-		envUnmount.control.Meta["app_name"] = fmt.Sprintf("%s_%s", config.AppName(), envUnmount.control.Env)
+		envUnmount.control.Meta["app_name"] = fmt.Sprintf("%s_%s", config.AppID(), envUnmount.control.Env)
 	}
 
 	// Get the root of the app (without _sim or _dev)

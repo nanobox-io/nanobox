@@ -42,14 +42,14 @@ func (linkAdd processLinkAdd) Process() error {
 
 	// store the auth token
 	link := models.AppLinks{}
-	if err := data.Get(config.AppName()+"_meta", "links", &link); err != nil {
+	if err := data.Get(config.AppID()+"_meta", "links", &link); err != nil {
 		//
 	}
 
 	//
 	link[linkAdd.alias] = app.ID
 
-	return data.Put(config.AppName()+"_meta", "links", link)
+	return data.Put(config.AppID()+"_meta", "links", link)
 }
 
 // validateMeta validates that the required metadata exists
