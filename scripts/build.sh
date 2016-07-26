@@ -14,4 +14,4 @@ gox -osarch "darwin/amd64 linux/amd64 windows/amd64" -output="./build/v1/{{.OS}}
 printf "\nBuilding nanobox updater...\n"
 
 # change into updater directory and build nanobox updater
-cd ./updater && gox -osarch "darwin/amd64 linux/amd64 windows/amd64" -output="../build/v1/{{.OS}}/{{.Arch}}/nanobox-updater"
+cd ./updater && gox -osarch "darwin/amd64 linux/amd64 windows/amd64" -output="../build/v1/{{.OS}}/{{.Arch}}/nanobox-update"

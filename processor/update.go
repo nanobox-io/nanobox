@@ -165,7 +165,7 @@ func runUpdate() error {
 
 // downloadUpdater attempts to download the nanobox-updater from S3.
 func downloadUpdater(location string) error {
-	tmpFile := filepath.Join(config.TmpDir(), "nanobox-updater")
+	tmpFile := filepath.Join(config.TmpDir(), "nanobox-update")
 
 	// create a tmp updater in tmp dir
 	f, err := os.Create(tmpFile)
@@ -175,15 +175,15 @@ func downloadUpdater(location string) error {
 	defer f.Close()
 
 	// the updateder is not available and needs to be downloaded
-	dl := fmt.Sprintf("%s/%s/%s/nanobox-updater", pathToDownload, runtime.GOOS, runtime.GOARCH)
+	dl := fmt.Sprintf("%s/%s/%s/nanobox-update", pathToDownload, runtime.GOOS, runtime.GOARCH)
 
 	// download the updater
-	fmt.Printf("'nanobox-updater' not found. Downloading from '%s' to '%s'\n", dl, location)
+	fmt.Printf("'nanobox-update' not found. Downloading from '%s' to '%s'\n", dl, location)
 	fileutil.Progress(dl, f)
 
 	// ensure updater download matches the remote md5; if the download fails for
 	// any reason this md5 should NOT match.
-	md5 := fmt.Sprintf("%s/%s/%s/nanobox-updater.md5", pathToDownload, runtime.GOOS, runtime.GOARCH)
+	md5 := fmt.Sprintf("%s/%s/%s/nanobox-update.md5", pathToDownload, runtime.GOOS, runtime.GOARCH)
 	if _, err = cryptoutil.MD5Match(tmpFile, md5); err != nil {
 		return err
 	}
@@ -194,7 +194,7 @@ func downloadUpdater(location string) error {
 	}
 
 	// move updater to the same location as the cli
-	if err = os.Rename(tmpFile, filepath.Join(location, "nanobox-updater")); err != nil {
+	if err = os.Rename(tmpFile, filepath.Join(location, "nanobox-update")); err != nil {
 		return err
 	}
 

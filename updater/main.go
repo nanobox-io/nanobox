@@ -12,20 +12,21 @@ import (
 	"github.com/mitchellh/go-homedir"
 	cryptoutil "github.com/sdomino/go-util/crypto"
 	fileutil "github.com/sdomino/go-util/file"
+	
+	"github.com/nanobox-io/nanobox/util"
 )
 
 var (
-
 	// path to nanobox download; this is hardcoded since the updater will only be
 	// responsible for updating minor and patch versions of nanobox. If another major
 	// version is released, it will include it's own downloader
 	pathToDownload = "https://s3.amazonaws.com/tools.nanobox.io/nanobox/v1"
-
+	
 	// name of the file to download ("nanobox" or "nanobox-dev")
-	fileToDownload = "nanobox"
+  fileToDownload = "nanobox"
 
-	// map of available downloads
-	availableDownloads = map[string]bool{"nanobox": true, "nanobox-dev": true}
+  // map of available downloads
+  availableDownloads = map[string]bool{"nanobox": true, "nanobox-dev": true}
 )
 
 // main ...
@@ -48,6 +49,19 @@ func main() {
 		os.Exit(1)
 	}
 
+	if runtime.GOOS == "windows" && !util.IsPrivileged() {
+		// re-run this command as the administrative user
+		fmt.Println("The update process requires Admin privileges, escalating...")
+		
+		cmd := fmt.Sprintf("%s -o %s", os.Args[0], fileToDownload)
+		if err := util.PrivilegeExec(cmd); err != nil {
+			os.Exit(1)
+		}
+		
+		// we're done
+		return
+	}
+
 	// get the current users home dir
 	home, err := homedir.Dir()
 	if err != nil {
@@ -55,8 +69,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	tmpDir := filepath.Join(home, ".nanobox", "tmp")
-	tmpPath := filepath.Join(tmpDir, fileToDownload)
+	// if this is windows, we need to tack an .exe extension onto the file
+	if runtime.GOOS == "windows" {
+		fileToDownload += ".exe"
+	}
+
+	tmpDir := filepath.ToSlash(filepath.Join(home, ".nanobox", "tmp"))
+	tmpPath := filepath.ToSlash(filepath.Join(tmpDir, fileToDownload))
 
 	// attempt to make a ~.nanobox/tmp directory just incase it doesn't exist
 	if err := os.MkdirAll(tmpDir, 0755); err != nil {
@@ -70,11 +89,14 @@ func main() {
 		fmt.Println("Failed to create temporary file - ", err.Error())
 		os.Exit(1)
 	}
-	defer tmpFile.Close()
 
 	// download the new CLI
 	fmt.Printf("Updating %s...\n", fileToDownload)
-	fileutil.Progress(fmt.Sprintf("%s/%s/%s/%s", pathToDownload, runtime.GOOS, runtime.GOARCH, fileToDownload), tmpFile)
+	pathLabel := filepath.ToSlash(fmt.Sprintf("%s/%s/%s/%s", pathToDownload, runtime.GOOS, runtime.GOARCH, fileToDownload))
+	fileutil.Progress(pathLabel, tmpFile)
+
+	// close the handle now so we can move the file later
+	tmpFile.Close()
 
 	// ensure new CLI download matches the remote md5; if the download fails for any
 	// reason these md5's should NOT match.
@@ -83,9 +105,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	// make new CLI executable
-	if err := os.Chmod(tmpPath, 0755); err != nil {
-		fmt.Println("Failed to set permissions - ", err.Error())
+	// The process for windows is different enough than the unixes
+	if runtime.GOOS != "windows" {
+		// make new CLI executable	
+		if err := os.Chmod(tmpPath, 0755); err != nil {
+			fmt.Println("Failed to set permissions - ", err.Error())
+		}
 	}
 
 	// replace the old CLI with the new one
@@ -99,9 +124,18 @@ func main() {
 
 	// if the new CLI fails to execute, just print a generic message and return
 	if err != nil {
-		fmt.Printf("[√] Update successful")
-		return
+		fmt.Printf("[!] Update failed")
+	} else {
+		fmt.Printf("[√] Now running %s", string(out))
 	}
 
-	fmt.Printf("[√] Now running %s", string(out))
+	
+	if runtime.GOOS == "windows" {
+		// The update process was spawned in a separate window, which will
+		// close as soon as this command is finished. To ensure they see the
+		// message, we need to hold open the process until they hit enter.
+		fmt.Println("Enter to continue:")
+		var input string
+    fmt.Scanln(&input)
+	}
 }
