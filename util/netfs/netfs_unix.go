@@ -63,6 +63,10 @@ func Add(path string) error {
 		return err
 	}
 
+	if err := cleanExport(); err != nil {
+		return err
+	}
+
 	// reload nfsd
 	if err := reloadServer(); err != nil {
 		return err
@@ -153,6 +157,50 @@ func addEntry(entry string) error {
 	}
 
 	return nil
+}
+
+func cleanExport() error {
+
+	// contents will end up storing the entire contents of the file excluding the
+	// entry that no longer have a folder
+	var contents string
+
+	// open exports file
+	f, err := os.OpenFile(EXPORTSFILE, os.O_RDWR, 0644)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	// remove entry from /etc/exports
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		parts := strings.Split(scanner.Text(), "\"")
+
+		// if it starts with a "
+		if len(parts) > 1 {
+			fileInfo, err := os.Stat(parts[1])
+			if err != nil || !fileInfo.IsDir() {
+				continue
+			}
+		}
+		
+		// add each line back into the file
+		contents += fmt.Sprintf("%s\n", scanner.Text())
+	}
+
+	// trim the contents to avoid any extra newlines
+	contents = strings.TrimSpace(contents)
+
+	// add a single newline for completeness
+	contents += "\n"
+
+	// write back the contents of the exports file minus the removed entry
+	if err := ioutil.WriteFile(EXPORTSFILE, []byte(contents), 0644); err != nil {
+		return err
+	}
+
+	return nil	
 }
 
 // removeEntry will remove the entry from the /etc/exports file
