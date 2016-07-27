@@ -51,7 +51,14 @@ func main() {
 
 	if runtime.GOOS == "windows" && !util.IsPrivileged() {
 		// re-run this command as the administrative user
-		fmt.Println("The update process requires Admin privileges, escalating...")
+		fmt.Println("The update process requires Administrator privileges.")
+		fmt.Println("Another window will be opened as the Administrator to continue this process.")
+		
+		// block here until the user hits enter. It's not ideal, but we need to make
+		// sure they see the new window open.
+		fmt.Println("Enter to continue:")
+		var input string
+		fmt.Scanln(&input)
 		
 		cmd := fmt.Sprintf("%s -o %s", os.Args[0], fileToDownload)
 		if err := util.PrivilegeExec(cmd); err != nil {

@@ -740,7 +740,7 @@ func (machine DockerMachine) HostIP() (string, error) {
 func (machine DockerMachine) Run(command []string) ([]byte, error) {
 
 	// All commands need to be run in the docker machine, so we create a prefix
-	context := []string{"docker-machine", "ssh", "nanobox", "sudo"}
+	context := []string{"docker-machine", "ssh", "nanobox"}
 
 	// now we can generate a run command combining the context with the command
 	run := append(context, command...)

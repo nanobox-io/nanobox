@@ -100,14 +100,14 @@ func Remove(path string) error {
 func Mount(hostPath, mountPath string) error {
 
 	// ensure portmap is running
-	cmd := []string{"/usr/local/sbin/portmap"}
+	cmd := []string{"sudo", "/usr/local/sbin/portmap"}
 	if b, err := provider.Run(cmd); err != nil {
 		lumber.Debug("output: %s", b)
 		return fmt.Errorf("portmap:%s", err.Error())
 	}
 
 	// ensure the destination directory exists
-	cmd = []string{"/bin/mkdir", "-p", mountPath}
+	cmd = []string{"sudo", "/bin/mkdir", "-p", mountPath}
 	if b, err := provider.Run(cmd); err != nil {
 		lumber.Debug("output: %s", b)
 		return fmt.Errorf("mkdir:%s", err.Error())
@@ -115,7 +115,7 @@ func Mount(hostPath, mountPath string) error {
 
 	// TODO: this IP shouldn't be hardcoded, needs to be figured out!
 	source := fmt.Sprintf("192.168.99.1:%s", hostPath)
-	cmd = []string{"/bin/mount", "-t", "nfs", source, mountPath}
+	cmd = []string{"sudo", "/bin/mount", "-t", "nfs", source, mountPath}
 	if b, err := provider.Run(cmd); err != nil {
 		lumber.Debug("output: %s", b)
 		return fmt.Errorf("mount: output: %s err:%s", b, err.Error())

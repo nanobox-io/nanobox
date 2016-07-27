@@ -3,6 +3,7 @@ package dns
 import (
 	"fmt"
 	"os"
+	"runtime"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
@@ -105,12 +106,24 @@ func (envDNSRemove *processEnvDNSRemove) removeEntries() error {
 // reExecPrivilege re-execs the current process with a privileged user
 func (envDNSRemove *processEnvDNSRemove) reExecPrivilege() error {
 
+	if runtime.GOOS == "windows" {
+		fmt.Println("Administrator privileges are required to modify host dns entries.")
+		fmt.Println("Another window will be opened as the Administrator and your password may be requested.")
+		
+		// block here until the user hits enter. It's not ideal, but we need to make
+		// sure they see the new window open if it requests their password.
+		fmt.Println("Enter to continue:")
+		var input string
+		fmt.Scanln(&input)
+	} else {
+		fmt.Println("Root privileges are required to modify your hosts file, your password may be requested...")
+	}
+
 	// call 'dev dns rm' with the original path and args; os.Args[0] will be the
 	// currently executing program, so this command will ultimately lead right back
 	// here
 	cmd := fmt.Sprintf("%s %s dns rm %s", os.Args[0], envDNSRemove.control.Env, envDNSRemove.name)
 
 	// if the sudo'ed subprocess fails, we need to return error to stop the process
-	fmt.Println("Admin privileges are required to remove DNS entries from your hosts file...")
 	return util.PrivilegeExec(cmd)
 }
