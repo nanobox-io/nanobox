@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"strings"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox-golang-stylish"
@@ -44,6 +45,11 @@ func (machine DockerMachine) Valid() error {
 	return nil
 }
 
+func (machine DockerMachine) Status() string {
+	cmd := exec.Command("docker-machine", "status", "nanobox")
+	output, _ := cmd.CombinedOutput()
+	return strings.TrimSpace(string(output))
+}
 // Create creates the docker-machine vm
 func (machine DockerMachine) Create() error {
 

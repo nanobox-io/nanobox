@@ -9,6 +9,7 @@ import (
 
 // Provider ...
 type Provider interface {
+	Status() string
 	IsReady() bool
 	HostShareDir() string
 	HostMntDir() string
@@ -70,6 +71,17 @@ func ValidReady() error {
 		return errors.New("the provider is not ready try running 'nanobox start' first")
 	}
 	return nil
+}
+
+// Status ...
+func Status() string {
+
+	p, err := fetchProvider()
+	if err != nil {
+		return "err: " + err.Error()
+	}
+
+	return p.Status()
 }
 
 // Create ...

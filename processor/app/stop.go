@@ -104,7 +104,7 @@ func (appStop *processAppStop) validateMeta() error {
 
 	// set the name of the app if we are not given one
 	if appStop.control.Meta["name"] == "" {
-		appStop.control.Meta["name"] = fmt.Sprintf("%s_%s", config.AppName(), appStop.control.Env)
+		appStop.control.Meta["name"] = fmt.Sprintf("%s_%s", config.AppID(), appStop.control.Env)
 	}
 
 	return nil

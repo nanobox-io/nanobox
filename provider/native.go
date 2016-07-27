@@ -40,6 +40,10 @@ func (native Native) Valid() error {
 	return nil
 }
 
+func (native Native) Status() string {
+	return "GOOD TO GO!"
+}
+
 // Create does nothing for native
 func (native Native) Create() error {
 	// TODO: maybe some setup stuff???
