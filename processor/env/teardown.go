@@ -1,8 +1,6 @@
 package env
 
 import (
-	"fmt"
-
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
@@ -29,12 +27,6 @@ func (teardown processTeardown) Results() processor.ProcessControl {
 
 //
 func (teardown *processTeardown) Process() error {
-
-	// dont shut anything down if we are supposed to background
-	if processor.DefaultControl.Debug {
-		fmt.Println("leaving running because your running in debug mode")
-		return nil
-	}
 
 	// if im given a environment to teardown i will tear the app down
 	// in the env. If not (in the case of a build) no app is teardownable.

@@ -39,12 +39,21 @@ match an DNS entry in your to your local hosts file.
 		`,
 		Run:   dnsRmFn,
 	}
+	// DNSRemoveCmd ...
+	DNSRemoveAllCmd = &cobra.Command{
+		Use:   "rm-all",
+		Short: "Removes all hostname mappings associated with your dev app.",
+		Long:  ``,
+		Run:   dnsRmAllFn,
+		Hidden: true,
+	}
 )
 
 //
 func init() {
 	DNSCmd.AddCommand(DNSAddCmd)
 	DNSCmd.AddCommand(DNSRemoveCmd)
+	DNSCmd.AddCommand(DNSRemoveAllCmd)
 }
 
 // dnsAddFn will run the DNS processor for adding DNS entires to the "hosts"
@@ -92,4 +101,13 @@ ex: nanobox sim dns rm <name>
 	processor.DefaultControl.Meta["name"] = args[0]
 	processor.DefaultControl.Env = "sim"
 	print.OutputCommandErr(processor.Run("env_dns_remove", processor.DefaultControl))
+}
+
+// dnsRmAllFn will run the DNS processor for removing DNS entries from the "hosts"
+// file
+func dnsRmAllFn(ccmd *cobra.Command, args []string) {
+
+	// set the meta arguments to be used in the processor and run the processor
+	processor.DefaultControl.Env = "dev"
+	print.OutputCommandErr(processor.Run("env_dns_remove_all", processor.DefaultControl))
 }

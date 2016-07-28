@@ -45,7 +45,7 @@ func (stop processStop) stopAllApps() error {
 
 	// run the app stop on all running apps
 	for _, app := range upApps() {
-		control.Meta["name"] = app.Name
+		control.Meta["name"] = app.ID
 
 		err := Run("app_stop", control)
 		if err != nil {

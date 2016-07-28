@@ -27,7 +27,7 @@ func statusFn(ccmd *cobra.Command, args []string) {
 	for _, appName := range appNames {
 		app := models.App{}
 		data.Get("apps", appName, &app)
-		fmt.Printf("  %s: %s\n", app.Name, app.Status)
+		fmt.Printf("  %s(%s): %s\n", app.ID, app.Name, app.Status)
 	}
 }
 
