@@ -12,8 +12,8 @@ import (
 	
 	"github.com/jcelliott/lumber"
 	
-	"github.com/howeyc/gopass"
 	"github.com/nanobox-io/nanobox/provider"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 )
 
@@ -122,12 +122,11 @@ func Mount(_, mountPath string) error {
 	
 	// fetch the password from the user
 	fmt.Printf("%s's password is required to mount a Windows share.\r\n", user)
-	fmt.Printf("Password: ")
-	pass, err := gopass.GetPasswdMasked()
+	pass, err := util.ReadPassword()
 	if err != nil {
 		return err
 	}
-	
+
 	// ensure the destination directory exists
 	cmd := []string{"sudo", "/bin/mkdir", "-p", mountPath}
 	if b, err := provider.Run(cmd); err != nil {

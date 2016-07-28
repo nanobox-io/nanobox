@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/odin"
 
@@ -64,7 +65,12 @@ func (login *processLogin) validateMeta() error {
 	}
 
 	if login.password == "" {
-		login.password = printutil.Password("Password:")
+		// ReadPassword prints Password: already
+		if pass, err := util.ReadPassword(); err != nil {
+			login.password = pass
+		} else {
+			login.password = ""
+		}
 		fmt.Println("password: ", login.password)
 	}
 

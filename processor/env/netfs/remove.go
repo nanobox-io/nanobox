@@ -96,7 +96,7 @@ func (envNetFSRemove *processEnvNetFSRemove) reExecPrivilege() error {
 
 	if runtime.GOOS == "windows" {
 		fmt.Println("Administrator privileges are required to modify network shares.")
-		fmt.Println("Another window will be opened as the Administrator and your password may be requested.")
+		fmt.Println("Another window will be opened as the Administrator and permission may be requested.")
 		
 		// block here until the user hits enter. It's not ideal, but we need to make
 		// sure they see the new window open if it requests their password.
