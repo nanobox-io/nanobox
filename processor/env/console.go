@@ -52,7 +52,15 @@ func (envConsole processEnvConsole) Process() error {
 	}
 
 	// this is the default command to run in the container
-	command := []string{"exec", "-u", "gonano", "-it", envConsole.container, "/bin/bash"}
+	cmd := []string{
+		"docker",
+		"exec",
+		"-u",
+		"gonano",
+		"-it",
+		envConsole.container,
+		"/bin/bash",
+	}
 
 	// check to see if there are any optional meta arguments that need to be handled
 	switch {
@@ -60,26 +68,24 @@ func (envConsole processEnvConsole) Process() error {
 	// if a current working directory (cwd) is provided then modify the command to
 	// change into that directory before executing
 	case envConsole.cwd != "":
-		command = append(command, "-c", fmt.Sprintf("cd %s; exec \"%s\"", envConsole.cwd, envConsole.shell))
+		cmd = append(cmd, "-c", fmt.Sprintf("cd %s; exec \"%s\"", envConsole.cwd, envConsole.shell))
 
 	// if a command is provided then modify the command to exec that command after
 	// running the base command
 	case envConsole.command != "":
-		command = append(command, "-c", envConsole.command)
+		cmd = append(cmd, "-c", envConsole.command)
 	}
 
-	//
-	cmd := exec.Command("docker", command...)
+	process := exec.Command(cmd[0], cmd[1:]...)
 
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	process.Stdin = os.Stdin
+	process.Stdout = os.Stdout
+	process.Stderr = os.Stderr
 
-	//
-	
-	if err := cmd.Run(); err != nil && err.Error() != "exit status 137" {
+	if err := process.Run(); err != nil && err.Error() != "exit status 137" {
 		return err
 	}
+	
 	return nil
 }
 
