@@ -12,7 +12,7 @@ var (
 	DevCmd = &cobra.Command{
 		Use:   "dev",
 		Short: "Manages your 'development' environment.",
-		Long: ``,
+		Long:  ``,
 	}
 )
 

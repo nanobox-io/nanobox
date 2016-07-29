@@ -1,8 +1,8 @@
 package service
 
 import (
-	"regexp"
 	"fmt"
+	"regexp"
 
 	"github.com/jcelliott/lumber"
 

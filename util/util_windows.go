@@ -17,7 +17,7 @@ func IsPrivileged() bool {
 	// process was not run as Administrator
 	cmd := exec.Command("net", "session")
 	output, err := cmd.CombinedOutput()
-	
+
 	// if there was an error, we'll short-circuit and return false
 	if err != nil {
 		return false
@@ -27,7 +27,7 @@ func IsPrivileged() bool {
 	if bytes.Contains(output, []byte("Access is denied.")) {
 		return false
 	}
-	
+
 	// if the previous checks didn't fail, then we must be the Administrator
 	return true
 }
@@ -63,7 +63,7 @@ func PrivilegeExec(command string) error {
 
 	// generate the powershell process
 	process := fmt.Sprintf("& {Start-Process %s -ArgumentList '%s' -Verb RunAs -Wait}", executable, arguments)
-	
+
 	// now we can generate a command to exec
 	cmd := exec.Command("PowerShell.exe", "-NoProfile", "-Command", process)
 
@@ -83,7 +83,7 @@ func PrivilegeExec(command string) error {
 func PowerShell(command string) ([]byte, error) {
 
 	process := fmt.Sprintf("& {%s}", command)
-	
+
 	cmd := exec.Command("PowerShell.exe", "-NoProfile", "-Command", process)
 
 	return cmd.CombinedOutput()

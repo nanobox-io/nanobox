@@ -28,7 +28,7 @@ type (
 	// member ...
 	member struct {
 		LocalIP string `json:"local_ip"`
-		UID     int `json:"uid"`
+		UID     int    `json:"uid"`
 		Role    string `json:"role"`
 	}
 

@@ -19,7 +19,7 @@ import (
 type processUpdatePortal struct {
 	control processor.ProcessControl
 	boxfile boxfile.Boxfile
-	portal models.Service
+	portal  models.Service
 }
 
 //
@@ -67,12 +67,12 @@ func (updatePortal *processUpdatePortal) Process() error {
 	return updatePortal.updatePorts()
 }
 
-// 
+//
 func (updatePortal *processUpdatePortal) loadPortal() error {
 	return data.Get(updatePortal.control.Meta["app_name"], "portal", &updatePortal.portal)
 }
 
-// 
+//
 func (updatePortal *processUpdatePortal) loadBoxfile() error {
 	updatePortal.boxfile = boxfile.New([]byte(updatePortal.control.Meta["boxfile"]))
 	if !updatePortal.boxfile.Valid {
@@ -148,7 +148,6 @@ func (updatePortal *processUpdatePortal) updatePorts() error {
 			services = append(services, service)
 		}
 	}
-
 
 	// send to portal
 	lumber.Trace("new services: %+v", services)
@@ -271,8 +270,8 @@ func parseRoute(route string) (subdomain, path string) {
 func ports(box boxfile.Boxfile) map[string]map[string]string {
 	// we allow tcp and udp ports
 	rtn := map[string]map[string]string{
-		"tcp":   map[string]string{},
-		"udp":   map[string]string{},
+		"tcp": map[string]string{},
+		"udp": map[string]string{},
 	}
 
 	// get the boxfiles ports section

@@ -5,8 +5,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util/data"
 )
 
@@ -17,7 +17,7 @@ var (
 		Use:   "status",
 		Short: "Manages environment variables in your local dev app.",
 		Long:  ``,
-		Run: statusFn,
+		Run:   statusFn,
 	}
 )
 
@@ -30,4 +30,3 @@ func statusFn(ccmd *cobra.Command, args []string) {
 		fmt.Printf("  %s(%s): %s\n", app.ID, app.Name, app.Status)
 	}
 }
-

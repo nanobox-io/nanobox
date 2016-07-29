@@ -9,41 +9,41 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
-	"github.com/nanobox-io/nanobox/util"
 )
 
 // processSimDeployHook ...
 type (
 	processSimDeployHook struct {
 		control processor.ProcessControl
-		app models.App
+		app     models.App
 		service models.Service
-		box boxfile.Boxfile
+		box     boxfile.Boxfile
 	}
 	// member ...
 	member struct {
-		UID     int `json:"uid,omitempty"`
+		UID int `json:"uid,omitempty"`
 	}
 
 	// component ...
 	component struct {
-		UID  string `json:"uid,omitempty"`
-		ID   string `json:"id,omitempty"`
+		UID string `json:"uid,omitempty"`
+		ID  string `json:"id,omitempty"`
 	}
 
 	// payload ...
 	payload struct {
-		LogvacHost string                 `json:"logvac_host"`
-		Platform   string                 `json:"platform"`
-		Member     member                 `json:"member"`
-		Component  component              `json:"component"`
-		BeforeDeploy interface{} `json:"before_deploy,omitempty"`
+		LogvacHost      string      `json:"logvac_host"`
+		Platform        string      `json:"platform"`
+		Member          member      `json:"member"`
+		Component       component   `json:"component"`
+		BeforeDeploy    interface{} `json:"before_deploy,omitempty"`
 		BeforeDeployAll interface{} `json:"before_deploy_all,omitempty"`
-		AfterDeploy interface{} `json:"after_deploy,omitempty"`
-		AfterDeployAll interface{} `json:"after_deploy_all,omitempty"`
-	}	
+		AfterDeploy     interface{} `json:"after_deploy,omitempty"`
+		AfterDeployAll  interface{} `json:"after_deploy_all,omitempty"`
+	}
 )
 
 //
@@ -61,7 +61,7 @@ func (simDeployHook *processSimDeployHook) validateMeta() error {
 
 	if simDeployHook.control.Meta["hook_type"] == "" {
 		return fmt.Errorf("Deploy hooks need a hook type")
-	}	
+	}
 
 	if simDeployHook.control.Meta["service_name"] == "" {
 		return fmt.Errorf("Deploy hooks need a service to run on")
@@ -78,7 +78,6 @@ func (simDeployHook *processSimDeployHook) validateMeta() error {
 
 	return nil
 }
-
 
 //
 func (simDeployHook processSimDeployHook) Results() processor.ProcessControl {
@@ -132,11 +131,11 @@ func (simDeployHook processSimDeployHook) hookPayload() string {
 		LogvacHost: app.LocalIPs["logvac"],
 		Platform:   "local",
 		Member: member{
-			UID:     1,
+			UID: 1,
 		},
 		Component: component{
-			UID:  serviceName,
-			ID:   service.ID,
+			UID: serviceName,
+			ID:  service.ID,
 		},
 		BeforeDeploy:    simDeployHook.box.Node("code.deploy").Node("before_deploy").Value(serviceName),
 		BeforeDeployAll: simDeployHook.box.Node("code.deploy").Node("before_deploy_all").Value(serviceName),

@@ -184,7 +184,7 @@ func cleanExport() error {
 				continue
 			}
 		}
-		
+
 		// add each line back into the file
 		contents += fmt.Sprintf("%s\n", scanner.Text())
 	}
@@ -200,7 +200,7 @@ func cleanExport() error {
 		return err
 	}
 
-	return nil	
+	return nil
 }
 
 // removeEntry will remove the entry from the /etc/exports file

@@ -3,8 +3,8 @@ package dev
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/print"
 	"github.com/nanobox-io/nanobox/validate"
@@ -13,9 +13,9 @@ import (
 // DestroyCmd ...
 var (
 	DestroyCmd = &cobra.Command{
-		Use:   "destroy",
-		Short: "Destroys the docker machines associated with your dev app.",
-		Long: ``,
+		Use:    "destroy",
+		Short:  "Destroys the docker machines associated with your dev app.",
+		Long:   ``,
 		PreRun: validate.Requires("provider", "provider_up"),
 		Run:    destroyFn,
 	}
@@ -34,7 +34,7 @@ func init() {
 func destroyFn(ccmd *cobra.Command, args []string) {
 	appID := getAppID()
 	if appID != "" {
-		processor.DefaultControl.Meta["app_name"]	= appID
+		processor.DefaultControl.Meta["app_name"] = appID
 	}
 	print.OutputCommandErr(processor.Run("dev_destroy", processor.DefaultControl))
 }

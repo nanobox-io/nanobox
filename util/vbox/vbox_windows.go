@@ -3,18 +3,18 @@
 package vbox
 
 import (
-  "fmt"
-  "os"
-  "os/exec"
-  "path/filepath"
-  
-  "golang.org/x/sys/windows/registry"
+	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
+
+	"golang.org/x/sys/windows/registry"
 )
 
-// DetectVBoxManageCmd tries to find VBoxManage 
+// DetectVBoxManageCmd tries to find VBoxManage
 func DetectVBoxManageCmd() string {
 	cmd := "VBoxManage"
-  
+
 	if p := os.Getenv("VBOX_INSTALL_PATH"); p != "" {
 		if path, err := exec.LookPath(filepath.Join(p, cmd)); err == nil {
 			return path

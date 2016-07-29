@@ -22,29 +22,29 @@ var (
 	DNSAddCmd = &cobra.Command{
 		Use:   "add",
 		Short: "Adds a hostname map to your sim app.",
-		Long:  `
+		Long: `
 Adds a hostname map to your sim app. The domain provided is added
 to your local hosts file pointing the the IP of your sim app.
 		`,
-		Run:   dnsAddFn,
+		Run: dnsAddFn,
 	}
 
 	// DNSRemoveCmd ...
 	DNSRemoveCmd = &cobra.Command{
 		Use:   "rm",
 		Short: "Removes a hostname map from your sim app.",
-		Long:  `
+		Long: `
 Removes a hostname map from your sim app. The domain must perfectly
 match an DNS entry in your to your local hosts file.
 		`,
-		Run:   dnsRmFn,
+		Run: dnsRmFn,
 	}
 	// DNSRemoveCmd ...
 	DNSRemoveAllCmd = &cobra.Command{
-		Use:   "rm-all",
-		Short: "Removes all hostname mappings associated with your dev app.",
-		Long:  ``,
-		Run:   dnsRmAllFn,
+		Use:    "rm-all",
+		Short:  "Removes all hostname mappings associated with your dev app.",
+		Long:   ``,
+		Run:    dnsRmAllFn,
 		Hidden: true,
 	}
 )

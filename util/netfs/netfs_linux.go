@@ -3,9 +3,9 @@
 package netfs
 
 import (
-	"os/exec"
 	"fmt"
-	
+	"os/exec"
+
 	"github.com/jcelliott/lumber"
 )
 
@@ -18,6 +18,6 @@ func reloadServer() error {
 		lumber.Debug("update: %s", b)
 		return fmt.Errorf("update: %s %s", b, err.Error())
 	}
-	
+
 	return nil
 }

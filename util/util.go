@@ -6,7 +6,7 @@ import (
 	"math/rand"
 	"os"
 	"time"
-	
+
 	"golang.org/x/crypto/ssh/terminal"
 )
 
@@ -35,7 +35,7 @@ func RandomString(size int) string {
 
 // ReadPassword reads a password from the terminal and masks the input
 func ReadPassword() (string, error) {
-	
+
 	// Fetch the current state of the terminal so it can be restored later
 	oldState, err := terminal.GetState(int(os.Stdin.Fd()))
 	if err != nil {
@@ -45,19 +45,19 @@ func ReadPassword() (string, error) {
 	terminal.MakeRaw(int(os.Stdin.Fd()))
 	// Restore echo after the function exits
 	defer terminal.Restore(int(os.Stdin.Fd()), oldState)
-	
+
 	fmt.Printf("Password: ")
 
 	// Read the password from stdin
 	t := terminal.NewTerminal(os.Stdin, "")
 	pass, err := t.ReadPassword("")
-	
-	// Add a newline so the next output isn't next to the Password: 
+
+	// Add a newline so the next output isn't next to the Password:
 	fmt.Println("")
-	
+
 	if err != nil {
 		return "", err
 	}
-	
+
 	return pass, nil
 }

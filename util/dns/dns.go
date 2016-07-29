@@ -80,7 +80,7 @@ func Remove(entry string) error {
 		// if the line contain the entry skip it
 		// make it do a loose string check
 		// if its exactly the entry then remove it.
-		// if it contains the same environment 
+		// if it contains the same environment
 		// also remove it
 		if strings.Contains(scanner.Text(), entry) {
 			continue

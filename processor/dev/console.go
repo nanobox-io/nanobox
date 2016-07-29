@@ -6,8 +6,8 @@ import (
 	"net"
 	"os"
 
-	"github.com/jcelliott/lumber"
 	dockType "github.com/docker/engine-api/types"
+	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox-boxfile"
 	"github.com/nanobox-io/nanobox-golang-stylish"

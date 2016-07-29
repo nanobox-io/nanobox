@@ -25,7 +25,7 @@ type (
 		LogvacHost   string            `json:"logvac_host,omitempty"`
 		Config       interface{}       `json:"config,omitempty"`
 		Component    component         `json:"component,omitempty"`
-		Member       map[string]int `json:"member,omitempty"`
+		Member       map[string]int    `json:"member,omitempty"`
 		Mounts       []mount           `json:"mounts,omitempty"`
 		WritableDirs interface{}       `json:"writable_dirs,omitempty"`
 		Transform    interface{}       `json:"transform,omitempty"`
@@ -50,12 +50,12 @@ type (
 
 	// fmt.Sprintf(`{"build":"%s","warehouse":"%s","warehouse_token":"%s"}`, codeConfigure.control.Meta["build_id"], codeConfigure.control.Meta["warehouse_url"], codeConfigure.control.Meta["warehouse_token"])
 	fetchPayload struct {
-		Component      component         `json:"component,omitempty"`
-		LogvacHost     string            `json:"logvac_host,omitempty"`
+		Component      component      `json:"component,omitempty"`
+		LogvacHost     string         `json:"logvac_host,omitempty"`
 		Member         map[string]int `json:"member,omitempty"`
-		Build          string            `json:"build,omitempty"`
-		Warehouse      string            `json:"warehouse,omitempty"`
-		WarehouseToken string            `json:"warehouse_token,omitempty"`
+		Build          string         `json:"build,omitempty"`
+		Warehouse      string         `json:"warehouse,omitempty"`
+		WarehouseToken string         `json:"warehouse_token,omitempty"`
 	}
 )
 

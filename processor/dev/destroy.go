@@ -43,4 +43,3 @@ func (devDestroy processDevDestroy) Process() error {
 
 	return processor.Run("env_destroy", devDestroy.control)
 }
-

@@ -3,8 +3,8 @@
 package netfs
 
 import (
-	"os/exec"
 	"fmt"
+	"os/exec"
 
 	"github.com/jcelliott/lumber"
 )

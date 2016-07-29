@@ -79,7 +79,7 @@ func (serviceSetup *processServiceSetup) Process() error {
 	}
 
 	serviceSetup.control.Display(stylish.Bullet("Launching %s...", serviceSetup.control.Meta["label"]))
-	
+
 	if err := serviceSetup.downloadImage(); err != nil {
 		serviceSetup.fail = true
 		return err
@@ -198,7 +198,6 @@ func (serviceSetup *processServiceSetup) reserveIps() error {
 	name := serviceSetup.control.Meta["name"]
 	app := serviceSetup.app
 
-
 	// dont reserve a new one if we already have this one
 	if serviceSetup.service.InternalIP == "" {
 		// first let's see if our local IP was reserved during app creation
@@ -218,9 +217,8 @@ func (serviceSetup *processServiceSetup) reserveIps() error {
 			serviceSetup.cleanFuncs = append(serviceSetup.cleanFuncs, func() error {
 				return dhcp.ReturnIP(net.ParseIP(serviceSetup.service.InternalIP))
 			})
-		}		
+		}
 	}
-
 
 	// dont reserve a new global ip if i already have on
 	if serviceSetup.service.ExternalIP == "" {

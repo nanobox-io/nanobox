@@ -9,9 +9,9 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-	
+
 	"github.com/jcelliott/lumber"
-	
+
 	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
@@ -24,7 +24,7 @@ func Exists(path string) bool {
 	// windows machine. This can be run as a non-administrator.
 	cmd := exec.Command("net", "share")
 	output, err := cmd.CombinedOutput()
-	
+
 	// if there was an error, we'll short-circuit and return false
 	if err != nil {
 		return false
@@ -34,19 +34,19 @@ func Exists(path string) bool {
 	if bytes.Contains(output, []byte(normalizePath(path))) {
 		return true
 	}
-	
+
 	return false
 }
 
 // Add exports a cifs share
 func Add(path string) error {
-	
+
 	appID := config.AppID()
 	user := os.Getenv("USERNAME")
-	
+
 	// net share APPNAME=path /unlimited /GRANT:Everyone,FULL
 	// net share APPNAME=path /unlimited /GRANT:%username%,FULL
-	
+
 	cmd := []string{
 		"net",
 		"share",
@@ -54,36 +54,36 @@ func Add(path string) error {
 		"/unlimited",
 		fmt.Sprintf("/GRANT:%s,FULL", user),
 	}
-	
+
 	process := exec.Command(cmd[0], cmd[1:]...)
 	output, err := process.CombinedOutput()
-	
+
 	// if there was an error, we'll short-circuit and return false
 	if err != nil {
 		return err
 	}
-	
+
 	// return nil (success) if the command was successful
 	if bytes.Contains(output, []byte("was shared successfully.")) {
 		return nil
 	}
-	
+
 	// if we are here, it might have failed. Lets just check one more time
 	// to see if the share already exists. If so, let's return success (nil)
 	if Exists(path) {
 		return nil
 	}
-	
+
 	return errors.New("Failed to create cifs share")
 }
 
 // Remove removes a cifs share
 func Remove(path string) error {
-	
+
 	appID := config.AppID()
-	
+
 	// net share APPNAME /delete /y
-	
+
 	cmd := []string{
 		"net",
 		"share",
@@ -91,35 +91,35 @@ func Remove(path string) error {
 		"/delete",
 		"/y",
 	}
-	
+
 	process := exec.Command(cmd[0], cmd[1:]...)
 	output, err := process.CombinedOutput()
-	
+
 	// if there was an error, we'll short-circuit and return false
 	if err != nil {
 		return err
 	}
-	
+
 	// return nil (success) if the command was successful
 	if bytes.Contains(output, []byte("was deleted successfully.")) {
 		return nil
 	}
-	
+
 	// if we are here, it might have failed. Lets just check one more time
 	// to see if the share is already gone. If so, let's return success (nil)
 	if !Exists(path) {
 		return nil
 	}
-	
+
 	return errors.New("Failed to delete cifs share")
 }
 
 // Mount mounts a cifs share on a guest machine
 func Mount(_, mountPath string) error {
-	
+
 	appID := config.AppID()
 	user := os.Getenv("USERNAME")
-	
+
 	// fetch the password from the user
 	fmt.Printf("%s's password is required to mount a Windows share.\r\n", user)
 	pass, err := util.ReadPassword()
@@ -133,20 +133,20 @@ func Mount(_, mountPath string) error {
 		lumber.Debug("output: %s", b)
 		return fmt.Errorf("mkdir:%s", err.Error())
 	}
-	
+
 	// ensure cifs/samba utilities are installed
 	cmd = []string{"bash", "-c", setupCifsUtilsScript()}
 	if b, err := provider.Run(cmd); err != nil {
 		lumber.Debug("output: %s", b)
 		return fmt.Errorf("mkdir:%s", err.Error())
 	}
-	
+
 	// mount!
 	// mount -t cifs -o username=USER,password=PASSWORD //192.168.99.1/APP /PATH
 	source := fmt.Sprintf("//192.168.99.1/nanobox-%s", appID)
 	opts := fmt.Sprintf("username=%s,password=%s,uid=1000,gid=1000", user, pass)
 	cmd = []string{
-		"sudo", 
+		"sudo",
 		"/bin/mount",
 		"-t",
 		"cifs",
@@ -159,7 +159,7 @@ func Mount(_, mountPath string) error {
 		lumber.Debug("output: %s", b)
 		return fmt.Errorf("mount: output: %s err:%s", b, err.Error())
 	}
-	
+
 	return nil
 }
 
@@ -182,6 +182,6 @@ func setupCifsUtilsScript() string {
 			tce-load -i cifs-utils
 		fi
 	`
-	
+
 	return strings.Replace(script, "\n", "", -1)
 }

@@ -85,7 +85,7 @@ func (envConsole processEnvConsole) Process() error {
 	if err := process.Run(); err != nil && err.Error() != "exit status 137" {
 		return err
 	}
-	
+
 	return nil
 }
 

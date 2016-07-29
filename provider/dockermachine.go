@@ -50,6 +50,7 @@ func (machine DockerMachine) Status() string {
 	output, _ := cmd.CombinedOutput()
 	return strings.TrimSpace(string(output))
 }
+
 // Create creates the docker-machine vm
 func (machine DockerMachine) Create() error {
 
@@ -65,7 +66,7 @@ func (machine DockerMachine) Create() error {
 		"virtualbox",
 		"nanobox",
 	}
-	
+
 	process := exec.Command(cmd[0], cmd[1:]...)
 
 	if verbose {
@@ -320,9 +321,9 @@ func (machine DockerMachine) AddIP(ip string) error {
 		"dev",
 		"eth1",
 	}
-	
+
 	process := exec.Command(cmd[0], cmd[1:]...)
-	
+
 	if b, err := process.CombinedOutput(); err != nil {
 		lumber.Debug("output: %s", b)
 		return err
@@ -335,7 +336,7 @@ func (machine DockerMachine) AddIP(ip string) error {
 
 // RemoveIP removes an IP from the docker-machine vm
 func (machine DockerMachine) RemoveIP(ip string) error {
-	
+
 	if !machine.hasIP(ip) {
 		return nil
 	}
@@ -354,7 +355,7 @@ func (machine DockerMachine) RemoveIP(ip string) error {
 	}
 
 	process := exec.Command(cmd[0], cmd[1:]...)
-	
+
 	if b, err := process.CombinedOutput(); err != nil {
 		lumber.Debug("output: %s", b)
 		return err
@@ -370,7 +371,7 @@ func (machine DockerMachine) AddNat(ip, containerIP string) error {
 
 	// add iptables prerouting rule
 	if !machine.hasNatPreroute(ip, containerIP) {
-		
+
 		cmd := []string{
 			"docker-machine",
 			"ssh",
@@ -388,21 +389,21 @@ func (machine DockerMachine) AddNat(ip, containerIP string) error {
 			"--to-destination",
 			containerIP,
 		}
-		
+
 		process := exec.Command(cmd[0], cmd[1:]...)
-		
+
 		if b, err := process.CombinedOutput(); err != nil {
 			lumber.Debug("output: %s", b)
 			return err
 		}
-		
+
 		// todo: check output for failures
-		
+
 	}
 
 	// add iptables postrouting rule
 	if !machine.hasNatPostroute(ip, containerIP) {
-		
+
 		cmd := []string{
 			"docker-machine",
 			"ssh",
@@ -420,16 +421,16 @@ func (machine DockerMachine) AddNat(ip, containerIP string) error {
 			"--to-source",
 			ip,
 		}
-		
+
 		process := exec.Command(cmd[0], cmd[1:]...)
-		
+
 		if b, err := process.CombinedOutput(); err != nil {
 			lumber.Debug("output: %s", b)
 			return err
 		}
-		
+
 		// todo: check output for failures
-		
+
 	}
 
 	return nil
@@ -440,7 +441,7 @@ func (machine DockerMachine) RemoveNat(ip, containerIP string) error {
 
 	// remove iptables prerouting rule
 	if machine.hasNatPreroute(ip, containerIP) {
-		
+
 		cmd := []string{
 			"docker-machine",
 			"ssh",
@@ -458,21 +459,21 @@ func (machine DockerMachine) RemoveNat(ip, containerIP string) error {
 			"--to-destination",
 			containerIP,
 		}
-		
+
 		process := exec.Command(cmd[0], cmd[1:]...)
-		
+
 		if b, err := process.CombinedOutput(); err != nil {
 			lumber.Debug("output: %s", b)
 			return err
 		}
-		
+
 		// todo: check output for failures
-		
+
 	}
 
 	// remove iptables postrouting rule
 	if machine.hasNatPostroute(ip, containerIP) {
-		
+
 		cmd := []string{
 			"docker-machine",
 			"ssh",
@@ -490,16 +491,16 @@ func (machine DockerMachine) RemoveNat(ip, containerIP string) error {
 			"--to-source",
 			ip,
 		}
-		
+
 		process := exec.Command(cmd[0], cmd[1:]...)
-		
+
 		if b, err := process.CombinedOutput(); err != nil {
 			lumber.Debug("output: %s", b)
 			return err
 		}
-		
+
 		// todo: check output for failures
-		
+
 	}
 
 	return nil
@@ -507,14 +508,14 @@ func (machine DockerMachine) RemoveNat(ip, containerIP string) error {
 
 // HasShare checks to see if the share exists
 func (machine DockerMachine) HasShare(local, _ string) bool {
-	
+
 	cmd := []string{
 		vboxManageCmd,
 		"showvminfo",
 		"nanobox",
 		"--machinereadable",
 	}
-	
+
 	process := exec.Command(cmd[0], cmd[1:]...)
 	output, err := process.CombinedOutput()
 	if err != nil {
@@ -537,7 +538,7 @@ func (machine DockerMachine) AddShare(local, host string) error {
 	name := hex.EncodeToString(h.Sum(nil))
 
 	if !machine.HasShare(local, host) {
-		
+
 		cmd := []string{
 			vboxManageCmd,
 			"sharedfolder",
@@ -549,16 +550,16 @@ func (machine DockerMachine) AddShare(local, host string) error {
 			local,
 			"--transient",
 		}
-		
+
 		process := exec.Command(cmd[0], cmd[1:]...)
 		b, err := process.CombinedOutput()
 		if err != nil {
 			lumber.Debug("output: %s", b)
 			return err
 		}
-		
+
 		// todo: check output for failures
-		
+
 	}
 
 	return nil
@@ -591,9 +592,9 @@ func (machine DockerMachine) RemoveShare(local, host string) error {
 			lumber.Debug("output: %s", b)
 			return err
 		}
-		
+
 		// todo: check output for failures
-		
+
 	}
 
 	return nil
@@ -601,7 +602,7 @@ func (machine DockerMachine) RemoveShare(local, host string) error {
 
 // HasMount checks to see if the mount exists in the vm
 func (machine DockerMachine) HasMount(mount string) bool {
-	
+
 	cmd := []string{
 		"docker-machine",
 		"ssh",
@@ -610,7 +611,7 @@ func (machine DockerMachine) HasMount(mount string) bool {
 		"cat",
 		"/proc/mounts",
 	}
-	
+
 	process := exec.Command(cmd[0], cmd[1:]...)
 	output, err := process.CombinedOutput()
 	if err != nil {
@@ -644,7 +645,7 @@ func (machine DockerMachine) AddMount(local, host string) error {
 			"-p",
 			host,
 		}
-		
+
 		process := exec.Command(cmd[0], cmd[1:]...)
 		b, err := process.CombinedOutput()
 		if err != nil {
@@ -666,16 +667,16 @@ func (machine DockerMachine) AddMount(local, host string) error {
 			name,
 			host,
 		}
-		
+
 		process = exec.Command(cmd[0], cmd[1:]...)
 		b, err = process.CombinedOutput()
 		if err != nil {
 			lumber.Debug("output: %s", b)
 			return err
 		}
-		
+
 		// todo: check output for failures
-		
+
 	}
 
 	return nil
@@ -694,16 +695,16 @@ func (machine DockerMachine) RemoveMount(_, host string) error {
 			"umount",
 			host,
 		}
-		
+
 		process := exec.Command(cmd[0], cmd[1:]...)
 		b, err := process.CombinedOutput()
 		if err != nil {
 			lumber.Debug("output: %s", b)
 			return err
 		}
-		
+
 		// todo: check output for failures
-		
+
 	}
 
 	return nil
@@ -771,23 +772,23 @@ func (machine DockerMachine) isCreated() bool {
 	// docker-machine status nanobox
 	cmd := exec.Command("docker-machine", "status", "nanobox")
 	output, err := cmd.CombinedOutput()
-	
+
 	if err != nil {
 		lumber.Debug("output: %s", output)
 		return false
 	}
-	
+
 	if bytes.Contains(output, []byte("Host does not exist: \"nanobox\"")) {
 		lumber.Debug("output: %s", output)
 		return false
 	}
-	
+
 	return true
 }
 
 // hasNetwork ...
 func (machine DockerMachine) hasNetwork() bool {
-	
+
 	cmd := []string{
 		"docker-machine",
 		"ssh",
@@ -797,15 +798,15 @@ func (machine DockerMachine) hasNetwork() bool {
 		"inspect",
 		"nanobox",
 	}
-	
+
 	process := exec.Command(cmd[0], cmd[1:]...)
 	output, err := process.CombinedOutput()
-	
+
 	if err != nil {
 		lumber.Debug("hasNetwork output: %s", output)
 		return false
 	}
-	
+
 	if bytes.Contains(output, []byte("Error: No such network: nanobox")) {
 		lumber.Debug("hasNetwork output: %s", output)
 		return false
@@ -833,7 +834,7 @@ func (machine DockerMachine) IsReady() bool {
 
 // hasIP ...
 func (machine DockerMachine) hasIP(ip string) bool {
-	
+
 	cmd := []string{
 		"docker-machine",
 		"ssh",
@@ -844,7 +845,7 @@ func (machine DockerMachine) hasIP(ip string) bool {
 		"dev",
 		"eth1",
 	}
-	
+
 	process := exec.Command(cmd[0], cmd[1:]...)
 	output, err := process.CombinedOutput()
 	if err != nil {
@@ -861,7 +862,7 @@ func (machine DockerMachine) hasIP(ip string) bool {
 
 // hasNatPreroute ...
 func (machine DockerMachine) hasNatPreroute(hostIP, containerIP string) bool {
-	
+
 	cmd := []string{
 		"docker-machine",
 		"ssh",
@@ -879,15 +880,15 @@ func (machine DockerMachine) hasNatPreroute(hostIP, containerIP string) bool {
 		"--to-destination",
 		containerIP,
 	}
-	
+
 	process := exec.Command(cmd[0], cmd[1:]...)
 	output, err := process.CombinedOutput()
-	
+
 	if err != nil {
 		lumber.Debug("output: %s", output)
 		return false
 	}
-	
+
 	if bytes.Contains(output, []byte("No chain/target/match by that name.")) {
 		lumber.Debug("output: %s", output)
 		return false
@@ -898,7 +899,7 @@ func (machine DockerMachine) hasNatPreroute(hostIP, containerIP string) bool {
 
 // hasNatPostroute
 func (machine DockerMachine) hasNatPostroute(hostIP, containerIP string) bool {
-	
+
 	cmd := []string{
 		"docker-machine",
 		"ssh",
@@ -916,15 +917,15 @@ func (machine DockerMachine) hasNatPostroute(hostIP, containerIP string) bool {
 		"--to-source",
 		hostIP,
 	}
-	
+
 	process := exec.Command(cmd[0], cmd[1:]...)
 	output, err := process.CombinedOutput()
-	
+
 	if err != nil {
 		lumber.Debug("output: %s", output)
 		return false
 	}
-	
+
 	if bytes.Contains(output, []byte("No chain/target/match by that name.")) {
 		lumber.Debug("output: %s", output)
 		return false

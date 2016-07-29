@@ -1,7 +1,7 @@
 package vbox
 
 import (
-  "os/exec"
+	"os/exec"
 )
 
 // Try to find VBoxManage on the path

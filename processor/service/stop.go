@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/jcelliott/lumber"
-	
+
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"

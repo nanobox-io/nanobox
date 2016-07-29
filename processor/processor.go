@@ -43,7 +43,6 @@ type (
 		Process() error
 		Results() ProcessControl
 	}
-
 )
 
 var (

@@ -158,7 +158,7 @@ func (codePublish *processCodePublish) runPublishHook() error {
 	pload := map[string]interface{}{}
 	if codePublish.control.Meta["previous_build"] != "" {
 		pload["previous_build"] = codePublish.control.Meta["previous_build"]
-	} 
+	}
 	pload[BUILD] = codePublish.control.Meta["build_id"]
 	pload["warehouse"] = codePublish.control.Meta["warehouse_url"]
 	pload["warehouse_token"] = codePublish.control.Meta["warehouse_token"]

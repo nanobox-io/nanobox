@@ -12,7 +12,7 @@ import (
 	"github.com/mitchellh/go-homedir"
 	cryptoutil "github.com/sdomino/go-util/crypto"
 	fileutil "github.com/sdomino/go-util/file"
-	
+
 	"github.com/nanobox-io/nanobox/util"
 )
 
@@ -21,12 +21,12 @@ var (
 	// responsible for updating minor and patch versions of nanobox. If another major
 	// version is released, it will include it's own downloader
 	pathToDownload = "https://s3.amazonaws.com/tools.nanobox.io/nanobox/v1"
-	
-	// name of the file to download ("nanobox" or "nanobox-dev")
-  fileToDownload = "nanobox"
 
-  // map of available downloads
-  availableDownloads = map[string]bool{"nanobox": true, "nanobox-dev": true}
+	// name of the file to download ("nanobox" or "nanobox-dev")
+	fileToDownload = "nanobox"
+
+	// map of available downloads
+	availableDownloads = map[string]bool{"nanobox": true, "nanobox-dev": true}
 )
 
 // main ...
@@ -53,18 +53,18 @@ func main() {
 		// re-run this command as the administrative user
 		fmt.Println("The update process requires Administrator privileges.")
 		fmt.Println("Another window will be opened as the Administrator to continue this process.")
-		
+
 		// block here until the user hits enter. It's not ideal, but we need to make
 		// sure they see the new window open.
 		fmt.Println("Enter to continue:")
 		var input string
 		fmt.Scanln(&input)
-		
+
 		cmd := fmt.Sprintf("%s -o %s", os.Args[0], fileToDownload)
 		if err := util.PrivilegeExec(cmd); err != nil {
 			os.Exit(1)
 		}
-		
+
 		// we're done
 		return
 	}
@@ -114,7 +114,7 @@ func main() {
 
 	// The process for windows is different enough than the unixes
 	if runtime.GOOS != "windows" {
-		// make new CLI executable	
+		// make new CLI executable
 		if err := os.Chmod(tmpPath, 0755); err != nil {
 			fmt.Println("Failed to set permissions - ", err.Error())
 		}
@@ -136,13 +136,12 @@ func main() {
 		fmt.Printf("[√] Now running %s", string(out))
 	}
 
-	
 	if runtime.GOOS == "windows" {
 		// The update process was spawned in a separate window, which will
 		// close as soon as this command is finished. To ensure they see the
 		// message, we need to hold open the process until they hit enter.
 		fmt.Println("Enter to continue:")
 		var input string
-    fmt.Scanln(&input)
+		fmt.Scanln(&input)
 	}
 }

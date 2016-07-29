@@ -7,9 +7,9 @@ import (
 	"github.com/nanobox-io/nanobox-golang-stylish"
 
 	"github.com/nanobox-io/nanobox/processor"
-	"github.com/nanobox-io/nanobox/util/locker"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/data"
+	"github.com/nanobox-io/nanobox/util/locker"
 )
 
 // processDestroy ...
@@ -27,7 +27,6 @@ func destroyFn(control processor.ProcessControl) (processor.Processor, error) {
 	envDestroy := &processDestroy{control}
 	return envDestroy, envDestroy.validateMeta()
 }
-
 
 func (destroy *processDestroy) validateMeta() error {
 	if destroy.control.Env == "" {
@@ -71,7 +70,7 @@ func (destroy *processDestroy) Process() error {
 
 	// remove all dns entries for this app
 	if err := processor.Run("env_dns_remove_all", destroy.control); err != nil {
-		return err		
+		return err
 	}
 
 	// destroy the mounts
@@ -116,7 +115,6 @@ func (destroy processDestroy) removeServices() error {
 	return nil
 }
 
-
 // destroyApp tears down the app when it's not being used
 func (destroy *processDestroy) destroyApp() error {
 
@@ -126,7 +124,7 @@ func (destroy *processDestroy) destroyApp() error {
 	defer locker.LocalUnlock()
 
 	// the app package expects a name. not an app_name
-	destroy.control.Meta["name"] = destroy.control.Meta["app_name"] 
+	destroy.control.Meta["name"] = destroy.control.Meta["app_name"]
 
 	// stop all data services
 	if err := processor.Run("app_destroy", destroy.control); err != nil {

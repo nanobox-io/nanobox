@@ -10,9 +10,9 @@ import (
 
 // DeployCmd ...
 var DeployCmd = &cobra.Command{
-	Use:   "deploy",
-	Short: "Deploys a build package into your dev platform and starts all data services.",
-	Long: ``,
+	Use:    "deploy",
+	Short:  "Deploys a build package into your dev platform and starts all data services.",
+	Long:   ``,
 	PreRun: validate.Requires("provider", "provider_up", "built", "dev_isup"),
 	Run:    deployFn,
 }
