@@ -15,7 +15,7 @@ var (
 	// EnvCmd ...
 	StatusCmd = &cobra.Command{
 		Use:   "status",
-		Short: "Manages environment variables in your local dev app.",
+		Short: "Displays the status of your Nanobox VM & running platforms.",
 		Long:  ``,
 		Run:   statusFn,
 	}
