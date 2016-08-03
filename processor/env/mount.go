@@ -78,6 +78,9 @@ func (envMount *processEnvMount) addShare(src, dst string) error {
 
 	// todo: we should display a warning when using native about performance
 
+	control := envMount.control.Dup()
+	control.Meta["path"] = src
+
 	// since vm.mount is configurable, it's possible and even likely that a
 	// machine may already have mounts configured. For each mount type we'll
 	// need to check if an existing mount needs to be undone before continuing
@@ -88,15 +91,6 @@ func (envMount *processEnvMount) addShare(src, dst string) error {
 	case "native":
 		if netfs.Exists(src) {
 			// netfs was used prior. So we need to tear it down.
-
-			control := processor.ProcessControl{
-				Env:          envMount.control.Env,
-				Verbose:      envMount.control.Verbose,
-				DisplayLevel: envMount.control.DisplayLevel,
-				Meta: map[string]string{
-					"path": src,
-				},
-			}
 
 			if err := processor.Run("env_netfs_remove", control); err != nil {
 				return err
@@ -116,15 +110,6 @@ func (envMount *processEnvMount) addShare(src, dst string) error {
 			if err := provider.RemoveShare(src, dst); err != nil {
 				return err
 			}
-		}
-
-		control := processor.ProcessControl{
-			Env:          envMount.control.Env,
-			Verbose:      envMount.control.Verbose,
-			DisplayLevel: envMount.control.DisplayLevel,
-			Meta: map[string]string{
-				"path": src,
-			},
 		}
 
 		if err := processor.Run("env_netfs_add", control); err != nil {

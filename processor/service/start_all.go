@@ -52,18 +52,12 @@ func (serviceStartAll *processServiceStartAll) Process() error {
 // startService starts a service
 func (serviceStartAll processServiceStartAll) startService(uid string) error {
 
-	config := processor.ProcessControl{
-		Env:     serviceStartAll.control.Env,
-		Verbose: serviceStartAll.control.Verbose,
-		Meta: map[string]string{
-			"app_name": serviceStartAll.control.Meta["app_name"],
-			"label":    uid,
-			"name":     uid,
-		},
-	}
+	control := serviceStartAll.control.Dup()
+	control.Meta["label"] = uid
+	control.Meta["name"] = uid
 
 	// provision
-	if err := processor.Run("service_start", config); err != nil {
+	if err := processor.Run("service_start", control); err != nil {
 		// serviceStartAll.control.Display(fmt.Sprintf("%s_start: %+v", uid, err))
 		return err
 	}

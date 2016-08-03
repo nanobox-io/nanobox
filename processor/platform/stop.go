@@ -49,13 +49,11 @@ func (platformStop *processPlatformStop) stopServices() error {
 // stopService will stop an individual service
 func (platformStop *processPlatformStop) stopService(service Service) error {
 	//
-	config := processor.ProcessControl{
-		Env:          platformStop.control.Env,
-		Verbose:      platformStop.control.Verbose,
-		DisplayLevel: platformStop.control.DisplayLevel + 1,
-		Meta:         map[string]string{"label": service.label, "name": service.name},
-	}
+	control := platformStop.control.Dup()
+	control.DisplayLevel++
+	control.Meta["label"] = service.label
+	control.Meta["name"] = service.name
 
 	//
-	return processor.Run("service_stop", config)
+	return processor.Run("service_stop", control)
 }

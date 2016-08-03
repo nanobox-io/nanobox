@@ -78,16 +78,11 @@ func (serviceClean processServiceClean) cleanService(uid string) error {
 func (serviceClean processServiceClean) removeService(uid string) error {
 	serviceClean.control.Display(stylish.Bullet(fmt.Sprintf("Cleaning %s...", uid)))
 
-	config := processor.ProcessControl{
-		Env:          serviceClean.control.Env,
-		Verbose:      serviceClean.control.Verbose,
-		DisplayLevel: serviceClean.control.DisplayLevel + 1,
-		Meta: map[string]string{
-			"name": uid,
-		},
-	}
+	control := serviceClean.control.Dup()
+	control.DisplayLevel++
+	control.Meta["name"] = uid
 
-	err := processor.Run("service_destroy", config)
+	err := processor.Run("service_destroy", control)
 	if err != nil {
 		fmt.Println(fmt.Sprintf("%s_remove:", uid), err)
 		return err

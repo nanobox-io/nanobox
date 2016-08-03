@@ -149,15 +149,11 @@ func (serviceSync *processServiceSync) purgeDeltaServices() error {
 
 // purgeService will purge a service from the nanobox
 func (serviceSync *processServiceSync) purgeService(uid string) error {
-	service := processor.ProcessControl{
-		Env:     serviceSync.control.Env,
-		Verbose: serviceSync.control.Verbose,
-		Meta: map[string]string{
-			"name": uid,
-		},
-	}
 
-	if err := processor.Run("service_destroy", service); err != nil {
+	control := serviceSync.control.Dup()
+	control.Meta["name"] = uid
+
+	if err := processor.Run("service_destroy", control); err != nil {
 		return err
 	}
 
@@ -182,23 +178,18 @@ func (serviceSync *processServiceSync) provisionDataServices() error {
 			image = "nanobox/" + serviceType
 		}
 
-		config := processor.ProcessControl{
-			Env:          serviceSync.control.Env,
-			Verbose:      serviceSync.control.Verbose,
-			DisplayLevel: serviceSync.control.DisplayLevel + 1,
-			Meta: map[string]string{
-				"name":  uid,
-				"image": image,
-			},
-		}
+		control := serviceSync.control.Dup()
+		control.DisplayLevel++
+		control.Meta["name"] = uid
+		control.Meta["image"] = image
 
 		// setup the service
-		if err := processor.Run("service_setup", config); err != nil {
+		if err := processor.Run("service_setup", control); err != nil {
 			return err
 		}
 
 		// and configure it
-		if err := processor.Run("service_configure", config); err != nil {
+		if err := processor.Run("service_configure", control); err != nil {
 			return err
 		}
 

@@ -56,30 +56,26 @@ func (platformSetup processPlatformSetup) provisionServices() error {
 // provisionService will provision an individual service
 func (platformSetup processPlatformSetup) provisionService(service Service) error {
 
-	config := processor.ProcessControl{
-		Env:          platformSetup.control.Env,
-		Verbose:      platformSetup.control.Verbose,
-		DisplayLevel: platformSetup.control.DisplayLevel + 1,
-		Meta: map[string]string{
-			"label": service.label,
-			"name":  service.name,
-			"image": service.image,
-		},
-	}
+	control := platformSetup.control.Dup()
+	control.DisplayLevel++
+	control.Meta["label"] = service.label
+	control.Meta["name"] = service.name
+	control.Meta["image"] = service.image
+
 
 	if platformSetup.isServiceActive(service.name) {
 		// start the service if the service is already active
-		return processor.Run("service_start", config)
+		return processor.Run("service_start", control)
 	}
 
 	// otherwise
 	// setup the service
-	if err := processor.Run("service_setup", config); err != nil {
+	if err := processor.Run("service_setup", control); err != nil {
 		return err
 	}
 
 	// and configure it
-	return processor.Run("service_configure", config)
+	return processor.Run("service_configure", control)
 }
 
 // isServiceActive returns true if a service is already active

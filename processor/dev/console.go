@@ -319,17 +319,13 @@ func (devConsole *processDevConsole) devPayload() string {
 // runConsole will establish a console within the dev container
 func (devConsole *processDevConsole) runConsole() error {
 
-	config := processor.ProcessControl{
-		Env:     devConsole.control.Env,
-		Verbose: devConsole.control.Verbose,
-		Meta: map[string]string{
-			"container": fmt.Sprintf("nanobox_%s_dev", config.AppID()),
-			"cwd":       devConsole.cwd(),
-			"shell":     "zsh",
-		},
-	}
+	control := devConsole.control.Dup()
+	control.Meta["container"] = fmt.Sprintf("nanobox_%s_dev", config.AppID())
+	control.Meta["cwd"] = devConsole.cwd()
+	control.Meta["shell"] = "zsh"
 
-	if err := processor.Run("env_console", config); err != nil {
+
+	if err := processor.Run("env_console", control); err != nil {
 		return err
 	}
 

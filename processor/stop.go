@@ -36,12 +36,9 @@ func (stop processStop) Process() error {
 
 // stop all of the apps that are currently up
 func (stop processStop) stopAllApps() error {
+	
 	// create a control for the child processes
-	control := ProcessControl{
-		Env:     stop.control.Env,
-		Verbose: stop.control.Verbose,
-		Meta:    map[string]string{},
-	}
+	control := stop.control.Dup()
 
 	// run the app stop on all running apps
 	for _, app := range upApps() {

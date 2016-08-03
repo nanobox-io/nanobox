@@ -131,19 +131,11 @@ func (simDeploy *processSimDeploy) publishCode() error {
 
 // startCodeServices ...
 func (simDeploy *processSimDeploy) startCodeServices() error {
-	code := processor.ProcessControl{
-		Env:     simDeploy.control.Env,
-		Verbose: simDeploy.control.Verbose,
-		Meta: map[string]string{
-			"boxfile":         simDeploy.control.Meta["boxfile"],
-			"build_id":        simDeploy.control.Meta["build_id"],
-			"warehouse_url":   simDeploy.control.Meta["warehouse_url"],
-			"warehouse_token": simDeploy.control.Meta["warehouse_token"],
-		},
-	}
+	control := simDeploy.control.Dup()
+	control.DisplayLevel++
 
 	// synchronize my code services
-	if err := processor.Run("code_sync", code); err != nil {
+	if err := processor.Run("code_sync", control); err != nil {
 		return err
 	}
 

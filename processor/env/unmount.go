@@ -139,15 +139,9 @@ func (envUnmount *processEnvUnmount) removeShare(src, dst string) error {
 
 	case "netfs":
 		// remove the netfs mount using its processor
-
-		control := processor.ProcessControl{
-			Env:          envUnmount.control.Env,
-			Verbose:      envUnmount.control.Verbose,
-			DisplayLevel: envUnmount.control.DisplayLevel,
-			Meta: map[string]string{
-				"path": src,
-			},
-		}
+	
+		control := envUnmount.control.Dup()
+		control.Meta["path"] = src
 
 		if err := processor.Run("env_netfs_remove", control); err != nil {
 			return err

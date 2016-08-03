@@ -101,6 +101,24 @@ func ExecWriter() io.Writer {
 	return os.Stdout
 }
 
+func (pc ProcessControl) Dup() ProcessControl {
+	newPC :=  ProcessControl{
+		Env:          pc.Env,
+		Debug:        pc.Debug,
+		Quiet:        pc.Quiet,
+		Verbose:      pc.Verbose,
+		Force:        pc.Force,
+		DisplayLevel: pc.DisplayLevel,
+		Meta: 				map[string]string{},
+	}
+
+	for key, value := range pc.Meta {
+	  newPC.Meta[key] = value
+	}
+
+	return newPC
+}
+
 // Process ...
 func (bcp BreadCrumbProcessor) Process() error {
 	err := bcp.proc.Process()

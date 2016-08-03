@@ -64,18 +64,9 @@ func (codeSync *processCodeSync) Process() error {
 
 		// create a new process config for code ensuring it has access to the warehouse
 		// and the boxfile
-		code := processor.ProcessControl{
-			Env:     codeSync.control.Env,
-			Verbose: codeSync.control.Verbose,
-			Meta: map[string]string{
-				"name":            codeName,
-				"image":           image,
-				"boxfile":         codeSync.control.Meta["boxfile"],
-				"build_id":        codeSync.control.Meta["build_id"],
-				"warehouse_url":   codeSync.control.Meta["warehouse_url"],
-				"warehouse_token": codeSync.control.Meta["warehouse_token"],
-			},
-		}
+		code := codeSync.control.Dup()
+		code.Meta["name"] = codeName
+		code.Meta["image"] = image
 
 		// run the code setup process with the new config
 		err := processor.Run("code_setup", code)

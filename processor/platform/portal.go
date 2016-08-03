@@ -108,7 +108,7 @@ func (updatePortal *processUpdatePortal) updateRoutes() error {
 
 	// if i have a web and no routes i need to add a default one
 	if len(updatePortal.boxfile.Nodes("web")) != 0 && len(routes) == 0 {
-		fmt.Println("found a web", updatePortal.boxfile.Nodes("web"))
+		// fmt.Println("found a web", updatePortal.boxfile.Nodes("web"))
 		webNode := updatePortal.boxfile.Nodes("web")[0]
 		service := models.Service{}
 
