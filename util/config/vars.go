@@ -1,6 +1,9 @@
 package config
 
 import (
+	"os"
+	"os/exec"
+	"strings"
 	"crypto/md5"
 	"encoding/json"
 	"fmt"
@@ -34,6 +37,21 @@ func AppName() string {
 // happen to have the same folder base name
 func AppID() string {
 	return fmt.Sprintf("%x", md5.Sum([]byte(LocalDir())))
+}
+
+func NanoboxPath() string {
+	programName := os.Args[0]
+
+	// find out the full path
+	cmd := exec.Command("which", programName)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		// if which doesnt work fall back to just the program name
+		return programName
+	}
+
+	// trim off any whitespace
+	return strings.TrimSpace(string(output))
 }
 
 // UserPayload ...

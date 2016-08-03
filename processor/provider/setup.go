@@ -84,13 +84,23 @@ func (providerSetup processProviderSetup) saveProvider() error {
 		return err
 	}
 
+	if err := provider.AddIP(ip.String()); err != nil {
+		return err
+	}
+
+	if err := provider.SetDefaultIP(ip.String()); err != nil {
+		return err
+	}
+
 	// retrieve the Hosts known ip
 	hIP, err := provider.HostIP()
 	if err != nil {
 		return err
 	}
+
 	mProvider.HostIP = hIP
 	mProvider.MountIP = ip.String()
+
 
 	return data.Put("global", "provider", mProvider)
 }

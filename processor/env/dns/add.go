@@ -2,7 +2,6 @@ package dns
 
 import (
 	"fmt"
-	"os"
 	"runtime"
 
 	"github.com/nanobox-io/nanobox/models"
@@ -122,10 +121,10 @@ func (envDNSAdd *processEnvDNSAdd) reExecPrivilege() error {
 		fmt.Println("Root privileges are required to modify your hosts file, your password may be requested...")
 	}
 
-	// call 'dev dns add' with the original path and args; os.Args[0] will be the
-	// currently executing program, so this command will ultimately lead right back
+	// call 'dev dns add' with the original path and args; config.NanoboxPath() will be the
+	// currently executing program with the path, so this command will ultimately lead right back
 	// here
-	cmd := fmt.Sprintf("%s %s dns add %s", os.Args[0], envDNSAdd.control.Env, envDNSAdd.name)
+	cmd := fmt.Sprintf("%s %s dns add %s", config.NanoboxPath(), envDNSAdd.control.Env, envDNSAdd.name)
 
 	// if the sudo'ed subprocess fails, we need to return error to stop the process
 	if err := util.PrivilegeExec(cmd); err != nil {

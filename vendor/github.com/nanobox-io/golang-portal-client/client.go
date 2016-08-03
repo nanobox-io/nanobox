@@ -132,9 +132,10 @@ func (self PortalClient) do(method, path string, requestBody, responseBody inter
 		if err != nil {
 			return err
 		}
+		fmt.Printf("CLIENT: requestBody: %+s\n", jsonBytes)
 		rbodyReader = bytes.NewBuffer(jsonBytes)
 	}
-
+	fmt.Printf("CLIENT: requestPath: https://%s%s\n", self.host, path)
 	req, err := http.NewRequest(method, fmt.Sprintf("https://%s%s", self.host, path), rbodyReader)
 	if err != nil {
 		return err
@@ -144,6 +145,7 @@ func (self PortalClient) do(method, path string, requestBody, responseBody inter
 	if err != nil {
 		return err
 	}
+	fmt.Printf("CLIENT: response %+v\n", res)
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
 		return fmt.Errorf("Bad exit code (%d)", res.StatusCode)
 	}

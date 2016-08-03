@@ -2,7 +2,6 @@ package dns
 
 import (
 	"fmt"
-	"os"
 	"runtime"
 
 	"github.com/nanobox-io/nanobox/processor"
@@ -69,7 +68,7 @@ func (envDNSRemoveAll *processEnvDNSRemoveAll) reExecPrivilege() error {
 	}
 
 	// call rm-all
-	cmd := fmt.Sprintf("%s %s dns rm-all", os.Args[0], envDNSRemoveAll.control.Env)
+	cmd := fmt.Sprintf("%s %s dns rm-all", config.NanoboxPath(), envDNSRemoveAll.control.Env)
 
 	// if the sudo'ed subprocess fails, we need to return error to stop the process
 	return util.PrivilegeExec(cmd)

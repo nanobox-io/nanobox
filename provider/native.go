@@ -145,6 +145,11 @@ func (native Native) RemoveIP(ip string) error {
 	return nil
 }
 
+func (native Native) SetDefaultIP(ip string) error {
+	// nothing is necessary ehre
+	return nil
+}
+
 // AddNat adds a nat to make an container accessible to the host network stack
 func (native Native) AddNat(ip, containerIP string) error {
 	// TODO: ???

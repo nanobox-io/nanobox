@@ -20,7 +20,6 @@ func init() {
 //
 func devDestroyFn(control processor.ProcessControl) (processor.Processor, error) {
 	devDestroy := &processDevDestroy{control}
-	fmt.Println("meta:", control.Meta)
 	return devDestroy, devDestroy.validateMeta()
 }
 

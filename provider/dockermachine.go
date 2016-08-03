@@ -366,6 +366,36 @@ func (machine DockerMachine) RemoveIP(ip string) error {
 	return nil
 }
 
+func (dockermachine DockerMachine) SetDefaultIP(ip string) error {
+
+	cmd := []string{
+		"docker-machine",
+		"ssh",
+		"nanobox",
+		"sudo",
+		"ip",
+		"route",
+		"change",
+		"192.168.99.0/24",
+		"dev",
+		"eth1",
+		"src",
+		ip,
+	}
+
+	process := exec.Command(cmd[0], cmd[1:]...)
+
+	if b, err := process.CombinedOutput(); err != nil {
+		lumber.Debug("output: %s", b)
+		return err
+	}
+
+	// todo: check output for failures
+
+	return nil
+}
+
+
 // AddNat adds a nat to make an container accessible to the host network stack
 func (machine DockerMachine) AddNat(ip, containerIP string) error {
 

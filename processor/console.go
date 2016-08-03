@@ -49,7 +49,7 @@ func (console processConsole) Process() error {
 	if err != nil {
 		return err
 	}
-
+	fmt.Println("key", key, "location", location, "container", container)
 	// establish connection to nanoagent
 	req, err := http.NewRequest("POST", fmt.Sprintf("/exec?key=%s&container=%s", key, container), nil)
 	if err != nil {

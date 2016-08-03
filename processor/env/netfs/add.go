@@ -2,11 +2,11 @@ package netfs
 
 import (
 	"fmt"
-	"os"
 	"runtime"
 
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/netfs"
 )
 
@@ -106,10 +106,10 @@ func (envNetFSAdd *processEnvNetFSAdd) reExecPrivilege() error {
 		fmt.Println("Root privileges are required to modify your exports file, your password may be requested...")
 	}
 
-	// call 'dev netfs add' with the original path and args; os.Args[0] will be the
+	// call 'dev netfs add' with the original path and args; config.NanoboxPath() will be the
 	// currently executing program, so this command will ultimately lead right back
 	// here
-	cmd := fmt.Sprintf("%s env netfs add %s", os.Args[0], envNetFSAdd.path)
+	cmd := fmt.Sprintf("%s env netfs add %s", config.NanoboxPath(), envNetFSAdd.path)
 
 	// if the escalated subprocess fails, we need to return error to stop the process
 	if err := util.PrivilegeExec(cmd); err != nil {

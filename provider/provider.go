@@ -23,6 +23,7 @@ type Provider interface {
 	DockerEnv() error
 	AddIP(ip string) error
 	RemoveIP(ip string) error
+	SetDefaultIP(ip string) error
 	AddNat(host, container string) error
 	RemoveNat(host, container string) error
 	HasShare(local, host string) bool
@@ -203,6 +204,16 @@ func RemoveIP(ip string) error {
 	}
 
 	return p.RemoveIP(ip)
+}
+
+// SetDefaultIP ...
+func SetDefaultIP(ip string) error {
+	p, err := fetchProvider()
+	if err != nil {
+		return err
+	}
+
+	return p.SetDefaultIP(ip)
 }
 
 // AddNat ..

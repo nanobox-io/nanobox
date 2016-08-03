@@ -139,6 +139,10 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 
 	lumber.Debug("res: %+v\n", res)
 
+	if res.StatusCode < 200 || res.StatusCode >= 300 {
+		return fmt.Errorf("bad exit response(%+v)", res)
+	}
+
 	//
 	if responseBody != nil {
 		b, err := ioutil.ReadAll(res.Body)

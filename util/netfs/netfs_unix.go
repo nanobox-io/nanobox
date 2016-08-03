@@ -136,7 +136,7 @@ func entry(path string) (string, error) {
 		return "", fmt.Errorf("there is no mount ip on the provider")
 	}
 
-	entry := fmt.Sprintf("\"%s\" %s -alldirs -mapall=%v:%v", path, provider.HostIP, uid(), gid())
+	entry := fmt.Sprintf("\"%s\" %s -alldirs -mapall=%v:%v", path, provider.MountIP, uid(), gid())
 
 	return entry, nil
 }

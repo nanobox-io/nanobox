@@ -43,6 +43,7 @@ type (
 	configPayload struct {
 		LogvacHost string                 `json:"logvac_host"`
 		MistHost   string                 `json:"mist_host"`
+		MistToken   string                 `json:"mist_token"`
 		Platform   string                 `json:"platform"`
 		Config     map[string]interface{} `json:"config"`
 		Member     member                 `json:"member"`
@@ -126,6 +127,7 @@ func (serviceConfigure processServiceConfigure) configurePayload() string {
 	payload := configPayload{
 		LogvacHost: app.LocalIPs["logvac"],
 		MistHost:   app.LocalIPs["mist"],
+		MistToken:  "123",
 		Platform:   "local",
 		Config:     config,
 		Member: member{

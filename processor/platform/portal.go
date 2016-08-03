@@ -108,8 +108,10 @@ func (updatePortal *processUpdatePortal) updateRoutes() error {
 
 	// if i have a web and no routes i need to add a default one
 	if len(updatePortal.boxfile.Nodes("web")) != 0 && len(routes) == 0 {
+		fmt.Println("found a web", updatePortal.boxfile.Nodes("web"))
 		webNode := updatePortal.boxfile.Nodes("web")[0]
 		service := models.Service{}
+
 		data.Get(updatePortal.control.Meta["app_name"], webNode, &service)
 		routes = append(routes, portal.Route{
 			Path:    "/",
@@ -118,7 +120,7 @@ func (updatePortal *processUpdatePortal) updateRoutes() error {
 	}
 
 	// send to portal
-	lumber.Trace("new routes: %+v", routes)
+	lumber.Debug("new routes: %+v", routes)
 	portalClient := portal.New(updatePortal.portal.ExternalIP+":8443", "123")
 	return portalClient.UpdateRoutes(routes)
 }

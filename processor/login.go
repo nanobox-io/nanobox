@@ -38,10 +38,13 @@ func (login processLogin) Process() error {
 		return err
 	}
 
+	fmt.Println("meta")
 	// verify that the user exists
 	if err := login.verifyUser(); err != nil {
 		return err
 	}
+
+	fmt.Println("verified user")
 
 	// store the user token
 	if err := login.saveUser(); err != nil {
@@ -61,7 +64,6 @@ func (login *processLogin) validateMeta() error {
 	// request username/password if missing
 	if login.username == "" {
 		login.username = printutil.Prompt("Username:")
-		fmt.Println("username: ", login.username)
 	}
 
 	if login.password == "" {
@@ -71,7 +73,6 @@ func (login *processLogin) validateMeta() error {
 		} else {
 			login.password = ""
 		}
-		fmt.Println("password: ", login.password)
 	}
 
 	return nil
