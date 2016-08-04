@@ -76,6 +76,8 @@ func (devConsole *processDevConsole) Process() error {
 		return err
 	}
 
+	// if run then start the run commands
+
 	//
 	if err := devConsole.printMOTD(); err != nil {
 		return err
@@ -323,7 +325,6 @@ func (devConsole *processDevConsole) runConsole() error {
 	control.Meta["container"] = fmt.Sprintf("nanobox_%s_dev", config.AppID())
 	control.Meta["cwd"] = devConsole.cwd()
 	control.Meta["shell"] = "zsh"
-
 
 	if err := processor.Run("env_console", control); err != nil {
 		return err

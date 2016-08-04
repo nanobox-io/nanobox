@@ -395,7 +395,6 @@ func (dockermachine DockerMachine) SetDefaultIP(ip string) error {
 	return nil
 }
 
-
 // AddNat adds a nat to make an container accessible to the host network stack
 func (machine DockerMachine) AddNat(ip, containerIP string) error {
 

@@ -8,7 +8,6 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/data"
-
 )
 
 // processClean ...
@@ -55,7 +54,6 @@ func (clean processClean) Process() error {
 			// remove apps that no longer exist in the folder
 			clean.control.Meta["app_name"] = app.ID
 			clean.control.Env = "dev"
-
 
 			// get the env from the id
 			if strings.Contains(app.ID, "_sim") {

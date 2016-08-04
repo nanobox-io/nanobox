@@ -102,18 +102,18 @@ func ExecWriter() io.Writer {
 }
 
 func (pc ProcessControl) Dup() ProcessControl {
-	newPC :=  ProcessControl{
+	newPC := ProcessControl{
 		Env:          pc.Env,
 		Debug:        pc.Debug,
 		Quiet:        pc.Quiet,
 		Verbose:      pc.Verbose,
 		Force:        pc.Force,
 		DisplayLevel: pc.DisplayLevel,
-		Meta: 				map[string]string{},
+		Meta:         map[string]string{},
 	}
 
 	for key, value := range pc.Meta {
-	  newPC.Meta[key] = value
+		newPC.Meta[key] = value
 	}
 
 	return newPC

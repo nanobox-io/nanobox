@@ -20,7 +20,6 @@ todo: write long description
 		PreRun: validate.Requires("provider"),
 		Run:    cleanFn,
 	}
-
 )
 
 // cleanFn ...

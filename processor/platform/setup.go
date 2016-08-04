@@ -62,7 +62,6 @@ func (platformSetup processPlatformSetup) provisionService(service Service) erro
 	control.Meta["name"] = service.name
 	control.Meta["image"] = service.image
 
-
 	if platformSetup.isServiceActive(service.name) {
 		// start the service if the service is already active
 		return processor.Run("service_start", control)

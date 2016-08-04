@@ -43,7 +43,7 @@ type (
 	configPayload struct {
 		LogvacHost string                 `json:"logvac_host"`
 		MistHost   string                 `json:"mist_host"`
-		MistToken   string                 `json:"mist_token"`
+		MistToken  string                 `json:"mist_token"`
 		Platform   string                 `json:"platform"`
 		Config     map[string]interface{} `json:"config"`
 		Member     member                 `json:"member"`

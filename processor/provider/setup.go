@@ -101,6 +101,5 @@ func (providerSetup processProviderSetup) saveProvider() error {
 	mProvider.HostIP = hIP
 	mProvider.MountIP = ip.String()
 
-
 	return data.Put("global", "provider", mProvider)
 }

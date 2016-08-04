@@ -18,6 +18,17 @@ var (
 		Long:  ``,
 	}
 
+	// DNSListCmd ...
+	DNSListCmd = &cobra.Command{
+		Use:   "list",
+		Short: "Lists the dns entries for this app",
+		Long: `
+Lists a hostnames maped to your dev app. The domain provided is added
+to your local hosts file pointing the the IP of your dev app.
+		`,
+		Run: dnsListFn,
+	}
+
 	// DNSAddCmd ...
 	DNSAddCmd = &cobra.Command{
 		Use:   "add",
@@ -52,9 +63,18 @@ match an DNS entry in your to your local hosts file.
 
 //
 func init() {
+	DNSCmd.AddCommand(DNSListCmd)
 	DNSCmd.AddCommand(DNSAddCmd)
 	DNSCmd.AddCommand(DNSRemoveCmd)
 	DNSCmd.AddCommand(DNSRemoveAllCmd)
+}
+
+// dnsListFn will run the DNS processor for adding DNS entires to the "hosts"
+// file
+func dnsListFn(ccmd *cobra.Command, args []string) {
+
+	processor.DefaultControl.Env = "dev"
+	print.OutputCommandErr(processor.Run("env_dns_list", processor.DefaultControl))
 }
 
 // dnsAddFn will run the DNS processor for adding DNS entires to the "hosts"

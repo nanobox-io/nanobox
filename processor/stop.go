@@ -36,7 +36,7 @@ func (stop processStop) Process() error {
 
 // stop all of the apps that are currently up
 func (stop processStop) stopAllApps() error {
-	
+
 	// create a control for the child processes
 	control := stop.control.Dup()
 

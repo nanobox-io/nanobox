@@ -1,14 +1,14 @@
 package config
 
 import (
-	"os"
-	"os/exec"
-	"strings"
 	"crypto/md5"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"os"
+	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/nanobox-io/nanobox-boxfile"
 )

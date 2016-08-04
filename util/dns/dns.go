@@ -9,6 +9,11 @@ import (
 	"strings"
 )
 
+type DomainName struct {
+	IP     string
+	Domain string
+}
+
 var (
 	hostsFile = detectHostsFile()
 	newline   = detectNewlineChar()
@@ -39,6 +44,30 @@ func Exists(entry string) bool {
 	}
 
 	return false
+}
+
+func List(filter string) []DomainName {
+
+	// open the hosts file
+	f, err := os.Open(hostsFile)
+	if err != nil {
+		return nil
+	}
+	defer f.Close()
+
+	entries := []DomainName{}
+
+	// scan each line of the hosts file to see if there is a match for this
+	// entry
+	scanner := bufio.NewScanner(f)
+	for scanner.Scan() {
+		if strings.Contains(scanner.Text(), filter) {
+			fields := strings.Fields(scanner.Text())
+			entries = append(entries, DomainName{IP: fields[0], Domain: fields[1]})
+		}
+	}
+
+	return entries
 }
 
 // Add ...
