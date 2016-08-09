@@ -32,6 +32,7 @@ type processDevConsole struct {
 	localIP   net.IP
 	image     string
 	container dockType.ContainerJSON
+	run       bool
 }
 
 //
@@ -42,7 +43,14 @@ func init() {
 //
 func devConsoleFn(control processor.ProcessControl) (processor.Processor, error) {
 	// confirm the provider is an accessable one that we support.
-	return &processDevConsole{control: control}, nil
+	devConsole := &processDevConsole{control: control}
+	return devConsole, devConsole.validateMeta()
+}
+
+func (devConsole *processDevConsole) validateMeta() error {
+	// set the dev run method if we are running a dev console in run mode
+	devConsole.run = devConsole.control.Meta["run"] == "true"
+	return nil
 }
 
 //
@@ -77,6 +85,10 @@ func (devConsole *processDevConsole) Process() error {
 	}
 
 	// if run then start the run commands
+	// and log but do not continue to the regular console
+	if devConsole.run {
+		return processor.Run("dev_run", devConsole.control)
+	}
 
 	//
 	if err := devConsole.printMOTD(); err != nil {
