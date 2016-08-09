@@ -8,6 +8,8 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 // IsPrivileged will return true if the current process is running as the
@@ -87,4 +89,13 @@ func PowerShell(command string) ([]byte, error) {
 	cmd := exec.Command("PowerShell.exe", "-NoProfile", "-Command", process)
 
 	return cmd.CombinedOutput()
+}
+
+// TODO: write a windows version that squashes the warning (tyler knows)
+func ReadPassword() (string, error) {
+	fmt.Print("Password: ")
+	pass, err := terminal.ReadPassword(int(os.Stdin.Fd()))
+	fmt.Println("")
+
+	return string(pass), err
 }
