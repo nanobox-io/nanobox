@@ -38,7 +38,6 @@ func (login processLogin) Process() error {
 		return err
 	}
 
-	fmt.Println("meta")
 	// verify that the user exists
 	if err := login.verifyUser(); err != nil {
 		return err
@@ -63,16 +62,16 @@ func (login *processLogin) validateMeta() error {
 
 	// request username/password if missing
 	if login.username == "" {
-		login.username = printutil.Prompt("Username:")
+		login.username = printutil.Prompt("Username: ")
 	}
 
 	if login.password == "" {
 		// ReadPassword prints Password: already
-		if pass, err := util.ReadPassword(); err != nil {
-			login.password = pass
-		} else {
-			login.password = ""
+		pass, err := util.ReadPassword()
+		if err != nil {
+			// TODO: print out the error to the log
 		}
+		login.password = pass
 	}
 
 	return nil

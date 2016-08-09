@@ -64,7 +64,9 @@ func envAddFn(ccmd *cobra.Command, args []string) {
 	data.Get(config.AppID()+"_meta", "dev_env", &evars)
 	for _, arg := range args {
 		for _, pair := range strings.Split(arg, ",") {
-			parts := strings.Split(pair, "=")
+			parts := strings.FieldsFunc(pair, func(c rune) bool {
+				return c == ':' || c == '='
+			})
 			if len(parts) == 2 {
 				evars[strings.ToUpper(parts[0])] = parts[1]
 			}

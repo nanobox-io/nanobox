@@ -61,7 +61,7 @@ func (devRun processDevRun) Process() error {
 	// run the start commands in from the boxfile
 	// in the dev container
 	if err := devRun.runStarts(); err != nil {
-		
+		return err
 	}
 
 	// catch signals and stop the run commands on signal

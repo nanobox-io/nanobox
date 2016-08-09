@@ -34,8 +34,8 @@ func (linkList processLinkList) Process() error {
 
 	// store the auth token
 	links := models.AppLinks{}
-	err := data.Get(config.AppID()+"_meta", "links", &links)
+	data.Get(config.AppID()+"_meta", "links", &links)
 	fmt.Printf("%+v\n", links)
 
-	return err
+	return nil
 }
