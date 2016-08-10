@@ -28,5 +28,3 @@ func RandomString(size int) string {
 
 	return string(b)
 }
-
-

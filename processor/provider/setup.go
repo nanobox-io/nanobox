@@ -56,6 +56,10 @@ func (providerSetup processProviderSetup) Process() error {
 		return err
 	}
 
+	if err := providerSetup.SetDefaultIP(); err != nil {
+		return err
+	}
+
 	if err := provider.DockerEnv(); err != nil {
 		lumber.Error("DockerEnv()", err)
 		return err
@@ -84,14 +88,6 @@ func (providerSetup processProviderSetup) saveProvider() error {
 		return err
 	}
 
-	if err := provider.AddIP(ip.String()); err != nil {
-		return err
-	}
-
-	if err := provider.SetDefaultIP(ip.String()); err != nil {
-		return err
-	}
-
 	// retrieve the Hosts known ip
 	hIP, err := provider.HostIP()
 	if err != nil {
@@ -102,4 +98,15 @@ func (providerSetup processProviderSetup) saveProvider() error {
 	mProvider.MountIP = ip.String()
 
 	return data.Put("global", "provider", mProvider)
+}
+
+func (providerSetup processProviderSetup) SetDefaultIP() error {
+	mProvider := models.Provider{}
+	data.Get("global", "provider", &mProvider)
+
+	if err := provider.AddIP(mProvider.MountIP); err != nil {
+		return err
+	}
+
+	return provider.SetDefaultIP(mProvider.MountIP)
 }

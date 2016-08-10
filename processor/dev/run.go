@@ -1,25 +1,25 @@
 package dev
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"os/signal"
-	"fmt"
 
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox-boxfile"
 
-	"github.com/nanobox-io/nanobox/processor"
-	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util/data"
 )
 
 // processDevRun ...
 type processDevRun struct {
 	control   processor.ProcessControl
 	boxfile   boxfile.Boxfile
-	starts    map[string][]string
+	starts    map[string]string
 	container string
 }
 
@@ -45,7 +45,6 @@ func (devRun processDevRun) Process() error {
 	if err := devRun.loadBoxfile(); err != nil {
 		return err
 	}
-
 
 	// load the start commands from the boxfile
 	if err := devRun.loadStarts(); err != nil {
@@ -73,7 +72,7 @@ func (devRun processDevRun) Process() error {
 	for range sigs {
 		// if we get a interupt we will jut return here
 		// causing the container to be destroyed and our
-		// exec processes to die 
+		// exec processes to die
 		return nil
 	}
 
@@ -81,7 +80,7 @@ func (devRun processDevRun) Process() error {
 }
 
 func (devRun *processDevRun) validateMeta() error {
-	devRun.starts = map[string][]string{}
+	devRun.starts = map[string]string{}
 
 	// currently no error conditions exist for this processor
 	return nil
@@ -96,7 +95,7 @@ func (devRun *processDevRun) loadBoxfile() error {
 
 	// load the boxfile into the boxfile package and make sure its
 	// valid
-	devRun.boxfile = boxfile.New(boxfileModel.Data)	
+	devRun.boxfile = boxfile.New(boxfileModel.Data)
 	if !devRun.boxfile.Valid {
 		return fmt.Errorf("the boxfile from the build is invalid")
 	}
@@ -106,18 +105,37 @@ func (devRun *processDevRun) loadBoxfile() error {
 func (devRun processDevRun) loadStarts() error {
 	// loop through the nodes and get there start commands
 	for _, node := range devRun.boxfile.Nodes("code") {
-		startSlice := devRun.boxfile.Node(node).StringSliceValue("start")
-		devRun.starts[node] = startSlice
+
+		values := devRun.boxfile.Node(node).Value("start")
+
+		switch values.(type) {
+		case string:
+			devRun.starts[node] = values.(string)
+		case []interface{}:
+			// if it is an array we need the keys to be
+			// web.site.2 where 2 is the index of the element
+			for index, iFace := range values.([]interface{}) {
+				if str, ok := iFace.(string); ok {
+					devRun.starts[fmt.Sprintf("%s.%d", node, index)] = str
+				}
+			}
+		case map[interface{}]interface{}:
+			for key, val := range values.(map[interface{}]interface{}) {
+				k, keyOk := key.(string)
+				v, valOk := val.(string)
+				if keyOk && valOk {
+					devRun.starts[fmt.Sprintf("%s.%s", node, k)] = v
+				}
+			}
+		}
 	}
 	return nil
 }
 
 func (devRun processDevRun) runStarts() error {
 	// loop through the starts and run them in go routines
-	for key, starts := range devRun.starts {
-		for _, start := range starts {
-			go devRun.runStart(key, start)
-		}
+	for key, start := range devRun.starts {
+		go devRun.runStart(key, start)
 	}
 	return nil
 }
@@ -130,20 +148,17 @@ func (devRun processDevRun) runStart(name, command string) error {
 		"exec",
 		"-u",
 		"gonano",
-		"-it",
 		devRun.container,
 		"/bin/bash",
-		"-c",
-		fmt.Sprintf("\"%s\"", command),
+		"-lc",
+		fmt.Sprintf("cd /app/; %s", command),
 	}
 
-	fmt.Println(cmd)
 	process := exec.Command(cmd[0], cmd[1:]...)
 
 	// TODO: these will be replaced with something from the
 	// new print library
 	// we will also want to use 'name' to create some prefix
-	process.Stdin = os.Stdin
 	process.Stdout = os.Stdout
 	process.Stderr = os.Stderr
 
@@ -152,8 +167,5 @@ func (devRun processDevRun) runStart(name, command string) error {
 		return err
 	}
 
-	return nil	
+	return nil
 }
-
-
-
