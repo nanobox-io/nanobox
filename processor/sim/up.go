@@ -4,50 +4,33 @@ import (
 	"github.com/nanobox-io/nanobox/processor"
 )
 
-// processSimUp ...
-type processSimUp struct {
-	control processor.ProcessControl
+// Up ...
+type Up struct {
 }
 
 //
-func init() {
-	processor.Register("sim_up", upFn)
-}
-
-// TODO: do some control validation check on the meta for the flags and make sure
-// they work
-func upFn(control processor.ProcessControl) (processor.Processor, error) {
-	return processSimUp{control: control}, nil
-}
-
-//
-func (sim processSimUp) Results() processor.ProcessControl {
-	return sim.control
-}
-
-//
-func (sim processSimUp) Process() error {
-	// set the process mode to sim
-	// which will allow isolation of containers
-	sim.control.Env = "sim"
-
+func (up Up) Run() error {
 	// run a nanobox start
-	if err := processor.Run("start", sim.control); err != nil {
+	processorStart := processor.Start{}
+	if err := processorStart.Run(); err != nil {
 		return err
 	}
 
 	// run a nanobox build
-	if err := processor.Run("build", sim.control); err != nil {
+	processorBuild := processor.Build{}
+	if err := processorBuild.Run(); err != nil {
 		return err
 	}
 
 	// run a sim start
-	if err := processor.Run("sim_start", sim.control); err != nil {
+	simStart := Start{Env: processorBuild.Env}
+	if err := simStart.Run(); err != nil {
 		return err
 	}
 
 	// run a sim deploy
-	if err := processor.Run("sim_deploy", sim.control); err != nil {
+	simDeploy := Deploy{Env: processorBuild.Env, App: simStart.App}
+	if err := simDeploy.Run(); err != nil {
 		return err
 	}
 

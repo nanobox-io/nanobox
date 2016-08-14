@@ -2,11 +2,10 @@
 package code
 
 import (
-	"errors"
+	"fmt"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/validate"
 )
 
@@ -20,8 +19,6 @@ const (
 	ACTIVE = "active"
 )
 
-var errMissingImageOrName = errors.New("missing image or name")
-
 func init() {
 	validate.Register("built", validBuilt)
 	validate.Register("dev_deployed", validDevDeployed)
@@ -29,25 +26,25 @@ func init() {
 }
 
 func validBuilt() error {
-	boxfile := models.Boxfile{}
-	if err := data.Get(config.AppID()+"_meta", "build_boxfile", &boxfile); err != nil {
-		return errors.New("No build has been completed for this application")
+	env, err := models.FindEnvByID(config.EnvID())
+	if err != nil || env.BuiltBoxfile == "" {
+		return fmt.Errorf("No build has been completed for this application")
 	}
 	return nil
 }
 
 func validDevDeployed() error {
-	boxfile := models.Boxfile{}
-	if err := data.Get(config.AppID()+"_meta", "dev_build_boxfile", &boxfile); err != nil {
-		return errors.New("Deploy has not been run for this application environment")
+	app, err := models.FindAppBySlug(config.EnvID(), "dev")
+	if err != nil || app.DeployedBoxfile == "" {
+		return fmt.Errorf("Deploy has not been run for this application environment")
 	}
 	return nil
 }
 
 func validSimDeployed() error {
-	boxfile := models.Boxfile{}
-	if err := data.Get(config.AppID()+"_meta", "sim_build_boxfile", &boxfile); err != nil {
-		return errors.New("Deploy has not been run for this application environment")
+	app, err := models.FindAppBySlug(config.EnvID(), "sim")
+	if err != nil || app.DeployedBoxfile == "" {
+		return fmt.Errorf("Deploy has not been run for this application environment")
 	}
 	return nil
 }

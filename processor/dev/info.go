@@ -4,60 +4,30 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/jcelliott/lumber"
-
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/processor"
-	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/data"
 )
 
-// processDevInfo ...
-type processDevInfo struct {
-	control processor.ProcessControl
+// Info ...
+type Info struct {
+	App models.App
 }
 
 //
-func init() {
-	processor.Register("dev_info", devInfoFn)
-}
-
-//
-func devInfoFn(control processor.ProcessControl) (processor.Processor, error) {
-	return processDevInfo{control}, nil
-}
-
-//
-func (devInfo processDevInfo) Results() processor.ProcessControl {
-	return devInfo.control
-}
-
-//
-func (devInfo processDevInfo) Process() error {
+func (info Info) Run() error {
 
 	//
-	bucket := fmt.Sprintf("%s_dev", config.AppID())
-	services, err := data.Keys(bucket)
-	if err != nil {
-		fmt.Println("data keys:", err)
-		lumber.Close()
-		return err
-	}
+	components, _ := models.AllComponentsByApp(info.App.ID)
 
 	//
-	for _, service := range services {
-		if service != "builds" {
-			svc := models.Service{}
-			data.Get(bucket, service, &svc)
-			bytes, _ := json.MarshalIndent(svc, "", "  ")
+	for _, component := range components {
+		if component.Name != "builds" {
+			bytes, _ := json.MarshalIndent(component, "", "  ")
 			fmt.Printf("%s\n", bytes)
 		}
 	}
 
 	//
-	envVars := models.Evars{}
-	data.Get(config.AppID()+"_meta", "dev_env", &envVars)
-	bytes, _ := json.MarshalIndent(envVars, "", "  ")
+	bytes, _ := json.MarshalIndent(info.App.Evars, "", "  ")
 	fmt.Printf("%s\n", bytes)
 
 	return nil

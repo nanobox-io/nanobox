@@ -1,38 +1,21 @@
 package provider
 
 import (
-	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
 
-// processProviderDestroy ...
-type processProviderDestroy struct {
-	control processor.ProcessControl
+// Destroy ...
+type Destroy struct {
 }
 
 //
-func init() {
-	processor.Register("provider_destroy", providerDestroyFn)
-}
-
-//
-func providerDestroyFn(control processor.ProcessControl) (processor.Processor, error) {
-	return processProviderDestroy{control}, nil
-}
-
-//
-func (providerDestroy processProviderDestroy) Results() processor.ProcessControl {
-	return providerDestroy.control
-}
-
-//
-func (providerDestroy processProviderDestroy) Process() error {
+func (destroy Destroy) Run() error {
 	locker.GlobalLock()
 	defer locker.GlobalUnlock()
 
 	//
-	if err := providerDestroy.removeDatabase(); err != nil {
+	if err := destroy.removeDatabase(); err != nil {
 		return err
 	}
 

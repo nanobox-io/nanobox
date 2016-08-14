@@ -3,8 +3,10 @@ package sim
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox/processor"
+	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processor/sim"
 	"github.com/nanobox-io/nanobox/util/print"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/validate"
 )
 
@@ -26,5 +28,9 @@ will be preserved in its current state.
 //
 // stopFn ...
 func stopFn(ccmd *cobra.Command, args []string) {
-	print.OutputCommandErr(processor.Run("sim_stop", processor.DefaultControl))
+	app, _ := models.FindAppBySlug(config.EnvID(), "sim")
+	simStop := sim.Stop{
+		App: app,
+	}
+	print.OutputCommandErr(simStop.Run())
 }

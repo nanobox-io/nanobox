@@ -14,7 +14,6 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/data"
 )
 
 // Auth ...
@@ -113,8 +112,7 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 	}
 
 	productionUrl := config.Viper().GetString("production_url")
-	auth := models.Auth{}
-	data.Get("global", "user", &auth)
+	auth, _ := models.LoadAuth()
 
 	if params == nil {
 		params = url.Values{}

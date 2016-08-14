@@ -16,36 +16,19 @@ import (
 	"github.com/nanobox-io/nanobox/util/odin"
 )
 
-// processConsole ...
-type processConsole struct {
-	control   ProcessControl
-	container string
-	app       string
+// Console ...
+type Console struct {
+	Container string
+	App       string
 }
 
 //
-func init() {
-	Register("console", consoleFn)
-}
-
-//
-func consoleFn(control ProcessControl) (Processor, error) {
-	console := &processConsole{control: control}
-	return console, console.validateMeta()
-}
-
-//
-func (console processConsole) Results() ProcessControl {
-	return console.control
-}
-
-//
-func (console processConsole) Process() error {
+func (console Console) Run() error {
 
 	var err error
 
 	// get a key from odin
-	key, location, container, err = odin.EstablishConsole(getAppID(console.app), console.container)
+	key, location, container, err = odin.EstablishConsole(getAppID(console.App), console.Container)
 	if err != nil {
 		return err
 	}
@@ -94,21 +77,6 @@ func (console processConsole) Process() error {
 		io.Copy(stdOut, remoteConn)
 		remoteConn.(*tls.Conn).Close()
 	}
-	return nil
-}
-
-// validateMeta validates that the required metadata exists
-func (console *processConsole) validateMeta() error {
-
-	// set optional meta values
-	console.app = console.control.Meta["app"]
-
-	// set container (required) and ensure it's provided
-	console.container = console.control.Meta["container"]
-	if console.container == "" {
-		return fmt.Errorf("Missing required meta value 'container'")
-	}
-
 	return nil
 }
 

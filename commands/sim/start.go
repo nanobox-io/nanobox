@@ -3,8 +3,10 @@ package sim
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox/processor"
+	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processor/sim"
 	"github.com/nanobox-io/nanobox/util/print"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/validate"
 )
 
@@ -24,8 +26,10 @@ and deploy it into your sim platform (nanobox sim deploy).
 	}
 )
 
-//
 // startFn ...
 func startFn(ccmd *cobra.Command, args []string) {
-	print.OutputCommandErr(processor.Run("sim_start", processor.DefaultControl))
+	app, _ := models.FindAppBySlug(config.EnvID(), "sim")
+
+	simStart := sim.Start{App: app}
+	print.OutputCommandErr(simStart.Run())
 }

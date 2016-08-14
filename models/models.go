@@ -1,13 +1,12 @@
-// Package models ...
 package models
 
-// BehaviorPresent ...
-func (p Plan) BehaviorPresent(b string) bool {
-	for _, behavior := range p.Behaviors {
-		if behavior == b {
-			return true
-		}
+func Inspect(bucket, key string) interface{} {
+	if key == "" {
+		v := []interface{}{}
+		getAll(bucket, &v)
+		return v
 	}
-
-	return false
+	var v interface{}
+	get(bucket, key, &v)
+	return v
 }

@@ -5,36 +5,23 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
-	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/odin"
 
 	printutil "github.com/sdomino/go-util/print"
 )
 
-type processLogin struct {
-	control  ProcessControl
-	username string
-	password string
+type Login struct {
+	Username string
+	Password string
 	token    string
 }
 
-func init() {
-	Register("login", loginFn)
-}
-
-func loginFn(control ProcessControl) (Processor, error) {
-	return processLogin{control: control}, nil
-}
-
-func (login processLogin) Results() ProcessControl {
-	return login.control
-}
 
 // Process ...
-func (login processLogin) Process() error {
+func (login Login) Run() error {
 
 	// validate we have all meta information needed
-	if err := login.validateMeta(); err != nil {
+	if err := login.validateUser(); err != nil {
 		return err
 	}
 
@@ -53,35 +40,32 @@ func (login processLogin) Process() error {
 	return nil
 }
 
-// validateMeta validates that the required metadata exists
-func (login *processLogin) validateMeta() error {
+// validateUser validates that the required metadata exists
+func (login *Login) validateUser() error {
 
-	// set username and password
-	login.username = login.control.Meta["username"]
-	login.password = login.control.Meta["password"]
-
-	// request username/password if missing
-	if login.username == "" {
-		login.username = printutil.Prompt("Username: ")
+	// request Username/Password if missing
+	if login.Username == "" {
+		// add in tylers display system for prompting
+		login.Username = printutil.Prompt("Username: ")
 	}
 
-	if login.password == "" {
+	if login.Password == "" {
 		// ReadPassword prints Password: already
 		pass, err := util.ReadPassword()
 		if err != nil {
 			// TODO: print out the error to the log
 		}
-		login.password = pass
+		login.Password = pass
 	}
 
 	return nil
 }
 
 // verifyUser ...
-func (login *processLogin) verifyUser() (err error) {
+func (login *Login) verifyUser() (err error) {
 
 	//
-	if login.token, err = odin.Auth(login.username, login.password); err != nil {
+	if login.token, err = odin.Auth(login.Username, login.Password); err != nil {
 		return err
 	}
 
@@ -89,12 +73,9 @@ func (login *processLogin) verifyUser() (err error) {
 }
 
 // saveUser ...
-func (login *processLogin) saveUser() error {
+func (login *Login) saveUser() error {
 
 	// store the auth token
-	if err := data.Put("global", "user", models.Auth{Key: login.token}); err != nil {
-		return err
-	}
-
-	return nil
+	auth := models.Auth{Key: login.token}
+	return auth.Save()
 }

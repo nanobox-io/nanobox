@@ -14,15 +14,15 @@ const (
 	UDP   = "udp"
 )
 
-// Service ...
-type Service struct {
+// Component ...
+type Component struct {
 	label string
 	name  string
 	image string
 }
 
-// Services ...
-var SetupServices = []Service{
+// Components ...
+var setupComponents = []Component{
 	{
 		label: "Logger",
 		name:  "logvac",
@@ -35,8 +35,8 @@ var SetupServices = []Service{
 	},
 }
 
-// Services ...
-var DeployServices = []Service{
+// Components ...
+var deployComponents = []Component{
 	{
 		label: "Router",
 		name:  "portal",

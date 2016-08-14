@@ -1,51 +1,21 @@
 package platform
 
 import (
-	"fmt"
-
-	"github.com/nanobox-io/nanobox-golang-stylish"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/processor"
-	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/data"
+	"github.com/nanobox-io/nanobox/processor/component"
 )
 
-// processPlatformSetup ...
-type processPlatformSetup struct {
-	control processor.ProcessControl
+// Setup ...
+type Setup struct {
+	App models.App
 }
 
 //
-func init() {
-	processor.Register("platform_setup", platformSetupFn)
-}
+func (setup Setup) Run() error {
 
-//
-func platformSetupFn(control processor.ProcessControl) (processor.Processor, error) {
-	return processPlatformSetup{control}, nil
-}
-
-//
-func (platformSetup processPlatformSetup) Results() processor.ProcessControl {
-	return platformSetup.control
-}
-
-//
-func (platformSetup processPlatformSetup) Process() error {
-
-	if err := platformSetup.provisionServices(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// provisionServices will provision all the platform services
-func (platformSetup processPlatformSetup) provisionServices() error {
-	platformSetup.control.Display(stylish.Bullet("Provisioning Platform Services"))
-	for _, service := range SetupServices {
-		if err := platformSetup.provisionService(service); err != nil {
+	for _, component := range setupComponents {
+		if err := setup.provisionComponent(component); err != nil {
 			return err
 		}
 	}
@@ -53,43 +23,41 @@ func (platformSetup processPlatformSetup) provisionServices() error {
 	return nil
 }
 
-// provisionService will provision an individual service
-func (platformSetup processPlatformSetup) provisionService(service Service) error {
 
-	control := platformSetup.control.Dup()
-	control.DisplayLevel++
-	control.Meta["label"] = service.label
-	control.Meta["name"] = service.name
-	control.Meta["image"] = service.image
+// provisionComponent will provision an individual component
+func (setup Setup) provisionComponent(pComp Component) error {
 
-	if platformSetup.isServiceActive(service.name) {
-		// start the service if the service is already active
-		return processor.Run("service_start", control)
+	if setup.isComponentActive(pComp.name) {
+		// start the component if the component is already active
+		comp, _  := models.FindComponentBySlug(setup.App.ID, pComp.name)
+		componentStart := component.Start{Component: comp}
+		return componentStart.Run()
 	}
 
 	// otherwise
-	// setup the service
-	if err := processor.Run("service_setup", control); err != nil {
+	// setup the component
+	componentSetup := component.Setup{
+		App: setup.App,
+		Name: pComp.name,
+		Image: pComp.image,
+	}
+	if err := componentSetup.Run(); err != nil {
 		return err
 	}
 
 	// and configure it
-	return processor.Run("service_configure", control)
+	componentConfigure := component.Configure{
+		App: setup.App,
+		Component: componentSetup.Component,
+	}
+	return componentConfigure.Run()
 }
 
-// isServiceActive returns true if a service is already active
-func (platformSetup processPlatformSetup) isServiceActive(id string) bool {
+// isComponentActive returns true if a component is already active
+func (setup Setup) isComponentActive(name string) bool {
 
-	// service db entry
-	service := models.Service{}
+	// component db entry
+	component, _  := models.FindComponentBySlug(setup.App.ID, name)
 
-	// fetch the entry from the database, ignoring any errors as the service
-	// might not exist yet
-	bucket := fmt.Sprintf("%s_%s", config.AppID(), platformSetup.control.Env)
-	err := data.Get(bucket, id, &service)
-	if err != nil {
-		// fmt.Println("isServiceActive", bucket, id, err)
-	}
-
-	return service.State == "active"
+	return component.State == "active"
 }

@@ -4,19 +4,19 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/processor"
-	"github.com/nanobox-io/nanobox/util/data"
+	"github.com/nanobox-io/nanobox/processor/dev"
 	"github.com/nanobox-io/nanobox/util/print"
 	"github.com/nanobox-io/nanobox/validate"
+	"github.com/nanobox-io/nanobox/util/config"
 )
 
 // DestroyCmd ...
 var (
 	DestroyCmd = &cobra.Command{
 		Use:    "destroy",
-		Short:  "Destroys the docker machines associated with your sim app.",
+		Short:  "Destroys the docker containers associated with your sim app.",
 		Long:   ``,
-		PreRun: validate.Requires("provider"),
+		PreRun: validate.Requires("provider", "provider_up"),
 		Run:    destroyFn,
 	}
 
@@ -25,34 +25,32 @@ var (
 	}{}
 )
 
+//
 func init() {
 	DestroyCmd.Flags().StringVarP(&destroyCmdFlags.app, "app", "a", "", "app to destroy")
 }
 
 // destroyFn ...
 func destroyFn(ccmd *cobra.Command, args []string) {
-	appID := getAppID()
-	if appID != "" {
-		processor.DefaultControl.Meta["app_name"] = appID
-	}
+	devDestroy := dev.Destroy{App: getApp()}
 
-	print.OutputCommandErr(processor.Run("sim_destroy", processor.DefaultControl))
+	print.OutputCommandErr(devDestroy.Run())
 }
 
 // look up the real app id based on what they told me.
-func getAppID() string {
-	if destroyCmdFlags.app == "" {
-		return ""
-	}
-
-	keys, _ := data.Keys("apps")
-	for _, appID := range keys {
-		app := models.App{}
-		data.Get("apps", appID, &app)
-		if app.ID == destroyCmdFlags.app || app.Name == destroyCmdFlags.app {
-			return app.ID
+func getApp() models.App {
+	if destroyCmdFlags.app != "" {
+		envs, _ := models.AllEnvs()
+		for _, env := range envs {
+			app, _ := models.FindAppBySlug(env.ID, "sim")
+			if env.ID == destroyCmdFlags.app || app.ID == destroyCmdFlags.app {
+				return app
+			}
 		}
 	}
 
-	return ""
+	// if none could be found based on the arguements
+	// use the one based on my folder
+	app, _ := models.FindAppBySlug(config.EnvID(), "sim")
+	return app
 }

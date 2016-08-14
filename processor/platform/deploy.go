@@ -1,52 +1,20 @@
 package platform
 
 import (
-	"fmt"
-
-	"github.com/nanobox-io/nanobox-golang-stylish"
-
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/processor"
-	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/data"
+	"github.com/nanobox-io/nanobox/processor/component"
 )
 
-// processPlatformDeploy ...
-type processPlatformDeploy struct {
-	control processor.ProcessControl
-}
-
-// this sets up the necessary pieces to do a deploy locally
-// which requires a warehouse as well as a portal
-func init() {
-	processor.Register("platform_deploy", platformDeployFn)
+// Deploy ...
+type Deploy struct {
+	App models.App
 }
 
 //
-func platformDeployFn(control processor.ProcessControl) (processor.Processor, error) {
-	return processPlatformDeploy{control}, nil
-}
+func (deploy Deploy) Run() error {
 
-//
-func (platformDeploy processPlatformDeploy) Results() processor.ProcessControl {
-	return platformDeploy.control
-}
-
-//
-func (platformDeploy processPlatformDeploy) Process() error {
-
-	if err := platformDeploy.provisionServices(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// provisionServices will provision all the platform services
-func (platformDeploy processPlatformDeploy) provisionServices() error {
-	platformDeploy.control.Display(stylish.Bullet("Provisioning Platform Services"))
-	for _, service := range DeployServices {
-		if err := platformDeploy.provisionService(service); err != nil {
+	for _, component := range deployComponents {
+		if err := deploy.provisionComponent(component); err != nil {
 			return err
 		}
 	}
@@ -54,40 +22,41 @@ func (platformDeploy processPlatformDeploy) provisionServices() error {
 	return nil
 }
 
-// provisionService will provision an individual service
-func (platformDeploy processPlatformDeploy) provisionService(service Service) error {
 
-	control := platformDeploy.control.Dup()
-	control.DisplayLevel++
-	control.Meta["label"] = service.label
-	control.Meta["name"] = service.name
-	control.Meta["image"] = service.image
+// provisionComponent will provision an individual component
+func (deploy Deploy) provisionComponent(pComp Component) error {
 
-	if platformDeploy.isServiceActive(service.name) {
-		// start the service if the service is already active
-		return processor.Run("service_start", control)
+	// if the component exists and is active just start it and stop here
+	if deploy.isComponentActive(pComp.name) {
+		compModel, _  := models.FindComponentBySlug(deploy.App.ID, pComp.name)
+		componentStart := component.Start{Component: compModel}
+		return componentStart.Run()
 	}
 
 	// otherwise
-	// setup the service
-	if err := processor.Run("service_setup", control); err != nil {
+	// deploy the component
+	componentSetup := component.Setup{
+		App: deploy.App,
+		Name: pComp.name,
+		Image: pComp.image,
+	}
+	if err := componentSetup.Run(); err != nil {
 		return err
 	}
 
 	// and configure it
-	return processor.Run("service_configure", control)
+	componentConfigure := component.Configure{
+		App: deploy.App,
+		Component: componentSetup.Component,
+	}
+	return componentConfigure.Run()
 }
 
-// isServiceActive returns true if a service is already active
-func (platformDeploy processPlatformDeploy) isServiceActive(id string) bool {
+// isComponentActive returns true if a component is already active
+func (deploy Deploy) isComponentActive(name string) bool {
 
-	// service db entry
-	service := models.Service{}
+	// component db entry
+	component, _  := models.FindComponentBySlug(deploy.App.ID, name)
 
-	// fetch the entry from the database, ignoring any errors as the service
-	// might not exist yet
-	bucket := fmt.Sprintf("%s_%s", config.AppID(), platformDeploy.control.Env)
-	data.Get(bucket, id, &service)
-
-	return service.State == "active"
+	return component.State == "active"
 }

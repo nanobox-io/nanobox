@@ -1,79 +1,47 @@
 package code
 
 import (
-	"fmt"
 	"net"
 
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
-	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 )
 
-// processCodeDestroy ...
-type processCodeDestroy struct {
-	control processor.ProcessControl
+// Destroy ...
+type Destroy struct {
+	Component models.Component
 }
 
 //
-func init() {
-	processor.Register("code_destroy", codeDestroyFn)
-}
-
-//
-func codeDestroyFn(control processor.ProcessControl) (processor.Processor, error) {
-	// confirm the provider is an accessable one that we support.
-	if control.Meta["name"] == "" {
-		return nil, errMissingImageOrName
-	}
-	return &processCodeDestroy{control: control}, nil
-}
-
-//
-func (codeDestroy processCodeDestroy) Results() processor.ProcessControl {
-	return codeDestroy.control
-}
-
-//
-func (codeDestroy *processCodeDestroy) Process() error {
-
-	// get the service from the database
-	service := models.Service{}
+func (destroy *Destroy) Run() error {
 
 	//
-	bucket := fmt.Sprintf("%s_%s", config.AppID(), codeDestroy.control.Env)
-	if err := data.Get(bucket, codeDestroy.control.Meta["name"], &service); err != nil {
+	if err := docker.ContainerRemove(destroy.Component.ID); err != nil {
 		return err
 	}
 
 	//
-	if err := docker.ContainerRemove(service.ID); err != nil {
+	if err := provider.RemoveNat(destroy.Component.ExternalIP, destroy.Component.InternalIP); err != nil {
 		return err
 	}
 
 	//
-	if err := provider.RemoveNat(service.ExternalIP, service.InternalIP); err != nil {
+	if err := provider.RemoveIP(destroy.Component.ExternalIP); err != nil {
 		return err
 	}
 
 	//
-	if err := provider.RemoveIP(service.ExternalIP); err != nil {
+	if err := dhcp.ReturnIP(net.ParseIP(destroy.Component.ExternalIP)); err != nil {
 		return err
 	}
 
 	//
-	if err := dhcp.ReturnIP(net.ParseIP(service.ExternalIP)); err != nil {
+	if err := dhcp.ReturnIP(net.ParseIP(destroy.Component.InternalIP)); err != nil {
 		return err
 	}
 
-	//
-	if err := dhcp.ReturnIP(net.ParseIP(service.InternalIP)); err != nil {
-		return err
-	}
-
-	// remove the service from the database
-	return data.Delete(bucket, codeDestroy.control.Meta["name"])
+	// remove the destroy.Component from the database
+	return destroy.Component.Delete()
 }

@@ -14,7 +14,6 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/provider"
-	"github.com/nanobox-io/nanobox/util/data"
 )
 
 // EXPORTSFILE ...
@@ -128,8 +127,8 @@ func Mount(hostPath, mountPath string) error {
 func entry(path string) (string, error) {
 
 	// use the mountIP saved on the provider in the database
-	provider := models.Provider{}
-	if err := data.Get("global", "provider", &provider); err != nil {
+	provider, err := models.LoadProvider()
+	if err != nil {
 		return "", err
 	}
 	if provider.MountIP == "" {

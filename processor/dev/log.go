@@ -1,35 +1,21 @@
 package dev
 
 import (
-	"github.com/nanobox-io/nanobox/processor"
+	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processor/platform"
 )
 
-// processDevLog ...
-type processDevLog struct {
-	control processor.ProcessControl
+// Log ...
+type Log struct {
+	App models.App
 }
 
 //
-func init() {
-	processor.Register("dev_log", devLogFn)
-}
-
-//
-func devLogFn(control processor.ProcessControl) (processor.Processor, error) {
-	return processDevLog{control}, nil
-}
-
-//
-func (devLog processDevLog) Results() processor.ProcessControl {
-	return devLog.control
-}
-
-//
-func (devLog processDevLog) Process() error {
-	// set the process mode to dev
-	devLog.control.Env = "dev"
+func (log Log) Run() error {
 
 	// some messaging about the logging??
-
-	return processor.Run("mist_log", devLog.control)
+	platformMistLog := platform.MistListen{
+		App:log.App,
+	}
+	return platformMistLog.Run()
 }

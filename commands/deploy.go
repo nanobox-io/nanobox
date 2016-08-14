@@ -5,8 +5,11 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util/print"
+	"github.com/nanobox-io/nanobox/util/config"
+
 )
 
 var (
@@ -32,18 +35,21 @@ func init() {
 
 // deployFn ...
 func deployFn(ccmd *cobra.Command, args []string) {
+	env, _ := models.FindEnvByID(config.EnvID())
+
+	deploy := processor.Deploy{
+		Env: env,
+		App: "default",
+		Message: deployCmdFlags.message,
+	}
 
 	// validate we have args required to set the meta we'll need; if we don't have
 	// the required args this will return with instructions
 	switch {
 
-	// if no arguments are passed we'll deploy to the "default" app...
-	case len(args) == 0:
-		processor.DefaultControl.Meta["app"] = "default"
-
 	// if one argument is passed we'll assume it's the name of the app to deploy to
 	case len(args) == 1:
-		processor.DefaultControl.Meta["app"] = args[0]
+		deploy.App = args[0]
 
 	// if more than one argument is passed we'll let the user know they are using
 	// the command wrong
@@ -59,8 +65,7 @@ ex: nanobox deploy <name>
 		return
 	}
 
-	processor.DefaultControl.Meta["message"] = deployCmdFlags.message
 
 	// set the meta arguments to be used in the processor and run the processor
-	print.OutputCommandErr(processor.Run("deploy", processor.DefaultControl))
+	print.OutputCommandErr(deploy.Run())
 }

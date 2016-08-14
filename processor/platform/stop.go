@@ -1,44 +1,23 @@
 package platform
 
 import (
-	"github.com/nanobox-io/nanobox-golang-stylish"
-
-	"github.com/nanobox-io/nanobox/processor"
+	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processor/component"
+	
 )
 
 //
-type processPlatformStop struct {
-	control processor.ProcessControl
+type Stop struct {
+	App models.App
 }
 
 //
-func init() {
-	processor.Register("platform_stop", platformStopFn)
-}
+func (stop Stop) Run() error {
 
-//
-func platformStopFn(control processor.ProcessControl) (processor.Processor, error) {
-	return processPlatformStop{control}, nil
-}
-
-//
-func (platformStop processPlatformStop) Results() processor.ProcessControl {
-	return platformStop.control
-}
-
-//
-func (platformStop processPlatformStop) Process() error {
-	return platformStop.stopServices()
-}
-
-// stopServices will stop all the platform services
-func (platformStop *processPlatformStop) stopServices() error {
-
-	// stop all the platform services weather they have been created
+	// stop all the platform components weather they have been created
 	// or not. (some may not be created in all instances)
-	platformStop.control.Display(stylish.Bullet("Stopping Platform Services..."))
-	for _, service := range append(SetupServices, DeployServices...) {
-		if err := platformStop.stopService(service); err != nil {
+	for _, component := range append(setupComponents, deployComponents...) {
+		if err := stop.stopComponent(component); err != nil {
 			return err
 		}
 	}
@@ -46,14 +25,16 @@ func (platformStop *processPlatformStop) stopServices() error {
 	return nil
 }
 
-// stopService will stop an individual service
-func (platformStop *processPlatformStop) stopService(service Service) error {
-	//
-	control := platformStop.control.Dup()
-	control.DisplayLevel++
-	control.Meta["label"] = service.label
-	control.Meta["name"] = service.name
-
-	//
-	return processor.Run("service_stop", control)
+// stopComponent will stop an individual component
+func (stop *Stop) stopComponent(pComp Component) error {
+	compModel, err := models.FindComponentBySlug(stop.App.ID, pComp.name)
+	if err == nil {
+		// if im able to retrieve the component from the db
+		// stop it
+		// probably put in some messaging here
+		componentStop := component.Stop{compModel}
+		return componentStop.Run()
+	}
+	
+	return nil
 }

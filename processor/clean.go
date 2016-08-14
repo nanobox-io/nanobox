@@ -2,69 +2,41 @@ package processor
 
 import (
 	"os"
-	"strings"
 
 	"github.com/nanobox-io/nanobox/util/locker"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util/data"
+	"github.com/nanobox-io/nanobox/processor/env"
 )
 
-// processClean ...
-type processClean struct {
-	control ProcessControl
+// Clean ...
+type Clean struct {
 }
 
 //
-func init() {
-	Register("clean", cleanFn)
-}
-
-//
-func cleanFn(control ProcessControl) (Processor, error) {
-	return processClean{control}, nil
-}
-
-//
-func (clean processClean) Results() ProcessControl {
-	return clean.control
-}
-
-//
-func (clean processClean) Process() error {
+func (clean *Clean) Run() error {
 
 	// aquire a global lock because we are going to be removing several apps
 	locker.GlobalLock()
 	defer locker.GlobalUnlock()
 
 	// collect all the apps
-	keys, err := data.Keys("apps")
+	envs, err := models.AllEnvs()
 	if err != nil {
 		return err
 	}
 
 	// check to see if the app folder still exists
-	for _, appID := range keys {
+	for _, e := range envs {
 
-		app := models.App{}
-		data.Get("apps", appID, &app)
+		if !folderExists(e.Directory) {
 
-		if !folderExists(app.Directory) {
+			// create an environment destroy for defunct environment
+			destroy := env.Destroy{Env: e}
 
-			// remove apps that no longer exist in the folder
-			clean.control.Meta["app_name"] = app.ID
-			clean.control.Env = "dev"
-
-			// get the env from the id
-			if strings.Contains(app.ID, "_sim") {
-				clean.control.Env = "sim"
-			}
-
-			err := Run("env_destroy", clean.control)
-			if err != nil {
+			if err := destroy.Run(); err != nil {
 				return err
 			}
-
 		}
 	}
 

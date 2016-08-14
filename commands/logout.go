@@ -20,5 +20,6 @@ var (
 
 // logoutFn ...
 func logoutFn(ccmd *cobra.Command, args []string) {
-	print.OutputCommandErr(processor.Run("logout", processor.DefaultControl))
+
+	print.OutputCommandErr(processor.Logout{}.Run())
 }

@@ -82,7 +82,7 @@ func LocalUnlock() (err error) {
 // localPort ...
 func localPort() (num int) {
 
-	b := []byte(config.AppID())
+	b := []byte(config.EnvID())
 
 	//
 	for i := 0; i < len(b); i++ {

@@ -25,5 +25,5 @@ dev and sim platforms.
 
 // stopFn ...
 func stopFn(ccmd *cobra.Command, args []string) {
-	print.OutputCommandErr(processor.Run("stop", processor.DefaultControl))
+	print.OutputCommandErr(processor.Stop{}.Run())
 }

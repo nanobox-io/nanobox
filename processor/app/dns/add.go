@@ -5,108 +5,66 @@ import (
 	"runtime"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/dns"
 )
 
-// processEnvDNSAdd ...
-type processEnvDNSAdd struct {
-	control processor.ProcessControl
-	app     models.App
-	name    string
-}
-
-func init() {
-	processor.Register("env_dns_add", envDNSAddFn)
-}
-
-// envDNSAddFn creates a processEnvDNSAdd and validates the meta data in the control
-func envDNSAddFn(control processor.ProcessControl) (processor.Processor, error) {
-	envDNSAdd := &processEnvDNSAdd{control: control}
-	return envDNSAdd, envDNSAdd.validateMeta()
-}
-
-func (envDNSAdd processEnvDNSAdd) Results() processor.ProcessControl {
-	return envDNSAdd.control
+// Add ...
+type Add struct {
+	App     models.App
+	Name    string
 }
 
 //
-func (envDNSAdd processEnvDNSAdd) Process() error {
-
-	// load the current "app"
-	if err := envDNSAdd.loadApp(); err != nil {
-		return err
-	}
+func (add Add) Run() error {
 
 	// short-circuit if the entries already exist; we do this after we validate meta
 	// and load the app because both of those are needed to determin the entry we're
 	// looking for
-	if envDNSAdd.entriesExist() {
+	if add.entriesExist() {
 		return nil
 	}
 
 	// if we're not running as the privileged user, we need to re-exec with privilege
 	if !util.IsPrivileged() {
-		return envDNSAdd.reExecPrivilege()
+		return add.reExecPrivilege()
 	}
 
 	// add the DNS entries
-	return envDNSAdd.addEntries()
-}
-
-// validateMeta validates that the required metadata exists
-func (envDNSAdd *processEnvDNSAdd) validateMeta() error {
-
-	// set name (required) and ensure it's provided
-	envDNSAdd.name = envDNSAdd.control.Meta["name"]
-	if envDNSAdd.name == "" {
-		return fmt.Errorf("Missing required meta value 'name'")
-	}
-
-	return nil
-}
-
-// loadApp loads the app from the db
-func (envDNSAdd *processEnvDNSAdd) loadApp() error {
-
-	//
-	key := fmt.Sprintf("%s_%s", config.AppID(), envDNSAdd.control.Env)
-	return data.Get("apps", key, &envDNSAdd.app)
+	return add.addEntries()
 }
 
 // entriesExist returns true if both entries already exist
-func (envDNSAdd *processEnvDNSAdd) entriesExist() bool {
+func (add *Add) entriesExist() bool {
 
 	// fetch the IP
 	// env in dev is used in the dev container
 	// env in sim is used for portal
-	envIP := envDNSAdd.app.GlobalIPs["env"]
+	envIP := add.App.GlobalIPs["env"]
 
 	// generate the entries
-	env := dns.Entry(envIP, envDNSAdd.name, fmt.Sprintf("%s_%s", config.AppID(), envDNSAdd.control.Env))
+	env := dns.Entry(envIP, add.Name, add.App.ID)
 
 	// if the entries dont exist just return
 	return dns.Exists(env)
 }
 
 // addEntries adds the dev and sim entries into the host dns
-func (envDNSAdd *processEnvDNSAdd) addEntries() error {
+func (add *Add) addEntries() error {
 
 	// fetch the IPs
-	envIP := envDNSAdd.app.GlobalIPs["env"]
+	envIP := add.App.GlobalIPs["env"]
 
 	// generate the entries
-	env := dns.Entry(envIP, envDNSAdd.name, fmt.Sprintf("%s_%s", config.AppID(), envDNSAdd.control.Env))
+	env := dns.Entry(envIP, add.Name, add.App.ID)
 
 	// add the 'sim' DNS entry into the /etc/hosts file
 	return dns.Add(env)
 }
 
 // reExecPrivilege re-execs the current process with a privileged user
-func (envDNSAdd *processEnvDNSAdd) reExecPrivilege() error {
+func (add *Add) reExecPrivilege() error {
 
 	if runtime.GOOS == "windows" {
 		fmt.Println("Administrator privileges are required to modify host dns entries.")
@@ -124,7 +82,7 @@ func (envDNSAdd *processEnvDNSAdd) reExecPrivilege() error {
 	// call 'dev dns add' with the original path and args; config.NanoboxPath() will be the
 	// currently executing program with the path, so this command will ultimately lead right back
 	// here
-	cmd := fmt.Sprintf("%s %s dns add %s", config.NanoboxPath(), envDNSAdd.control.Env, envDNSAdd.name)
+	cmd := fmt.Sprintf("%s %s dns add %s", config.NanoboxPath(), add.App.Name, add.Name)
 
 	// if the sudo'ed subprocess fails, we need to return error to stop the process
 	if err := util.PrivilegeExec(cmd); err != nil {

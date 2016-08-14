@@ -3,90 +3,64 @@ package app
 import (
 	"fmt"
 	"net"
-	"strings"
+
+	"github.com/nanobox-io/golang-docker-client"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/processor"
-	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/data"
+	"github.com/nanobox-io/nanobox/processor/component"
+	"github.com/nanobox-io/nanobox/processor/app/dns"
+	
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
 
-// processAppDestroy ...
-type processAppDestroy struct {
-	control processor.ProcessControl
-	app     models.App
+// Destroy ...
+type Destroy struct {
+	App models.App
 }
 
 //
-func init() {
-	processor.Register("app_destroy", appDestroyFn)
-}
-
-//
-func appDestroyFn(control processor.ProcessControl) (processor.Processor, error) {
-	appDestroy := &processAppDestroy{control: control}
-	return appDestroy, appDestroy.validateMeta()
-}
-
-func (appDestroy *processAppDestroy) validateMeta() error {
-	if appDestroy.control.Env == "" {
-		return fmt.Errorf("Env not set")
-	}
-
-	if appDestroy.control.Meta["name"] == "" {
-		appDestroy.control.Meta["name"] = fmt.Sprintf("%s_%s", config.AppID(), appDestroy.control.Env)
-	}
-
-	return nil
-}
-
-//
-func (appDestroy *processAppDestroy) Results() processor.ProcessControl {
-	return appDestroy.control
-}
-
-//
-func (appDestroy *processAppDestroy) Process() error {
+func (destroy *Destroy) Run() error {
 
 	// establish an app-level lock to ensure we're the only ones setting up an app
 	// also, we need to ensure that the lock is released even if we error out.
 	locker.LocalLock()
 	defer locker.LocalUnlock()
 
-	if err := appDestroy.loadApp(); err != nil {
+	// remove the dev container if there is one
+	// but dont catch any errors because there
+	// may not be a container
+	docker.ContainerRemove(fmt.Sprintf("nanobox_%s", destroy.App.ID))
+
+	// remove all app components
+	if err := destroy.removeComponents(); err != nil {
 		return err
 	}
 
-	if err := appDestroy.releaseIPs(); err != nil {
+	// release my ips
+	if err := destroy.releaseIPs(); err != nil {
 		return err
 	}
 
-	if err := appDestroy.deleteMeta(); err != nil {
+	// remove all dns entries for this app
+	dnsRemoveAll := dns.RemoveAll{destroy.App}
+	if err := dnsRemoveAll.Run(); err != nil {
 		return err
 	}
 
-	if err := appDestroy.deleteApp(); err != nil {
+	// destroy the app
+	if err := destroy.App.Delete(); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-// loadApp loads the app from the db
-func (appDestroy *processAppDestroy) loadApp() error {
-
-	// durring the app destroy it should absolutely exist
-	// so we will be returning an error if it fails
-	return data.Get("apps", appDestroy.control.Meta["name"], &appDestroy.app)
-}
-
 // releaseIPs releases necessary app-global ip addresses
-func (appDestroy *processAppDestroy) releaseIPs() error {
+func (destroy *Destroy) releaseIPs() error {
 
 	// release all of the external IPs
-	for _, ip := range appDestroy.app.GlobalIPs {
+	for _, ip := range destroy.App.GlobalIPs {
 		// release the IP
 		if err := dhcp.ReturnIP(net.ParseIP(ip)); err != nil {
 			return err
@@ -94,7 +68,7 @@ func (appDestroy *processAppDestroy) releaseIPs() error {
 	}
 
 	// release all of the local IPs
-	for _, ip := range appDestroy.app.LocalIPs {
+	for _, ip := range destroy.App.LocalIPs {
 		// release the IP
 		if err := dhcp.ReturnIP(net.ParseIP(ip)); err != nil {
 			return err
@@ -104,26 +78,32 @@ func (appDestroy *processAppDestroy) releaseIPs() error {
 	return nil
 }
 
-// deleteMeta deletes metadata about this app from the database
-func (appDestroy *processAppDestroy) deleteMeta() error {
-	// just get the raw appid without the dev or sim
-	stripped := strings.Replace(appDestroy.control.Meta["name"], "_dev", "", -1)
-	stripped = strings.Replace(stripped, "_sim", "", -1)
+// removeComponents gets all the components in the app and remove them
+func (destroy Destroy) removeComponents() error {
 
-	// remove the boxfile information
-	data.Delete(stripped+"_meta", "build_boxfile")
-	data.Delete(stripped+"_meta", "dev_build_boxfile")
+	components, err := models.AllComponentsByApp(destroy.App.ID)
+	if err != nil {
+		return fmt.Errorf("unable to retrieve components: %s", err.Error())
+	}
 
-	// delete the evars model
-	return data.Delete(stripped+"_meta", appDestroy.control.Env+"_env")
-}
+	for _, comp := range components {
 
-// deleteApp deletes the app to the db
-func (appDestroy *processAppDestroy) deleteApp() error {
+		// do not remove a inprogress build
+		if comp.Name == "build" {
+			continue
+		}
 
-	// delete the app model
-	if err := data.Delete("apps", appDestroy.control.Meta["name"]); err != nil {
-		return err
+		// creat a component destroy
+		componentDestroy := component.Destroy{
+			App: destroy.App,
+			Component: comp,
+		}
+
+		// run it
+		if err := componentDestroy.Run(); err != nil {
+			// continue but report the error
+		}
+
 	}
 
 	return nil

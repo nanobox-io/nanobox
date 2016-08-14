@@ -3,7 +3,9 @@ package dev
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox/processor"
+	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processor/dev"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/print"
 	"github.com/nanobox-io/nanobox/validate"
 )
@@ -19,13 +21,13 @@ var RunCmd = &cobra.Command{
 
 // runFn ...
 func runFn(ccmd *cobra.Command, args []string) {
-	processor.DefaultControl.Env = "dev"
 
 	// if given an argument they wanted to run a console into a container
 	// if no arguement is provided they wanted to run a dev console
 	// and be dropped into a dev environment
-	processor.DefaultControl.Meta["run"] = "true"
+	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
+	devConsole := dev.Console{App: app, DevRun: true}
 
 	// set the meta arguments to be used in the processor and run the processor
-	print.OutputCommandErr(processor.Run("dev_console", processor.DefaultControl))
+	print.OutputCommandErr(devConsole.Run())
 }

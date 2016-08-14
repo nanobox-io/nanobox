@@ -10,43 +10,17 @@ import (
 	"github.com/nanobox-io/nanobox-boxfile"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/processor"
-	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/data"
 )
 
-// processUpdatePortal ...
-type processUpdatePortal struct {
-	control processor.ProcessControl
+// UpdatePortal ...
+type UpdatePortal struct {
+	App     models.App
 	boxfile boxfile.Boxfile
-	portal  models.Service
+	portal  models.Component
 }
 
 //
-func init() {
-	processor.Register("update_portal", updatePortalFn)
-}
-
-//
-func updatePortalFn(control processor.ProcessControl) (processor.Processor, error) {
-	updatePortal := &processUpdatePortal{control: control}
-	return updatePortal, updatePortal.ValidateMeta()
-}
-
-func (updatePortal *processUpdatePortal) ValidateMeta() error {
-	if updatePortal.control.Meta["app_name"] == "" {
-		updatePortal.control.Meta["app_name"] = fmt.Sprintf("%s_%s", config.AppID(), updatePortal.control.Env)
-	}
-	return nil
-}
-
-//
-func (updatePortal processUpdatePortal) Results() processor.ProcessControl {
-	return updatePortal.control
-}
-
-//
-func (updatePortal *processUpdatePortal) Process() error {
+func (updatePortal *UpdatePortal) Run() error {
 
 	// load portal
 	if err := updatePortal.loadPortal(); err != nil {
@@ -68,13 +42,14 @@ func (updatePortal *processUpdatePortal) Process() error {
 }
 
 //
-func (updatePortal *processUpdatePortal) loadPortal() error {
-	return data.Get(updatePortal.control.Meta["app_name"], "portal", &updatePortal.portal)
+func (updatePortal *UpdatePortal) loadPortal() (err error) {
+	updatePortal.portal, err = models.FindComponentBySlug(updatePortal.App.ID, "portal")
+	return
 }
 
 //
-func (updatePortal *processUpdatePortal) loadBoxfile() error {
-	updatePortal.boxfile = boxfile.New([]byte(updatePortal.control.Meta["boxfile"]))
+func (updatePortal *UpdatePortal) loadBoxfile() error {
+	updatePortal.boxfile = boxfile.New([]byte(updatePortal.App.DeployedBoxfile))
 	if !updatePortal.boxfile.Valid {
 		return fmt.Errorf("invalid boxfile")
 	}
@@ -85,17 +60,17 @@ func (updatePortal *processUpdatePortal) loadBoxfile() error {
 // updating the routes assumes the web servers are listening on
 // 80 and 443 and in the container we assume the clients web server
 // is listening on 8080
-func (updatePortal *processUpdatePortal) updateRoutes() error {
+func (updatePortal *UpdatePortal) updateRoutes() error {
 	routes := []portal.Route{}
 
 	// build the routes for all web containers
 	for _, node := range updatePortal.boxfile.Nodes("web") {
-		service := models.Service{}
-		if err := data.Get(updatePortal.control.Meta["app_name"], node, &service); err != nil {
-			continue // unable to get the service
+		component, err := models.FindComponentBySlug(updatePortal.App.ID, node)
+		if err != nil {
+			continue // unable to get the component
 		}
 
-		for _, route := range updatePortal.buildRoutes(updatePortal.boxfile.Node(node), service) {
+		for _, route := range updatePortal.buildRoutes(updatePortal.boxfile.Node(node), component) {
 			lumber.Trace("route: %+v", route)
 			if duplciateRoute(routes, route) {
 				fmt.Println("duplicate route:", route.SubDomain, route.Path)
@@ -108,14 +83,12 @@ func (updatePortal *processUpdatePortal) updateRoutes() error {
 
 	// if i have a web and no routes i need to add a default one
 	if len(updatePortal.boxfile.Nodes("web")) != 0 && len(routes) == 0 {
-		// fmt.Println("found a web", updatePortal.boxfile.Nodes("web"))
 		webNode := updatePortal.boxfile.Nodes("web")[0]
-		service := models.Service{}
+		component, _ := models.FindComponentBySlug(updatePortal.App.ID, webNode)
 
-		data.Get(updatePortal.control.Meta["app_name"], webNode, &service)
 		routes = append(routes, portal.Route{
 			Path:    "/",
-			Targets: []string{fmt.Sprintf("http://%s:%s", service.InternalIP, "8080")},
+			Targets: []string{fmt.Sprintf("http://%s:%s", component.InternalIP, "8080")},
 		})
 	}
 
@@ -126,18 +99,18 @@ func (updatePortal *processUpdatePortal) updateRoutes() error {
 }
 
 // Update the ports that portal knows about.
-func (updatePortal *processUpdatePortal) updatePorts() error {
+func (updatePortal *UpdatePortal) updatePorts() error {
 	services := []portal.Service{}
 
 	//
 	for _, node := range updatePortal.boxfile.Nodes("code") {
-		service := models.Service{}
-		if err := data.Get(updatePortal.control.Meta["app_name"], node, &service); err != nil {
-			continue // unable to get the service
+		component, err := models.FindComponentBySlug(updatePortal.App.ID, node)
+		if err != nil {
+			continue // unable to get the component
 		}
 
 		//
-		for _, service := range updatePortal.buildService(updatePortal.boxfile.Node(node), service) {
+		for _, service := range updatePortal.buildService(updatePortal.boxfile.Node(node), component) {
 			lumber.Trace("service: %+v", service)
 
 			if duplicateService(services, service) {
@@ -159,7 +132,7 @@ func (updatePortal *processUpdatePortal) updatePorts() error {
 
 // buildService builds all the tcp and udp port forwarding services
 // it does not take into account any routing or information
-func (updatePortal processUpdatePortal) buildService(boxfile boxfile.Boxfile, service models.Service) []portal.Service {
+func (updatePortal UpdatePortal) buildService(boxfile boxfile.Boxfile, component models.Component) []portal.Service {
 
 	portServices := []portal.Service{}
 
@@ -175,7 +148,7 @@ func (updatePortal processUpdatePortal) buildService(boxfile boxfile.Boxfile, se
 				Scheduler: "rr",
 				Servers: []portal.Server{
 					portal.Server{
-						Host:      service.InternalIP,
+						Host:      component.InternalIP,
 						Port:      toInt,
 						Forwarder: "m",
 						Weight:    1,
@@ -202,11 +175,12 @@ func (updatePortal processUpdatePortal) buildService(boxfile boxfile.Boxfile, se
 // 	FwdPath string   `json:"fwdpath"` // path to forward to targets - "/goadmin" incoming req: test.com/admin -> 127.0.0.1/goadmin (optional)
 // 	Page    string   `json:"page"`    // page to serve instead of routing to targets - "<HTML>We are fixing it</HTML>" (optional)
 // }
-func (updatePortal processUpdatePortal) buildRoutes(boxfile boxfile.Boxfile, service models.Service) []portal.Route {
+func (updatePortal UpdatePortal) buildRoutes(boxfile boxfile.Boxfile, component models.Component) []portal.Route {
 	portalRoutes := []portal.Route{}
 	boxRoutes, ok := boxfile.Value("routes").([]string)
 
-	//
+	// if the routes are not a []strings try converting
+	// an []interface to []string
 	if !ok {
 		tmps, ok := boxfile.Value("routes").([]interface{})
 		if !ok {
@@ -228,7 +202,7 @@ func (updatePortal processUpdatePortal) buildRoutes(boxfile boxfile.Boxfile, ser
 			Path:      path,
 		}
 
-		portalRoute.Targets = append(portalRoute.Targets, fmt.Sprintf("http://%s:%s", service.InternalIP, "8080"))
+		portalRoute.Targets = append(portalRoute.Targets, fmt.Sprintf("http://%s:%s", component.InternalIP, "8080"))
 		portalRoutes = append(portalRoutes, portalRoute)
 	}
 
@@ -272,8 +246,8 @@ func parseRoute(route string) (subdomain, path string) {
 func ports(box boxfile.Boxfile) map[string]map[string]string {
 	// we allow tcp and udp ports
 	rtn := map[string]map[string]string{
-		"tcp": map[string]string{},
-		"udp": map[string]string{},
+		TCP: map[string]string{},
+		UDP: map[string]string{},
 	}
 
 	// get the boxfiles ports section

@@ -3,8 +3,11 @@ package commands
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/nanobox-io/nanobox/commands/registry"
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util/print"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/validate"
 )
 
@@ -32,7 +35,9 @@ func init() {
 // buildFn ...
 func buildFn(ccmd *cobra.Command, args []string) {
 	if buildNoCompile {
-		processor.DefaultControl.Meta["no-compile"] = "true"
+		registry.Set("no-compile", true)
 	}
-	print.OutputCommandErr(processor.Run("build", processor.DefaultControl))
+	env, _ := models.FindEnvByID(config.EnvID())
+	build := processor.Build{Env: env}
+	print.OutputCommandErr(build.Run())
 }

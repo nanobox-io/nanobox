@@ -8,9 +8,8 @@ import (
 	"github.com/nanobox-io/golang-docker-client"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/data"
+	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/validate"
 )
 
@@ -31,47 +30,46 @@ func init() {
 }
 
 func validateDevUp() error {
-	processor.Run("env_init", processor.DefaultControl)
-	app := models.App{}
-	data.Get("apps", config.AppID()+"_dev", &app)
-	if !(app.Status == UP) {
+	// initialize the docker system so i can communicate
+	dockerInit()
+
+	// get the app and make sure its up
+	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
+	if app.Status != UP {
 		return fmt.Errorf("the environment has not been started. Please run the start command")
 	}
-	if !appServicesRunning(config.AppID() + "_dev") {
+
+	// ensure all the services are running
+	if !appServicesRunning(app) {
 		return fmt.Errorf("The app is running but some services are not. Try running stop then start to clean this anomaly. if the problem persists please contact nanobox")
 	}
 	return nil
 }
 
 func validatSimUp() error {
-	processor.Run("env_init", processor.DefaultControl)
-	app := models.App{}
-	data.Get("apps", config.AppID()+"_sim", &app)
+	// initialize the docker system so i can communicate
+	dockerInit()
+
+	// get the app and make sure its up
+	app, _ := models.FindAppBySlug(config.EnvID(), "sim")
 	if !(app.Status == UP) {
 		return fmt.Errorf("the environment has not been started. Please run the start command")
 	}
 
-	if !appServicesRunning(config.AppID() + "_sim") {
+	// ensure all the services are running
+	if !appServicesRunning(app) {
 		return fmt.Errorf("The app is running but some services are not. Try running stop then start to clean this anomaly. if the problem persists please contact nanobox")
 	}
 
 	return nil
 }
 
-func appServicesRunning(app string) bool {
+func appServicesRunning(app models.App) bool {
 
-	// if the app cant be found in the database
-	// its up and we will accept a failure later
-	serviceNames, err := data.Keys(app)
-	if err != nil {
-		// if i cant get the keys from the app. its safer to assume the app is
-		// down then to assume its up.
-		return false
-	}
-
-	for _, serviceName := range serviceNames {
+	components, _ := models.AllComponentsByApp(app.ID)
+	for _, component := range components {
 		// if any service are not running the app is not up
-		if !isServiceRunning(app, serviceName) {
+		if !isServiceRunning(component) {
 			return false
 		}
 	}
@@ -81,15 +79,20 @@ func appServicesRunning(app string) bool {
 }
 
 // isServiceRunning returns true if a service is already running
-func isServiceRunning(app, name string) bool {
+func isServiceRunning(component models.Component) bool {
 
 	// get the container
-	container, err := docker.GetContainer(fmt.Sprintf("nanobox_%s_%s", app, name))
+	container, err := docker.GetContainer(component.ID)
 
 	if err != nil {
-		lumber.Error("Tried looking up nanobox_%s_%s Error: %s", app, name, err.Error())
+		lumber.Error("Tried looking up nanobox_%s_%s Error: %s", component.AppID, component.Name, err.Error())
 		return false
 	}
 
 	return container.State.Status == "running"
+}
+
+func dockerInit() {
+	provider.DockerEnv()
+	docker.Initialize("env")
 }

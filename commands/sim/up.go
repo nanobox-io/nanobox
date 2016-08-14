@@ -3,7 +3,7 @@ package sim
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox/processor"
+	"github.com/nanobox-io/nanobox/processor/sim"
 	"github.com/nanobox-io/nanobox/util/print"
 	"github.com/nanobox-io/nanobox/validate"
 )
@@ -20,12 +20,12 @@ var (
 		'nanobox build', 'nanobox sim start', 'nanobox sim deploy'.
 		`,
 		PreRun: validate.Requires("provider"),
-		Run:    simUp,
+		Run:    upFn,
 	}
 )
 
-//
-// simUp ...
-func simUp(ccmd *cobra.Command, args []string) {
-	print.OutputCommandErr(processor.Run("sim_up", processor.DefaultControl))
+// upFn ...
+func upFn(ccmd *cobra.Command, args []string) {
+	simUp := sim.Up{}
+	print.OutputCommandErr(simUp.Run())
 }

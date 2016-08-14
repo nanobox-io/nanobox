@@ -9,36 +9,19 @@ import (
 	"github.com/nanobox-io/nanobox/util/odin"
 )
 
-// processTunnel ...
-type processTunnel struct {
-	control   ProcessControl
-	app       string
-	port      string
-	container string
+// Tunnel ...
+type Tunnel struct {
+	App       string
+	Port      string
+	Container string
 }
 
 //
-func init() {
-	Register("tunnel", tunnelFn)
-}
-
-//
-func tunnelFn(control ProcessControl) (Processor, error) {
-	tunnel := &processTunnel{control: control}
-	return tunnel, tunnel.validateMeta()
-}
-
-//
-func (tunnel processTunnel) Results() ProcessControl {
-	return tunnel.control
-}
-
-//
-func (tunnel processTunnel) Process() error {
+func (tunnel Tunnel) Run() error {
 
 	var err error
 
-	key, location, container, err = odin.EstablishTunnel(getAppID(tunnel.app), tunnel.container)
+	key, location, container, err = odin.EstablishTunnel(getAppID(tunnel.App), tunnel.Container)
 	if err != nil {
 		return err
 	}
@@ -61,7 +44,7 @@ func (tunnel processTunnel) Process() error {
 	defer conn.Close()
 
 	//
-	serv, err := net.Listen("tcp4", fmt.Sprintf(":%v", tunnel.port))
+	serv, err := net.Listen("tcp4", fmt.Sprintf(":%v", tunnel.Port))
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -75,27 +58,6 @@ func (tunnel processTunnel) Process() error {
 		}
 		go handleConnection(conn)
 	}
-}
-
-// validateMeta validates that the required metadata exists
-func (tunnel *processTunnel) validateMeta() error {
-
-	// set optional meta values
-	tunnel.app = tunnel.control.Meta["app"]
-
-	// set container (required) and ensure it's provided
-	tunnel.container = tunnel.control.Meta["container"]
-	if tunnel.container == "" {
-		return fmt.Errorf("Missing required meta value 'container'")
-	}
-
-	// set port (required) and ensure it's provided
-	tunnel.port = tunnel.control.Meta["port"]
-	if tunnel.port == "" {
-		return fmt.Errorf("Missing required meta value 'port'")
-	}
-
-	return nil
 }
 
 // handleConnection ...

@@ -3,20 +3,15 @@ package counter
 
 import (
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
 
 // Increment will increment a counter by ID
-func Increment(ID string) (int, error) {
+func Increment(id string) (int, error) {
+	locker.GlobalLock()
+	defer locker.GlobalUnlock()
 
-	// aquire a lock to ensure we're atomically updating
-	if err := locker.GlobalLock(); err != nil {
-		return 0, err
-	}
-
-	counter := models.Counter{}
-	data.Get("counters", ID, &counter)
+	counter, _ := models.FindCounterByID(id)
 
 	//
 	if counter.Count < 0 {
@@ -26,28 +21,17 @@ func Increment(ID string) (int, error) {
 	counter.Count = counter.Count + 1
 
 	//
-	if err := data.Put("counters", ID, counter); err != nil {
-		return 0, err
-	}
+	err := counter.Save()
 
-	// release the lock
-	if err := locker.GlobalUnlock(); err != nil {
-		return 0, err
-	}
-
-	return counter.Count, nil
+	return counter.Count, err
 }
 
 // Decrement will decrement a counter by ID
-func Decrement(ID string) (int, error) {
+func Decrement(id string) (int, error) {
+	locker.GlobalLock()
+	defer locker.GlobalUnlock()
 
-	// aquire a lock to ensure we're atomically updating
-	if err := locker.GlobalLock(); err != nil {
-		return 0, err
-	}
-
-	counter := models.Counter{}
-	data.Get("counters", ID, &counter)
+	counter, _ := models.FindCounterByID(id)
 
 	//
 	if counter.Count <= 0 {
@@ -57,46 +41,24 @@ func Decrement(ID string) (int, error) {
 	}
 
 	//
-	if err := data.Put("counters", ID, counter); err != nil {
-		return 0, err
-	}
-
-	// release the lock
-	if err := locker.GlobalUnlock(); err != nil {
-		return 0, err
-	}
-
-	return counter.Count, nil
+	err := counter.Save()
+	
+	return counter.Count, err
 }
 
 // Get returns the current counter value by ID
-func Get(ID string) (int, error) {
+func Get(id string) (int, error) {
 
-	counter := models.Counter{}
+	counter, err := models.FindCounterByID(id)
 
-	//
-	if err := data.Get("counters", ID, &counter); err != nil {
-		return 0, err
-	}
-
-	return counter.Count, nil
+	return counter.Count, err
 }
 
 // Reset resets a counter by ID; we can simply delete the counter model
-func Reset(ID string) error {
+func Reset(id string) error {
+	locker.GlobalLock()
+	defer locker.GlobalUnlock()
 
-	// aquire a lock to ensure we're atomically updating
-	if err := locker.GlobalLock(); err != nil {
-		return err
-	}
-
-	// we don't care if it errors because that means it didn't exist
-	data.Delete("counters", ID)
-
-	// release the lock
-	if err := locker.GlobalUnlock(); err != nil {
-		return err
-	}
-
-	return nil
+	counter := models.Counter{ID: id}
+	return counter.Delete()
 }

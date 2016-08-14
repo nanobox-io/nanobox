@@ -10,56 +10,38 @@ import (
 	"github.com/nanobox-io/nanobox-boxfile"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/processor"
-	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/data"
 )
 
-// processDevRun ...
-type processDevRun struct {
-	control   processor.ProcessControl
+// Run ...
+type Run struct {
+	App models.App
+
 	boxfile   boxfile.Boxfile
 	starts    map[string]string
 	container string
 }
 
 //
-func init() {
-	processor.Register("dev_run", devRunFn)
-}
-
-//
-func devRunFn(control processor.ProcessControl) (processor.Processor, error) {
-	devRun := &processDevRun{control: control}
-	return devRun, devRun.validateMeta()
-}
-
-//
-func (devRun processDevRun) Results() processor.ProcessControl {
-	return devRun.control
-}
-
-//
-func (devRun processDevRun) Process() error {
+func (run Run) Run() error {
 	// get the boxfile
-	if err := devRun.loadBoxfile(); err != nil {
+	if err := run.loadBoxfile(); err != nil {
 		return err
 	}
 
 	// load the start commands from the boxfile
-	if err := devRun.loadStarts(); err != nil {
+	if err := run.loadStarts(); err != nil {
 		return err
 	}
 
 	// get the id of the container we will be running in
-	id := fmt.Sprintf("nanobox_%s_dev", config.AppID())
+	id := fmt.Sprintf("nanobox_%s", run.App.ID)
 	if container, err := docker.GetContainer(id); err == nil {
-		devRun.container = container.ID
+		run.container = container.ID
 	}
 
 	// run the start commands in from the boxfile
 	// in the dev container
-	if err := devRun.runStarts(); err != nil {
+	if err := run.runStarts(); err != nil {
 		return err
 	}
 
@@ -79,44 +61,34 @@ func (devRun processDevRun) Process() error {
 	return nil
 }
 
-func (devRun *processDevRun) validateMeta() error {
-	devRun.starts = map[string]string{}
 
-	// currently no error conditions exist for this processor
-	return nil
-}
+func (run *Run) loadBoxfile() error {
+	env, _ := models.FindEnvByID(run.App.EnvID)
+	run.boxfile = boxfile.New([]byte(env.BuiltBoxfile))
 
-func (devRun *processDevRun) loadBoxfile() error {
-	// get the build boxfile from the database
-	boxfileModel := models.Boxfile{}
-	if err := data.Get(config.AppID()+"_meta", "build_boxfile", &boxfileModel); err != nil {
-		return fmt.Errorf("No build has been completed for this application")
-	}
-
-	// load the boxfile into the boxfile package and make sure its
-	// valid
-	devRun.boxfile = boxfile.New(boxfileModel.Data)
-	if !devRun.boxfile.Valid {
+	if !run.boxfile.Valid {
 		return fmt.Errorf("the boxfile from the build is invalid")
 	}
 	return nil
 }
 
-func (devRun processDevRun) loadStarts() error {
-	// loop through the nodes and get there start commands
-	for _, node := range devRun.boxfile.Nodes("code") {
+func (run Run) loadStarts() error {
+	run.starts = map[string]string{}
 
-		values := devRun.boxfile.Node(node).Value("start")
+	// loop through the nodes and get there start commands
+	for _, node := range run.boxfile.Nodes("code") {
+
+		values := run.boxfile.Node(node).Value("start")
 
 		switch values.(type) {
 		case string:
-			devRun.starts[node] = values.(string)
+			run.starts[node] = values.(string)
 		case []interface{}:
 			// if it is an array we need the keys to be
 			// web.site.2 where 2 is the index of the element
 			for index, iFace := range values.([]interface{}) {
 				if str, ok := iFace.(string); ok {
-					devRun.starts[fmt.Sprintf("%s.%d", node, index)] = str
+					run.starts[fmt.Sprintf("%s.%d", node, index)] = str
 				}
 			}
 		case map[interface{}]interface{}:
@@ -124,7 +96,7 @@ func (devRun processDevRun) loadStarts() error {
 				k, keyOk := key.(string)
 				v, valOk := val.(string)
 				if keyOk && valOk {
-					devRun.starts[fmt.Sprintf("%s.%s", node, k)] = v
+					run.starts[fmt.Sprintf("%s.%s", node, k)] = v
 				}
 			}
 		}
@@ -132,15 +104,15 @@ func (devRun processDevRun) loadStarts() error {
 	return nil
 }
 
-func (devRun processDevRun) runStarts() error {
+func (run Run) runStarts() error {
 	// loop through the starts and run them in go routines
-	for key, start := range devRun.starts {
-		go devRun.runStart(key, start)
+	for key, start := range run.starts {
+		go run.runStart(key, start)
 	}
 	return nil
 }
 
-func (devRun processDevRun) runStart(name, command string) error {
+func (run Run) runStart(name, command string) error {
 
 	// create the docker command
 	cmd := []string{
@@ -148,7 +120,7 @@ func (devRun processDevRun) runStart(name, command string) error {
 		"exec",
 		"-u",
 		"gonano",
-		devRun.container,
+		run.container,
 		"/bin/bash",
 		"-lc",
 		fmt.Sprintf("cd /app/; %s", command),

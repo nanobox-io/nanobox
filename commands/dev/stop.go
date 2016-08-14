@@ -3,8 +3,10 @@ package dev
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox/processor"
+	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processor/dev"
 	"github.com/nanobox-io/nanobox/util/print"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/validate"
 )
 
@@ -18,12 +20,16 @@ var (
 Stops your dev platform. All data will be preserved in its current state.
 		`,
 		PreRun: validate.Requires("provider"),
-		Run:    devStop,
+		Run:    stopFn,
 	}
 )
 
 //
-// devStop ...
-func devStop(ccmd *cobra.Command, args []string) {
-	print.OutputCommandErr(processor.Run("dev_stop", processor.DefaultControl))
+// stopFn ...
+func stopFn(ccmd *cobra.Command, args []string) {
+	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
+	devStop := dev.Stop{
+		App: app,
+	}
+	print.OutputCommandErr(devStop.Run())
 }

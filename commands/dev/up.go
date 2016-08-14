@@ -1,7 +1,7 @@
 package dev
 
 import (
-	"github.com/nanobox-io/nanobox/processor"
+	"github.com/nanobox-io/nanobox/processor/dev"
 	"github.com/nanobox-io/nanobox/util/print"
 	"github.com/nanobox-io/nanobox/validate"
 	"github.com/spf13/cobra"
@@ -19,12 +19,12 @@ the VM and preparing a dev application. It's a shortcut for 'nanobox start',
 'nanobox build', 'nanobox dev start', 'nanobox dev deploy'.
 		`,
 		PreRun: validate.Requires("provider"),
-		Run:    devUp,
+		Run:    upFn,
 	}
 )
 
-//
-// devUp ...
-func devUp(ccmd *cobra.Command, args []string) {
-	print.OutputCommandErr(processor.Run("dev_up", processor.DefaultControl))
+// upFn ...
+func upFn(ccmd *cobra.Command, args []string) {
+	devUp := dev.Up{}
+	print.OutputCommandErr(devUp.Run())
 }

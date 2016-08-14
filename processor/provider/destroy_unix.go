@@ -10,6 +10,6 @@ import (
 )
 
 // removeDatabase ...
-func (providerDestroy processProviderDestroy) removeDatabase() error {
+func (destroy Destroy) removeDatabase() error {
 	return exec.Command("rm", filepath.ToSlash(filepath.Join(config.GlobalDir(), "data.db"))).Run()
 }

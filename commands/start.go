@@ -22,5 +22,5 @@ var (
 
 // startFn ...
 func startFn(ccmd *cobra.Command, args []string) {
-	print.OutputCommandErr(processor.Run("start", processor.DefaultControl))
+	print.OutputCommandErr(processor.Start{}.Run())
 }

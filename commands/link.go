@@ -3,8 +3,10 @@ package commands
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox/processor"
+	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processor/link"
 	"github.com/nanobox-io/nanobox/util/print"
+	"github.com/nanobox-io/nanobox/util/config"
 )
 
 var (
@@ -63,22 +65,31 @@ func init() {
 
 // linkAddFn ...
 func linkAddFn(ccmd *cobra.Command, args []string) {
-
-	// set the meta arguments to be used in the processor and run the processor
-	processor.DefaultControl.Meta["app"] = linkCmdFlags.app
-	processor.DefaultControl.Meta["alias"] = linkCmdFlags.alias
-	print.OutputCommandErr(processor.Run("link_add", processor.DefaultControl))
+	env, _ := models.FindEnvByID(config.EnvID())
+	add := link.Add{
+		Env: env,
+		App: linkCmdFlags.app,
+		Alias: linkCmdFlags.alias,
+	}
+	print.OutputCommandErr(add.Run())
 }
 
 // linkListFn ...
 func linkListFn(ccmd *cobra.Command, args []string) {
-	print.OutputCommandErr(processor.Run("link_list", processor.DefaultControl))
+	env, _ := models.FindEnvByID(config.EnvID())
+	list := link.List{
+		Env: env,
+	}
+	print.OutputCommandErr(list.Run())
 }
 
 // linkRemoveFn ...
 func linkRemoveFn(ccmd *cobra.Command, args []string) {
-
+	env, _ := models.FindEnvByID(config.EnvID())
+	remove := link.Remove{
+		Env: env,
+		Alias: linkCmdFlags.alias,
+	}
 	// set the meta arguments to be used in the processor and run the processor
-	processor.DefaultControl.Meta["alias"] = linkCmdFlags.alias
-	print.OutputCommandErr(processor.Run("link_remove", processor.DefaultControl))
+	print.OutputCommandErr(remove.Run())
 }

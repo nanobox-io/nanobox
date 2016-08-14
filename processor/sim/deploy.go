@@ -4,85 +4,75 @@ import (
 	"fmt"
 
 	"github.com/nanobox-io/nanobox-boxfile"
-	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/processor"
-	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/data"
-)
 
-// processSimDeploy ...
-type processSimDeploy struct {
-	control processor.ProcessControl
-	box     boxfile.Boxfile
-}
+	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processor/env"
+	"github.com/nanobox-io/nanobox/processor/code"
+	"github.com/nanobox-io/nanobox/processor/component"
+	"github.com/nanobox-io/nanobox/processor/platform"
+)
 
 // deploys the code to the warehouse and builds
 // webs, workers, and updates services
 // then updates the router with the new code services
-func init() {
-	processor.Register("sim_deploy", simDeployFn)
+type Deploy struct {
+	// mandatory
+	App models.App
+	// added
+	Env models.Env
 }
 
 //
-func simDeployFn(control processor.ProcessControl) (processor.Processor, error) {
-	// control.Meta["processSimDeploy-control"]
+func (deploy Deploy) Run() error {
 
-	// do some control validation check on the meta for the flags and make sure they
-	// work
-
-	return processSimDeploy{control: control}, nil
-}
-
-//
-func (simDeploy processSimDeploy) Results() processor.ProcessControl {
-	return simDeploy.control
-}
-
-//
-func (simDeploy processSimDeploy) Process() error {
-	// set the mode of this processes
-	// this allows the dev and the deploy to be isolated
-	simDeploy.control.Env = "sim"
+	deploy.Env, _ = models.FindEnvByID(deploy.App.EnvID)
 
 	// run the share init which gives access to docker
-	if err := processor.Run("env_init", simDeploy.control); err != nil {
+	envInit := env.Init{}
+	if err := envInit.Run(); err != nil {
 		return err
 	}
 
-	// get the platform deploy ready
-	if err := processor.Run("platform_deploy", simDeploy.control); err != nil {
+	platformSetup := platform.Setup{App: deploy.App}
+	if err := platformSetup.Run(); err != nil {
 		return err
 	}
 
-	if err := simDeploy.publishCode(); err != nil {
+	if err := deploy.publishCode(); err != nil {
 		return err
 	}
 
+	codeClean := code.Clean{App: deploy.App}
 	// remove all the previous code services
-	if err := processor.Run("code_clean", simDeploy.control); err != nil {
+	if err := codeClean.Run(); err != nil {
 		return err
 	}
 
+	componentSync := component.Sync{
+		Env: deploy.Env,
+		App: deploy.App,
+	}
 	// syncronize the services as per the new boxfile
-	if err := processor.Run("service_sync", simDeploy.control); err != nil {
+	if err := componentSync.Run(); err != nil {
 		return err
 	}
 
 	// start code
-	if err := simDeploy.startCodeServices(); err != nil {
+	if err := deploy.startCodeServices(); err != nil {
 		return err
 	}
 
-	if err := simDeploy.runDeployHook("before_deploy"); err != nil {
+	if err := deploy.runDeployHook("before_deploy"); err != nil {
 		return err
 	}
 
 	// update nanoagent portal
-	if err := processor.Run("update_portal", simDeploy.control); err != nil {
+	platformUpdatePortal := platform.UpdatePortal{App: deploy.App}
+	if err := platformUpdatePortal.Run(); err != nil {
 		return err
 	}
 
-	if err := simDeploy.runDeployHook("after_deploy"); err != nil {
+	if err := deploy.runDeployHook("after_deploy"); err != nil {
 		return err
 	}
 
@@ -93,65 +83,57 @@ func (simDeploy processSimDeploy) Process() error {
 }
 
 // publishCode ...
-func (simDeploy *processSimDeploy) publishCode() error {
+func (deploy *Deploy) publishCode() error {
 
 	// setup the var's required for code_publish
-	hoarder := models.Service{}
-	bucket := fmt.Sprintf("%s_%s", config.AppID(), simDeploy.control.Env)
-	data.Get(bucket, "hoarder", &hoarder)
+	hoarder, _ := models.FindComponentBySlug(deploy.App.ID, "hoarder")
 
-	simDeploy.control.Meta["build_id"] = "1234"
-	simDeploy.control.Meta["warehouse_url"] = hoarder.InternalIP
-	simDeploy.control.Meta["warehouse_token"] = "123"
-
-	// publish code
-	publishProcessor, err := processor.Build("code_publish", simDeploy.control)
-	if err != nil {
-		return err
+	codePublish := code.Publish{
+		Env: deploy.Env,
+		BuildID: "1234",
+		WarehouseURL: hoarder.InternalIP,
+		WarehouseToken: "123",
 	}
 
-	err = publishProcessor.Process()
-	if err != nil {
-		return err
-	}
-
-	publishResult := publishProcessor.Results()
-	if publishResult.Meta["boxfile"] == "" {
-		return fmt.Errorf("publishCode: the boxfile was empty")
-	}
-
-	// store the boxfile on mydeploy
-	simDeploy.box = boxfile.New([]byte(publishResult.Meta["boxfile"]))
-
-	// set it in the control file so child process have access to it as well
-	simDeploy.control.Meta["boxfile"] = publishResult.Meta["boxfile"]
-
-	return nil
+	return codePublish.Run()
 }
 
 // startCodeServices ...
-func (simDeploy *processSimDeploy) startCodeServices() error {
-	control := simDeploy.control.Dup()
-	control.DisplayLevel++
+func (deploy *Deploy) startCodeServices() error {
 
 	// synchronize my code services
-	if err := processor.Run("code_sync", control); err != nil {
-		return err
+	hoarder, _ := models.FindComponentBySlug(deploy.App.ID, "hoarder")
+
+	codeSync := code.Sync{
+		App: deploy.App,
+		BuildID: "1234",
+		WarehouseURL: hoarder.InternalIP,
+		WarehouseToken: "123",
 	}
 
-	return nil
+	return codeSync.Run()
 }
 
 // run the before/after hooks and populate the necessary data
-func (simDeploy *processSimDeploy) runDeployHook(hookType string) error {
-
-	control := simDeploy.control
-	control.Meta["hook_type"] = hookType
+func (deploy *Deploy) runDeployHook(hookType string) error {
+	box := boxfile.New([]byte(deploy.App.DeployedBoxfile))
 
 	// run the hooks for each service in the boxfile
-	for _, serviceName := range simDeploy.box.Nodes("code") {
-		control.Meta["service_name"] = serviceName
-		if err := processor.Run("sim_deploy_hook", control); err != nil {
+	for _, componentName := range box.Nodes("code") {
+
+		component, err := models.FindComponentBySlug(deploy.App.ID, componentName)
+		if err != nil {
+			// no component for that thing in the database..
+			// prolly need to report this error but we might not want to fail
+			continue 
+		}
+
+		deployHook := DeployHook{
+			App: deploy.App,
+			Component: component,
+			HookType: hookType,
+		}
+		if err := deployHook.Run(); err != nil {
 			return err
 		}
 	}

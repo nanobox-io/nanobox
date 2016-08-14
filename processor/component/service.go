@@ -1,5 +1,5 @@
 // Package service ...
-package service
+package component
 
 // these constants represent all the "platform components" thats nanobox uses;
 // platform components are just our other go microservcies

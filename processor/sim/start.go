@@ -1,34 +1,46 @@
 package sim
 
 import (
-	"github.com/nanobox-io/nanobox/processor"
+	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processor/app"
+	"github.com/nanobox-io/nanobox/processor/env"
 )
 
-// processSimStart ...
-type processSimStart struct {
-	control processor.ProcessControl
+// Start ...
+type Start struct {
+	// mandatory
+	Env models.Env
+	// created
+	App models.App
 }
 
 //
-func init() {
-	processor.Register("sim_start", startFn)
+func (start *Start) Run() error {
+
+	start.App, _ = models.FindAppBySlug(config.EnvID(), "sim")
+
+	// if the app has not been setup
+	// setup the app first
+	if start.App.ID == "" {
+		envSetup := env.Setup{}
+		err := envSetup.Run()
+		if err != nil {
+			return err
+		}
+	}
+
+	// make sure we have an up to date app
+	start.App, _ = models.FindAppBySlug(config.EnvID(), "sim")
+
+	appSetup := app.Setup{App: start.App}
+	if err := appSetup.Run(); err != nil {
+		return err
+	}
+
+	// messaging about what happened and next steps
+
+	return nil
 }
 
-// TODO: do some control validation check on the meta for the flags and make sure
-// they work
-func startFn(control processor.ProcessControl) (processor.Processor, error) {
-	return processSimStart{control: control}, nil
-}
 
-//
-func (sim processSimStart) Results() processor.ProcessControl {
-	return sim.control
-}
-
-//
-func (sim processSimStart) Process() error {
-	// set the process mode to sim
-	sim.control.Env = "sim"
-
-	return processor.Run("app_start", sim.control)
-}

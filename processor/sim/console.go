@@ -1,32 +1,19 @@
 package sim
 
 import (
-	"github.com/nanobox-io/nanobox/processor"
+"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processor/env"
 )
 
-// processSimConsole ...
-type processSimConsole struct {
-	control processor.ProcessControl
-}
-
-// the sim console is the same as the share console
-func init() {
-	processor.Register("sim_console", simConsoleFn)
-}
-
-//
-func simConsoleFn(control processor.ProcessControl) (processor.Processor, error) {
-	simConsole := &processSimConsole{control: control}
-	return simConsole, nil
-}
-
-func (simConsole processSimConsole) Results() processor.ProcessControl {
-	return simConsole.control
+// Console ...
+type Console struct {
+	Component models.Component
 }
 
 // this process is just a shortcut so we can do any other special
-// stuff. Which currently there is nothing other tuen running
+// stuff. Which currently there is nothing other then running
 // the share console.
-func (simConsole processSimConsole) Process() error {
-	return processor.Run("env_console", simConsole.control)
+func (console Console) Run() error {
+	envConsole := env.Console{Component: console.Component}
+	return envConsole.Run()
 }

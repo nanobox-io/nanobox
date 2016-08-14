@@ -3,8 +3,10 @@ package sim
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox/processor"
+	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processor/sim"
 	"github.com/nanobox-io/nanobox/util/print"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/validate"
 )
 
@@ -22,5 +24,9 @@ var (
 
 // logFn will run the DNS processor for adding DNS entires to the "hosts" file
 func logFn(ccmd *cobra.Command, args []string) {
-	print.OutputCommandErr(processor.Run("sim_log", processor.DefaultControl))
+	app, _ := models.FindAppBySlug(config.EnvID(), "sim")
+	simLog := sim.Log{
+		App: app,
+	}
+	print.OutputCommandErr(simLog.Run())
 }

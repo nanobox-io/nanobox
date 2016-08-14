@@ -3,67 +3,48 @@ package env
 import (
 	"fmt"
 
-	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/provider"
+	"github.com/nanobox-io/nanobox/models"	
+	netfs_processor "github.com/nanobox-io/nanobox/processor/env/netfs"		
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/netfs"
 )
 
-// processEnvMount ...
-type processEnvMount struct {
-	control processor.ProcessControl
+// Mount ...
+type Mount struct {
+	Env models.Env
 }
 
 //
-func init() {
-	processor.Register("env_mount", envMountFn)
-}
-
-//
-func envMountFn(control processor.ProcessControl) (processor.Processor, error) {
-	// control.Meta["processEnvMount-control"]
-
-	// do some control validation check on the meta for the flags and make sure they
-	// work
-
-	return &processEnvMount{control: control}, nil
-}
-
-//
-func (envMount processEnvMount) Results() processor.ProcessControl {
-	return envMount.control
-}
-
-//
-func (envMount *processEnvMount) Process() error {
+func (mount *Mount) Run() error {
 
 	// mount the engine if it's a local directory
 	if config.EngineDir() != "" {
 		src := config.EngineDir()
-		dst := fmt.Sprintf("%s%s/engine", provider.HostShareDir(), config.AppID())
+		dst := fmt.Sprintf("%s%s/engine", provider.HostShareDir(), mount.Env.ID)
 
 		// first export the env on the workstation
-		if err := envMount.addShare(src, dst); err != nil {
+		if err := mount.addShare(src, dst); err != nil {
 			return err
 		}
 
 		// mount the env on the provider
-		if err := envMount.addMount(src, dst); err != nil {
+		if err := mount.addMount(src, dst); err != nil {
 			return err
 		}
 	}
 
 	// mount the app src
-	src := config.LocalDir()
-	dst := fmt.Sprintf("%s%s/code", provider.HostShareDir(), config.AppID())
+	src := mount.Env.Directory
+	dst := fmt.Sprintf("%s%s/code", provider.HostShareDir(), mount.Env.ID)
 
 	// first export the env on the workstation
-	if err := envMount.addShare(src, dst); err != nil {
+	if err := mount.addShare(src, dst); err != nil {
 		return fmt.Errorf("addShare:%s", err.Error())
 	}
 
 	// then mount the env on the provider
-	if err := envMount.addMount(src, dst); err != nil {
+	if err := mount.addMount(src, dst); err != nil {
 		return fmt.Errorf("addMount:%s", err.Error())
 	}
 
@@ -71,15 +52,12 @@ func (envMount *processEnvMount) Process() error {
 }
 
 // addShare will add a filesystem env on the host machine
-func (envMount *processEnvMount) addShare(src, dst string) error {
+func (mount *Mount) addShare(src, dst string) error {
 
 	// the mount type is configurable by the user
 	mountType := config.Viper().GetString("mount-type")
 
 	// todo: we should display a warning when using native about performance
-
-	control := envMount.control.Dup()
-	control.Meta["path"] = src
 
 	// since vm.mount is configurable, it's possible and even likely that a
 	// machine may already have mounts configured. For each mount type we'll
@@ -92,7 +70,8 @@ func (envMount *processEnvMount) addShare(src, dst string) error {
 		if netfs.Exists(src) {
 			// netfs was used prior. So we need to tear it down.
 
-			if err := processor.Run("env_netfs_remove", control); err != nil {
+			netfsRemove := netfs_processor.Remove{src}
+			if err := netfsRemove.Run(); err != nil {
 				return err
 			}
 		}
@@ -112,7 +91,8 @@ func (envMount *processEnvMount) addShare(src, dst string) error {
 			}
 		}
 
-		if err := processor.Run("env_netfs_add", control); err != nil {
+		netfsAdd := netfs_processor.Add{src}
+		if err := netfsAdd.Run(); err != nil {
 			return err
 		}
 	}
@@ -121,7 +101,7 @@ func (envMount *processEnvMount) addShare(src, dst string) error {
 }
 
 // addMount will mount a env in the nanobox guest context
-func (envMount *processEnvMount) addMount(src, dst string) error {
+func (mount *Mount) addMount(src, dst string) error {
 
 	// short-circuit if the mount already exists
 	if provider.HasMount(dst) {

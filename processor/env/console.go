@@ -5,50 +5,29 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/jcelliott/lumber"
-	"github.com/nanobox-io/golang-docker-client"
-	"github.com/nanobox-io/nanobox/processor"
-	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processor/provider"
 )
 
-// processEnvConsole ...
-type processEnvConsole struct {
-	control   processor.ProcessControl
-	name      string
-	container string
-	command   string
-	cwd       string
-	shell     string
-}
-
-func init() {
-	processor.Register("env_console", envConsoleFn)
+// Console ...
+type Console struct {
+	Component models.Component
+	Command   string
+	Cwd       string
+	Shell     string
 }
 
 //
-func envConsoleFn(control processor.ProcessControl) (processor.Processor, error) {
-	envConsole := &processEnvConsole{control: control}
-	return envConsole, envConsole.validateMeta()
-}
-
-func (envConsole processEnvConsole) Results() processor.ProcessControl {
-	return envConsole.control
-}
-
-//
-func (envConsole processEnvConsole) Process() error {
-
-	// setup the environment (boot vm)
-	if err := processor.Run("provider_setup", envConsole.control); err != nil {
-		fmt.Println("provider_setup:", err)
-		lumber.Close()
-		return err
+func (console Console) Run() error {
+	// set the default shell
+	if console.Shell == "" {
+		console.Shell = "bash"
 	}
 
-	//
-	id := fmt.Sprintf("nanobox_%s_%s_%s", config.AppID(), envConsole.control.Env, envConsole.container)
-	if container, err := docker.GetContainer(id); err == nil {
-		envConsole.container = container.ID
+	// setup the environment (boot vm)
+	providerSetup := provider.Setup{}
+	if err := providerSetup.Run(); err != nil {
+		return err
 	}
 
 	// this is the default command to run in the container
@@ -58,7 +37,7 @@ func (envConsole processEnvConsole) Process() error {
 		"-u",
 		"gonano",
 		"-it",
-		envConsole.container,
+		console.Component.ID,
 		"/bin/bash",
 	}
 
@@ -67,13 +46,13 @@ func (envConsole processEnvConsole) Process() error {
 
 	// if a current working directory (cwd) is provided then modify the command to
 	// change into that directory before executing
-	case envConsole.cwd != "":
-		cmd = append(cmd, "-c", fmt.Sprintf("cd %s; exec \"%s\"", envConsole.cwd, envConsole.shell))
+	case console.Cwd != "":
+		cmd = append(cmd, "-c", fmt.Sprintf("cd %s; exec \"%s\"", console.Cwd, console.Shell))
 
 	// if a command is provided then modify the command to exec that command after
 	// running the base command
-	case envConsole.command != "":
-		cmd = append(cmd, "-c", envConsole.command)
+	case console.Command != "":
+		cmd = append(cmd, "-c", console.Command)
 	}
 
 	process := exec.Command(cmd[0], cmd[1:]...)
@@ -84,28 +63,6 @@ func (envConsole processEnvConsole) Process() error {
 
 	if err := process.Run(); err != nil && err.Error() != "exit status 137" {
 		return err
-	}
-
-	return nil
-}
-
-// validateMeta validates that the required metadata exists
-func (envConsole *processEnvConsole) validateMeta() error {
-
-	// set optional meta values
-	envConsole.command = envConsole.control.Meta["command"]
-	envConsole.cwd = envConsole.control.Meta["cwd"]
-
-	// set container; if no container is provided default to "build"
-	envConsole.container = envConsole.control.Meta["container"]
-	if envConsole.container == "" {
-		envConsole.container = fmt.Sprintf("nanobox_%s_build", config.AppID())
-	}
-
-	// set shell; if no shell is provided default to "bash"
-	envConsole.shell = envConsole.control.Meta["shell"]
-	if envConsole.shell == "" {
-		envConsole.shell = "bash"
 	}
 
 	return nil

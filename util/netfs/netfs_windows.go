@@ -41,7 +41,7 @@ func Exists(path string) bool {
 // Add exports a cifs share
 func Add(path string) error {
 
-	appID := config.AppID()
+	appID := config.EnvID()
 	user := os.Getenv("USERNAME")
 
 	// net share APPNAME=path /unlimited /GRANT:Everyone,FULL
@@ -80,7 +80,7 @@ func Add(path string) error {
 // Remove removes a cifs share
 func Remove(path string) error {
 
-	appID := config.AppID()
+	appID := config.EnvID()
 
 	// net share APPNAME /delete /y
 
@@ -117,7 +117,7 @@ func Remove(path string) error {
 // Mount mounts a cifs share on a guest machine
 func Mount(_, mountPath string) error {
 
-	appID := config.AppID()
+	appID := config.EnvID()
 	user := os.Getenv("USERNAME")
 
 	// fetch the password from the user

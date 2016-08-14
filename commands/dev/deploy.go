@@ -3,8 +3,10 @@ package dev
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox/processor"
+	"github.com/nanobox-io/nanobox/processor/dev"
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/print"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/validate"
 )
 
@@ -19,5 +21,11 @@ var DeployCmd = &cobra.Command{
 
 // deployFn ...
 func deployFn(ccmd *cobra.Command, args []string) {
-	print.OutputCommandErr(processor.Run("dev_deploy", processor.DefaultControl))
+	env, _ := models.FindEnvByID(config.EnvID())
+	app, _ := models.FindAppBySlug(env.ID, "dev")
+	devDeploy := dev.Deploy{
+		Env: env,
+		App: app,
+	}
+	print.OutputCommandErr(devDeploy.Run())
 }

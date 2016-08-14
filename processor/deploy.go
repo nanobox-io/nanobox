@@ -1,39 +1,32 @@
 package processor
 
 import (
-	"fmt"
 
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/odin"
+	"github.com/nanobox-io/nanobox/processor/provider"
+	"github.com/nanobox-io/nanobox/processor/code"
 )
 
-// processDeploy ...
-type processDeploy struct {
-	control ProcessControl
-	app     string
+// Deploy ...
+type Deploy struct {
+	Env models.Env
+	App     string
+	Message string
+
+	appID   string
+	buildID string
+	warehouseURL string
+	warehouseToken string
+	previousBuild string
 }
 
 //
-func init() {
-	Register("deploy", deployFn)
-}
-
-//
-func deployFn(control ProcessControl) (Processor, error) {
-	deploy := &processDeploy{control: control}
-	return deploy, deploy.validateMeta()
-}
-
-//
-func (deploy processDeploy) Results() ProcessControl {
-	return deploy.control
-}
-
-//
-func (deploy *processDeploy) Process() error {
+func (deploy *Deploy) Run() error {
 	// setup the environment (boot vm)
-	err := Run("provider_setup", deploy.control)
-	if err != nil {
+	providerSetup := provider.Setup{}
+	if err := providerSetup.Run(); err != nil {
 		return err
 	}
 
@@ -46,60 +39,38 @@ func (deploy *processDeploy) Process() error {
 	}
 
 	// tell odin what happened
-	return odin.Deploy(deploy.control.Meta["app_id"], deploy.control.Meta["build_id"], deploy.control.Meta["boxfile"], deploy.control.Meta["message"])
-}
-
-// validateMeta validates that the required metadata exists
-func (deploy *processDeploy) validateMeta() error {
-
-	// set app (required) and ensure it's provided
-	deploy.app = deploy.control.Meta["app"]
-	if deploy.app == "" {
-		return fmt.Errorf("Missing required meta value 'app'")
-	}
-
-	return nil
+	return odin.Deploy(deploy.appID, deploy.buildID, deploy.Env.BuiltBoxfile, deploy.Message)
 }
 
 // setWarehouseToken ...
-func (deploy *processDeploy) setWarehouseToken() error {
+func (deploy *Deploy) setWarehouseToken() (err error) {
 
 	// get remote hoarder credentials
-	deploy.control.Meta["app_id"] = getAppID(deploy.app)
-	deploy.control.Meta["build_id"] = util.RandomString(30)
-	warehouseToken, warehouseURL, err := odin.GetWarehouse(deploy.control.Meta["app_id"])
+	deploy.appID = getAppID(deploy.App)
+	// TODO: could make this not as random but based on something
+	// so if the same code was 'deployed' odin could react??
+	deploy.buildID = util.RandomString(30)
+	deploy.warehouseToken, deploy.warehouseURL, err = odin.GetWarehouse(deploy.appID)
 	if err != nil {
-		return err
+		return
 	}
-
-	deploy.control.Meta["warehouse_token"] = warehouseToken
-	deploy.control.Meta["warehouse_url"] = warehouseURL
 
 	// get the previous build if there was one
-	prevBuild, err := odin.GetPreviousBuild(deploy.control.Meta["app_id"])
-	if err != nil {
-		return err
-	}
-	deploy.control.Meta["previous_build"] = prevBuild
-	return nil
+	deploy.previousBuild, err = odin.GetPreviousBuild(deploy.appID)
+	return
 }
 
 // publishCode ...
-func (deploy *processDeploy) publishCode() error {
-	publishProcessor, err := Build("code_publish", deploy.control)
-	if err != nil {
-		return err
+func (deploy *Deploy) publishCode() error {
+
+	codePublish := code.Publish{
+		Env: deploy.Env,
+		BuildID: deploy.buildID,
+		WarehouseURL: deploy.warehouseURL,
+		WarehouseToken: deploy.warehouseToken,
+		PreviousBuild: deploy.previousBuild,
 	}
 
-	if err := publishProcessor.Process(); err != nil {
-		return err
-	}
-	publishResult := publishProcessor.Results()
-	if publishResult.Meta["boxfile"] == "" {
-		return fmt.Errorf("the boxfile from publish was blank")
-	}
-	// boxfile := boxfile.New([]byte(publishResult.Meta["boxfile"]))
-	deploy.control.Meta["boxfile"] = publishResult.Meta["boxfile"]
-
-	return nil
+	return codePublish.Run()
 }
+

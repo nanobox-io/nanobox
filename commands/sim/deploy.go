@@ -3,8 +3,10 @@ package sim
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox/processor"
+	"github.com/nanobox-io/nanobox/processor/sim"
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/print"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/validate"
 )
 
@@ -23,5 +25,11 @@ deploy locally, before deploying into production.
 
 // deployFn ...
 func deployFn(ccmd *cobra.Command, args []string) {
-	print.OutputCommandErr(processor.Run("sim_deploy", processor.DefaultControl))
+	env, _ := models.FindEnvByID(config.EnvID())
+	app, _ := models.FindAppBySlug(env.ID, "sim")
+	simDeploy := sim.Deploy{
+		Env: env,
+		App: app,
+	}
+	print.OutputCommandErr(simDeploy.Run())
 }

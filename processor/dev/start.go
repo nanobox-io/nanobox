@@ -1,36 +1,42 @@
 package dev
 
 import (
-	"github.com/nanobox-io/nanobox/processor"
+	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/commands/registry"
+	"github.com/nanobox-io/nanobox/processor/app"
+	"github.com/nanobox-io/nanobox/processor/env"
 )
 
-// processDevStart ...
-type processDevStart struct {
-	control processor.ProcessControl
+// Start ...
+type Start struct {
+	// mandatory
+	Env models.Env
+	// created
+	App models.App
 }
 
 //
-func init() {
-	processor.Register("dev_start", startFn)
-}
+func (start *Start) Run() error {
+	registry.Set("appname", "dev")
 
-// TODO: do some control validation check on the meta for the flags and make sure
-// they work
-func startFn(control processor.ProcessControl) (processor.Processor, error) {
-	return &processDevStart{control: control}, nil
-}
+	envInit := env.Init{}
+	if err := envInit.Run(); err != nil {
+		return err
+	}
 
-//
-func (dev *processDevStart) Results() processor.ProcessControl {
-	return dev.control
-}
+	// if the app has not been setup
+	// setup the app first
+	if !start.appExists(start.Env.ID) {
+		envSetup := env.Setup{}
+		err := envSetup.Run()
+		if err != nil {
+			return err
+		}
+	}
 
-//
-func (dev *processDevStart) Process() error {
-	// set the process mode to dev
-	dev.control.Env = "dev"
-
-	if err := processor.Run("app_start", dev.control); err != nil {
+	start.App, _ = models.FindAppBySlug(start.Env.ID, "dev")
+	appStart := app.Start{App: start.App}
+	if err := appStart.Run(); err != nil {
 		return err
 	}
 
@@ -38,3 +44,9 @@ func (dev *processDevStart) Process() error {
 
 	return nil
 }
+
+func (start *Start) appExists(envID string) bool {
+	appModel, _ := models.FindAppBySlug(start.Env.ID, "dev")
+	return appModel.ID != ""
+}
+

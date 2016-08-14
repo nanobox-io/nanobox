@@ -13,7 +13,7 @@ var (
 	// CleanCmd ...
 	CleanCmd = &cobra.Command{
 		Use:   "clean",
-		Short: "Clean out any apps that no longer exist",
+		Short: "Clean out any environemnts that no longer exist",
 		Long: `
 todo: write long description
 `,
@@ -24,5 +24,6 @@ todo: write long description
 
 // cleanFn ...
 func cleanFn(ccmd *cobra.Command, args []string) {
-	print.OutputCommandErr(processor.Run("clean", processor.DefaultControl))
+	clean := processor.Clean{}
+	print.OutputCommandErr(clean.Run())
 }

@@ -1,35 +1,18 @@
 package sim
 
 import (
-	"github.com/nanobox-io/nanobox/processor"
+	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processor/platform"
 )
 
-// processSimLog ...
-type processSimLog struct {
-	control processor.ProcessControl
+// Log ...
+type Log struct {
+	App models.App
 }
 
 //
-func init() {
-	processor.Register("sim_log", simLogFn)
-}
-
-//
-func simLogFn(control processor.ProcessControl) (processor.Processor, error) {
-	return processSimLog{control}, nil
-}
-
-//
-func (simLog processSimLog) Results() processor.ProcessControl {
-	return simLog.control
-}
-
-//
-func (simLog processSimLog) Process() error {
-	// set the process mode to sim
-	simLog.control.Env = "sim"
-
+func (log Log) Run() error {
 	// some messaging about the logging??
-
-	return processor.Run("mist_log", simLog.control)
+	platformMistListen := platform.MistListen{App: log.App}
+	return platformMistListen.Run()
 }

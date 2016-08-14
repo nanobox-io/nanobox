@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox/util/data"
+	"github.com/nanobox-io/nanobox/models"
 )
 
 type (
@@ -31,29 +31,12 @@ func inspectFunc(ccmd *cobra.Command, args []string) {
 		fmt.Println("I need to know some data starting point")
 
 	case len(args) == 1:
-		keys, err := data.Keys(args[0])
-		if err != nil {
-			fmt.Println(err)
-		}
-		for _, key := range keys {
-			showData(args[0], key)
-		}
+		showData(models.Inspect(args[0], ""))
 	case len(args) == 2:
-		showData(args[0], args[1])
+		showData(models.Inspect(args[0], args[1]))
 	}
 }
 
-func showData(bucket, key string) {
-	i := map[string]interface{}{}
-	err := data.Get(bucket, key, &i)
-	if err != nil {
-		a := []interface{}{}
-		err := data.Get(bucket, key, &a)
-		if err != nil {
-			fmt.Println(err)
-		}
-		fmt.Printf("key: %s, val: %+v\n", key, a)
-		return
-	}
-	fmt.Printf("key: %s, val: %+v\n", key, i)
+func showData(v interface{}) {
+	fmt.Printf("%+v\n", v)
 }

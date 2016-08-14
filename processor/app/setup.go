@@ -3,61 +3,53 @@ package app
 import (
 	"fmt"
 
+	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/processor"
-	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
 
 //
-type processAppSetup struct {
-	control processor.ProcessControl
-	app     models.App
+type Setup struct {
+	// required
+	Env models.Env
+	AppName string
+
+	// added
+	App models.App
 }
 
 //
-func init() {
-	processor.Register("app_setup", appSetupFn)
-}
+func (setup *Setup) Run() error {
 
-//
-func appSetupFn(control processor.ProcessControl) (processor.Processor, error) {
-	return &processAppSetup{control: control}, nil
-}
+	// fill in this apps name from the registry
+	// this should allow the env.Setup to run
+	// without ahving to knwo what apps will be setup
+	if setup.AppName == "" {
+		setup.AppName = registry.GetString("appname")
+	}
 
-//
-func (appSetup *processAppSetup) Results() processor.ProcessControl {
-	return appSetup.control
-}
-
-//
-func (appSetup *processAppSetup) Process() error {
+	setup.loadApp()
 
 	// establish an app-level lock to ensure we're the only ones setting up an app
 	// also, we need to ensure that the lock is released even if we error out.
 	locker.LocalLock()
 	defer locker.LocalUnlock()
 
-	if err := appSetup.loadApp(); err != nil {
-		return err
-	}
-
 	// short-circuit if the app is already active
-	if appSetup.app.State == ACTIVE {
+	if setup.App.State == ACTIVE {
 		return nil
 	}
 
-	if err := appSetup.reserveIPs(); err != nil {
+	if err := setup.reserveIPs(); err != nil {
 		return err
 	}
 
-	if err := appSetup.generateEvars(); err != nil {
+	if err := setup.generateEvars(); err != nil {
 		return err
 	}
 
-	if err := appSetup.persistApp(); err != nil {
+	if err := setup.persistApp(); err != nil {
 		return err
 	}
 
@@ -65,28 +57,26 @@ func (appSetup *processAppSetup) Process() error {
 }
 
 // loadApp loads the app from the db
-func (appSetup *processAppSetup) loadApp() error {
+func (setup *Setup) loadApp() error {
 	// the app might not exist yet, so let's not return the error if it fails
-	key := fmt.Sprintf("%s_%s", config.AppID(), appSetup.control.Env)
-	data.Get("apps", key, &appSetup.app)
+	setup.App, _ = models.FindAppBySlug(setup.Env.ID, setup.AppName)
 
 	// set the default state
-	if appSetup.app.State == "" {
-		appSetup.app.ID = key
-		appSetup.app.Directory = config.LocalDir()
-		appSetup.app.Name = config.AppName()
-		appSetup.app.State = INITIALIZED
-		appSetup.app.GlobalIPs = map[string]string{}
-		appSetup.app.LocalIPs = map[string]string{}
+	if setup.App.State == "" {
+		setup.App.EnvID = setup.Env.ID
+		setup.App.ID = fmt.Sprintf("%s_%s", setup.Env.ID, setup.AppName)
+		setup.App.Name = setup.AppName
+		setup.App.State = INITIALIZED
+		setup.App.GlobalIPs = map[string]string{}
+		setup.App.LocalIPs = map[string]string{}
+		setup.App.Evars = map[string]string{}
 	}
 
 	return nil
 }
 
 // reserveIPs reserves necessary app global and local ip addresses
-func (appSetup *processAppSetup) reserveIPs() error {
-
-	var err error
+func (setup *Setup) reserveIPs() error {
 
 	// reserve a dev ip
 	envIP, err := dhcp.ReserveGlobal()
@@ -107,47 +97,28 @@ func (appSetup *processAppSetup) reserveIPs() error {
 	}
 
 	// now let's assign them onto the app
-	appSetup.app.GlobalIPs["env"] = envIP.String()
+	setup.App.GlobalIPs["env"] = envIP.String()
 
-	appSetup.app.LocalIPs["logvac"] = logvacIP.String()
-	appSetup.app.LocalIPs["mist"] = mistIP.String()
+	setup.App.LocalIPs["logvac"] = logvacIP.String()
+	setup.App.LocalIPs["mist"] = mistIP.String()
 
 	return nil
 }
 
 // generateEvars generates the default app evars
-func (appSetup *processAppSetup) generateEvars() error {
-	// create the bucket name one time
-	bucket := fmt.Sprintf("%s_meta", config.AppID())
+func (setup *Setup) generateEvars() error {
 
-	// fetch the app evars model if it exists
-	evars := models.Evars{}
-
-	// ignore the error because it's likely to not exist
-	data.Get(bucket, appSetup.control.Env+"_env", &evars)
-
-	if evars["APP_NAME"] == "" {
-		evars["APP_NAME"] = config.AppName()
-	}
-
-	if err := data.Put(bucket, appSetup.control.Env+"_env", evars); err != nil {
-		return err
+	if setup.App.Evars["APP_NAME"] == "" {
+		setup.App.Evars["APP_NAME"] = setup.AppName
 	}
 
 	return nil
 }
 
 // persistApp saves the app to the db
-func (appSetup *processAppSetup) persistApp() error {
+func (setup *Setup) persistApp() error {
 
-	// set the app state to active so we don't appSetup again
-	appSetup.app.State = ACTIVE
-
-	// save the app
-	key := fmt.Sprintf("%s_%s", config.AppID(), appSetup.control.Env)
-	if err := data.Put("apps", key, &appSetup.app); err != nil {
-		return err
-	}
-
-	return nil
+	// set the app state to active so we don't setup again
+	setup.App.State = ACTIVE
+	return setup.App.Save()
 }

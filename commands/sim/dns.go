@@ -5,8 +5,10 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox/processor"
+	"github.com/nanobox-io/nanobox/processor/app/dns"
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/print"
+	"github.com/nanobox-io/nanobox/util/config"
 )
 
 var (
@@ -53,7 +55,7 @@ match an DNS entry in your to your local hosts file.
 	// DNSRemoveCmd ...
 	DNSRemoveAllCmd = &cobra.Command{
 		Use:    "rm-all",
-		Short:  "Removes all hostname mappings associated with your dev app.",
+		Short:  "Removes all hostname mappings associated with your sim app.",
 		Long:   ``,
 		Run:    dnsRmAllFn,
 		Hidden: true,
@@ -71,9 +73,9 @@ func init() {
 // dnsListFn will run the DNS processor for adding DNS entires to the "hosts"
 // file
 func dnsListFn(ccmd *cobra.Command, args []string) {
-
-	processor.DefaultControl.Env = "sim"
-	print.OutputCommandErr(processor.Run("env_dns_list", processor.DefaultControl))
+	app, _ := models.FindAppBySlug(config.EnvID(), "sim")
+	dnsList := dns.List{App: app}
+	print.OutputCommandErr(dnsList.Run())
 }
 
 // dnsAddFn will run the DNS processor for adding DNS entires to the "hosts"
@@ -94,12 +96,12 @@ nanobox sim dns add <name>
 	}
 
 	// set the meta arguments to be used in the processor and run the processor
-	processor.DefaultControl.Meta["name"] = args[0]
-	processor.DefaultControl.Env = "sim"
-	print.OutputCommandErr(processor.Run("env_dns_add", processor.DefaultControl))
+	app, _ := models.FindAppBySlug(config.EnvID(), "sim")
+	dnsAdd := dns.Add{App: app, Name: args[0]}
+	print.OutputCommandErr(dnsAdd.Run())
 }
 
-// dnsRmFn will run the DNS processor for removing DNS entries from the "hosts"
+// dnsRmFn will run the DNS processor for removing a DNS from the "hosts"
 // file
 func dnsRmFn(ccmd *cobra.Command, args []string) {
 
@@ -118,9 +120,9 @@ ex: nanobox sim dns rm <name>
 	}
 
 	// set the meta arguments to be used in the processor and run the processor
-	processor.DefaultControl.Meta["name"] = args[0]
-	processor.DefaultControl.Env = "sim"
-	print.OutputCommandErr(processor.Run("env_dns_remove", processor.DefaultControl))
+	app, _ := models.FindAppBySlug(config.EnvID(), "sim")
+	dnsRemove := dns.Remove{App: app, Name: args[0]}
+	print.OutputCommandErr(dnsRemove.Run())
 }
 
 // dnsRmAllFn will run the DNS processor for removing DNS entries from the "hosts"
@@ -128,6 +130,7 @@ ex: nanobox sim dns rm <name>
 func dnsRmAllFn(ccmd *cobra.Command, args []string) {
 
 	// set the meta arguments to be used in the processor and run the processor
-	processor.DefaultControl.Env = "dev"
-	print.OutputCommandErr(processor.Run("env_dns_remove_all", processor.DefaultControl))
+	app, _ := models.FindAppBySlug(config.EnvID(), "sim")
+	dnsRemoveAll := dns.RemoveAll{App: app}
+	print.OutputCommandErr(dnsRemoveAll.Run())
 }

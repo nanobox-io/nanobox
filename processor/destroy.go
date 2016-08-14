@@ -1,30 +1,17 @@
 package processor
 
-import ()
+import (
+	"github.com/nanobox-io/nanobox/processor/provider"
+)
 
-// processDestroy ...
-type processDestroy struct {
-	control ProcessControl
+// Destroy ...
+type Destroy struct {
 }
 
-//
-func init() {
-	Register("destroy", destroyFn)
-}
 
 //
-func destroyFn(control ProcessControl) (Processor, error) {
-	return processDestroy{control}, nil
-}
-
-//
-func (destroy processDestroy) Results() ProcessControl {
-	return destroy.control
-}
-
-//
-func (destroy processDestroy) Process() error {
-
+func (destroy Destroy) Run() error {
+	providerDestroy := provider.Destroy{}
 	// run a provider destroy
-	return Run("provider_destroy", destroy.control)
+	return providerDestroy.Run()
 }

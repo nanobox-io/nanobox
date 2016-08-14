@@ -32,9 +32,9 @@ func init() {
 
 // loginFn ...
 func loginFn(ccmd *cobra.Command, args []string) {
-
-	// set the meta arguments to be used in the processor and run the processor
-	processor.DefaultControl.Meta["username"] = loginCmdFlags.username
-	processor.DefaultControl.Meta["password"] = loginCmdFlags.password
-	print.OutputCommandErr(processor.Run("login", processor.DefaultControl))
+	login := processor.Login{
+		Username: loginCmdFlags.username,
+		Password: loginCmdFlags.password,
+	}
+	print.OutputCommandErr(login.Run())
 }

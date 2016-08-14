@@ -3,45 +3,21 @@ package processor
 import (
 	"fmt"
 
-	"github.com/nanobox-io/nanobox/util/data"
+	"github.com/nanobox-io/nanobox/models"
 )
 
-type processLogout struct {
-	control ProcessControl
-}
-
-func init() {
-	Register("logout", logoutFn)
-}
-
-func logoutFn(conf ProcessControl) (Processor, error) {
-	return processLogout{conf}, nil
-}
-
-func (logout processLogout) Results() ProcessControl {
-	return logout.control
+type Logout struct {
 }
 
 // Process ...
-func (logout processLogout) Process() error {
+func (logout Logout) Run() error {
 
 	// remove token from database
-	if err := logout.deleteUser(); err != nil {
+	if err := models.DeleteAuth(); err != nil {
 		return err
 	}
 
 	fmt.Println("Successfully logged out!")
-
-	return nil
-}
-
-// deleteUser ...
-func (logout *processLogout) deleteUser() error {
-
-	// remove token from database
-	if err := data.Delete("global", "user"); err != nil {
-		return err
-	}
 
 	return nil
 }

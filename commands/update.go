@@ -2,10 +2,7 @@ package commands
 
 import (
 	"fmt"
-
 	"github.com/spf13/cobra"
-
-	"github.com/nanobox-io/nanobox/processor"
 )
 
 var (
@@ -15,18 +12,13 @@ var (
 		Use:   "update",
 		Short: "Updates the Nanobox CLI to the newest available *minor* version.",
 		Long: `
-Updates the Nanobox CLI to the newest available *minor* version.
-Major version updates must be manually downloaded & installed.
+use the other one.. not this one.. just left in to help people get to the right place
 		`,
 		Run: updateFn,
 	}
 )
 
 // updateFn ...
-// I handle this error manually because I want a different message than all other
-// commands
 func updateFn(ccmd *cobra.Command, args []string) {
-	if err := processor.Run("update", processor.DefaultControl); err != nil {
-		fmt.Println("Nanobox was unable to update because of the following error:\n", err.Error())
-	}
+	fmt.Println("YO DAWG!! you gonna have to use the nanobox-update thingie ma jig")
 }

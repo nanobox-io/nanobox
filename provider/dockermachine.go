@@ -15,7 +15,6 @@ import (
 	"github.com/nanobox-io/nanobox-golang-stylish"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util/data"
 	"github.com/nanobox-io/nanobox/util/print"
 	"github.com/nanobox-io/nanobox/util/vbox"
 )
@@ -965,10 +964,11 @@ func (machine DockerMachine) hasNatPostroute(hostIP, containerIP string) bool {
 
 func (machine DockerMachine) changedIP() bool {
 	// get the previous host ip
-	provider := models.Provider{}
-	if err := data.Get("global", "provider", &provider); err != nil {
+	provider, err := models.LoadProvider()
+	if err != nil {
 		return true
 	}
+	
 	// if it was never set the it cant have changed
 	if provider.HostIP == "" {
 		return false
@@ -984,7 +984,7 @@ func (machine DockerMachine) changedIP() bool {
 	defer func() {
 		if provider.HostIP != newIP {
 			provider.HostIP = newIP
-			data.Put("global", "provider", provider)
+			provider.Save()
 		}
 	}()
 

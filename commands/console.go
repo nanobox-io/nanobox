@@ -49,7 +49,6 @@ ex: nanobox console <container>
 	}
 
 	// set the meta arguments to be used in the processor and run the processor
-	processor.DefaultControl.Meta["container"] = args[0]
-	processor.DefaultControl.Meta["app"] = consoleCmdFlags.app
-	print.OutputCommandErr(processor.Run("console", processor.DefaultControl))
+	console := processor.Console{Container: args[0], App: consoleCmdFlags.app}
+	print.OutputCommandErr(console.Run())
 }

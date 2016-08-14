@@ -8,7 +8,6 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/data"
 )
 
 var (
@@ -60,37 +59,35 @@ func init() {
 
 // envAddFn ...
 func envAddFn(ccmd *cobra.Command, args []string) {
-	evars := models.Evars{}
-	data.Get(config.AppID()+"_meta", "dev_env", &evars)
+	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
 	for _, arg := range args {
 		for _, pair := range strings.Split(arg, ",") {
 			parts := strings.FieldsFunc(pair, func(c rune) bool {
 				return c == ':' || c == '='
 			})
 			if len(parts) == 2 {
-				evars[strings.ToUpper(parts[0])] = parts[1]
+				app.Evars[strings.ToUpper(parts[0])] = parts[1]
 			}
 		}
 	}
 
-	data.Put(config.AppID()+"_meta", "dev_env", evars)
+	app.Save()
 }
 
 // envListFn ...
 func envListFn(ccmd *cobra.Command, args []string) {
-	evars := models.Evars{}
-	data.Get(config.AppID()+"_meta", "dev_env", &evars)
-	fmt.Println(evars)
+	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
+	fmt.Println(app.Evars)
 }
 
 // envRemoveFn ...
 func envRemoveFn(ccmd *cobra.Command, args []string) {
-	evars := models.Evars{}
-	data.Get(config.AppID()+"_meta", "dev_env", &evars)
+	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
 	for _, arg := range args {
 		for _, key := range strings.Split(arg, ",") {
-			delete(evars, strings.ToUpper(key))
+			delete(app.Evars, strings.ToUpper(key))
 		}
 	}
-	data.Put(config.AppID()+"_meta", "dev_env", evars)
+	
+	app.Save()
 }

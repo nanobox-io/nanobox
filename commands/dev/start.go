@@ -3,7 +3,9 @@ package dev
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox/processor"
+	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processor/dev"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/print"
 	"github.com/nanobox-io/nanobox/validate"
 )
@@ -24,8 +26,11 @@ and deploy it into your dev platform (nanobox dev deploy).
 	}
 )
 
-//
 // devStart ...
 func devStart(ccmd *cobra.Command, args []string) {
-	print.OutputCommandErr(processor.Run("dev_start", processor.DefaultControl))
+	env, _ := models.FindEnvByID(config.EnvID())
+	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
+
+	devStart := dev.Start{Env: env, App: app}
+	print.OutputCommandErr(devStart.Run())
 }

@@ -35,7 +35,7 @@ func AppName() string {
 // on the name as well as the folder
 // this should help us keep a unique name for apps that
 // happen to have the same folder base name
-func AppID() string {
+func EnvID() string {
 	return fmt.Sprintf("%x", md5.Sum([]byte(LocalDir())))
 }
 

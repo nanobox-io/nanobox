@@ -1,30 +1,16 @@
 package processor
 
-import ()
+import (
+	"github.com/nanobox-io/nanobox/processor/provider"
+)
 
-// processStart ...
-type processStart struct {
-	control ProcessControl
+// Start ...
+type Start struct {
 }
 
 //
-func init() {
-	Register("start", startFn)
-}
-
-//
-func startFn(control ProcessControl) (Processor, error) {
-	return processStart{control}, nil
-}
-
-//
-func (start processStart) Results() ProcessControl {
-	return start.control
-}
-
-//
-func (start processStart) Process() error {
-
+func (start Start) Run() error {
 	// run a provider setup
-	return Run("provider_setup", start.control)
+	providerStart := provider.Setup{}
+	return providerStart.Run()
 }

@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/data"
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
 
@@ -66,8 +66,9 @@ func Flush() {
 	mutex.Lock()
 	defer mutex.Unlock()
 
-	data.Delete("global", "ipreserved")
-	data.Delete("global", "ipreserved")
+	// remove all the ip models
+	ips := models.IPs{}
+	ips.Delete()
 }
 
 // ReserveLocal ...
@@ -164,14 +165,14 @@ func contains(ips []net.IP, ip net.IP) bool {
 
 // getReserved ...
 func getReserved() ([]net.IP, error) {
-	ips := []net.IP{}
-	data.Get("global", "ipreserved", &ips)
-	return ips, nil
+	ips, _ := models.LoadIPs()
+	return []net.IP(ips), nil
 }
 
 // setReserved ...
 func setReserved(ips []net.IP) error {
-	return data.Put("global", "ipreserved", ips)
+	mIPs := models.IPs(ips)
+	return mIPs.Save()
 }
 
 // inc ...

@@ -2,54 +2,14 @@ package processor
 
 import (
 	"crypto/tls"
-	"fmt"
-	"io"
 	"net"
 	"net/http"
-	"os"
-
-	"github.com/jcelliott/lumber"
-	"github.com/nanobox-io/nanobox-golang-stylish"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/data"
-)
-
-type (
-
-	// BreadCrumbProcessor ...
-	BreadCrumbProcessor struct {
-		crumb string
-		proc  Processor
-	}
-
-	// ProcessControl ...
-	ProcessControl struct {
-		Env          string
-		Debug        bool
-		Quiet        bool
-		Verbose      bool
-		Force        bool
-		DisplayLevel int
-		Meta         map[string]string
-	}
-
-	// ProcessBuilder ...
-	ProcessBuilder func(ProcessControl) (Processor, error)
-
-	// Processor ...
-	Processor interface {
-		Process() error
-		Results() ProcessControl
-	}
 )
 
 var (
-	// DefaultControl ...
-	DefaultControl = ProcessControl{Meta: map[string]string{}}
-
-	processors = map[string]ProcessBuilder{}
 
 	// used for console and tunnel
 	container string
@@ -57,109 +17,13 @@ var (
 	location  string
 )
 
-// Register ...
-func Register(name string, sb ProcessBuilder) {
-	if _, ok := processors[name]; !DefaultControl.Force && ok {
-		panic("Duplicate Registration - " + name)
-	}
-
-	//
-	processors[name] = sb
-}
-
-// Build ...
-func Build(name string, pc ProcessControl) (Processor, error) {
-	lumber.Debug(name)
-	procFunc, ok := processors[name]
-	if !ok {
-		return nil, fmt.Errorf("Invalid Processor %s", name)
-	}
-	proc, err := procFunc(pc)
-
-	// include the breadcrumb even when errors happen in proc functions
-	if err != nil {
-		return nil, fmt.Errorf("%s:%s", name, err)
-	}
-
-	return BreadCrumbProcessor{name, proc}, err
-}
-
-// Run ...
-func Run(name string, pc ProcessControl) error {
-	proc, err := Build(name, pc)
-	if err != nil {
-		return err
-	}
-	return proc.Process()
-}
-
-// ExecWriter ...
-func ExecWriter() io.Writer {
-	if DefaultControl.Quiet {
-		return nil
-	}
-	return os.Stdout
-}
-
-func (pc ProcessControl) Dup() ProcessControl {
-	newPC := ProcessControl{
-		Env:          pc.Env,
-		Debug:        pc.Debug,
-		Quiet:        pc.Quiet,
-		Verbose:      pc.Verbose,
-		Force:        pc.Force,
-		DisplayLevel: pc.DisplayLevel,
-		Meta:         map[string]string{},
-	}
-
-	for key, value := range pc.Meta {
-		newPC.Meta[key] = value
-	}
-
-	return newPC
-}
-
-// Process ...
-func (bcp BreadCrumbProcessor) Process() error {
-	err := bcp.proc.Process()
-	if err != nil {
-		err = fmt.Errorf("%s:%s", bcp.crumb, err.Error())
-	}
-	return err
-}
-
-// Results ...
-func (bcp BreadCrumbProcessor) Results() ProcessControl {
-	return bcp.proc.Results()
-}
-
-// Display ...
-func (control ProcessControl) Display(msg string) {
-	fmt.Print(stylish.Nest(control.DisplayLevel, msg))
-}
-
-// Info ...
-func (control ProcessControl) Info(msg string) {
-	if !DefaultControl.Quiet {
-		fmt.Print(stylish.Nest(control.DisplayLevel, msg))
-	}
-}
-
-// Trace ...
-func (control ProcessControl) Trace(msg string) {
-	if DefaultControl.Verbose {
-		fmt.Print(stylish.Nest(control.DisplayLevel, msg))
-	}
-}
-
 // getAppID ...
 func getAppID(alias string) string {
-	link := models.AppLinks{}
-	data.Get(config.AppID()+"_meta", "links", &link)
+	env, _ := models.FindEnvByID(config.EnvID())
 	if alias == "" {
 		alias = "default"
 	}
-	app, ok := link[alias]
+	app, ok := env.Links[alias]
 	if !ok {
 		return alias
 	}
@@ -199,16 +63,14 @@ func connect(req *http.Request) (net.Conn, []byte, error) {
 func upApps() []models.App {
 	apps := []models.App{}
 
-	appNames, err := data.Keys("apps")
-	if err != nil {
-		return apps
-	}
-
-	for _, appName := range appNames {
-		app := models.App{}
-		data.Get("apps", appName, &app)
-		if app.Status == "up" {
-			apps = append(apps, app)
+	envs, _ := models.AllEnvs()
+	for _, env := range envs{
+		envApps, _ := models.AllAppsByEnv(env.ID)
+		for _, envApp := range envApps {
+			if envApp.Status == "up" {
+				apps = append(apps, envApp)
+			}
+			
 		}
 	}
 

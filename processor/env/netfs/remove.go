@@ -4,34 +4,18 @@ import (
 	"fmt"
 	"runtime"
 
-	"github.com/nanobox-io/nanobox/processor"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/netfs"
 )
 
-// processEnvNetFSRemove ...
-type processEnvNetFSRemove struct {
-	control processor.ProcessControl
-	path    string
-}
-
-func init() {
-	processor.Register("env_netfs_remove", envNetFSRemoveFn)
+// Remove ...
+type Remove struct {
+	Path    string
 }
 
 //
-func envNetFSRemoveFn(control processor.ProcessControl) (processor.Processor, error) {
-	envNetFSRemove := &processEnvNetFSRemove{control: control}
-	return envNetFSRemove, envNetFSRemove.validateMeta()
-}
-
-func (envNetFSRemove processEnvNetFSRemove) Results() processor.ProcessControl {
-	return envNetFSRemove.control
-}
-
-//
-func (envNetFSRemove processEnvNetFSRemove) Process() error {
+func (envNetFSRemove Remove) Run() error {
 
 	// short-circuit if the entry already exist; we do this after we validate meta
 	// because the meta is needed to determin the entry we're looking for
@@ -57,23 +41,11 @@ func (envNetFSRemove processEnvNetFSRemove) Process() error {
 	return nil
 }
 
-// validateMeta validates that the required metadata exists
-func (envNetFSRemove *processEnvNetFSRemove) validateMeta() error {
-
-	// set path (required) and ensure it's provided
-	envNetFSRemove.path = envNetFSRemove.control.Meta["path"]
-	if envNetFSRemove.path == "" {
-		return fmt.Errorf("Missing required meta value 'path'")
-	}
-
-	return nil
-}
-
 // entryExists returns true if the entry already exists
-func (envNetFSRemove *processEnvNetFSRemove) entryExists() bool {
+func (envNetFSRemove *Remove) entryExists() bool {
 
 	// if the entry exists just return
-	if netfs.Exists(envNetFSRemove.path) {
+	if netfs.Exists(envNetFSRemove.Path) {
 		return true
 	}
 
@@ -81,10 +53,10 @@ func (envNetFSRemove *processEnvNetFSRemove) entryExists() bool {
 }
 
 // rmEntry rms the netfs entry into the /etc/exports
-func (envNetFSRemove *processEnvNetFSRemove) rmEntry() error {
+func (envNetFSRemove *Remove) rmEntry() error {
 
 	// rm the entry into the /etc/exports file
-	if err := netfs.Remove(envNetFSRemove.path); err != nil {
+	if err := netfs.Remove(envNetFSRemove.Path); err != nil {
 		return err
 	}
 
@@ -92,7 +64,7 @@ func (envNetFSRemove *processEnvNetFSRemove) rmEntry() error {
 }
 
 // reExecPrivilege re-execs the current process with a privileged user
-func (envNetFSRemove *processEnvNetFSRemove) reExecPrivilege() error {
+func (envNetFSRemove *Remove) reExecPrivilege() error {
 
 	if runtime.GOOS == "windows" {
 		fmt.Println("Administrator privileges are required to modify network shares.")
@@ -110,7 +82,7 @@ func (envNetFSRemove *processEnvNetFSRemove) reExecPrivilege() error {
 	// call 'env netfs rm' with the original path and args; config.NanoboxPath() will be the
 	// currently executing program, so this command will ultimately lead right back
 	// here
-	cmd := fmt.Sprintf("%s env netfs rm %s", config.NanoboxPath(), envNetFSRemove.path)
+	cmd := fmt.Sprintf("%s env netfs rm %s", config.NanoboxPath(), envNetFSRemove.Path)
 
 	// if the sudo'ed subprocess fails, we need to return error to stop the process
 	if err := util.PrivilegeExec(cmd); err != nil {
