@@ -14,11 +14,11 @@ type (
 
 	// Configure ...
 	Configure struct {
-		Env models.Env
-		App models.App
-		Component models.Component
-		BuildID string
-		WarehouseURL string
+		Env            models.Env
+		App            models.App
+		Component      models.Component
+		BuildID        string
+		WarehouseURL   string
 		WarehouseToken string
 	}
 
@@ -96,7 +96,6 @@ func (configure *Configure) Run() error {
 
 	//
 	configure.Component.State = ACTIVE
-
 
 	return configure.Component.Save()
 }

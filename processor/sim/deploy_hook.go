@@ -13,11 +13,11 @@ import (
 type (
 	DeployHook struct {
 		// mandatory
-		App     models.App
+		App       models.App
 		Component models.Component
-		HookType string
+		HookType  string
 		// internal
-		box     boxfile.Boxfile
+		box boxfile.Boxfile
 	}
 
 	// member ...

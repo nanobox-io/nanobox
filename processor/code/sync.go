@@ -5,19 +5,19 @@ import (
 
 	"github.com/nanobox-io/nanobox-boxfile"
 
-	"github.com/nanobox-io/nanobox/util/locker"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util/locker"
 )
 
 // Sync is used by the deploy process to syncronize the code parts
 // from the boxfile
 type Sync struct {
-	App models.App
-	Image   string
-	BuildID string
-	WarehouseURL string
+	App            models.App
+	Image          string
+	BuildID        string
+	WarehouseURL   string
 	WarehouseToken string
-	box     boxfile.Boxfile
+	box            boxfile.Boxfile
 }
 
 //
@@ -45,8 +45,8 @@ func (sync *Sync) Run() error {
 		// create a new process config for code ensuring it has access to the warehouse
 		// and the boxfile
 		codeSetup := Setup{
-			App: sync.App,
-			Name: codeName,
+			App:   sync.App,
+			Name:  codeName,
 			Image: image,
 		}
 		// run the code setup process with the new config
@@ -56,10 +56,10 @@ func (sync *Sync) Run() error {
 		}
 
 		codeConfigure := Configure{
-			App: sync.App,
-			Component: codeSetup.Component,
-			BuildID: sync.BuildID,
-			WarehouseURL: sync.WarehouseURL,
+			App:            sync.App,
+			Component:      codeSetup.Component,
+			BuildID:        sync.BuildID,
+			WarehouseURL:   sync.WarehouseURL,
 			WarehouseToken: sync.WarehouseToken,
 		}
 		// configure this code container

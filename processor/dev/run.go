@@ -61,7 +61,6 @@ func (run Run) Run() error {
 	return nil
 }
 
-
 func (run *Run) loadBoxfile() error {
 	env, _ := models.FindEnvByID(run.App.EnvID)
 	run.boxfile = boxfile.New([]byte(env.BuiltBoxfile))

@@ -6,8 +6,8 @@ import (
 
 // Remove ...
 type Remove struct {
-	Env models.Env
-	Alias   string
+	Env   models.Env
+	Alias string
 }
 
 //

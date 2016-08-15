@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processor/env/netfs"
 	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/processor/env/netfs"
 )
 
 // Unmount ...

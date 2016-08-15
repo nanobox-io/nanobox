@@ -2,7 +2,7 @@ package dev
 
 import (
 	"github.com/nanobox-io/nanobox/processor/dev"
-	"github.com/nanobox-io/nanobox/util/print"
+	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/validate"
 	"github.com/spf13/cobra"
 )
@@ -26,5 +26,5 @@ the VM and preparing a dev application. It's a shortcut for 'nanobox start',
 // upFn ...
 func upFn(ccmd *cobra.Command, args []string) {
 	devUp := dev.Up{}
-	print.OutputCommandErr(devUp.Run())
+	display.CommandErr(devUp.Run())
 }

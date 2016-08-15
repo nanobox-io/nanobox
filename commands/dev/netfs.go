@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/processor/env/netfs"
-	"github.com/nanobox-io/nanobox/util/print"
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 var (
@@ -62,7 +62,7 @@ ex: nanobox dev netfs add <path>
 	}
 
 	netfsAdd := netfs.Add{Path: args[0]}
-	print.OutputCommandErr(netfsAdd.Run())
+	display.CommandErr(netfsAdd.Run())
 }
 
 // netfsRmFn will run the netfs processor for removing a netfs export
@@ -84,5 +84,5 @@ ex: nanobox dev netfs rm <path>
 
 	// set the meta arguments to be used in the processor and run the processor
 	netfsRemove := netfs.Remove{Path: args[0]}
-	print.OutputCommandErr(netfsRemove.Run())
+	display.CommandErr(netfsRemove.Run())
 }

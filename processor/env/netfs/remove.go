@@ -11,7 +11,7 @@ import (
 
 // Remove ...
 type Remove struct {
-	Path    string
+	Path string
 }
 
 //

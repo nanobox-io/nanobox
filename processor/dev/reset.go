@@ -10,5 +10,5 @@ type Reset struct {
 
 //
 func (reset Reset) Run() error {
-	return models.DeleteAllCounters()	
+	return models.DeleteAllCounters()
 }

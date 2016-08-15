@@ -12,20 +12,19 @@ import (
 	"github.com/nanobox-io/nanobox-boxfile"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processor/env"
 	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/counter"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/locker"
-	"github.com/nanobox-io/nanobox/processor/env"
-
 )
 
 // Console ...
 type Console struct {
-	App       models.App
-	DevRun    bool
+	App    models.App
+	DevRun bool
 
 	boxfile   boxfile.Boxfile
 	localIP   net.IP
@@ -286,12 +285,12 @@ func (console *Console) runConsole() error {
 	component := models.Component{
 		ID: console.container.ID,
 	}
-	// for tyler: I dont like forcing someone into zsh.. 
+	// for tyler: I dont like forcing someone into zsh..
 	// your chosen shell is a very personal
 	envConsole := env.Console{
 		Component: component,
-		Cwd: console.cwd(),
-		Shell: "zsh", 
+		Cwd:       console.cwd(),
+		Shell:     "zsh",
 	}
 
 	return envConsole.Run()

@@ -7,12 +7,11 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 )
 
-
 // Sync ...
 type Sync struct {
-	Env models.Env
-	App models.App
-	builtBoxfile boxfile.Boxfile
+	Env             models.Env
+	App             models.App
+	builtBoxfile    boxfile.Boxfile
 	deployedBoxfile boxfile.Boxfile
 }
 
@@ -117,9 +116,9 @@ func (sync *Sync) provisionComponents() error {
 		}
 
 		setup := Setup{
-			App: sync.App, 
+			App:   sync.App,
 			Image: image,
-			Name: name,
+			Name:  name,
 		}
 
 		// setup the service
@@ -128,7 +127,7 @@ func (sync *Sync) provisionComponents() error {
 		}
 
 		configure := Configure{
-			App: sync.App,
+			App:       sync.App,
 			Component: setup.Component,
 		}
 

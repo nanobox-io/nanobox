@@ -1,10 +1,10 @@
 package processor
 
 import (
-	"github.com/nanobox-io/nanobox/util/locker"
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/processor/env"
 	"github.com/nanobox-io/nanobox/processor/code"
+	"github.com/nanobox-io/nanobox/processor/env"
+	"github.com/nanobox-io/nanobox/util/locker"
 )
 
 // Build ...

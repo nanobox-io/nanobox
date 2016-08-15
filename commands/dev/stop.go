@@ -5,8 +5,8 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor/dev"
-	"github.com/nanobox-io/nanobox/util/print"
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/validate"
 )
 
@@ -31,5 +31,5 @@ func stopFn(ccmd *cobra.Command, args []string) {
 	devStop := dev.Stop{
 		App: app,
 	}
-	print.OutputCommandErr(devStop.Run())
+	display.CommandErr(devStop.Run())
 }

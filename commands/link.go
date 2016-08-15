@@ -5,8 +5,8 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor/link"
-	"github.com/nanobox-io/nanobox/util/print"
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 var (
@@ -67,11 +67,11 @@ func init() {
 func linkAddFn(ccmd *cobra.Command, args []string) {
 	env, _ := models.FindEnvByID(config.EnvID())
 	add := link.Add{
-		Env: env,
-		App: linkCmdFlags.app,
+		Env:   env,
+		App:   linkCmdFlags.app,
 		Alias: linkCmdFlags.alias,
 	}
-	print.OutputCommandErr(add.Run())
+	display.CommandErr(add.Run())
 }
 
 // linkListFn ...
@@ -80,16 +80,16 @@ func linkListFn(ccmd *cobra.Command, args []string) {
 	list := link.List{
 		Env: env,
 	}
-	print.OutputCommandErr(list.Run())
+	display.CommandErr(list.Run())
 }
 
 // linkRemoveFn ...
 func linkRemoveFn(ccmd *cobra.Command, args []string) {
 	env, _ := models.FindEnvByID(config.EnvID())
 	remove := link.Remove{
-		Env: env,
+		Env:   env,
 		Alias: linkCmdFlags.alias,
 	}
 	// set the meta arguments to be used in the processor and run the processor
-	print.OutputCommandErr(remove.Run())
+	display.CommandErr(remove.Run())
 }

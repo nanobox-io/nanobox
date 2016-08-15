@@ -22,7 +22,7 @@ type (
 		App        models.App
 		Name       string
 		Image      string
-		Component    models.Component
+		Component  models.Component
 		fail       bool
 		cleanFuncs []cleanFunc
 	}
@@ -245,7 +245,7 @@ func (setup *Setup) planService() error {
 	planPayload := map[string]interface{}{"config": boxConfig.Parsed}
 	jsonPayload, _ := json.Marshal(planPayload)
 
-	// TODO: replace nil with something from the display package 
+	// TODO: replace nil with something from the display package
 	p, err := util.Exec(setup.Component.ID, "plan", string(jsonPayload), nil)
 	if err != nil {
 		return err

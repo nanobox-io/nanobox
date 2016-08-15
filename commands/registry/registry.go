@@ -1,8 +1,8 @@
 package registry
 
 import (
-	"time"
 	"github.com/spf13/viper"
+	"time"
 )
 
 var v = viper.New()

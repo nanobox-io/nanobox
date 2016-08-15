@@ -1,8 +1,8 @@
 package dev
 
 import (
-	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/commands/registry"
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor/app"
 	"github.com/nanobox-io/nanobox/processor/env"
 )
@@ -49,4 +49,3 @@ func (start *Start) appExists(envID string) bool {
 	appModel, _ := models.FindAppBySlug(start.Env.ID, "dev")
 	return appModel.ID != ""
 }
-

@@ -1,13 +1,13 @@
 package env
 
 import (
-	"github.com/nanobox-io/nanobox/processor/provider"
-	"github.com/nanobox-io/nanobox/processor/platform"
+	"github.com/nanobox-io/nanobox/commands/registry"
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor/app"
 	"github.com/nanobox-io/nanobox/processor/component"
-	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processor/platform"
+	"github.com/nanobox-io/nanobox/processor/provider"
 	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/commands/registry"
 )
 
 // Setup ...

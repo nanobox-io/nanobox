@@ -1,17 +1,17 @@
 package models
 
 type ComponentPlan struct {
-  IPs           []string 					  `json:"ips"`            
-  Users         []ComponentPlanUser `json:"users"`          
-  MountProtocol string   					  `json:"mount_protocol"` 
-  Behaviors     []string 					  `json:"behaviors"`      
-  DefaultUser   string   					  `json:"user"`           
+	IPs           []string            `json:"ips"`
+	Users         []ComponentPlanUser `json:"users"`
+	MountProtocol string              `json:"mount_protocol"`
+	Behaviors     []string            `json:"behaviors"`
+	DefaultUser   string              `json:"user"`
 }
 
 type ComponentPlanUser struct {
-  Username string                 `json:"username"` 
-  Password string                 `json:"password"` 
-  Meta     map[string]interface{} `json:"meta"`     
+	Username string                 `json:"username"`
+	Password string                 `json:"password"`
+	Meta     map[string]interface{} `json:"meta"`
 }
 
 // BehaviorPresent ...

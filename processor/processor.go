@@ -64,13 +64,13 @@ func upApps() []models.App {
 	apps := []models.App{}
 
 	envs, _ := models.AllEnvs()
-	for _, env := range envs{
+	for _, env := range envs {
 		envApps, _ := models.AllAppsByEnv(env.ID)
 		for _, envApp := range envApps {
 			if envApp.Status == "up" {
 				apps = append(apps, envApp)
 			}
-			
+
 		}
 	}
 

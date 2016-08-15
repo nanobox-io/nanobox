@@ -5,14 +5,14 @@ import (
 )
 
 type App struct {
-	EnvID			string
-	ID			  string
-	Name 			string
+	EnvID string
+	ID    string
+	Name  string
 	// State is used to ensure we don't setup this environment multiple times
-	State  		string
-	Status 		string
+	State  string
+	Status string
 	// Appironment variables available to the environment
-	Evars			map[string]string
+	Evars map[string]string
 	// There are certain global ips that need to be reserved across container
 	// lifetimes. The dev ip and preview ip are examples. We'll store those here.
 	GlobalIPs map[string]string
@@ -26,35 +26,35 @@ type App struct {
 
 // Save persists the App to the database
 func (a *App) Save() error {
-	
+
 	if err := put(a.EnvID, a.ID, a); err != nil {
 		return fmt.Errorf("failed to save env: %s", err.Error())
 	}
-	
+
 	return nil
 }
 
 // Delete deletes the env record from the database
 func (a *App) Delete() error {
-	
+
 	if err := delete(a.EnvID, a.ID); err != nil {
 		return fmt.Errorf("failed to delete env: %s", err.Error())
 	}
-	
+
 	return nil
 }
 
 // FindBySlug finds an app by an appID and name
 func FindAppBySlug(envID, name string) (App, error) {
-	
+
 	app := App{}
-	
+
 	key := fmt.Sprintf("%s_%s", envID, name)
 
 	if err := get(envID, key, &app); err != nil {
 		return app, fmt.Errorf("failed to load app: %s", err.Error())
 	}
-	
+
 	return app, nil
 }
 

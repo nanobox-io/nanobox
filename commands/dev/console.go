@@ -6,9 +6,9 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor/dev"
 	"github.com/nanobox-io/nanobox/processor/env"
-	"github.com/nanobox-io/nanobox/util/print"
-	"github.com/nanobox-io/nanobox/validate"
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util/display"
+	"github.com/nanobox-io/nanobox/validate"
 )
 
 // ConsoleCmd ...
@@ -30,12 +30,12 @@ func consoleFn(ccmd *cobra.Command, args []string) {
 	// and be dropped into a dev environment
 	if len(args) > 0 {
 		component, _ := models.FindComponentBySlug(app.ID, args[0])
-		
+
 		envConsole := env.Console{
 			Component: component,
 		}
 
-		print.OutputCommandErr(envConsole.Run())
+		display.CommandErr(envConsole.Run())
 		return
 	}
 
@@ -44,5 +44,5 @@ func consoleFn(ccmd *cobra.Command, args []string) {
 	}
 
 	// set the meta arguments to be used in the processor and run the processor
-	print.OutputCommandErr(devConsole.Run())
+	display.CommandErr(devConsole.Run())
 }

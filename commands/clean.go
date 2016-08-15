@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/processor"
-	"github.com/nanobox-io/nanobox/util/print"
+	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/validate"
 )
 
@@ -25,5 +25,5 @@ todo: write long description
 // cleanFn ...
 func cleanFn(ccmd *cobra.Command, args []string) {
 	clean := processor.Clean{}
-	print.OutputCommandErr(clean.Run())
+	display.CommandErr(clean.Run())
 }

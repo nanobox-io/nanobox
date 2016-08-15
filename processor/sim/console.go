@@ -1,7 +1,7 @@
 package sim
 
 import (
-"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor/env"
 )
 

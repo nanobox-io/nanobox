@@ -5,9 +5,9 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor/dev"
-	"github.com/nanobox-io/nanobox/util/print"
-	"github.com/nanobox-io/nanobox/validate"
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util/display"
+	"github.com/nanobox-io/nanobox/validate"
 )
 
 // DestroyCmd ...
@@ -34,7 +34,7 @@ func init() {
 func destroyFn(ccmd *cobra.Command, args []string) {
 	devDestroy := dev.Destroy{App: getApp()}
 
-	print.OutputCommandErr(devDestroy.Run())
+	display.CommandErr(devDestroy.Run())
 }
 
 // look up the real app id based on what they told me.

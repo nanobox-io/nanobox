@@ -42,7 +42,7 @@ func Decrement(id string) (int, error) {
 
 	//
 	err := counter.Save()
-	
+
 	return counter.Count, err
 }
 

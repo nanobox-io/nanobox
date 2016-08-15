@@ -7,9 +7,8 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor"
-	"github.com/nanobox-io/nanobox/util/print"
 	"github.com/nanobox-io/nanobox/util/config"
-
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 var (
@@ -38,8 +37,8 @@ func deployFn(ccmd *cobra.Command, args []string) {
 	env, _ := models.FindEnvByID(config.EnvID())
 
 	deploy := processor.Deploy{
-		Env: env,
-		App: "default",
+		Env:     env,
+		App:     "default",
 		Message: deployCmdFlags.message,
 	}
 
@@ -65,7 +64,6 @@ ex: nanobox deploy <name>
 		return
 	}
 
-
 	// set the meta arguments to be used in the processor and run the processor
-	print.OutputCommandErr(deploy.Run())
+	display.CommandErr(deploy.Run())
 }

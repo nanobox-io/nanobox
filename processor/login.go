@@ -16,7 +16,6 @@ type Login struct {
 	token    string
 }
 
-
 // Process ...
 func (login Login) Run() error {
 

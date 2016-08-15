@@ -5,8 +5,8 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor/sim"
-	"github.com/nanobox-io/nanobox/util/print"
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/validate"
 )
 
@@ -26,5 +26,5 @@ var (
 func infoFn(ccmd *cobra.Command, args []string) {
 	app, _ := models.FindAppBySlug(config.EnvID(), "sim")
 	simInfo := sim.Info{App: app}
-	print.OutputCommandErr(simInfo.Run())
+	display.CommandErr(simInfo.Run())
 }

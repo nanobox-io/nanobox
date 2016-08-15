@@ -6,7 +6,7 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor/dev"
 	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/print"
+	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/validate"
 )
 
@@ -28,5 +28,5 @@ func logFn(ccmd *cobra.Command, args []string) {
 	devLog := dev.Log{
 		App: app,
 	}
-	print.OutputCommandErr(devLog.Run())
+	display.CommandErr(devLog.Run())
 }

@@ -3,7 +3,6 @@ package platform
 import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor/component"
-	
 )
 
 //
@@ -35,6 +34,6 @@ func (stop *Stop) stopComponent(pComp Component) error {
 		componentStop := component.Stop{compModel}
 		return componentStop.Run()
 	}
-	
+
 	return nil
 }

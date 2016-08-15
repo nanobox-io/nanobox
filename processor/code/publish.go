@@ -8,24 +8,24 @@ import (
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox-boxfile"
 
-	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/provider"
-	"github.com/nanobox-io/nanobox/processor/env"
-	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/commands/registry"
+	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processor/env"
+	"github.com/nanobox-io/nanobox/provider"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 )
 
 // Publish ...
 type Publish struct {
-	Env models.Env
-	Image   string
-	BuildID string
-	WarehouseURL string
+	Env            models.Env
+	Image          string
+	BuildID        string
+	WarehouseURL   string
 	WarehouseToken string
-	PreviousBuild string
-	component models.Component
+	PreviousBuild  string
+	component      models.Component
 }
 
 //

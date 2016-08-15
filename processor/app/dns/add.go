@@ -12,8 +12,8 @@ import (
 
 // Add ...
 type Add struct {
-	App     models.App
-	Name    string
+	App  models.App
+	Name string
 }
 
 //

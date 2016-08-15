@@ -11,7 +11,7 @@ import (
 	"github.com/nanobox-io/nanobox-golang-stylish"
 
 	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/print"
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 // Native ...
@@ -71,8 +71,8 @@ func (native Native) Destroy() error {
 
 		cmd := exec.Command("docker", "network", "rm", "nanobox")
 
-		cmd.Stdout = print.NewStreamer("  ")
-		cmd.Stderr = print.NewStreamer("  ")
+		cmd.Stdout = display.NewStreamer("  ")
+		cmd.Stderr = display.NewStreamer("  ")
 
 		if err := cmd.Run(); err != nil {
 			return err
@@ -91,8 +91,8 @@ func (native Native) Start() error {
 
 		cmd := exec.Command("docker", "network", "create", "--driver=bridge", "--subnet=192.168.0.0/24", "--opt=\"com.docker.network.driver.mtu=1450\"", "--opt=\"com.docker.network.bridge.name=redd0\"", "--gateway=192.168.0.1", "nanobox")
 
-		cmd.Stdout = print.NewStreamer("  ")
-		cmd.Stderr = print.NewStreamer("  ")
+		cmd.Stdout = display.NewStreamer("  ")
+		cmd.Stderr = display.NewStreamer("  ")
 
 		if err := cmd.Run(); err != nil {
 			return err

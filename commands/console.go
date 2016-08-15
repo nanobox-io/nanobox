@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/processor"
-	"github.com/nanobox-io/nanobox/util/print"
+	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/validate"
 )
 
@@ -50,5 +50,5 @@ ex: nanobox console <container>
 
 	// set the meta arguments to be used in the processor and run the processor
 	console := processor.Console{Container: args[0], App: consoleCmdFlags.app}
-	print.OutputCommandErr(console.Run())
+	display.CommandErr(console.Run())
 }

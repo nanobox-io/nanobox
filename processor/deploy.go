@@ -1,25 +1,24 @@
 package processor
 
 import (
-
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processor/code"
+	"github.com/nanobox-io/nanobox/processor/provider"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/odin"
-	"github.com/nanobox-io/nanobox/processor/provider"
-	"github.com/nanobox-io/nanobox/processor/code"
 )
 
 // Deploy ...
 type Deploy struct {
-	Env models.Env
+	Env     models.Env
 	App     string
 	Message string
 
-	appID   string
-	buildID string
-	warehouseURL string
+	appID          string
+	buildID        string
+	warehouseURL   string
 	warehouseToken string
-	previousBuild string
+	previousBuild  string
 }
 
 //
@@ -64,13 +63,12 @@ func (deploy *Deploy) setWarehouseToken() (err error) {
 func (deploy *Deploy) publishCode() error {
 
 	codePublish := code.Publish{
-		Env: deploy.Env,
-		BuildID: deploy.buildID,
-		WarehouseURL: deploy.warehouseURL,
+		Env:            deploy.Env,
+		BuildID:        deploy.buildID,
+		WarehouseURL:   deploy.warehouseURL,
 		WarehouseToken: deploy.warehouseToken,
-		PreviousBuild: deploy.previousBuild,
+		PreviousBuild:  deploy.previousBuild,
 	}
 
 	return codePublish.Run()
 }
-

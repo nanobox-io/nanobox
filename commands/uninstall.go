@@ -6,7 +6,7 @@ package commands
 
 // 	"github.com/spf13/cobra"
 
-// 	printutil "github.com/nanobox-io/nanobox/util/print"
+//  "github.com/nanobox-io/nanobox/util/display"
 // )
 
 // var uninstallCmd = &cobra.Command{

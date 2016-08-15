@@ -1,10 +1,10 @@
 package sim
 
 import (
-	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor/app"
 	"github.com/nanobox-io/nanobox/processor/env"
+	"github.com/nanobox-io/nanobox/util/config"
 )
 
 // Start ...
@@ -42,5 +42,3 @@ func (start *Start) Run() error {
 
 	return nil
 }
-
-

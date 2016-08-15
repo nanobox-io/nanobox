@@ -1,16 +1,15 @@
 package link
 
 import (
-
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/odin"
 )
 
 // Add
 type Add struct {
-	Env     models.Env
-	App     string
-	Alias   string
+	Env   models.Env
+	App   string
+	Alias string
 }
 
 //
@@ -29,4 +28,3 @@ func (add Add) Run() error {
 
 	return add.Env.Save()
 }
-

@@ -15,7 +15,7 @@ func (log Log) Run() error {
 
 	// some messaging about the logging??
 	platformMistLog := platform.MistListen{
-		App:log.App,
+		App: log.App,
 	}
 	return platformMistLog.Run()
 }

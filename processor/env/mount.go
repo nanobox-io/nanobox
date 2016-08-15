@@ -3,9 +3,9 @@ package env
 import (
 	"fmt"
 
+	"github.com/nanobox-io/nanobox/models"
+	netfs_processor "github.com/nanobox-io/nanobox/processor/env/netfs"
 	"github.com/nanobox-io/nanobox/provider"
-	"github.com/nanobox-io/nanobox/models"	
-	netfs_processor "github.com/nanobox-io/nanobox/processor/env/netfs"		
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/netfs"
 )

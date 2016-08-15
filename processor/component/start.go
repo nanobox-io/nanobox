@@ -70,4 +70,3 @@ func (start Start) isServiceRunning() bool {
 	// if the container doesn't exist then just return false
 	return err == nil && container.State.Status == "running"
 }
-

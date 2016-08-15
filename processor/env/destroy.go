@@ -3,9 +3,9 @@ package env
 import (
 	"fmt"
 
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor/app"
 	"github.com/nanobox-io/nanobox/processor/provider"
-	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
 
@@ -18,7 +18,7 @@ type Destroy struct {
 func (destroy *Destroy) Run() error {
 	locker.LocalLock()
 	defer locker.LocalUnlock()
-	
+
 	// we need the vm to be up and running
 	providerSetup := provider.Setup{}
 	if err := providerSetup.Run(); err != nil {
@@ -46,7 +46,6 @@ func (destroy *Destroy) Run() error {
 	// destroy the mounts
 	return destroy.destroyMounts()
 }
-
 
 // destroyMounts removes the environments mounts from the provider
 func (destroy *Destroy) destroyMounts() error {

@@ -22,13 +22,12 @@ func (deploy Deploy) Run() error {
 	return nil
 }
 
-
 // provisionComponent will provision an individual component
 func (deploy Deploy) provisionComponent(pComp Component) error {
 
 	// if the component exists and is active just start it and stop here
 	if deploy.isComponentActive(pComp.name) {
-		compModel, _  := models.FindComponentBySlug(deploy.App.ID, pComp.name)
+		compModel, _ := models.FindComponentBySlug(deploy.App.ID, pComp.name)
 		componentStart := component.Start{Component: compModel}
 		return componentStart.Run()
 	}
@@ -36,8 +35,8 @@ func (deploy Deploy) provisionComponent(pComp Component) error {
 	// otherwise
 	// deploy the component
 	componentSetup := component.Setup{
-		App: deploy.App,
-		Name: pComp.name,
+		App:   deploy.App,
+		Name:  pComp.name,
 		Image: pComp.image,
 	}
 	if err := componentSetup.Run(); err != nil {
@@ -46,7 +45,7 @@ func (deploy Deploy) provisionComponent(pComp Component) error {
 
 	// and configure it
 	componentConfigure := component.Configure{
-		App: deploy.App,
+		App:       deploy.App,
 		Component: componentSetup.Component,
 	}
 	return componentConfigure.Run()
@@ -56,7 +55,7 @@ func (deploy Deploy) provisionComponent(pComp Component) error {
 func (deploy Deploy) isComponentActive(name string) bool {
 
 	// component db entry
-	component, _  := models.FindComponentBySlug(deploy.App.ID, name)
+	component, _ := models.FindComponentBySlug(deploy.App.ID, name)
 
 	return component.State == "active"
 }

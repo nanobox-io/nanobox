@@ -11,7 +11,7 @@ import (
 
 // Add ...
 type Add struct {
-	Path    string
+	Path string
 }
 
 //

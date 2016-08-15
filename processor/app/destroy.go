@@ -7,9 +7,9 @@ import (
 	"github.com/nanobox-io/golang-docker-client"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/processor/component"
 	"github.com/nanobox-io/nanobox/processor/app/dns"
-	
+	"github.com/nanobox-io/nanobox/processor/component"
+
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
@@ -95,7 +95,7 @@ func (destroy Destroy) removeComponents() error {
 
 		// creat a component destroy
 		componentDestroy := component.Destroy{
-			App: destroy.App,
+			App:       destroy.App,
 			Component: comp,
 		}
 

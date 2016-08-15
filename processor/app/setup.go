@@ -12,7 +12,7 @@ import (
 //
 type Setup struct {
 	// required
-	Env models.Env
+	Env     models.Env
 	AppName string
 
 	// added

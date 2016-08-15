@@ -2,8 +2,8 @@ package dev
 
 import (
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/processor/env"
 	"github.com/nanobox-io/nanobox/processor/component"
+	"github.com/nanobox-io/nanobox/processor/env"
 )
 
 // Deploy ...

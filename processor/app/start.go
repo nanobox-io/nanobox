@@ -1,7 +1,6 @@
 package app
 
 import (
-
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor/component"
 	"github.com/nanobox-io/nanobox/util/locker"

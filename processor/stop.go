@@ -31,7 +31,7 @@ func (stop Stop) stopAllApps() error {
 		appStop := app.Stop{
 			App: a,
 		}
-		
+
 		if err := appStop.Run(); err != nil {
 			return err
 		}

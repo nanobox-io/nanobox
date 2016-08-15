@@ -20,11 +20,11 @@ import (
 
 // Build ...
 type Build struct {
-	Env models.Env
-	boxfile      boxfile.Boxfile
-	localIP      net.IP
-	image        string
-	container    dockType.ContainerJSON
+	Env       models.Env
+	boxfile   boxfile.Boxfile
+	localIP   net.IP
+	image     string
+	container dockType.ContainerJSON
 }
 
 //

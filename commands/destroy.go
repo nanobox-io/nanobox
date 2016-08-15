@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/processor"
-	"github.com/nanobox-io/nanobox/util/print"
+	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/validate"
 )
 
@@ -22,5 +22,5 @@ var (
 
 // destroyFn ...
 func destroyFn(ccmd *cobra.Command, args []string) {
-	print.OutputCommandErr(processor.Destroy{}.Run())
+	display.CommandErr(processor.Destroy{}.Run())
 }

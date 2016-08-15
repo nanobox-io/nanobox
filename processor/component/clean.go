@@ -1,7 +1,6 @@
 package component
 
 import (
-
 	"github.com/nanobox-io/golang-docker-client"
 
 	"github.com/nanobox-io/nanobox/models"
@@ -41,9 +40,9 @@ func (clean Clean) cleanService(component models.Component) error {
 
 // removeService will remove a service from nanobox
 func (clean Clean) removeService(component models.Component) error {
-	
+
 	componentRemove := Destroy{
-		App: clean.App,
+		App:       clean.App,
 		Component: component,
 	}
 

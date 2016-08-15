@@ -1,9 +1,8 @@
 package sim
 
 import (
-
-	"github.com/nanobox-io/nanobox/processor/app"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processor/app"
 )
 
 // Destroy ...

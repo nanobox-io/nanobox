@@ -6,7 +6,7 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor/dev"
 	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/print"
+	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/validate"
 )
 
@@ -32,5 +32,5 @@ func devStart(ccmd *cobra.Command, args []string) {
 	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
 
 	devStart := dev.Start{Env: env, App: app}
-	print.OutputCommandErr(devStart.Run())
+	display.CommandErr(devStart.Run())
 }

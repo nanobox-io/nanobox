@@ -14,11 +14,11 @@ import (
 
 // Setup ...
 type Setup struct {
-	App models.App
+	App       models.App
 	Component models.Component
-	Name string
-	Image string
-	fail    bool
+	Name      string
+	Image     string
+	fail      bool
 }
 
 //

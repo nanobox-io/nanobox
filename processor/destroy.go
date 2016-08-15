@@ -8,7 +8,6 @@ import (
 type Destroy struct {
 }
 
-
 //
 func (destroy Destroy) Run() error {
 	providerDestroy := provider.Destroy{}

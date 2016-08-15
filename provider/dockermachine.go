@@ -15,7 +15,7 @@ import (
 	"github.com/nanobox-io/nanobox-golang-stylish"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util/print"
+	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/vbox"
 )
 
@@ -69,8 +69,8 @@ func (machine DockerMachine) Create() error {
 	process := exec.Command(cmd[0], cmd[1:]...)
 
 	if verbose {
-		process.Stdout = print.NewStreamer("  ")
-		process.Stderr = print.NewStreamer("  ")
+		process.Stdout = display.NewStreamer("  ")
+		process.Stderr = display.NewStreamer("  ")
 	}
 
 	//
@@ -110,8 +110,8 @@ func (machine DockerMachine) Stop() error {
 	process := exec.Command(cmd[0], cmd[1:]...)
 
 	if verbose {
-		process.Stdout = print.NewStreamer("  ")
-		process.Stderr = print.NewStreamer("  ")
+		process.Stdout = display.NewStreamer("  ")
+		process.Stderr = display.NewStreamer("  ")
 	}
 
 	fmt.Print(stylish.ProcessStart("Stopping docker-machine vm"))
@@ -140,8 +140,8 @@ func (machine DockerMachine) Destroy() error {
 	process := exec.Command(cmd[0], cmd[1:]...)
 
 	if verbose {
-		process.Stdout = print.NewStreamer("  ")
-		process.Stderr = print.NewStreamer("  ")
+		process.Stdout = display.NewStreamer("  ")
+		process.Stderr = display.NewStreamer("  ")
 	}
 
 	fmt.Print(stylish.ProcessStart("Destroying docker-machine vm"))
@@ -168,8 +168,8 @@ func (machine DockerMachine) Start() error {
 		process := exec.Command(cmd[0], cmd[1:]...)
 
 		if verbose {
-			process.Stdout = print.NewStreamer("  ")
-			process.Stderr = print.NewStreamer("  ")
+			process.Stdout = display.NewStreamer("  ")
+			process.Stderr = display.NewStreamer("  ")
 		}
 
 		fmt.Print(stylish.ProcessStart("Starting docker-machine vm"))
@@ -200,8 +200,8 @@ func (machine DockerMachine) Start() error {
 		process := exec.Command(cmd[0], cmd[1:]...)
 
 		if verbose {
-			process.Stdout = print.NewStreamer("  ")
-			process.Stderr = print.NewStreamer("  ")
+			process.Stdout = display.NewStreamer("  ")
+			process.Stderr = display.NewStreamer("  ")
 		}
 
 		fmt.Print(stylish.Bullet("Setting up custom docker network..."))
@@ -222,8 +222,8 @@ func (machine DockerMachine) Start() error {
 	process := exec.Command(cmd[0], cmd[1:]...)
 
 	if verbose {
-		process.Stdout = print.NewStreamer("  ")
-		process.Stderr = print.NewStreamer("  ")
+		process.Stdout = display.NewStreamer("  ")
+		process.Stderr = display.NewStreamer("  ")
 	}
 
 	// fmt.Print(stylish.Bullet("Ensure kernel modules are loaded..."))
@@ -968,7 +968,7 @@ func (machine DockerMachine) changedIP() bool {
 	if err != nil {
 		return true
 	}
-	
+
 	// if it was never set the it cant have changed
 	if provider.HostIP == "" {
 		return false

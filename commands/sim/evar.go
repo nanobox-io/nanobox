@@ -88,6 +88,6 @@ func envRemoveFn(ccmd *cobra.Command, args []string) {
 			delete(app.Evars, strings.ToUpper(key))
 		}
 	}
-	
+
 	app.Save()
 }

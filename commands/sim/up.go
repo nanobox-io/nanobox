@@ -4,7 +4,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/processor/sim"
-	"github.com/nanobox-io/nanobox/util/print"
+	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/validate"
 )
 
@@ -27,5 +27,5 @@ var (
 // upFn ...
 func upFn(ccmd *cobra.Command, args []string) {
 	simUp := sim.Up{}
-	print.OutputCommandErr(simUp.Run())
+	display.CommandErr(simUp.Run())
 }

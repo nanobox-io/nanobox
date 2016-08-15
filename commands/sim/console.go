@@ -6,9 +6,9 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor/sim"
-	"github.com/nanobox-io/nanobox/util/print"
-	"github.com/nanobox-io/nanobox/validate"
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util/display"
+	"github.com/nanobox-io/nanobox/validate"
 )
 
 // ConsoleCmd ...
@@ -32,5 +32,5 @@ func consoleFn(ccmd *cobra.Command, args []string) {
 
 	simConsole := sim.Console{Component: component}
 
-	print.OutputCommandErr(simConsole.Run())
+	display.CommandErr(simConsole.Run())
 }

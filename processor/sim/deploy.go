@@ -6,9 +6,9 @@ import (
 	"github.com/nanobox-io/nanobox-boxfile"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/processor/env"
 	"github.com/nanobox-io/nanobox/processor/code"
 	"github.com/nanobox-io/nanobox/processor/component"
+	"github.com/nanobox-io/nanobox/processor/env"
 	"github.com/nanobox-io/nanobox/processor/platform"
 )
 
@@ -89,9 +89,9 @@ func (deploy *Deploy) publishCode() error {
 	hoarder, _ := models.FindComponentBySlug(deploy.App.ID, "hoarder")
 
 	codePublish := code.Publish{
-		Env: deploy.Env,
-		BuildID: "1234",
-		WarehouseURL: hoarder.InternalIP,
+		Env:            deploy.Env,
+		BuildID:        "1234",
+		WarehouseURL:   hoarder.InternalIP,
 		WarehouseToken: "123",
 	}
 
@@ -105,9 +105,9 @@ func (deploy *Deploy) startCodeServices() error {
 	hoarder, _ := models.FindComponentBySlug(deploy.App.ID, "hoarder")
 
 	codeSync := code.Sync{
-		App: deploy.App,
-		BuildID: "1234",
-		WarehouseURL: hoarder.InternalIP,
+		App:            deploy.App,
+		BuildID:        "1234",
+		WarehouseURL:   hoarder.InternalIP,
 		WarehouseToken: "123",
 	}
 
@@ -125,13 +125,13 @@ func (deploy *Deploy) runDeployHook(hookType string) error {
 		if err != nil {
 			// no component for that thing in the database..
 			// prolly need to report this error but we might not want to fail
-			continue 
+			continue
 		}
 
 		deployHook := DeployHook{
-			App: deploy.App,
+			App:       deploy.App,
 			Component: component,
-			HookType: hookType,
+			HookType:  hookType,
 		}
 		if err := deployHook.Run(); err != nil {
 			return err

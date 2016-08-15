@@ -5,8 +5,8 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor/sim"
-	"github.com/nanobox-io/nanobox/util/print"
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/validate"
 )
 
@@ -28,5 +28,5 @@ func logFn(ccmd *cobra.Command, args []string) {
 	simLog := sim.Log{
 		App: app,
 	}
-	print.OutputCommandErr(simLog.Run())
+	display.CommandErr(simLog.Run())
 }
