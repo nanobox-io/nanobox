@@ -28,17 +28,17 @@ type App struct {
 func (a *App) Save() error {
 
 	if err := put(a.EnvID, a.ID, a); err != nil {
-		return fmt.Errorf("failed to save env: %s", err.Error())
+		return fmt.Errorf("failed to save app %s", err.Error())
 	}
 
 	return nil
 }
 
-// Delete deletes the env record from the database
+// Delete deletes the app record from the database
 func (a *App) Delete() error {
 
 	if err := delete(a.EnvID, a.ID); err != nil {
-		return fmt.Errorf("failed to delete env: %s", err.Error())
+		return fmt.Errorf("failed to delete app %s", err.Error())
 	}
 
 	return nil

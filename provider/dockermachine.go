@@ -11,9 +11,6 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/jcelliott/lumber"
-	"github.com/nanobox-io/nanobox-golang-stylish"
-
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/vbox"
@@ -69,16 +66,14 @@ func (machine DockerMachine) Create() error {
 	process := exec.Command(cmd[0], cmd[1:]...)
 
 	if verbose {
-		process.Stdout = display.NewStreamer("  ")
-		process.Stderr = display.NewStreamer("  ")
+		process.Stdout = display.NewStreamer("debug")
+		process.Stderr = display.NewStreamer("debug")
 	}
 
 	//
-	fmt.Print(stylish.ProcessStart("Starting docker-machine vm"))
 	if err := process.Run(); err != nil {
 		return err
 	}
-	fmt.Print(stylish.ProcessEnd())
 
 	return nil
 }
@@ -110,15 +105,13 @@ func (machine DockerMachine) Stop() error {
 	process := exec.Command(cmd[0], cmd[1:]...)
 
 	if verbose {
-		process.Stdout = display.NewStreamer("  ")
-		process.Stderr = display.NewStreamer("  ")
+		process.Stdout = display.NewStreamer("debug")
+		process.Stderr = display.NewStreamer("debug")
 	}
 
-	fmt.Print(stylish.ProcessStart("Stopping docker-machine vm"))
 	if err := process.Run(); err != nil {
 		return nil
 	}
-	fmt.Print(stylish.ProcessEnd())
 
 	return nil
 }
@@ -140,15 +133,13 @@ func (machine DockerMachine) Destroy() error {
 	process := exec.Command(cmd[0], cmd[1:]...)
 
 	if verbose {
-		process.Stdout = display.NewStreamer("  ")
-		process.Stderr = display.NewStreamer("  ")
+		process.Stdout = display.NewStreamer("debug")
+		process.Stderr = display.NewStreamer("debug")
 	}
 
-	fmt.Print(stylish.ProcessStart("Destroying docker-machine vm"))
 	if err := process.Run(); err != nil {
 		return nil
 	}
-	fmt.Print(stylish.ProcessEnd())
 
 	return nil
 }
@@ -168,15 +159,13 @@ func (machine DockerMachine) Start() error {
 		process := exec.Command(cmd[0], cmd[1:]...)
 
 		if verbose {
-			process.Stdout = display.NewStreamer("  ")
-			process.Stderr = display.NewStreamer("  ")
+			process.Stdout = display.NewStreamer("debug")
+			process.Stderr = display.NewStreamer("debug")
 		}
 
-		fmt.Print(stylish.ProcessStart("Starting docker-machine vm"))
 		if err := process.Run(); err != nil {
 			return err
 		}
-		fmt.Print(stylish.ProcessEnd())
 	}
 
 	// create custom nanobox docker network
@@ -200,11 +189,10 @@ func (machine DockerMachine) Start() error {
 		process := exec.Command(cmd[0], cmd[1:]...)
 
 		if verbose {
-			process.Stdout = display.NewStreamer("  ")
-			process.Stderr = display.NewStreamer("  ")
+			process.Stdout = display.NewStreamer("debug")
+			process.Stderr = display.NewStreamer("debug")
 		}
 
-		fmt.Print(stylish.Bullet("Setting up custom docker network..."))
 		if err := process.Run(); err != nil {
 			return err
 		}
@@ -222,11 +210,10 @@ func (machine DockerMachine) Start() error {
 	process := exec.Command(cmd[0], cmd[1:]...)
 
 	if verbose {
-		process.Stdout = display.NewStreamer("  ")
-		process.Stderr = display.NewStreamer("  ")
+		process.Stdout = display.NewStreamer("debug")
+		process.Stderr = display.NewStreamer("debug")
 	}
 
-	// fmt.Print(stylish.Bullet("Ensure kernel modules are loaded..."))
 	if err := process.Run(); err != nil {
 		return err
 	}
@@ -275,14 +262,12 @@ func (machine DockerMachine) DockerEnv() error {
 	cmd := exec.Command("docker-machine", "inspect", "nanobox")
 	b, err := cmd.CombinedOutput()
 	if err != nil {
-		lumber.Debug("output: %s", b)
-		return err
+		return fmt.Errorf("%s: %s", b, err)
 	}
 
 	// marshal the json output into the anonymous struct as defined above
 	err = json.Unmarshal(b, &inspect)
 	if err != nil {
-		lumber.Debug("marshal: %s", b)
 		return err
 	}
 
@@ -323,9 +308,9 @@ func (machine DockerMachine) AddIP(ip string) error {
 
 	process := exec.Command(cmd[0], cmd[1:]...)
 
-	if b, err := process.CombinedOutput(); err != nil {
-		lumber.Debug("output: %s", b)
-		return err
+	b, err := process.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("%s: %s", b, err)
 	}
 
 	// todo: check output for failures
@@ -354,10 +339,9 @@ func (machine DockerMachine) RemoveIP(ip string) error {
 	}
 
 	process := exec.Command(cmd[0], cmd[1:]...)
-
-	if b, err := process.CombinedOutput(); err != nil {
-		lumber.Debug("output: %s", b)
-		return err
+	b, err := process.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("%s: %s", b, err)
 	}
 
 	// todo: check output for failures
@@ -383,10 +367,9 @@ func (dockermachine DockerMachine) SetDefaultIP(ip string) error {
 	}
 
 	process := exec.Command(cmd[0], cmd[1:]...)
-
-	if b, err := process.CombinedOutput(); err != nil {
-		lumber.Debug("output: %s", b)
-		return err
+	b, err := process.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("%s: %s", b, err)
 	}
 
 	// todo: check output for failures
@@ -419,10 +402,9 @@ func (machine DockerMachine) AddNat(ip, containerIP string) error {
 		}
 
 		process := exec.Command(cmd[0], cmd[1:]...)
-
-		if b, err := process.CombinedOutput(); err != nil {
-			lumber.Debug("output: %s", b)
-			return err
+		b, err := process.CombinedOutput()
+		if err != nil {
+			return fmt.Errorf("%s: %s", b, err)
 		}
 
 		// todo: check output for failures
@@ -451,10 +433,9 @@ func (machine DockerMachine) AddNat(ip, containerIP string) error {
 		}
 
 		process := exec.Command(cmd[0], cmd[1:]...)
-
-		if b, err := process.CombinedOutput(); err != nil {
-			lumber.Debug("output: %s", b)
-			return err
+		b, err := process.CombinedOutput()
+		if err != nil {
+			return fmt.Errorf("%s: %s", b, err)
 		}
 
 		// todo: check output for failures
@@ -489,10 +470,9 @@ func (machine DockerMachine) RemoveNat(ip, containerIP string) error {
 		}
 
 		process := exec.Command(cmd[0], cmd[1:]...)
-
-		if b, err := process.CombinedOutput(); err != nil {
-			lumber.Debug("output: %s", b)
-			return err
+		b, err := process.CombinedOutput()
+		if err != nil {
+			return fmt.Errorf("%s: %s", b, err)
 		}
 
 		// todo: check output for failures
@@ -521,10 +501,9 @@ func (machine DockerMachine) RemoveNat(ip, containerIP string) error {
 		}
 
 		process := exec.Command(cmd[0], cmd[1:]...)
-
-		if b, err := process.CombinedOutput(); err != nil {
-			lumber.Debug("output: %s", b)
-			return err
+		b, err := process.CombinedOutput()
+		if err != nil {
+			return fmt.Errorf("%s: %s", b, err)
 		}
 
 		// todo: check output for failures
@@ -582,8 +561,7 @@ func (machine DockerMachine) AddShare(local, host string) error {
 		process := exec.Command(cmd[0], cmd[1:]...)
 		b, err := process.CombinedOutput()
 		if err != nil {
-			lumber.Debug("output: %s", b)
-			return err
+			return fmt.Errorf("%s: %s", b, err)
 		}
 
 		// todo: check output for failures
@@ -617,8 +595,7 @@ func (machine DockerMachine) RemoveShare(local, host string) error {
 		process := exec.Command(cmd[0], cmd[1:]...)
 		b, err := process.CombinedOutput()
 		if err != nil {
-			lumber.Debug("output: %s", b)
-			return err
+			return fmt.Errorf("%s: %s", b, err)
 		}
 
 		// todo: check output for failures
@@ -677,8 +654,7 @@ func (machine DockerMachine) AddMount(local, host string) error {
 		process := exec.Command(cmd[0], cmd[1:]...)
 		b, err := process.CombinedOutput()
 		if err != nil {
-			lumber.Debug("output: %s", b)
-			return err
+			return fmt.Errorf("%s: %s", b, err)
 		}
 
 		// mount
@@ -699,8 +675,7 @@ func (machine DockerMachine) AddMount(local, host string) error {
 		process = exec.Command(cmd[0], cmd[1:]...)
 		b, err = process.CombinedOutput()
 		if err != nil {
-			lumber.Debug("output: %s", b)
-			return err
+			return fmt.Errorf("%s: %s", b, err)
 		}
 
 		// todo: check output for failures
@@ -727,8 +702,7 @@ func (machine DockerMachine) RemoveMount(_, host string) error {
 		process := exec.Command(cmd[0], cmd[1:]...)
 		b, err := process.CombinedOutput()
 		if err != nil {
-			lumber.Debug("output: %s", b)
-			return err
+			return fmt.Errorf("%s: %s", b, err)
 		}
 
 		// todo: check output for failures
@@ -751,14 +725,12 @@ func (machine DockerMachine) HostIP() (string, error) {
 	cmd := exec.Command("docker-machine", "inspect", "nanobox")
 	b, err := cmd.CombinedOutput()
 	if err != nil {
-		lumber.Debug("output: %s", b)
-		return "", err
+		return "", fmt.Errorf("%s: %s", b, err)
 	}
 
 	// marshal the json output into the anonymous struct as defined above
 	err = json.Unmarshal(b, &inspect)
 	if err != nil {
-		lumber.Debug("marshal: %s", b)
 		return "", err
 	}
 
@@ -789,8 +761,7 @@ func (machine DockerMachine) regenerateCert() error {
 	cmd := exec.Command("docker-machine", "regenerate-certs", "-f", "nanobox")
 	b, err := cmd.CombinedOutput()
 	if err != nil {
-		lumber.Debug("output: %s", b)
-		return err
+		return fmt.Errorf("%s: %s", b, err)
 	}
 	return nil
 }
@@ -802,12 +773,10 @@ func (machine DockerMachine) isCreated() bool {
 	output, err := cmd.CombinedOutput()
 
 	if err != nil {
-		lumber.Debug("output: %s", output)
 		return false
 	}
 
 	if bytes.Contains(output, []byte("Host does not exist: \"nanobox\"")) {
-		lumber.Debug("output: %s", output)
 		return false
 	}
 
@@ -831,12 +800,10 @@ func (machine DockerMachine) hasNetwork() bool {
 	output, err := process.CombinedOutput()
 
 	if err != nil {
-		lumber.Debug("hasNetwork output: %s", output)
 		return false
 	}
 
 	if bytes.Contains(output, []byte("Error: No such network: nanobox")) {
-		lumber.Debug("hasNetwork output: %s", output)
 		return false
 	}
 
@@ -913,12 +880,10 @@ func (machine DockerMachine) hasNatPreroute(hostIP, containerIP string) bool {
 	output, err := process.CombinedOutput()
 
 	if err != nil {
-		lumber.Debug("output: %s", output)
 		return false
 	}
 
 	if bytes.Contains(output, []byte("No chain/target/match by that name.")) {
-		lumber.Debug("output: %s", output)
 		return false
 	}
 
@@ -950,12 +915,10 @@ func (machine DockerMachine) hasNatPostroute(hostIP, containerIP string) bool {
 	output, err := process.CombinedOutput()
 
 	if err != nil {
-		lumber.Debug("output: %s", output)
 		return false
 	}
 
 	if bytes.Contains(output, []byte("No chain/target/match by that name.")) {
-		lumber.Debug("output: %s", output)
 		return false
 	}
 

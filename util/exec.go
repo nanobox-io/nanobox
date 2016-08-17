@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
 )
 
@@ -19,6 +20,8 @@ type Cmd struct {
 
 // Run builds a command and executes within the context of a docker container
 func (cmd *Cmd) Run() error {
+	lumber.Debug("exec:Cmd:Run: %s, %s, %s", cmd.ID, cmd.Path, cmd.Payload)
+	
 	// assemble the full command to run within the hooks dir
 	run := []string{"/opt/nanobox/hooks/" + cmd.Path, cmd.Payload}
 
@@ -68,8 +71,13 @@ func (cmd *Cmd) Output() (string, error) {
 	cmd.Stdout = &buffer
 	err := cmd.Run()
 	if err != nil {
-		err = fmt.Errorf("%s: %s", cmd.Path, err.Error())
+		lumber.Error("exec:Cmd:Run: %s, %s, %s", cmd.ID, cmd.Path, cmd.Payload)
+		lumber.Error("exec:cmd:Output: %s, err: %s", buffer.String(), err.Error())
+		err = fmt.Errorf("util:Cmd:%s: %s", cmd.Path, err.Error())
 	}
+
+	lumber.Debug("exec:Cmd:Output: %s", buffer.String())
+
 	return buffer.String(), err
 }
 

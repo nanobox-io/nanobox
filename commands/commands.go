@@ -3,20 +3,41 @@ package commands
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/jcelliott/lumber"
+
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 //
 var (
 
-	//
-	version bool // display the version of nanobox
+	// display level debug
+	displayDebugMode bool
+	
+	// display level trace
+	displayTraceMode bool
 
 	// NanoboxCmd ...
 	NanoboxCmd = &cobra.Command{
 		Use:   "nanobox",
 		Short: "",
 		Long:  ``,
+		PersistentPreRun: func(ccmd *cobra.Command, args []string) {
 
+			// setup the display output
+			if displayDebugMode {
+				lumber.Level(lumber.DEBUG)
+				display.Summary = false
+				display.Mode    = "debug"
+			}
+			
+			if displayTraceMode {
+				lumber.Level(lumber.TRACE)
+				display.Summary = false
+				display.Mode    = "trace"
+			}			
+
+		},
 		//
 		Run: func(ccmd *cobra.Command, args []string) {
 
@@ -31,10 +52,8 @@ func init() {
 
 	// commented because this part is changing
 	// // persistent flags
-	// NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultControl.Debug, "debug", "", false, "run nanobox in debug mode")
-	// NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultControl.Force, "force", "f", false, "Forces a command to run (effects vary per command).")
-	// NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultControl.Verbose, "verbose", "v", false, "Increases display output.")
-	// NanoboxCmd.PersistentFlags().BoolVarP(&processor.DefaultControl.Quiet, "quiet", "q", false, "Decreases display output.")
+	NanoboxCmd.PersistentFlags().BoolVarP(&displayDebugMode, "v", "", false, "Increases display output and sets level to debug")
+	NanoboxCmd.PersistentFlags().BoolVarP(&displayTraceMode, "vv", "", false, "Increases display output and sets level to trace")
 
 	// // local flags
 	// NanoboxCmd.Flags().BoolVarP(&version, "version", "", false, "Displays the current version of this CLI.")

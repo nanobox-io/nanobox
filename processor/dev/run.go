@@ -5,7 +5,8 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
-
+	
+	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox-boxfile"
 
@@ -22,11 +23,13 @@ type Run struct {
 }
 
 //
-func (run Run) Run() error {
+func (run *Run) Run() error {
 	// get the boxfile
 	if err := run.loadBoxfile(); err != nil {
 		return err
 	}
+
+	lumber.Debug("devRun:boxfile: %+v", run.boxfile)
 
 	// load the start commands from the boxfile
 	if err := run.loadStarts(); err != nil {
@@ -62,8 +65,7 @@ func (run Run) Run() error {
 }
 
 func (run *Run) loadBoxfile() error {
-	env, _ := models.FindEnvByID(run.App.EnvID)
-	run.boxfile = boxfile.New([]byte(env.BuiltBoxfile))
+	run.boxfile = boxfile.New([]byte(run.App.DeployedBoxfile))
 
 	if !run.boxfile.Valid {
 		return fmt.Errorf("the boxfile from the build is invalid")
@@ -71,7 +73,7 @@ func (run *Run) loadBoxfile() error {
 	return nil
 }
 
-func (run Run) loadStarts() error {
+func (run *Run) loadStarts() error {
 	run.starts = map[string]string{}
 
 	// loop through the nodes and get there start commands
@@ -125,6 +127,7 @@ func (run Run) runStart(name, command string) error {
 		fmt.Sprintf("cd /app/; %s", command),
 	}
 
+	lumber.Debug("run:runstarts: %+v", cmd)
 	process := exec.Command(cmd[0], cmd[1:]...)
 
 	// TODO: these will be replaced with something from the

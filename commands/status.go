@@ -24,10 +24,10 @@ func statusFn(ccmd *cobra.Command, args []string) {
 	fmt.Printf("Provider status: %s\n", provider.Status())
 	envs, _ := models.AllEnvs()
 	for _, env := range envs {
-		fmt.Printf("Environment: %s", env.Name)
+		fmt.Printf("Environment: %s\n", env.Name)
 		apps, _ := models.AllAppsByEnv(env.ID)
 		for _, app := range apps {
-			fmt.Println("  %s(%s): %s\n", app.Name, app.ID, app.Status)
+			fmt.Printf("  %s(%s): %s\n", app.Name, app.ID, app.Status)
 		}
 	}
 }

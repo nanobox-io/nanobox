@@ -4,21 +4,20 @@ import (
 	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor/app"
-	"github.com/nanobox-io/nanobox/processor/component"
-	"github.com/nanobox-io/nanobox/processor/platform"
 	"github.com/nanobox-io/nanobox/processor/provider"
 	"github.com/nanobox-io/nanobox/util/config"
 )
 
 // Setup ...
 type Setup struct {
+	// created
 	Env models.Env
 }
 
 //
 func (setup *Setup) Run() error {
 
-	setup.setupEnv()
+	setup.loadEnv()
 
 	if err := setup.setupProvider(); err != nil {
 		return err
@@ -40,11 +39,17 @@ func (setup *Setup) Run() error {
 }
 
 // get the environment data
-func (setup *Setup) setupEnv() error {
-	setup.Env.ID = config.EnvID()
-	setup.Env.Directory = config.LocalDir()
-	setup.Env.Name = config.LocalDirName()
-	return setup.Env.Save()
+func (setup *Setup) loadEnv() error {
+	setup.Env, _ = models.FindEnvByID(config.EnvID())
+
+	if setup.Env.ID == "" {
+		setup.Env.ID = config.EnvID()
+		setup.Env.Directory = config.LocalDir()
+		setup.Env.Name = config.LocalDirName()
+		return setup.Env.Save()
+	}
+
+	return nil
 }
 
 // setupProvider sets up the provider
@@ -65,17 +70,6 @@ func (setup *Setup) setupApp() error {
 
 	// setup the app
 	appSetup := app.Setup{Env: setup.Env}
-	if err := appSetup.Run(); err != nil {
-		return err
-	}
 
-	// clean up after any possible failures in a previous deploy
-	componentClean := component.Clean{App: appSetup.App}
-	if err := componentClean.Run(); err != nil {
-		return err
-	}
-
-	// setup the platform services
-	platformSetup := platform.Setup{App: appSetup.App}
-	return platformSetup.Run()
+	return appSetup.Run()
 }

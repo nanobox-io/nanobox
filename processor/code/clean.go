@@ -1,6 +1,8 @@
 package code
 
 import (
+	"github.com/jcelliott/lumber"
+	
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
@@ -21,6 +23,7 @@ func (clean *Clean) Run() error {
 
 	components, err := models.AllComponentsByApp(clean.App.ID)
 	if err != nil {
+		lumber.Error("code:Clean:models.AllComponentsByApp(%s): %s", clean.App.ID, err.Error())
 		return err
 	}
 

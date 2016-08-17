@@ -25,7 +25,10 @@ func (destroy *Destroy) Run() error {
 	if err := destroy.removeContainer(); err != nil {
 		// if im unable to remove the container (especially if it doesnt exist)
 		// we shouldnt fail
-		lumber.Error("unable to removeContainer: %s", err.Error())
+	}
+
+	if err := destroy.detachNetwork(); err != nil {
+		return fmt.Errorf("unable to remove networking: %s", err.Error())
 	}
 
 	if err := destroy.removeEvars(); err != nil {
@@ -41,10 +44,8 @@ func (destroy *Destroy) Run() error {
 
 // removeContainer destroys the docker container
 func (destroy *Destroy) removeContainer() error {
-
-	containerName := fmt.Sprintf("nanobox_%s_%s", destroy.App.ID, destroy.Component.Name)
-
-	if err := docker.ContainerRemove(containerName); err != nil {
+	if err := docker.ContainerRemove(destroy.Component.ID); err != nil {
+		lumber.Error("component:Destroy:removeContainerdocker.ContainerRemove(%s): %s", destroy.Component.ID, err.Error())
 		return err
 	}
 
@@ -56,10 +57,12 @@ func (destroy *Destroy) detachNetwork() error {
 	name := destroy.Component.Name
 
 	if err := provider.RemoveNat(destroy.Component.ExternalIP, destroy.Component.InternalIP); err != nil {
+		lumber.Error("component:Destroy:detachNetwork:provider.RemoveNat(%s, %s): %s", destroy.Component.ExternalIP, destroy.Component.InternalIP, err.Error())
 		return err
 	}
 
 	if err := provider.RemoveIP(destroy.Component.ExternalIP); err != nil {
+		lumber.Error("component:Destroy:detachNetwork:provider.RemoveIP(%s): %s", destroy.Component.ExternalIP, err.Error())
 		return err
 	}
 

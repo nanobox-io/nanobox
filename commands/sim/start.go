@@ -28,8 +28,9 @@ and deploy it into your sim platform (nanobox sim deploy).
 
 // startFn ...
 func startFn(ccmd *cobra.Command, args []string) {
+	env, _ := models.FindEnvByID(config.EnvID())
 	app, _ := models.FindAppBySlug(config.EnvID(), "sim")
 
-	simStart := sim.Start{App: app}
+	simStart := sim.Start{Env: env, App: app}
 	display.CommandErr(simStart.Run())
 }

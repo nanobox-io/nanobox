@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 
+	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
 
 	"github.com/nanobox-io/nanobox/models"
@@ -22,6 +23,13 @@ type Destroy struct {
 //
 func (destroy *Destroy) Run() error {
 
+	if destroy.App.ID == "" {
+		// the app doesnt exist
+		return nil
+	}
+	
+	dockerInit()
+	
 	// establish an app-level lock to ensure we're the only ones setting up an app
 	// also, we need to ensure that the lock is released even if we error out.
 	locker.LocalLock()
@@ -45,11 +53,12 @@ func (destroy *Destroy) Run() error {
 	// remove all dns entries for this app
 	dnsRemoveAll := dns.RemoveAll{destroy.App}
 	if err := dnsRemoveAll.Run(); err != nil {
-		return err
+		// report the error but dont stop the process
 	}
 
 	// destroy the app
 	if err := destroy.App.Delete(); err != nil {
+		lumber.Error("app:Destroy:app.Delete(): %s", err.Error())
 		return err
 	}
 
@@ -63,6 +72,7 @@ func (destroy *Destroy) releaseIPs() error {
 	for _, ip := range destroy.App.GlobalIPs {
 		// release the IP
 		if err := dhcp.ReturnIP(net.ParseIP(ip)); err != nil {
+			lumber.Error("app:Destroy:releaseIPs:dhcp.ReturnIP(%s): %s", ip, err.Error())
 			return err
 		}
 	}
@@ -71,6 +81,7 @@ func (destroy *Destroy) releaseIPs() error {
 	for _, ip := range destroy.App.LocalIPs {
 		// release the IP
 		if err := dhcp.ReturnIP(net.ParseIP(ip)); err != nil {
+			lumber.Error("app:Destroy:releaseIPs:dhcp.ReturnIP(%s): %s", ip, err.Error())
 			return err
 		}
 	}
@@ -83,6 +94,7 @@ func (destroy Destroy) removeComponents() error {
 
 	components, err := models.AllComponentsByApp(destroy.App.ID)
 	if err != nil {
+		lumber.Error("app:Destroy:removeComponents:models.AllComponentsByApp(%s) %s", destroy.App.ID, err.Error())
 		return fmt.Errorf("unable to retrieve components: %s", err.Error())
 	}
 

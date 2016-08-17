@@ -1,6 +1,7 @@
 package sim
 
 import (
+	"fmt"
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/models"
@@ -51,6 +52,9 @@ func getApp() models.App {
 
 	// if none could be found based on the arguements
 	// use the one based on my folder
-	app, _ := models.FindAppBySlug(config.EnvID(), "sim")
+	app, err := models.FindAppBySlug(config.EnvID(), "sim")
+	if err != nil {
+		fmt.Println(err)
+	}
 	return app
 }

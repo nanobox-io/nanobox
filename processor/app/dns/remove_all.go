@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"runtime"
 
+	"github.com/jcelliott/lumber"
+
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
@@ -47,5 +49,9 @@ func (removeAll *RemoveAll) reExecPrivilege() error {
 	cmd := fmt.Sprintf("%s %s dns rm-all", config.NanoboxPath(), removeAll.App.Name)
 
 	// if the sudo'ed subprocess fails, we need to return error to stop the process
-	return util.PrivilegeExec(cmd)
+	if err := util.PrivilegeExec(cmd); err != nil {
+		lumber.Error("dns:RemoveAll:reExecPrivilege:util.PrivilegeExec(%s): %s", cmd, err)
+		return err
+	}
+	return nil
 }

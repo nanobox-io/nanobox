@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"os"
 	"strings"
 )
 
@@ -53,6 +52,7 @@ type (
 
 	// DockerPercentDisplay ...
 	DockerPercentDisplay struct {
+		Output   io.Writer
 		Prefix   string
 		parts    map[string]DockerPercentPart
 		leftover []byte
@@ -155,10 +155,9 @@ func (display *DockerPercentDisplay) Write(data []byte) (int, error) {
 			part.update(status)
 			display.parts[status.ID] = part
 		}
-		fmt.Fprintf(os.Stdout, "%c[2K\r", 27)
-		fmt.Printf("%s %s", display.Prefix, display.show())
+		fmt.Fprintf(display.Output, "%c[2K\r", 27)
+		fmt.Fprintf(display.Output, "%s %s", display.Prefix, display.show())
 		if strings.HasPrefix(status.Status, "Status:") {
-			fmt.Printf("\n")
 			// maybe we want to display the status line here
 		}
 	}

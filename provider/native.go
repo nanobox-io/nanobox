@@ -41,7 +41,7 @@ func (native Native) Valid() error {
 }
 
 func (native Native) Status() string {
-	return "GOOD TO GO!"
+	return "Running"
 }
 
 // Create does nothing for native

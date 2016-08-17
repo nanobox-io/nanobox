@@ -3,10 +3,12 @@ package code
 import (
 	"fmt"
 
+	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox-boxfile"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/locker"
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 // Sync is used by the deploy process to syncronize the code parts
@@ -22,7 +24,9 @@ type Sync struct {
 
 //
 func (sync *Sync) Run() error {
-
+	display.OpenContext("starting code components")
+	defer display.CloseContext()
+	
 	// do not allow more then one process to run the
 	// code sync or code clean at the same time
 	locker.LocalLock()
@@ -44,7 +48,7 @@ func (sync *Sync) Run() error {
 
 		// create a new process config for code ensuring it has access to the warehouse
 		// and the boxfile
-		codeSetup := Setup{
+		codeSetup := &Setup{
 			App:   sync.App,
 			Name:  codeName,
 			Image: image,
@@ -76,6 +80,7 @@ func (sync *Sync) Run() error {
 func (sync *Sync) setBoxfile() error {
 	sync.box = boxfile.New([]byte(sync.App.DeployedBoxfile))
 	if !sync.box.Valid {
+		lumber.Error("code:Sync:setBoxfile:boxfileData(%s)", sync.App.DeployedBoxfile)
 		return fmt.Errorf("Invalid Boxfile")
 	}
 

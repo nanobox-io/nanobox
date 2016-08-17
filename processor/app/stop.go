@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 
+	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
 
 	"github.com/nanobox-io/nanobox/models"
@@ -61,7 +62,11 @@ func (stop *Stop) removeDev() {
 // downApp sets the app status to down
 func (stop *Stop) downApp() error {
 	stop.App.Status = DOWN
-	return stop.App.Save()
+	if err := stop.App.Save(); err != nil {
+		lumber.Error("app:Stop:downApp:App.Save(): %s", err.Error())
+		return err
+	}
+	return nil
 }
 
 // the app is concidered up if its status is up

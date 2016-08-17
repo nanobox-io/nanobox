@@ -54,6 +54,7 @@ func (stop *Stop) isServiceRunning() bool {
 func (stop *Stop) stopContainer() error {
 
 	if err := docker.ContainerStop(stop.Component.ID); err != nil {
+		lumber.Error("component:Stop:stopContainer:docker.ContainerStop(%s): %s", stop.Component.ID, err.Error())
 		// TODO: display some error message but do not quit here
 	}
 
@@ -63,15 +64,16 @@ func (stop *Stop) stopContainer() error {
 // detachNetwork detaches the container from the host network
 func (stop *Stop) detachNetwork() error {
 
+
 	//
 	if err := provider.RemoveNat(stop.Component.ExternalIP, stop.Component.InternalIP); err != nil {
-		// TODO: display an error message
+		lumber.Error("component:Stop:attachNetwork:provider.AddNat(%s, %s): %s", stop.Component.ExternalIP, stop.Component.InternalIP, err.Error())		
 		return err
 	}
 
 	//
 	if err := provider.RemoveIP(stop.Component.ExternalIP); err != nil {
-		// TODO display an error message
+		lumber.Error("component:Stop:attachNetwork:provider.AddIP(%s): %s", stop.Component.ExternalIP, err.Error())		
 		return err
 	}
 

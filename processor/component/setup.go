@@ -6,12 +6,14 @@ import (
 	"net"
 	"strings"
 
+	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox-boxfile"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 )
 
@@ -33,6 +35,8 @@ type (
 
 //
 func (setup *Setup) Run() error {
+	display.OpenContext("Setting up %s", setup.Name)
+	defer display.CloseContext()
 
 	// call the cleanup function to ensure we don't leave any bad state
 	defer setup.clean()
@@ -44,8 +48,12 @@ func (setup *Setup) Run() error {
 
 	// short-circuit if the service has already progressed past this point
 	if setup.Component.State != "initialized" {
+		lumber.Error("code:Setup: Called on inappropriate component: %+v", setup.Component)
 		return nil
 	}
+
+	lumber.Prefix("component:Setup")
+	defer lumber.Prefix("")
 
 	if err := setup.downloadImage(); err != nil {
 		setup.fail = true
@@ -67,12 +75,12 @@ func (setup *Setup) Run() error {
 		return err
 	}
 
-	if err := setup.planService(); err != nil {
+	if err := setup.planComponent(); err != nil {
 		setup.fail = true
 		return err
 	}
 
-	if err := setup.persistService(); err != nil {
+	if err := setup.persistComponent(); err != nil {
 		setup.fail = true
 		return err
 	}
@@ -117,17 +125,17 @@ func (setup *Setup) loadComponent() error {
 
 // downloadImage downloads the docker image
 func (setup *Setup) downloadImage() error {
-	// Create a pipe to for the JSONMessagesStream to read from
-	// pr, pw := io.Pipe()
-	// prefix := fmt.Sprintf("%s+ Pulling %s -", stylish.GenerateNestedPrefix(setup.control.DisplayLevel+1), setup.control.Meta["image"])
-	//  go print.DisplayJSONMessagesStream(pr, os.Stdout, os.Stdout.Fd(), true, prefix, nil)
-	// if _, err := docker.ImagePull(setup.Image, &print.DockerPercentDisplay{Prefix: prefix}); err != nil {
+	display.StartTask("Downloading image")
 
-	// TODO: the portion above is commented pending display updates
-	if _, err := docker.ImagePull(setup.Image, nil); err != nil {
+	streamer := display.NewStreamer("info")	
+	dockerPercent := &display.DockerPercentDisplay{Output: streamer, Prefix: setup.Image}
+	if _, err := docker.ImagePull(setup.Image, dockerPercent); err != nil {
+		lumber.Error("code:Setup:downloadImage:docker.ImagePull(%s, nil): %s", setup.Image, err.Error())
+		display.ErrorTask()
 		return err
 	}
 
+	display.StopTask()
 	return nil
 }
 
@@ -145,6 +153,7 @@ func (setup *Setup) reserveIps() error {
 
 			localIP, err := dhcp.ReserveLocal()
 			if err != nil {
+				lumber.Error("setup.ReserveIps:dhcp.ReserveLocal(): %s", err.Error())
 				return err
 			}
 
@@ -169,6 +178,7 @@ func (setup *Setup) reserveIps() error {
 
 			globalIP, err := dhcp.ReserveGlobal()
 			if err != nil {
+				lumber.Error("setup.ReserveIps:dhcp.ReserveGlobal(): %s", err.Error())
 				return err
 			}
 
@@ -185,6 +195,7 @@ func (setup *Setup) reserveIps() error {
 
 // launchContainer launches and starts a docker container
 func (setup *Setup) launchContainer() error {
+	display.StartTask("launching container")
 
 	name := fmt.Sprintf("nanobox_%s_%s", setup.App.ID, setup.Name)
 
@@ -197,6 +208,8 @@ func (setup *Setup) launchContainer() error {
 
 	container, err := docker.CreateContainer(config)
 	if err != nil {
+		lumber.Error("setup.ReserveIps:docker.CreateContainer(%+v): %s", config, err.Error())
+		display.ErrorTask()
 		return err
 	}
 
@@ -206,6 +219,7 @@ func (setup *Setup) launchContainer() error {
 
 	setup.Component.ID = container.ID
 
+	display.StopTask()
 	return nil
 }
 
@@ -214,6 +228,7 @@ func (setup *Setup) attachNetwork() error {
 
 	err := provider.AddIP(setup.Component.ExternalIP)
 	if err != nil {
+		lumber.Error("component:Setup:attachNetwork:provider.AddIP(%s): %s", setup.Component.ExternalIP, err.Error())
 		return err
 	}
 
@@ -223,6 +238,7 @@ func (setup *Setup) attachNetwork() error {
 
 	err = provider.AddNat(setup.Component.ExternalIP, setup.Component.InternalIP)
 	if err != nil {
+		lumber.Error("component:Setup:attachNetwork:provider.AddNat(%s, %s): %s", setup.Component.ExternalIP, setup.Component.InternalIP, err.Error())
 		return err
 	}
 
@@ -233,8 +249,8 @@ func (setup *Setup) attachNetwork() error {
 	return nil
 }
 
-// planService runs the plan hook
-func (setup *Setup) planService() error {
+// planComponent runs the plan hook
+func (setup *Setup) planComponent() error {
 	// get the environment so i can get the latest build boxfile
 	env, _ := models.FindEnvByID(setup.App.EnvID)
 
@@ -254,7 +270,7 @@ func (setup *Setup) planService() error {
 	// now set the plans responses data as the components plan object
 	err = json.Unmarshal([]byte(p), &setup.Component.Plan)
 	if err != nil {
-		return fmt.Errorf("persistService:%s", err.Error())
+		return fmt.Errorf("json parse failure:%s", err.Error())
 	}
 
 	// set passwords for the users in the plan
@@ -265,8 +281,8 @@ func (setup *Setup) planService() error {
 	return nil
 }
 
-// persistService saves the service in the database
-func (setup *Setup) persistService() error {
+// persistComponent saves the service in the database
+func (setup *Setup) persistComponent() error {
 	// save service in DB
 	setup.Component.AppID = setup.App.ID
 	setup.Component.Name = setup.Name

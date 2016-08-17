@@ -32,6 +32,10 @@ func (updatePortal *UpdatePortal) Run() error {
 		return err
 	}
 
+	lumber.Debug("updateportal:App: %+v", updatePortal.App)
+
+	lumber.Debug("updateportal:Boxfile: %+v", updatePortal.boxfile)
+
 	// update routes
 	if err := updatePortal.updateRoutes(); err != nil {
 		return err
@@ -71,7 +75,7 @@ func (updatePortal *UpdatePortal) updateRoutes() error {
 		}
 
 		for _, route := range updatePortal.buildRoutes(updatePortal.boxfile.Node(node), component) {
-			lumber.Trace("route: %+v", route)
+			lumber.Trace("updateportal:route: %+v", route)
 			if duplciateRoute(routes, route) {
 				fmt.Println("duplicate route:", route.SubDomain, route.Path)
 			}
@@ -93,7 +97,7 @@ func (updatePortal *UpdatePortal) updateRoutes() error {
 	}
 
 	// send to portal
-	lumber.Debug("new routes: %+v", routes)
+	lumber.Debug("updateportal:new routes: %+v", routes)
 	portalClient := portal.New(updatePortal.portal.ExternalIP+":8443", "123")
 	return portalClient.UpdateRoutes(routes)
 }
@@ -111,7 +115,7 @@ func (updatePortal *UpdatePortal) updatePorts() error {
 
 		//
 		for _, service := range updatePortal.buildService(updatePortal.boxfile.Node(node), component) {
-			lumber.Trace("service: %+v", service)
+			lumber.Trace("updateportal:service: %+v", service)
 
 			if duplicateService(services, service) {
 				// if there is a duplicate port we will just contine and log
@@ -125,7 +129,7 @@ func (updatePortal *UpdatePortal) updatePorts() error {
 	}
 
 	// send to portal
-	lumber.Trace("new services: %+v", services)
+	lumber.Debug("updateportal:new services: %+v", services)
 	portalClient := portal.New(updatePortal.portal.ExternalIP+":8443", "123")
 	return portalClient.UpdateServices(services)
 }

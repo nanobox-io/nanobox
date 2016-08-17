@@ -24,7 +24,8 @@ func main() {
 
 	//
 	lumber.SetLogger(fileLogger)
-	lumber.Level(lumber.DEBUG)
+	lumber.Level(lumber.INFO)
+	defer lumber.Close()
 
 	// global panic handler; this is done to avoid showing any panic output if
 	// something happens to fail. The output is logged and "pretty" message is

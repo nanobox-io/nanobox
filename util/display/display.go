@@ -140,7 +140,7 @@ func StartTask(format string, args ...interface{}) error {
 func StopTask() error {
 
 	// stop the task summarizer
-	if Summary {
+	if Summary && summarizer != nil{
 		summarizer.Stop()
 		summarizer = nil
 	}
@@ -182,7 +182,8 @@ func ErrorTask() error {
 }
 
 // Info sends an info level message to the current task
-func Info(message string) error {
+func Info(message string, args ...interface{}) error {
+	message = fmt.Sprintf(message, args...)
 
 	// short-circuit if our log-level isn't high enough
 	if currentLogLevel() > 2 {
@@ -197,7 +198,8 @@ func Info(message string) error {
 }
 
 // Warn sends a warn level message to the current task
-func Warn(message string) error {
+func Warn(message string, args ...interface{}) error {
+	message = fmt.Sprintf(message, args...)
 
 	// short-circuit if our log-level isn't high enough
 	if currentLogLevel() > 3 {
@@ -212,7 +214,8 @@ func Warn(message string) error {
 }
 
 // Error sends an error level message to the current task
-func Error(message string) error {
+func Error(message string, args ...interface{}) error {
+	message = fmt.Sprintf(message, args...)
 
 	// short-circuit if our log-level isn't high enough
 	if currentLogLevel() > 4 {
@@ -227,7 +230,8 @@ func Error(message string) error {
 }
 
 // Debug sends a debug level message to the current task
-func Debug(message string) error {
+func Debug(message string, args ...interface{}) error {
+	message = fmt.Sprintf(message, args...)
 
 	// short-circuit if our log-level isn't high enough
 	if currentLogLevel() > 1 {
@@ -242,7 +246,8 @@ func Debug(message string) error {
 }
 
 // Trace sends a trace level message to the current task
-func Trace(message string) error {
+func Trace(message string, args ...interface{}) error {
+	message = fmt.Sprintf(message, args...)
 
 	// short-circuit if our log-level isn't high enough
 	if currentLogLevel() > 0 {
@@ -260,13 +265,17 @@ func Trace(message string) error {
 func log(message string) error {
 
 	// run the message through prefixer
-	msg := prefixer.Parse(message)
+	if prefixer != nil {
+		message = prefixer.Parse(message)
+	}
 
 	// append to the taskLog
-	taskLog.WriteString(msg)
+	if taskLog != nil {
+		taskLog.WriteString(message)
+	}
 
 	// print message to logfile
-	if err := printLogFile(msg); err != nil {
+	if err := printLogFile(message); err != nil {
 		return err
 	}
 
@@ -274,7 +283,7 @@ func log(message string) error {
 		summarizer.Log(message)
 	} else {
 		// print the message
-		if err := printOut(msg); err != nil {
+		if err := printOut(message); err != nil {
 			return err
 		}
 	}

@@ -3,6 +3,8 @@ package dev
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/jcelliott/lumber"
+
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor/dev"
 	"github.com/nanobox-io/nanobox/util/config"
@@ -32,8 +34,9 @@ func init() {
 
 // destroyFn ...
 func destroyFn(ccmd *cobra.Command, args []string) {
-	devDestroy := dev.Destroy{App: getApp()}
 
+	devDestroy := dev.Destroy{App: getApp()}
+	lumber.Debug("dev destroy command: %+v", devDestroy)
 	display.CommandErr(devDestroy.Run())
 }
 

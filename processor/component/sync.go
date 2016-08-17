@@ -5,6 +5,7 @@ import (
 
 	"github.com/nanobox-io/nanobox-boxfile"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 // Sync ...
@@ -17,6 +18,8 @@ type Sync struct {
 
 //
 func (sync *Sync) Run() error {
+	display.OpenContext("syncronizing boxfile components")
+	defer display.CloseContext()
 
 	if err := sync.loadBuiltBoxfile(); err != nil {
 		return err
@@ -63,9 +66,11 @@ func (sync *Sync) updateDeployedBoxfile() error {
 
 // purgeDeltaComponents will purge the services that were removed from the boxfile
 func (sync *Sync) purgeDeltaComponents() error {
+	display.StartTask("perging delta components")
 
 	components, err := models.AllComponentsByApp(sync.App.ID)
 	if err != nil {
+		display.ErrorTask()
 		return err
 	}
 
@@ -86,11 +91,13 @@ func (sync *Sync) purgeDeltaComponents() error {
 		}
 
 		if err := sync.purgeComponent(component); err != nil {
+			display.ErrorTask()
 			return err
 		}
 
 	}
 
+	display.StopTask()
 	return nil
 }
 
@@ -103,6 +110,7 @@ func (sync *Sync) purgeComponent(component models.Component) error {
 // provisionServices will provision services that are defined in the boxfile
 // but not running on nanobox
 func (sync *Sync) provisionComponents() error {
+	display.StartTask("building new/updated components")
 
 	// grab all of the data nodes
 	dataServices := sync.builtBoxfile.Nodes("data")
@@ -115,7 +123,13 @@ func (sync *Sync) provisionComponents() error {
 			image = "nanobox/" + serviceType
 		}
 
-		setup := Setup{
+		// check to see if this component is already active
+		comp, _ := models.FindComponentBySlug(sync.App.ID, name)
+		if comp.State == ACTIVE {
+			continue
+		}
+
+		setup := &Setup{
 			App:   sync.App,
 			Image: image,
 			Name:  name,
@@ -123,8 +137,12 @@ func (sync *Sync) provisionComponents() error {
 
 		// setup the service
 		if err := setup.Run(); err != nil {
+			display.ErrorTask()
 			return err
 		}
+
+		// each component has the potential to update the app
+		sync.App = setup.App
 
 		configure := Configure{
 			App:       sync.App,
@@ -133,11 +151,13 @@ func (sync *Sync) provisionComponents() error {
 
 		// and configure it
 		if err := configure.Run(); err != nil {
+			display.ErrorTask()
 			return err
 		}
 
 	}
 
+	display.StopTask()
 	return nil
 }
 

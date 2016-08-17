@@ -147,7 +147,7 @@ func (self PortalClient) do(method, path string, requestBody, responseBody inter
 	}
 	// fmt.Printf("CLIENT: response %+v\n", res)
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
-		return fmt.Errorf("Bad exit code (%d)", res.StatusCode)
+		return fmt.Errorf("Bad Status Code (%d)", res.StatusCode)
 	}
 
 	if responseBody != nil {

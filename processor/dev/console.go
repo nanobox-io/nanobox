@@ -118,6 +118,9 @@ func (console *Console) setup() error {
 			return err
 		}
 
+		lumber.Prefix("dev:Console")
+		defer lumber.Prefix("")
+		
 		// TODO: The nil in this call needs to be replaced with something from the new display
 		if _, err := util.Exec(console.container.ID, "user", config.UserPayload(), nil); err != nil {
 			return err
@@ -282,8 +285,9 @@ func (console *Console) devPayload() string {
 // runConsole will establish a console within the dev container
 func (console *Console) runConsole() error {
 
+	// create a dummy component using the appname
 	component := models.Component{
-		ID: console.container.ID,
+		ID: "nanobox_"+console.App.ID,
 	}
 	// for tyler: I dont like forcing someone into zsh..
 	// your chosen shell is a very personal

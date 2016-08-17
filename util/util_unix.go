@@ -33,11 +33,7 @@ func PrivilegeExec(command string) error {
 	cmd.Stderr = os.Stderr
 
 	// run command
-	if err := cmd.Run(); err != nil {
-		return err
-	}
-
-	return nil
+	return cmd.Run()
 }
 
 // ReadPassword reads a password from the terminal and masks the input

@@ -3,6 +3,8 @@ package display
 import (
 	"fmt"
 	"os"
+
+	"github.com/jcelliott/lumber"
 )
 
 // CommandErr ...
@@ -11,6 +13,8 @@ import (
 // If not, come talk and we'll walk you through the resolution.
 func CommandErr(err error) {
 	if err != nil {
+		lumber.Error("Command: %+s", err.Error())
+
 		fmt.Printf(`
 
 Whoops, looks like we encountered a small error:

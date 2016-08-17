@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"runtime"
 
+	"github.com/jcelliott/lumber"
+
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
@@ -57,7 +59,12 @@ func (remove *Remove) removeEntries() error {
 	env := dns.Entry(envIP, remove.Name, remove.App.ID)
 
 	// remove the DNS entry from the /etc/hosts file
-	return dns.Remove(env)
+	if err := dns.Remove(env); err != nil {
+		lumber.Error("dns:Remove:reExecPrivilege:dns.Remove(%s): %s", env, err)
+		return err
+	}
+
+	return nil
 }
 
 // reExecPrivilege re-execs the current process with a privileged user
@@ -82,5 +89,10 @@ func (remove *Remove) reExecPrivilege() error {
 	cmd := fmt.Sprintf("%s %s dns rm %s", config.NanoboxPath(), remove.App.Name, remove.Name)
 
 	// if the sudo'ed subprocess fails, we need to return error to stop the process
-	return util.PrivilegeExec(cmd)
+	if err := util.PrivilegeExec(cmd); err != nil {
+		lumber.Error("dns:Remove:reExecPrivilege:util.PrivilegeExec(%s): %s", cmd, err)
+		return err
+	}
+
+	return nil
 }

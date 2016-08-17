@@ -1,7 +1,6 @@
 package sim
 
 import (
-	"fmt"
 
 	"github.com/nanobox-io/nanobox-boxfile"
 
@@ -10,6 +9,7 @@ import (
 	"github.com/nanobox-io/nanobox/processor/component"
 	"github.com/nanobox-io/nanobox/processor/env"
 	"github.com/nanobox-io/nanobox/processor/platform"
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 // deploys the code to the warehouse and builds
@@ -17,15 +17,14 @@ import (
 // then updates the router with the new code services
 type Deploy struct {
 	// mandatory
-	App models.App
-	// added
 	Env models.Env
+	App models.App
 }
 
 //
 func (deploy Deploy) Run() error {
-
-	deploy.Env, _ = models.FindEnvByID(deploy.App.EnvID)
+	display.OpenContext("Deploying Sim")
+	defer display.CloseContext()
 
 	// run the share init which gives access to docker
 	envInit := env.Init{}
@@ -33,10 +32,12 @@ func (deploy Deploy) Run() error {
 		return err
 	}
 
-	platformSetup := platform.Setup{App: deploy.App}
-	if err := platformSetup.Run(); err != nil {
+	display.StartTask("starting services for deploy")
+	platformDeploy := platform.Deploy{App: deploy.App}
+	if err := platformDeploy.Run(); err != nil {
 		return err
 	}
+	display.StopTask()
 
 	if err := deploy.publishCode(); err != nil {
 		return err
@@ -48,7 +49,7 @@ func (deploy Deploy) Run() error {
 		return err
 	}
 
-	componentSync := component.Sync{
+	componentSync := &component.Sync{
 		Env: deploy.Env,
 		App: deploy.App,
 	}
@@ -56,6 +57,7 @@ func (deploy Deploy) Run() error {
 	if err := componentSync.Run(); err != nil {
 		return err
 	}
+	deploy.App = componentSync.App
 
 	// start code
 	if err := deploy.startCodeServices(); err != nil {
@@ -77,14 +79,15 @@ func (deploy Deploy) Run() error {
 	}
 
 	// complete message
-	fmt.Println("The deploy completed successfully!")
 
 	return nil
 }
 
 // publishCode ...
 func (deploy *Deploy) publishCode() error {
-
+	display.StartTask("publishing build to warehouse")
+	defer display.StopTask()
+	
 	// setup the var's required for code_publish
 	hoarder, _ := models.FindComponentBySlug(deploy.App.ID, "hoarder")
 

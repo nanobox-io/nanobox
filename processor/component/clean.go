@@ -1,6 +1,7 @@
 package component
 
 import (
+	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
 
 	"github.com/nanobox-io/nanobox/models"
@@ -16,11 +17,12 @@ func (clean Clean) Run() error {
 
 	components, err := models.AllComponentsByApp(clean.App.ID)
 	if err != nil {
+		lumber.Error("component:Clean:models.AllComponentsByApp(%s): %s", clean.App.ID, err.Error())
 		return err
 	}
 
 	for _, component := range components {
-		if err := clean.cleanService(component); err != nil {
+		if err := clean.cleanComponent(component); err != nil {
 			return err
 		}
 	}
@@ -28,8 +30,8 @@ func (clean Clean) Run() error {
 	return nil
 }
 
-// cleanService will clean a service if it was left in a bad state
-func (clean Clean) cleanService(component models.Component) error {
+// cleanComponent will clean a service if it was left in a bad state
+func (clean Clean) cleanComponent(component models.Component) error {
 
 	if clean.isComponentDirty(component) {
 		return clean.removeService(component)

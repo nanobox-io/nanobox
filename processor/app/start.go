@@ -1,9 +1,12 @@
 package app
 
 import (
+	"github.com/jcelliott/lumber"
+
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor/component"
 	"github.com/nanobox-io/nanobox/util/locker"
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 // Start start all services associated with an app
@@ -14,7 +17,7 @@ type Start struct {
 
 //
 func (appStart *Start) Run() error {
-
+	display.StartTask("starting existing components")
 	// local lock so no starts or stops can run on this app while I am
 	locker.LocalLock()
 	defer locker.LocalUnlock()
@@ -22,15 +25,23 @@ func (appStart *Start) Run() error {
 	// start all the apps services
 	componentStartAll := component.StartAll{App: appStart.App}
 	if err := componentStartAll.Run(); err != nil {
+		display.ErrorTask()
 		return err
 	}
 
+	display.StopTask()
+
 	// set the app status to up
-	return appStart.upApp()
+	err := appStart.upApp()
+	return err
 }
 
 // upApp sets the app status to up
 func (appStart *Start) upApp() error {
 	appStart.App.Status = UP
-	return appStart.App.Save()
+	if err := appStart.App.Save(); err != nil {
+		lumber.Error("app:Start:App.Save(): %s", err.Error())
+	}
+
+	return nil
 }

@@ -4,6 +4,7 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor/component"
 	"github.com/nanobox-io/nanobox/processor/env"
+	"github.com/nanobox-io/nanobox/util/display"	
 )
 
 // Deploy ...
@@ -14,6 +15,9 @@ type Deploy struct {
 
 //
 func (deploy Deploy) Run() error {
+	display.OpenContext("deploying dev")
+	defer display.CloseContext()
+
 	// run the share init which gives access to docker
 	envInit := env.Init{}
 	if err := envInit.Run(); err != nil {

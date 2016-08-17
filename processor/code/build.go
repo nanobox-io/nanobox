@@ -8,6 +8,7 @@ import (
 	dockType "github.com/docker/engine-api/types"
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox-boxfile"
+	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/models"
@@ -16,6 +17,7 @@ import (
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/dhcp"
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 // Build ...
@@ -50,23 +52,33 @@ func (codeBuild *Build) Run() error {
 	}
 	defer codeBuild.stopContainer()
 
+	// set the prefix so the utilExec lumber logging has context
+	lumber.Prefix("code:Build")
+	defer lumber.Prefix("")
+
+	display.StartTask("running Hooks")
+
 	// run the user hook in the build container
-	if _, err := util.Exec(codeBuild.container.ID, "user", config.UserPayload(), nil); err != nil {
+	display.Debug("running user hook")
+	if _, err := util.Exec(codeBuild.container.ID, "user", config.UserPayload(), display.NewStreamer("debug")); err != nil {
 		return codeBuild.runDebugSession(err)
 	}
 
 	// run the configure hook in the build container
-	if _, err := util.Exec(codeBuild.container.ID, "configure", "{}", nil); err != nil {
+	display.Info("running configure hook")
+	if _, err := util.Exec(codeBuild.container.ID, "configure", "{}", display.NewStreamer("info")); err != nil {
 		return codeBuild.runDebugSession(err)
 	}
 
 	// run the fetch hook in the build container
-	if _, err := util.Exec(codeBuild.container.ID, "fetch", "{}", nil); err != nil {
+	display.Info("running fetch hook")
+	if _, err := util.Exec(codeBuild.container.ID, "fetch", "{}", display.NewStreamer("info")); err != nil {
 		return codeBuild.runDebugSession(err)
 	}
 
 	// run the setup hook in the build container
-	if _, err := util.Exec(codeBuild.container.ID, "setup", "{}", nil); err != nil {
+	display.Info("running setup hook")
+	if _, err := util.Exec(codeBuild.container.ID, "setup", "{}", display.NewStreamer("info")); err != nil {
 		return codeBuild.runDebugSession(err)
 	}
 
@@ -77,45 +89,55 @@ func (codeBuild *Build) Run() error {
 	}
 
 	// run the prepare hook in the build container
-	if _, err := util.Exec(codeBuild.container.ID, "prepare", "{}", nil); err != nil {
+	display.Info("running prepare hook")
+	if _, err := util.Exec(codeBuild.container.ID, "prepare", "{}", display.NewStreamer("info")); err != nil {
 		return codeBuild.runDebugSession(err)
 	}
 
 	if !registry.GetBool("no-compile") {
 		// run the compile hook in the build container
-		if _, err := util.Exec(codeBuild.container.ID, "compile", "{}", nil); err != nil {
+		display.Info("running compile hook")
+		if _, err := util.Exec(codeBuild.container.ID, "compile", "{}", display.NewStreamer("info")); err != nil {
 			return codeBuild.runDebugSession(err)
 		}
 
 		// run the pack-app hook in the build container
-		if _, err := util.Exec(codeBuild.container.ID, "pack-app", "{}", nil); err != nil {
+		display.Debug("running pack-app hook")
+		if _, err := util.Exec(codeBuild.container.ID, "pack-app", "{}", display.NewStreamer("debug")); err != nil {
 			return codeBuild.runDebugSession(err)
 		}
 
 	}
 
 	// run the pack-build hook in the build container
-	if _, err := util.Exec(codeBuild.container.ID, "pack-build", "{}", nil); err != nil {
+	display.Debug("running pack-build hook")
+	if _, err := util.Exec(codeBuild.container.ID, "pack-build", "{}", display.NewStreamer("info")); err != nil {
 		return codeBuild.runDebugSession(err)
 	}
 
 	if !registry.GetBool("no-compile") {
 		// run the clean hook in the build container
-		if _, err := util.Exec(codeBuild.container.ID, "clean", "{}", nil); err != nil {
+		display.Debug("running clean hook")
+		if _, err := util.Exec(codeBuild.container.ID, "clean", "{}", display.NewStreamer("info")); err != nil {
 			return codeBuild.runDebugSession(err)
 		}
 
 		// run the pack-deploy hook in the build container
-		if _, err := util.Exec(codeBuild.container.ID, "pack-deploy", "{}", nil); err != nil {
+		display.Debug("running pack-deploy hook")
+		if _, err := util.Exec(codeBuild.container.ID, "pack-deploy", "{}", display.NewStreamer("debug")); err != nil {
 			return codeBuild.runDebugSession(err)
 		}
 	}
+
+	lumber.Debug("build:end:env: %+v", codeBuild.Env)
+	display.StopTask()
 
 	return nil
 }
 
 // downloadImage downloads a build image
 func (codeBuild *Build) downloadImage() error {
+	display.StartTask("downloading image")
 	// load the boxfile from the users file
 	// because it is the only one we have
 	codeBuild.boxfile = boxfile.NewFromPath(config.Boxfile())
@@ -126,13 +148,15 @@ func (codeBuild *Build) downloadImage() error {
 		codeBuild.image = "nanobox/build:v1"
 	}
 
-	// TODO: replace with displays tuff
-	// prefix := fmt.Sprintf("%s+ Pulling %s -", stylish.GenerateNestedPrefix(codeBuild.control.DisplayLevel+1), codeBuild.image)
-	// if _, err := docker.ImagePull(codeBuild.image, &print.DockerPercentDisplay{Prefix: prefix}); err != nil {
-	if _, err := docker.ImagePull(codeBuild.image, nil); err != nil {
+	streamer := display.NewStreamer("info")	
+	dockerPercent := &display.DockerPercentDisplay{Output: streamer, Prefix: codeBuild.image}
+	if _, err := docker.ImagePull(codeBuild.image, dockerPercent); err != nil {
+		lumber.Error("code:Build:downloadImage:docker.ImagePull(%s, nil): %s", codeBuild.image, err.Error())
+		display.ErrorTask()
 		return err
 	}
 
+	display.StopTask()
 	return nil
 }
 
@@ -140,6 +164,7 @@ func (codeBuild *Build) downloadImage() error {
 func (codeBuild *Build) reserveIP() error {
 	IP, err := dhcp.ReserveLocal()
 	if err != nil {
+		lumber.Error("code:Build:reserveIP:dhcp.ReserveLocal(): %s", err.Error())
 		return err
 	}
 
@@ -155,6 +180,7 @@ func (codeBuild *Build) releaseIP() error {
 
 // startContainer starts a build container
 func (codeBuild *Build) startContainer() error {
+	display.StartTask("starting build container")
 
 	appName := config.EnvID()
 	config := docker.ContainerConfig{
@@ -175,27 +201,34 @@ func (codeBuild *Build) startContainer() error {
 	// start container
 	container, err := docker.CreateContainer(config)
 	if err != nil {
+		lumber.Error("code:Build:startContainer:docker.CreateContainer(%+v): %s", config, err.Error())
+		display.ErrorTask()
 		return err
 	}
 
 	codeBuild.container = container
-
+	display.StopTask()
 	return nil
 }
 
 // stopContainer stops the docker build container
 func (codeBuild *Build) stopContainer() error {
-	return docker.ContainerRemove(codeBuild.container.ID)
+	if err := docker.ContainerRemove(codeBuild.container.ID); err != nil {
+		lumber.Error("code:Build:stopContainer:docker.ContainerRemove(%s): %s", codeBuild.container.ID, err.Error())
+		return err
+	}
+	return nil
 }
 
 // runBoxfileHook runs the boxfile hook in the build container
 func (codeBuild *Build) runBoxfileHook() error {
-	output, err := util.Exec(codeBuild.container.ID, "boxfile", "{}", nil)
+	output, err := util.Exec(codeBuild.container.ID, "boxfile", "{}", display.NewStreamer("info"))
 	if err != nil {
 		return err
 	}
 
 	codeBuild.Env.BuiltBoxfile = output
+	lumber.Debug("build:boxfilehook:env: %+v", codeBuild.Env)
 
 	return codeBuild.Env.Save()
 }

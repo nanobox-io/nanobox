@@ -85,7 +85,7 @@ func isServiceRunning(component models.Component) bool {
 	container, err := docker.GetContainer(component.ID)
 
 	if err != nil {
-		lumber.Error("Tried looking up nanobox_%s_%s Error: %s", component.AppID, component.Name, err.Error())
+		lumber.Error("app:isServiceRunning(%#v): %s", component, err.Error())
 		return false
 	}
 

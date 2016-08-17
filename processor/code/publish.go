@@ -39,17 +39,20 @@ func (publish *Publish) Run() error {
 	// create build container
 	localIP, err := dhcp.ReserveLocal()
 	if err != nil {
+		lumber.Error("code:Publish:dhcp.ReserveLocal(): %s", err.Error())
 		return err
 	}
 	defer dhcp.ReturnIP(localIP)
-
 	publish.component.InternalIP = localIP.String()
 
+	// create a container
 	if err := publish.createContainer(); err != nil {
 		return err
 	}
-	// shutdown container
 	defer publish.destroyContainer()
+
+	lumber.Prefix("code:Publish")
+	defer lumber.Prefix("")
 
 	// run user hook
 	// TODO: display output from hooks
@@ -80,6 +83,7 @@ func (publish *Publish) pullImage() error {
 		_, err := docker.ImagePull(publish.Image, nil)
 
 		if err != nil {
+			lumber.Error("code:Publish:pullImage:docker.ImagePull(%s, nil): %s", publish.Image, err.Error())
 			return err
 		}
 
@@ -108,9 +112,10 @@ func (publish *Publish) createContainer() error {
 	// start container
 	container, err := docker.CreateContainer(config)
 	if err != nil {
-		lumber.Error("container: ", err)
+		lumber.Error("code:Publish:createContainer:docker.CreateContainer(%+v): %s", config, err.Error())
 		return err
 	}
+
 	publish.component.ID = container.ID
 	publish.component.Name = "build"
 
@@ -119,7 +124,11 @@ func (publish *Publish) createContainer() error {
 
 // destroyContainer ...
 func (publish *Publish) destroyContainer() error {
-	return docker.ContainerRemove(publish.component.ID)
+	if err := docker.ContainerRemove(publish.component.ID); err != nil {
+		lumber.Error("code:Publish:destroyContainer:docker.ContainerRemove(%s): %s", publish.component.ID, err.Error())
+		return err
+	}
+	return nil
 }
 
 // runPublishHook ...
@@ -134,7 +143,7 @@ func (publish *Publish) runPublishHook() error {
 	pload["warehouse_token"] = publish.WarehouseToken
 	pload["boxfile"] = publish.Env.BuiltBoxfile
 	b, _ := json.Marshal(pload)
-	// TODO: output
+
 	_, err := util.Exec(publish.component.ID, "publish", string(b), nil)
 
 	return err

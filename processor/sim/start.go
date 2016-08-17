@@ -1,10 +1,15 @@
 package sim
 
 import (
+	
+	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor/app"
 	"github.com/nanobox-io/nanobox/processor/env"
+	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util/display"
+
 )
 
 // Start ...
@@ -17,28 +22,50 @@ type Start struct {
 
 //
 func (start *Start) Run() error {
+	display.OpenContext("starting sim")
 
-	start.App, _ = models.FindAppBySlug(config.EnvID(), "sim")
+	registry.Set("appname", "sim")
+
+	if  start.App.ID == "" {
+		start.App, _ = models.FindAppBySlug(config.EnvID(), "sim")
+	}
 
 	// if the app has not been setup
 	// setup the app first
-	if start.App.ID == "" {
+	if provider.Status() != "Running" {
 		envSetup := env.Setup{}
 		err := envSetup.Run()
 		if err != nil {
 			return err
 		}
+		start.Env = envSetup.Env
+	} else {
+		// only run the init if we dont do an env setup
+		envInit := env.Init{}
+		if err := envInit.Run(); err != nil {
+			return err
+		}
 	}
 
-	// make sure we have an up to date app
-	start.App, _ = models.FindAppBySlug(config.EnvID(), "sim")
+	// retrieve the app
+	a, _ := models.FindAppBySlug(start.Env.ID, "sim")
 
-	appSetup := app.Setup{App: start.App}
-	if err := appSetup.Run(); err != nil {
+	// if the provider was running but the app wasnt setup
+	if a.ID == "" {
+		appSetup := app.Setup{Env: start.Env}
+		if err := appSetup.Run(); err != nil {
+			return err
+		}
+		a = appSetup.App
+	}
+
+	// run an app start
+	appStart := &app.Start{App: a}
+	if err := appStart.Run(); err != nil {
 		return err
 	}
+	start.App = appStart.App
 
-	// messaging about what happened and next steps
-
+	display.CloseContext()
 	return nil
 }

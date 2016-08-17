@@ -9,6 +9,7 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/provider"
+	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 )
 
@@ -32,20 +33,26 @@ func (setup *Setup) clean(fn func()) func() {
 
 //
 func (setup *Setup) Run() error {
-
 	// quit early if the service was found in the database as well as docker
 	if setup.componentExists() {
 		return nil
 	}
 
+	display.OpenContext("setting up %s", setup.Name)
+	defer display.CloseContext()
+
 	//
 	if err := setup.getLocalIP(); err != nil {
+		lumber.Error("code:Setup:setup.getLocalIP(): %s", err.Error())
+		setup.fail = true
 		return err
 	}
 	defer setup.clean(setup.returnLocalIP)()
 
 	//
 	if err := setup.getGlobalIP(); err != nil {
+		lumber.Error("code:Setup:setup.getGlobalIP(): %s", err.Error())
+		setup.fail = true
 		return err
 	}
 	defer setup.clean(setup.returnGlobalIP)()
@@ -55,6 +62,8 @@ func (setup *Setup) Run() error {
 	// prefix := fmt.Sprintf("%s+ Pulling %s -", stylish.GenerateNestedPrefix(setup.control.DisplayLevel), setup.control.Meta["image"])
 	// if _, err := docker.ImagePull(setup.control.Meta["image"], &print.DockerPercentDisplay{Prefix: prefix}); err != nil {
 	if _, err := docker.ImagePull(setup.Image, nil); err != nil {
+		lumber.Error("code:Setup:docker.ImagePull(%s, nil): %s", setup.Image, err.Error())
+		setup.fail = true
 		return err
 	}
 
@@ -72,8 +81,8 @@ func (setup *Setup) Run() error {
 
 	// save the component
 	if err := setup.Component.Save(); err != nil {
+		lumber.Error("code:Setup:Component.Save(): %s", err.Error())
 		setup.fail = true
-		lumber.Error("insert data: ", err)
 		return err
 	}
 
@@ -99,6 +108,7 @@ func (setup *Setup) getLocalIP() error {
 	}
 	ip, err := dhcp.ReserveLocal()
 	if err != nil {
+		lumber.Error("code:Setup:dhcp.ReserveLocal(): %s", err.Error())
 		setup.fail = true
 		return err
 	}
@@ -115,6 +125,7 @@ func (setup *Setup) getGlobalIP() error {
 	}
 	ip, err := dhcp.ReserveGlobal()
 	if err != nil {
+		lumber.Error("code:Setup:dhcp.ReserveGlobal(): %s", err.Error())
 		setup.fail = true
 		return err
 	}
@@ -140,11 +151,13 @@ func (setup *Setup) addIPToProvider() error {
 	}
 
 	if err := provider.AddIP(setup.Component.ExternalIP); err != nil {
+		lumber.Error("code:Setup:addIPToProvider:provider.AddIP(%s): %s", setup.Component.ExternalIP, err.Error())
 		setup.fail = true
 		return err
 	}
 
 	if err := provider.AddNat(setup.Component.ExternalIP, setup.Component.InternalIP); err != nil {
+		lumber.Error("code:Setup:addIPToProvider:provider.AddNat(%s, %s): %s", setup.Component.ExternalIP, setup.Component.InternalIP, err.Error())
 		setup.fail = true
 		return err
 	}
@@ -159,8 +172,9 @@ func (setup *Setup) removeIPFromProvider() {
 
 // createContainer ...
 func (setup *Setup) createContainer() error {
+	display.StartTask("creating container")
+
 	// configure the container
-	fmt.Println("-> building container", setup.Name)
 	config := docker.ContainerConfig{
 		Name:    fmt.Sprintf("nanobox_%s_%s", setup.App.ID, setup.Name),
 		Image:   setup.Image,
@@ -171,14 +185,17 @@ func (setup *Setup) createContainer() error {
 	// create docker container
 	container, err := docker.CreateContainer(config)
 	if err != nil {
+		lumber.Error("code:Setup:createContainer:docker.CreateContainer(%+v): %s", config, err.Error())
+		display.ErrorTask()
 		setup.fail = true
-		lumber.Error("container: ", err)
 		return err
 	}
 	setup.Component.AppID = setup.App.ID
 	setup.Component.ID = container.ID
 	setup.Component.Name = setup.Name
 	setup.Component.Type = "code"
+
+	display.StopTask()
 	return nil
 }
 

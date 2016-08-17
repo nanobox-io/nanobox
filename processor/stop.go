@@ -1,7 +1,9 @@
 package processor
 
 import (
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processor/app"
+	"github.com/nanobox-io/nanobox/processor/env"
 	"github.com/nanobox-io/nanobox/processor/provider"
 )
 
@@ -14,6 +16,10 @@ func (stop Stop) Run() error {
 
 	// stop all running environments
 	if err := stop.stopAllApps(); err != nil {
+		return err
+	}
+
+	if err := stop.unmountEnvs(); err != nil {
 		return err
 	}
 
@@ -38,4 +44,25 @@ func (stop Stop) stopAllApps() error {
 
 	}
 	return nil
+}
+
+func (stop Stop) unmountEnvs() error {
+	// unmount all the environments so stoping doesnt take forever
+	envs, err := models.AllEnvs()
+	if err != nil	{
+		return err
+	}
+
+	for _, e := range envs {
+
+		envUnmount := env.Unmount{
+			Env: e,
+		}
+
+		if err := envUnmount.Run(); err != nil {
+			return err
+		}
+
+	}
+	return nil	
 }

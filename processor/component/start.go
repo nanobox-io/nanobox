@@ -3,6 +3,7 @@ package component
 import (
 	"fmt"
 
+	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
 
 	"github.com/nanobox-io/nanobox/models"
@@ -42,6 +43,7 @@ func (start *Start) startContainer() error {
 
 	err := docker.ContainerStart(start.Component.ID)
 	if err != nil {
+		lumber.Error("component:Start:startContainer:docker.ContainerStart(%s): %s", start.Component.ID, err.Error())
 		return err
 	}
 
@@ -52,11 +54,13 @@ func (start *Start) startContainer() error {
 func (start *Start) attachNetwork() error {
 	err := provider.AddIP(start.Component.ExternalIP)
 	if err != nil {
+		lumber.Error("component:Start:attachNetwork:provider.AddIP(%s): %s", start.Component.ExternalIP, err.Error())
 		return err
 	}
 
 	err = provider.AddNat(start.Component.ExternalIP, start.Component.InternalIP)
 	if err != nil {
+		lumber.Error("component:Start:attachNetwork:provider.AddNat(%s, %s): %s", start.Component.ExternalIP, start.Component.InternalIP, err.Error())
 		return err
 	}
 

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"runtime"
 
+	"github.com/jcelliott/lumber"
+
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
@@ -60,7 +62,12 @@ func (add *Add) addEntries() error {
 	env := dns.Entry(envIP, add.Name, add.App.ID)
 
 	// add the 'sim' DNS entry into the /etc/hosts file
-	return dns.Add(env)
+	err := dns.Add(env)
+	if err != nil {
+		lumber.Error("dns:Add:addEntries:dns.Add(%s): %s", env, err.Error())
+		return fmt.Errorf("unalbe to add dns: %s", err.Error())
+	}
+	return nil
 }
 
 // reExecPrivilege re-execs the current process with a privileged user
@@ -86,8 +93,8 @@ func (add *Add) reExecPrivilege() error {
 
 	// if the sudo'ed subprocess fails, we need to return error to stop the process
 	if err := util.PrivilegeExec(cmd); err != nil {
+		lumber.Error("dns:Add:reExecPrivilege:util.PrivilegeExec(%s): %s", cmd, err.Error())
 		return err
 	}
-
 	return nil
 }

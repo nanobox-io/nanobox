@@ -4,17 +4,18 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox-boxfile"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 type (
 
 	// Configure ...
 	Configure struct {
-		Env            models.Env
 		App            models.App
 		Component      models.Component
 		BuildID        string
@@ -24,15 +25,15 @@ type (
 
 	// payload ...
 	payload struct {
-		LogvacHost   string            `json:"logvac_host,omitempty"`
-		Config       interface{}       `json:"config,omitempty"`
-		Component    component         `json:"component,omitempty"`
-		Member       map[string]int    `json:"member,omitempty"`
-		Mounts       []mount           `json:"mounts,omitempty"`
-		WritableDirs interface{}       `json:"writable_dirs,omitempty"`
-		Transform    interface{}       `json:"transform,omitempty"`
-		Env          map[string]string `json:"env,omitempty"`
-		LogWatches   interface{}       `json:"log_watches,omitempty"`
+		LogvacHost   string            `json:"logvac_host"`
+		Config       interface{}       `json:"config"`
+		Component    component         `json:"component"`
+		Member       map[string]int    `json:"member"`
+		Mounts       []mount           `json:"mounts"`
+		WritableDirs interface{}       `json:"writable_dirs"`
+		Transform    interface{}       `json:"transform"`
+		Env          map[string]string `json:"env"`
+		LogWatches   interface{}       `json:"log_watches"`
 		Start        interface{}       `json:"start"`
 	}
 
@@ -51,12 +52,12 @@ type (
 	}
 
 	fetchPayload struct {
-		Component      component      `json:"component,omitempty"`
-		LogvacHost     string         `json:"logvac_host,omitempty"`
-		Member         map[string]int `json:"member,omitempty"`
-		Build          string         `json:"build,omitempty"`
-		Warehouse      string         `json:"warehouse,omitempty"`
-		WarehouseToken string         `json:"warehouse_token,omitempty"`
+		Component      component      `json:"component"`
+		LogvacHost     string         `json:"logvac_host"`
+		Member         map[string]int `json:"member"`
+		Build          string         `json:"build"`
+		Warehouse      string         `json:"warehouse"`
+		WarehouseToken string         `json:"warehouse_token"`
 	}
 )
 
@@ -68,41 +69,56 @@ func (configure *Configure) Run() error {
 		return nil
 	}
 
-	// run fetch build command
-	fetchPayload, err := configure.fetchPayload()
-	if err != nil {
-		return err
-	}
+	// set the prefix so the utilExec lumber logging has context
+	lumber.Prefix("code:Configure")
+	defer lumber.Prefix("")
 
-	if _, err := util.Exec(configure.Component.ID, "fetch", fetchPayload, nil); err != nil {
+	display.OpenContext("configuring %s", configure.Component.Name)
+	defer display.CloseContext()
+
+	streamer := display.NewStreamer("info")
+
+	// run fetch build command
+	fetchPayload := configure.fetchPayload()
+
+	display.StartTask("fetching code")
+	if _, err := util.Exec(configure.Component.ID, "fetch", fetchPayload, streamer); err != nil {
+		display.ErrorTask()
 		return err
 	}
+	display.StopTask()
 
 	// run configure command
-	payload, err := configure.configurePayload()
-	if err != nil {
-		return err
-	}
+	payload := configure.configurePayload()
 
 	//
-	if _, err = util.Exec(configure.Component.ID, "configure", payload, nil); err != nil {
+	display.StartTask("configuring code")
+	if _, err := util.Exec(configure.Component.ID, "configure", payload, streamer); err != nil {
+		display.ErrorTask()
 		return err
 	}
+	display.StopTask()
 
 	// run start command
-	if _, err = util.Exec(configure.Component.ID, "start", payload, nil); err != nil {
+	display.StartTask("starting code")
+	if _, err := util.Exec(configure.Component.ID, "start", payload, streamer); err != nil {
+		display.ErrorTask()
 		return err
 	}
+	display.StopTask()
 
 	//
 	configure.Component.State = ACTIVE
-
-	return configure.Component.Save()
+	err := configure.Component.Save()
+	if err != nil {
+		lumber.Error("code:Configure:Component.Save(): %s", err.Error())
+	}
+	return err
 }
 
 // startPayload ...
 func (configure Configure) startPayload() string {
-	boxfile := boxfile.New([]byte(configure.Env.BuiltBoxfile))
+	boxfile := boxfile.New([]byte(configure.App.DeployedBoxfile))
 	pload := payload{
 		Config: boxfile.Node(configure.Component.Name).Value("config"),
 		Start:  boxfile.Node(configure.Component.Name).StringValue("start"),
@@ -117,9 +133,9 @@ func (configure Configure) startPayload() string {
 }
 
 // configurePayload ...
-func (configure *Configure) configurePayload() (string, error) {
+func (configure *Configure) configurePayload() string {
 
-	boxfile := boxfile.New([]byte(configure.Env.BuiltBoxfile))
+	boxfile := boxfile.New([]byte(configure.App.DeployedBoxfile))
 
 	logvac, _ := models.FindComponentBySlug(configure.Component.AppID, "logvac")
 
@@ -141,11 +157,15 @@ func (configure *Configure) configurePayload() (string, error) {
 	}
 
 	bytes, err := json.Marshal(pload)
-	return string(bytes), err
+	if err != nil {
+		return "{}"
+	}
+
+	return string(bytes)
 }
 
 // fetch payload
-func (configure *Configure) fetchPayload() (string, error) {
+func (configure *Configure) fetchPayload() string {
 
 	logvac, _ := models.FindComponentBySlug(configure.Component.AppID, "logvac")
 
@@ -163,12 +183,16 @@ func (configure *Configure) fetchPayload() (string, error) {
 	}
 
 	bytes, err := json.Marshal(pload)
-	return string(bytes), err
+	if err != nil {
+		return "{}"
+	}
+
+	return string(bytes)
 }
 
 // mounts ...
 func (configure *Configure) mounts() []mount {
-	boxfile := boxfile.New([]byte(configure.Env.BuiltBoxfile))
+	boxfile := boxfile.New([]byte(configure.App.DeployedBoxfile))
 	boxNetworkDirs := boxfile.Node(configure.Component.Name).Node("network_dirs")
 
 	m := []mount{}
