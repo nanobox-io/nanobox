@@ -15,6 +15,7 @@ import (
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/dhcp"
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 // Publish ...
@@ -77,10 +78,9 @@ func (publish *Publish) pullImage() error {
 	}
 
 	if !docker.ImageExists(publish.Image) {
-		// TODO: output
-		// prefix := fmt.Sprintf("%s+ Pulling %s -", stylish.GenerateNestedPrefix(publish.control.DisplayLevel+1), publish.Image)
-		// _, err := docker.ImagePull(publish.Image, &print.DockerPercentDisplay{Prefix: prefix})
-		_, err := docker.ImagePull(publish.Image, nil)
+		streamer := display.NewStreamer("info")
+		dockerPercent := &display.DockerPercentDisplay{Output: streamer, Prefix: publish.Image}
+		_, err := docker.ImagePull(publish.Image, dockerPercent)
 
 		if err != nil {
 			lumber.Error("code:Publish:pullImage:docker.ImagePull(%s, nil): %s", publish.Image, err.Error())

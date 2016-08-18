@@ -2,8 +2,8 @@
 package commands
 
 import (
-	"github.com/spf13/cobra"
 	"github.com/jcelliott/lumber"
+	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/util/display"
 )
@@ -13,7 +13,7 @@ var (
 
 	// display level debug
 	displayDebugMode bool
-	
+
 	// display level trace
 	displayTraceMode bool
 
@@ -28,14 +28,14 @@ var (
 			if displayDebugMode {
 				lumber.Level(lumber.DEBUG)
 				display.Summary = false
-				display.Mode    = "debug"
+				display.Mode = "debug"
 			}
-			
+
 			if displayTraceMode {
 				lumber.Level(lumber.TRACE)
 				display.Summary = false
-				display.Mode    = "trace"
-			}			
+				display.Mode = "trace"
+			}
 
 		},
 		//

@@ -21,7 +21,7 @@ type Cmd struct {
 // Run builds a command and executes within the context of a docker container
 func (cmd *Cmd) Run() error {
 	lumber.Debug("exec:Cmd:Run: %s, %s, %s", cmd.ID, cmd.Path, cmd.Payload)
-	
+
 	// assemble the full command to run within the hooks dir
 	run := []string{"/opt/nanobox/hooks/" + cmd.Path, cmd.Payload}
 

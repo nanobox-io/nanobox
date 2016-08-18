@@ -49,7 +49,7 @@ func (stop Stop) stopAllApps() error {
 func (stop Stop) unmountEnvs() error {
 	// unmount all the environments so stoping doesnt take forever
 	envs, err := models.AllEnvs()
-	if err != nil	{
+	if err != nil {
 		return err
 	}
 
@@ -64,5 +64,5 @@ func (stop Stop) unmountEnvs() error {
 		}
 
 	}
-	return nil	
+	return nil
 }

@@ -13,8 +13,8 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/provider"
 	"github.com/nanobox-io/nanobox/util"
-	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/dhcp"
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 type (
@@ -127,7 +127,7 @@ func (setup *Setup) loadComponent() error {
 func (setup *Setup) downloadImage() error {
 	display.StartTask("Downloading image")
 
-	streamer := display.NewStreamer("info")	
+	streamer := display.NewStreamer("info")
 	dockerPercent := &display.DockerPercentDisplay{Output: streamer, Prefix: setup.Image}
 	if _, err := docker.ImagePull(setup.Image, dockerPercent); err != nil {
 		lumber.Error("code:Setup:downloadImage:docker.ImagePull(%s, nil): %s", setup.Image, err.Error())

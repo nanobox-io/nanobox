@@ -1,7 +1,6 @@
 package sim
 
 import (
-
 	"github.com/nanobox-io/nanobox-boxfile"
 
 	"github.com/nanobox-io/nanobox/models"
@@ -87,7 +86,7 @@ func (deploy Deploy) Run() error {
 func (deploy *Deploy) publishCode() error {
 	display.StartTask("publishing build to warehouse")
 	defer display.StopTask()
-	
+
 	// setup the var's required for code_publish
 	hoarder, _ := models.FindComponentBySlug(deploy.App.ID, "hoarder")
 

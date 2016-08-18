@@ -12,8 +12,8 @@ type Start struct {
 //
 func (start Start) Run() error {
 	display.OpenContext("start provider")
-	defer display.CloseContext()	
-	
+	defer display.CloseContext()
+
 	// run a provider setup
 	providerStart := provider.Setup{}
 	return providerStart.Run()

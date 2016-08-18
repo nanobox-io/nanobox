@@ -139,7 +139,7 @@ func (setup *Setup) generateEvars() error {
 func (setup *Setup) persistApp() error {
 	// set the app state to active so we don't setup again
 	setup.App.State = ACTIVE
-	
+
 	if err := setup.App.Save(); err != nil {
 		lumber.Error("app:Setup:persistApp:App.Save(): %s", err.Error())
 		return err

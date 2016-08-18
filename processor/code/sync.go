@@ -7,8 +7,8 @@ import (
 	"github.com/nanobox-io/nanobox-boxfile"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util/locker"
 	"github.com/nanobox-io/nanobox/util/display"
+	"github.com/nanobox-io/nanobox/util/locker"
 )
 
 // Sync is used by the deploy process to syncronize the code parts
@@ -26,7 +26,7 @@ type Sync struct {
 func (sync *Sync) Run() error {
 	display.OpenContext("starting code components")
 	defer display.CloseContext()
-	
+
 	// do not allow more then one process to run the
 	// code sync or code clean at the same time
 	locker.LocalLock()
