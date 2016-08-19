@@ -13,54 +13,51 @@ import (
 
 type Setup struct {}
 
+// Run sets up the provider (launch VM, etc)
 func (setup Setup) Run() error {
-	
-	display.StartTask("preparing provider")
-
-	// ensure we have an exclusive lock while working with the provider
 	locker.GlobalLock()
 	defer locker.GlobalUnlock()
 
+	display.OpenContext("Preparing Nanobox")
+
 	// create the provider (VM)
 	if err := provider.Create(); err != nil {
-		display.ErrorTask()
-		return err
+		lumber.Error("provider:Setup:Run:provider.Create(): %s", err.Error())
+		return fmt.Errorf("failed to create the provider: %s", err.Error())
 	}
-
-	display.StopTask()
-	display.StartTask("booting provider")
 
 	// start the provider (VM)
 	if err := provider.Start(); err != nil {
-		display.ErrorTask()
-		return err
+		lumber.Error("provider:Setup:Run:provider.Start(): %s", err.Error())
+		return fmt.Errorf("failed to start the provider: %s", err.Error())
 	}
 
 	// attach the network to the host stack
 	if err := setup.setupNetwork(); err != nil {
-		display.ErrorTask()
-		return err
+		return fmt.Errorf("failed to setup the provider network: %s", err.Error())
 	}
 
-	// fetch the docker env from the provider
+	// load the docker environment
 	if err := provider.DockerEnv(); err != nil {
-		display.ErrorTask()
-		return err
+		lumber.Error("provider:Setup:Run:provider.DockerEnv(): %s", err.Error())
+		return fmt.Errorf("failed to load the docker environment: %s", err.Error())
 	}
 
-	// setup the docker client with the docker environment
+	// initialize the docker client
 	if err := docker.Initialize("env"); err != nil {
-		display.ErrorTask()
-		return err
+		lumber.Error("provider:Setup:Run:docker.Initialize(): %s", err.Error())
+		return fmt.Errorf("failed to initialize the docker client: %s", err.Error())
 	}
 
-	display.StopTask()
+	display.CloseContext()
 	
 	return nil
 }
 
-// setupNetwork attaches the provider network to the host stack
+// setupNetwork sets up the provider network
 func (setup Setup) setupNetwork() error {
+	display.StartTask("Joining virtual network")
+	
 	// fetch the provider model
 	model, _ := models.LoadProvider()
 	
@@ -73,34 +70,36 @@ func (setup Setup) setupNetwork() error {
 	mountIP, err := dhcp.ReserveGlobal()
 	if err != nil {
 		lumber.Error("provider:Setup:setupNetwork:dhcp.ReserveGlobal(): %s", err.Error())
-		return err
+		return fmt.Errorf("failed to reserve a global IP: %s", err.Error())
 	}
 	
-	// fetch the host ip from the provider
+	// add the global IP to the provider
+	if err := provider.AddIP(mountIP); err != nil {
+		lumber.Error("provider:Setup:setupNetwork:provider.AddIP(%s): %s", mountIP, err.Error())
+		return fmt.Errorf("failed to add IP to provider: %s", err.Error())
+	}
+	
+	// tell the provider to set this IP as the default gateway
+	if err := provider.SetDefaultIP(mountIP); err != nil {
+		lumber.Error("provider:Setup:setupNetwork:provider.SetDefaultIP(%s): %s", mountIP, err.Error())
+		return fmt.Errorf("failed to set a default gateway on the provider: %s", err.Error())
+	}
+	
+	// retrieve the provider's Host IP
 	hostIP, err := provider.HostIP()
 	if err != nil {
 		lumber.Error("provider:Setup:setupNetwork:provider.HostIP(): %s", err.Error())
-		return err
+		return fmt.Errorf("unable to retrieve the host IP from the provider: %s", err.Error())
 	}
 	
 	// persist the IPs for later use
 	model.MountIP = mountIP
 	model.HostIP  = hostIP
 	if err := model.Save(); err != nil {
-		return err
+		return fmt.Errorf("failed to persist the provider model: %s", err.Error())
 	}
 	
-	// let's attach the mount IP to the provider
-	if err := provider.AddIP(mountIP); err != nil {
-		lumber.Error("provider:Setup:setupNetwork:provider.AddIP(%s): %s", mountIP, err.Error())
-		return err
-	}
-	
-	// now let's set the mount IP as the default route
-	if err := provider.SetDefaultIP(mountIP); err != nil {
-		lumber.Error("provider:Setup:setupNetwork:provider.SetDefaultIP(%s): %s", mountIP, err.Error())
-		return err
-	}
+	display.CloseContext()
 	
 	return nil
 }
