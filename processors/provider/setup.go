@@ -1,6 +1,8 @@
 package provider
 
 import (
+	"fmt"
+
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/golang-docker-client"
@@ -85,7 +87,7 @@ func (setup Setup) setupNetwork() error {
 	}
 	
 	// persist the IPs for later use
-	model.MountIP = mountIP
+	model.MountIP = mountIP.String()
 	model.HostIP  = hostIP
 	if err := model.Save(); err != nil {
 		return fmt.Errorf("failed to persist the provider model: %s", err.Error())

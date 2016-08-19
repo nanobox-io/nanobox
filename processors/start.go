@@ -1,4 +1,4 @@
-package processor
+package processors
 
 import (
 	"github.com/nanobox-io/nanobox/processors/provider"
