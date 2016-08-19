@@ -19,6 +19,9 @@ type Tunnel struct {
 //
 func (tunnel Tunnel) Run() error {
 
+	// clean the app id
+	tunnel.App = getAppID(tunnel.App)
+
 	var err error
 
 	key, location, container, err = odin.EstablishTunnel(getAppID(tunnel.App), tunnel.Container)
@@ -42,6 +45,7 @@ func (tunnel Tunnel) Run() error {
 		return err
 	}
 	defer conn.Close()
+	fmt.Println("server connection established")
 
 	//
 	serv, err := net.Listen("tcp4", fmt.Sprintf(":%v", tunnel.Port))
@@ -49,6 +53,8 @@ func (tunnel Tunnel) Run() error {
 		fmt.Println(err)
 		return err
 	}
+
+	fmt.Println("listening on port", tunnel.Port)
 
 	//
 	for {
@@ -58,10 +64,13 @@ func (tunnel Tunnel) Run() error {
 		}
 		go handleConnection(conn)
 	}
+	fmt.Println("done")
+	return nil
 }
 
 // handleConnection ...
 func handleConnection(conn net.Conn) {
+	fmt.Println("handling new connection")
 	req, err := http.NewRequest("POST", fmt.Sprintf("/tunnel?key=%s", key), nil)
 	if err != nil {
 		fmt.Println(err)
@@ -73,11 +82,14 @@ func handleConnection(conn net.Conn) {
 		fmt.Println(err)
 		return
 	}
+	fmt.Println("new connectin to server")
 	defer remoteConn.Close()
 
+	fmt.Println("piping")
 	go io.Copy(conn, io.MultiReader(br, remoteConn))
 	_, err = io.Copy(remoteConn, conn)
 	if err != nil {
 		fmt.Println(err)
 	}
+	fmt.Println("connection closed")
 }

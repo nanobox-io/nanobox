@@ -58,7 +58,6 @@ func Deploy(appID, id, boxfile, message string) error {
 
 // EstablishTunnel ...
 func EstablishTunnel(appID, id string) (string, string, string, error) {
-	// TODO: do somethign else here
 	r := map[string]string{}
 	err := doRequest("GET", fmt.Sprintf("apps/%s/tunnels/%s", appID, id), nil, nil, &r)
 
@@ -67,7 +66,6 @@ func EstablishTunnel(appID, id string) (string, string, string, error) {
 
 // EstablishConsole ...
 func EstablishConsole(appID, id string) (string, string, string, error) {
-	// TODO: do somethign else here
 	r := map[string]string{}
 	err := doRequest("GET", fmt.Sprintf("apps/%s/consoles/%s", appID, id), nil, nil, &r)
 
@@ -76,7 +74,6 @@ func EstablishConsole(appID, id string) (string, string, string, error) {
 
 // GetWarehouse ...
 func GetWarehouse(appID string) (string, string, error) {
-	// TODO: do somethign else here
 	r := map[string]string{}
 	err := doRequest("GET", fmt.Sprintf("apps/%s/services/warehouse", appID), nil, nil, &r)
 

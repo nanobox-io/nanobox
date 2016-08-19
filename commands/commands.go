@@ -74,6 +74,7 @@ func init() {
 	NanoboxCmd.AddCommand(DevCmd)
 	NanoboxCmd.AddCommand(SimCmd)
 	NanoboxCmd.AddCommand(EnvCmd)
+	NanoboxCmd.AddCommand(TunnelCmd)
 	NanoboxCmd.AddCommand(DestroyCmd)
 	NanoboxCmd.AddCommand(StartCmd)
 	NanoboxCmd.AddCommand(StopCmd)
