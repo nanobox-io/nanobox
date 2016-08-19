@@ -1,21 +1,31 @@
 package provider
 
 import (
-	"github.com/nanobox-io/nanobox/util/provider"
+	"fmt"
+	
+	"github.com/jcelliott/lumber"
+	
 	"github.com/nanobox-io/nanobox/util/locker"
+	"github.com/nanobox-io/nanobox/util/provider"
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
-// Stop ...
-type Stop struct {
-}
+type Stop struct {}
 
-//
+// Run stops the provider (stops the VM)
 func (providerStop Stop) Run() error {
-	// establish a global lock to ensure we're the only ones bringing down
-	// the provider. Also we need to ensure that we release the lock even
-	// if we error out.
 	locker.GlobalLock()
 	defer locker.GlobalUnlock()
 
-	return provider.Stop()
+	display.OpenContext("Halting Nanobox")
+
+	// stop the provider (VM)
+	if err := provider.Stop(); err != nil {
+		lumber.Error("provider:Stop:Run:provider.Stop(): %s", err.Error())
+		return fmt.Errorf("failed to stop the provider: %s", err.Error())
+	}
+	
+	display.CloseContext()
+	
+	return nil
 }

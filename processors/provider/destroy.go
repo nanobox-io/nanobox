@@ -1,36 +1,31 @@
 package provider
 
 import (
-	"github.com/nanobox-io/nanobox/util/provider"
+	"fmt"
+	
+	"github.com/jcelliott/lumber"
+	
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/locker"
+	"github.com/nanobox-io/nanobox/util/provider"
 )
 
-// Destroy ...
-type Destroy struct {
-}
+type Destroy struct {}
 
-//
+// Run destroys the provider
 func (destroy Destroy) Run() error {
 	locker.GlobalLock()
 	defer locker.GlobalUnlock()
 
-	// delete the nanobox database
-	display.StartTask("removing database")
-	if err := destroy.removeDatabase(); err != nil {
-		return err
-	}
-	display.StopTask()
+	display.OpenContext("Destroying Nanobox")
 
-	// remove the provider
-	display.StartTask("removing vm")
-	err := provider.Destroy()
-	if err != nil {
-		display.ErrorTask()
-		return err
+	// destroy the provider
+	if err := provider.Destroy(); err != nil {
+		lumber.Error("provider:Destroy:Run:provider.Destroy(): %s", err.Error())
+		return fmt.Errorf("failed to destroy the provider: %s", err.Error())
 	}
-	display.StopTask()
+
+	display.CloseContext()
 
 	return nil
 }
-

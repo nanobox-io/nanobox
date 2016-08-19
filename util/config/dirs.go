@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
@@ -9,10 +10,6 @@ import (
 
 	"github.com/nanobox-io/nanobox-boxfile"
 )
-
-// TODO: win: make sure the folders are in the correct place the go-homedir is
-// supposed to work in both packages and we used filpath.ToSlash which puts the
-// correct slashes in.
 
 // GlobalDir ...
 func GlobalDir() string {
@@ -23,11 +20,22 @@ func GlobalDir() string {
 		return ""
 	}
 
-	//
 	globalDir := filepath.ToSlash(filepath.Join(p, ".nanobox"))
 	os.MkdirAll(globalDir, 0755)
 
 	return globalDir
+}
+
+// ImplodeGlobalDir will remove the global dir and everything inside
+func ImplodeGlobalDir() error {
+	globalDir := GlobalDir()
+	
+	// blast the global directory
+	if err := os.RemoveAll(globalDir); err != nil {
+		return fmt.Errorf("failed to remove %s: %s", globalDir, err.Error())
+	}
+	
+	return nil
 }
 
 // LocalDir ...
