@@ -1,7 +1,6 @@
 package sim
 
 import (
-	
 	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/app"
@@ -9,7 +8,6 @@ import (
 	"github.com/nanobox-io/nanobox/util/provider"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
-
 )
 
 // Start ...
@@ -26,7 +24,7 @@ func (start *Start) Run() error {
 
 	registry.Set("appname", "sim")
 
-	if  start.App.ID == "" {
+	if start.App.ID == "" {
 		start.App, _ = models.FindAppBySlug(config.EnvID(), "sim")
 	}
 

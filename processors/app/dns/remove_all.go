@@ -20,6 +20,11 @@ type RemoveAll struct {
 //
 func (removeAll RemoveAll) Run() error {
 
+	// shortcut if we dont have any entries for this app
+	if len(dns.List(removeAll.App.ID)) == 0 {
+		return nil
+	}
+
 	// if we're not running as the privileged user, we need to re-exec with privilege
 	if !util.IsPrivileged() {
 		return removeAll.reExecPrivilege()

@@ -18,6 +18,7 @@ import (
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/counter"
 	"github.com/nanobox-io/nanobox/util/dhcp"
+	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
 
@@ -120,7 +121,7 @@ func (console *Console) setup() error {
 
 		lumber.Prefix("dev:Console")
 		defer lumber.Prefix("")
-		
+
 		// TODO: The nil in this call needs to be replaced with something from the new display
 		if _, err := util.Exec(console.container.ID, "user", config.UserPayload(), nil); err != nil {
 			return err
@@ -193,10 +194,9 @@ func (console *Console) setImage() error {
 // downloadImage downloads the dev docker image
 func (console *Console) downloadImage() error {
 	if !docker.ImageExists(console.image) {
-		// TODO: replace the display parts with a better system
-		// prefix := fmt.Sprintf("%s+ Pulling %s -", stylish.GenerateNestedPrefix(console.control.DisplayLevel+1), console.image)
-		// if _, err := docker.ImagePull(console.image, &print.DockerPercentDisplay{Prefix: prefix}); err != nil {
-		if _, err := docker.ImagePull(console.image, nil); err != nil {
+		streamer := display.NewStreamer("info")
+		dockerPercent := &display.DockerPercentDisplay{Output: streamer, Prefix: console.image}
+		if _, err := docker.ImagePull(console.image, dockerPercent); err != nil {
 			return err
 		}
 	}
@@ -287,7 +287,7 @@ func (console *Console) runConsole() error {
 
 	// create a dummy component using the appname
 	component := models.Component{
-		ID: "nanobox_"+console.App.ID,
+		ID: "nanobox_" + console.App.ID,
 	}
 	// for tyler: I dont like forcing someone into zsh..
 	// your chosen shell is a very personal

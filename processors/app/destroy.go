@@ -27,9 +27,9 @@ func (destroy *Destroy) Run() error {
 		// the app doesnt exist
 		return nil
 	}
-	
+
 	dockerInit()
-	
+
 	// establish an app-level lock to ensure we're the only ones setting up an app
 	// also, we need to ensure that the lock is released even if we error out.
 	locker.LocalLock()

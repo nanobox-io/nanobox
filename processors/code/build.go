@@ -6,9 +6,9 @@ import (
 	"os"
 
 	dockType "github.com/docker/engine-api/types"
+	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox-boxfile"
-	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/models"
@@ -148,7 +148,7 @@ func (codeBuild *Build) downloadImage() error {
 		codeBuild.image = "nanobox/build:v1"
 	}
 
-	streamer := display.NewStreamer("info")	
+	streamer := display.NewStreamer("info")
 	dockerPercent := &display.DockerPercentDisplay{Output: streamer, Prefix: codeBuild.image}
 	if _, err := docker.ImagePull(codeBuild.image, dockerPercent); err != nil {
 		lumber.Error("code:Build:downloadImage:docker.ImagePull(%s, nil): %s", codeBuild.image, err.Error())

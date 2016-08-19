@@ -2,12 +2,12 @@ package processors
 
 import (
 	"github.com/jcelliott/lumber"
-	
+
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/code"
 	"github.com/nanobox-io/nanobox/processors/env"
-	"github.com/nanobox-io/nanobox/util/locker"
 	"github.com/nanobox-io/nanobox/util/display"
+	"github.com/nanobox-io/nanobox/util/locker"
 )
 
 // Build ...
@@ -41,6 +41,6 @@ func (build *Build) Run() error {
 	build.Env = codeBuild.Env
 
 	lumber.Debug("processor:build:Env: %+v", build.Env)
-	
+
 	return nil
 }

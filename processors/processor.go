@@ -1,6 +1,7 @@
 package processors
 
 import (
+	"bytes"
 	"crypto/tls"
 	"net"
 	"net/http"
@@ -32,31 +33,27 @@ func getAppID(alias string) string {
 }
 
 // connect ...
-func connect(req *http.Request) (net.Conn, []byte, error) {
-
+func connect(req *http.Request) (net.Conn, *bytes.Buffer, error) {
 	//
 	b := make([]byte, 1)
 
 	// if we can't connect to the server, lets bail out early
 	conn, err := tls.Dial("tcp4", location, &tls.Config{InsecureSkipVerify: true})
 	if err != nil {
-		return conn, b, err
+		return conn, bytes.NewBuffer(b), err
 	}
+
+
 	// we dont defer a conn.Close() here because we're returning the conn and
 	// want it to remain open
 
 	// make an http request
 
 	if err := req.Write(conn); err != nil {
-		return conn, b, err
+		return conn, bytes.NewBuffer(b), err
 	}
 
-	// wait trying to read from the connection until a single read happens (blocking)
-	if _, err := conn.Read(b); err != nil {
-		return conn, b, err
-	}
-
-	return conn, b, nil
+	return conn, bytes.NewBuffer(b), nil
 }
 
 // get a list of the apps in the database that believe they are up and running

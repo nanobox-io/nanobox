@@ -3,7 +3,6 @@
 package processors
 
 import (
-	"crypto/tls"
 	"fmt"
 	"io"
 	"net/http"
@@ -32,6 +31,7 @@ func (console Console) Run() error {
 	if err != nil {
 		return err
 	}
+
 	fmt.Println("key", key, "location", location, "container", container)
 	// establish connection to nanoagent
 	req, err := http.NewRequest("POST", fmt.Sprintf("/exec?key=%s&container=%s", key, container), nil)
@@ -41,12 +41,13 @@ func (console Console) Run() error {
 	}
 
 	// connect to remote machine
-	remoteConn, bytes, err := connect(req)
+	remoteConn, br, err := connect(req)
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
 	defer remoteConn.Close()
+
 	stdIn, stdOut, _ := term.StdStreams()
 
 	// establish file descriptors
@@ -60,23 +61,20 @@ func (console Console) Run() error {
 		// forward all signals to nanobox server
 		go monitor(stdOutFD)
 
-		oldState, err := term.SetRawTerminal(stdInFD)
+	  oldInState, err := term.SetRawTerminal(stdInFD)
+	  oldOutState, err := term.SetRawTerminalOutput(stdOutFD)
 
 		// we only use raw mode if it is available.
 		if err == nil {
-			defer term.RestoreTerminal(stdInFD, oldState)
+		  defer term.RestoreTerminal(stdInFD, oldInState)
+		  defer term.RestoreTerminal(stdOutFD, oldOutState)
 		}
 
-		// pipe data from out to the conn (server)
-		go func() {
-			io.Copy(remoteConn, stdIn)
-		}()
-
-		os.Stdout.Write(bytes)
-
-		io.Copy(stdOut, remoteConn)
-		remoteConn.(*tls.Conn).Close()
 	}
+
+  go io.Copy(remoteConn, os.Stdin)
+  io.Copy(os.Stdout, io.MultiReader(br, remoteConn))
+
 	return nil
 }
 

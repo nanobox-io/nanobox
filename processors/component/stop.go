@@ -64,16 +64,15 @@ func (stop *Stop) stopContainer() error {
 // detachNetwork detaches the container from the host network
 func (stop *Stop) detachNetwork() error {
 
-
 	//
 	if err := provider.RemoveNat(stop.Component.ExternalIP, stop.Component.InternalIP); err != nil {
-		lumber.Error("component:Stop:attachNetwork:provider.AddNat(%s, %s): %s", stop.Component.ExternalIP, stop.Component.InternalIP, err.Error())		
+		lumber.Error("component:Stop:attachNetwork:provider.AddNat(%s, %s): %s", stop.Component.ExternalIP, stop.Component.InternalIP, err.Error())
 		return err
 	}
 
 	//
 	if err := provider.RemoveIP(stop.Component.ExternalIP); err != nil {
-		lumber.Error("component:Stop:attachNetwork:provider.AddIP(%s): %s", stop.Component.ExternalIP, err.Error())		
+		lumber.Error("component:Stop:attachNetwork:provider.AddIP(%s): %s", stop.Component.ExternalIP, err.Error())
 		return err
 	}
 

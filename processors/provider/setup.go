@@ -37,6 +37,10 @@ func (setup Setup) Run() error {
 		return fmt.Errorf("failed to setup the provider network: %s", err.Error())
 	}
 
+	if err := setup.SetDefaultIP(); err != nil {
+		return fmt.Errorf("failed to set the default IP: %s", err.Error)
+	}
+
 	// load the docker environment
 	if err := provider.DockerEnv(); err != nil {
 		lumber.Error("provider:Setup:Run:provider.DockerEnv(): %s", err.Error())
@@ -73,18 +77,6 @@ func (setup Setup) setupNetwork() error {
 		return fmt.Errorf("failed to reserve a global IP: %s", err.Error())
 	}
 	
-	// add the global IP to the provider
-	if err := provider.AddIP(mountIP); err != nil {
-		lumber.Error("provider:Setup:setupNetwork:provider.AddIP(%s): %s", mountIP, err.Error())
-		return fmt.Errorf("failed to add IP to provider: %s", err.Error())
-	}
-	
-	// tell the provider to set this IP as the default gateway
-	if err := provider.SetDefaultIP(mountIP); err != nil {
-		lumber.Error("provider:Setup:setupNetwork:provider.SetDefaultIP(%s): %s", mountIP, err.Error())
-		return fmt.Errorf("failed to set a default gateway on the provider: %s", err.Error())
-	}
-	
 	// retrieve the provider's Host IP
 	hostIP, err := provider.HostIP()
 	if err != nil {
@@ -103,3 +95,15 @@ func (setup Setup) setupNetwork() error {
 	
 	return nil
 }
+
+func (setup Setup) SetDefaultIP() error {
+	model, _ := models.LoadProvider()
+
+	if err := provider.AddIP(model.MountIP); err != nil {
+		lumber.Error("provider:Setup:SetDefaultIP:provider.AddIP(%s): %s", model.MountIP, err.Error())
+		return err
+	}
+
+	return provider.SetDefaultIP(model.MountIP)
+}
+

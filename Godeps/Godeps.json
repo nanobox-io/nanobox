@@ -1,6 +1,6 @@
 {
 	"ImportPath": "github.com/nanobox-io/nanobox",
-	"GoVersion": "go1.6",
+	"GoVersion": "go1.7",
 	"GodepVersion": "v63",
 	"Deps": [
 		{
@@ -43,28 +43,23 @@
 		},
 		{
 			"ImportPath": "github.com/docker/docker/pkg/signal",
-			"Comment": "v1.4.1-11899-g9837ec4",
-			"Rev": "9837ec4da53f15f9120d53a6e1517491ba8b0261"
+			"Comment": "docs-v1.12.0-rc4-2016-07-15-893-g09e1de2",
+			"Rev": "09e1de2080fd3b0bafb38adbd4b8c12ee949794d"
 		},
 		{
 			"ImportPath": "github.com/docker/docker/pkg/stdcopy",
-			"Comment": "v1.4.1-11899-g9837ec4",
-			"Rev": "9837ec4da53f15f9120d53a6e1517491ba8b0261"
-		},
-		{
-			"ImportPath": "github.com/docker/docker/pkg/system",
-			"Comment": "v1.4.1-11899-g9837ec4",
-			"Rev": "9837ec4da53f15f9120d53a6e1517491ba8b0261"
+			"Comment": "docs-v1.12.0-rc4-2016-07-15-893-g09e1de2",
+			"Rev": "09e1de2080fd3b0bafb38adbd4b8c12ee949794d"
 		},
 		{
 			"ImportPath": "github.com/docker/docker/pkg/term",
-			"Comment": "v1.4.1-11899-g9837ec4",
-			"Rev": "9837ec4da53f15f9120d53a6e1517491ba8b0261"
+			"Comment": "docs-v1.12.0-rc4-2016-07-15-893-g09e1de2",
+			"Rev": "09e1de2080fd3b0bafb38adbd4b8c12ee949794d"
 		},
 		{
 			"ImportPath": "github.com/docker/docker/pkg/term/windows",
-			"Comment": "v1.4.1-11899-g9837ec4",
-			"Rev": "9837ec4da53f15f9120d53a6e1517491ba8b0261"
+			"Comment": "docs-v1.12.0-rc4-2016-07-15-893-g09e1de2",
+			"Rev": "09e1de2080fd3b0bafb38adbd4b8c12ee949794d"
 		},
 		{
 			"ImportPath": "github.com/docker/engine-api/client",
@@ -205,10 +200,6 @@
 			"Rev": "dd349441af25132d146d7095c6693a15431fc9b1"
 		},
 		{
-			"ImportPath": "github.com/kardianos/osext",
-			"Rev": "6e7f843663477789fac7c02def0d0909e969b4e5"
-		},
-		{
 			"ImportPath": "github.com/kr/pretty",
 			"Comment": "go.weekly.2011-12-22-27-ge6ac2fc",
 			"Rev": "e6ac2fc51e89a3249e82157fa0bb7a18ef9dd5bb"
@@ -240,7 +231,7 @@
 		},
 		{
 			"ImportPath": "github.com/nanobox-io/golang-docker-client",
-			"Rev": "d6a6b07ff43ff4c4afd2d66e9afb1186fa7e7b6b"
+			"Rev": "2a9f4c723c348803359028a5d549b1bc5daf4f95"
 		},
 		{
 			"ImportPath": "github.com/nanobox-io/golang-portal-client",
@@ -256,30 +247,18 @@
 		},
 		{
 			"ImportPath": "github.com/nanopack/mist/clients",
-			"Comment": "v1.1.0-2-g0897a35",
-			"Rev": "0897a355fb1232b9b6f3dd5800937dccf42d8ea3"
+			"Comment": "v1.1.0-4-g5d5621c",
+			"Rev": "5d5621c29dfb71d4b9a7807017fa2b0888b3bf2b"
 		},
 		{
 			"ImportPath": "github.com/nanopack/mist/core",
-			"Comment": "v1.1.0-2-g0897a35",
-			"Rev": "0897a355fb1232b9b6f3dd5800937dccf42d8ea3"
+			"Comment": "v1.1.0-4-g5d5621c",
+			"Rev": "5d5621c29dfb71d4b9a7807017fa2b0888b3bf2b"
 		},
 		{
 			"ImportPath": "github.com/opencontainers/runc/libcontainer/user",
 			"Comment": "v0.0.8-39-g0107c7f",
 			"Rev": "0107c7fb6cef8d2f302f299039cc2f9a903880ac"
-		},
-		{
-			"ImportPath": "github.com/pagodabox/nanobox-golang-stylish",
-			"Rev": "0fdfc90fd2a0cb557590511dc0240085caecd4a8"
-		},
-		{
-			"ImportPath": "github.com/sdomino/go-util/crypto",
-			"Rev": "1ca3b1e3b179725f7683700e6829aea136d6b084"
-		},
-		{
-			"ImportPath": "github.com/sdomino/go-util/file",
-			"Rev": "1ca3b1e3b179725f7683700e6829aea136d6b084"
 		},
 		{
 			"ImportPath": "github.com/sdomino/go-util/print",
@@ -319,6 +298,14 @@
 		},
 		{
 			"ImportPath": "golang.org/x/sys/unix",
+			"Rev": "b776ec39b3e54652e09028aaaaac9757f4f8211a"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/windows",
+			"Rev": "b776ec39b3e54652e09028aaaaac9757f4f8211a"
+		},
+		{
+			"ImportPath": "golang.org/x/sys/windows/registry",
 			"Rev": "b776ec39b3e54652e09028aaaaac9757f4f8211a"
 		},
 		{

@@ -9,8 +9,8 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/provider"
-	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/dhcp"
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 // Setup ...
@@ -58,10 +58,9 @@ func (setup *Setup) Run() error {
 	defer setup.clean(setup.returnGlobalIP)()
 
 	// pull the docker image
-	// TODO: output
-	// prefix := fmt.Sprintf("%s+ Pulling %s -", stylish.GenerateNestedPrefix(setup.control.DisplayLevel), setup.control.Meta["image"])
-	// if _, err := docker.ImagePull(setup.control.Meta["image"], &print.DockerPercentDisplay{Prefix: prefix}); err != nil {
-	if _, err := docker.ImagePull(setup.Image, nil); err != nil {
+	streamer := display.NewStreamer("info")
+	dockerPercent := &display.DockerPercentDisplay{Output: streamer, Prefix: setup.Image}
+	if _, err := docker.ImagePull(setup.Image, dockerPercent); err != nil {
 		lumber.Error("code:Setup:docker.ImagePull(%s, nil): %s", setup.Image, err.Error())
 		setup.fail = true
 		return err

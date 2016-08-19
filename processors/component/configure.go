@@ -171,10 +171,10 @@ func (configure *Configure) runUpdate() error {
 
 // runConfigure will run the configure hook in the container
 func (configure *Configure) runConfigure() error {
-		display.StartTask("running configure hook")
-		defer display.StopTask()
+	display.StartTask("running configure hook")
+	defer display.StopTask()
 	// run configure
-		streamer := display.NewStreamer("info")
+	streamer := display.NewStreamer("info")
 	_, err := util.Exec(configure.Component.ID, "configure", configure.configurePayload(), streamer)
 
 	return err

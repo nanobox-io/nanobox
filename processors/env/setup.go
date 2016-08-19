@@ -46,6 +46,7 @@ func (setup *Setup) loadEnv() error {
 		setup.Env.ID = config.EnvID()
 		setup.Env.Directory = config.LocalDir()
 		setup.Env.Name = config.LocalDirName()
+		setup.Env.Links = map[string]string{}
 		return setup.Env.Save()
 	}
 

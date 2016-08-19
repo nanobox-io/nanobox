@@ -15,13 +15,14 @@ func (destroy Destroy) Run() error {
 	locker.GlobalLock()
 	defer locker.GlobalUnlock()
 
+	// delete the nanobox database
 	display.StartTask("removing database")
-	//
 	if err := destroy.removeDatabase(); err != nil {
 		return err
 	}
 	display.StopTask()
 
+	// remove the provider
 	display.StartTask("removing vm")
 	err := provider.Destroy()
 	if err != nil {
@@ -29,5 +30,7 @@ func (destroy Destroy) Run() error {
 		return err
 	}
 	display.StopTask()
+
 	return nil
 }
+

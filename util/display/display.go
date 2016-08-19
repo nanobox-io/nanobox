@@ -140,7 +140,7 @@ func StartTask(format string, args ...interface{}) error {
 func StopTask() error {
 
 	// stop the task summarizer
-	if Summary && summarizer != nil{
+	if Summary && summarizer != nil {
 		summarizer.Stop()
 		summarizer = nil
 	}
@@ -279,7 +279,7 @@ func log(message string) error {
 		return err
 	}
 
-	if Summary {
+	if Summary && summarizer != nil {
 		summarizer.Log(message)
 	} else {
 		// print the message

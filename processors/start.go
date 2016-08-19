@@ -1,16 +1,20 @@
-package processors
+package processor
 
 import (
 	"github.com/nanobox-io/nanobox/processors/provider"
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
-type Start struct {}
+// Start ...
+type Start struct {
+}
 
+//
 func (start Start) Run() error {
 	display.OpenContext("start provider")
-	defer display.CloseContext()	
-	
-	// run the provider setup processor
-	return provider.Setup{}.Run()
+	defer display.CloseContext()
+
+	// run a provider setup
+	providerStart := provider.Setup{}
+	return providerStart.Run()
 }

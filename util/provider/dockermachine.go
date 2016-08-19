@@ -66,8 +66,8 @@ func (machine DockerMachine) Create() error {
 	process := exec.Command(cmd[0], cmd[1:]...)
 
 	if verbose {
-		process.Stdout = display.NewStreamer("debug")
-		process.Stderr = display.NewStreamer("debug")
+		process.Stdout = display.NewStreamer("info")
+		process.Stderr = display.NewStreamer("info")
 	}
 
 	//
@@ -105,8 +105,8 @@ func (machine DockerMachine) Stop() error {
 	process := exec.Command(cmd[0], cmd[1:]...)
 
 	if verbose {
-		process.Stdout = display.NewStreamer("debug")
-		process.Stderr = display.NewStreamer("debug")
+		process.Stdout = display.NewStreamer("info")
+		process.Stderr = display.NewStreamer("info")
 	}
 
 	if err := process.Run(); err != nil {
@@ -133,8 +133,8 @@ func (machine DockerMachine) Destroy() error {
 	process := exec.Command(cmd[0], cmd[1:]...)
 
 	if verbose {
-		process.Stdout = display.NewStreamer("debug")
-		process.Stderr = display.NewStreamer("debug")
+		process.Stdout = display.NewStreamer("info")
+		process.Stderr = display.NewStreamer("info")
 	}
 
 	if err := process.Run(); err != nil {
@@ -159,8 +159,8 @@ func (machine DockerMachine) Start() error {
 		process := exec.Command(cmd[0], cmd[1:]...)
 
 		if verbose {
-			process.Stdout = display.NewStreamer("debug")
-			process.Stderr = display.NewStreamer("debug")
+			process.Stdout = display.NewStreamer("info")
+			process.Stderr = display.NewStreamer("info")
 		}
 
 		if err := process.Run(); err != nil {
@@ -189,8 +189,8 @@ func (machine DockerMachine) Start() error {
 		process := exec.Command(cmd[0], cmd[1:]...)
 
 		if verbose {
-			process.Stdout = display.NewStreamer("debug")
-			process.Stderr = display.NewStreamer("debug")
+			process.Stdout = display.NewStreamer("info")
+			process.Stderr = display.NewStreamer("info")
 		}
 
 		if err := process.Run(); err != nil {
@@ -210,8 +210,8 @@ func (machine DockerMachine) Start() error {
 	process := exec.Command(cmd[0], cmd[1:]...)
 
 	if verbose {
-		process.Stdout = display.NewStreamer("debug")
-		process.Stderr = display.NewStreamer("debug")
+		process.Stdout = display.NewStreamer("info")
+		process.Stderr = display.NewStreamer("info")
 	}
 
 	if err := process.Run(); err != nil {
