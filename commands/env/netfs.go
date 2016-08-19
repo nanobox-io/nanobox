@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox/processor/env/netfs"
+	"github.com/nanobox-io/nanobox/processors/env/netfs"
 	"github.com/nanobox-io/nanobox/util/display"
 )
 

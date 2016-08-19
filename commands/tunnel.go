@@ -5,7 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox/processor"
+	"github.com/nanobox-io/nanobox/processors"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/validate"
 )
@@ -56,7 +56,7 @@ ex: nanobox tunnel <container>
 	}
 
 	// set the meta arguments to be used in the processor and run the processor
-	tunnel := processor.Tunnel{
+	tunnel := processors.Tunnel{
 		App:       args[0],
 		Port:      tunnelCmdFlags.app,
 		Container: tunnelCmdFlags.port,

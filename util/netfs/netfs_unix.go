@@ -13,7 +13,7 @@ import (
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/provider"
+	"github.com/nanobox-io/nanobox/util/provider"
 )
 
 // EXPORTSFILE ...

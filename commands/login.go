@@ -3,7 +3,7 @@ package commands
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox/processor"
+	"github.com/nanobox-io/nanobox/processors"
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
@@ -32,7 +32,7 @@ func init() {
 
 // loginFn ...
 func loginFn(ccmd *cobra.Command, args []string) {
-	login := processor.Login{
+	login := processors.Login{
 		Username: loginCmdFlags.username,
 		Password: loginCmdFlags.password,
 	}

@@ -3,7 +3,7 @@ package commands
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox/processor"
+	"github.com/nanobox-io/nanobox/processors"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/validate"
 )
@@ -25,5 +25,5 @@ dev and sim platforms.
 
 // stopFn ...
 func stopFn(ccmd *cobra.Command, args []string) {
-	display.CommandErr(processor.Stop{}.Run())
+	display.CommandErr(processors.Stop{}.Run())
 }

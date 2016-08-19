@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/provider"
+	"github.com/nanobox-io/nanobox/util/provider"
 )
 
 var (
