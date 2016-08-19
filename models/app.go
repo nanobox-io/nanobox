@@ -58,10 +58,54 @@ func FindAppBySlug(envID, name string) (App, error) {
 	return app, nil
 }
 
+// AllApps loads all of the Apps across all environments
+func AllApps() ([]App, error) {
+	apps := []App{}
+	
+	// load all envs
+	envs, err := AllEnvs()
+	if err != nil {
+		return apps, fmt.Errorf("failed to load envs: %s", err.Error())
+	}
+	
+	for _, env := range envs {
+		// load all apps by env
+		envApps, err := AllAppsByEnv(env.ID)
+		if err != nil {
+			return apps, fmt.Errorf("failed to load env apps: %s", err.Error())
+		}
+		
+		for _, app := range envApps {
+			// append to the apps that we'll return
+			apps = append(apps, app)
+		}
+	}
+	
+	return apps, nil
+}
+
 // AllApps loads all of the Apps in the database
 func AllAppsByEnv(envID string) ([]App, error) {
 	// list of envs to return
 	apps := []App{}
 
 	return apps, getAll(envID, &apps)
+}
+
+// AllAppsByStatus loads all of the Apps filtering by status
+func AllAppsByStatus(status string) ([]App, error) {
+	apps := []App{}
+	
+	all, err := AllApps()
+	if err != nil {
+		return apps, fmt.Errorf("failed to load all apps: %s", err.Error())
+	}
+	
+	for _, app := range all {
+		if app.Status == status {
+			apps = append(apps, app)
+		}
+	}
+	
+	return apps, nil
 }

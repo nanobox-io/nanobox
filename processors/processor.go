@@ -55,21 +55,3 @@ func connect(req *http.Request) (net.Conn, *bytes.Buffer, error) {
 
 	return conn, bytes.NewBuffer(b), nil
 }
-
-// get a list of the apps in the database that believe they are up and running
-func upApps() []models.App {
-	apps := []models.App{}
-
-	envs, _ := models.AllEnvs()
-	for _, env := range envs {
-		envApps, _ := models.AllAppsByEnv(env.ID)
-		for _, envApp := range envApps {
-			if envApp.Status == "up" {
-				apps = append(apps, envApp)
-			}
-
-		}
-	}
-
-	return apps
-}
