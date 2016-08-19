@@ -63,6 +63,7 @@ func (setup Setup) Run() error {
 // setupNetwork sets up the provider network
 func (setup Setup) setupNetwork() error {
 	display.StartTask("Joining virtual network")
+	defer display.StopTask()
 	
 	// fetch the provider model
 	model, _ := models.LoadProvider()

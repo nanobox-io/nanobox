@@ -39,7 +39,7 @@ func (tunnel Tunnel) Run() error {
 	// set noproxy because this connection allows more multiple connections
 	// to use the tunnel
 	req.Header.Set("X-NOPROXY", "true")
-	conn, _, err := connect(req)
+	conn, err := connect(req)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -77,7 +77,7 @@ func handleConnection(conn net.Conn) {
 		return
 	}
 
-	remoteConn, br, err := connect(req)
+	remoteConn, err := connect(req)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -86,7 +86,7 @@ func handleConnection(conn net.Conn) {
 	defer remoteConn.Close()
 
 	fmt.Println("piping")
-	go io.Copy(conn, io.MultiReader(br, remoteConn))
+	go io.Copy(conn, remoteConn)
 	_, err = io.Copy(remoteConn, conn)
 	if err != nil {
 		fmt.Println(err)

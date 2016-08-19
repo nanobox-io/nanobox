@@ -73,7 +73,7 @@ func (cmd *Cmd) Output() (string, error) {
 	if err != nil {
 		lumber.Error("exec:Cmd:Run: %s, %s, %s", cmd.ID, cmd.Path, cmd.Payload)
 		lumber.Error("exec:cmd:Output: %s, err: %s", buffer.String(), err.Error())
-		err = fmt.Errorf("util:Cmd:%s: %s", cmd.Path, err.Error())
+		err = fmt.Errorf("util:Exec:%s: %s", cmd.Path, err.Error())
 	}
 
 	lumber.Debug("exec:Cmd:Output: %s", buffer.String())

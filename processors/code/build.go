@@ -236,7 +236,8 @@ func (codeBuild *Build) runBoxfileHook() error {
 // runDebugSession drops the user in the build container to debug
 func (codeBuild *Build) runDebugSession(err error) error {
 	fmt.Println("there has been a failure")
-	if registry.GetBool("debug") {
+	if err != nil && registry.GetBool("debug") {
+		display.ErrorTask()
 		fmt.Println(err)
 		fmt.Println("we will be dropping you into the failed build container")
 		fmt.Println("GOOD LUCK!")

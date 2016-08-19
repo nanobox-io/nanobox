@@ -41,7 +41,7 @@ func (console Console) Run() error {
 	}
 
 	// connect to remote machine
-	remoteConn, br, err := connect(req)
+	remoteConn, err := connect(req)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -73,7 +73,7 @@ func (console Console) Run() error {
 	}
 
   go io.Copy(remoteConn, os.Stdin)
-  io.Copy(os.Stdout, io.MultiReader(br, remoteConn))
+  io.Copy(os.Stdout, remoteConn)
 
 	return nil
 }

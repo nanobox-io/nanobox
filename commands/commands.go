@@ -5,11 +5,14 @@ import (
 	"github.com/jcelliott/lumber"
 	"github.com/spf13/cobra"
 
+	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
 //
 var (
+	// debug mode
+	debugMode bool
 
 	// display level debug
 	displayDebugMode bool
@@ -23,6 +26,10 @@ var (
 		Short: "",
 		Long:  ``,
 		PersistentPreRun: func(ccmd *cobra.Command, args []string) {
+
+			if debugMode {
+				registry.Set("debug", true)
+			}
 
 			// setup the display output
 			if displayDebugMode {
@@ -52,6 +59,7 @@ func init() {
 
 	// commented because this part is changing
 	// // persistent flags
+	NanoboxCmd.PersistentFlags().BoolVarP(&debugMode, "debug", "", false, "Increases display output and sets level to debug")
 	NanoboxCmd.PersistentFlags().BoolVarP(&displayDebugMode, "v", "", false, "Increases display output and sets level to debug")
 	NanoboxCmd.PersistentFlags().BoolVarP(&displayTraceMode, "vv", "", false, "Increases display output and sets level to trace")
 
