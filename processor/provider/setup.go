@@ -28,6 +28,7 @@ func (setup Setup) Run() error {
 	}
 
 	display.StopTask()
+	
 	display.StartTask("booting provider")
 
 	if err := provider.Start(); err != nil {

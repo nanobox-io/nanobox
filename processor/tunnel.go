@@ -68,15 +68,14 @@ func handleConnection(conn net.Conn) {
 		return
 	}
 
-	remoteConn, bytes, err := connect(req)
+	remoteConn, br, err := connect(req)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	defer remoteConn.Close()
 
-	conn.Write(bytes)
-	go io.Copy(conn, remoteConn)
+	go io.Copy(conn, io.MultiReader(br, remoteConn))
 	_, err = io.Copy(remoteConn, conn)
 	if err != nil {
 		fmt.Println(err)

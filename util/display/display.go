@@ -279,7 +279,7 @@ func log(message string) error {
 		return err
 	}
 
-	if Summary {
+	if Summary && summarizer != nil {
 		summarizer.Log(message)
 	} else {
 		// print the message
