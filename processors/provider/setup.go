@@ -39,10 +39,6 @@ func (setup Setup) Run() error {
 		return fmt.Errorf("failed to setup the provider network: %s", err.Error())
 	}
 
-	if err := setup.SetDefaultIP(); err != nil {
-		return fmt.Errorf("failed to set the default IP: %s", err.Error)
-	}
-
 	// load the docker environment
 	if err := provider.DockerEnv(); err != nil {
 		lumber.Error("provider:Setup:Run:provider.DockerEnv(): %s", err.Error())
@@ -62,9 +58,6 @@ func (setup Setup) Run() error {
 
 // setupNetwork sets up the provider network
 func (setup Setup) setupNetwork() error {
-	display.StartTask("Joining virtual network")
-	defer display.StopTask()
-	
 	// fetch the provider model
 	model, _ := models.LoadProvider()
 	
@@ -72,17 +65,35 @@ func (setup Setup) setupNetwork() error {
 	if model.HostIP != "" {
 		return nil
 	}
+
+	display.StartTask("Joining virtual network")
 	
 	// reserve an IP to be used for mounting
 	mountIP, err := dhcp.ReserveGlobal()
 	if err != nil {
+		display.ErrorTask()
 		lumber.Error("provider:Setup:setupNetwork:dhcp.ReserveGlobal(): %s", err.Error())
 		return fmt.Errorf("failed to reserve a global IP: %s", err.Error())
+	}
+	
+	// add the mount IP to the provider
+	if err := provider.AddIP(mountIP); err != nil {
+		display.ErrorTask()
+		lumber.Error("provider:Setup:setupNetwork:provider.AddIP(%s): %s", mountIP, err.Error())
+		return fmt.Errorf("failed to add an IP to the provider for mounting: %s", err.Error())
+	}
+	
+	// set the mount IP as the default gateway
+	if err := provider.SetDefaultIP(mountIP); err != nil {
+		display.ErrorTask()
+		lumber.Error("provider:Setup:setupNetwork:provider.SetDefaultIP(%s): %s", mountIP, err.Error())
+		return fmt.Errorf("failed to set the mount IP as the default gateway: %s", err.Error())
 	}
 	
 	// retrieve the provider's Host IP
 	hostIP, err := provider.HostIP()
 	if err != nil {
+		display.ErrorTask()
 		lumber.Error("provider:Setup:setupNetwork:provider.HostIP(): %s", err.Error())
 		return fmt.Errorf("unable to retrieve the host IP from the provider: %s", err.Error())
 	}
@@ -91,22 +102,11 @@ func (setup Setup) setupNetwork() error {
 	model.MountIP = mountIP.String()
 	model.HostIP  = hostIP
 	if err := model.Save(); err != nil {
+		display.ErrorTask()
 		return fmt.Errorf("failed to persist the provider model: %s", err.Error())
 	}
 	
-	display.CloseContext()
+	display.StopTask()
 	
 	return nil
 }
-
-func (setup Setup) SetDefaultIP() error {
-	model, _ := models.LoadProvider()
-
-	if err := provider.AddIP(model.MountIP); err != nil {
-		lumber.Error("provider:Setup:SetDefaultIP:provider.AddIP(%s): %s", model.MountIP, err.Error())
-		return err
-	}
-
-	return provider.SetDefaultIP(model.MountIP)
-}
-

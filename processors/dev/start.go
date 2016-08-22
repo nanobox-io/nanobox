@@ -10,7 +10,6 @@ import (
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
-// Start ...
 type Start struct {
 	// mandatory
 	Env models.Env
@@ -18,18 +17,11 @@ type Start struct {
 	App models.App
 }
 
-//
+// Run initializes and starts the dev environment
 func (start *Start) Run() error {
 	display.OpenContext("starting dev")
 
-	registry.Set("appname", "dev")
-
-	if start.App.ID == "" {
-		start.App, _ = models.FindAppBySlug(config.EnvID(), "dev")
-	}
-
-	// if the app has not been setup
-	// setup the app first
+	// before we can setup the app, the env has to be setup
 	if provider.Status() != "Running" {
 		envSetup := env.Setup{}
 		err := envSetup.Run()

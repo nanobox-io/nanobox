@@ -8,16 +8,20 @@ import (
 	"github.com/nanobox-io/nanobox/util/config"
 )
 
-// Setup ...
 type Setup struct {
-	// created
 	Env models.Env
 }
 
-//
-func (setup *Setup) Run() error {
+// Run sets up the provider and the env mounts
+func (s *Setup) Run() error {
 
-	setup.loadEnv()
+	// ensure the env data has been generated
+	if err := s.Env.Generate(); err != nil {
+		lumber.Error("env:Setup:Run:models:Env:Generate(): %s", err.Error())
+		return fmt.Errorf("failed to initialize the env data: %s", err.Error())
+	}
+
+	
 
 	if err := setup.setupProvider(); err != nil {
 		return err
@@ -27,28 +31,14 @@ func (setup *Setup) Run() error {
 		return err
 	}
 
-	// if there is an environment then we should set up app
-	// if not (in the case of a build) no app setup is necessary
-	if registry.GetString("appname") != "" {
-		if err := setup.setupApp(); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-// get the environment data
-func (setup *Setup) loadEnv() error {
-	setup.Env, _ = models.FindEnvByID(config.EnvID())
-
-	if setup.Env.ID == "" {
-		setup.Env.ID = config.EnvID()
-		setup.Env.Directory = config.LocalDir()
-		setup.Env.Name = config.LocalDirName()
-		setup.Env.Links = map[string]string{}
-		return setup.Env.Save()
-	}
+	// TODO: we shouldn't be doing this here
+	// // if there is an environment then we should set up app
+	// // if not (in the case of a build) no app setup is necessary
+	// if registry.GetString("appname") != "" {
+	// 	if err := setup.setupApp(); err != nil {
+	// 		return err
+	// 	}
+	// }
 
 	return nil
 }
@@ -66,11 +56,11 @@ func (setup *Setup) setupMounts() error {
 	return mount.Run()
 }
 
-// setupApp sets up the app plaftorm and data services
-func (setup *Setup) setupApp() error {
-
-	// setup the app
-	appSetup := app.Setup{Env: setup.Env}
-
-	return appSetup.Run()
-}
+// // setupApp sets up the app plaftorm and data services
+// func (setup *Setup) setupApp() error {
+// 
+// 	// setup the app
+// 	appSetup := app.Setup{Env: setup.Env}
+// 
+// 	return appSetup.Run()
+// }

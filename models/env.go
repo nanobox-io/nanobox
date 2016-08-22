@@ -2,6 +2,8 @@ package models
 
 import (
 	"fmt"
+	
+	"github.com/nanobox-io/nanobox/util/config"
 )
 
 type Env struct {
@@ -15,11 +17,16 @@ type Env struct {
 	BuiltBoxfile string
 }
 
+// IsNew returns true if the Env hasn't been created yet
+func (e *Env) IsNew() bool {
+	return e.ID == ""
+}
+
 // Save persists the Env to the database
 func (e *Env) Save() error {
 
 	if err := put("envs", e.ID, e); err != nil {
-		return fmt.Errorf("failed to save app: %s", err.Error())
+		return fmt.Errorf("failed to save env: %s", err.Error())
 	}
 
 	return nil
@@ -29,10 +36,27 @@ func (e *Env) Save() error {
 func (e *Env) Delete() error {
 
 	if err := delete("envs", e.ID); err != nil {
-		return fmt.Errorf("failed to delete app: %s", err.Error())
+		return fmt.Errorf("failed to delete env: %s", err.Error())
 	}
 
 	return nil
+}
+
+// Generate populates an Env from config data and persists the record
+func (e *Env) Generate() error {
+	
+	// short-circuit if this record has already been generated
+	if !e.IsNew() {
+		return nil
+	}
+	
+	// populate the data from the config package
+	e.ID        = config.EnvID()
+	e.Directory = config.LocalDir()
+	e.Name      = config.LocalDirName()
+	e.Links     = map[string]string{}
+	
+	return e.Save()
 }
 
 // FindEnvByID finds an app by an ID
