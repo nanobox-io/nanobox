@@ -1,6 +1,8 @@
 package processors
 
 import (
+	"github.com/jcelliott/lumber"
+
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/code"
 	"github.com/nanobox-io/nanobox/processors/provider"
@@ -32,13 +34,15 @@ func (deploy *Deploy) Run() error {
 	if err := deploy.setWarehouseToken(); err != nil {
 		return err
 	}
-
 	if err := deploy.publishCode(); err != nil {
 		return err
 	}
-
 	// tell odin what happened
-	return odin.Deploy(deploy.appID, deploy.buildID, deploy.Env.BuiltBoxfile, deploy.Message)
+	if err := odin.Deploy(deploy.appID, deploy.buildID, deploy.Env.BuiltBoxfile, deploy.Message); err != nil {
+		lumber.Error("deploy:odin.Deploy(%s,%s,%s,%s): %s", deploy.appID, deploy.buildID, deploy.Env.BuiltBoxfile, deploy.Message, err.Error())
+		return err
+	}
+	return nil
 }
 
 // setWarehouseToken ...
@@ -51,11 +55,16 @@ func (deploy *Deploy) setWarehouseToken() (err error) {
 	deploy.buildID = util.RandomString(30)
 	deploy.warehouseToken, deploy.warehouseURL, err = odin.GetWarehouse(deploy.appID)
 	if err != nil {
+		lumber.Error("deploy:setWarehouseToken:GetWarehouse(%s): %s", deploy.appID, err.Error())
 		return
 	}
 
 	// get the previous build if there was one
 	deploy.previousBuild, err = odin.GetPreviousBuild(deploy.appID)
+	if err != nil {
+		lumber.Error("deploy:setWarehouseToken:GetPreviousBuild(%s): %s", deploy.appID, err.Error())
+		return
+	}
 	return
 }
 

@@ -109,4 +109,3 @@ func (setup Setup) SetDefaultIP() error {
 
 	return provider.SetDefaultIP(model.MountIP)
 }
-

@@ -26,7 +26,7 @@ func (cmd *Cmd) Run() error {
 	run := []string{"/opt/nanobox/hooks/" + cmd.Path, cmd.Payload}
 
 	// start the exec
-	exec, hj, err := docker.ExecStart(cmd.ID, run, false, true, true)
+	exec, hj, err := docker.ExecStart(cmd.ID, run, false, true, true, false)
 	if err != nil {
 		return err
 	}
