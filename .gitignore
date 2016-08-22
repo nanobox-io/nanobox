@@ -29,7 +29,7 @@ TODO
 nanobox
 nanobox-updater
 updater/updater
-build
+.build
 rsrc.syso
 Icon
 .sync
