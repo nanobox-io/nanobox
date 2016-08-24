@@ -2,7 +2,6 @@ package link
 
 import (
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/processors/env"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/odin"
 )
@@ -17,14 +16,15 @@ type Add struct {
 //
 func (add Add) Run() error {
 
+	// TODO: turn this into env.Generate() 
 	// we dont have an environemnt so we will need to set one up
-	if add.Env.ID == "" {
-		envSetup := &env.Setup{}
-		if err := envSetup.Run(); err != nil {
-			return err
-		}
-		add.Env = envSetup.Env
-	}
+	// if add.Env.ID == "" {
+	// 	envSetup := &env.Setup{}
+	// 	if err := envSetup.Run(); err != nil {
+	// 		return err
+	// 	}
+	// 	add.Env = envSetup.Env
+	// }
 
 	// set the alias to be the default its missing
 	if add.Alias == "" {

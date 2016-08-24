@@ -60,9 +60,9 @@ func (e *Env) Generate() error {
 }
 
 // FindEnvByID finds an app by an ID
-func FindEnvByID(ID string) (Env, error) {
+func FindEnvByID(ID string) (*Env, error) {
 
-	env := Env{}
+	env := &Env{}
 
 	if err := get("envs", ID, &env); err != nil {
 		return env, fmt.Errorf("failed to load env: %s", err.Error())
@@ -72,9 +72,9 @@ func FindEnvByID(ID string) (Env, error) {
 }
 
 // AllEnvs loads all of the Envs in the database
-func AllEnvs() ([]Env, error) {
+func AllEnvs() ([]*Env, error) {
 	// list of apps to return
-	apps := []Env{}
+	apps := []*Env{}
 
 	return apps, getAll("envs", &apps)
 }

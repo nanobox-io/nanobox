@@ -1,148 +1,91 @@
 package app
 
 import (
-	"fmt"
-
-	"github.com/jcelliott/lumber"
-
-	"github.com/nanobox-io/nanobox/commands/registry"
-	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/processors/component"
-	"github.com/nanobox-io/nanobox/processors/platform"
-	"github.com/nanobox-io/nanobox/util/dhcp"
-	"github.com/nanobox-io/nanobox/util/locker"
+  "fmt"
+  
+  "github.com/jcelliott/lumber"
+  
+  "github.com/nanobox-io/nanobox/models"
+  "github.com/nanobox-io/nanobox/processors/component"
+  "github.com/nanobox-io/nanobox/processors/platform"
+  "github.com/nanobox-io/nanobox/util/dhcp"
 )
 
-//
-type Setup struct {
-	// required
-	Env     models.Env
-	AppName string
-
-	// added
-	App models.App
-}
-
-//
-func (setup *Setup) Run() error {
-
-	// fill in this apps name from the registry
-	// this should allow the env.Setup to run
-	// without ahving to knwo what apps will be setup
-	if setup.AppName == "" {
-		setup.AppName = registry.GetString("appname")
-	}
-
-	setup.loadApp()
-
-	lumber.Debug("app load complete %+v", setup.App)
-
-	// establish an app-level lock to ensure we're the only ones setting up an app
-	// also, we need to ensure that the lock is released even if we error out.
+// Setup sets up the app on the provider and in the database
+func Setup(e *models.Env, a *models.App, name string) error {
 	locker.LocalLock()
-	defer locker.LocalUnlock()
+	defer locker.LocalUnlock()  
+  
+  // short-circuit if this app is already active
+  if a.State == "active" {
+    return nil
+  }
+  
+  // generate the app data
+  if err := a.Generate(e, name); err != nil {
+    lumber.Error("app:Setup:models.App:Generate(): %s", err.Error())
+    return fmt.Errorf("failed to generate app data: %s", err.Error())
+  }
+  
+  // reserve IPs
+  if err := reserveIPs(a); err != nil {
+    return fmt.Errorf("failed to reserve app IPs: %s", err.Error())
+  }
 
-	// short-circuit if the app is already active
-	if setup.App.State == ACTIVE {
-		return nil
-	}
+  // clean crufty components
+  if err := component.Clean(a); err != nil {
+    return fmt.Errorf("failed to clean crufty components: %s", err.Error())
+  }
+  
+  // setup the platform services
+  if err := platform.Setup(a); err != nil {
+    return fmt.Errorf("failed to setup platform services: %s", err.Error())
+  }
 
-	if err := setup.reserveIPs(); err != nil {
-		return err
-	}
+  // set app state to active
+  a.State = "active"
+  if err := a.Save(); err != nil {
+    lumber.Error("app:Setup:models:App:Save(): %s", err.Error())
+    return fmt.Errorf("failed to persist app state: %s", err.Error())
+  }
 
-	if err := setup.generateEvars(); err != nil {
-		return err
-	}
-
-	if err := setup.persistApp(); err != nil {
-		return err
-	}
-
-	// clean up after any possible failures in a previous deploy
-	componentClean := component.Clean{App: setup.App}
-	if err := componentClean.Run(); err != nil {
-		return err
-	}
-
-	// setup the platform services
-	platformSetup := platform.Setup{App: setup.App}
-	return platformSetup.Run()
+  return nil
 }
 
-// loadApp loads the app from the db
-func (setup *Setup) loadApp() error {
-	// the app might not exist yet, so let's not return the error if it fails
-	setup.App, _ = models.FindAppBySlug(setup.Env.ID, setup.AppName)
+// reserIPs reserves app-level ip addresses
+func reserveIPs(a *models.App) error {
+  // reserve a dev ip
+  envIP, err := dhcp.ReserveGlobal()
+  if err != nil {
+    lumber.Error("app:reserveIPs:dhcp.ReserveGlobal(): %s", err.Error())
+    return fmt.Errorf("failed to reserve an env IP: %s", err.Error())
+  }
 
-	// set the default state
-	if setup.App.State == "" {
-		lumber.Debug("app not setup yet")
-		setup.App.EnvID = setup.Env.ID
-		setup.App.ID = fmt.Sprintf("%s_%s", setup.Env.ID, setup.AppName)
-		setup.App.Name = setup.AppName
-		setup.App.State = INITIALIZED
-		setup.App.GlobalIPs = map[string]string{}
-		setup.App.LocalIPs = map[string]string{}
-		setup.App.Evars = map[string]string{}
-	}
+  // reserve a logvac ip
+  logvacIP, err := dhcp.ReserveLocal()
+  if err != nil {
+    lumber.Error("app:reserveIPs:dhcp.ReserveLocal(): %s", err.Error())
+    return fmt.Errorf("failed to reserve a logvac IP: %s", err.Error())
+  }
 
-	lumber.Debug("app:Setup:loadApp:appModel:%+v", setup.App)
-
-	return nil
-}
-
-// reserveIPs reserves necessary app global and local ip addresses
-func (setup *Setup) reserveIPs() error {
-
-	// reserve a dev ip
-	envIP, err := dhcp.ReserveGlobal()
-	if err != nil {
-		lumber.Error("app:Setup:reserveIPs:dhcp.ReserveGlobal(): %s", err.Error())
-		return err
-	}
-
-	// reserve a logvac ip
-	logvacIP, err := dhcp.ReserveLocal()
-	if err != nil {
-		lumber.Error("app:Setup:reserveIPs:dhcp.ReserveLocal(): %s", err.Error())
-		return err
-	}
-
-	// reserve a mist ip
-	mistIP, err := dhcp.ReserveLocal()
-	if err != nil {
-		lumber.Error("app:Setup:reserveIPs:dhcp.ReserveLocal(): %s", err.Error())
-		return err
-	}
-
-	// now let's assign them onto the app
-	setup.App.GlobalIPs["env"] = envIP.String()
-
-	setup.App.LocalIPs["logvac"] = logvacIP.String()
-	setup.App.LocalIPs["mist"] = mistIP.String()
-
-	return nil
-}
-
-// generateEvars generates the default app evars
-func (setup *Setup) generateEvars() error {
-
-	if setup.App.Evars["APP_NAME"] == "" {
-		setup.App.Evars["APP_NAME"] = setup.AppName
-	}
-
-	return nil
-}
-
-// persistApp saves the app to the db
-func (setup *Setup) persistApp() error {
-	// set the app state to active so we don't setup again
-	setup.App.State = ACTIVE
-
-	if err := setup.App.Save(); err != nil {
-		lumber.Error("app:Setup:persistApp:App.Save(): %s", err.Error())
-		return err
-	}
-	return nil
+  // reserve a mist ip
+  mistIP, err := dhcp.ReserveLocal()
+  if err != nil {
+    lumber.Error("app:reserveIPs:dhcp.ReserveLocal(): %s", err.Error())
+    return fmt.Errorf("failed to reserve a mist IP: %s", err.Error())
+  }
+  
+  // now assign the IPs onto the app model
+  a.GlobalIPs["env"] = envIP.String()
+  
+  a.LocalIPs["logvac"] = logvacIP.String()
+  a.LocalIPs["mist"]   = mistIP.String()
+  
+  // save the app
+  if err := a.Save(); err != nil {
+    lumber.Error("app:reserveIPs:models:App:Save(): %s", err.Error())
+    return fmt.Errorf("failed to persist IPs to the db: %s", err.Error())
+  }
+  
+  return nil
 }

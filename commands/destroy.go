@@ -22,5 +22,5 @@ var (
 
 // destroyFn ...
 func destroyFn(ccmd *cobra.Command, args []string) {
-	display.CommandErr(processors.Destroy{}.Run())
+	display.CommandErr(processors.Destroy())
 }

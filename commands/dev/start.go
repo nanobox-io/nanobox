@@ -31,6 +31,5 @@ func devStart(ccmd *cobra.Command, args []string) {
 	env, _ := models.FindEnvByID(config.EnvID())
 	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
 
-	devStart := dev.Start{Env: env, App: app}
-	display.CommandErr(devStart.Run())
+	display.CommandErr(dev.Start(env, app))
 }

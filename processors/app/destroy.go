@@ -1,122 +1,97 @@
 package app
 
 import (
-	"fmt"
-	"net"
-
-	"github.com/jcelliott/lumber"
-	"github.com/nanobox-io/golang-docker-client"
-
-	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/processors/app/dns"
-	"github.com/nanobox-io/nanobox/processors/component"
-
-	"github.com/nanobox-io/nanobox/util/dhcp"
-	"github.com/nanobox-io/nanobox/util/locker"
+  "fmt"
+  "net"
+  
+  "github.com/jcelliott/lumber"
+  "github.com/nanobox-io/golang-docker-client"
+  
+  "github.com/nanobox-io/nanobox/models"
+  "github.com/nanobox-io/nanobox/processors/app/dns"
+  "github.com/nanobox-io/nanobox/processors/component"
+  "github.com/nanobox-io/nanobox/processors/provider"
+  "github.com/nanobox-io/nanobox/util/dhcp"
 )
 
-// Destroy ...
-type Destroy struct {
-	App models.App
+// Destroy removes the app from the provider and the database
+func Destroy(a *models.App) error {
+  locker.LocalLock()
+  defer locker.LocalUnlock()
+  
+  // short-circuit if this app isn't created
+  if a.IsNew() {
+    return nil
+  }
+  
+  // initialize docker for the provider
+  if err := provider.Init(); err != nil {
+    return fmt.Errorf("failed to initialize docker environment: %s", err.Error())
+  }
+  
+  // remove the dev container if there is one
+  docker.ContainerRemove(fmt.Sprintf("nanobox_%s", a.ID))
+  
+  // destroy the associated components
+  if err := destroyComponents(s); err != nil {
+    return fmt.Errorf("failed to destroy components: %s", err.Error())
+  }
+  
+  // release IPs
+  if err := releaseIPs(a); err != nil {
+    return fmt.Errorf("failed to release IPs: %s", err.Error())
+  }
+  
+  // remove dns entries for this app
+  if err := dns.RemoveAll(a); err != nil {
+    return fmt.Errorf("failed to clean dns entries: %s", err.Error())
+  }
+  
+  // destroy the app model
+  if err := a.Delete(); err != nil {
+    lumber.Error("app:Destroy:models.App.Destroy(): %s", err.Error())
+    return fmt.Errorf("failed to delete app model: %s", err.Error())
+  }
+  
+  return nil
 }
 
-//
-func (destroy *Destroy) Run() error {
-
-	if destroy.App.ID == "" {
-		// the app doesnt exist
-		return nil
-	}
-
-	dockerInit()
-
-	// establish an app-level lock to ensure we're the only ones setting up an app
-	// also, we need to ensure that the lock is released even if we error out.
-	locker.LocalLock()
-	defer locker.LocalUnlock()
-
-	// remove the dev container if there is one
-	// but dont catch any errors because there
-	// may not be a container
-	docker.ContainerRemove(fmt.Sprintf("nanobox_%s", destroy.App.ID))
-
-	// remove all app components
-	if err := destroy.removeComponents(); err != nil {
-		return err
-	}
-
-	// release my ips
-	if err := destroy.releaseIPs(); err != nil {
-		return err
-	}
-
-	// remove all dns entries for this app
-	dnsRemoveAll := dns.RemoveAll{destroy.App}
-	if err := dnsRemoveAll.Run(); err != nil {
-		// report the error but dont stop the process
-	}
-
-	// destroy the app
-	if err := destroy.App.Delete(); err != nil {
-		lumber.Error("app:Destroy:app.Delete(): %s", err.Error())
-		return err
-	}
-
-	return nil
+// destroyComponents destroys all the components of this app
+func destroyComponents(a *models.App) error {
+  components, err := models.AllComponentsByApp(a.ID)
+  if err != nil {
+    lumber.Error("app:destroyComponents:models.AllComponentsByApp(%s) %s", a.ID, err.Error())
+    return fmt.Errorf("unable to retrieve components: %s", err.Error())
+  }
+  
+  for _, c := range components {
+    if err := component.Destroy(a, c); err != nil {
+      return fmt.Errorf("failed to destroy app component: %s", err.Error())
+    }
+  }
+  
+  return nil
 }
 
-// releaseIPs releases necessary app-global ip addresses
-func (destroy *Destroy) releaseIPs() error {
+// releaseIPs releases the app-level ip addresses
+func releaseIPs(a *models.App) error {
+  // release all of the external IPs
+  for _, ip := range a.GlobalIPs {
+    // release the IP
+    if err := dhcp.ReturnIP(net.ParseIP(ip)); err != nil {
+      lumber.Error("app:Destroy:releaseIPs:dhcp.ReturnIP(%s): %s", ip, err.Error())
+      return fmt.Errorf("failed to release IP: %s", err.Error())
+    }
+  }
 
-	// release all of the external IPs
-	for _, ip := range destroy.App.GlobalIPs {
-		// release the IP
-		if err := dhcp.ReturnIP(net.ParseIP(ip)); err != nil {
-			lumber.Error("app:Destroy:releaseIPs:dhcp.ReturnIP(%s): %s", ip, err.Error())
-			return err
-		}
-	}
+  // release all of the local IPs
+  for _, ip := range a.LocalIPs {
+    // release the IP
+    if err := dhcp.ReturnIP(net.ParseIP(ip)); err != nil {
+      lumber.Error("app:Destroy:releaseIPs:dhcp.ReturnIP(%s): %s", ip, err.Error())
+      return fmt.Errorf("failed to release IP: %s", err.Error())
+    }
+  }
 
-	// release all of the local IPs
-	for _, ip := range destroy.App.LocalIPs {
-		// release the IP
-		if err := dhcp.ReturnIP(net.ParseIP(ip)); err != nil {
-			lumber.Error("app:Destroy:releaseIPs:dhcp.ReturnIP(%s): %s", ip, err.Error())
-			return err
-		}
-	}
-
-	return nil
-}
-
-// removeComponents gets all the components in the app and remove them
-func (destroy Destroy) removeComponents() error {
-
-	components, err := models.AllComponentsByApp(destroy.App.ID)
-	if err != nil {
-		lumber.Error("app:Destroy:removeComponents:models.AllComponentsByApp(%s) %s", destroy.App.ID, err.Error())
-		return fmt.Errorf("unable to retrieve components: %s", err.Error())
-	}
-
-	for _, comp := range components {
-
-		// do not remove a inprogress build
-		if comp.Name == "build" {
-			continue
-		}
-
-		// creat a component destroy
-		componentDestroy := component.Destroy{
-			App:       destroy.App,
-			Component: comp,
-		}
-
-		// run it
-		if err := componentDestroy.Run(); err != nil {
-			// continue but report the error
-		}
-
-	}
-
-	return nil
+  return nil
 }

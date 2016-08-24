@@ -26,8 +26,8 @@ func (a *Auth) Delete() error {
 }
 
 // LoadAuth loads the auth entry
-func LoadAuth() (Auth, error) {
-	auth := Auth{}
+func LoadAuth() (*Auth, error) {
+	auth := &Auth{}
 
 	if err := get("registry", "auth", &auth); err != nil {
 		return auth, fmt.Errorf("failed to load auth: %s", err.Error())

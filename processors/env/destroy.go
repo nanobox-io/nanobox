@@ -3,32 +3,23 @@ package env
 import (
 	"fmt"
 
+	"github.com/jcelliott/lumber"
+
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/app"
-	"github.com/nanobox-io/nanobox/processors/provider"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
 
-// Destroy ...
-type Destroy struct {
-	Env models.Env
-}
-
-//
-func (destroy *Destroy) Run() error {
+// Destroy brings down the environment setup
+func Destroy(env *models.Env) error {
 	locker.LocalLock()
 	defer locker.LocalUnlock()
 
-	// we need the vm to be up and running
-	providerSetup := provider.Setup{}
-	if err := providerSetup.Run(); err != nil {
-		return err
-	}
-
 	// find apps
-	apps, err := models.AllAppsByEnv(destroy.Env.ID)
+	apps, err := models.AllAppsByEnv(env.ID)
 	if err != nil {
-		return err
+		lumber.Error("env:Destroy:models.AllAppsByEnv(%s): %s", env.ID, err.Error())
+		return fmt.Errorf("failed to load app collection: %s", err.Error())
 	}
 
 	// destroy apps
@@ -43,14 +34,5 @@ func (destroy *Destroy) Run() error {
 		}
 	}
 
-	// destroy the mounts
-	return destroy.destroyMounts()
-}
-
-// destroyMounts removes the environments mounts from the provider
-func (destroy *Destroy) destroyMounts() error {
-	// we will not be tearing down the mounts currently
-	// this is because they are required for production builds
 	return nil
-	// return processors.Run("app_unmount", destroy.control)
 }

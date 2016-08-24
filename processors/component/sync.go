@@ -1,167 +1,114 @@
 package component
 
 import (
-	"regexp"
-
-	"github.com/nanobox-io/nanobox-boxfile"
-	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util/display"
+  "fmt"
+  
+  "github.com/jcelliott/lumber"
+  
+  "github.com/nanobox-io/nanobox/models"
+  "github.com/nanobox-io/nanobox-boxfile"
 )
 
-// Sync ...
-type Sync struct {
-	Env             models.Env
-	App             models.App
-	builtBoxfile    boxfile.Boxfile
-	deployedBoxfile boxfile.Boxfile
+// Sync syncronizes an app's components with the boxfile config
+func Sync(e *models.Env, a *models.App) error {
+  
+  // purge delta components
+  if err := purgeDeltaComponents(e, a); err != nil {
+    return fmt.Errorf("failed to purge delta components: %s", err.Error())
+  }
+  
+  // provision components
+  if err := provisionComponents(e, a); err != nil {
+    return fmt.Errorf("failed to provision components: %s", err.Error())
+  }
+  
+  // update deployed boxfile
+  a.DeployedBoxfile = e.BuiltBoxfile
+  if err := a.Save(); err != nil {
+    lumber.Error("component:Sync:models.App.Save(): %s", err.Error())
+    return fmt.Errorf("failed to update deployed boxfile on app: %s", err.Error())
+  }
+  
+  return nil
 }
 
-//
-func (sync *Sync) Run() error {
-	display.OpenContext("syncronizing boxfile components")
-	defer display.CloseContext()
-
-	if err := sync.loadBuiltBoxfile(); err != nil {
-		return err
-	}
-
-	if err := sync.loadDeployedBoxfile(); err != nil {
-		return err
-	}
-
-	if err := sync.purgeDeltaComponents(); err != nil {
-		return err
-	}
-
-	if err := sync.provisionComponents(); err != nil {
-		return err
-	}
-
-	if err := sync.updateDeployedBoxfile(); err != nil {
-		return err
-	}
-
-	return nil
+// purgeDeltaComponents purges components that have changed in the boxfile
+func purgeDeltaComponents(e *models.Env, a *models.App) error {
+  // parse the boxfiles
+  builtBoxfile    := boxfile.New([]byte(e.BuiltBoxfile))
+  deployedBoxfile := boxfile.New([]byte(a.DeployedBoxfile))
+  
+  components, err := models.AllComponentsByApp(a.ID)
+  if err != nil {
+    lumber.Error("component:purgeDeltaComponents:models.AllComponentsByApp(%s): %s", a.ID, err.Error())
+    return fmt.Errorf("failed to load app components: %s", err.Error())
+  }
+  
+  for _, component := range components {
+    
+    // ignore platform services
+    if isPlatformUID(component.Name) {
+      continue
+    }
+    
+    // fetch the data nodes
+    newNode := builtBoxfile.Node(component.Name)
+    oldNode := deployedBoxfile.Node(component.Name)
+    
+    // skip if the new node is valid and they are the same
+    if newNode.Valid && newNode.Equal(oldNode) {
+      continue
+    }
+    
+    // destroy the component
+    if err := Destroy(a, component); err != nil {
+      return fmt.Errorf("failed to destroy component: %s", err.Error())
+    }
+  }
+  
+  return nil
 }
 
-// loadBuiltBoxfile loads the new build boxfile from the database
-func (sync *Sync) loadBuiltBoxfile() error {
-	sync.builtBoxfile = boxfile.New([]byte(sync.Env.BuiltBoxfile))
+// provisionComponents will provision components from the boxfile
+func provisionComponents(e *models.Env, a *models.App) error {
+  // parse the boxfile
+  builtBoxfile := boxfile.New([]byte(e.BuiltBoxfile))
+  
+  // grab all of the data nodes
+  dataServices := builtBoxfile.Nodes("data")
+  
+  for _, name := range dataServices {
+    // check to see if this component is already active
+    comp, _ := models.FindComponentBySlug(a.ID, name)
+    if comp.State == "active" {
+      continue
+    }
 
-	return nil
-}
+    // fetch the image
+    image := builtBoxfile.Node(name).StringValue("image")
 
-// loadDeployedBoxfile loads the old boxfile from the database
-func (sync *Sync) loadDeployedBoxfile() error {
-	sync.deployedBoxfile = boxfile.New([]byte(sync.App.DeployedBoxfile))
-
-	return nil
-}
-
-// update that we have deployed
-func (sync *Sync) updateDeployedBoxfile() error {
-	sync.App.DeployedBoxfile = sync.Env.BuiltBoxfile
-	return sync.App.Save()
-}
-
-// purgeDeltaComponents will purge the services that were removed from the boxfile
-func (sync *Sync) purgeDeltaComponents() error {
-	display.StartTask("perging delta components")
-
-	components, err := models.AllComponentsByApp(sync.App.ID)
-	if err != nil {
-		display.ErrorTask()
-		return err
-	}
-
-	for _, component := range components {
-
-		// ignore platform services
-		if isPlatformUID(component.Name) {
-			continue
-		}
-
-		// fetch the nodes
-		newNode := sync.builtBoxfile.Node(component.Name)
-		oldNode := sync.deployedBoxfile.Node(component.Name)
-
-		// skip if the new node is valid and they are the same
-		if newNode.Valid && newNode.Equal(oldNode) {
-			continue
-		}
-
-		if err := sync.purgeComponent(component); err != nil {
-			display.ErrorTask()
-			return err
-		}
-
-	}
-
-	display.StopTask()
-	return nil
-}
-
-// purgeComponent will purge a service from the nanobox
-func (sync *Sync) purgeComponent(component models.Component) error {
-	destroy := Destroy{sync.App, component}
-	return destroy.Run()
-}
-
-// provisionServices will provision services that are defined in the boxfile
-// but not running on nanobox
-func (sync *Sync) provisionComponents() error {
-	display.StartTask("building new/updated components")
-
-	// grab all of the data nodes
-	dataServices := sync.builtBoxfile.Nodes("data")
-
-	for _, name := range dataServices {
-		image := sync.builtBoxfile.Node(name).StringValue("image")
-
-		if image == "" {
-			serviceType := regexp.MustCompile(`.+\.`).ReplaceAllString(name, "")
-			image = "nanobox/" + serviceType
-		}
-
-		// check to see if this component is already active
-		comp, _ := models.FindComponentBySlug(sync.App.ID, name)
-		if comp.State == ACTIVE {
-			continue
-		}
-
-		setup := &Setup{
-			App:   sync.App,
-			Image: image,
-			Name:  name,
-		}
-
-		// setup the service
-		if err := setup.Run(); err != nil {
-			display.ErrorTask()
-			return err
-		}
-
-		// each component has the potential to update the app
-		sync.App = setup.App
-
-		configure := Configure{
-			App:       sync.App,
-			Component: setup.Component,
-		}
-
-		// and configure it
-		if err := configure.Run(); err != nil {
-			display.ErrorTask()
-			return err
-		}
-
-	}
-
-	display.StopTask()
-	return nil
+    // setup
+    if err := Setup(a, name, name, image); err != nil {
+      return fmt.Errorf("failed to setup component (%s): %s", name, err.Error())
+    }
+    
+    // load the component
+    c, err := models.FindComponentBySlug(a.ID, name)
+    if err != nil {
+      lumber.Error("component:provisionComponents:models.FindComponentBySlug(%s, %s): %s", a.ID, name, err.Error())
+      return fmt.Errorf("failed to load the component: %s", err.Error())
+    }
+    
+    // configure
+    if err := Configure(a, c); err != nil {
+      return fmt.Errorf("failed to configure component: %s", err.Error())
+    }
+  }
+  
+  return nil
 }
 
 // isPlatform will return true if the uid matches a platform service
 func isPlatformUID(uid string) bool {
-	return uid == PORTAL || uid == HOARDER || uid == MIST || uid == LOGVAC
+	return uid == "portal" || uid == "hoarder" || uid == "mist" || uid == "logvac"
 }

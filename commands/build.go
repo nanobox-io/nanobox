@@ -25,19 +25,20 @@ deployed into dev, sim, or production platforms.
 		Run:    buildFn,
 	}
 
-	buildNoCompile bool
+	buildSkipCompile bool
 )
 
 func init() {
-	BuildCmd.PersistentFlags().BoolVarP(&buildNoCompile, "no-compile", "", false, "dont compile the build")
+	BuildCmd.PersistentFlags().BoolVarP(&buildSkipCompile, "skip-compile", "", false, "dont compile the build")
 }
 
 // buildFn ...
 func buildFn(ccmd *cobra.Command, args []string) {
-	if buildNoCompile {
-		registry.Set("no-compile", true)
+	
+	if buildSkipCompile {
+		registry.Set("skip-compile", true)
 	}
+	
 	env, _ := models.FindEnvByID(config.EnvID())
-	build := processors.Build{Env: env}
-	display.CommandErr(build.Run())
+	display.CommandErr(processors.Build(env))
 }

@@ -10,10 +10,8 @@ import (
 	"github.com/nanobox-io/nanobox/util/provider"
 )
 
-type Destroy struct {}
-
-// Run destroys the provider
-func (destroy Destroy) Run() error {
+// Destroy destroys the provider
+func Destroy() error {
 	locker.GlobalLock()
 	defer locker.GlobalUnlock()
 
@@ -21,7 +19,7 @@ func (destroy Destroy) Run() error {
 
 	// destroy the provider
 	if err := provider.Destroy(); err != nil {
-		lumber.Error("provider:Destroy:Run:provider.Destroy(): %s", err.Error())
+		lumber.Error("provider:Destroy:provider.Destroy(): %s", err.Error())
 		return fmt.Errorf("failed to destroy the provider: %s", err.Error())
 	}
 

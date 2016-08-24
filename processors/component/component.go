@@ -1,16 +1,14 @@
 // Package service ...
 package component
 
-// these constants represent all the "platform components" thats nanobox uses;
-// platform components are just our other go microservcies
-const (
-	LOGVAC  = "logvac"
-	PORTAL  = "portal"
-	MIST    = "mist"
-	HOARDER = "hoarder"
+import (
+	"github.com/nanobox-io/golang-docker-client"
 )
 
-// these constants represent different potential states a service can end up in
-const (
-	ACTIVE = "active"
-)
+// isComponentRunning returns true if a service is already running
+func isComponentRunning(containerID string) bool {
+	container, err := docker.GetContainer(containerID)
+
+	// if the container doesn't exist then just return false
+	return err == nil && container.State.Status == "running"
+}

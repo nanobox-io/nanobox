@@ -1,357 +1,170 @@
 package component
 
 import (
-	"encoding/json"
-	"fmt"
-	"net"
-	"strings"
-
-	"github.com/jcelliott/lumber"
-	"github.com/nanobox-io/golang-docker-client"
-	"github.com/nanobox-io/nanobox-boxfile"
-
-	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util/provider"
-	"github.com/nanobox-io/nanobox/util"
-	"github.com/nanobox-io/nanobox/util/dhcp"
-	"github.com/nanobox-io/nanobox/util/display"
+  "fmt"
+  
+  "github.com/jcelliott/lumber"
+  "github.com/nanobox-io/golang-docker-client"
+  
+  "github.com/nanobox-io/nanobox/generators/containers"
+  "github.com/nanobox-io/nanobox/models"
+  "github.com/nanobox-io/nanobox/util/boxfile"
+  "github.com/nanobox-io/nanobox/util/display"
+  "github.com/nanobox-io/nanobox/util/dhcp"
+  "github.com/nanobox-io/nanobox/util/provider"
 )
 
-type (
-
-	// Setup
-	Setup struct {
-		App        models.App
-		Name       string
-		Image      string
-		Component  models.Component
-		fail       bool
-		cleanFuncs []cleanFunc
-	}
-
-	// cleanFunc
-	cleanFunc func() error
-)
-
-//
-func (setup *Setup) Run() error {
-	display.OpenContext("Setting up %s", setup.Name)
-	defer display.CloseContext()
-
-	// call the cleanup function to ensure we don't leave any bad state
-	defer setup.clean()
-
-	// attempt to load the component
-	// if the component has not been created it is fine
-	// so no errors are caught here
-	setup.loadComponent()
-
-	// short-circuit if the service has already progressed past this point
-	if setup.Component.State != "initialized" {
-		lumber.Error("code:Setup: Called on inappropriate component: %+v", setup.Component)
-		return nil
-	}
-
-	lumber.Prefix("component:Setup")
-	defer lumber.Prefix("")
-
-	if err := setup.downloadImage(); err != nil {
-		setup.fail = true
-		return err
-	}
-
-	if err := setup.reserveIps(); err != nil {
-		setup.fail = true
-		return err
-	}
-
-	if err := setup.launchContainer(); err != nil {
-		setup.fail = true
-		return err
-	}
-
-	if err := setup.attachNetwork(); err != nil {
-		setup.fail = true
-		return err
-	}
-
-	if err := setup.planComponent(); err != nil {
-		setup.fail = true
-		return err
-	}
-
-	if err := setup.persistComponent(); err != nil {
-		setup.fail = true
-		return err
-	}
-
-	if err := setup.addEvars(); err != nil {
-		setup.fail = true
-		return err
-	}
-
-	return nil
+// Setup sets up the component container and model data
+func Setup(a *models.App, name, label, image string) error {
+  // fetch the component or get a new one
+  c, _ := models.FindComponentBySlug(a.ID, name)
+  
+  // generate the component data
+  if err := c.Generate(a, name, label, image, "data"); err != nil {
+    lumber.Error("component:Setup:models.Component:Generate(%s, %s, data): %s", a.ID, name, err.Error())
+    return fmt.Errorf("failed to generate component data: %s", err.Error())
+  }
+  
+  // short-circuit if this component is already setup
+  if c.State != "initialized" {
+    return nil
+  }
+  
+  // extract the image from the boxfile node
+  image, err := boxfile.ComponentImage(c)
+  if err != nil {
+    lumber.Error("component:Setup:boxfile.ComponentImage(%+v): %s", c, err.Error())
+    return fmt.Errorf("unable to retrieve component image: %s", err.Error())
+  }
+  
+  // generate a docker percent display
+  dockerPercent := &display.DockerPercentDisplay{
+    Output: display.NewStreamer("info"), 
+    Prefix: image,
+  }
+  
+  // pull the component image
+  if _, err := docker.ImagePull(image, dockerPercent); err != nil {
+    lumber.Error("component:Setup:docker.ImagePull(%s, nil): %s", image, err.Error())
+    return fmt.Errorf("failed to pull docker image (%s): %s", image, err.Error())
+  }
+  
+  // reserve IPs
+  if err := reserveIPs(a, c); err != nil {
+    return fmt.Errorf("failed to reserve IPs for component: %s", err.Error())
+  }
+  
+  // start the container
+  config := containers.ComponentConfig(c, image, c.InternalIP)
+  container, err := docker.CreateContainer(config)
+  if err != nil {
+    lumber.Error("component:Setup:docker.CreateContainer(%+v): %s", config, err.Error())
+    return fmt.Errorf("failed to start docker container: %s", err.Error())
+  }
+  
+  // persist the container ID
+  c.ID = container.ID
+  if err := c.Save(); err != nil {
+    lumber.Error("component:Setup:models.Component.Save(): %s", err.Error())
+    return fmt.Errorf("failed to persist container ID: %s", err.Error())
+  }
+  
+  // attach container to the host network
+  if err := attachNetwork(c); err != nil {
+    return fmt.Errorf("failed to attach container to host network: %s", err.Error())
+  }
+  
+  // plan the component
+  planOutput, err := RunPlanHook(c)
+  if err != nil {
+    return fmt.Errorf("failed to run plan hook: %s", err.Error())
+  }
+  
+  // generate the component plan
+  if err := c.GeneratePlan(planOutput); err != nil {
+    lumber.Error("component:Setup:models.Component.GeneratePlan(%s): %s", planOutput, err.Error())
+    return fmt.Errorf("failed to generate the component plan: %s", err.Error())
+  }
+  
+  // generate environment variables
+  if err := c.GenerateEvars(a); err != nil {
+    lumber.Error("component:Setup:models.Component.GenerateEvars(%+v): %s", a, err.Error())
+    return fmt.Errorf("failed to generate the component evars: %s", err.Error())
+  }
+  
+  // update state
+  c.State = "planned"
+  if err := c.Save(); err != nil {
+    lumber.Error("component:Setup:models.Component.Save(): %s", err.Error())
+    return fmt.Errorf("failed to persist component state: %s", err.Error())
+  }
+  
+  return nil
 }
 
-// clean will iterate through the cleanup functions that were registered and
-// call them one-by-one
-func (setup *Setup) clean() error {
-	// short-circuit if we haven't failed
-	if !setup.fail {
-		return nil
-	}
+// reserveIPs reserves IP addresses for this component
+func reserveIPs(a *models.App, c *models.Component) error {
+  // dont reserve a new one if we already have this one
+  if c.InternalIP == "" {
+    // first let's see if our local IP was reserved during app creation
+    if a.LocalIPs[c.Name] != "" {
 
-	// iterate through the cleanup functions that were registered and call them
-	for _, cleanF := range setup.cleanFuncs {
-		if err := cleanF(); err != nil {
-			return err
-		}
-	}
+      // assign the localIP from the pre-generated app cache
+      c.InternalIP = a.LocalIPs[c.Name]
+    } else {
 
-	return nil
+      localIP, err := dhcp.ReserveLocal()
+      if err != nil {
+        lumber.Error("component.reserveIPs:dhcp.ReserveLocal(): %s", err.Error())
+        return fmt.Errorf("failed to reserve local IP address: %s", err.Error())
+      }
+
+      c.InternalIP = localIP.String()
+    }
+  }
+
+  // dont reserve a new global ip if i already have one
+  if c.ExternalIP == "" {
+    // only if this service is portal, we need to use the preview IP
+    // in a dev environment there will be no portal installed
+    // so the env ip should be available
+    // in dev the env ip is used for the dev container
+    if c.Name == "portal" {
+      // portal's global ip is the preview ip
+      c.ExternalIP = a.GlobalIPs["env"]
+    } else {
+
+      globalIP, err := dhcp.ReserveGlobal()
+      if err != nil {
+        lumber.Error("component.reserveIPs:dhcp.ReserveGlobal(): %s", err.Error())
+        return fmt.Errorf("failed to reserve global IP address: %s", err.Error())
+      }
+
+      c.ExternalIP = globalIP.String()
+    }
+  }
+  
+  if err := c.Save(); err != nil {
+    lumber.Error("component.reserveIPs:models.Component.Save(): %s", err.Error())
+    return fmt.Errorf("failed to persist component IPs: %s", err.Error())
+  }
+  
+  return nil
 }
 
-// loadService fetches the service from the database
-func (setup *Setup) loadComponent() error {
-	setup.Component, _ = models.FindComponentBySlug(setup.App.ID, setup.Name)
-
-	// set the default state
-	if setup.Component.State == "" {
-		setup.Component.State = "initialized"
-	}
-
-	return nil
-}
-
-// downloadImage downloads the docker image
-func (setup *Setup) downloadImage() error {
-	display.StartTask("Downloading image")
-
-	streamer := display.NewStreamer("info")
-	dockerPercent := &display.DockerPercentDisplay{Output: streamer, Prefix: setup.Image}
-	if _, err := docker.ImagePull(setup.Image, dockerPercent); err != nil {
-		lumber.Error("code:Setup:downloadImage:docker.ImagePull(%s, nil): %s", setup.Image, err.Error())
-		display.ErrorTask()
-		return err
-	}
-
-	display.StopTask()
-	return nil
-}
-
-// reserveIps reserves a global and local ip for the container
-func (setup *Setup) reserveIps() error {
-
-	// dont reserve a new one if we already have this one
-	if setup.Component.InternalIP == "" {
-		// first let's see if our local IP was reserved during app creation
-		if setup.App.LocalIPs[setup.Name] != "" {
-
-			// assign the localIP from the pre-generated app cache
-			setup.Component.InternalIP = setup.App.LocalIPs[setup.Name]
-		} else {
-
-			localIP, err := dhcp.ReserveLocal()
-			if err != nil {
-				lumber.Error("setup.ReserveIps:dhcp.ReserveLocal(): %s", err.Error())
-				return err
-			}
-
-			setup.Component.InternalIP = localIP.String()
-
-			setup.cleanFuncs = append(setup.cleanFuncs, func() error {
-				return dhcp.ReturnIP(net.ParseIP(setup.Component.InternalIP))
-			})
-		}
-	}
-
-	// dont reserve a new global ip if i already have on
-	if setup.Component.ExternalIP == "" {
-		// only if this service is portal, we need to use the preview IP
-		// in a dev environment there will be no portal installed
-		// so the env ip should be available
-		// in dev the env ip is used for the dev container
-		if setup.Name == "portal" {
-			// portal's global ip is the preview ip
-			setup.Component.ExternalIP = setup.App.GlobalIPs["env"]
-		} else {
-
-			globalIP, err := dhcp.ReserveGlobal()
-			if err != nil {
-				lumber.Error("setup.ReserveIps:dhcp.ReserveGlobal(): %s", err.Error())
-				return err
-			}
-
-			setup.Component.ExternalIP = globalIP.String()
-
-			setup.cleanFuncs = append(setup.cleanFuncs, func() error {
-				return dhcp.ReturnIP(net.ParseIP(setup.Component.ExternalIP))
-			})
-		}
-	}
-
-	return nil
-}
-
-// launchContainer launches and starts a docker container
-func (setup *Setup) launchContainer() error {
-	display.StartTask("launching container")
-
-	name := fmt.Sprintf("nanobox_%s_%s", setup.App.ID, setup.Name)
-
-	config := docker.ContainerConfig{
-		Name:    name,
-		Image:   setup.Image,
-		Network: "virt",
-		IP:      setup.Component.InternalIP,
-	}
-
-	container, err := docker.CreateContainer(config)
-	if err != nil {
-		lumber.Error("setup.ReserveIps:docker.CreateContainer(%+v): %s", config, err.Error())
-		display.ErrorTask()
-		return err
-	}
-
-	setup.cleanFuncs = append(setup.cleanFuncs, func() error {
-		return docker.ContainerRemove(container.ID)
-	})
-
-	setup.Component.ID = container.ID
-
-	display.StopTask()
-	return nil
-}
-
-// attachNetwork attaches the IP addresses to the container
-func (setup *Setup) attachNetwork() error {
-
-	err := provider.AddIP(setup.Component.ExternalIP)
-	if err != nil {
-		lumber.Error("component:Setup:attachNetwork:provider.AddIP(%s): %s", setup.Component.ExternalIP, err.Error())
-		return err
-	}
-
-	setup.cleanFuncs = append(setup.cleanFuncs, func() error {
-		return provider.RemoveIP(setup.Component.ExternalIP)
-	})
-
-	err = provider.AddNat(setup.Component.ExternalIP, setup.Component.InternalIP)
-	if err != nil {
-		lumber.Error("component:Setup:attachNetwork:provider.AddNat(%s, %s): %s", setup.Component.ExternalIP, setup.Component.InternalIP, err.Error())
-		return err
-	}
-
-	setup.cleanFuncs = append(setup.cleanFuncs, func() error {
-		return provider.RemoveNat(setup.Component.ExternalIP, setup.Component.InternalIP)
-	})
-
-	return nil
-}
-
-// planComponent runs the plan hook
-func (setup *Setup) planComponent() error {
-	// get the environment so i can get the latest build boxfile
-	env, _ := models.FindEnvByID(setup.App.EnvID)
-
-	// get this services config from the boxfile
-	boxfile := boxfile.New([]byte(env.BuiltBoxfile))
-	boxConfig := boxfile.Node(setup.Name).Node("config")
-
-	planPayload := map[string]interface{}{"config": boxConfig.Parsed}
-	jsonPayload, _ := json.Marshal(planPayload)
-
-	// TODO: replace nil with something from the display package
-	p, err := util.Exec(setup.Component.ID, "plan", string(jsonPayload), nil)
-	if err != nil {
-		return err
-	}
-
-	// now set the plans responses data as the components plan object
-	err = json.Unmarshal([]byte(p), &setup.Component.Plan)
-	if err != nil {
-		return fmt.Errorf("json parse failure:%s", err.Error())
-	}
-
-	// set passwords for the users in the plan
-	for i := 0; i < len(setup.Component.Plan.Users); i++ {
-		setup.Component.Plan.Users[i].Password = util.RandomString(10)
-	}
-
-	return nil
-}
-
-// persistComponent saves the service in the database
-func (setup *Setup) persistComponent() error {
-	// save service in DB
-	setup.Component.AppID = setup.App.ID
-	setup.Component.Name = setup.Name
-	setup.Component.State = "planned"
-	setup.Component.Type = "data"
-
-	// save the service
-	return setup.Component.Save()
-}
-
-// updateEvars will generate environment variables from the plan
-func (setup *Setup) addEvars() error {
-
-	// fetch the environment variables model
-	envVars := setup.App.Evars
-
-	// create a prefix for each of the environment variables.
-	// for example, if the service is 'data.db' the prefix
-	// would be DATA_DB. Dots are replaced with underscores,
-	// and characters are uppercased.
-	prefix := strings.ToUpper(strings.Replace(setup.Component.Name, ".", "_", -1))
-
-	// we need to create an host evar that holds the IP of the service
-	envVars[fmt.Sprintf("%s_HOST", prefix)] = setup.Component.InternalIP
-
-	// we need to create evars that contain usernames and passwords
-	//
-	// during the plan phase, the service was informed of potentially
-	// 	1 - users (all of the users)
-	// 	2 - user (the default user)
-	//
-	// First, we need to create an evar that contains the list of users.
-	// 	{prefix}_USERS
-	//
-	// Each user provided was given a password. For every user specified,
-	// we need to create a corresponding evars to store the password:
-	//  {prefix}_{username}_PASS
-	//
-	// Lastly, if a default user was provided, we need to create a pair
-	// of environment variables as a convenience to the user:
-	// 	1 - {prefix}_USER
-	// 	2 - {prefix}_PASS
-
-	// create a slice of user strings that we will use to generate the list of users
-	users := []string{}
-
-	// users will have been loaded into the service plan, so let's iterate
-	for _, user := range setup.Component.Plan.Users {
-		// add this username to the list
-		users = append(users, user.Username)
-
-		// generate the corresponding evar for the password
-		key := fmt.Sprintf("%s_%s_PASS", prefix, strings.ToUpper(user.Username))
-		envVars[key] = user.Password
-
-		// if this user is the default user
-		// set additional default env vars
-		if user.Username == setup.Component.Plan.DefaultUser {
-			envVars[fmt.Sprintf("%s_USER", prefix)] = user.Username
-			envVars[fmt.Sprintf("%s_PASS", prefix)] = user.Password
-		}
-	}
-
-	// if there are users, create an environment variable to represent the list
-	if len(users) > 0 {
-		envVars[fmt.Sprintf("%s_USERS", prefix)] = strings.Join(users, " ")
-	}
-
-	// persist the evars
-	setup.App.Evars = envVars
-	return setup.App.Save()
+// attachNetwork attaches the component to the host network
+func attachNetwork(c *models.Component) error {
+  // add the IP to the provider
+  if err := provider.AddIP(c.ExternalIP); err != nil {
+    lumber.Error("component:Setup:attachNetwork:provider.AddIP(%s): %s", c.ExternalIP, err.Error())
+    return fmt.Errorf("failed to add IP to provider: %s", err.Error())
+  }
+  
+  // nat traffic from the external IP to the internal
+  if err := provider.AddNat(c.ExternalIP, c.InternalIP); err != nil {
+    lumber.Error("component:Setup:attachNetwork:provider.AddNat(%s, %s): %s", c.ExternalIP, c.InternalIP, err.Error())
+    return fmt.Errorf("failed to nat IP on provider: %s", err.Error())
+  }
+  
+  return nil
 }

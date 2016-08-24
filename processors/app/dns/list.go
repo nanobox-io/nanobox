@@ -7,16 +7,11 @@ import (
 	"github.com/nanobox-io/nanobox/util/dns"
 )
 
-// List ...
-type List struct {
-	App models.App
-}
+// List lists all dns entries for an app
+func List(a *models.App) error {
 
-//
-func (list List) Run() error {
-
-	fmt.Printf("dns entries for %s(%s):\n", list.App.EnvID, list.App.Name)
-	entries := dns.List(list.App.ID)
+	fmt.Printf("dns entries for %s(%s):\n", a.EnvID, a.Name)
+	entries := dns.List(a.ID)
 	for _, entry := range entries {
 		fmt.Printf("  %s\n", entry.Domain)
 	}

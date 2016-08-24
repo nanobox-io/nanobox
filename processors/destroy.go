@@ -12,21 +12,18 @@ import (
 	"github.com/nanobox-io/nanobox/util/dns"
 )
 
-type Destroy struct {}
-
-// Run destroys the provider and cleans nanobox off of the system
-func (destroy Destroy) Run() error {
+// Destroy destroys the provider and cleans nanobox off of the system
+func Destroy() error {
 	
 	// ensure we're running as the administrator for this
 	if !util.IsPrivileged() {
-		return destroy.reExecPrivilege()
+		return reExecPrivilegedDestroy()
 	}
 	
 	display.OpenContext("Uninstalling Nanobox and configuration")
 
 	// destroy the provider (VM)
-	providerDestroy := provider.Destroy{}
-	if err := providerDestroy.Run(); err != nil {
+	if err := provider.Destroy(); err != nil {
 		return fmt.Errorf("failed to uninstall the provider: %s", err.Error())
 	}
 
@@ -51,7 +48,7 @@ func (destroy Destroy) Run() error {
 }
 
 // reExecPrivilege re-execs the current process with a privileged user
-func (destroy *Destroy) reExecPrivilege() error {
+func reExecPrivilegedDestroy() error {
 
 	display.PrintRequiresPrivilege("to uninstall nanobox and configuration")
 

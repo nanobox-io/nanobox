@@ -36,8 +36,8 @@ func (a *Provider) Delete() error {
 }
 
 // LoadProvider loads the provider entry
-func LoadProvider() (Provider, error) {
-	provider := Provider{}
+func LoadProvider() (*Provider, error) {
+	provider := &Provider{}
 
 	if err := get("registry", "provider", &provider); err != nil {
 		return provider, fmt.Errorf("failed to load provider: %s", err.Error())

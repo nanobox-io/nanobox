@@ -91,27 +91,27 @@ func TestAllAppsByEnv(t *testing.T) {
 	defer truncate("1")
 	defer truncate("2")
 
-	env1 := App{EnvID: "1", ID: "1_dev", Name: "dev"}
-	env2 := App{EnvID: "1", ID: "1_sim", Name: "sim"}
-	env3 := App{EnvID: "2", ID: "2_dev", Name: "dev"}
+	apps1 := App{EnvID: "1", ID: "1_dev", Name: "dev"}
+	apps2 := App{EnvID: "1", ID: "1_sim", Name: "sim"}
+	apps3 := App{EnvID: "2", ID: "2_dev", Name: "dev"}
 
-	if err := env1.Save(); err != nil {
+	if err := apps1.Save(); err != nil {
 		t.Error(err)
 	}
-	if err := env2.Save(); err != nil {
-		t.Error(err)
-	}
-
-	if err := env3.Save(); err != nil {
+	if err := apps2.Save(); err != nil {
 		t.Error(err)
 	}
 
-	envs, err := AllAppsByEnv("1")
+	if err := apps3.Save(); err != nil {
+		t.Error(err)
+	}
+
+	apps, err := AllAppsByEnv("1")
 	if err != nil {
 		t.Error(err)
 	}
 
-	if len(envs) != 2 {
-		t.Errorf("did not load all envs, got %d", len(envs))
+	if len(apps) != 2 {
+		t.Errorf("did not load all apps, got %d", len(apps))
 	}
 }

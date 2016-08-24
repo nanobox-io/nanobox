@@ -6,7 +6,7 @@ import (
 	"os/exec"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/processors/provider"
+	// "github.com/nanobox-io/nanobox/processors/provider"
 )
 
 // Console ...
@@ -24,11 +24,11 @@ func (console Console) Run() error {
 		console.Shell = "bash"
 	}
 
-	// setup the environment (boot vm)
-	providerSetup := provider.Setup{}
-	if err := providerSetup.Run(); err != nil {
-		return err
-	}
+	// // setup the environment (boot vm)
+	// providerSetup := provider.Setup{}
+	// if err := providerSetup.Run(); err != nil {
+	// 	return err
+	// }
 
 	// this is the default command to run in the container
 	cmd := []string{

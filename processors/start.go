@@ -4,11 +4,8 @@ import (
 	"github.com/nanobox-io/nanobox/processors/provider"
 )
 
-type Start struct {}
-
-// Run starts the provider (VM)
-func (start Start) Run() error {
+// Start starts the provider (VM)
+func Start() error {
 	// run a provider setup
-	providerSetup := provider.Setup{}
-	return providerSetup.Run()
+	return provider.Setup()
 }

@@ -40,20 +40,20 @@ func (c *Counter) Delete() error {
 }
 
 // FindCounterByID finds an counter by an ID
-func FindCounterByID(ID string) (Counter, error) {
+func FindCounterByID(ID string) (*Counter, error) {
 	return findCounterByID(ID, false)
 }
 
 // MustFindCounterByID finds a counter by an ID and
 // returns an error if the counter doesn't exist
-func MustFindCounterByID(ID string) (Counter, error) {
+func MustFindCounterByID(ID string) (*Counter, error) {
 	return findCounterByID(ID, true)
 }
 
 // AllCounters loads all of the Counters in the database
-func AllCounters() ([]Counter, error) {
+func AllCounters() ([]*Counter, error) {
 	// list of counters to return
-	counters := []Counter{}
+	counters := []*Counter{}
 
 	// fetch all of the keys
 	keys, err := keys("counters")
@@ -85,9 +85,9 @@ func DeleteAllCounters() error {
 
 // findCounterByID finds a counter by the ID and
 // optionally errors if the record doesn't already exist
-func findCounterByID(ID string, mustExist bool) (Counter, error) {
+func findCounterByID(ID string, mustExist bool) (*Counter, error) {
 
-	counter := Counter{}
+	counter := &Counter{}
 
 	if err := get("counters", ID, &counter); err != nil {
 

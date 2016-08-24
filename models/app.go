@@ -24,6 +24,11 @@ type App struct {
 	DeployedBoxfile string
 }
 
+// InNew returns true if the App hasn't been created yet
+func (a *App) IsNew() bool {
+	return a.ID == ""
+}
+
 // Save persists the App to the database
 func (a *App) Save() error {
 
@@ -44,10 +49,31 @@ func (a *App) Delete() error {
 	return nil
 }
 
-// FindBySlug finds an app by an appID and name
-func FindAppBySlug(envID, name string) (App, error) {
+// Generate populates an App with data and persists the record
+func (a *App) Generate(env Env, name string) error {
+	
+	// short-circuit if this record has already been generated
+	if !a.IsNew() {
+		return nil
+	}
+	
+	a.EnvID     = env.ID
+	a.ID        = fmt.Sprintf("%s_%s", env.ID, name)
+	a.Name      = name
+	a.State     = "initialized"
+	a.GlobalIPs = map[string]string{}
+	a.LocalIPs  = map[string]string{}
+	a.Evars     = map[string]string{
+		"APP_NAME": name,
+	}
+	
+	return a.Save()
+}
 
-	app := App{}
+// FindBySlug finds an app by an appID and name
+func FindAppBySlug(envID, name string) (*App, error) {
+
+	app := &App{}
 
 	key := fmt.Sprintf("%s_%s", envID, name)
 
@@ -59,8 +85,8 @@ func FindAppBySlug(envID, name string) (App, error) {
 }
 
 // AllApps loads all of the Apps across all environments
-func AllApps() ([]App, error) {
-	apps := []App{}
+func AllApps() ([]*App, error) {
+	apps := []*App{}
 	
 	// load all envs
 	envs, err := AllEnvs()
@@ -85,16 +111,16 @@ func AllApps() ([]App, error) {
 }
 
 // AllApps loads all of the Apps in the database
-func AllAppsByEnv(envID string) ([]App, error) {
+func AllAppsByEnv(envID string) ([]*App, error) {
 	// list of envs to return
-	apps := []App{}
+	apps := []*App{}
 
 	return apps, getAll(envID, &apps)
 }
 
 // AllAppsByStatus loads all of the Apps filtering by status
-func AllAppsByStatus(status string) ([]App, error) {
-	apps := []App{}
+func AllAppsByStatus(status string) ([]*App, error) {
+	apps := []*App{}
 	
 	all, err := AllApps()
 	if err != nil {

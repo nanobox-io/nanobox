@@ -11,24 +11,21 @@ import (
 	"github.com/nanobox-io/nanobox/processors/provider"
 )
 
-type Stop struct {}
-
-// Run stops the running apps, unmounts all envs, and stops the provider
-func (stop Stop) Run() error {
+// Stop stops the running apps, unmounts all envs, and stops the provider
+func Stop() error {
 
 	// stop all running apps
-	if err := stop.stopAllApps(); err != nil {
+	if err := stopAllApps(); err != nil {
 		return fmt.Errorf("failed to stop running apps: %s", err.Error())
 	}
 
 	// unmount envs
-	if err := stop.unmountEnvs(); err != nil {
+	if err := unmountEnvs(); err != nil {
 		return fmt.Errorf("failed to unmount envs: %s", err.Error())
 	}
 
 	// stop the provider
-	providerStop := provider.Stop{}
-	if err := providerStop.Run(); err != nil {
+	if err := provider.Stop(); err != nil {
 		return fmt.Errorf("failed to stop the provider: %s", err.Error())
 	}
 	
@@ -36,12 +33,12 @@ func (stop Stop) Run() error {
 }
 
 // stopAllApps stops all of the apps that are currently running
-func (stop Stop) stopAllApps() error {
+func stopAllApps() error {
 
 	// load all the apps that think they're currently up
 	apps, err := models.AllAppsByStatus("up")
 	if err != nil {
-		lumber.Error("Stop:stopAllApps:models.AllAppsByStatus(up): %s", err.Error())
+		lumber.Error("stopAllApps:models.AllAppsByStatus(up): %s", err.Error())
 		return fmt.Errorf("failed to load running apps: %s", err.Error())
 	}
 
@@ -57,11 +54,11 @@ func (stop Stop) stopAllApps() error {
 }
 
 // unmountEnvs unmounts all of the environments
-func (stop Stop) unmountEnvs() error {
+func unmountEnvs() error {
 	// unmount all the environments so stoping doesnt take forever
 	envs, err := models.AllEnvs()
 	if err != nil {
-		lumber.Error("Stop:unmountEnvs:models.AllEnvs(): %s", err.Error())
+		lumber.Error("unmountEnvs:models.AllEnvs(): %s", err.Error())
 		return fmt.Errorf("failed to load all envs: %s", err.Error())
 	}
 

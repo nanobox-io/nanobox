@@ -1,69 +1,60 @@
 package component
 
 import (
-	"github.com/jcelliott/lumber"
-	"github.com/nanobox-io/golang-docker-client"
-
-	"github.com/nanobox-io/nanobox/models"
+  "fmt"
+  
+  "github.com/jcelliott/lumber"
+  "github.com/nanobox-io/golang-docker-client"
+  
+  "github.com/nanobox-io/nanobox/models"
 )
 
-// Clean ...
-type Clean struct {
-	App models.App
+// Clean purges any components in a dirty or incomplete state
+func Clean(a *models.App) error {
+  // fetch all of the app components
+  components, err := models.AllComponentsByApp(a.ID)
+  if err != nil {
+    lumber.Error("component:Clean:models.AllComponentsByApp(%s): %s", a.ID, err.Error())
+    return fmt.Errorf("failed to fetch app component collection: %s", err.Error())
+  }
+  
+  // iterate through the components and clean them
+  for _, component := range components {
+    if err := cleanComponent(a, component); err != nil {
+      return fmt.Errorf("failed to clean component: %s", err.Error())
+    }
+  }
+  
+  return nil
 }
 
-//
-func (clean Clean) Run() error {
+// cleanComponent will clean a component if it was left in a bad state
+func cleanComponent(a *models.App, component *models.Component) error {
 
-	components, err := models.AllComponentsByApp(clean.App.ID)
-	if err != nil {
-		lumber.Error("component:Clean:models.AllComponentsByApp(%s): %s", clean.App.ID, err.Error())
-		return err
-	}
-
-	for _, component := range components {
-		if err := clean.cleanComponent(component); err != nil {
-			return err
-		}
-	}
+  // short-circuit if the component is not dirty
+  if !isComponentDirty(component) {
+    return nil
+  }
+  
+  if err := Destroy(a, component); err != nil {
+    return fmt.Errorf("failed to remove component: %s", err.Error())
+  }
 
 	return nil
 }
 
-// cleanComponent will clean a service if it was left in a bad state
-func (clean Clean) cleanComponent(component models.Component) error {
+// isComponentDirty returns true if the container is removed or in a bad state
+func isComponentDirty(component *models.Component) bool {
+  // short-circuit if this service never made it to active
+  if component.State != "active" {
+    return true
+  }
 
-	if clean.isComponentDirty(component) {
-		return clean.removeService(component)
-	}
-
-	return nil
-}
-
-// removeService will remove a service from nanobox
-func (clean Clean) removeService(component models.Component) error {
-
-	componentRemove := Destroy{
-		App:       clean.App,
-		Component: component,
-	}
-
-	return componentRemove.Run()
-}
-
-// isComponentDirty will return true if the service is not active and available
-func (clean Clean) isComponentDirty(component models.Component) bool {
-
-	// short-circuit if this service never made it to active
-	if component.State != ACTIVE {
-		return true
-	}
-
-	return !clean.containerExists(component)
-}
-
-// containerExists will check to see if a docker container exists on the provider
-func (clean Clean) containerExists(component models.Component) bool {
-	_, err := docker.GetContainer(component.ID)
-	return err == nil
+  // let's see if the container exists
+  _, err := docker.GetContainer(component.ID)
+  if err != nil {
+    return true
+  }
+  
+  return false
 }

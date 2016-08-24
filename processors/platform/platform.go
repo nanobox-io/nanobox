@@ -15,14 +15,14 @@ const (
 )
 
 // Component ...
-type Component struct {
+type PlatformComponent struct {
 	label string
 	name  string
 	image string
 }
 
 // Components ...
-var setupComponents = []Component{
+var setupComponents = []PlatformComponent{
 	{
 		label: "Logger",
 		name:  "logvac",
@@ -36,7 +36,7 @@ var setupComponents = []Component{
 }
 
 // Components ...
-var deployComponents = []Component{
+var deployComponents = []PlatformComponent{
 	{
 		label: "Router",
 		name:  "portal",

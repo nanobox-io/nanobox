@@ -1,46 +1,37 @@
 package processors
 
 import (
-	"github.com/jcelliott/lumber"
+	"fmt"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/code"
 	"github.com/nanobox-io/nanobox/processors/env"
+	"github.com/nanobox-io/nanobox/processors/provider"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
 
-// Build ...
-type Build struct {
-	Env models.Env
-}
-
-//
-func (build *Build) Run() error {
-	display.OpenContext("running build")
-	defer display.CloseContext()
-
+// Build sets up the environment and runs a code build
+func Build(env *models.Env) error {
 	// by aquiring a local lock we are only allowing
 	// one build to happen at a time
 	locker.LocalLock()
 	defer locker.LocalUnlock()
 
-	setup := &env.Setup{}
-	// get the vm and app up.
-	if err := setup.Run(); err != nil {
-		return err
+	// setup the provider
+	if err := provider.Setup(); err != nil {
+		return fmt.Errorf("failed to setup the provider: %s", err.Error())
+	}
+
+	// setup the env
+	if err := env.Setup(env); err != nil {
+		return fmt.Errorf("failed to setup the env: %s", err.Error())
 	}
 
 	// build code
-	codeBuild := &code.Build{Env: setup.Env}
-	err := codeBuild.Run()
-	if err != nil {
-		return err
+	if err := code.Build(env); err != nil {
+		return fmt.Errorf("failed to build the code: %s", err.Error())
 	}
-
-	build.Env = codeBuild.Env
-
-	lumber.Debug("processor:build:Env: %+v", build.Env)
 
 	return nil
 }

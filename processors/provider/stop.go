@@ -10,10 +10,8 @@ import (
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
-type Stop struct {}
-
-// Run stops the provider (stops the VM)
-func (providerStop Stop) Run() error {
+// Stop stops the provider (stops the VM)
+func Stop() error {
 	locker.GlobalLock()
 	defer locker.GlobalUnlock()
 
@@ -21,7 +19,7 @@ func (providerStop Stop) Run() error {
 
 	// stop the provider (VM)
 	if err := provider.Stop(); err != nil {
-		lumber.Error("provider:Stop:Run:provider.Stop(): %s", err.Error())
+		lumber.Error("provider:Stop:provider.Stop(): %s", err.Error())
 		return fmt.Errorf("failed to stop the provider: %s", err.Error())
 	}
 	
