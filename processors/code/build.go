@@ -182,19 +182,19 @@ func (codeBuild *Build) releaseIP() error {
 func (codeBuild *Build) startContainer() error {
 	display.StartTask("starting build container")
 
-	appName := config.EnvID()
+	envID := config.EnvID()
 	config := docker.ContainerConfig{
 		Name:    fmt.Sprintf("nanobox_%s_build", config.EnvID()),
 		Image:   codeBuild.image, // this will need to be controlurable some time
 		Network: "virt",
 		IP:      codeBuild.localIP.String(),
 		Binds: []string{
-			fmt.Sprintf("%s%s/code:/share/code", provider.HostShareDir(), appName),
-			fmt.Sprintf("%s%s/engine:/share/engine", provider.HostShareDir(), appName),
-			fmt.Sprintf("%s%s/build:/mnt/build", provider.HostMntDir(), appName),
-			fmt.Sprintf("%s%s/deploy:/mnt/deploy", provider.HostMntDir(), appName),
-			fmt.Sprintf("%s%s/app:/mnt/app", provider.HostMntDir(), appName),
-			fmt.Sprintf("%s%s/cache:/mnt/cache", provider.HostMntDir(), appName),
+			fmt.Sprintf("%s%s/code:/share/code", provider.HostShareDir(), envID),
+			fmt.Sprintf("%s%s/engine:/share/engine", provider.HostShareDir(), envID),
+			fmt.Sprintf("%s%s/build:/mnt/build", provider.HostMntDir(), envID),
+			fmt.Sprintf("%s%s/deploy:/mnt/deploy", provider.HostMntDir(), envID),
+			fmt.Sprintf("%s%s/app:/mnt/app", provider.HostMntDir(), envID),
+			fmt.Sprintf("%s%s/cache:/mnt/cache", provider.HostMntDir(), envID),
 		},
 	}
 

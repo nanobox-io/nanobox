@@ -15,6 +15,7 @@ import (
 	"github.com/nanobox-io/nanobox/processors/env"
 	"github.com/nanobox-io/nanobox/util/provider"
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/watch"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/counter"
 	"github.com/nanobox-io/nanobox/util/dhcp"
@@ -54,6 +55,10 @@ func (console *Console) Run() error {
 	if err := console.setup(); err != nil {
 		return err
 	}
+
+	env, _ := models.FindEnvByID(console.App.EnvID)
+
+	go watch.Watch(env.Directory)
 
 	// if run then start the run commands
 	// and log but do not continue to the regular console
