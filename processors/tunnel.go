@@ -23,12 +23,16 @@ func (tunnel Tunnel) Run() error {
 	tunnel.App = getAppID(tunnel.App)
 
 	var err error
-
-	key, location, container, err = odin.EstablishTunnel(getAppID(tunnel.App), tunnel.Container)
+	var port int
+	key, location, container, port, err = odin.EstablishTunnel(getAppID(tunnel.App), tunnel.Container)
 	if err != nil {
 		return err
 	}
 
+	if tunnel.Port == "" {
+		tunnel.Port = fmt.Sprintf("%d", port)
+	}
+	
 	// establish a connection and just leave it open.
 	req, err := http.NewRequest("POST", fmt.Sprintf("/tunnel?key=%s", key), nil)
 	if err != nil {
@@ -48,7 +52,7 @@ func (tunnel Tunnel) Run() error {
 	fmt.Println("server connection established")
 
 	//
-	serv, err := net.Listen("tcp4", fmt.Sprintf(":%v", tunnel.Port))
+	serv, err := net.Listen("tcp4", fmt.Sprintf(":%s", tunnel.Port))
 	if err != nil {
 		fmt.Println(err)
 		return err

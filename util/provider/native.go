@@ -133,6 +133,12 @@ func (native Native) DockerEnv() error {
 	return nil
 }
 
+// Touch touches a file on the host
+func (native Native) Touch(file string) error {
+	// TODO: ???
+	return nil
+}
+
 // AddIP adds an IP into the host for host access
 func (native Native) AddIP(ip string) error {
 	// TODO: ???
