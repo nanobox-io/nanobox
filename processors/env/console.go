@@ -6,29 +6,21 @@ import (
 	"os/exec"
 
 	"github.com/nanobox-io/nanobox/models"
-	// "github.com/nanobox-io/nanobox/processors/provider"
+	"github.com/nanobox-io/nanobox/processors/provider"
+
 )
 
 // Console ...
-type Console struct {
-	Component models.Component
-	Command   string
-	Cwd       string
-	Shell     string
-}
-
-//
-func (console Console) Run() error {
+func Console(componentModel *models.Component, consoleConfig ConsoleConfig) error {
 	// set the default shell
-	if console.Shell == "" {
-		console.Shell = "bash"
+	if consoleConfig.Shell == "" {
+		consoleConfig.Shell = "bash"
 	}
 
-	// // setup the environment (boot vm)
-	// providerSetup := provider.Setup{}
-	// if err := providerSetup.Run(); err != nil {
-	// 	return err
-	// }
+	// setup docker client
+	if err := provider.Init(); err != nil {
+		return err
+	}
 
 	// this is the default command to run in the container
 	cmd := []string{
@@ -37,7 +29,7 @@ func (console Console) Run() error {
 		"-u",
 		"gonano",
 		"-it",
-		console.Component.ID,
+		componentModel.ID,
 		"/bin/bash",
 	}
 
@@ -46,13 +38,13 @@ func (console Console) Run() error {
 
 	// if a current working directory (cwd) is provided then modify the command to
 	// change into that directory before executing
-	case console.Cwd != "":
-		cmd = append(cmd, "-c", fmt.Sprintf("cd %s; exec \"%s\"", console.Cwd, console.Shell))
+	case consoleConfig.Cwd != "":
+		cmd = append(cmd, "-c", fmt.Sprintf("cd %s; exec \"%s\"", consoleConfig.Cwd, consoleConfig.Shell))
 
 	// if a command is provided then modify the command to exec that command after
 	// running the base command
-	case console.Command != "":
-		cmd = append(cmd, "-c", console.Command)
+	case consoleConfig.Command != "":
+		cmd = append(cmd, "-c", consoleConfig.Command)
 	}
 
 	process := exec.Command(cmd[0], cmd[1:]...)

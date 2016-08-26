@@ -69,7 +69,7 @@ func (cmd *Cmd) Output() (string, error) {
 
 	var buffer bytes.Buffer
 	cmd.Stdout = &buffer
-  
+
 	err := cmd.Run()
 	if err != nil {
 		lumber.Error("hookit:Cmd:Run: %s, %s, %s", cmd.ID, cmd.Path, cmd.Payload)

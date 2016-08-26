@@ -95,8 +95,9 @@ func get(bucket, id string, v interface{}) error {
 	})
 }
 
-// delete deletes an element from the bolt database
-func delete(bucket, id string) error {
+// destroy deletes an element from the bolt database
+// renamed to destroy so we dont overwrite the builtin delete
+func destroy(bucket, id string) error {
 
 	// open the database
 	db, err := db()
@@ -220,7 +221,7 @@ func truncate(bucket string) error {
 
 	// delete the keys
 	for _, key := range keys {
-		if err := delete(bucket, key); err != nil {
+		if err := destroy(bucket, key); err != nil {
 			return fmt.Errorf("failed to delete entry by key (%s): %s", key, err.Error())
 		}
 	}

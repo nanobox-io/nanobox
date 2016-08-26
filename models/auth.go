@@ -38,7 +38,7 @@ func LoadAuth() (*Auth, error) {
 
 func DeleteAuth() error {
 	// Since there is only ever a single auth value, we'll use the registry
-	if err := delete("registry", "auth"); err != nil {
+	if err := destroy("registry", "auth"); err != nil {
 		return fmt.Errorf("failed to delete auth: %s", err.Error())
 	}
 

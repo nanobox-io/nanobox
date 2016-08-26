@@ -2,7 +2,7 @@ package netfs
 
 import (
 	"fmt"
-	
+
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/util"

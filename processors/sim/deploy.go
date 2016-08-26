@@ -14,66 +14,60 @@ import (
 // deploys the code to the warehouse and builds
 // webs, workers, and updates services
 // then updates the router with the new code services
-type Deploy struct {
-	// mandatory
-	Env models.Env
-	App models.App
-}
-
-//
-func (deploy Deploy) Run() error {
+func Deploy(envModel *models.Env, appModel *models.App) error {
 	display.OpenContext("Deploying Sim")
 	defer display.CloseContext()
 
 	// run the share init which gives access to docker
-	envInit := env.Init{}
-	if err := envInit.Run(); err != nil {
+	if err := provider.Init(); err != nil {
 		return err
 	}
 
 	display.StartTask("starting services for deploy")
-	platformDeploy := platform.Deploy{App: deploy.App}
-	if err := platformDeploy.Run(); err != nil {
+	if err := platform.Deploy(appModel); err != nil {
 		return err
 	}
 	display.StopTask()
 
-	if err := deploy.publishCode(); err != nil {
+	// create the warehouse config for child processes
+	hoarder, _ := models.FindComponentBySlug(appModel.ID, "hoarder")
+
+	warehouseConfig := code.WarehouseConfig{
+		BuildID:        "1234",
+		WarehouseURL:   hoarder.InternalIP,
+		WarehouseToken: "123",
+	}
+
+	// publish the code
+	if err := code.Publish(envModel, warehouseConfig); err != nil {
 		return err
 	}
 
-	codeClean := code.Clean{App: deploy.App}
 	// remove all the previous code services
-	if err := codeClean.Run(); err != nil {
+	if err := code.Clean(appModel); err != nil {
 		return err
 	}
 
-	componentSync := &component.Sync{
-		Env: deploy.Env,
-		App: deploy.App,
-	}
 	// syncronize the services as per the new boxfile
-	if err := componentSync.Run(); err != nil {
+	if err := component.Sync(envModel, appModel); err != nil {
 		return err
 	}
-	deploy.App = componentSync.App
 
 	// start code
-	if err := deploy.startCodeServices(); err != nil {
+	if err := code.Sync(AppModel, warehouseConfig); err != nil {
 		return err
 	}
 
-	if err := deploy.runDeployHook("before_deploy"); err != nil {
+	if err := runDeployHook(appModel, "before_deploy"); err != nil {
 		return err
 	}
 
 	// update nanoagent portal
-	platformUpdatePortal := platform.UpdatePortal{App: deploy.App}
-	if err := platformUpdatePortal.Run(); err != nil {
+	if err := platform.UpdatePortal(appModel); err != nil {
 		return err
 	}
 
-	if err := deploy.runDeployHook("after_deploy"); err != nil {
+	if err := runDeployHook(appModel, "after_deploy"); err != nil {
 		return err
 	}
 
@@ -82,60 +76,21 @@ func (deploy Deploy) Run() error {
 	return nil
 }
 
-// publishCode ...
-func (deploy *Deploy) publishCode() error {
-	display.StartTask("publishing build to warehouse")
-	defer display.StopTask()
-
-	// setup the var's required for code_publish
-	hoarder, _ := models.FindComponentBySlug(deploy.App.ID, "hoarder")
-
-	codePublish := code.Publish{
-		Env:            deploy.Env,
-		BuildID:        "1234",
-		WarehouseURL:   hoarder.InternalIP,
-		WarehouseToken: "123",
-	}
-
-	return codePublish.Run()
-}
-
-// startCodeServices ...
-func (deploy *Deploy) startCodeServices() error {
-
-	// synchronize my code services
-	hoarder, _ := models.FindComponentBySlug(deploy.App.ID, "hoarder")
-
-	codeSync := code.Sync{
-		App:            deploy.App,
-		BuildID:        "1234",
-		WarehouseURL:   hoarder.InternalIP,
-		WarehouseToken: "123",
-	}
-
-	return codeSync.Run()
-}
-
 // run the before/after hooks and populate the necessary data
-func (deploy *Deploy) runDeployHook(hookType string) error {
-	box := boxfile.New([]byte(deploy.App.DeployedBoxfile))
+func runDeployHook(appModel *models.App, hookType string) error {
+	box := boxfile.New([]byte(appModel.DeployedBoxfile))
 
 	// run the hooks for each service in the boxfile
 	for _, componentName := range box.Nodes("code") {
 
-		component, err := models.FindComponentBySlug(deploy.App.ID, componentName)
+		component, err := models.FindComponentBySlug(appModel.ID, componentName)
 		if err != nil {
 			// no component for that thing in the database..
 			// prolly need to report this error but we might not want to fail
 			continue
 		}
 
-		deployHook := DeployHook{
-			App:       deploy.App,
-			Component: component,
-			HookType:  hookType,
-		}
-		if err := deployHook.Run(); err != nil {
+		if err := DeployHook(appModel, component, hookType); err != nil {
 			return err
 		}
 	}

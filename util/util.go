@@ -2,6 +2,7 @@
 package util
 
 import (
+	"os"
 	"math/rand"
 	"time"
 )
@@ -27,4 +28,12 @@ func RandomString(size int) string {
 	}
 
 	return string(b)
+}
+
+func FolderExists(folderName string) bool {
+	dir, err := os.Stat(folderName)
+	if err != nil {
+		return false
+	}
+	return dir.IsDir()
 }

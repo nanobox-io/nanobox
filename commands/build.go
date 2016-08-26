@@ -34,11 +34,11 @@ func init() {
 
 // buildFn ...
 func buildFn(ccmd *cobra.Command, args []string) {
-	
+
 	if buildSkipCompile {
 		registry.Set("skip-compile", true)
 	}
-	
+
 	env, _ := models.FindEnvByID(config.EnvID())
 	display.CommandErr(processors.Build(env))
 }

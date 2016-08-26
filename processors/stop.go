@@ -2,9 +2,9 @@ package processors
 
 import (
 	"fmt"
-	
+
 	"github.com/jcelliott/lumber"
-	
+
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/app"
 	"github.com/nanobox-io/nanobox/processors/env"
@@ -28,7 +28,7 @@ func Stop() error {
 	if err := provider.Stop(); err != nil {
 		return fmt.Errorf("failed to stop the provider: %s", err.Error())
 	}
-	
+
 	return nil
 }
 
@@ -49,7 +49,7 @@ func stopAllApps() error {
 			return fmt.Errorf("failed to stop running app: %s", err.Error())
 		}
 	}
-	
+
 	return nil
 }
 
@@ -68,6 +68,6 @@ func unmountEnvs() error {
 			return fmt.Errorf("failed to unmount env: %s", err.Error())
 		}
 	}
-	
+
 	return nil
 }

@@ -27,9 +27,8 @@ Stops your dev platform. All data will be preserved in its current state.
 //
 // stopFn ...
 func stopFn(ccmd *cobra.Command, args []string) {
+	// TODO: check the app and return some message
 	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
-	devStop := dev.Stop{
-		App: app,
-	}
-	display.CommandErr(devStop.Run())
+
+	display.CommandErr(dev.Stop(app))
 }

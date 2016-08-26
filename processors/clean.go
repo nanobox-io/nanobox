@@ -1,52 +1,28 @@
 package processors
 
 import (
-	"os"
+	"fmt"
 
-	"github.com/nanobox-io/nanobox/util/locker"
-
-	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/env"
+	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/locker"
 )
 
-// Clean ...
-type Clean struct {
-}
-
 //
-func (clean *Clean) Run() error {
-
-	// aquire a global lock because we are going to be removing several apps
+func Clean(envModels []*models.Env) error {
 	locker.GlobalLock()
 	defer locker.GlobalUnlock()
 
-	// collect all the apps
-	envs, err := models.AllEnvs()
-	if err != nil {
-		return err
-	}
+	for _, envModel := range envModels {
+		// check to see if the app folder still exists
+		if !util.FolderExists(envModel.Directory) {
 
-	// check to see if the app folder still exists
-	for _, e := range envs {
-
-		if !folderExists(e.Directory) {
-
-			// create an environment destroy for defunct environment
-			destroy := env.Destroy{Env: e}
-
-			if err := destroy.Run(); err != nil {
-				return err
+			if err := env.Destroy(envModel); err != nil {
+				return fmt.Errorf("unable to destroy environment(%s): %s", envModel.Name, err)
 			}
 		}
 	}
 
 	return nil
-}
-
-func folderExists(dirName string) bool {
-	dir, err := os.Stat(dirName)
-	if err != nil {
-		return false
-	}
-	return dir.IsDir()
 }

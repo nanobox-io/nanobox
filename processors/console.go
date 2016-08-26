@@ -61,19 +61,19 @@ func (console Console) Run() error {
 		// forward all signals to nanobox server
 		go monitor(stdOutFD)
 
-	  oldInState, err := term.SetRawTerminal(stdInFD)
-	  oldOutState, err := term.SetRawTerminalOutput(stdOutFD)
+		oldInState, err := term.SetRawTerminal(stdInFD)
+		oldOutState, err := term.SetRawTerminalOutput(stdOutFD)
 
 		// we only use raw mode if it is available.
 		if err == nil {
-		  defer term.RestoreTerminal(stdInFD, oldInState)
-		  defer term.RestoreTerminal(stdOutFD, oldOutState)
+			defer term.RestoreTerminal(stdInFD, oldInState)
+			defer term.RestoreTerminal(stdOutFD, oldOutState)
 		}
 
 	}
 
-  go io.Copy(remoteConn, os.Stdin)
-  io.Copy(os.Stdout, remoteConn)
+	go io.Copy(remoteConn, os.Stdin)
+	io.Copy(os.Stdout, remoteConn)
 
 	return nil
 }

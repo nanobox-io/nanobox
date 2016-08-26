@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strings"
-	
+
 	"github.com/nanobox-io/nanobox/util"
 )
 
@@ -16,8 +16,8 @@ type (
 		EnvID string `json:"env_id"`
 		// name is used for boltdb storage
 		Name       string        `json:"name"`
-		Label			 string				 `json:"label"`
-		Image 		 string 			 `json:"image"`
+		Label      string        `json:"label"`
+		Image      string        `json:"image"`
 		Type       string        `json:"type"`
 		ExternalIP string        `json:"external_ip"`
 		InternalIP string        `json:"internal_ip"`
@@ -49,7 +49,7 @@ func (c *Component) Save() error {
 
 // Delete deletes the component record from the database
 func (c *Component) Delete() error {
-	if err := delete(c.AppID, c.Name); err != nil {
+	if err := destroy(c.AppID, c.Name); err != nil {
 		return fmt.Errorf("failed to delete component: %s", err.Error())
 	}
 
@@ -57,20 +57,17 @@ func (c *Component) Delete() error {
 }
 
 // Generate populates a Component with data and persists the record
-func (c *Component) Generate(app *App, name, label, image, ttype string) error {
+func (c *Component) Generate(app *App, ttype string) error {
 	// short-circuit if the component is already created
 	if !c.IsNew() {
 		return nil
 	}
-	
+
 	c.AppID = app.ID
 	c.EnvID = app.EnvID
-	c.Name  = name
-	c.Label = label
-	c.Image = image
 	c.State = "initialized"
-	c.Type  = ttype
-	
+	c.Type = ttype
+
 	return c.Save()
 }
 
@@ -85,7 +82,7 @@ func (c *Component) GeneratePlan(data string) error {
 	for i := 0; i < len(c.Plan.Users); i++ {
 		c.Plan.Users[i].Password = util.RandomString(10)
 	}
-	
+
 	return c.Save()
 }
 
@@ -148,24 +145,22 @@ func (c *Component) GenerateEvars(app *App) error {
 
 // PurgeEvars purges the generated evars for a component
 func (c *Component) PurgeEvars(a *App) error {
-	// // fetch the environment variables
-	// envVars := a.Evars
-	// 
-	// // create a prefix for each of the environment variables.
-	// // for example, if the service is 'data.db' the prefix
-	// // would be DATA_DB. Dots are replaced with underscores,
-	// // and characters are uppercased.
-	// prefix := strings.ToUpper(strings.Replace(c.Name, ".", "_", -1))
-	// 
-	// // we loop over all environment variables and see if the key contains
-	// // the prefix above. If so, we delete the item.
-	// for key := range envVars {
-	// 	if strings.HasPrefix(key, prefix) {
-	// 		delete(envVars, key)
-	// 	}
-	// }
 
-	// persist the evars
+	// create a prefix for each of the environment variables.
+	// for example, if the service is 'data.db' the prefix
+	// would be DATA_DB. Dots are replaced with underscores,
+	// and characters are uppercased.
+	prefix := strings.ToUpper(strings.Replace(c.Name, ".", "_", -1))
+	
+	// we loop over all environment variables and see if the key contains
+	// the prefix above. If so, we delete the item.
+	for key, _ := range a.Evars {
+		if strings.HasPrefix(key, prefix) {
+			delete(a.Evars, key)
+		}
+	}
+
+	// persist the app with the new env vars
 	return a.Save()
 }
 

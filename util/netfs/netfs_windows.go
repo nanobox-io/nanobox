@@ -12,9 +12,9 @@ import (
 
 	"github.com/jcelliott/lumber"
 
-	"github.com/nanobox-io/nanobox/util/provider"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util/provider"
 )
 
 // Exists checks to see if the share already exists

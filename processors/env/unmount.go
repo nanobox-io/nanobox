@@ -5,8 +5,8 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/env/netfs"
-	"github.com/nanobox-io/nanobox/util/provider"
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util/provider"
 )
 
 // Unmount unmounts the env shares

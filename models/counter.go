@@ -29,7 +29,7 @@ func (c *Counter) Save() error {
 // Delete deletes the counter record from the database
 func (c *Counter) Delete() error {
 
-	if err := delete("counters", c.ID); err != nil {
+	if err := destroy("counters", c.ID); err != nil {
 		return fmt.Errorf("failed to delete counter: %s", err.Error())
 	}
 

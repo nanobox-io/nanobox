@@ -2,9 +2,9 @@ package provider
 
 import (
 	"fmt"
-	
+
 	"github.com/jcelliott/lumber"
-	
+
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/locker"
 	"github.com/nanobox-io/nanobox/util/provider"

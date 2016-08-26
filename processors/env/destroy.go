@@ -16,19 +16,16 @@ func Destroy(env *models.Env) error {
 	defer locker.LocalUnlock()
 
 	// find apps
-	apps, err := models.AllAppsByEnv(env.ID)
+	apps, err := env.Apps()
 	if err != nil {
-		lumber.Error("env:Destroy:models.AllAppsByEnv(%s): %s", env.ID, err.Error())
+		lumber.Error("env:Destroy:models.Env{ID:%s}.Apps(): %s", env.ID, err.Error())
 		return fmt.Errorf("failed to load app collection: %s", err.Error())
 	}
 
 	// destroy apps
 	for _, a := range apps {
-		appDestroy := app.Destroy{
-			App: a,
-		}
 
-		err := appDestroy.Run()
+		err := app.Destroy(a)
 		if err != nil {
 			return fmt.Errorf("failed to remove app: %s", err.Error())
 		}

@@ -135,7 +135,7 @@ func Remove(entry string) error {
 
 // RemoveAll removes all dns entries added by nanobox
 func RemoveAll() error {
-	
+
 	// short-circuit if no entries were added by nanobox
 	if len(List("by nanobox")) == 0 {
 		return nil

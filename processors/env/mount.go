@@ -5,9 +5,9 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	netfs_processors "github.com/nanobox-io/nanobox/processors/env/netfs"
-	"github.com/nanobox-io/nanobox/util/provider"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/netfs"
+	"github.com/nanobox-io/nanobox/util/provider"
 )
 
 // Mount sets up the env mounts

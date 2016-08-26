@@ -22,7 +22,7 @@ func (ips *IPs) Save() error {
 func (ips *IPs) Delete() error {
 
 	// Since there is only ever a single auth value, we'll use the registry
-	if err := delete("registry", "ips"); err != nil {
+	if err := destroy("registry", "ips"); err != nil {
 		return fmt.Errorf("failed to delete auth: %s", err.Error())
 	}
 

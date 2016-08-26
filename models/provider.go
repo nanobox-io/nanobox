@@ -25,7 +25,7 @@ func (a *Provider) Save() error {
 func (a *Provider) Delete() error {
 
 	// Since there is only ever a single provider value, we'll use the registry
-	if err := delete("registry", "provider"); err != nil {
+	if err := destroy("registry", "provider"); err != nil {
 		return fmt.Errorf("failed to delete provider: %s", err.Error())
 	}
 

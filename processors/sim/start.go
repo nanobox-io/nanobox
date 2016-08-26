@@ -1,69 +1,38 @@
 package sim
 
 import (
-	"github.com/nanobox-io/nanobox/commands/registry"
+	"fmt"
+
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/app"
 	"github.com/nanobox-io/nanobox/processors/env"
-	"github.com/nanobox-io/nanobox/util/provider"
-	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/display"
+	"github.com/nanobox-io/nanobox/processors/provider"
 )
 
-// Start ...
-type Start struct {
-	// mandatory
-	Env models.Env
-	// created
-	App models.App
-}
+// Start initializes and starts the dev environment
+func Start(envModel *models.Env, appModel *models.App) error {
 
-//
-func (start *Start) Run() error {
-	display.OpenContext("starting sim")
-
-	registry.Set("appname", "sim")
-
-	if start.App.ID == "" {
-		start.App, _ = models.FindAppBySlug(config.EnvID(), "sim")
+	// ensure the provider is setup
+	if err := provider.Setup(); err != nil {
+		return fmt.Errorf("failed to setup the provider: %s", err.Error())
 	}
 
-	// if the app has not been setup
-	// setup the app first
-	if provider.Status() != "Running" {
-		envSetup := env.Setup{}
-		err := envSetup.Run()
-		if err != nil {
-			return err
-		}
-		start.Env = envSetup.Env
-	} else {
-		// only run the init if we dont do an env setup
-		envInit := env.Init{}
-		if err := envInit.Run(); err != nil {
-			return err
+	// ensure the environment is setup
+	if err := env.Setup(envModel); err != nil {
+		return fmt.Errorf("failed to setup the env: %s", err.Error())
+	}
+
+	// setup the app if it's not already active
+	if appModel.State != "active" {
+		if err := app.Setup(envModel, appModel); err != nil {
+			return fmt.Errorf("failed to setup app: %s", err.Error())
 		}
 	}
 
-	// retrieve the app
-	a, _ := models.FindAppBySlug(start.Env.ID, "sim")
-
-	// if the provider was running but the app wasnt setup
-	if a.ID == "" {
-		appSetup := app.Setup{Env: start.Env}
-		if err := appSetup.Run(); err != nil {
-			return err
-		}
-		a = appSetup.App
+	// start the app
+	if err := app.Start(envModel, appModel); err != nil {
+		return fmt.Errorf("failed to start app: %s", err.Error())
 	}
 
-	// run an app start
-	appStart := &app.Start{App: a}
-	if err := appStart.Run(); err != nil {
-		return err
-	}
-	start.App = appStart.App
-
-	display.CloseContext()
 	return nil
 }

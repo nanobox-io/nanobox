@@ -16,7 +16,7 @@ type Add struct {
 //
 func (add Add) Run() error {
 
-	// TODO: turn this into env.Generate() 
+	// TODO: turn this into env.Generate()
 	// we dont have an environemnt so we will need to set one up
 	// if add.Env.ID == "" {
 	// 	envSetup := &env.Setup{}

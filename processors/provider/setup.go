@@ -6,10 +6,10 @@ import (
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util/provider"
 	"github.com/nanobox-io/nanobox/util/dhcp"
-	"github.com/nanobox-io/nanobox/util/locker"
 	"github.com/nanobox-io/nanobox/util/display"
+	"github.com/nanobox-io/nanobox/util/locker"
+	"github.com/nanobox-io/nanobox/util/provider"
 )
 
 // Setup sets up the provider (launch VM, etc)
@@ -18,6 +18,7 @@ func Setup() error {
 	defer locker.GlobalUnlock()
 
 	display.OpenContext("Preparing Nanobox")
+	defer display.CloseContext()
 
 	// create the provider (VM)
 	if err := provider.Create(); err != nil {
@@ -31,8 +32,16 @@ func Setup() error {
 		return fmt.Errorf("failed to start the provider: %s", err.Error())
 	}
 
+	// fetch the provider model
+	providerModel, _ := models.LoadProvider()
+
 	// attach the network to the host stack
-	if err := setupNetwork(); err != nil {
+	if err := setupNetwork(providerModel); err != nil {
+		return fmt.Errorf("failed to setup the provider network: %s", err.Error())
+	}
+
+	// attach the network to the host stack
+	if err := setDefaultIP(providerModel); err != nil {
 		return fmt.Errorf("failed to setup the provider network: %s", err.Error())
 	}
 
@@ -41,23 +50,18 @@ func Setup() error {
 		return fmt.Errorf("failed to initialize docker for provider: %s", err.Error())
 	}
 
-	display.CloseContext()
-	
 	return nil
 }
 
 // setupNetwork sets up the provider network
-func setupNetwork() error {
-	// fetch the provider model
-	model, _ := models.LoadProvider()
-	
+func setupNetwork(providerModel *models.Provider) error {
 	// short-circuit if this is already done
-	if model.HostIP != "" {
+	if providerModel.HostIP != "" {
 		return nil
 	}
 
 	display.StartTask("Joining virtual network")
-	
+
 	// reserve an IP to be used for mounting
 	mountIP, err := dhcp.ReserveGlobal()
 	if err != nil {
@@ -65,21 +69,8 @@ func setupNetwork() error {
 		lumber.Error("provider:Setup:setupNetwork:dhcp.ReserveGlobal(): %s", err.Error())
 		return fmt.Errorf("failed to reserve a global IP: %s", err.Error())
 	}
-	
-	// add the mount IP to the provider
-	if err := provider.AddIP(mountIP.String()); err != nil {
-		display.ErrorTask()
-		lumber.Error("provider:Setup:setupNetwork:provider.AddIP(%s): %s", mountIP, err.Error())
-		return fmt.Errorf("failed to add an IP to the provider for mounting: %s", err.Error())
-	}
-	
-	// set the mount IP as the default gateway
-	if err := provider.SetDefaultIP(mountIP.String()); err != nil {
-		display.ErrorTask()
-		lumber.Error("provider:Setup:setupNetwork:provider.SetDefaultIP(%s): %s", mountIP, err.Error())
-		return fmt.Errorf("failed to set the mount IP as the default gateway: %s", err.Error())
-	}
-	
+	providerModel.MountIP = mountIP.String()
+
 	// retrieve the provider's Host IP
 	hostIP, err := provider.HostIP()
 	if err != nil {
@@ -87,16 +78,36 @@ func setupNetwork() error {
 		lumber.Error("provider:Setup:setupNetwork:provider.HostIP(): %s", err.Error())
 		return fmt.Errorf("unable to retrieve the host IP from the provider: %s", err.Error())
 	}
-	
+	providerModel.HostIP = hostIP
+
 	// persist the IPs for later use
-	model.MountIP = mountIP.String()
-	model.HostIP  = hostIP
-	if err := model.Save(); err != nil {
+	if err := providerModel.Save(); err != nil {
 		display.ErrorTask()
 		return fmt.Errorf("failed to persist the provider model: %s", err.Error())
 	}
-	
+
 	display.StopTask()
-	
+
 	return nil
 }
+
+// set the default ip everytime 
+func setDefaultIP(providerModel *models.Provider) error {
+
+	// add the mount IP to the provider
+	if err := provider.AddIP(providerModel.MountIP); err != nil {
+		display.ErrorTask()
+		lumber.Error("provider:Setup:setDefaultIP:provider.AddIP(%s): %s", providerModel.MountIP, err.Error())
+		return fmt.Errorf("failed to add an IP to the provider for mounting: %s", err.Error())
+	}
+
+	// set the mount IP as the default gateway
+	if err := provider.SetDefaultIP(providerModel.MountIP); err != nil {
+		display.ErrorTask()
+		lumber.Error("provider:Setup:setDefaultIP:provider.SetDefaultIP(%s): %s", providerModel.MountIP, err.Error())
+		return fmt.Errorf("failed to set the mount IP as the default gateway: %s", err.Error())
+	}
+
+	return nil
+}
+

@@ -2,6 +2,8 @@ package models
 
 import (
 	"fmt"
+
+	"github.com/nanobox-io/nanobox/util/config"
 )
 
 type App struct {
@@ -42,32 +44,41 @@ func (a *App) Save() error {
 // Delete deletes the app record from the database
 func (a *App) Delete() error {
 
-	if err := delete(a.EnvID, a.ID); err != nil {
-		return fmt.Errorf("failed to delete app %s", err.Error())
+	if err := destroy(a.EnvID, a.ID); err != nil {
+		return fmt.Errorf("failed to destroy app %s", err.Error())
 	}
 
 	return nil
 }
 
 // Generate populates an App with data and persists the record
-func (a *App) Generate(env Env, name string) error {
-	
+func (a *App) Generate(env *Env, name string) error {
+
 	// short-circuit if this record has already been generated
 	if !a.IsNew() {
 		return nil
 	}
-	
-	a.EnvID     = env.ID
-	a.ID        = fmt.Sprintf("%s_%s", env.ID, name)
-	a.Name      = name
-	a.State     = "initialized"
+
+	// if no env is present we will need to create one
+	if env == nil {
+		env = &Env{ID: config.EnvID()}
+	}
+
+	a.EnvID = env.ID
+	a.ID = fmt.Sprintf("%s_%s", env.ID, name)
+	a.Name = name
+	a.State = "initialized"
 	a.GlobalIPs = map[string]string{}
-	a.LocalIPs  = map[string]string{}
-	a.Evars     = map[string]string{
+	a.LocalIPs = map[string]string{}
+	a.Evars = map[string]string{
 		"APP_NAME": name,
 	}
-	
+
 	return a.Save()
+}
+
+func (a *App) Components() ([]*Component, error) {
+	return AllComponentsByApp(a.ID)
 }
 
 // FindBySlug finds an app by an appID and name
@@ -87,26 +98,26 @@ func FindAppBySlug(envID, name string) (*App, error) {
 // AllApps loads all of the Apps across all environments
 func AllApps() ([]*App, error) {
 	apps := []*App{}
-	
+
 	// load all envs
 	envs, err := AllEnvs()
 	if err != nil {
 		return apps, fmt.Errorf("failed to load envs: %s", err.Error())
 	}
-	
+
 	for _, env := range envs {
 		// load all apps by env
 		envApps, err := AllAppsByEnv(env.ID)
 		if err != nil {
 			return apps, fmt.Errorf("failed to load env apps: %s", err.Error())
 		}
-		
+
 		for _, app := range envApps {
 			// append to the apps that we'll return
 			apps = append(apps, app)
 		}
 	}
-	
+
 	return apps, nil
 }
 
@@ -121,17 +132,17 @@ func AllAppsByEnv(envID string) ([]*App, error) {
 // AllAppsByStatus loads all of the Apps filtering by status
 func AllAppsByStatus(status string) ([]*App, error) {
 	apps := []*App{}
-	
+
 	all, err := AllApps()
 	if err != nil {
 		return apps, fmt.Errorf("failed to load all apps: %s", err.Error())
 	}
-	
+
 	for _, app := range all {
 		if app.Status == status {
 			apps = append(apps, app)
 		}
 	}
-	
+
 	return apps, nil
 }

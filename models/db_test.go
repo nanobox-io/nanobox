@@ -43,7 +43,7 @@ func TestDelete(t *testing.T) {
 	// clear the users table when we're finished
 	defer truncate("users")
 
-	err := delete("user", "1")
+	err := destroy("user", "1")
 	if err != nil {
 		t.Errorf("unable to delete %+v", err)
 	}

@@ -2,7 +2,7 @@ package models
 
 import (
 	"fmt"
-	
+
 	"github.com/nanobox-io/nanobox/util/config"
 )
 
@@ -35,7 +35,7 @@ func (e *Env) Save() error {
 // Delete deletes the app record from the database
 func (e *Env) Delete() error {
 
-	if err := delete("envs", e.ID); err != nil {
+	if err := destroy("envs", e.ID); err != nil {
 		return fmt.Errorf("failed to delete env: %s", err.Error())
 	}
 
@@ -44,19 +44,24 @@ func (e *Env) Delete() error {
 
 // Generate populates an Env from config data and persists the record
 func (e *Env) Generate() error {
-	
+
 	// short-circuit if this record has already been generated
 	if !e.IsNew() {
 		return nil
 	}
-	
+
 	// populate the data from the config package
-	e.ID        = config.EnvID()
+	e.ID = config.EnvID()
 	e.Directory = config.LocalDir()
-	e.Name      = config.LocalDirName()
-	e.Links     = map[string]string{}
-	
+	e.Name = config.LocalDirName()
+	e.Links = map[string]string{}
+
 	return e.Save()
+}
+
+// get a list of the apps that belong to this
+func (e *Env) Apps() ([]*App, error) {
+	return AllAppsByEnv(e.ID)
 }
 
 // FindEnvByID finds an app by an ID

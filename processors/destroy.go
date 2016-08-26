@@ -2,7 +2,7 @@ package processors
 
 import (
 	"fmt"
-	
+
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/processors/provider"
@@ -14,12 +14,12 @@ import (
 
 // Destroy destroys the provider and cleans nanobox off of the system
 func Destroy() error {
-	
+
 	// ensure we're running as the administrator for this
 	if !util.IsPrivileged() {
 		return reExecPrivilegedDestroy()
 	}
-	
+
 	display.OpenContext("Uninstalling Nanobox and configuration")
 
 	// destroy the provider (VM)
@@ -40,10 +40,10 @@ func Destroy() error {
 		lumber.Error("Destroy:Run:dns.RemoveAll(): %s", err.Error())
 		return fmt.Errorf("failed to remove dns entries: %s", err.Error())
 	}
-	
+
 	display.StopTask()
 	display.CloseContext()
-	
+
 	return nil
 }
 
@@ -60,6 +60,6 @@ func reExecPrivilegedDestroy() error {
 		lumber.Error("Destroy:reExecPrivilege:util.PrivilegeExec(%s): %s", cmd, err)
 		return err
 	}
-	
+
 	return nil
 }

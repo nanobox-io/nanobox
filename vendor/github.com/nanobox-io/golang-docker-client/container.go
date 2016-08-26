@@ -1,9 +1,9 @@
 package docker
 
 import (
+	"golang.org/x/net/context"
 	"strings"
 	"time"
-	"golang.org/x/net/context"
 
 	dockType "github.com/docker/engine-api/types"
 	dockContainer "github.com/docker/engine-api/types/container"
@@ -45,7 +45,7 @@ func CreateContainer(conf ContainerConfig) (dockType.ContainerJSON, error) {
 
 	hostConfig := &dockContainer.HostConfig{
 		Privileged: true,
-		Binds: conf.Binds,
+		Binds:      conf.Binds,
 		// NetworkMode:   "host",
 		CapAdd:        strslice.StrSlice([]string{"NET_ADMIN"}),
 		NetworkMode:   "bridge",
@@ -99,7 +99,7 @@ func ContainerStart(id string) error {
 
 // give them 5 seconds.. todo maybe make it adjustable
 func ContainerStop(id string) error {
-	timeout := 5*time.Second
+	timeout := 5 * time.Second
 	return client.ContainerStop(context.Background(), id, &timeout)
 }
 
@@ -110,7 +110,7 @@ func ContainerRemove(id string) error {
 		return err
 	}
 
-	timeout := 0*time.Second
+	timeout := 0 * time.Second
 	if err := client.ContainerStop(context.Background(), id, &timeout); err != nil {
 		// return err
 	}
