@@ -19,7 +19,7 @@ func Destroy(appModel *models.App, componentModel *models.Component) error {
 	defer display.CloseContext()
 
 	// remove the docker container
-	if err := destroyContainer(componentModel.ID) err != nil {
+	if err := destroyContainer(componentModel.ID); err != nil {
 		return err
 	}
 
@@ -48,8 +48,8 @@ func destroyContainer(id string) error {
 	display.StartTask("Destroying docker container")
 	defer display.StopTask()
 	
-	if err := docker.ContainerRemove(componentModel.ID); err != nil {
-		lumber.Error("component:Destroy:docker.ContainerRemove(%s): %s", componentModel.ID, err.Error())
+	if err := docker.ContainerRemove(id); err != nil {
+		lumber.Error("component:Destroy:docker.ContainerRemove(%s): %s", id, err.Error())
 		display.ErrorTask()
 		return fmt.Errorf("failed to remove docker container: %s", err.Error())
 	}

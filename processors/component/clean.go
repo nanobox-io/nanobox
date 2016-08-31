@@ -7,6 +7,7 @@ import (
 	"github.com/nanobox-io/golang-docker-client"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 // Clean purges any components in a dirty or incomplete state
@@ -52,7 +53,7 @@ func cleanComponent(appModel *models.App, componentModel *models.Component) erro
 
 // areComponentsDirty checks to see if any of the components are dirty
 func areComponentsDirty(componentModels []*models.Component) bool {
-	for _, componentModel := componentModels {
+	for _, componentModel := range componentModels {
 		if isComponentDirty(componentModel) {
 			return true
 		}
