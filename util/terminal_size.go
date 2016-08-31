@@ -23,7 +23,7 @@ func GetTerminalSize() (int, int) {
 
   if int(retCode) == -1 {
   	lumber.Error("GetTerminalSize(): %s", errno.Error())
-    return 0, 0
+    return 30, 80
   }
 
   return int(ws.Row), int(ws.Col)
