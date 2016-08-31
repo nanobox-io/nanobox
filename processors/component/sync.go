@@ -95,10 +95,6 @@ func provisionComponents(envModel *models.Env, appModel *models.App) error {
 			return fmt.Errorf("failed to setup component (%s): %s", name, err.Error())
 		}
 
-		// configure
-		if err := Configure(appModel, componentModel); err != nil {
-			return fmt.Errorf("failed to configure component: %s", err.Error())
-		}
 	}
 
 	return nil

@@ -32,11 +32,6 @@ func provisionComponent(appModel *models.App, platformComponent PlatformComponen
 		return fmt.Errorf("failed to setup platform component (%s): %s", componentModel.Label, err.Error())
 	}
 
-	// configure
-	if err := component.Configure(appModel, componentModel); err != nil {
-		return fmt.Errorf("failed to configure platform component (%s): %s", componentModel.Label, err.Error())
-	}
-
 	return nil
 }
 

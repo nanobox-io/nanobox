@@ -7,14 +7,16 @@ import (
 	"github.com/nanobox-io/golang-docker-client"
 
 	container_generator "github.com/nanobox-io/nanobox/generators/containers"
+	hook_generator "github.com/nanobox-io/nanobox/generators/hooks/code"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/provider"
+	"github.com/nanobox-io/nanobox/util/hookit"
 )
 
 //
-func Setup(appModel *models.App, componentModel *models.Component) error {
+func Setup(appModel *models.App, componentModel *models.Component, warehouseConfig WarehouseConfig) error {
 	display.OpenContext("setting up %s", componentModel.Name)
 	defer display.CloseContext()
 
@@ -71,6 +73,45 @@ func Setup(appModel *models.App, componentModel *models.Component) error {
 	//
 	if err := addIPToProvider(componentModel); err != nil {
 		return err
+	}
+
+	lumber.Prefix("code:Setup")
+	defer lumber.Prefix("")
+
+	// run fetch build command
+	fetchPayload := hook_generator.FetchPayload(componentModel, warehouseConfig.WarehouseURL)
+
+	display.StartTask("fetching code")
+	if _, err := hookit.RunFetchHook(componentModel.ID, fetchPayload); err != nil {
+		display.ErrorTask()
+		return err
+	}
+	display.StopTask()
+
+	// run configure command
+	payload := hook_generator.ConfigurePayload(appModel, componentModel)
+
+	//
+	display.StartTask("configuring code")
+	if _, err := hookit.RunConfigureHook(componentModel.ID, payload); err != nil {
+		display.ErrorTask()
+		return fmt.Errorf("failed to configure code: %s", err.Error())
+	}
+	display.StopTask()
+
+	// run start command
+	display.StartTask("starting code")
+	if _, err := hookit.RunStartHook(componentModel.ID, payload); err != nil {
+		display.ErrorTask()
+		return err
+	}
+	display.StopTask()
+
+	//
+	componentModel.State = ACTIVE
+	if err := componentModel.Save(); err != nil {
+		lumber.Error("code:Configure:Component.Save(): %s", err.Error())
+		return fmt.Errorf("unable to save component model: %s", err.Error())
 	}
 
 	return nil

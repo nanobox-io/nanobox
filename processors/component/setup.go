@@ -104,11 +104,31 @@ func Setup(appModel *models.App, componentModel *models.Component) error {
 		return fmt.Errorf("failed to generate the component evars: %s", err.Error())
 	}
 
-	// update state
-	componentModel.State = "planned"
+	display.StartTask("running configuration hooks")
+	// run the update hook
+	if _, err := hookit.RunUpdateHook(componentModel.ID, hook_generator.UpdatePayload(componentModel)); err != nil {
+		display.ErrorTask()
+		return fmt.Errorf("failed to run update hook: %s", err.Error())
+	}
+
+	// run the configure hook
+	if _, err := hookit.RunConfigureHook(componentModel.ID, hook_generator.ConfigurePayload(appModel, componentModel)); err != nil {
+		display.ErrorTask()
+		return fmt.Errorf("failed to run configure hook: %s", err.Error())
+	}
+
+	// run the start hook
+	if _, err := hookit.RunStartHook(componentModel.ID, hook_generator.UpdatePayload(componentModel)); err != nil {
+		display.ErrorTask()
+		return fmt.Errorf("failed to run start hook: %s", err.Error())
+	}
+
+	// set state as active
+	componentModel.State = "active"
 	if err := componentModel.Save(); err != nil {
-		lumber.Error("component:Setup:models.Component.Save(): %s", err.Error())
-		return fmt.Errorf("failed to persist component state: %s", err.Error())
+		lumber.Error("component:Configure:models.Component.Save()", err.Error())
+		display.ErrorTask()
+		return fmt.Errorf("failed to set component state: %s", err.Error())
 	}
 
 	return nil

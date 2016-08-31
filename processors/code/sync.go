@@ -24,16 +24,11 @@ func Sync(appModel *models.App, warehouseConfig WarehouseConfig) error {
 	for _, componentModel := range codeComponentModels(appModel) {
 
 		// run the code setup process with the new config
-		err := Setup(appModel, componentModel)
+		err := Setup(appModel, componentModel, warehouseConfig)
 		if err != nil {
 			return fmt.Errorf("failed to setup code (%s): %s\n", componentModel.Name, err.Error())
 		}
 
-		// configure this code container
-		err = Configure(appModel, componentModel, warehouseConfig)
-		if err != nil {
-			return fmt.Errorf("failed to configure code (%s): %s\n", componentModel.Name, err.Error())
-		}
 	}
 
 	return nil
