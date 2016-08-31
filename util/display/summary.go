@@ -197,7 +197,7 @@ func (s *Summarizer) tick() {
 	s.spinIdx += 1
 
 	// reset the index back to 0 if we've reached the top
-	if s.spinIdx == len(TaskSpinner) - 1 {
+	if s.spinIdx == len(TaskSpinner) {
 		s.spinIdx = 0
 	}
 
