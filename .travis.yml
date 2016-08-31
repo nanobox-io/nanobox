@@ -12,5 +12,4 @@ before_install:
   - bash <(curl -fsSL https://get.docker.com/)
   - go get github.com/tools/godep
 
-install: godep restore
 script: go test -v $(go list ./... | grep -v /vendor/)
