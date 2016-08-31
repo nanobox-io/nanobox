@@ -10,7 +10,7 @@ import (
 )
 
 // Unmount unmounts the env shares
-func Unmount(env *models.Env) error {
+func Unmount(env *models.Env, keepShare bool) error {
 	// break early if there is still an environemnt using the mounts
 	if mountsInUse(env) {
 		return nil
@@ -27,8 +27,11 @@ func Unmount(env *models.Env) error {
 		}
 
 		// remove the share
-		if err := removeShare(src, dst); err != nil {
-			return fmt.Errorf("failed to remove engine share: %s", err.Error())
+		if !keepShare {
+			if err := removeShare(src, dst); err != nil {
+				return fmt.Errorf("failed to remove engine share: %s", err.Error())
+			}
+			
 		}
 	}
 
@@ -42,8 +45,10 @@ func Unmount(env *models.Env) error {
 	}
 
 	// then remove the share from the workstation
-	if err := removeShare(src, dst); err != nil {
-		return fmt.Errorf("failed to remove code share: %s", err.Error())
+	if !keepShare {
+		if err := removeShare(src, dst); err != nil {
+			return fmt.Errorf("failed to remove code share: %s", err.Error())
+		}
 	}
 
 	return nil
