@@ -50,12 +50,9 @@ func Watch(path string) error {
 
 	// catch a kill signal
 	for e := range watcher.eventChan() {
-		fmt.Printf("event: %+v\r\n", e)
 
 		providerFile := filepath.ToSlash(filepath.Join(fmt.Sprintf("%s%s/code", provider.HostShareDir(), config.EnvID()), strings.Replace(e.file, config.LocalDir(), "", 1)))
-		fmt.Printf("updating: %s\r\n", providerFile)
-		err := provider.Touch(providerFile)
-		fmt.Println("err:", err)
+		provider.Touch(providerFile)
 	}
 
 	// report any errors from either
