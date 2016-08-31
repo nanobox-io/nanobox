@@ -12,7 +12,6 @@ import (
 )
 
 var (
-	Spinner       = []string{"\\", "|", "/", "-"}
 	EscSeqRegex   = regexp.MustCompile("\\x1b[[][?0123456789]*;?[?0123456789]*[ABCDEFGHJKRSTfminsulhp]")
 	LogStripRegex = regexp.MustCompile("^[ \t-]*")
 	_, termWidth  = util.GetTerminalSize()
@@ -213,7 +212,7 @@ func (s *Summarizer) stop() {
 	s.reset()
 
 	// generate and print the complete header
-	header := fmt.Sprintf("%s√ %s\n", s.Prefix, s.Label)
+	header := fmt.Sprintf("%s%s %s\n", s.Prefix, TaskComplete, s.Label)
 	io.WriteString(s.Out, header)
 
 	// set the shutdown flag to ensure the loop ends
@@ -249,7 +248,7 @@ func (s *Summarizer) reset() {
 // print prints the current summary
 func (s *Summarizer) print() {
 
-	header := fmt.Sprintf("%s%s %s :\n", s.Prefix, Spinner[s.spinIdx], s.Label)
+	header := fmt.Sprintf("%s%s %s :\n", s.Prefix, TaskSpinner[s.spinIdx], s.Label)
 	detail := fmt.Sprintf("%s  %s\n", s.Prefix, s.detail)
 
 	// todo: add progress estimator
