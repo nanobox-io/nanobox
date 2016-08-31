@@ -183,7 +183,9 @@ func ErrorTask() error {
 
 // Info sends an info level message to the current task
 func Info(message string, args ...interface{}) error {
-	message = fmt.Sprintf(message, args...)
+	if len(args) != 0 {
+		message = fmt.Sprintf(message, args...)
+	}
 
 	// short-circuit if our log-level isn't high enough
 	if currentLogLevel() > 2 {
@@ -199,7 +201,9 @@ func Info(message string, args ...interface{}) error {
 
 // Warn sends a warn level message to the current task
 func Warn(message string, args ...interface{}) error {
-	message = fmt.Sprintf(message, args...)
+	if len(args) != 0 {
+		message = fmt.Sprintf(message, args...)
+	}
 
 	// short-circuit if our log-level isn't high enough
 	if currentLogLevel() > 3 {
@@ -215,7 +219,9 @@ func Warn(message string, args ...interface{}) error {
 
 // Error sends an error level message to the current task
 func Error(message string, args ...interface{}) error {
-	message = fmt.Sprintf(message, args...)
+	if len(args) != 0 {
+		message = fmt.Sprintf(message, args...)
+	}
 
 	// short-circuit if our log-level isn't high enough
 	if currentLogLevel() > 4 {
@@ -231,7 +237,9 @@ func Error(message string, args ...interface{}) error {
 
 // Debug sends a debug level message to the current task
 func Debug(message string, args ...interface{}) error {
-	message = fmt.Sprintf(message, args...)
+	if len(args) != 0 {
+		message = fmt.Sprintf(message, args...)
+	}
 
 	// short-circuit if our log-level isn't high enough
 	if currentLogLevel() > 1 {
@@ -247,7 +255,9 @@ func Debug(message string, args ...interface{}) error {
 
 // Trace sends a trace level message to the current task
 func Trace(message string, args ...interface{}) error {
-	message = fmt.Sprintf(message, args...)
+	if len(args) != 0 {
+		message = fmt.Sprintf(message, args...)
+	}
 
 	// short-circuit if our log-level isn't high enough
 	if currentLogLevel() > 0 {

@@ -1,6 +1,8 @@
 package display
 
-import ()
+import (
+	"github.com/jcelliott/lumber"
+)
 
 type Streamer struct {
 	logLevel string
@@ -24,8 +26,9 @@ func NewPrefixedStreamer(logLevel string, prefix string) Streamer {
 
 // Write implements the io.Writer interface to write bytes on a writer
 func (s Streamer) Write(p []byte) (n int, err error) {
-
 	msg := string(p)
+
+	lumber.Info("msg: %q", msg)
 
 	// if we have a prefixer run the message through it
 	if s.prefixer != nil {
