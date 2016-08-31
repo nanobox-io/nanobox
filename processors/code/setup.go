@@ -6,7 +6,7 @@ import (
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
 
-	"github.com/nanobox-io/nanobox/generators/containers"
+	container_generator "github.com/nanobox-io/nanobox/generators/containers"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
@@ -36,11 +36,13 @@ func Setup(appModel *models.App, componentModel *models.Component) error {
 	}
 
 	// pull the component image
+	display.StartTask("pulling %s image", componentModel.Image)
 	if _, err := docker.ImagePull(componentModel.Image, dockerPercent); err != nil {
 		lumber.Error("component:Setup:docker.ImagePull(%s, nil): %s", componentModel.Image, err.Error())
+		display.ErrorTask()
 		return fmt.Errorf("failed to pull docker image (%s): %s", componentModel.Image, err.Error())
 	}
-
+	display.StopTask()
 	//
 
 	if err := reserveIps(componentModel); err != nil {
@@ -48,15 +50,16 @@ func Setup(appModel *models.App, componentModel *models.Component) error {
 		return err
 	}
 
-
 	// create docker container
-	config := generate_container.ComponentConfig(componentModel)
+	display.StartTask("starting container")
+	config := container_generator.ComponentConfig(componentModel)
 	container, err := docker.CreateContainer(config)
 	if err != nil {
 		lumber.Error("code:Setup:createContainer:docker.CreateContainer(%+v): %s", config, err.Error())
 		display.ErrorTask()
 		return err
 	}
+	display.StopTask()
 
 	// save the component
 	componentModel.ID = container.ID
@@ -95,29 +98,31 @@ func reserveIps(componentModel *models.Component) error {
 	}
 
 	return nil
-}	
+}
 
 // createContainer ...
 func createContainer(componentModel *models.Component) error {
 	display.StartTask("creating container")
-	
 
 	display.StopTask()
-	
+
 	return nil
 }
 
 // addIPToProvider ...
 func addIPToProvider(componentModel *models.Component) error {
-
+	display.StartTask("building network")
 	if err := provider.AddIP(componentModel.ExternalIP); err != nil {
+		display.ErrorTask()
 		lumber.Error("code:Setup:addIPToProvider:provider.AddIP(%s): %s", componentModel.ExternalIP, err.Error())
 		return err
 	}
 
 	if err := provider.AddNat(componentModel.ExternalIP, componentModel.InternalIP); err != nil {
 		lumber.Error("code:Setup:addIPToProvider:provider.AddNat(%s, %s): %s", componentModel.ExternalIP, componentModel.InternalIP, err.Error())
+		display.ErrorTask()
 		return err
 	}
+	display.StopTask()
 	return nil
 }

@@ -25,8 +25,5 @@ var (
 // logFn will run the DNS processor for adding DNS entires to the "hosts" file
 func logFn(ccmd *cobra.Command, args []string) {
 	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
-	devLog := dev.Log{
-		App: app,
-	}
-	display.CommandErr(devLog.Run())
+	display.CommandErr(dev.Log(app))
 }

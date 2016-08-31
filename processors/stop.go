@@ -44,8 +44,7 @@ func stopAllApps() error {
 
 	// run the app stop on all running apps
 	for _, a := range apps {
-		appStop := app.Stop{App: a}
-		if err := appStop.Run(); err != nil {
+		if err := app.Stop(a); err != nil {
 			return fmt.Errorf("failed to stop running app: %s", err.Error())
 		}
 	}
@@ -63,8 +62,7 @@ func unmountEnvs() error {
 	}
 
 	for _, e := range envs {
-		envUnmount := env.Unmount{Env: e}
-		if err := envUnmount.Run(); err != nil {
+		if err := env.Unmount(e); err != nil {
 			return fmt.Errorf("failed to unmount env: %s", err.Error())
 		}
 	}

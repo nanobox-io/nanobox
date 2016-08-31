@@ -16,18 +16,12 @@ import (
 )
 
 // Console ...
-type Console struct {
-	Container string
-	App       string
-}
-
-//
-func (console Console) Run() error {
+func Console(app, container string) error {
 
 	var err error
 
 	// get a key from odin
-	key, location, container, err = odin.EstablishConsole(getAppID(console.App), console.Container)
+	key, location, container, err = odin.EstablishConsole(getAppID(app), container)
 	if err != nil {
 		return err
 	}

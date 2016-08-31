@@ -2,17 +2,16 @@ package component
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/boxfile"
 )
 
 // PlanPayload returns a string for the user hook payload
-func PlanPayload(component *models.Component) (string, error) {
+func PlanPayload(component *models.Component) string {
 	config, err := boxfile.ComponentConfig(component)
 	if err != nil {
-		return "", fmt.Errorf("failed to fetch component config: %s", err.Error())
+		return "{}"
 	}
 
 	payload := map[string]interface{}{
@@ -22,8 +21,8 @@ func PlanPayload(component *models.Component) (string, error) {
 	// marshal the payload into json
 	b, err := json.Marshal(payload)
 	if err != nil {
-		return "", fmt.Errorf("failed to encode hook payload into json: %s", err.Error())
+		return "{}"
 	}
 
-	return string(b), nil
+	return string(b)
 }

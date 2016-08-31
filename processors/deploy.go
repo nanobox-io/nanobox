@@ -10,74 +10,52 @@ import (
 	"github.com/nanobox-io/nanobox/util/odin"
 )
 
-// Deploy ...
-type Deploy struct {
-	Env     models.Env
-	App     string
-	Message string
-
-	appID          string
-	buildID        string
-	warehouseURL   string
-	warehouseToken string
-	previousBuild  string
-}
-
 //
-func (deploy *Deploy) Run() error {
+func Deploy(envModel *models.Env, deployConfig DeployConfig) error {
+
 	// setup the environment (boot vm)
-	providerSetup := provider.Setup{}
-	if err := providerSetup.Run(); err != nil {
+	if err := provider.Setup(); err != nil {
 		return err
 	}
 
-	if err := deploy.setWarehouseToken(); err != nil {
+	appID := getAppID(deployConfig.App)
+
+	warehouseConfig, err := getWarhouseConfig(appID)
+	if err != nil {
 		return err
 	}
-	if err := deploy.publishCode(); err != nil {
+
+	// publish to remote warehouse
+	if err := code.Publish(envModel, warehouseConfig); err != nil {
 		return err
 	}
+
 	// tell odin what happened
-	if err := odin.Deploy(deploy.appID, deploy.buildID, deploy.Env.BuiltBoxfile, deploy.Message); err != nil {
-		lumber.Error("deploy:odin.Deploy(%s,%s,%s,%s): %s", deploy.appID, deploy.buildID, deploy.Env.BuiltBoxfile, deploy.Message, err.Error())
+	if err := odin.Deploy(appID, warehouseConfig.BuildID, envModel.BuiltBoxfile, deployConfig.Message); err != nil {
+		lumber.Error("deploy:odin.Deploy(%s,%s,%s,%s): %s", appID, warehouseConfig.BuildID, envModel.BuiltBoxfile, deployConfig.Message, err.Error())
 		return err
 	}
 	return nil
 }
 
 // setWarehouseToken ...
-func (deploy *Deploy) setWarehouseToken() (err error) {
+func getWarhouseConfig(appID string) (warehouseConfig code.WarehouseConfig, err error) {
 
-	// get remote hoarder credentials
-	deploy.appID = getAppID(deploy.App)
-	// TODO: could make this not as random but based on something
-	// so if the same code was 'deployed' odin could react??
-	deploy.buildID = util.RandomString(30)
-	deploy.warehouseToken, deploy.warehouseURL, err = odin.GetWarehouse(deploy.appID)
+	token, url, err := odin.GetWarehouse(appID)
 	if err != nil {
-		lumber.Error("deploy:setWarehouseToken:GetWarehouse(%s): %s", deploy.appID, err.Error())
+		lumber.Error("deploy:setWarehouseToken:GetWarehouse(%s): %s", appID, err.Error())
 		return
 	}
 
 	// get the previous build if there was one
-	deploy.previousBuild, err = odin.GetPreviousBuild(deploy.appID)
+	prevBuild, err := odin.GetPreviousBuild(appID)
 	if err != nil {
-		lumber.Error("deploy:setWarehouseToken:GetPreviousBuild(%s): %s", deploy.appID, err.Error())
+		lumber.Error("deploy:setWarehouseToken:GetPreviousBuild(%s): %s", appID, err.Error())
 		return
 	}
+	warehouseConfig.BuildID = util.RandomString(30)
+	warehouseConfig.WarehouseURL = url
+	warehouseConfig.WarehouseToken = token
+	warehouseConfig.PreviousBuild = prevBuild
 	return
-}
-
-// publishCode ...
-func (deploy *Deploy) publishCode() error {
-
-	codePublish := code.Publish{
-		Env:            deploy.Env,
-		BuildID:        deploy.buildID,
-		WarehouseURL:   deploy.warehouseURL,
-		WarehouseToken: deploy.warehouseToken,
-		PreviousBuild:  deploy.previousBuild,
-	}
-
-	return codePublish.Run()
 }

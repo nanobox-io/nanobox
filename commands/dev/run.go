@@ -26,8 +26,7 @@ func runFn(ccmd *cobra.Command, args []string) {
 	// if no arguement is provided they wanted to run a dev console
 	// and be dropped into a dev environment
 	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
-	devConsole := dev.Console{App: app, DevRun: true}
 
 	// set the meta arguments to be used in the processor and run the processor
-	display.CommandErr(devConsole.Run())
+	display.CommandErr(dev.Console(app, true))
 }

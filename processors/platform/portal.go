@@ -6,30 +6,30 @@ import (
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-portal-client"
 
-	route_generator "github.com/nanobox-io/nanobox/generators/router"
+	generator "github.com/nanobox-io/nanobox/generators/router"
 	"github.com/nanobox-io/nanobox/models"
 )
 
 //
 func UpdatePortal(appModel *models.App) error {
+	client := portalClient(appModel)
 
 	// update routes
-	routes := route_generator.BuildRoutes(appModel)
-	if err := portalClient(appModel).UpdateRoutes(routes); err != nil {
+	routes := generator.BuildRoutes(appModel)
+	if err := client.UpdateRoutes(routes); err != nil {
 		lumber.Error("platform:UpdatePortal:UpdateRoutes(%+v): %s", routes, err.Error)
-		return fmt.Errorf("failed to sending routing updates to the router: %s",err.Error())
+		return fmt.Errorf("failed to sending routing updates to the router: %s", err.Error())
 	}
 
 	// update services
-	services := route_generator.BuildServices(appModel)
-	if err := portalClient(appModel).UpdateServices(services); err != nil {
+	services := generator.BuildServices(appModel)
+	if err := client.UpdateServices(services); err != nil {
 		lumber.Error("platform:UpdatePortal:UpdateServices(%+v): %s", services, err.Error)
 		return fmt.Errorf("failed to update port forwarding: %s", err.Error())
 	}
 
 	return nil
 }
-
 
 //
 func portalClient(appModel *models.App) portal.PortalClient {

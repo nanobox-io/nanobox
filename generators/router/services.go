@@ -1,13 +1,13 @@
 package router
 
-import(
+import (
 	"strconv"
 	"strings"
 
 	"github.com/nanobox-io/golang-portal-client"
 
-	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox-boxfile"
+	"github.com/nanobox-io/nanobox/models"
 )
 
 // Update the ports that portal knows about.
@@ -70,8 +70,6 @@ func buildComponentServices(boxfile boxfile.Boxfile, component *models.Component
 	return portServices
 }
 
-
-
 // duplicateService ...
 func duplicateService(services []portal.Service, service portal.Service) bool {
 	for _, existingService := range services {
@@ -81,7 +79,6 @@ func duplicateService(services []portal.Service, service portal.Service) bool {
 	}
 	return false
 }
-
 
 // ports ...
 func ports(box boxfile.Boxfile) map[string]map[string]string {

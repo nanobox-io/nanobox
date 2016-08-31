@@ -3,8 +3,8 @@ package processors
 import (
 	"fmt"
 
-	"github.com/nanobox-io/nanobox/processors/env"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processors/env"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/locker"
 )

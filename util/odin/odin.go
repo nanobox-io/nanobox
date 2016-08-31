@@ -59,10 +59,10 @@ func Deploy(appID, id, boxfile, message string) error {
 // EstablishTunnel ...
 func EstablishTunnel(appID, id string) (string, string, string, int, error) {
 	r := struct {
-		Token string `json:"token"`
-		Url   string `json:"url"`
+		Token     string `json:"token"`
+		Url       string `json:"url"`
 		Container string `json:"container"`
-		Port   int `json:"port"`
+		Port      int    `json:"port"`
 	}{}
 
 	err := doRequest("GET", fmt.Sprintf("apps/%s/tunnels/%s", appID, id), nil, nil, &r)

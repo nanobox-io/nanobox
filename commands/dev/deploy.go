@@ -23,9 +23,5 @@ var DeployCmd = &cobra.Command{
 func deployFn(ccmd *cobra.Command, args []string) {
 	env, _ := models.FindEnvByID(config.EnvID())
 	app, _ := models.FindAppBySlug(env.ID, "dev")
-	devDeploy := dev.Deploy{
-		Env: env,
-		App: app,
-	}
-	display.CommandErr(devDeploy.Run())
+	display.CommandErr(dev.Deploy(env, app))
 }

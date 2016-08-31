@@ -21,5 +21,5 @@ var (
 // logoutFn ...
 func logoutFn(ccmd *cobra.Command, args []string) {
 
-	display.CommandErr(processors.Logout{}.Run())
+	display.CommandErr(processors.Logout())
 }

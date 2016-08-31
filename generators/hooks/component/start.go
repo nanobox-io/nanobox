@@ -2,7 +2,6 @@ package component
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/boxfile"
@@ -13,10 +12,10 @@ type startPayload struct {
 }
 
 // StartPayload returns a string for the start hook payload
-func StartPayload(c *models.Component) (string, error) {
+func StartPayload(c *models.Component) string {
 	config, err := boxfile.ComponentConfig(c)
 	if err != nil {
-		return "", fmt.Errorf("unable to fetch component config: %s", err.Error())
+		return "{}"
 	}
 
 	payload := startPayload{
@@ -30,8 +29,8 @@ func StartPayload(c *models.Component) (string, error) {
 
 	j, err := json.Marshal(payload)
 	if err != nil {
-		return "", fmt.Errorf("failed to encode start payload: %s", err.Error())
+		return "{}"
 	}
 
-	return string(j), nil
+	return string(j)
 }

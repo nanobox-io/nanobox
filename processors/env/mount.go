@@ -6,12 +6,14 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	netfs_processors "github.com/nanobox-io/nanobox/processors/env/netfs"
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/netfs"
 	"github.com/nanobox-io/nanobox/util/provider"
 )
 
 // Mount sets up the env mounts
 func Mount(env *models.Env) error {
+	display.StartTask("mounting code")
 
 	// mount the engine if it's a local directory
 	if config.EngineDir() != "" {
@@ -20,11 +22,13 @@ func Mount(env *models.Env) error {
 
 		// first export the env on the workstation
 		if err := addShare(src, dst); err != nil {
+			display.ErrorTask()
 			return fmt.Errorf("failed to export engine share: %s", err.Error())
 		}
 
 		// mount the env on the provider
 		if err := addMount(src, dst); err != nil {
+			display.ErrorTask()
 			return fmt.Errorf("failed to mount the engine share on the provider: %s", err.Error())
 		}
 	}
@@ -35,13 +39,17 @@ func Mount(env *models.Env) error {
 
 	// first export the env on the workstation
 	if err := addShare(src, dst); err != nil {
+		display.ErrorTask()
 		return fmt.Errorf("failed to export code share: %s", err.Error())
 	}
 
 	// then mount the env on the provider
 	if err := addMount(src, dst); err != nil {
+		display.ErrorTask()
 		return fmt.Errorf("failed to mount the code share on the provider: %s", err.Error())
 	}
+
+	display.StopTask()
 
 	return nil
 }

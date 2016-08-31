@@ -56,11 +56,11 @@ ex: nanobox tunnel <container>
 	}
 
 	// set the meta arguments to be used in the processor and run the processor
-	tunnel := processors.Tunnel{
+	tunnelConfig := processors.TunnelConfig{
 		App:       tunnelCmdFlags.app,
 		Port:      tunnelCmdFlags.port,
 		Container: args[0],
 	}
 
-	display.CommandErr(tunnel.Run())
+	display.CommandErr(processors.Tunnel(tunnelConfig))
 }

@@ -1,37 +1,34 @@
 package dev
 
 import (
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors"
+	"github.com/nanobox-io/nanobox/util/config"
 )
 
 // Up ...
-type Up struct {
-}
-
-//
-func (up Up) Run() error {
+func Up() error {
 
 	// run a nanobox start
-	processorStart := processors.Start{}
-	if err := processorStart.Run(); err != nil {
+	if err := processors.Start(); err != nil {
 		return err
 	}
 
+	envModel, _ := models.FindEnvByID(config.EnvID())
+	appModel, _ := models.FindAppBySlug(config.EnvID(), "dev")
+
 	// run a nanobox build
-	processorBuild := &processors.Build{}
-	if err := processorBuild.Run(); err != nil {
+	if err := processors.Build(envModel); err != nil {
 		return err
 	}
 
 	// run a dev start
-	devStart := &Start{Env: processorBuild.Env}
-	if err := devStart.Run(); err != nil {
+	if err := Start(envModel, appModel); err != nil {
 		return err
 	}
 
 	// run a dev deploy
-	devDeploy := Deploy{Env: processorBuild.Env, App: devStart.App}
-	if err := devDeploy.Run(); err != nil {
+	if err := Deploy(envModel, appModel); err != nil {
 		return err
 	}
 

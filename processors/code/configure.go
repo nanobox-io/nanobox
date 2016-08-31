@@ -1,13 +1,14 @@
 package code
 
 import (
-
+	"fmt"
+	
 	"github.com/jcelliott/lumber"
 
+	generator "github.com/nanobox-io/nanobox/generators/hooks/code"
 	"github.com/nanobox-io/nanobox/models"
-	code_hook_gen "github.com/nanobox-io/nanobox/generators/hooks/code"
-	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
+	"github.com/nanobox-io/nanobox/util/hookit"
 )
 
 //
@@ -22,35 +23,33 @@ func Configure(appModel *models.App, componentModel *models.Component, warehouse
 	lumber.Prefix("code:Configure")
 	defer lumber.Prefix("")
 
-	display.OpenContext("configuring %s", componentModel.Name)
+	display.OpenContext("configuring %s(%s)", componentModel.Label, componentModel.Name)
 	defer display.CloseContext()
 
-	streamer := display.NewStreamer("info")
-
 	// run fetch build command
-	fetchPayload := code_hook_gen.FetchPayload(componentModel, warehouseConfig.WarehouseURL)
+	fetchPayload := generator.FetchPayload(componentModel, warehouseConfig.WarehouseURL)
 
 	display.StartTask("fetching code")
-	if _, err := util.Exec(componentModel.ID, "fetch", fetchPayload, streamer); err != nil {
+	if _, err := hookit.RunFetchHook(componentModel.ID, fetchPayload); err != nil {
 		display.ErrorTask()
 		return err
 	}
 	display.StopTask()
 
 	// run configure command
-	payload := code_hook_gen.ConfigurePayload(appModel, componentModel)
+	payload := generator.ConfigurePayload(appModel, componentModel)
 
 	//
 	display.StartTask("configuring code")
-	if _, err := util.Exec(componentModel.ID, "configure", payload, streamer); err != nil {
+	if _, err := hookit.RunConfigureHook(componentModel.ID, payload); err != nil {
 		display.ErrorTask()
-		return err
+		return fmt.Errorf("failed to configure code: %s", err.Error())
 	}
 	display.StopTask()
 
 	// run start command
 	display.StartTask("starting code")
-	if _, err := util.Exec(componentModel.ID, "start", payload, streamer); err != nil {
+	if _, err := hookit.RunStartHook(componentModel.ID, payload); err != nil {
 		display.ErrorTask()
 		return err
 	}

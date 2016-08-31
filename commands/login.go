@@ -32,9 +32,5 @@ func init() {
 
 // loginFn ...
 func loginFn(ccmd *cobra.Command, args []string) {
-	login := processors.Login{
-		Username: loginCmdFlags.username,
-		Password: loginCmdFlags.password,
-	}
-	display.CommandErr(login.Run())
+	display.CommandErr(processors.Login(loginCmdFlags.username, loginCmdFlags.password))
 }

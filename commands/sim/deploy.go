@@ -28,6 +28,6 @@ func deployFn(ccmd *cobra.Command, args []string) {
 	env, _ := models.FindEnvByID(config.EnvID())
 	app, _ := models.FindAppBySlug(env.ID, "sim")
 	// TODO: display an error if we cant find either of these
-	
+
 	display.CommandErr(sim.Deploy(env, app))
 }

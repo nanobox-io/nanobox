@@ -4,13 +4,16 @@ import (
 	"fmt"
 
 	"github.com/jcelliott/lumber"
-
 	"github.com/nanobox-io/nanobox-boxfile"
+
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 // Sync syncronizes an app's components with the boxfile config
 func Sync(envModel *models.Env, appModel *models.App) error {
+	display.OpenContext("syncronizing data components")
+	defer display.CloseContext()
 
 	// purge delta components
 	if err := purgeDeltaComponents(envModel, appModel); err != nil {

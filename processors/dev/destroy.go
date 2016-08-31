@@ -6,13 +6,7 @@ import (
 )
 
 // Destroy ...
-type Destroy struct {
-	App models.App
-}
+func Destroy(appModel *models.App) error {
 
-//
-func (destroy Destroy) Run() error {
-	appDestroy := app.Destroy{App: destroy.App}
-
-	return appDestroy.Run()
+	return app.Destroy(appModel)
 }

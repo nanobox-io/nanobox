@@ -1,79 +1,64 @@
 package dev
 
 import (
-	"encoding/json"
 	"fmt"
 	"net"
 	"os"
 
-	dockType "github.com/docker/engine-api/types"
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox-boxfile"
 
+	container_generator "github.com/nanobox-io/nanobox/generators/containers"
+	build_generator "github.com/nanobox-io/nanobox/generators/hooks/build"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/env"
-	"github.com/nanobox-io/nanobox/util"
-	"github.com/nanobox-io/nanobox/util/watch"
+	process_provider "github.com/nanobox-io/nanobox/processors/provider"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/counter"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
+	"github.com/nanobox-io/nanobox/util/hookit"
 	"github.com/nanobox-io/nanobox/util/locker"
 	"github.com/nanobox-io/nanobox/util/provider"
+	"github.com/nanobox-io/nanobox/util/watch"
 )
 
-// Console ...
-type Console struct {
-	App    models.App
-	DevRun bool
-
-	boxfile   boxfile.Boxfile
-	localIP   net.IP
-	image     string
-	container dockType.ContainerJSON
-}
-
 //
-func (console *Console) Run() error {
-
-	// this is bad... we should probably print a pretty message explaining that the
-	// app was left in a bad state and needs to be reset
-	defer func() {
-		if err := console.teardown(); err != nil {
-			return
-		}
-	}()
+func Console(appModel *models.App, devRun bool) error {
 
 	// run the share init which gives access to docker
-	envInit := env.Init{}
-	if err := envInit.Run(); err != nil {
+	if err := process_provider.Init(); err != nil {
 		return err
 	}
 
-	//
-	if err := console.setup(); err != nil {
+	// generate a container config
+	config := container_generator.DevConfig(appModel)
+
+	defer teardown(appModel, config)
+
+	// setup the docker container one is needed
+	if err := setup(appModel, config); err != nil {
 		return err
 	}
 
-	env, _ := models.FindEnvByID(console.App.EnvID)
+	envModel, _ := models.FindEnvByID(appModel.EnvID)
 
-	go watch.Watch(env.Directory)
+	go watch.Watch(envModel.Directory)
 
 	// if run then start the run commands
 	// and log but do not continue to the regular console
-	if console.DevRun {
-		devRun := Run{App: console.App}
-		return devRun.Run()
+	if devRun {
+		return Run(appModel)
 	}
 
 	//
-	if err := console.printMOTD(); err != nil {
+	if err := printMOTD(appModel); err != nil {
 		return err
 	}
 
 	//
-	if err := console.runConsole(); err != nil {
+	if err := runConsole(appModel); err != nil {
 		return err
 	}
 
@@ -81,7 +66,7 @@ func (console *Console) Run() error {
 }
 
 // setup ...
-func (console *Console) setup() error {
+func setup(appModel *models.App, config docker.ContainerConfig) error {
 
 	// establish a local lock to ensure we're the only ones bringing up the
 	// dev container. Also, we need to ensure the lock is released even in we error
@@ -89,38 +74,23 @@ func (console *Console) setup() error {
 	defer locker.LocalUnlock()
 
 	// let anyone else know we're using the dev container
-	counter.Increment(console.App.ID)
-
-	//
-	if err := console.loadBoxfile(); err != nil {
-		return err
-	}
+	counter.Increment(appModel.ID)
 
 	//
 	if !isDevRunning() {
 
 		//
-		if err := console.setImage(); err != nil {
+		if err := downloadImage(config.Image); err != nil {
+			return err
+		}
+
+		container, err := docker.CreateContainer(config)
+		if err != nil {
 			return err
 		}
 
 		//
-		if err := console.downloadImage(); err != nil {
-			return err
-		}
-
-		//
-		if err := console.reserveIP(); err != nil {
-			return err
-		}
-
-		//
-		if err := console.launchContainer(); err != nil {
-			return err
-		}
-
-		//
-		if err := console.attachNetwork(); err != nil {
+		if err := attachNetwork(appModel, config); err != nil {
 			return err
 		}
 
@@ -128,80 +98,64 @@ func (console *Console) setup() error {
 		defer lumber.Prefix("")
 
 		// TODO: The nil in this call needs to be replaced with something from the new display
-		if _, err := util.Exec(console.container.ID, "user", config.UserPayload(), nil); err != nil {
+		userPayload := build_generator.UserPayload()
+		if _, err := hookit.Exec(container.ID, "user", userPayload, "debug"); err != nil {
 			return err
 		}
 
 		// TODO: The nil in this call needs to be replaced with something from the new display
-		if _, err := util.Exec(console.container.ID, "dev", console.devPayload(), nil); err != nil {
+		if _, err := hookit.Exec(container.ID, "dev", build_generator.DevPayload(appModel), "debug"); err != nil {
 			return err
 		}
+	} else {
+
+		// if im not creating one i need to release the ip that was reserved in the config
+		dhcp.ReturnIP(net.ParseIP(config.IP))
 	}
 
 	return nil
 }
 
 // teardown ...
-func (console *Console) teardown() error {
+func teardown(appModel *models.App, config docker.ContainerConfig) error {
 
 	// establish a local app lock to ensure we're the only ones bringing
 	// down the app platform. Also ensure that we release it even if we error
 	locker.LocalLock()
 	defer locker.LocalUnlock()
 
-	counter.Decrement(console.App.ID)
+	counter.Decrement(appModel.ID)
 
 	//
 	if devIsUnused() {
 
 		//
-		if err := console.removeContainer(); err != nil {
+		if err := removeContainer(); err != nil {
 			lumber.Error("An error occurred durring dev console teadown:%s", err.Error())
 		}
 
 		//
-		if err := console.detachNetwork(); err != nil {
+		if err := detachNetwork(appModel, config); err != nil {
 			lumber.Error("An error occurred durring dev console teadown:%s", err.Error())
 		}
 
 		//
-		if err := console.releaseIP(); err != nil {
+		if err := dhcp.ReturnIP(net.ParseIP(config.IP)); err != nil {
 			lumber.Error("An error occurred durring dev console teadown:%s", err.Error())
 		}
-	}
-
-	return nil
-}
-
-// loadBoxfile loads the build boxfile from the database
-func (console *Console) loadBoxfile() error {
-
-	env, _ := models.FindEnvByID(console.App.EnvID)
-	console.boxfile = boxfile.New([]byte(env.BuiltBoxfile))
-	if !console.boxfile.Valid {
-		return fmt.Errorf("the boxfile from the build is invalid")
-	}
-	return nil
-}
-
-// setImage sets the image to use for the dev container
-func (console *Console) setImage() error {
-
-	console.image = console.boxfile.Node("build").StringValue("image")
-
-	if console.image == "" {
-		console.image = "nanobox/dev"
 	}
 
 	return nil
 }
 
 // downloadImage downloads the dev docker image
-func (console *Console) downloadImage() error {
-	if !docker.ImageExists(console.image) {
+func downloadImage(image string) error {
+	if !docker.ImageExists(image) {
+
 		streamer := display.NewStreamer("info")
-		dockerPercent := &display.DockerPercentDisplay{Output: streamer, Prefix: console.image}
-		if _, err := docker.ImagePull(console.image, dockerPercent); err != nil {
+		dockerPercent := &display.DockerPercentDisplay{Output: streamer, Prefix: image}
+
+		if _, err := docker.ImagePull(image, dockerPercent); err != nil {
 			return err
 		}
 	}
@@ -209,61 +163,11 @@ func (console *Console) downloadImage() error {
 	return nil
 }
 
-// reserveIP reserves a local IP for the build container
-func (console *Console) reserveIP() error {
-	IP, err := dhcp.ReserveLocal()
-
-	console.localIP = IP
-
-	return err
-}
-
-// releaseIP releases a local IP back into the pool
-func (console *Console) releaseIP() error {
-	return dhcp.ReturnIP(console.localIP)
-}
-
-// launchContainer starts the dev container
-func (console *Console) launchContainer() error {
-	// parse the boxfile data
-
-	config := docker.ContainerConfig{
-		Name:    fmt.Sprintf("nanobox_%s", console.App.ID),
-		Image:   console.image, // this will need to be configurable some time
-		Network: "virt",
-		IP:      console.localIP.String(),
-		Binds: []string{
-			fmt.Sprintf("%s%s/code:/app", provider.HostShareDir(), console.App.EnvID),
-			fmt.Sprintf("%s%s/build:/data", provider.HostMntDir(), console.App.EnvID),
-			fmt.Sprintf("%s%s/cache:/mnt/cache", provider.HostMntDir(), console.App.EnvID),
-		},
-	}
-
-	//
-	for _, libDir := range console.boxfile.Node("code.build").StringSliceValue("lib_dirs") {
-		path := fmt.Sprintf("/mnt/sda1/%s/cache/lib_dirs/%s:/app/%s", console.App.EnvID, libDir, libDir)
-		config.Binds = append(config.Binds, path)
-	}
-
-	// start container
-	container, err := docker.CreateContainer(config)
-
-	if err != nil {
-		return err
-	}
-
-	console.container = container
-
-	return nil
-}
-
 // removeContainer will lookup the dev container and remove it
-func (console *Console) removeContainer() error {
-
-	name := fmt.Sprintf("nanobox_%s", console.App.ID)
+func removeContainer() error {
 
 	// grab the container info
-	container, err := docker.GetContainer(name)
+	container, err := docker.GetContainer(container_generator.DevName())
 	if err != nil {
 		// if we cant get the container it may have been removed by someone else
 		// just return here
@@ -279,48 +183,39 @@ func (console *Console) removeContainer() error {
 	return nil
 }
 
-// runUserHook runs the user hook in the dev container
-func (console *Console) devPayload() string {
-	rtn := map[string]interface{}{}
-	rtn["env"] = console.App.Evars
-	bytes, _ := json.Marshal(rtn)
-	return string(bytes)
-}
-
 // runConsole will establish a console within the dev container
-func (console *Console) runConsole() error {
+func runConsole(appModel *models.App) error {
 
 	// create a dummy component using the appname
-	component := models.Component{
-		ID: "nanobox_" + console.App.ID,
+	component := &models.Component{
+		ID: "nanobox_" + appModel.ID,
 	}
 	// for tyler: I dont like forcing someone into zsh..
 	// your chosen shell is a very personal
-	envConsole := env.Console{
-		Component: component,
-		Cwd:       console.cwd(),
-		Shell:     "zsh",
+	consoleConfig := env.ConsoleConfig{
+		Cwd: cwd(appModel),
 	}
 
-	return envConsole.Run()
+	return env.Console(component, consoleConfig)
 }
 
 // cwd sets the cwd from the boxfile or provides a sensible default
-func (console *Console) cwd() string {
+func cwd(appModel *models.App) string {
+	boxfile := boxfile.New([]byte(appModel.DeployedBoxfile))
 	// parse the boxfile data
 
-	if console.boxfile.Node("dev").StringValue("cwd") != "" {
-		return console.boxfile.Node("dev").StringValue("cwd")
+	if boxfile.Node("dev").StringValue("cwd") != "" {
+		return boxfile.Node("dev").StringValue("cwd")
 	}
 
 	return "/app"
 }
 
 // printMOTD prints the motd with information for the user to connect
-func (console *Console) printMOTD() error {
+func printMOTD(appModel *models.App) error {
 
 	// fetch the dev ip
-	devIP := console.App.GlobalIPs["env"]
+	devIP := appModel.GlobalIPs["env"]
 
 	os.Stderr.WriteString(fmt.Sprintf(`
                                    **
@@ -351,10 +246,10 @@ func (console *Console) printMOTD() error {
 }
 
 // attachNetwork attaches the container to the host network
-func (console *Console) attachNetwork() error {
+func attachNetwork(appModel *models.App, config docker.ContainerConfig) error {
 
 	// fetch the devIP
-	devIP := console.App.GlobalIPs["env"]
+	devIP := appModel.GlobalIPs["env"]
 
 	//
 	if err := provider.AddIP(devIP); err != nil {
@@ -362,7 +257,7 @@ func (console *Console) attachNetwork() error {
 	}
 
 	//
-	if err := provider.AddNat(devIP, console.localIP.String()); err != nil {
+	if err := provider.AddNat(devIP, config.IP); err != nil {
 		return fmt.Errorf("provider:add_nat: %s", err.Error())
 	}
 
@@ -370,13 +265,13 @@ func (console *Console) attachNetwork() error {
 }
 
 // detachNetwork detaches the container from the host network
-func (console *Console) detachNetwork() error {
+func detachNetwork(appModel *models.App, config docker.ContainerConfig) error {
 
 	// fetch the devIP
-	devIP := console.App.GlobalIPs["env"]
+	devIP := appModel.GlobalIPs["env"]
 
 	//
-	if err := provider.RemoveNat(devIP, console.localIP.String()); err != nil {
+	if err := provider.RemoveNat(devIP, config.IP); err != nil {
 		return err
 	}
 
@@ -396,9 +291,8 @@ func devIsUnused() bool {
 
 // isDevRunning returns true if a service is already running
 func isDevRunning() bool {
-	name := fmt.Sprintf("nanobox_%s_dev", config.EnvID())
 
-	container, err := docker.GetContainer(name)
+	container, err := docker.GetContainer(container_generator.DevName())
 
 	// if the container doesn't exist then just return false
 	return err == nil && container.State.Status == "running"

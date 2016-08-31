@@ -2,25 +2,25 @@ package watch
 
 import (
 	"os"
-	"time"
 	"path/filepath"
+	"time"
 )
 
 type crawl struct {
 	path string
 
 	events chan event
-	done chan struct {}
+	done   chan struct{}
 
 	started bool
-	files map[string]time.Time
+	files   map[string]time.Time
 }
 
 func newCrawlWatcher(path string) Watcher {
 	return &crawl{
-		path: path,
+		path:   path,
 		events: make(chan event, 10),
-		files: map[string]time.Time{},
+		files:  map[string]time.Time{},
 	}
 }
 
@@ -54,18 +54,18 @@ func (c *crawl) walkFunc(path string, info os.FileInfo, err error) error {
 	if err != nil {
 		return err
 	}
-	
+
 	// read the file with the md5 library and generate a hash
 	if !info.IsDir() {
 		val, ok := c.files[path]
-		if c.started && (!ok || !val.Equal(info.ModTime().Round(5*time.Second)) ) {
+		if c.started && (!ok || !val.Equal(info.ModTime().Round(5*time.Second))) {
 			// this is a new file or the file has been changed
 			c.events <- event{file: path}
 		}
 
 		// update my cached files
 		// the rounding is so we dont detect the change that we make
-		c.files[path] = info.ModTime().Round(5*time.Second)
+		c.files[path] = info.ModTime().Round(5 * time.Second)
 	}
 
 	return nil
@@ -75,9 +75,9 @@ func (c *crawl) start() {
 	c.started = true
 	for {
 		select {
-			// sleep for a second between walking the tree
-			// this could be made variable
-		case <- time.After(time.Second):
+		// sleep for a second between walking the tree
+		// this could be made variable
+		case <-time.After(time.Second):
 			err := filepath.Walk(c.path, c.walkFunc)
 			if err != nil {
 				c.events <- event{error: err}
@@ -86,7 +86,7 @@ func (c *crawl) start() {
 			}
 
 			// if we are asked to close then close grace fully
-		case <- c.done:
+		case <-c.done:
 			close(c.events)
 			return
 		}

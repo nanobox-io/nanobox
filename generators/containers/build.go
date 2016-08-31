@@ -1,4 +1,4 @@
-package generate_container
+package containers
 
 import (
 	"fmt"

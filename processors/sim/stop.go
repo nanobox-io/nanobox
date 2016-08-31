@@ -6,14 +6,6 @@ import (
 )
 
 // Stop ...
-type Stop struct {
-	App models.App
-}
-
-//
-func (stop Stop) Run() error {
-	appStop := app.Stop{
-		App: stop.App,
-	}
-	return appStop.Run()
+func Stop(appModel *models.App) error {
+	return app.Stop(appModel)
 }

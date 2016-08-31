@@ -8,15 +8,10 @@ import (
 )
 
 // Info ...
-type Info struct {
-	App models.App
-}
-
-//
-func (info Info) Run() error {
+func Info(appModel *models.App) error {
 
 	//
-	components, _ := models.AllComponentsByApp(info.App.ID)
+	components, _ := models.AllComponentsByApp(appModel.ID)
 
 	//
 	for _, component := range components {
@@ -27,7 +22,7 @@ func (info Info) Run() error {
 	}
 
 	//
-	bytes, _ := json.MarshalIndent(info.App.Evars, "", "  ")
+	bytes, _ := json.MarshalIndent(appModel.Evars, "", "  ")
 	fmt.Printf("%s\n", bytes)
 
 	return nil

@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/models"
@@ -28,7 +30,8 @@ func cleanFn(ccmd *cobra.Command, args []string) {
 	// get the environments
 	envs, err := models.AllEnvs()
 	if err != nil {
-		return fmt.Printf("TODO: write message for command clean: %s\n", err.Error())
+		fmt.Printf("TODO: write message for command clean: %s\n", err.Error())
+		return
 	}
 
 	display.CommandErr(processors.Clean(envs))

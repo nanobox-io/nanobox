@@ -26,6 +26,5 @@ var (
 
 // upFn ...
 func upFn(ccmd *cobra.Command, args []string) {
-	simUp := sim.Up{}
-	display.CommandErr(simUp.Run())
+	display.CommandErr(sim.Up())
 }

@@ -7,15 +7,10 @@ import (
 )
 
 // List ...
-type List struct {
-	Env models.Env
-}
-
-//
-func (list List) Run() error {
+func List(envModel *models.Env) error {
 
 	// store the auth token
-	fmt.Printf("%+v\n", list.Env.Links)
+	fmt.Printf("%+v\n", envModel.Links)
 
 	return nil
 }

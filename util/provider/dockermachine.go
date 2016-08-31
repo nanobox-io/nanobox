@@ -287,7 +287,6 @@ func (machine DockerMachine) DockerEnv() error {
 	return nil
 }
 
-
 // Touch adds an IP into the docker-machine vm for host access
 func (machine DockerMachine) Touch(file string) error {
 	cmd := []string{

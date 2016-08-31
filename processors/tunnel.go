@@ -10,29 +10,22 @@ import (
 )
 
 // Tunnel ...
-type Tunnel struct {
-	App       string
-	Port      string
-	Container string
-}
-
-//
-func (tunnel Tunnel) Run() error {
+func Tunnel(tunnelConfig TunnelConfig) error {
 
 	// clean the app id
-	tunnel.App = getAppID(tunnel.App)
+	tunnelConfig.App = getAppID(tunnelConfig.App)
 
 	var err error
 	var port int
-	key, location, container, port, err = odin.EstablishTunnel(getAppID(tunnel.App), tunnel.Container)
+	key, location, container, port, err = odin.EstablishTunnel(getAppID(tunnelConfig.App), tunnelConfig.Container)
 	if err != nil {
 		return err
 	}
 
-	if tunnel.Port == "" {
-		tunnel.Port = fmt.Sprintf("%d", port)
+	if tunnelConfig.Port == "" {
+		tunnelConfig.Port = fmt.Sprintf("%d", port)
 	}
-	
+
 	// establish a connection and just leave it open.
 	req, err := http.NewRequest("POST", fmt.Sprintf("/tunnel?key=%s", key), nil)
 	if err != nil {
@@ -49,16 +42,15 @@ func (tunnel Tunnel) Run() error {
 		return err
 	}
 	defer conn.Close()
-	fmt.Println("server connection established")
 
 	//
-	serv, err := net.Listen("tcp4", fmt.Sprintf(":%s", tunnel.Port))
+	serv, err := net.Listen("tcp4", fmt.Sprintf(":%s", tunnelConfig.Port))
 	if err != nil {
 		fmt.Println(err)
 		return err
 	}
 
-	fmt.Println("listening on port", tunnel.Port)
+	fmt.Println("listening on port", tunnelConfig.Port)
 
 	//
 	for {
@@ -86,14 +78,11 @@ func handleConnection(conn net.Conn) {
 		fmt.Println(err)
 		return
 	}
-	fmt.Println("new connectin to server")
 	defer remoteConn.Close()
 
-	fmt.Println("piping")
 	go io.Copy(conn, remoteConn)
 	_, err = io.Copy(remoteConn, conn)
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println("connection closed")
 }

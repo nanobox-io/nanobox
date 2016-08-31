@@ -30,7 +30,5 @@ func consoleFn(ccmd *cobra.Command, args []string) {
 
 	component, _ := models.FindComponentBySlug(config.EnvID()+"_sim", args[0])
 
-	simConsole := sim.Console{Component: component}
-
-	display.CommandErr(simConsole.Run())
+	display.CommandErr(sim.Console(component))
 }

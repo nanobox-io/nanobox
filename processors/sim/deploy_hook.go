@@ -1,19 +1,16 @@
 package sim
 
 import (
-	"encoding/json"
-
-	"github.com/nanobox-io/nanobox-boxfile"
-	code_hook_gen "github.com/nanobox-io/nanobox/generators/hooks/code"
+	generator "github.com/nanobox-io/nanobox/generators/hooks/code"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/hookit"
 )
 
 //
-func DeployHook(appModel *models.App, componentModel *models.Component, hooktype string) error {
+func DeployHook(appModel *models.App, componentModel *models.Component, hookType string) error {
 
-	_, err := util.Exec(componentModel.ID, hookType, code.DeployPayload(), nil)
+	_, err := hookit.Exec(componentModel.ID, hookType, generator.DeployPayload(appModel, componentModel), "debug")
 
 	return err
 }

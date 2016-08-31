@@ -1,13 +1,15 @@
 package sim
 
 import (
+	"fmt"
+
 	"github.com/nanobox-io/nanobox-boxfile"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/code"
 	"github.com/nanobox-io/nanobox/processors/component"
-	"github.com/nanobox-io/nanobox/processors/env"
 	"github.com/nanobox-io/nanobox/processors/platform"
+	"github.com/nanobox-io/nanobox/processors/provider"
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
@@ -23,11 +25,9 @@ func Deploy(envModel *models.Env, appModel *models.App) error {
 		return err
 	}
 
-	display.StartTask("starting services for deploy")
 	if err := platform.Deploy(appModel); err != nil {
 		return err
 	}
-	display.StopTask()
 
 	// create the warehouse config for child processes
 	hoarder, _ := models.FindComponentBySlug(appModel.ID, "hoarder")
@@ -40,35 +40,38 @@ func Deploy(envModel *models.Env, appModel *models.App) error {
 
 	// publish the code
 	if err := code.Publish(envModel, warehouseConfig); err != nil {
-		return err
+		return fmt.Errorf("unable to publish code: %s", err.Error())
 	}
 
 	// remove all the previous code services
 	if err := code.Clean(appModel); err != nil {
-		return err
+		return fmt.Errorf("failed to clean old code components: %s", err.Error())
 	}
 
 	// syncronize the services as per the new boxfile
 	if err := component.Sync(envModel, appModel); err != nil {
-		return err
+		return fmt.Errorf("unalbe to synchronize data components: %s", err.Error())
 	}
 
 	// start code
-	if err := code.Sync(AppModel, warehouseConfig); err != nil {
-		return err
+	if err := code.Sync(appModel, warehouseConfig); err != nil {
+		return fmt.Errorf("failed to add code components: %s", err.Error())
 	}
 
 	if err := runDeployHook(appModel, "before_deploy"); err != nil {
-		return err
+		return fmt.Errorf("failed to run before deploy hooks: %s", err.Error())
 	}
 
 	// update nanoagent portal
+	display.StartTask("updating router")
 	if err := platform.UpdatePortal(appModel); err != nil {
-		return err
+		display.ErrorTask()
+		return fmt.Errorf("failed to update router: %s", err.Error())
 	}
+	display.StopTask()
 
 	if err := runDeployHook(appModel, "after_deploy"); err != nil {
-		return err
+		return fmt.Errorf("failed to run after deloy hooks: %s", err.Error())
 	}
 
 	// complete message

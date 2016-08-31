@@ -5,16 +5,10 @@ import (
 )
 
 // Remove ...
-type Remove struct {
-	Env   models.Env
-	Alias string
-}
-
-//
-func (link Remove) Run() error {
+func Remove(envModel *models.Env, alias string) error {
 
 	//
-	delete(link.Env.Links, link.Alias)
+	delete(envModel.Links, alias)
 
-	return link.Env.Save()
+	return envModel.Save()
 }

@@ -6,14 +6,18 @@ import (
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util/locker"
 	"github.com/nanobox-io/nanobox/processors/component"
 	"github.com/nanobox-io/nanobox/processors/platform"
 	"github.com/nanobox-io/nanobox/util/dhcp"
+	"github.com/nanobox-io/nanobox/util/display"
+	"github.com/nanobox-io/nanobox/util/locker"
 )
 
 // Setup sets up the app on the provider and in the database
 func Setup(envModel *models.Env, appModel *models.App, name string) error {
+	display.OpenContext("setting up app")
+	defer display.CloseContext()
+
 	locker.LocalLock()
 	defer locker.LocalUnlock()
 
@@ -29,9 +33,12 @@ func Setup(envModel *models.Env, appModel *models.App, name string) error {
 	}
 
 	// reserve IPs
+	display.StartTask("reserving IPs")
 	if err := reserveIPs(appModel); err != nil {
+		display.ErrorTask()
 		return fmt.Errorf("failed to reserve app IPs: %s", err.Error())
 	}
+	display.StopTask()
 
 	// clean crufty components
 	if err := component.Clean(appModel); err != nil {

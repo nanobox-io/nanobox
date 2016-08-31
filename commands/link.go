@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/models"
@@ -16,6 +18,7 @@ var (
 		Use:   "link",
 		Short: "Manages links between local & production apps.",
 		Long:  ``,
+		Run:   linkAddFn,
 	}
 
 	// LinkAddCmd ...
@@ -48,14 +51,12 @@ an alias. If no alias is provided, 'default' is assumed.
 
 	// linkCmdFlags ...
 	linkCmdFlags = struct {
-		app   string
 		alias string
 	}{}
 )
 
 //
 func init() {
-	LinkAddCmd.Flags().StringVarP(&linkCmdFlags.app, "app", "n", "", "app name")
 	LinkCmd.PersistentFlags().StringVarP(&linkCmdFlags.alias, "alias", "a", "", "alias")
 
 	LinkCmd.AddCommand(LinkAddCmd)
@@ -66,30 +67,28 @@ func init() {
 // linkAddFn ...
 func linkAddFn(ccmd *cobra.Command, args []string) {
 	env, _ := models.FindEnvByID(config.EnvID())
-	add := link.Add{
-		Env:   env,
-		App:   linkCmdFlags.app,
-		Alias: linkCmdFlags.alias,
+	// TODO: validate env?
+	if len(args) != 1 {
+		fmt.Printf("TODO: message: i need an app name to link to")
 	}
-	display.CommandErr(add.Run())
+
+	display.CommandErr(link.Add(env, args[0], linkCmdFlags.alias))
 }
 
 // linkListFn ...
 func linkListFn(ccmd *cobra.Command, args []string) {
 	env, _ := models.FindEnvByID(config.EnvID())
-	list := link.List{
-		Env: env,
-	}
-	display.CommandErr(list.Run())
+
+	display.CommandErr(link.List(env))
 }
 
 // linkRemoveFn ...
 func linkRemoveFn(ccmd *cobra.Command, args []string) {
 	env, _ := models.FindEnvByID(config.EnvID())
-	remove := link.Remove{
-		Env:   env,
-		Alias: linkCmdFlags.alias,
-	}
 	// set the meta arguments to be used in the processor and run the processor
-	display.CommandErr(remove.Run())
+	if len(args) != 0 {
+		linkCmdFlags.alias = args[0]
+	}
+
+	display.CommandErr(link.Remove(env, linkCmdFlags.alias))
 }

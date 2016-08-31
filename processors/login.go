@@ -10,71 +10,38 @@ import (
 	printutil "github.com/sdomino/go-util/print"
 )
 
-type Login struct {
-	Username string
-	Password string
-	token    string
-}
-
 // Process ...
-func (login Login) Run() error {
-
-	// validate we have all meta information needed
-	if err := login.validateUser(); err != nil {
-		return err
-	}
-
-	// verify that the user exists
-	if err := login.verifyUser(); err != nil {
-		return err
-	}
-
-	fmt.Println("verified user")
-
-	// store the user token
-	if err := login.saveUser(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// validateUser validates that the required metadata exists
-func (login *Login) validateUser() error {
+func Login(username, password string) error {
 
 	// request Username/Password if missing
-	if login.Username == "" {
+	if username == "" {
 		// add in tylers display system for prompting
-		login.Username = printutil.Prompt("Username: ")
+		username = printutil.Prompt("Username: ")
 	}
 
-	if login.Password == "" {
+	if password == "" {
 		// ReadPassword prints Password: already
 		pass, err := util.ReadPassword()
 		if err != nil {
 			// TODO: print out the error to the log
+			return fmt.Errorf("failed to read password: %s", err.Error())
 		}
-		login.Password = pass
+		password = pass
 	}
 
-	return nil
-}
-
-// verifyUser ...
-func (login *Login) verifyUser() (err error) {
-
-	//
-	if login.token, err = odin.Auth(login.Username, login.Password); err != nil {
-		return err
+	// verify that the user exists
+	token, err := odin.Auth(username, password)
+	if err != nil {
+		return fmt.Errorf("unable to authenticate with nanobox: %s", err.Error())
 	}
 
+	// store the user token
+	auth := models.Auth{Key: token}
+	if auth.Save() != nil {
+		return fmt.Errorf("unable to save user")
+	}
+
+	fmt.Println("TODO: Message: user has been verified and granted access")
+
 	return nil
-}
-
-// saveUser ...
-func (login *Login) saveUser() error {
-
-	// store the auth token
-	auth := models.Auth{Key: login.token}
-	return auth.Save()
 }

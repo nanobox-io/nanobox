@@ -7,7 +7,6 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/provider"
-
 )
 
 // Console ...

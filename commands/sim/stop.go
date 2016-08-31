@@ -29,8 +29,5 @@ will be preserved in its current state.
 // stopFn ...
 func stopFn(ccmd *cobra.Command, args []string) {
 	app, _ := models.FindAppBySlug(config.EnvID(), "sim")
-	simStop := sim.Stop{
-		App: app,
-	}
-	display.CommandErr(simStop.Run())
+	display.CommandErr(sim.Stop(app))
 }

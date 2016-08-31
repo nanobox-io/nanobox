@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"github.com/jcelliott/lumber"
 )
 
 // "Pulling fs layer"
@@ -120,6 +121,8 @@ func (display *DockerPercentDisplay) show() string {
 	}
 
 	//
+	lumber.Info("percent: %s", fmt.Sprintf("Downloaded: %3d%% Extracted: %3d%% Total: %3d%%", downloaded/count, extracted/count, (downloaded/count+extracted/count)/2))
+
 	return fmt.Sprintf("Downloaded: %3d%% Extracted: %3d%% Total: %3d%%", downloaded/count, extracted/count, (downloaded/count+extracted/count)/2)
 }
 
@@ -155,7 +158,7 @@ func (display *DockerPercentDisplay) Write(data []byte) (int, error) {
 			part.update(status)
 			display.parts[status.ID] = part
 		}
-		fmt.Fprintf(display.Output, "%c[2K\r", 27)
+		// fmt.Fprintf(display.Output, "%c[2K\r", 27)
 		fmt.Fprintf(display.Output, "%s %s", display.Prefix, display.show())
 		if strings.HasPrefix(status.Status, "Status:") {
 			// maybe we want to display the status line here

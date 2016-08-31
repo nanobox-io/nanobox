@@ -3,12 +3,11 @@ package code
 import (
 	"encoding/json"
 
-	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox-boxfile"
+	"github.com/nanobox-io/nanobox/models"
 )
 
 type (
-
 	deploy struct {
 		LogvacHost      string         `json:"logvac_host"`
 		Platform        string         `json:"platform"`
@@ -28,7 +27,7 @@ func DeployPayload(appModel *models.App, componentModel *models.Component) strin
 	pload := deploy{
 		LogvacHost: appModel.LocalIPs["logvac"],
 		Platform:   "local",
-		Member: map[string]int{"uid": 1},
+		Member:     map[string]int{"uid": 1},
 		Component: component{
 			Name: componentModel.Name,
 			UID:  componentModel.Name,

@@ -1,8 +1,6 @@
 package commands
 
 import (
-	"fmt"
-
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/models"
@@ -23,47 +21,31 @@ var (
 
 	// deployCmdFlags ...
 	deployCmdFlags = struct {
+		app     string
 		message string
 	}{}
 )
 
 //
 func init() {
+	DeployCmd.Flags().StringVarP(&deployCmdFlags.message, "app", "a", "", "message to accompany this command")
 	DeployCmd.Flags().StringVarP(&deployCmdFlags.message, "message", "m", "", "message to accompany this command")
 }
 
 // deployFn ...
 func deployFn(ccmd *cobra.Command, args []string) {
 	env, _ := models.FindEnvByID(config.EnvID())
+	// TODO: make sure the environmetn is setup
 
-	deploy := processors.Deploy{
-		Env:     env,
-		App:     "default",
+	deployConfig := processors.DeployConfig{
+		App:     deployCmdFlags.app,
 		Message: deployCmdFlags.message,
 	}
 
-	// validate we have args required to set the meta we'll need; if we don't have
-	// the required args this will return with instructions
-	switch {
-
-	// if one argument is passed we'll assume it's the name of the app to deploy to
-	case len(args) == 1:
-		deploy.App = args[0]
-
-	// if more than one argument is passed we'll let the user know they are using
-	// the command wrong
-	case len(args) > 1:
-		fmt.Printf(`
-Wrong number of arguments (expecting 1 got %v). Run the command again with the
-name of the app you wish to deploy to:
-
-ex: nanobox deploy <name>
-
-`, len(args))
-
-		return
+	if deployConfig.App == "" {
+		deployConfig.App = "default"
 	}
 
 	// set the meta arguments to be used in the processor and run the processor
-	display.CommandErr(deploy.Run())
+	display.CommandErr(processors.Deploy(env, deployConfig))
 }

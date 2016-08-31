@@ -1,52 +1,41 @@
 package link
 
 import (
+	"fmt"
+
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/odin"
 )
 
 // Add
-type Add struct {
-	Env   models.Env
-	App   string
-	Alias string
-}
+func Add(envModel *models.Env, appName, alias string) error {
 
-//
-func (add Add) Run() error {
-
-	// TODO: turn this into env.Generate()
-	// we dont have an environemnt so we will need to set one up
-	// if add.Env.ID == "" {
-	// 	envSetup := &env.Setup{}
-	// 	if err := envSetup.Run(); err != nil {
-	// 		return err
-	// 	}
-	// 	add.Env = envSetup.Env
-	// }
-
-	// set the alias to be the default its missing
-	if add.Alias == "" {
-		add.Alias = "default"
+	if err := envModel.Generate(); err != nil {
+		return fmt.Errorf("unable to generate the environment")
 	}
 
-	// set the app to the folder name its missing
-	if add.App == "" {
-		add.App = config.LocalDirName()
+	// set the alias to be the default its missing
+	if alias == "" {
+		alias = "default"
+	}
+
+	// set the appName to the folder name its missing
+	if appName == "" {
+		appName = config.LocalDirName()
 	}
 
 	// get app id
-	app, err := odin.App(add.App)
+	app, err := odin.App(appName)
 	if err != nil {
 		return err
 	}
 
-	if add.Env.Links == nil {
-		add.Env.Links = map[string]string{}
+	if envModel.Links == nil {
+		envModel.Links = map[string]string{}
 	}
 
-	add.Env.Links[add.Alias] = app.ID
+	envModel.Links[alias] = app.ID
 
-	return add.Env.Save()
+	return envModel.Save()
 }

@@ -6,14 +6,13 @@ import (
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
-	
 
-	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/commands/registry"
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/env"
-	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/boxfile"
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/validate"
 )
 
@@ -76,6 +75,8 @@ func pullBuildImage() (string, error) {
 	// extract the build image from the boxfile
 	buildImage := boxfile.BuildImage()
 
+	display.StartTask("pulling %s image for build", buildImage)
+
 	// generate a docker percent display
 	dockerPercent := &display.DockerPercentDisplay{
 		Output: display.NewStreamer("info"),
@@ -85,7 +86,9 @@ func pullBuildImage() (string, error) {
 	// pull the build image
 	if _, err := docker.ImagePull(buildImage, dockerPercent); err != nil {
 		lumber.Error("code:pullBuildImage:docker.ImagePull(%s, nil): %s", buildImage, err.Error())
+		display.ErrorTask()
 		return "", fmt.Errorf("failed to pull docker image (%s): %s", buildImage, err.Error())
-	}	
+	}
+	display.StopTask()
 	return buildImage, nil
 }

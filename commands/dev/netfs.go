@@ -61,8 +61,7 @@ ex: nanobox dev netfs add <path>
 		return
 	}
 
-	netfsAdd := netfs.Add{Path: args[0]}
-	display.CommandErr(netfsAdd.Run())
+	display.CommandErr(netfs.Add(args[0]))
 }
 
 // netfsRmFn will run the netfs processor for removing a netfs export
@@ -83,6 +82,5 @@ ex: nanobox dev netfs rm <path>
 	}
 
 	// set the meta arguments to be used in the processor and run the processor
-	netfsRemove := netfs.Remove{Path: args[0]}
-	display.CommandErr(netfsRemove.Run())
+	display.CommandErr(netfs.Remove(args[0]))
 }

@@ -61,7 +61,15 @@ func init() {
 func envAddFn(ccmd *cobra.Command, args []string) {
 	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
 	for _, arg := range args {
-		for _, pair := range strings.Split(arg, ",") {
+		// define a function that will allow us to
+		// split on ',' or ' '
+		f := func(c rune) bool {
+			return c == ',' || c == ' '
+		}
+
+		for _, pair := range strings.FieldsFunc(arg, f) {
+			// define a field split that llows us to split on
+			// ':' or '='
 			parts := strings.FieldsFunc(pair, func(c rune) bool {
 				return c == ':' || c == '='
 			})
@@ -70,6 +78,7 @@ func envAddFn(ccmd *cobra.Command, args []string) {
 			}
 		}
 	}
+	fmt.Printf("app evars are update to: %+v\n", app.Evars)
 
 	app.Save()
 }

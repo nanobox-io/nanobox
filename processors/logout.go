@@ -6,15 +6,12 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 )
 
-type Logout struct {
-}
-
 // Process ...
-func (logout Logout) Run() error {
+func Logout() error {
 
 	// remove token from database
 	if err := models.DeleteAuth(); err != nil {
-		return err
+		return fmt.Errorf("failed to delete auth: %s", err.Error())
 	}
 
 	fmt.Println("Successfully logged out!")

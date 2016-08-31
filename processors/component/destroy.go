@@ -9,17 +9,23 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/dhcp"
+	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/provider"
 )
 
 // Destroy destroys a component from the provider and database
 func Destroy(appModel *models.App, componentModel *models.Component) error {
+	display.OpenContext("removing %s(%s) component", componentModel.Label, componentModel.Name)
+	defer display.CloseContext()
 
 	// remove the docker container
+	display.StartTask("removing container")
 	if err := docker.ContainerRemove(componentModel.ID); err != nil {
 		lumber.Error("component:Destroy:docker.ContainerRemove(%s): %s", componentModel.ID, err.Error())
+		display.ErrorTask()
 		return fmt.Errorf("failed to remove docker container: %s", err.Error())
 	}
+	display.StopTask()
 
 	// detach from the host network
 	if err := detachNetwork(appModel, componentModel); err != nil {
@@ -43,16 +49,19 @@ func Destroy(appModel *models.App, componentModel *models.Component) error {
 
 // detachNetwork detaches the network from the host
 func detachNetwork(appModel *models.App, componentModel *models.Component) error {
+	display.StartTask("cleaning networking")
 
 	// remove NAT
 	if err := provider.RemoveNat(componentModel.ExternalIP, componentModel.InternalIP); err != nil {
 		lumber.Error("component:detachNetwork:provider.RemoveNat(%s, %s): %s", componentModel.ExternalIP, componentModel.InternalIP, err.Error())
+		display.ErrorTask()
 		return fmt.Errorf("failed to remove NAT from provider: %s", err.Error())
 	}
 
 	// remove IP
 	if err := provider.RemoveIP(componentModel.ExternalIP); err != nil {
 		lumber.Error("component:detachNetwork:provider.RemoveIP(%s): %s", componentModel.ExternalIP, err.Error())
+		display.ErrorTask()
 		return fmt.Errorf("failed to remove IP from provider: %s", err.Error())
 	}
 
@@ -62,6 +71,7 @@ func detachNetwork(appModel *models.App, componentModel *models.Component) error
 		ip := net.ParseIP(componentModel.ExternalIP)
 		if err := dhcp.ReturnIP(ip); err != nil {
 			lumber.Error("component:detachNetwork:dhcp.ReturnIP(%s): %s", ip, err.Error())
+			display.ErrorTask()
 			return fmt.Errorf("failed to release IP back to pool: %s", err.Error())
 		}
 	}
@@ -72,9 +82,11 @@ func detachNetwork(appModel *models.App, componentModel *models.Component) error
 		ip := net.ParseIP(componentModel.InternalIP)
 		if err := dhcp.ReturnIP(ip); err != nil {
 			lumber.Error("component:detachNetwork:dhcp.ReturnIP(%s): %s", ip, err.Error())
+			display.ErrorTask()
 			return fmt.Errorf("failed to release IP back to pool: %s", err.Error())
 		}
 	}
 
+	display.StopTask()
 	return nil
 }

@@ -11,13 +11,8 @@ import (
 )
 
 // MistListen ...
-type MistListen struct {
-	App models.App
-}
-
-//
-func (mistListen MistListen) Run() error {
-	mist, err := models.FindComponentBySlug(mistListen.App.ID, "mist")
+func MistListen(appModel *models.App) error {
+	mist, err := models.FindComponentBySlug(appModel.ID, "mist")
 
 	// connect to the mist server
 	client, err := clients.New(mist.ExternalIP+":1445", "123")

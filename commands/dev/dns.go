@@ -22,7 +22,7 @@ var (
 
 	// DNSListCmd ...
 	DNSListCmd = &cobra.Command{
-		Use:   "list",
+		Use:   "ls",
 		Short: "Lists the dns entries for this app",
 		Long: `
 Lists a hostnames maped to your dev app. The domain provided is added
@@ -75,31 +75,21 @@ func init() {
 // file
 func dnsListFn(ccmd *cobra.Command, args []string) {
 	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
-	list := dns.List{App: app}
-	display.CommandErr(list.Run())
+	display.CommandErr(dns.List(app))
 }
 
 // dnsAddFn will run the DNS processor for adding DNS entires to the "hosts"
 // file
 func dnsAddFn(ccmd *cobra.Command, args []string) {
+	domain := config.LocalDirName() + ".dev"
 
-	// validate we have args required to set the meta we'll need; if we don't have
-	// the required args this will return with instructions
-	if len(args) != 1 {
-		fmt.Printf(`
-Wrong number of arguments (expecting 1 got %v). Run the command again with the
-name of the DNS entry you would like to add:
-
-nanobox dev dns add <name>
-`, len(args))
-
-		return
+	if len(args) == 1 {
+		domain = args[0]
 	}
 
 	// set the meta arguments to be used in the processor and run the processor
 	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
-	dnsAdd := dns.Add{App: app, Name: args[0]}
-	display.CommandErr(dnsAdd.Run())
+	display.CommandErr(dns.Add(app, domain))
 }
 
 // dnsRmFn will run the DNS processor for removing a DNS from the "hosts"
@@ -122,8 +112,7 @@ ex: nanobox dev dns rm <name>
 
 	// set the meta arguments to be used in the processor and run the processor
 	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
-	dnsRemove := dns.Remove{App: app, Name: args[0]}
-	display.CommandErr(dnsRemove.Run())
+	display.CommandErr(dns.Remove(app, args[0]))
 }
 
 // dnsRmAllFn will run the DNS processor for removing DNS entries from the "hosts"
@@ -132,6 +121,5 @@ func dnsRmAllFn(ccmd *cobra.Command, args []string) {
 
 	// set the meta arguments to be used in the processor and run the processor
 	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
-	dnsRemoveAll := dns.RemoveAll{App: app}
-	display.CommandErr(dnsRemoveAll.Run())
+	display.CommandErr(dns.RemoveAll(app))
 }

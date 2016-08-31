@@ -60,8 +60,8 @@ func init() {
 	// commented because this part is changing
 	// // persistent flags
 	NanoboxCmd.PersistentFlags().BoolVarP(&debugMode, "debug", "", false, "Increases display output and sets level to debug")
-	NanoboxCmd.PersistentFlags().BoolVarP(&displayDebugMode, "v", "", false, "Increases display output and sets level to debug")
-	NanoboxCmd.PersistentFlags().BoolVarP(&displayTraceMode, "vv", "", false, "Increases display output and sets level to trace")
+	NanoboxCmd.PersistentFlags().BoolVarP(&displayDebugMode, "verbose", "v", false, "Increases display output and sets level to debug")
+	NanoboxCmd.PersistentFlags().BoolVarP(&displayTraceMode, "veryverbose", "V", false, "Increases display output and sets level to trace")
 
 	// // local flags
 	// NanoboxCmd.Flags().BoolVarP(&version, "version", "", false, "Displays the current version of this CLI.")

@@ -25,6 +25,5 @@ the VM and preparing a dev application. It's a shortcut for 'nanobox start',
 
 // upFn ...
 func upFn(ccmd *cobra.Command, args []string) {
-	devUp := dev.Up{}
-	display.CommandErr(devUp.Run())
+	display.CommandErr(dev.Up())
 }

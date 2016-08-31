@@ -2,8 +2,8 @@
 package util
 
 import (
-	"os"
 	"math/rand"
+	"os"
 	"time"
 )
 

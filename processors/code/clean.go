@@ -4,9 +4,9 @@ import (
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
-
 
 // clean all the code services after a dev deploy; unlike the service clean it
 // doenst clean ones no longer in the box file but instead removes them all.
@@ -24,11 +24,19 @@ func Clean(appModel *models.App) error {
 		return err
 	}
 
+	// make sure we only show the context one time
+	messaged := false
+
 	// remove components that are of the code type
 	for _, componentModel := range componentModels {
 
 		// only destroy code type containers
 		if componentModel.Type == "code" {
+			if messaged {
+				messaged = true
+				display.OpenContext("cleaning previous code components")
+				defer display.CloseContext()
+			}
 
 			// run a code destroy
 			if err := Destroy(componentModel); err != nil {

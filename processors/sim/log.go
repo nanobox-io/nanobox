@@ -6,13 +6,9 @@ import (
 )
 
 // Log ...
-type Log struct {
-	App models.App
-}
 
 //
-func (log Log) Run() error {
+func Log(appModel *models.App) error {
 	// some messaging about the logging??
-	platformMistListen := platform.MistListen{App: log.App}
-	return platformMistListen.Run()
+	return platform.MistListen(appModel)
 }

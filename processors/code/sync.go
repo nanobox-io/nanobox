@@ -47,13 +47,14 @@ func codeComponentModels(appModel *models.App) []*models.Component {
 	// look in the boxfile for code nodes and generate a stub component
 	box := boxfile.New([]byte(appModel.DeployedBoxfile))
 	for _, componentName := range box.Nodes("code") {
+
 		image := box.Node(componentName).StringValue("image")
 		if image == "" {
 			image = "nanobox/code:v1"
 		}
 
 		componentModel := &models.Component{
-			Name: componentName,
+			Name:  componentName,
 			Image: image,
 		}
 

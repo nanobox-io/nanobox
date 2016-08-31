@@ -2,7 +2,6 @@ package component
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/boxfile"
@@ -35,10 +34,11 @@ type configPayload struct {
 }
 
 // ConfigurePayload returns a string for the configure hook payload
-func ConfigurePayload(appModel *models.App, componentModel *models.Component) (string, error) {
+func ConfigurePayload(appModel *models.App, componentModel *models.Component) string {
 	config, err := boxfile.ComponentConfig(componentModel)
 	if err != nil {
-		return "", fmt.Errorf("unable to fetch component config: %s", err.Error())
+		// lumber.Error("unable to fetch component config: %s", err.Error())
+		return "{}"
 	}
 
 	payload := configPayload{
@@ -62,8 +62,8 @@ func ConfigurePayload(appModel *models.App, componentModel *models.Component) (s
 
 	j, err := json.Marshal(payload)
 	if err != nil {
-		return "", fmt.Errorf("failed to encode configure payload: %s", err.Error())
+		return "{}"
 	}
 
-	return string(j), nil
+	return string(j)
 }

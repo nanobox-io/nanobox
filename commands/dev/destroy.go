@@ -3,8 +3,6 @@ package dev
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/jcelliott/lumber"
-
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/dev"
 	"github.com/nanobox-io/nanobox/util/config"
@@ -35,13 +33,11 @@ func init() {
 // destroyFn ...
 func destroyFn(ccmd *cobra.Command, args []string) {
 
-	devDestroy := dev.Destroy{App: getApp()}
-	lumber.Debug("dev destroy command: %+v", devDestroy)
-	display.CommandErr(devDestroy.Run())
+	display.CommandErr(dev.Destroy(getApp()))
 }
 
 // look up the real app id based on what they told me.
-func getApp() models.App {
+func getApp() *models.App {
 	if destroyCmdFlags.app != "" {
 		envs, _ := models.AllEnvs()
 		for _, env := range envs {

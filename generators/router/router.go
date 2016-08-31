@@ -1,9 +1,8 @@
 package router
 
 import (
-
-	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox-boxfile"
+	"github.com/nanobox-io/nanobox/models"
 )
 
 //

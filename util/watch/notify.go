@@ -4,19 +4,19 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/jcelliott/lumber"
 	"github.com/fsnotify/fsnotify"
+	"github.com/jcelliott/lumber"
 )
 
 type notify struct {
-	path string
-	events chan event
+	path    string
+	events  chan event
 	watcher *fsnotify.Watcher
 }
 
 func newNotifyWatcher(path string) Watcher {
 	return &notify{
-		path: path,
+		path:   path,
 		events: make(chan event, 10),
 	}
 }
@@ -36,7 +36,7 @@ func (n *notify) watch() (err error) {
 
 	go n.EventHandler()
 
-	return 
+	return
 }
 
 func (n *notify) eventChan() chan event {
@@ -59,36 +59,36 @@ func (n *notify) walkFunc(path string, info os.FileInfo, err error) error {
 
 func (n *notify) EventHandler() {
 	for {
-	 	select {
-	  case e := <-n.watcher.Events:
-	    lumber.Debug("e: %+v", e)
-	    switch {
-	    case e.Op&fsnotify.Create == fsnotify.Create:
-	    	// a new file/folder was created.. add it
-	    	n.watcher.Add(e.Name)
-	    	// send an event
-	    	n.events <- event{file: e.Name}
+		select {
+		case e := <-n.watcher.Events:
+			lumber.Debug("e: %+v", e)
+			switch {
+			case e.Op&fsnotify.Create == fsnotify.Create:
+				// a new file/folder was created.. add it
+				n.watcher.Add(e.Name)
+				// send an event
+				n.events <- event{file: e.Name}
 
-	    case e.Op&fsnotify.Write == fsnotify.Write:
-	    	// a file was written to.. send the event
-	    	n.events <- event{file: e.Name}
+			case e.Op&fsnotify.Write == fsnotify.Write:
+				// a file was written to.. send the event
+				n.events <- event{file: e.Name}
 
-	    case e.Op&fsnotify.Remove == fsnotify.Remove:
-	    	// a file was removed. remove it
-	    	n.watcher.Remove(e.Name)
+			case e.Op&fsnotify.Remove == fsnotify.Remove:
+				// a file was removed. remove it
+				n.watcher.Remove(e.Name)
 
-	    case e.Op&fsnotify.Rename == fsnotify.Rename:
-	    	// remove from watcher because we no longer need to watch
-	    	n.watcher.Remove(e.Name)
+			case e.Op&fsnotify.Rename == fsnotify.Rename:
+				// remove from watcher because we no longer need to watch
+				n.watcher.Remove(e.Name)
 
-	    case e.Op&fsnotify.Chmod == fsnotify.Chmod:
-	    	// ignore anything that is just changing modes
-	    	// mostlikely it was just a touch
+			case e.Op&fsnotify.Chmod == fsnotify.Chmod:
+				// ignore anything that is just changing modes
+				// mostlikely it was just a touch
 
-	    }
-	  case err := <-n.watcher.Errors:
-	    n.events <- event{file: "", error: err}
-	  }			
+			}
+		case err := <-n.watcher.Errors:
+			n.events <- event{file: "", error: err}
+		}
 	}
 
 }

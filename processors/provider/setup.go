@@ -17,8 +17,11 @@ func Setup() error {
 	locker.GlobalLock()
 	defer locker.GlobalUnlock()
 
-	display.OpenContext("Preparing Nanobox")
-	defer display.CloseContext()
+	// TODO: make message conditional
+	if !provider.IsReady() {
+		display.StartTask("Preparing Nanobox")
+		defer display.StopTask()
+	}
 
 	// create the provider (VM)
 	if err := provider.Create(); err != nil {
@@ -91,7 +94,7 @@ func setupNetwork(providerModel *models.Provider) error {
 	return nil
 }
 
-// set the default ip everytime 
+// set the default ip everytime
 func setDefaultIP(providerModel *models.Provider) error {
 
 	// add the mount IP to the provider

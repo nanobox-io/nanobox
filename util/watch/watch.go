@@ -2,26 +2,27 @@ package watch
 
 import (
 	"fmt"
-	"strings"
 	"path/filepath"
+	"strings"
 
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/provider"	
+	"github.com/nanobox-io/nanobox/util/provider"
 )
+
 // the watch package watches a folder and all its sub folders
 // in doing so it may run into open file errors or things of that nature
-// if it does, it will automatically fall back to a slower but still 
+// if it does, it will automatically fall back to a slower but still
 // useful watching mechanism that looks at files and gets a hash of the content
-// then when 
+// then when
 
 type event struct {
-	file string
+	file  string
 	error error
 }
 
-type Watcher interface{
+type Watcher interface {
 	watch() error
 	eventChan() chan event
 	close() error

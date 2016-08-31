@@ -5,17 +5,8 @@ import (
 	"github.com/nanobox-io/nanobox/processors/platform"
 )
 
-// Log ...
-type Log struct {
-	App models.App
-}
-
 //
-func (log Log) Run() error {
+func Log(appModel *models.App) error {
 
-	// some messaging about the logging??
-	platformMistLog := platform.MistListen{
-		App: log.App,
-	}
-	return platformMistLog.Run()
+	return platform.MistListen(appModel)
 }

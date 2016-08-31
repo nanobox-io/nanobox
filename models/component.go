@@ -34,7 +34,7 @@ type (
 
 // IsNew returns true if the Component hasn't been created yet
 func (c *Component) IsNew() bool {
-	return c.ID == "" && c.Name == ""
+	return c.ID == ""
 }
 
 // Save persists the Component to the database
@@ -151,7 +151,7 @@ func (c *Component) PurgeEvars(a *App) error {
 	// would be DATA_DB. Dots are replaced with underscores,
 	// and characters are uppercased.
 	prefix := strings.ToUpper(strings.Replace(c.Name, ".", "_", -1))
-	
+
 	// we loop over all environment variables and see if the key contains
 	// the prefix above. If so, we delete the item.
 	for key, _ := range a.Evars {

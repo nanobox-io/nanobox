@@ -6,16 +6,20 @@ import (
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
 
-	"github.com/nanobox-io/nanobox/generators/containers"
+	container_generator "github.com/nanobox-io/nanobox/generators/containers"
+	hook_generator "github.com/nanobox-io/nanobox/generators/hooks/component"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/boxfile"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/provider"
+	"github.com/nanobox-io/nanobox/util/hookit"
 )
 
 // Setup sets up the component container and model data
 func Setup(appModel *models.App, componentModel *models.Component) error {
+	display.OpenContext("setting up %s(%s)", componentModel.Label, componentModel.Name)
+	defer display.CloseContext()
 
 	// generate the missing component data
 	if err := componentModel.Generate(appModel, "data"); err != nil {
@@ -46,10 +50,13 @@ func Setup(appModel *models.App, componentModel *models.Component) error {
 	}
 
 	// pull the component image
+	display.StartTask("pulling %s image", componentModel.Image)
 	if _, err := docker.ImagePull(componentModel.Image, dockerPercent); err != nil {
 		lumber.Error("component:Setup:docker.ImagePull(%s, nil): %s", componentModel.Image, err.Error())
+		display.ErrorTask()
 		return fmt.Errorf("failed to pull docker image (%s): %s", componentModel.Image, err.Error())
 	}
+	display.StopTask()
 
 	// reserve IPs
 	if err := reserveIPs(appModel, componentModel); err != nil {
@@ -57,12 +64,15 @@ func Setup(appModel *models.App, componentModel *models.Component) error {
 	}
 
 	// start the container
-	config := generate_container.ComponentConfig(componentModel)
+	display.StartTask("starting container")
+	config := container_generator.ComponentConfig(componentModel)
 	container, err := docker.CreateContainer(config)
 	if err != nil {
 		lumber.Error("component:Setup:docker.CreateContainer(%+v): %s", config, err.Error())
+		display.ErrorTask()
 		return fmt.Errorf("failed to start docker container: %s", err.Error())
 	}
+	display.StopTask()
 
 	// persist the container ID
 	componentModel.ID = container.ID
@@ -77,7 +87,7 @@ func Setup(appModel *models.App, componentModel *models.Component) error {
 	}
 
 	// plan the component
-	planOutput, err := RunPlanHook(componentModel)
+	planOutput, err := hookit.RunPlanHook(componentModel.ID, hook_generator.PlanPayload(componentModel))
 	if err != nil {
 		return fmt.Errorf("failed to run plan hook: %s", err.Error())
 	}
@@ -156,17 +166,22 @@ func reserveIPs(appModel *models.App, componentModel *models.Component) error {
 
 // attachNetwork attaches the component to the host network
 func attachNetwork(componentModel *models.Component) error {
+	display.StartTask("building network")
+
 	// add the IP to the provider
 	if err := provider.AddIP(componentModel.ExternalIP); err != nil {
 		lumber.Error("component:Setup:attachNetwork:provider.AddIP(%s): %s", componentModel.ExternalIP, err.Error())
+		display.ErrorTask()
 		return fmt.Errorf("failed to add IP to provider: %s", err.Error())
 	}
 
 	// nat traffic from the external IP to the internal
 	if err := provider.AddNat(componentModel.ExternalIP, componentModel.InternalIP); err != nil {
 		lumber.Error("component:Setup:attachNetwork:provider.AddNat(%s, %s): %s", componentModel.ExternalIP, componentModel.InternalIP, err.Error())
+		display.ErrorTask()
 		return fmt.Errorf("failed to nat IP on provider: %s", err.Error())
 	}
 
+	display.StopTask()
 	return nil
 }

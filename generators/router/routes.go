@@ -3,11 +3,11 @@ package router
 import (
 	"fmt"
 	"strings"
-	
+
 	"github.com/nanobox-io/golang-portal-client"
 
-	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox-boxfile"
+	"github.com/nanobox-io/nanobox/models"
 )
 
 func BuildRoutes(appModel *models.App) []portal.Route {
@@ -22,7 +22,7 @@ func BuildRoutes(appModel *models.App) []portal.Route {
 		}
 
 		for _, route := range buildComponentRoutes(boxfile.Node(node), component) {
-			if duplciateRoute(routes, route) {
+			if duplicateRoute(routes, route) {
 				continue // this route exits already so we wont replace it
 			}
 
@@ -45,7 +45,6 @@ func BuildRoutes(appModel *models.App) []portal.Route {
 	// send to portal
 	return routes
 }
-
 
 // buildRoutes ...
 //
@@ -94,7 +93,7 @@ func buildComponentRoutes(boxfile boxfile.Boxfile, component *models.Component) 
 }
 
 // duplicateRoute ...
-func duplciateRoute(services []portal.Route, service portal.Route) bool {
+func duplicateRoute(services []portal.Route, service portal.Route) bool {
 	for _, existingRoute := range services {
 		if existingRoute.SubDomain == service.SubDomain && existingRoute.Path == service.Path {
 			return true

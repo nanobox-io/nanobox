@@ -31,18 +31,10 @@ func consoleFn(ccmd *cobra.Command, args []string) {
 	if len(args) > 0 {
 		component, _ := models.FindComponentBySlug(app.ID, args[0])
 
-		envConsole := env.Console{
-			Component: component,
-		}
-
-		display.CommandErr(envConsole.Run())
+		display.CommandErr(env.Console(component, env.ConsoleConfig{}))
 		return
 	}
 
-	devConsole := dev.Console{
-		App: app,
-	}
-
 	// set the meta arguments to be used in the processor and run the processor
-	display.CommandErr(devConsole.Run())
+	display.CommandErr(dev.Console(app, false))
 }

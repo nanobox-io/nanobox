@@ -11,19 +11,20 @@ import (
 
 // Cmd ...
 type Cmd struct {
-	ID      string
-	Path    string
-	Payload string
-	Stdout  io.Writer
-	Stderr  io.Writer
+	ID     string
+	Path   string
+	Args   []string
+	Stdout io.Writer
+	Stderr io.Writer
 }
 
 // Run builds a command and executes within the context of a docker container
 func (cmd *Cmd) Run() error {
-	lumber.Debug("exec:Cmd:Run: %s, %s, %s", cmd.ID, cmd.Path, cmd.Payload)
+	lumber.Debug("exec:Cmd:Run: %s, %s, %s", cmd.ID, cmd.Path, cmd.Args)
 
 	// assemble the full command to run within the hooks dir
-	run := []string{"/opt/nanobox/hooks/" + cmd.Path, cmd.Payload}
+
+	run := append([]string{cmd.Path}, cmd.Args...)
 
 	// start the exec
 	exec, hj, err := docker.ExecStart(cmd.ID, run, false, true, true, false)
@@ -71,7 +72,7 @@ func (cmd *Cmd) Output() (string, error) {
 	cmd.Stdout = &buffer
 	err := cmd.Run()
 	if err != nil {
-		lumber.Error("exec:Cmd:Run: %s, %s, %s", cmd.ID, cmd.Path, cmd.Payload)
+		lumber.Error("exec:Cmd:Run: %s, %s, %v", cmd.ID, cmd.Path, cmd.Args)
 		lumber.Error("exec:cmd:Output: %s, err: %s", buffer.String(), err.Error())
 		err = fmt.Errorf("util:Exec:%s: %s", cmd.Path, err.Error())
 	}
@@ -82,11 +83,11 @@ func (cmd *Cmd) Output() (string, error) {
 }
 
 // DockerCommand generates a new Cmd struct
-func DockerCommand(id string, path string, payload string) *Cmd {
+func DockerCommand(id, path string, args []string) *Cmd {
 	return &Cmd{
-		ID:      id,
-		Path:    path,
-		Payload: payload,
+		ID:   id,
+		Path: path,
+		Args: args,
 	}
 }
 
@@ -94,8 +95,8 @@ func DockerCommand(id string, path string, payload string) *Cmd {
 // the recieved stream is used for display or error handling as the Stderr portion
 // while the Stdout is left blank to allow the run command to set a bytes buffer
 // which is then returned from the Output() function
-func Exec(id, name, payload string, stream io.Writer) (string, error) {
-	cmd := DockerCommand(id, name, payload)
+func DockerExec(id, name string, args []string, stream io.Writer) (string, error) {
+	cmd := DockerCommand(id, name, args)
 	cmd.Stderr = stream
 	return cmd.Output()
 }

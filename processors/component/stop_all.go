@@ -2,7 +2,7 @@ package component
 
 import (
 	"fmt"
-	
+
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/models"

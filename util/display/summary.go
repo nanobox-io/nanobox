@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 	"time"
+
 )
 
 var (
@@ -174,7 +175,6 @@ func (s *Summarizer) handleLog(data string) {
 			msg = line
 		}
 	}
-
 	if len(msg) > 0 {
 		s.detail = msg
 		s.reset()

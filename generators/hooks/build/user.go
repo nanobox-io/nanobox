@@ -2,21 +2,22 @@ package build
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+
+	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/util/config"
 )
 
 // UserPayload returns a string for the user hook payload
-func UserPayload() (string, error) {
+func UserPayload() string {
 
 	// read all of the ssh files on the system
 	sshFiles, err := ioutil.ReadDir(config.SSHDir())
 	if err != nil {
-		return "", fmt.Errorf("failed to read ssh directory: %s", err.Error())
+		return "{}"
 	}
 
 	// create a list of files that will be installed on the system
@@ -31,7 +32,10 @@ func UserPayload() (string, error) {
 		keyFile := filepath.Join(config.SSHDir(), file.Name())
 		content, err := ioutil.ReadFile(keyFile)
 		if err != nil {
-			return "", fmt.Errorf("failed to read ssh key file (%s): %s", keyFile, err.Error())
+			lumber.Error("hooks:ioutil.ReadFile(%s): %s", keyFile, err.Error())
+			// if this file cant be read continue on and give as many 
+			// of the ssh keys as we can
+			continue
 		}
 
 		// add the keyFile to the list
@@ -45,33 +49,17 @@ func UserPayload() (string, error) {
 	// marshal the payload into json
 	b, err := json.Marshal(payload)
 	if err != nil {
-		return "", fmt.Errorf("failed to encode hook payload into json: %s", err.Error())
+		return "{}"
 	}
 
-	return string(b), nil
+	return string(b)
 }
 
 // isValidKeyFile returns true if a file is a valid key file
 func isValidKeyFile(file os.FileInfo) bool {
-	// ignore directories
-	if file.IsDir() {
-		return false
-	}
 
-	// ignore authorized_keys file
-	if file.Name() == "authorized_keys" {
-		return false
-	}
-
-	// ignore ssh config
-	if file.Name() == "config" {
-		return false
-	}
-
-	// ignore known_hosts
-	if file.Name() == "known_hosts" {
-		return false
-	}
-
-	return true
+	return !file.IsDir() &&
+		file.Name() != "authorized_keys" &&
+		file.Name() != "config" && 
+		file.Name() != "known_hosts"
 }
