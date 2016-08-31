@@ -6,10 +6,14 @@ import (
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 // StartAll starts all app components
 func StartAll(a *models.App) error {
+	display.OpenContext("Starting components")
+	defer display.CloseContext()
+	
 	// get all the components that belong to this app
 	components, err := models.AllComponentsByApp(a.ID)
 	if err != nil {

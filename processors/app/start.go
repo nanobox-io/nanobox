@@ -7,6 +7,7 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/component"
+	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
 
@@ -14,6 +15,9 @@ import (
 func Start(appModel *models.App) error {
 	locker.LocalLock()
 	defer locker.LocalUnlock()
+
+	display.OpenContext("Starting %s", appModel.Name)
+	defer display.CloseContext()
 
 	// start all the app components
 	if err := component.StartAll(appModel); err != nil {

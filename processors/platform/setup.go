@@ -9,7 +9,7 @@ import (
 
 // Setup provisions platform components needed for an app setup
 func Setup(appModel *models.App) error {
-	display.OpenContext("Starting platform components")
+	display.OpenContext("Starting components")
 	defer display.CloseContext()
 
 	for _, component := range setupComponents {

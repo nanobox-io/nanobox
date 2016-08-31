@@ -18,9 +18,7 @@ import (
 
 // Setup sets up the component container and model data
 func Setup(appModel *models.App, componentModel *models.Component) error {
-	display.OpenContext("setting up %s(%s)", componentModel.Label, componentModel.Name)
-	defer display.CloseContext()
-
+	
 	// generate the missing component data
 	if err := componentModel.Generate(appModel, "data"); err != nil {
 		lumber.Error("component:Setup:models.Component:Generate(%s, data): %s", appModel.ID, componentModel.Name, err.Error())
@@ -31,6 +29,9 @@ func Setup(appModel *models.App, componentModel *models.Component) error {
 	if componentModel.State != "initialized" {
 		return nil
 	}
+
+	display.OpenContext(componentModel.Label)
+	defer display.CloseContext()
 
 	// if the image was not provided
 	if componentModel.Image == "" {
@@ -64,7 +65,7 @@ func Setup(appModel *models.App, componentModel *models.Component) error {
 	}
 
 	// start the container
-	display.StartTask("starting container")
+	display.StartTask("Starting docker container")
 	config := container_generator.ComponentConfig(componentModel)
 	container, err := docker.CreateContainer(config)
 	if err != nil {
@@ -87,47 +88,18 @@ func Setup(appModel *models.App, componentModel *models.Component) error {
 	}
 
 	// plan the component
-	planOutput, err := hookit.RunPlanHook(componentModel.ID, hook_generator.PlanPayload(componentModel))
-	if err != nil {
-		return fmt.Errorf("failed to run plan hook: %s", err.Error())
+	if err := planComponent(appModel, componentModel); err != nil {
+		return err
 	}
 
-	// generate the component plan
-	if err := componentModel.GeneratePlan(planOutput); err != nil {
-		lumber.Error("component:Setup:models.Component.GeneratePlan(%s): %s", planOutput, err.Error())
-		return fmt.Errorf("failed to generate the component plan: %s", err.Error())
-	}
-
-	// generate environment variables
-	if err := componentModel.GenerateEvars(appModel); err != nil {
-		lumber.Error("component:Setup:models.Component.GenerateEvars(%+v): %s", appModel, err.Error())
-		return fmt.Errorf("failed to generate the component evars: %s", err.Error())
-	}
-
-	display.StartTask("running configuration hooks")
-	// run the update hook
-	if _, err := hookit.RunUpdateHook(componentModel.ID, hook_generator.UpdatePayload(componentModel)); err != nil {
-		display.ErrorTask()
-		return fmt.Errorf("failed to run update hook: %s", err.Error())
-	}
-
-	// run the configure hook
-	if _, err := hookit.RunConfigureHook(componentModel.ID, hook_generator.ConfigurePayload(appModel, componentModel)); err != nil {
-		display.ErrorTask()
-		return fmt.Errorf("failed to run configure hook: %s", err.Error())
-	}
-
-	// run the start hook
-	if _, err := hookit.RunStartHook(componentModel.ID, hook_generator.UpdatePayload(componentModel)); err != nil {
-		display.ErrorTask()
-		return fmt.Errorf("failed to run start hook: %s", err.Error())
+	if err := configureComponent(appModel, componentModel); err != nil {
+		return err
 	}
 
 	// set state as active
 	componentModel.State = "active"
 	if err := componentModel.Save(); err != nil {
-		lumber.Error("component:Configure:models.Component.Save()", err.Error())
-		display.ErrorTask()
+		lumber.Error("component:Setup:models.Component.Save()", err.Error())
 		return fmt.Errorf("failed to set component state: %s", err.Error())
 	}
 
@@ -136,6 +108,9 @@ func Setup(appModel *models.App, componentModel *models.Component) error {
 
 // reserveIPs reserves IP addresses for this component
 func reserveIPs(appModel *models.App, componentModel *models.Component) error {
+	display.StartTask("Reserve IPs")
+	defer display.StopTask()
+	
 	// dont reserve a new one if we already have this one
 	if componentModel.InternalIP == "" {
 		// first let's see if our local IP was reserved during app creation
@@ -147,6 +122,7 @@ func reserveIPs(appModel *models.App, componentModel *models.Component) error {
 
 			localIP, err := dhcp.ReserveLocal()
 			if err != nil {
+				display.StopTask()
 				lumber.Error("component.reserveIPs:dhcp.ReserveLocal(): %s", err.Error())
 				return fmt.Errorf("failed to reserve local IP address: %s", err.Error())
 			}
@@ -168,6 +144,7 @@ func reserveIPs(appModel *models.App, componentModel *models.Component) error {
 
 			globalIP, err := dhcp.ReserveGlobal()
 			if err != nil {
+				display.StopTask()
 				lumber.Error("component.reserveIPs:dhcp.ReserveGlobal(): %s", err.Error())
 				return fmt.Errorf("failed to reserve global IP address: %s", err.Error())
 			}
@@ -177,6 +154,7 @@ func reserveIPs(appModel *models.App, componentModel *models.Component) error {
 	}
 
 	if err := componentModel.Save(); err != nil {
+		display.StopTask()
 		lumber.Error("component.reserveIPs:models.Component.Save(): %s", err.Error())
 		return fmt.Errorf("failed to persist component IPs: %s", err.Error())
 	}
@@ -186,7 +164,8 @@ func reserveIPs(appModel *models.App, componentModel *models.Component) error {
 
 // attachNetwork attaches the component to the host network
 func attachNetwork(componentModel *models.Component) error {
-	display.StartTask("building network")
+	display.StartTask("Attaching network")
+	defer display.StopTask()
 
 	// add the IP to the provider
 	if err := provider.AddIP(componentModel.ExternalIP); err != nil {
@@ -202,6 +181,57 @@ func attachNetwork(componentModel *models.Component) error {
 		return fmt.Errorf("failed to nat IP on provider: %s", err.Error())
 	}
 
-	display.StopTask()
+	return nil
+}
+
+// planComponent gathers information about the componenent
+func planComponent(appModel *models.App, componentModel *models.Component) error {
+	display.StartTask("Gathering requirements")
+	defer display.StopTask()
+	
+	planOutput, err := hookit.RunPlanHook(componentModel.ID, hook_generator.PlanPayload(componentModel))
+	if err != nil {
+		display.ErrorTask()
+		return fmt.Errorf("failed to run plan hook: %s", err.Error())
+	}
+
+	// generate the component plan
+	if err := componentModel.GeneratePlan(planOutput); err != nil {
+		lumber.Error("component:Setup:models.Component.GeneratePlan(%s): %s", planOutput, err.Error())
+		return fmt.Errorf("failed to generate the component plan: %s", err.Error())
+	}
+
+	// generate environment variables
+	if err := componentModel.GenerateEvars(appModel); err != nil {
+		lumber.Error("component:Setup:models.Component.GenerateEvars(%+v): %s", appModel, err.Error())
+		return fmt.Errorf("failed to generate the component evars: %s", err.Error())
+	}
+	
+	return nil
+}
+
+// configureComponent configures the component
+func configureComponent(appModel *models.App, componentModel *models.Component) error {
+	display.StartTask("Configuring services")
+	defer display.StopTask()
+	
+	// run the update hook
+	if _, err := hookit.RunUpdateHook(componentModel.ID, hook_generator.UpdatePayload(componentModel)); err != nil {
+		display.ErrorTask()
+		return fmt.Errorf("failed to run update hook: %s", err.Error())
+	}
+
+	// run the configure hook
+	if _, err := hookit.RunConfigureHook(componentModel.ID, hook_generator.ConfigurePayload(appModel, componentModel)); err != nil {
+		display.ErrorTask()
+		return fmt.Errorf("failed to run configure hook: %s", err.Error())
+	}
+
+	// run the start hook
+	if _, err := hookit.RunStartHook(componentModel.ID, hook_generator.UpdatePayload(componentModel)); err != nil {
+		display.ErrorTask()
+		return fmt.Errorf("failed to run start hook: %s", err.Error())
+	}
+	
 	return nil
 }

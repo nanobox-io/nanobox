@@ -57,6 +57,11 @@ func Setup() error {
 	}
 	
 	display.StopTask()
+	
+	// initialize the docker client
+	if err := Init(); err != nil {
+		return fmt.Errorf("failed to initialize docker for provider: %s", err.Error())
+	}	
 
 	return nil
 }
