@@ -8,12 +8,14 @@ import (
 	"strings"
 	"time"
 
+	"github.com/nanobox-io/nanobox/util"
 )
 
 var (
 	Spinner       = []string{"\\", "|", "/", "-"}
 	EscSeqRegex   = regexp.MustCompile("\\x1b[[][?0123456789]*;?[?0123456789]*[ABCDEFGHJKRSTfminsulhp]")
 	LogStripRegex = regexp.MustCompile("^[ \t-]*")
+	_, termWidth  = util.GetTerminalSize()
 )
 
 type (
@@ -22,13 +24,15 @@ type (
 		Prefix string    // the prefix to prepend to the summary
 		Out    io.Writer // writer to send output to
 
+
 		// internal
-		chEvent  chan *sEventOp // channel to receive stop/error/tick events
-		chLog    chan string    // channel to receive logs
-		spinIdx  int            // track the current spinner index
-		ticker   *time.Ticker   // timer to send tick events at an interval
-		detail   string         // the current line of detail to print
-		shutdown bool           // toggle to inform the run loop to exit
+		chEvent     chan *sEventOp // channel to receive stop/error/tick events
+		chLog       chan string    // channel to receive logs
+		spinIdx     int            // track the current spinner index
+		ticker      *time.Ticker   // timer to send tick events at an interval
+		detail      string         // the current line of detail to print
+		shutdown    bool           // toggle to inform the run loop to exit
+		windowWidth int
 	}
 
 	// Sending events to the summarizer needs to block the caller until
@@ -49,6 +53,7 @@ func NewSummarizer(label string, prefix string) *Summarizer {
 
 		chEvent: make(chan *sEventOp),   // no buffering, block the sending process
 		chLog:   make(chan string, 100), // buffer up to 100 log messages before blocking
+		windowWidth: termWidth, 
 	}
 }
 
@@ -174,7 +179,12 @@ func (s *Summarizer) handleLog(data string) {
 		if len(line) > 0 {
 			msg = line
 		}
+
+		if s.windowWidth > 0 && len(line) > s.windowWidth {
+			msg = msg[:s.windowWidth - 3] + "..."
+		}
 	}
+
 	if len(msg) > 0 {
 		s.detail = msg
 		s.reset()
