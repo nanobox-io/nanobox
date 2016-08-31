@@ -18,6 +18,13 @@ func Clean(appModel *models.App) error {
 		return fmt.Errorf("failed to fetch app component collection: %s", err.Error())
 	}
 
+	if !areComponentsDirty(components) {
+		return nil
+	}
+	
+	display.OpenContext("Cleaning dirty components")
+	defer display.CloseContext()
+
 	// iterate through the components and clean them
 	for _, componentModel := range components {
 		if err := cleanComponent(appModel, componentModel); err != nil {
@@ -41,6 +48,17 @@ func cleanComponent(appModel *models.App, componentModel *models.Component) erro
 	}
 
 	return nil
+}
+
+// areComponentsDirty checks to see if any of the components are dirty
+func areComponentsDirty(componentModels []*models.Component) bool {
+	for _, componentModel := componentModels {
+		if isComponentDirty(componentModel) {
+			return true
+		}
+	}
+	
+	return false
 }
 
 // isComponentDirty returns true if the container is removed or in a bad state

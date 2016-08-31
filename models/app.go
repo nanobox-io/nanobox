@@ -77,6 +77,10 @@ func (a *App) Generate(env *Env, name string) error {
 	return a.Save()
 }
 
+func (a *App) Env() (*Env, error) {
+	return FindEnvByID(a.EnvID)
+}
+
 func (a *App) Components() ([]*Component, error) {
 	return AllComponentsByApp(a.ID)
 }

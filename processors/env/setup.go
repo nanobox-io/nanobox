@@ -12,7 +12,7 @@ import (
 // Setup sets up the provider and the env mounts
 func Setup(envModel *models.Env) error {
 
-	display.OpenContext("setting up environment")
+	display.OpenContext("Preparing environment")
 	defer display.CloseContext()
 
 	// ensure the envModel data has been generated

@@ -15,15 +15,14 @@ func Stop() error {
 	locker.GlobalLock()
 	defer locker.GlobalUnlock()
 
-	display.OpenContext("Halting Nanobox")
+	display.OpenContext("Stopping Nanobox")
+	defer display.CloseContext()
 
 	// stop the provider (VM)
 	if err := provider.Stop(); err != nil {
 		lumber.Error("provider:Stop:provider.Stop(): %s", err.Error())
 		return fmt.Errorf("failed to stop the provider: %s", err.Error())
 	}
-
-	display.CloseContext()
 
 	return nil
 }

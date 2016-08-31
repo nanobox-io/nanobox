@@ -6,6 +6,7 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/env/netfs"
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/provider"
 )
 
@@ -16,6 +17,9 @@ func Unmount(env *models.Env, keepShare bool) error {
 		return nil
 	}
 
+	display.StartTask(env.Name)
+	defer display.StopTask()
+
 	// unmount the engine if it's a local directory
 	if config.EngineDir() != "" {
 		src := config.EngineDir()
@@ -23,15 +27,16 @@ func Unmount(env *models.Env, keepShare bool) error {
 
 		// unmount the env on the provider
 		if err := removeMount(src, dst); err != nil {
+			display.ErrorTask()
 			return fmt.Errorf("failed to remove engine mount: %s", err.Error())
 		}
 
 		// remove the share
 		if !keepShare {
 			if err := removeShare(src, dst); err != nil {
+				display.ErrorTask()
 				return fmt.Errorf("failed to remove engine share: %s", err.Error())
 			}
-			
 		}
 	}
 
@@ -41,12 +46,14 @@ func Unmount(env *models.Env, keepShare bool) error {
 
 	// unmount the env on the provider
 	if err := removeMount(src, dst); err != nil {
+		display.ErrorTask()
 		return fmt.Errorf("failed to remove code mount: %s", err.Error())
 	}
 
 	// then remove the share from the workstation
 	if !keepShare {
 		if err := removeShare(src, dst); err != nil {
+			display.ErrorTask()
 			return fmt.Errorf("failed to remove code share: %s", err.Error())
 		}
 	}

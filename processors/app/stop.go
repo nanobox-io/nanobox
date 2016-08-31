@@ -9,6 +9,7 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/component"
 	"github.com/nanobox-io/nanobox/processors/provider"
+	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
 
@@ -22,6 +23,16 @@ func Stop(appModel *models.App) error {
 	if appModel.Status != "up" {
 		return nil
 	}
+
+	// load the env for the display context
+	envModel, err := appModel.Env()
+	if err != nil {
+		lumber.Error("app:Stop:models.App.Env(): %s", err.Error())
+		return fmt.Errorf("failed to load app env: %s", err.Error())
+	}
+
+	display.OpenContext("%s (%s)", envModel.Name, appModel.Name)
+	defer display.CloseContext()
 
 	// initialize docker for the provider
 	if err := provider.Init(); err != nil {

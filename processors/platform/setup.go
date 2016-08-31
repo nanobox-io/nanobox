@@ -8,12 +8,12 @@ import (
 )
 
 // Setup provisions platform components needed for an app setup
-func Setup(a *models.App) error {
-	display.OpenContext("provisioning platform services")
+func Setup(appModel *models.App) error {
+	display.OpenContext("Starting platform components")
 	defer display.CloseContext()
 
 	for _, component := range setupComponents {
-		if err := provisionComponent(a, component); err != nil {
+		if err := provisionComponent(appModel, component); err != nil {
 			return fmt.Errorf("failed to provision platform component: %s", err.Error())
 		}
 	}

@@ -15,17 +15,13 @@ import (
 
 // Destroy destroys a component from the provider and database
 func Destroy(appModel *models.App, componentModel *models.Component) error {
-	display.OpenContext("removing %s(%s) component", componentModel.Label, componentModel.Name)
+	display.OpenContext(componentModel.Label)
 	defer display.CloseContext()
 
 	// remove the docker container
-	display.StartTask("removing container")
-	if err := docker.ContainerRemove(componentModel.ID); err != nil {
-		lumber.Error("component:Destroy:docker.ContainerRemove(%s): %s", componentModel.ID, err.Error())
-		display.ErrorTask()
-		return fmt.Errorf("failed to remove docker container: %s", err.Error())
+	if err := destroyContainer(componentModel.ID) err != nil {
+		return err
 	}
-	display.StopTask()
 
 	// detach from the host network
 	if err := detachNetwork(appModel, componentModel); err != nil {
@@ -47,9 +43,24 @@ func Destroy(appModel *models.App, componentModel *models.Component) error {
 	return nil
 }
 
+// destroyContainer destroys a docker container associated with this component
+func destroyContainer(id string) error {
+	display.StartTask("Destroying docker container")
+	defer display.StopTask()
+	
+	if err := docker.ContainerRemove(componentModel.ID); err != nil {
+		lumber.Error("component:Destroy:docker.ContainerRemove(%s): %s", componentModel.ID, err.Error())
+		display.ErrorTask()
+		return fmt.Errorf("failed to remove docker container: %s", err.Error())
+	}
+	
+	return nil
+}
+
 // detachNetwork detaches the network from the host
 func detachNetwork(appModel *models.App, componentModel *models.Component) error {
-	display.StartTask("cleaning networking")
+	display.StartTask("Releasing IPs")
+	defer display.StopTask()
 
 	// remove NAT
 	if err := provider.RemoveNat(componentModel.ExternalIP, componentModel.InternalIP); err != nil {
@@ -87,6 +98,5 @@ func detachNetwork(appModel *models.App, componentModel *models.Component) error
 		}
 	}
 
-	display.StopTask()
 	return nil
 }

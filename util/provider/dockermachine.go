@@ -65,16 +65,18 @@ func (machine DockerMachine) Create() error {
 
 	process := exec.Command(cmd[0], cmd[1:]...)
 
-	if verbose {
-		process.Stdout = display.NewStreamer("info")
-		process.Stderr = display.NewStreamer("info")
-	}
+	process.Stdout = display.NewStreamer("info")
+	process.Stderr = display.NewStreamer("info")
 
-	//
+	display.StartTask("Launching VM")
+	
 	if err := process.Run(); err != nil {
+		display.ErrorTask()
 		return err
 	}
-
+	
+	display.StopTask()
+	
 	return nil
 }
 
@@ -104,14 +106,17 @@ func (machine DockerMachine) Stop() error {
 
 	process := exec.Command(cmd[0], cmd[1:]...)
 
-	if verbose {
-		process.Stdout = display.NewStreamer("info")
-		process.Stderr = display.NewStreamer("info")
-	}
+	process.Stdout = display.NewStreamer("info")
+	process.Stderr = display.NewStreamer("info")
 
+	display.StartTask("Shutting down VM")
+	
 	if err := process.Run(); err != nil {
+		display.ErrorTask()
 		return nil
 	}
+	
+	display.StopTask()
 
 	return nil
 }
@@ -132,14 +137,17 @@ func (machine DockerMachine) Destroy() error {
 
 	process := exec.Command(cmd[0], cmd[1:]...)
 
-	if verbose {
-		process.Stdout = display.NewStreamer("info")
-		process.Stderr = display.NewStreamer("info")
-	}
+	process.Stdout = display.NewStreamer("info")
+	process.Stderr = display.NewStreamer("info")
 
+	display.StartTask("Destroying VM")
+	
 	if err := process.Run(); err != nil {
+		display.ErrorTask()
 		return nil
 	}
+	
+	display.StopTask()
 
 	return nil
 }
@@ -158,14 +166,17 @@ func (machine DockerMachine) Start() error {
 
 		process := exec.Command(cmd[0], cmd[1:]...)
 
-		if verbose {
-			process.Stdout = display.NewStreamer("info")
-			process.Stderr = display.NewStreamer("info")
-		}
+		process.Stdout = display.NewStreamer("info")
+		process.Stderr = display.NewStreamer("info")
 
+		display.StartTask("Booting VM")
+		
 		if err := process.Run(); err != nil {
+			display.ErrorTask()
 			return err
 		}
+		
+		display.StopTask()
 	}
 
 	// create custom nanobox docker network
@@ -188,14 +199,17 @@ func (machine DockerMachine) Start() error {
 
 		process := exec.Command(cmd[0], cmd[1:]...)
 
-		if verbose {
-			process.Stdout = display.NewStreamer("info")
-			process.Stderr = display.NewStreamer("info")
-		}
+		process.Stdout = display.NewStreamer("info")
+		process.Stderr = display.NewStreamer("info")
 
+		display.StartTask("Configuring Network")
+		
 		if err := process.Run(); err != nil {
+			display.ErrorTask()
 			return err
 		}
+		
+		display.StopTask()
 	}
 
 	cmd := []string{
@@ -209,14 +223,17 @@ func (machine DockerMachine) Start() error {
 
 	process := exec.Command(cmd[0], cmd[1:]...)
 
-	if verbose {
-		process.Stdout = display.NewStreamer("info")
-		process.Stderr = display.NewStreamer("info")
-	}
+	process.Stdout = display.NewStreamer("info")
+	process.Stderr = display.NewStreamer("info")
 
+	display.StartTask("Loading kernel modules")
+	
 	if err := process.Run(); err != nil {
+		display.ErrorTask()
 		return err
 	}
+	
+	display.StopTask()
 
 	if machine.changedIP() {
 		return machine.regenerateCert()
@@ -781,11 +798,17 @@ func (machine DockerMachine) Run(command []string) ([]byte, error) {
 // is different then last time
 func (machine DockerMachine) regenerateCert() error {
 	// fetch the docker-machine endpoint information
+	
+	display.StartTask("Regenerating Docker certs")
+	
 	cmd := exec.Command("docker-machine", "regenerate-certs", "-f", "nanobox")
 	b, err := cmd.CombinedOutput()
 	if err != nil {
+		display.ErrorTask()
 		return fmt.Errorf("%s: %s", b, err)
 	}
+	
+	display.StopTask()
 	return nil
 }
 

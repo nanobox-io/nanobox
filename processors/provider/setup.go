@@ -17,41 +17,46 @@ func Setup() error {
 	locker.GlobalLock()
 	defer locker.GlobalUnlock()
 
-	// TODO: make message conditional
-	if !provider.IsReady() {
-		display.StartTask("Preparing Nanobox")
-		defer display.StopTask()
+	if provider.IsReady() {
+		// initialize the docker client
+		if err := Init(); err != nil {
+			return fmt.Errorf("failed to initialize docker for provider: %s", err.Error())
+		}	
+		
+		return nil
 	}
 
+	display.OpenContext("Starting Nanobox")
+	defer display.CloseContext()
+	
 	// create the provider (VM)
 	if err := provider.Create(); err != nil {
 		lumber.Error("provider:Setup:provider.Create(): %s", err.Error())
 		return fmt.Errorf("failed to create the provider: %s", err.Error())
 	}
-
+	
 	// start the provider (VM)
 	if err := provider.Start(); err != nil {
 		lumber.Error("provider:Setup:provider.Start(): %s", err.Error())
 		return fmt.Errorf("failed to start the provider: %s", err.Error())
 	}
-
+	
 	// fetch the provider model
 	providerModel, _ := models.LoadProvider()
-
+	
+	display.StartTask("Joining virtual network")
+	
 	// attach the network to the host stack
 	if err := setupNetwork(providerModel); err != nil {
 		return fmt.Errorf("failed to setup the provider network: %s", err.Error())
 	}
-
+	
 	// attach the network to the host stack
 	if err := setDefaultIP(providerModel); err != nil {
 		return fmt.Errorf("failed to setup the provider network: %s", err.Error())
 	}
-
-	// initialize the docker client
-	if err := Init(); err != nil {
-		return fmt.Errorf("failed to initialize docker for provider: %s", err.Error())
-	}
+	
+	display.StopTask()
 
 	return nil
 }
@@ -62,8 +67,6 @@ func setupNetwork(providerModel *models.Provider) error {
 	if providerModel.HostIP != "" {
 		return nil
 	}
-
-	display.StartTask("Joining virtual network")
 
 	// reserve an IP to be used for mounting
 	mountIP, err := dhcp.ReserveGlobal()
@@ -88,8 +91,6 @@ func setupNetwork(providerModel *models.Provider) error {
 		display.ErrorTask()
 		return fmt.Errorf("failed to persist the provider model: %s", err.Error())
 	}
-
-	display.StopTask()
 
 	return nil
 }

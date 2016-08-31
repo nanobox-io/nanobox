@@ -18,6 +18,9 @@ func Start(c *models.Component) error {
 		return nil
 	}
 
+	display.OpenContext(c.Label)
+	defer display.CloseContext()
+
 	// make sure the component is active
 	if c.State != "active" {
 		return fmt.Errorf("tried to start an inactive component")

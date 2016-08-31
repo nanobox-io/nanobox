@@ -15,9 +15,6 @@ import (
 
 // Setup sets up the app on the provider and in the database
 func Setup(envModel *models.Env, appModel *models.App, name string) error {
-	display.OpenContext("setting up app")
-	defer display.CloseContext()
-
 	locker.LocalLock()
 	defer locker.LocalUnlock()
 
@@ -26,6 +23,9 @@ func Setup(envModel *models.Env, appModel *models.App, name string) error {
 		return nil
 	}
 
+	display.OpenContext("Starting %s", appModel.Name)
+	defer display.CloseContext()
+
 	// generate the app data
 	if err := appModel.Generate(envModel, name); err != nil {
 		lumber.Error("app:Setup:models.App:Generate(): %s", err.Error())
@@ -33,12 +33,9 @@ func Setup(envModel *models.Env, appModel *models.App, name string) error {
 	}
 
 	// reserve IPs
-	display.StartTask("reserving IPs")
 	if err := reserveIPs(appModel); err != nil {
-		display.ErrorTask()
 		return fmt.Errorf("failed to reserve app IPs: %s", err.Error())
 	}
-	display.StopTask()
 
 	// clean crufty components
 	if err := component.Clean(appModel); err != nil {
@@ -62,9 +59,13 @@ func Setup(envModel *models.Env, appModel *models.App, name string) error {
 
 // reserIPs reserves app-level ip addresses
 func reserveIPs(appModel *models.App) error {
+	display.StartTask("Reserving IPs")
+	defer display.StopTask()
+	
 	// reserve a dev ip
 	envIP, err := dhcp.ReserveGlobal()
 	if err != nil {
+		display.ErrorTask()
 		lumber.Error("app:reserveIPs:dhcp.ReserveGlobal(): %s", err.Error())
 		return fmt.Errorf("failed to reserve an env IP: %s", err.Error())
 	}
@@ -72,6 +73,7 @@ func reserveIPs(appModel *models.App) error {
 	// reserve a logvac ip
 	logvacIP, err := dhcp.ReserveLocal()
 	if err != nil {
+		display.ErrorTask()
 		lumber.Error("app:reserveIPs:dhcp.ReserveLocal(): %s", err.Error())
 		return fmt.Errorf("failed to reserve a logvac IP: %s", err.Error())
 	}
@@ -79,6 +81,7 @@ func reserveIPs(appModel *models.App) error {
 	// reserve a mist ip
 	mistIP, err := dhcp.ReserveLocal()
 	if err != nil {
+		display.ErrorTask()
 		lumber.Error("app:reserveIPs:dhcp.ReserveLocal(): %s", err.Error())
 		return fmt.Errorf("failed to reserve a mist IP: %s", err.Error())
 	}
@@ -91,6 +94,7 @@ func reserveIPs(appModel *models.App) error {
 
 	// save the app
 	if err := appModel.Save(); err != nil {
+		display.ErrorTask()
 		lumber.Error("app:reserveIPs:models:App:Save(): %s", err.Error())
 		return fmt.Errorf("failed to persist IPs to the db: %s", err.Error())
 	}

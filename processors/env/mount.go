@@ -13,7 +13,8 @@ import (
 
 // Mount sets up the env mounts
 func Mount(env *models.Env) error {
-	display.StartTask("mounting code")
+	display.StartTask("Mounting codebase")
+	defer display.StopTask()
 
 	// mount the engine if it's a local directory
 	if config.EngineDir() != "" {
@@ -48,8 +49,6 @@ func Mount(env *models.Env) error {
 		display.ErrorTask()
 		return fmt.Errorf("failed to mount the code share on the provider: %s", err.Error())
 	}
-
-	display.StopTask()
 
 	return nil
 }
