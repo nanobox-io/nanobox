@@ -2,6 +2,6 @@
 package display
 
 var (
-  TaskSpinner  = []string{"◜", "◝", "◞", "◟"}
+  TaskSpinner  = []string{"⣷", "⣯", "⣟", "⡿", "⢿", "⣻", "⣽", "⣾"}
   TaskComplete = "✓"
 )
