@@ -9,26 +9,6 @@ import (
 	"github.com/jcelliott/lumber"
 )
 
-// "Pulling fs layer"
-// "Waiting"
-// "Downloading"
-// "Verifying Checksum"
-// "Download complete"
-// "Extracting"
-// "Pull complete"
-// "Status: **"
-
-// ...
-const (
-	Pulling = iota
-	Waiting
-	Downloading
-	Verifying
-	DLComplete
-	Extracting
-	Complete
-)
-
 type (
 
 	// Status ...
