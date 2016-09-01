@@ -6,10 +6,14 @@ import (
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 // StopAll stops all app components
 func StopAll(appModel *models.App) error {
+
+	display.OpenContext("Stopping components")
+	defer display.CloseContext()
 
 	// get all the components that belong to this app
 	componentModels, err := appModel.Components()

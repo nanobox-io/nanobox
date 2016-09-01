@@ -16,7 +16,14 @@ func Start(appModel *models.App) error {
 	locker.LocalLock()
 	defer locker.LocalUnlock()
 
-	display.OpenContext("Starting %s", appModel.Name)
+	// load the env for the display context
+	envModel, err := appModel.Env()
+	if err != nil {
+		lumber.Error("app:Start:models.App.Env(): %s", err.Error())
+		return fmt.Errorf("failed to load app env: %s", err.Error())
+	}
+
+	display.OpenContext("%s (%s)", envModel.Name, appModel.Name)
 	defer display.CloseContext()
 
 	// start all the app components
