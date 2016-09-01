@@ -6,7 +6,6 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/code"
 	"github.com/nanobox-io/nanobox/processors/env"
-	"github.com/nanobox-io/nanobox/processors/provider"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
 
@@ -18,7 +17,7 @@ func Build(envModel *models.Env) error {
 	defer locker.LocalUnlock()
 
 	// init docker client
-	if err := provider.Init(); err != nil {
+	if err := env.Setup(envModel); err != nil {
 		return fmt.Errorf("failed to init docker client: %s", err.Error())
 	}
 

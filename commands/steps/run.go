@@ -42,7 +42,6 @@ func Run(stepNames ...string) func(ccmd *cobra.Command, args []string) {
 	}
 }
 
-
 func printMessage(prereqs []string) {
 	fmt.Println()
 	fmt.Println("------------------------------------")

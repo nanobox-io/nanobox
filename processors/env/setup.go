@@ -6,11 +6,17 @@ import (
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processors/provider"
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
 // Setup sets up the provider and the env mounts
 func Setup(envModel *models.Env) error {
+
+	// init docker client
+	if err := provider.Init(); err != nil {
+		return fmt.Errorf("failed to init docker client: %s", err.Error())
+	}
 
 	display.OpenContext("Preparing environment")
 	defer display.CloseContext()

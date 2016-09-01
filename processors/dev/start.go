@@ -4,14 +4,15 @@ import (
 	"fmt"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processors/env"
 	"github.com/nanobox-io/nanobox/processors/app"
 )
 
 // Start initializes and starts the dev environment
 func Start(envModel *models.Env, appModel *models.App) error {
 	
-	// init docker client
-	if err := provider.Init(); err != nil {
+	// initialize the environemnt
+	if err := env.Setup(envModel); err != nil {
 		return fmt.Errorf("failed to init docker client: %s", err.Error())
 	}
 	

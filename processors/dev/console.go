@@ -13,7 +13,6 @@ import (
 	build_generator "github.com/nanobox-io/nanobox/generators/hooks/build"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/env"
-	process_provider "github.com/nanobox-io/nanobox/processors/provider"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/counter"
 	"github.com/nanobox-io/nanobox/util/dhcp"
@@ -28,7 +27,8 @@ import (
 func Console(appModel *models.App, devRun bool) error {
 
 	// run the share init which gives access to docker
-	if err := process_provider.Init(); err != nil {
+	envModel, _ := models.FindEnvByID(appModel.EnvID)
+	if err := env.Setup(envModel); err != nil {
 		return err
 	}
 
@@ -41,8 +41,6 @@ func Console(appModel *models.App, devRun bool) error {
 	if err := setup(appModel, config); err != nil {
 		return err
 	}
-
-	envModel, _ := models.FindEnvByID(appModel.EnvID)
 
 	go watch.Watch(envModel.Directory)
 
