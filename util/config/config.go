@@ -1,7 +1,11 @@
 // Package config ...
 package config
 
-import "github.com/spf13/viper"
+import (
+  "github.com/spf13/viper"
+  "github.com/jcelliott/lumber"
+)
+
 
 //
 var config *viper.Viper

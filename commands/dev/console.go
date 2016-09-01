@@ -8,7 +8,7 @@ import (
 	"github.com/nanobox-io/nanobox/processors/env"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/validate"
+	"github.com/nanobox-io/nanobox/commands/steps"
 )
 
 // ConsoleCmd ...
@@ -16,7 +16,7 @@ var ConsoleCmd = &cobra.Command{
 	Use:    "console",
 	Short:  "Opens an interactive console inside your dev platform.",
 	Long:   ``,
-	PreRun: validate.Requires("provider", "provider_up", "dev_isup"),
+	PreRun: steps.Run("start", "build", "dev start", "dev deploy"),
 	Run:    consoleFn,
 }
 

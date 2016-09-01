@@ -4,11 +4,11 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/commands/registry"
+	"github.com/nanobox-io/nanobox/commands/steps"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/validate"
 )
 
 var (
@@ -21,7 +21,7 @@ var (
 Generates a deployable build package that can be
 deployed into dev, sim, or production platforms.
 		`,
-		PreRun: validate.Requires("provider"),
+		PreRun: steps.Run("start"),
 		Run:    buildFn,
 	}
 
@@ -30,6 +30,8 @@ deployed into dev, sim, or production platforms.
 
 func init() {
 	BuildCmd.PersistentFlags().BoolVarP(&buildSkipCompile, "skip-compile", "", false, "dont compile the build")
+
+	steps.Build("build", buildCheck, buildFn)
 }
 
 // buildFn ...
@@ -41,4 +43,9 @@ func buildFn(ccmd *cobra.Command, args []string) {
 
 	env, _ := models.FindEnvByID(config.EnvID())
 	display.CommandErr(processors.Build(env))
+}
+
+func buildCheck() bool {
+	env, _ := models.FindEnvByID(config.EnvID())
+	return env.BuiltBoxfile != ""
 }
