@@ -23,7 +23,7 @@ func Setup(envModel *models.Env, appModel *models.App, name string) error {
 		return nil
 	}
 
-	display.OpenContext("Starting %s", appModel.Name)
+	display.OpenContext("%s (%s)", envModel.Name, appModel.Name)
 	defer display.CloseContext()
 
 	// generate the app data

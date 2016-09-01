@@ -32,7 +32,6 @@ func init() {
 
 // destroyFn ...
 func destroyFn(ccmd *cobra.Command, args []string) {
-
 	display.CommandErr(dev.Destroy(getApp()))
 }
 

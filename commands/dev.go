@@ -31,5 +31,4 @@ func init() {
 	DevCmd.AddCommand(dev.RunCmd)
 	DevCmd.AddCommand(dev.EnvCmd)
 	DevCmd.AddCommand(dev.ResetCmd)
-	DevCmd.AddCommand(dev.UpCmd)
 }
