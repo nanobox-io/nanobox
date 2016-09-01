@@ -17,14 +17,9 @@ func Build(envModel *models.Env) error {
 	locker.LocalLock()
 	defer locker.LocalUnlock()
 
-	// setup the provider
-	if err := provider.Setup(); err != nil {
-		return fmt.Errorf("failed to setup the provider: %s", err.Error())
-	}
-
-	// setup the env
-	if err := env.Setup(envModel); err != nil {
-		return fmt.Errorf("failed to setup the env: %s", err.Error())
+	// init docker client
+	if err := provider.Init(); err != nil {
+		return fmt.Errorf("failed to init docker client: %s", err.Error())
 	}
 
 	// build code

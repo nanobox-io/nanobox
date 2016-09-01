@@ -15,6 +15,11 @@ import (
 // Stop stops the running apps, unmounts all envs, and stops the provider
 func Stop() error {
 
+	// init docker client
+	if err := provider.Init(); err != nil {
+		return fmt.Errorf("failed to init docker client: %s", err.Error())
+	}
+
 	// stop all running apps
 	if err := stopAllApps(); err != nil {
 		return fmt.Errorf("failed to stop running apps: %s", err.Error())

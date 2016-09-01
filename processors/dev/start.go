@@ -9,6 +9,12 @@ import (
 
 // Start initializes and starts the dev environment
 func Start(envModel *models.Env, appModel *models.App) error {
+	
+	// init docker client
+	if err := provider.Init(); err != nil {
+		return fmt.Errorf("failed to init docker client: %s", err.Error())
+	}
+	
 	// setup the app if it's not already active
 	switch appModel.State {
 	case "active":
