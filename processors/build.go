@@ -7,15 +7,11 @@ import (
 	"github.com/nanobox-io/nanobox/processors/code"
 	"github.com/nanobox-io/nanobox/processors/env"
 	"github.com/nanobox-io/nanobox/processors/provider"
-	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
 
 // Build sets up the environment and runs a code build
 func Build(envModel *models.Env) error {
-	display.OpenContext("building")
-	defer display.CloseContext()
-
 	// by aquiring a local lock we are only allowing
 	// one build to happen at a time
 	locker.LocalLock()

@@ -51,7 +51,7 @@ func Setup(appModel *models.App, componentModel *models.Component) error {
 	}
 
 	// pull the component image
-	display.StartTask("pulling %s image", componentModel.Image)
+	display.StartTask("Pulling %s image", componentModel.Image)
 	if _, err := docker.ImagePull(componentModel.Image, dockerPercent); err != nil {
 		lumber.Error("component:Setup:docker.ImagePull(%s, nil): %s", componentModel.Image, err.Error())
 		display.ErrorTask()

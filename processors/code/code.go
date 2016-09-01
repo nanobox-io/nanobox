@@ -75,7 +75,8 @@ func pullBuildImage() (string, error) {
 	// extract the build image from the boxfile
 	buildImage := boxfile.BuildImage()
 
-	display.StartTask("pulling %s image for build", buildImage)
+	display.StartTask("Pulling %s image", buildImage)
+	defer display.StopTask()
 
 	// generate a docker percent display
 	dockerPercent := &display.DockerPercentDisplay{
@@ -89,6 +90,6 @@ func pullBuildImage() (string, error) {
 		display.ErrorTask()
 		return "", fmt.Errorf("failed to pull docker image (%s): %s", buildImage, err.Error())
 	}
-	display.StopTask()
+
 	return buildImage, nil
 }
