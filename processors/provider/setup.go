@@ -17,7 +17,14 @@ func Setup() error {
 	locker.GlobalLock()
 	defer locker.GlobalUnlock()
 
+	display.OpenContext("Starting Nanobox")
+	defer display.CloseContext()
+
 	if provider.IsReady() {
+		
+		display.StartTask("Skipping (already running)")
+		display.StopTask()
+		
 		// initialize the docker client
 		if err := Init(); err != nil {
 			return fmt.Errorf("failed to initialize docker for provider: %s", err.Error())
@@ -26,9 +33,6 @@ func Setup() error {
 		return nil
 	}
 
-	display.OpenContext("Starting Nanobox")
-	defer display.CloseContext()
-	
 	// create the provider (VM)
 	if err := provider.Create(); err != nil {
 		lumber.Error("provider:Setup:provider.Create(): %s", err.Error())
