@@ -12,7 +12,7 @@ import (
 
 // Sync syncronizes an app's components with the boxfile config
 func Sync(envModel *models.Env, appModel *models.App) error {
-	display.OpenContext("syncronizing data components")
+	display.OpenContext("Deploying application")
 	defer display.CloseContext()
 
 	// purge delta components
@@ -37,6 +37,13 @@ func Sync(envModel *models.Env, appModel *models.App) error {
 
 // purgeDeltaComponents purges components that have changed in the boxfile
 func purgeDeltaComponents(envModel *models.Env, appModel *models.App) error {
+	
+	display.OpenContext("Removing components")
+	defer display.CloseContext()
+	
+	// flag to determine if we display an up-to-date message
+	upToDate := true
+	
 	// parse the boxfiles
 	builtBoxfile := boxfile.New([]byte(envModel.BuiltBoxfile))
 	deployedBoxfile := boxfile.New([]byte(appModel.DeployedBoxfile))
@@ -63,10 +70,17 @@ func purgeDeltaComponents(envModel *models.Env, appModel *models.App) error {
 			continue
 		}
 
+		upToDate = false
+
 		// destroy the component
 		if err := Destroy(appModel, component); err != nil {
 			return fmt.Errorf("failed to destroy component: %s", err.Error())
 		}
+	}
+
+	if upToDate {
+		display.StartTask("Skipping (up-to-date)")
+		display.StopTask()
 	}
 
 	return nil
@@ -74,6 +88,12 @@ func purgeDeltaComponents(envModel *models.Env, appModel *models.App) error {
 
 // provisionComponents will provision components from the boxfile
 func provisionComponents(envModel *models.Env, appModel *models.App) error {
+	display.OpenContext("Launching components")
+	defer display.CloseContext()
+	
+	// flag to determine if we display an up-to-date message
+	upToDate := true
+	
 	// parse the boxfile
 	builtBoxfile := boxfile.New([]byte(envModel.BuiltBoxfile))
 
@@ -87,7 +107,10 @@ func provisionComponents(envModel *models.Env, appModel *models.App) error {
 			continue
 		}
 
-		componentModel.Name = name
+		upToDate = false
+
+		componentModel.Name  = name
+		componentModel.Label = name
 		componentModel.Image = builtBoxfile.Node(name).StringValue("image")
 
 		// setup
@@ -95,6 +118,11 @@ func provisionComponents(envModel *models.Env, appModel *models.App) error {
 			return fmt.Errorf("failed to setup component (%s): %s", name, err.Error())
 		}
 
+	}
+
+	if upToDate {
+		display.StartTask("Skipping (up-to-date)")
+		display.StopTask()
 	}
 
 	return nil
