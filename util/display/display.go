@@ -161,7 +161,7 @@ func StopTask() error {
 func ErrorTask() error {
 
 	// stop the task summarizer
-	if Summary {
+	if Summary && summarizer != nil {
 		summarizer.Error()
 		summarizer = nil
 
