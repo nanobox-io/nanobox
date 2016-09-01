@@ -17,9 +17,6 @@ import (
 
 //
 func Setup(appModel *models.App, componentModel *models.Component, warehouseConfig WarehouseConfig) error {
-	display.OpenContext("setting up %s", componentModel.Name)
-	defer display.CloseContext()
-
 	// generate the missing component data
 	if err := componentModel.Generate(appModel, "code"); err != nil {
 		lumber.Error("component:Setup:models.Component:Generate(%s, code): %s", appModel.ID, componentModel.Name, err.Error())
@@ -31,6 +28,9 @@ func Setup(appModel *models.App, componentModel *models.Component, warehouseConf
 		return nil
 	}
 
+	display.OpenContext(componentModel.Label)
+	defer display.CloseContext()
+
 	// generate a docker percent display
 	dockerPercent := &display.DockerPercentDisplay{
 		Output: display.NewStreamer("info"),
@@ -38,7 +38,7 @@ func Setup(appModel *models.App, componentModel *models.Component, warehouseConf
 	}
 
 	// pull the component image
-	display.StartTask("pulling %s image", componentModel.Image)
+	display.StartTask("Pulling %s image", componentModel.Image)
 	if _, err := docker.ImagePull(componentModel.Image, dockerPercent); err != nil {
 		lumber.Error("component:Setup:docker.ImagePull(%s, nil): %s", componentModel.Image, err.Error())
 		display.ErrorTask()
@@ -53,7 +53,7 @@ func Setup(appModel *models.App, componentModel *models.Component, warehouseConf
 	}
 
 	// create docker container
-	display.StartTask("starting container")
+	display.StartTask("Starting docker container")
 	config := container_generator.ComponentConfig(componentModel)
 	container, err := docker.CreateContainer(config)
 	if err != nil {
@@ -70,9 +70,9 @@ func Setup(appModel *models.App, componentModel *models.Component, warehouseConf
 		return err
 	}
 
-	//
-	if err := addIPToProvider(componentModel); err != nil {
-		return err
+	// attach container to the host network
+	if err := attachNetwork(componentModel); err != nil {
+		return fmt.Errorf("failed to attach container to host network: %s", err.Error())
 	}
 
 	lumber.Prefix("code:Setup")
@@ -81,7 +81,7 @@ func Setup(appModel *models.App, componentModel *models.Component, warehouseConf
 	// run fetch build command
 	fetchPayload := hook_generator.FetchPayload(componentModel, warehouseConfig.WarehouseURL)
 
-	display.StartTask("fetching code")
+	display.StartTask("Fetching build from warehouse")
 	if _, err := hookit.RunFetchHook(componentModel.ID, fetchPayload); err != nil {
 		display.ErrorTask()
 		return err
@@ -92,7 +92,7 @@ func Setup(appModel *models.App, componentModel *models.Component, warehouseConf
 	payload := hook_generator.ConfigurePayload(appModel, componentModel)
 
 	//
-	display.StartTask("configuring code")
+	display.StartTask("Configuring services")
 	if _, err := hookit.RunConfigureHook(componentModel.ID, payload); err != nil {
 		display.ErrorTask()
 		return fmt.Errorf("failed to configure code: %s", err.Error())
@@ -100,7 +100,7 @@ func Setup(appModel *models.App, componentModel *models.Component, warehouseConf
 	display.StopTask()
 
 	// run start command
-	display.StartTask("starting code")
+	display.StartTask("Starting services")
 	if _, err := hookit.RunStartHook(componentModel.ID, payload); err != nil {
 		display.ErrorTask()
 		return err
@@ -119,6 +119,8 @@ func Setup(appModel *models.App, componentModel *models.Component, warehouseConf
 
 //  ...
 func reserveIps(componentModel *models.Component) error {
+	display.StartTask("Reserve IPs")
+	defer display.StopTask()
 
 	if componentModel.InternalIP == "" {
 		localIP, err := dhcp.ReserveLocal()
@@ -141,18 +143,11 @@ func reserveIps(componentModel *models.Component) error {
 	return nil
 }
 
-// createContainer ...
-func createContainer(componentModel *models.Component) error {
-	display.StartTask("creating container")
-
-	display.StopTask()
-
-	return nil
-}
-
-// addIPToProvider ...
-func addIPToProvider(componentModel *models.Component) error {
-	display.StartTask("building network")
+// attachNetwork attaches the component to the host network
+func attachNetwork(componentModel *models.Component) error {
+	display.StartTask("Attaching network")
+	defer display.StopTask()
+	
 	if err := provider.AddIP(componentModel.ExternalIP); err != nil {
 		display.ErrorTask()
 		lumber.Error("code:Setup:addIPToProvider:provider.AddIP(%s): %s", componentModel.ExternalIP, err.Error())
@@ -164,6 +159,6 @@ func addIPToProvider(componentModel *models.Component) error {
 		display.ErrorTask()
 		return err
 	}
-	display.StopTask()
+	
 	return nil
 }

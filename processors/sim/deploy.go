@@ -17,12 +17,9 @@ import (
 // webs, workers, and updates services
 // then updates the router with the new code services
 func Deploy(envModel *models.Env, appModel *models.App) error {
-	display.OpenContext("Deploying Sim")
-	defer display.CloseContext()
-
-	// run the share init which gives access to docker
+	// init docker client
 	if err := provider.Init(); err != nil {
-		return err
+		return fmt.Errorf("failed to init docker client: %s", err.Error())
 	}
 
 	if err := platform.Deploy(appModel); err != nil {
@@ -43,14 +40,9 @@ func Deploy(envModel *models.Env, appModel *models.App) error {
 		return fmt.Errorf("unable to publish code: %s", err.Error())
 	}
 
-	// remove all the previous code services
-	if err := code.Clean(appModel); err != nil {
-		return fmt.Errorf("failed to clean old code components: %s", err.Error())
-	}
-
 	// syncronize the services as per the new boxfile
 	if err := component.Sync(envModel, appModel); err != nil {
-		return fmt.Errorf("unalbe to synchronize data components: %s", err.Error())
+		return fmt.Errorf("unable to synchronize data components: %s", err.Error())
 	}
 
 	// start code
@@ -58,21 +50,27 @@ func Deploy(envModel *models.Env, appModel *models.App) error {
 		return fmt.Errorf("failed to add code components: %s", err.Error())
 	}
 
+	display.StartTask("Running before_deploy hooks")
 	if err := runDeployHook(appModel, "before_deploy"); err != nil {
+		display.ErrorTask()
 		return fmt.Errorf("failed to run before deploy hooks: %s", err.Error())
 	}
+	display.StopTask()
 
 	// update nanoagent portal
-	display.StartTask("updating router")
+	display.StartTask("Updating router")
 	if err := platform.UpdatePortal(appModel); err != nil {
 		display.ErrorTask()
 		return fmt.Errorf("failed to update router: %s", err.Error())
 	}
 	display.StopTask()
 
+	display.StartTask("Running after_deploy hooks")
 	if err := runDeployHook(appModel, "after_deploy"); err != nil {
+		display.ErrorTask()
 		return fmt.Errorf("failed to run after deloy hooks: %s", err.Error())
 	}
+	display.StopTask()
 
 	// complete message
 

@@ -9,7 +9,7 @@ import (
 
 // Deploy provisions platform components needed for an app deploy
 func Deploy(a *models.App) error {
-	display.OpenContext("provisioning platform services")
+	display.OpenContext("Starting platform components")
 	defer display.CloseContext()
 
 	for _, component := range deployComponents {

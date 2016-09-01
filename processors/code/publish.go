@@ -16,7 +16,7 @@ import (
 
 // Publish ...
 func Publish(envModel *models.Env, WarehouseConfig WarehouseConfig) error {
-	display.OpenContext("publishing code to the warehouse")
+	display.OpenContext("Publishing build")
 	defer display.CloseContext()
 
 	// pull the latest build image
@@ -25,6 +25,8 @@ func Publish(envModel *models.Env, WarehouseConfig WarehouseConfig) error {
 		return fmt.Errorf("failed to pull the build image: %s", err.Error())
 	}
 
+	display.StartTask("Starting docker container")
+	
 	// reserve an ip
 	ip, err := dhcp.ReserveLocal()
 	if err != nil {
@@ -34,7 +36,6 @@ func Publish(envModel *models.Env, WarehouseConfig WarehouseConfig) error {
 	defer dhcp.ReturnIP(ip)
 
 	// start the container
-	display.StartTask("starting publish container")
 	config := container_generator.BuildConfig(buildImage, ip.String())
 	container, err := docker.CreateContainer(config)
 	if err != nil {
@@ -42,13 +43,15 @@ func Publish(envModel *models.Env, WarehouseConfig WarehouseConfig) error {
 		display.ErrorTask()
 		return fmt.Errorf("failed to start docker container: %s", err.Error())
 	}
-	display.StopTask()
-
 	// ensure we stop the container when we're done
 	defer docker.ContainerRemove(container.ID)
+	
+	display.StopTask()
 
 	lumber.Prefix("code:Publish")
 	defer lumber.Prefix("")
+
+	display.StartTask("Uploading")
 
 	// run user hook
 	// TODO: display output from hooks
@@ -61,7 +64,6 @@ func Publish(envModel *models.Env, WarehouseConfig WarehouseConfig) error {
 		return runDebugSession(container.ID, err)
 	}
 
-	display.StartTask("publishing")
 	buildWarehouseConfig := build.WarehouseConfig{
 		BuildID: WarehouseConfig.BuildID,
 		WarehouseURL: WarehouseConfig.WarehouseURL,
@@ -80,6 +82,7 @@ func Publish(envModel *models.Env, WarehouseConfig WarehouseConfig) error {
 		err = fmt.Errorf("failed to run publish hook: %s", err.Error())
 		return runDebugSession(container.ID, err)
 	}
+	
 	display.StopTask()
 
 	return nil

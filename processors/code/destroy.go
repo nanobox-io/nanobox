@@ -13,22 +13,50 @@ import (
 	"github.com/nanobox-io/nanobox/util/provider"
 )
 
-// Destroy ...
-//
+// Destroy destroys a code component from the app
 func Destroy(componentModel *models.Component) error {
-	display.OpenContext("removing %s(%s) component", componentModel.Label, componentModel.Name)
+	display.OpenContext(componentModel.Label)
 	defer display.CloseContext()
 
-	//
-	display.StartTask("removing container")
-	if err := docker.ContainerRemove(componentModel.ID); err != nil {
-		lumber.Error("code:Destroy:docker.ContainerRemove(%s): %s", componentModel.ID, err.Error())
-		display.ErrorTask()
+	// remove the docker container
+	if err := destroyContainer(componentModel.ID); err != nil {
 		return err
 	}
-	display.StopTask()
 
-	display.StartTask("cleaning networking")
+	// detach from the host network
+	if err := detachNetwork(componentModel); err != nil {
+		return fmt.Errorf("failed to detach container from the host network: %s", err.Error())
+	}
+
+	// remove the componentModel from the database
+	if err := componentModel.Delete(); err != nil {
+		lumber.Error("code:Destroy:Component.Delete(): %s", err.Error())
+		display.ErrorTask()
+		return fmt.Errorf("unable to delete database model: %s", err.Error())
+	}
+
+	return nil
+}
+
+// destroys a docker container associated with this app
+func destroyContainer(id string) error {
+	display.StartTask("Destroying docker container")
+	defer display.StopTask()
+	
+	if err := docker.ContainerRemove(id); err != nil {
+		lumber.Error("component:Destroy:docker.ContainerRemove(%s): %s", id, err.Error())
+		display.ErrorTask()
+		return fmt.Errorf("failed to remove docker container: %s", err.Error())
+	}
+	
+	return nil
+}
+
+// detachNetwork detaches the network from the host
+func detachNetwork(componentModel *models.Component) error {
+	display.StartTask("Releasing IPs")
+	defer display.StopTask()
+	
 	//
 	if err := provider.RemoveNat(componentModel.ExternalIP, componentModel.InternalIP); err != nil {
 		lumber.Error("code:Destroy:provider.RemoveNat(%s, %s): %s", componentModel.ExternalIP, componentModel.InternalIP, err.Error())
@@ -56,15 +84,6 @@ func Destroy(componentModel *models.Component) error {
 		display.ErrorTask()
 		return fmt.Errorf(": %s", err.Error())
 	}
-
-	// remove the componentModel from the database
-	if err := componentModel.Delete(); err != nil {
-		lumber.Error("code:Destroy:Component.Delete(): %s", err.Error())
-		display.ErrorTask()
-		return fmt.Errorf("unable to delete database model: %s", err.Error())
-	}
-
-	display.StopTask()
-
+	
 	return nil
 }

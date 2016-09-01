@@ -12,7 +12,7 @@ import (
 
 // Sync syncronizes an app's components with the boxfile config
 func Sync(envModel *models.Env, appModel *models.App) error {
-	display.OpenContext("Deploying application")
+	display.OpenContext("Syncing data components")
 	defer display.CloseContext()
 
 	// purge delta components
@@ -38,7 +38,7 @@ func Sync(envModel *models.Env, appModel *models.App) error {
 // purgeDeltaComponents purges components that have changed in the boxfile
 func purgeDeltaComponents(envModel *models.Env, appModel *models.App) error {
 	
-	display.OpenContext("Removing components")
+	display.OpenContext("Removing old")
 	defer display.CloseContext()
 	
 	// flag to determine if we display an up-to-date message
@@ -88,7 +88,7 @@ func purgeDeltaComponents(envModel *models.Env, appModel *models.App) error {
 
 // provisionComponents will provision components from the boxfile
 func provisionComponents(envModel *models.Env, appModel *models.App) error {
-	display.OpenContext("Launching components")
+	display.OpenContext("Launching new")
 	defer display.CloseContext()
 	
 	// flag to determine if we display an up-to-date message
