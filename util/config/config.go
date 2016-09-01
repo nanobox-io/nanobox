@@ -25,7 +25,7 @@ func Viper() *viper.Viper {
 	// parse the config file if it's not already
 	if config == nil {
 		if err := parseConfig(); err != nil {
-			return nil
+			lumber.Error("config:Viper():parseConfig(): %s", err.Error())
 		}
 	}
 
