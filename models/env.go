@@ -15,6 +15,8 @@ type Env struct {
 	Links map[string]string
 	// the boxfile from the most recent build
 	BuiltBoxfile string
+	BuiltID      string
+	DeployedID   string
 }
 
 // IsNew returns true if the Env hasn't been created yet

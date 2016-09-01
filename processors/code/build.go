@@ -11,6 +11,7 @@ import (
 	hook_generator "github.com/nanobox-io/nanobox/generators/hooks/build"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/hookit"
@@ -124,6 +125,7 @@ func gatherRequirements(envModel *models.Env, containerID string) error {
 
 	// persist the boxfile output to the env model
 	envModel.BuiltBoxfile = boxOutput
+	envModel.BuiltID = util.RandomString(30)
 	if err := envModel.Save(); err != nil {
 		lumber.Error("code:Build:models:Env:Save(): %s", err.Error())
 		return fmt.Errorf("failed to persist build boxfile to db: %s", err.Error())

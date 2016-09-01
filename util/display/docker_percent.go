@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"strings"
-	"github.com/jcelliott/lumber"
 )
 
 type (
