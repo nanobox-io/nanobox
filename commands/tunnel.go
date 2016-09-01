@@ -7,7 +7,7 @@ import (
 
 	"github.com/nanobox-io/nanobox/processors"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/validate"
+	"github.com/nanobox-io/nanobox/commands/steps"
 )
 
 var (
@@ -21,7 +21,7 @@ Creates a secure tunnel between your local machine & a
 production component. The tunnel allows you to manage
 production data using your local client of choice.
 		`,
-		PreRun: validate.Requires("provider"),
+		PreRun: steps.Run("login"),
 		Run:    tunnelFn,
 	}
 

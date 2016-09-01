@@ -9,6 +9,7 @@ import (
 	"github.com/nanobox-io/nanobox/processors/link"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
+	"github.com/nanobox-io/nanobox/commands/steps"
 )
 
 var (
@@ -18,6 +19,7 @@ var (
 		Use:   "link",
 		Short: "Manages links between local & production apps.",
 		Long:  ``,
+		PreRun: steps.Run("login"),
 		Run:   linkAddFn,
 	}
 
@@ -30,6 +32,7 @@ Adds a new link between a local and production app. A local
 app can be linked to multiple production apps. Each link needs
 an alias. If no alias is provided, 'default' is assumed.
 		`,
+		PreRun: steps.Run("login"),
 		Run: linkAddFn,
 	}
 
@@ -38,6 +41,7 @@ an alias. If no alias is provided, 'default' is assumed.
 		Use:   "ls",
 		Short: "Lists all links for the current local app.",
 		Long:  ``,
+		PreRun: steps.Run("login"),
 		Run:   linkListFn,
 	}
 
@@ -46,6 +50,7 @@ an alias. If no alias is provided, 'default' is assumed.
 		Use:   "rm",
 		Short: "Removes a link between a local & production app.",
 		Long:  ``,
+		PreRun: steps.Run("login"),
 		Run:   linkRemoveFn,
 	}
 

@@ -7,7 +7,7 @@ import (
 	"github.com/nanobox-io/nanobox/processors/dev"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/validate"
+	"github.com/nanobox-io/nanobox/commands/steps"
 )
 
 var (
@@ -19,7 +19,7 @@ var (
 		Long: `
 Stops your dev platform. All data will be preserved in its current state.
 		`,
-		PreRun: validate.Requires("provider"),
+		PreRun: steps.Run("start", "dev start"),
 		Run:    stopFn,
 	}
 )

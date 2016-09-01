@@ -5,7 +5,6 @@ import (
 
 	"github.com/nanobox-io/nanobox/processors"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/validate"
 )
 
 var (
@@ -15,7 +14,6 @@ var (
 		Use:    "destroy",
 		Short:  "Destroys the Nanobox virtual machine.",
 		Long:   ``,
-		PreRun: validate.Requires("provider"),
 		Run:    destroyFn,
 	}
 )

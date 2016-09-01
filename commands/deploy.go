@@ -7,6 +7,7 @@ import (
 	"github.com/nanobox-io/nanobox/processors"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
+	"github.com/nanobox-io/nanobox/commands/steps"
 )
 
 var (
@@ -16,6 +17,7 @@ var (
 		Use:   "deploy",
 		Short: "Deploys your generated build package to a production app.",
 		Long:  ``,
+		PreRun: steps.Run("start", "build", "login"),
 		Run:   deployFn,
 	}
 

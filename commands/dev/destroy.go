@@ -7,7 +7,7 @@ import (
 	"github.com/nanobox-io/nanobox/processors/dev"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/validate"
+	"github.com/nanobox-io/nanobox/commands/steps"
 )
 
 // DestroyCmd ...
@@ -16,7 +16,7 @@ var (
 		Use:    "destroy",
 		Short:  "Destroys the docker machines associated with your dev app.",
 		Long:   ``,
-		PreRun: validate.Requires("provider", "provider_up"),
+		PreRun: steps.Run("start", "dev start"),
 		Run:    destroyFn,
 	}
 

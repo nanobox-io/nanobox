@@ -7,7 +7,6 @@ import (
 	"github.com/nanobox-io/nanobox/processors/sim"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/validate"
 )
 
 var (
@@ -17,7 +16,6 @@ var (
 		Use:    "info",
 		Short:  "Displays information about the running sim app and its components.",
 		Long:   ``,
-		PreRun: validate.Requires("provider"),
 		Run:    infoFn,
 	}
 )

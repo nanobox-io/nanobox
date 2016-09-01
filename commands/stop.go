@@ -5,7 +5,6 @@ import (
 
 	"github.com/nanobox-io/nanobox/processors"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/validate"
 )
 
 var (
@@ -18,7 +17,6 @@ var (
 Stops the Nanobox virtual machine as well as any running
 dev and sim platforms.
 		`,
-		PreRun: validate.Requires("provider"),
 		Run:    stopFn,
 	}
 )

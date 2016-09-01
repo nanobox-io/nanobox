@@ -7,7 +7,7 @@ import (
 	"github.com/nanobox-io/nanobox/processors/sim"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/validate"
+	"github.com/nanobox-io/nanobox/commands/steps"
 )
 
 // DeployCmd ...
@@ -19,8 +19,12 @@ Deploys a build package into your sim platform and
 starts all services. This is used to simulate a full
 deploy locally, before deploying into production.
 		`,
-	PreRun: validate.Requires("provider", "provider_up", "built"),
+	PreRun: steps.Run("start", "build", "sim start"),
 	Run:    deployFn,
+}
+
+func init() {
+	steps.Build("sim deploy", deployCheck, deployFn)
 }
 
 // deployFn ...
@@ -30,4 +34,9 @@ func deployFn(ccmd *cobra.Command, args []string) {
 	// TODO: display an error if we cant find either of these
 
 	display.CommandErr(sim.Deploy(env, app))
+}
+
+func deployCheck() bool {
+	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
+	return app.DeployedBoxfile != ""
 }

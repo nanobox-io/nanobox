@@ -9,6 +9,7 @@ import (
 	"github.com/nanobox-io/nanobox/processors/app/dns"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
+	"github.com/nanobox-io/nanobox/commands/steps"
 )
 
 var (
@@ -28,6 +29,7 @@ var (
 Lists a hostnames maped to your sim app. The domain provided is added
 to your local hosts file pointing the the IP of your sim app.
 		`,
+		PreRun: steps.Run("start", "build", "sim start", "sim deploy"),
 		Run: dnsListFn,
 	}
 
@@ -39,6 +41,7 @@ to your local hosts file pointing the the IP of your sim app.
 Adds a hostname map to your sim app. The domain provided is added
 to your local hosts file pointing the the IP of your sim app.
 		`,
+		PreRun: steps.Run("start", "build", "sim start", "sim deploy"),
 		Run: dnsAddFn,
 	}
 
@@ -50,6 +53,7 @@ to your local hosts file pointing the the IP of your sim app.
 Removes a hostname map from your sim app. The domain must perfectly
 match an DNS entry in your to your local hosts file.
 		`,
+		PreRun: steps.Run("start", "build", "sim start", "sim deploy"),
 		Run: dnsRmFn,
 	}
 	// DNSRemoveCmd ...
@@ -57,6 +61,7 @@ match an DNS entry in your to your local hosts file.
 		Use:    "rm-all",
 		Short:  "Removes all hostname mappings associated with your sim app.",
 		Long:   ``,
+		PreRun: steps.Run("start", "build", "sim start", "sim deploy"),
 		Run:    dnsRmAllFn,
 		Hidden: true,
 	}

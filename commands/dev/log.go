@@ -7,7 +7,7 @@ import (
 	"github.com/nanobox-io/nanobox/processors/dev"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/validate"
+	"github.com/nanobox-io/nanobox/commands/steps"
 )
 
 var (
@@ -17,7 +17,7 @@ var (
 		Use:    "log",
 		Short:  "Displays logs from the running dev app and its components.",
 		Long:   ``,
-		PreRun: validate.Requires("provider", "provider_up", "built", "dev_isup"),
+		PreRun: steps.Run("start", "build", "dev start", "dev deploy"),
 		Run:    logFn,
 	}
 )

@@ -7,7 +7,7 @@ import (
 	"github.com/nanobox-io/nanobox/processors/sim"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/validate"
+	"github.com/nanobox-io/nanobox/commands/steps"
 )
 
 var (
@@ -17,7 +17,7 @@ var (
 		Use:    "log",
 		Short:  "Displays logs from the running sim app and its components.",
 		Long:   ``,
-		PreRun: validate.Requires("provider", "provider_up", "built"),
+		PreRun: steps.Run("start", "build", "sim start", "sim deploy"),
 		Run:    logFn,
 	}
 )

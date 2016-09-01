@@ -8,7 +8,7 @@ import (
 	"github.com/nanobox-io/nanobox/processors/sim"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/validate"
+	"github.com/nanobox-io/nanobox/commands/steps"
 )
 
 // DestroyCmd ...
@@ -17,7 +17,7 @@ var (
 		Use:    "destroy",
 		Short:  "Destroys the docker containers associated with your sim app.",
 		Long:   ``,
-		PreRun: validate.Requires("provider", "provider_up"),
+		PreRun: steps.Run("start", "sim start"),
 		Run:    destroyFn,
 	}
 

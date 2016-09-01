@@ -4,11 +4,10 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/commands/steps"
 	"github.com/nanobox-io/nanobox/processors/dev"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/validate"
+	"github.com/nanobox-io/nanobox/commands/steps"
 )
 
 var (
@@ -22,7 +21,7 @@ Starts your dev platform from its previous state. If starting for
 the first time, you should also generate a build (nanobox build)
 and deploy it into your dev platform (nanobox dev deploy).
 		`,
-		PreRun: validate.Requires("provider"),
+		PreRun: steps.Run("start"),
 		Run:    devStart,
 	}
 )

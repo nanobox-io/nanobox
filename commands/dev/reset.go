@@ -5,7 +5,6 @@ import (
 
 	"github.com/nanobox-io/nanobox/processors/dev"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/validate"
 )
 
 var (
@@ -15,7 +14,6 @@ var (
 		Use:    "reset",
 		Short:  "Resets the dev VM registry.",
 		Long:   ``,
-		PreRun: validate.Requires("provider"),
 		Run:    resetFn,
 		Hidden: true,
 	}

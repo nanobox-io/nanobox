@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/validate"
 )
 
 // Provider ...
@@ -46,11 +45,6 @@ func Register(name string, p Provider) {
 	providers[name] = p
 }
 
-// init ...
-func init() {
-	validate.Register("provider", Valid)
-	validate.Register("provider_up", ValidReady)
-}
 
 // Display ...
 func Display(verb bool) {

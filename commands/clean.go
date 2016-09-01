@@ -8,7 +8,6 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/validate"
 )
 
 var (
@@ -20,7 +19,6 @@ var (
 		Long: `
 todo: write long description
 `,
-		PreRun: validate.Requires("provider"),
 		Run:    cleanFn,
 	}
 )

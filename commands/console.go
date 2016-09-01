@@ -7,7 +7,6 @@ import (
 
 	"github.com/nanobox-io/nanobox/processors"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/validate"
 )
 
 var (
@@ -17,7 +16,6 @@ var (
 		Use:    "console",
 		Short:  "Opens an interactive console inside a production component.",
 		Long:   ``,
-		PreRun: validate.Requires("provider"),
 		Run:    consoleFn,
 	}
 

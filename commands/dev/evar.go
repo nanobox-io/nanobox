@@ -8,6 +8,7 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/commands/steps"
 )
 
 var (
@@ -27,6 +28,7 @@ var (
 Adds environment variable(s) to your dev app. Multiple key-value
 pairs can be added simultaneously using a comma-delimited list.
 		`,
+		PreRun: steps.Run("start", "build", "dev start", "dev deploy"),
 		Run: envAddFn,
 	}
 
@@ -35,6 +37,7 @@ pairs can be added simultaneously using a comma-delimited list.
 		Use:   "ls",
 		Short: "Lists all environment variables registered in your dev app.",
 		Long:  ``,
+		PreRun: steps.Run("start", "build", "dev start", "dev deploy"),
 		Run:   envListFn,
 	}
 
@@ -46,6 +49,7 @@ pairs can be added simultaneously using a comma-delimited list.
 Removes environment variable(s) from your dev app. Multiple keys
 can be removed simultaneously using a comma-delimited list.
 		`,
+		PreRun: steps.Run("start", "build", "dev start", "dev deploy"),
 		Run: envRemoveFn,
 	}
 )

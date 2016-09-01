@@ -8,7 +8,8 @@ import (
 	"github.com/nanobox-io/nanobox/processors/sim"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/validate"
+	"github.com/nanobox-io/nanobox/commands/steps"
+
 )
 
 // ConsoleCmd ...
@@ -16,7 +17,7 @@ var ConsoleCmd = &cobra.Command{
 	Use:    "console",
 	Short:  "Opens an interactive console inside your sim platform.",
 	Long:   ``,
-	PreRun: validate.Requires("provider", "provider_up", "built", "sim_deployed"),
+	PreRun: steps.Run("start", "build", "sim start", "sim deploy"),
 	Run:    consoleFn,
 }
 
