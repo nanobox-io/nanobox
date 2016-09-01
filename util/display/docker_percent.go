@@ -101,8 +101,6 @@ func (display *DockerPercentDisplay) show() string {
 	}
 
 	//
-	lumber.Info("percent: %s", fmt.Sprintf("Downloaded: %3d%% Extracted: %3d%% Total: %3d%%", downloaded/count, extracted/count, (downloaded/count+extracted/count)/2))
-
 	return fmt.Sprintf("Downloaded: %3d%% Extracted: %3d%% Total: %3d%%", downloaded/count, extracted/count, (downloaded/count+extracted/count)/2)
 }
 
