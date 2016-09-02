@@ -22,6 +22,8 @@ var (
 
 // infoFn will run the DNS processor for adding DNS entires to the "hosts" file
 func infoFn(ccmd *cobra.Command, args []string) {
+	env, _ := models.FindEnvByID(config.EnvID())
 	app, _ := models.FindAppBySlug(config.EnvID(), "sim")
-	display.CommandErr(sim.Info(app))
+	
+	display.CommandErr(sim.Info(env, app))
 }
