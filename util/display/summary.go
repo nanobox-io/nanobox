@@ -78,7 +78,7 @@ func (s *Summarizer) Pause() {
 // stop prints the "complete" label and toggles shutdown
 func (s *Summarizer) Resume() {
 	// generate and print the complete header
-	s.Label = s.Label + " (cont)"
+	s.Label = s.Label
 
 	// turn the ticker back on
 	s.shutdown = false
