@@ -1,4 +1,3 @@
-// +build windows
 package display
 
 var (
