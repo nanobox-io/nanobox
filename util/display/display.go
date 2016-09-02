@@ -140,12 +140,14 @@ func PauseTask() {
 	// stop the task summarizer
 	if Summary && summarizer != nil {
 		summarizer.Pause()
+		fmt.Println()
 	}	
 }
 
 func ResumeTask() {
 	// resume task
 	if Summary && summarizer != nil {
+		fmt.Println()
 		summarizer.Resume()
 	}	
 }
