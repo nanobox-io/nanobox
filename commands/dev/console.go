@@ -23,18 +23,19 @@ var ConsoleCmd = &cobra.Command{
 // consoleFn ...
 func consoleFn(ccmd *cobra.Command, args []string) {
 
-	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
+	envModel, _ := models.FindEnvByID(config.EnvID())
+	appModel, _ := models.FindAppBySlug(config.EnvID(), "dev")
 
 	// if given an argument they wanted to run a console into a container
 	// if no arguement is provided they wanted to run a dev console
 	// and be dropped into a dev environment
 	if len(args) > 0 {
-		component, _ := models.FindComponentBySlug(app.ID, args[0])
+		component, _ := models.FindComponentBySlug(appModel.ID, args[0])
 
 		display.CommandErr(env.Console(component, env.ConsoleConfig{}))
 		return
 	}
 
 	// set the meta arguments to be used in the processor and run the processor
-	display.CommandErr(dev.Console(app, false))
+	display.CommandErr(dev.Console(envModel, appModel, false))
 }

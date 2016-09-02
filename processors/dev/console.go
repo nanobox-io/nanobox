@@ -1,146 +1,203 @@
 package dev
 
 import (
-	"fmt"
-	"net"
-	"os"
+  "fmt"
+  "net"
+  "os"
 
-	"github.com/jcelliott/lumber"
-	"github.com/nanobox-io/golang-docker-client"
-	"github.com/nanobox-io/nanobox-boxfile"
+  "github.com/jcelliott/lumber"
+  "github.com/nanobox-io/golang-docker-client"
+  "github.com/nanobox-io/nanobox-boxfile"
 
-	container_generator "github.com/nanobox-io/nanobox/generators/containers"
-	build_generator "github.com/nanobox-io/nanobox/generators/hooks/build"
-	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/processors/env"
-	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/counter"
-	"github.com/nanobox-io/nanobox/util/dhcp"
-	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/util/hookit"
-	"github.com/nanobox-io/nanobox/util/locker"
-	"github.com/nanobox-io/nanobox/util/provider"
-	// "github.com/nanobox-io/nanobox/util/watch"
+  container_generator "github.com/nanobox-io/nanobox/generators/containers"
+  build_generator     "github.com/nanobox-io/nanobox/generators/hooks/build"
+  
+  "github.com/nanobox-io/nanobox/models"
+  "github.com/nanobox-io/nanobox/processors/env"
+  "github.com/nanobox-io/nanobox/util/counter"
+  "github.com/nanobox-io/nanobox/util/dhcp"
+  "github.com/nanobox-io/nanobox/util/display"
+  "github.com/nanobox-io/nanobox/util/hookit"
+  "github.com/nanobox-io/nanobox/util/locker"
+  "github.com/nanobox-io/nanobox/util/provider"
+  // "github.com/nanobox-io/nanobox/util/watch"
 )
 
-//
-func Console(appModel *models.App, devRun bool) error {
+// Start a dev container 
+func Console(envModel *models.Env, appModel *models.App, devRun bool) error {
+  
+  // ensure the environment is setup
+  if err := env.Setup(envModel); err != nil {
+    return fmt.Errorf("failed to setup environment: %s", err.Error())
+  }
+  
+  // whatever happens next, ensure we teardown this container
+  defer teardown(appModel)
+  
+  // setup the dev container
+  if err := setup(appModel); err != nil {
+    return fmt.Errorf("failed to setup dev container: %s", err.Error())
+  }
+  
+  // start a watcher to watch for changes and inform the vm
+  // go watch.Watch(envModel.Directory)
+  
+  // if run then start the run commands
+  if devRun {
+    return Run(appModel)
+  }
+  
+  // print the MOTD before dropping into the container
+  if err := printMOTD(appModel); err != nil {
+    return fmt.Errorf("failed to print MOTD: %s", err.Error())
+  }
 
-	// run the share init which gives access to docker
-	envModel, _ := models.FindEnvByID(appModel.EnvID)
-	if err := env.Setup(envModel); err != nil {
-		return err
-	}
+  // console into the newly created container
+  if err := runConsole(appModel); err != nil {
+    return fmt.Errorf("failed to console into dev container: %s", err.Error())
+  }
 
-	// generate a container config
-	config := container_generator.DevConfig(appModel)
-
-	defer teardown(appModel, config)
-
-	// setup the docker container one is needed
-	if err := setup(appModel, config); err != nil {
-		return err
-	}
-
-	// go watch.Watch(envModel.Directory)
-
-	// if run then start the run commands
-	// and log but do not continue to the regular console
-	if devRun {
-		return Run(appModel)
-	}
-
-	//
-	if err := printMOTD(appModel); err != nil {
-		return err
-	}
-
-	//
-	if err := runConsole(appModel); err != nil {
-		return err
-	}
-
-	return nil
+  return nil
 }
 
-// setup ...
-func setup(appModel *models.App, config docker.ContainerConfig) error {
+// sets up the dev container and network stack
+func setup(appModel *models.App) error {
 
 	// establish a local lock to ensure we're the only ones bringing up the
 	// dev container. Also, we need to ensure the lock is released even in we error
 	locker.LocalLock()
 	defer locker.LocalUnlock()
-
+  
 	// let anyone else know we're using the dev container
 	counter.Increment(appModel.ID)
 
+  // we don't need to setup if dev is already running
+  if isDevRunning() {
+    return nil
+  }
+
+  display.OpenContext("Building dev environment")
+  defer display.CloseContext()
+
+  // generate a container config
+  config := container_generator.DevConfig(appModel)
+
 	//
-	if !isDevRunning() {
+	if err := downloadImage(config.Image); err != nil {
+    return err
+	}
 
-		//
-		if err := downloadImage(config.Image); err != nil {
-			return err
-		}
+  display.StartTask("Starting docker container")
+	container, err := docker.CreateContainer(config)
+	if err != nil {
+    display.ErrorTask()
+		return fmt.Errorf("failed to create docker container: %s", err.Error())
+	}
+  display.StopTask()
 
-		container, err := docker.CreateContainer(config)
-		if err != nil {
-			return err
-		}
+	//
+	if err := attachNetwork(appModel, config.IP); err != nil {
+		return fmt.Errorf("unable to attach container to network: %s", err.Error())
+	}
 
-		//
-		if err := attachNetwork(appModel, config); err != nil {
-			return err
-		}
+	lumber.Prefix("dev:Console")
+	defer lumber.Prefix("")
 
-		lumber.Prefix("dev:Console")
-		defer lumber.Prefix("")
+  display.StartTask("Configuring")
+	userPayload := build_generator.UserPayload()
+	if _, err := hookit.Exec(container.ID, "user", userPayload, "debug"); err != nil {
+    display.ErrorTask()
+		return fmt.Errorf("failed to run the user hook: %s", err.Error())
+	}
 
-		// TODO: The nil in this call needs to be replaced with something from the new display
-		userPayload := build_generator.UserPayload()
-		if _, err := hookit.Exec(container.ID, "user", userPayload, "debug"); err != nil {
-			return err
-		}
+	if _, err := hookit.Exec(container.ID, "dev", build_generator.DevPayload(appModel), "debug"); err != nil {
+    display.ErrorTask()
+		return fmt.Errorf("failed to run the dev hook: %s", err.Error())
+	}
+  display.StopTask()
 
-		// TODO: The nil in this call needs to be replaced with something from the new display
-		if _, err := hookit.Exec(container.ID, "dev", build_generator.DevPayload(appModel), "debug"); err != nil {
-			return err
-		}
-	} else {
+	return nil
+}
 
-		// if im not creating one i need to release the ip that was reserved in the config
-		dhcp.ReturnIP(net.ParseIP(config.IP))
+func teardown(appModel *models.App) error {
+  locker.LocalLock()
+  defer locker.LocalUnlock()
+
+  counter.Decrement(appModel.ID)
+  
+  if !devIsUnused(appModel.ID) {
+    return nil
+  }
+  
+  // grab the container info
+	container, err := docker.GetContainer(container_generator.DevName())
+	if err != nil {
+		// if we cant get the container it may have been removed by someone else
+		// just return here
+		return nil
+	}
+  
+  // remove the container
+  if err := docker.ContainerRemove(container.ID); err != nil {
+		return fmt.Errorf("failed to remove dev container: %s", err.Error())
+	}
+  
+  // extract the container IP
+  ip := docker.GetIP(container)
+  
+  // detach dev container from the network
+  if err := detachNetwork(appModel, ip); err != nil {
+    return fmt.Errorf("failed to detach dev container from network: %s", err.Error())
+  }
+  
+  // return the container IP back to the IP pool
+  if err := dhcp.ReturnIP(net.ParseIP(ip)); err != nil {
+    lumber.Error("An error occurred durring dev console teadown:%s", err.Error())
+    return fmt.Errorf("failed to return unused IP back to pool: %s", err.Error())
+  }
+  
+  return nil
+}
+
+// attachNetwork attaches the container to the host network
+func attachNetwork(appModel *models.App, containerIP string) error {
+  display.StartTask("Attaching network")
+	defer display.StopTask()
+
+	// fetch the devIP
+	devIP := appModel.GlobalIPs["env"]
+
+	//
+	if err := provider.AddIP(devIP); err != nil {
+    lumber.Error("dev:attachNetwork:provider.AddIP(%s):%s", devIP, err.Error())
+		return fmt.Errorf("failed to add IP to the provider: %s", err.Error())
+	}
+
+	//
+	if err := provider.AddNat(devIP, containerIP); err != nil {
+    lumber.Error("dev:attachNetwork:provider.AddNat(%s, %s):%s", devIP, containerIP, err.Error())
+		return fmt.Errorf("failed to add NAT from container: %s", err.Error())
 	}
 
 	return nil
 }
 
-// teardown ...
-func teardown(appModel *models.App, config docker.ContainerConfig) error {
+// detachNetwork detaches the container from the host network
+func detachNetwork(appModel *models.App, containerIP string) error {
 
-	// establish a local app lock to ensure we're the only ones bringing
-	// down the app platform. Also ensure that we release it even if we error
-	locker.LocalLock()
-	defer locker.LocalUnlock()
+	// fetch the devIP
+	devIP := appModel.GlobalIPs["env"]
 
-	counter.Decrement(appModel.ID)
+	// remove nat
+	if err := provider.RemoveNat(devIP, containerIP); err != nil {
+    lumber.Error("dev:detachNetwork:provider.RemoveNat(%s, %s):%s", devIP, containerIP, err.Error())
+		return fmt.Errorf("failed to remove NAT from container: %s", err.Error())
+	}
 
-	//
-	if devIsUnused() {
-
-		//
-		if err := removeContainer(); err != nil {
-			lumber.Error("An error occurred durring dev console teadown:%s", err.Error())
-		}
-
-		//
-		if err := detachNetwork(appModel, config); err != nil {
-			lumber.Error("An error occurred durring dev console teadown:%s", err.Error())
-		}
-
-		//
-		if err := dhcp.ReturnIP(net.ParseIP(config.IP)); err != nil {
-			lumber.Error("An error occurred durring dev console teadown:%s", err.Error())
-		}
+	// remove the IP from the provider
+	if err := provider.RemoveIP(devIP); err != nil {
+    lumber.Error("dev:detachNetwork:provider.RemoveIP(%s):%s", devIP, err.Error())
+		return fmt.Errorf("failed to remove the IP from the provider: %s", err.Error())
 	}
 
 	return nil
@@ -148,65 +205,23 @@ func teardown(appModel *models.App, config docker.ContainerConfig) error {
 
 // downloadImage downloads the dev docker image
 func downloadImage(image string) error {
-	if !docker.ImageExists(image) {
 
-		streamer := display.NewStreamer("info")
-		dockerPercent := &display.DockerPercentDisplay{Output: streamer, Prefix: image}
+  display.StartTask("Pulling %s image", image)
+  defer display.StopTask()
 
-		if _, err := docker.ImagePull(image, dockerPercent); err != nil {
-			return err
-		}
+  // generate a docker percent display
+  dockerPercent := &display.DockerPercentDisplay{
+    Output: display.NewStreamer("info"),
+    Prefix: image,
+  }
+
+	if _, err := docker.ImagePull(image, dockerPercent); err != nil {
+    display.ErrorTask()
+    lumber.Error("dev:Setup:downloadImage.ImagePull(%s, nil): %s", image, err.Error())
+    return fmt.Errorf("failed to pull docker image (%s): %s", image, err.Error())
 	}
 
 	return nil
-}
-
-// removeContainer will lookup the dev container and remove it
-func removeContainer() error {
-
-	// grab the container info
-	container, err := docker.GetContainer(container_generator.DevName())
-	if err != nil {
-		// if we cant get the container it may have been removed by someone else
-		// just return here
-		return nil
-	}
-
-	if err := docker.ContainerRemove(container.ID); err != nil {
-		// but if the container exists and we cant remove it for some other reason
-		// we need to report that error
-		return err
-	}
-
-	return nil
-}
-
-// runConsole will establish a console within the dev container
-func runConsole(appModel *models.App) error {
-
-	// create a dummy component using the appname
-	component := &models.Component{
-		ID: "nanobox_" + appModel.ID,
-	}
-	// for tyler: I dont like forcing someone into zsh..
-	// your chosen shell is a very personal
-	consoleConfig := env.ConsoleConfig{
-		Cwd: cwd(appModel),
-	}
-
-	return env.Console(component, consoleConfig)
-}
-
-// cwd sets the cwd from the boxfile or provides a sensible default
-func cwd(appModel *models.App) string {
-	boxfile := boxfile.New([]byte(appModel.DeployedBoxfile))
-	// parse the boxfile data
-
-	if boxfile.Node("dev").StringValue("cwd") != "" {
-		return boxfile.Node("dev").StringValue("cwd")
-	}
-
-	return "/app"
 }
 
 // printMOTD prints the motd with information for the user to connect
@@ -243,47 +258,36 @@ func printMOTD(appModel *models.App) error {
 	return nil
 }
 
-// attachNetwork attaches the container to the host network
-func attachNetwork(appModel *models.App, config docker.ContainerConfig) error {
+// runConsole will establish a console within the dev container
+func runConsole(appModel *models.App) error {
 
-	// fetch the devIP
-	devIP := appModel.GlobalIPs["env"]
-
-	//
-	if err := provider.AddIP(devIP); err != nil {
-		return fmt.Errorf("provider:add_ip: %s", err.Error())
+	// create a dummy component using the appname
+	component := &models.Component{
+		ID: "nanobox_" + appModel.ID,
+	}
+  
+	consoleConfig := env.ConsoleConfig{
+		Cwd: cwd(appModel),
 	}
 
-	//
-	if err := provider.AddNat(devIP, config.IP); err != nil {
-		return fmt.Errorf("provider:add_nat: %s", err.Error())
-	}
-
-	return nil
+	return env.Console(component, consoleConfig)
 }
 
-// detachNetwork detaches the container from the host network
-func detachNetwork(appModel *models.App, config docker.ContainerConfig) error {
+// cwd sets the cwd from the boxfile or provides a sensible default
+func cwd(appModel *models.App) string {
+	boxfile := boxfile.New([]byte(appModel.DeployedBoxfile))
+	// parse the boxfile data
 
-	// fetch the devIP
-	devIP := appModel.GlobalIPs["env"]
-
-	//
-	if err := provider.RemoveNat(devIP, config.IP); err != nil {
-		return err
+	if boxfile.Node("dev").StringValue("cwd") != "" {
+		return boxfile.Node("dev").StringValue("cwd")
 	}
 
-	//
-	if err := provider.RemoveIP(devIP); err != nil {
-		return err
-	}
-
-	return nil
+	return "/app"
 }
 
 // devIsUnused returns true if the dev isn't being used by any other session
-func devIsUnused() bool {
-	count, err := counter.Get(config.EnvID() + "_dev")
+func devIsUnused(ID string) bool {
+	count, err := counter.Get(ID)
 	return count == 0 && err == nil
 }
 
