@@ -50,6 +50,18 @@ func Deploy(envModel *models.Env, appModel *models.App) error {
 		return fmt.Errorf("failed to add code components: %s", err.Error())
 	}
 
+	if err := finalizeDeploy(appModel); err != nil {
+		return fmt.Errorf("failed to finalize deploy: %s", err.Error())
+	}
+
+	return nil
+}
+
+// update the router and run deploy hooks
+func finalizeDeploy(appModel *models.App) error {
+	display.OpenContext("Finalizing deploy")
+	defer display.CloseContext()
+	
 	display.StartTask("Running before_deploy hooks")
 	if err := runDeployHook(appModel, "before_deploy"); err != nil {
 		display.ErrorTask()
@@ -71,9 +83,7 @@ func Deploy(envModel *models.Env, appModel *models.App) error {
 		return fmt.Errorf("failed to run after deloy hooks: %s", err.Error())
 	}
 	display.StopTask()
-
-	// complete message
-
+	
 	return nil
 }
 

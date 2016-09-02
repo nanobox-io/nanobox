@@ -10,7 +10,7 @@ import (
 //
 func DeployHook(appModel *models.App, componentModel *models.Component, hookType string) error {
 
-	_, err := hookit.Exec(componentModel.ID, hookType, generator.DeployPayload(appModel, componentModel), "debug")
+	_, err := hookit.Exec(componentModel.ID, hookType, generator.DeployPayload(appModel, componentModel), "info")
 
 	return err
 }

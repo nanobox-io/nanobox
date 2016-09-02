@@ -663,12 +663,7 @@ func (machine DockerMachine) HasMount(mount string) bool {
 		return false
 	}
 
-	matched, regerr := regexp.Match(mount, output)
-	if regerr != nil {
-		return false
-	}
-
-	return matched
+	return strings.Contains(string(output), mount)
 }
 
 // AddMount adds a virtualbox mount into the docker-machine vm

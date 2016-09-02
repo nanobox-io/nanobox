@@ -26,7 +26,7 @@ func Sync(appModel *models.App, warehouseConfig WarehouseConfig) error {
   }
   
   if err := provisionComponents(appModel, warehouseConfig); err != nil {
-    return fmt.Errorf("failed to ")
+    return fmt.Errorf("failed to provision components: %s", err.Error())
   }
   
   return nil
@@ -100,6 +100,7 @@ func codeComponentModels(appModel *models.App) []*models.Component {
 
 		componentModel := &models.Component{
 			Name:  componentName,
+      Label: componentName,
 			Image: image,
 		}
 

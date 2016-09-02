@@ -47,13 +47,14 @@ func Setup(appModel *models.App, componentModel *models.Component, warehouseConf
 	display.StopTask()
 	//
 
+	display.StartTask("Starting docker container")
 	if err := reserveIps(componentModel); err != nil {
+		display.ErrorTask()
 		lumber.Error("code:Setup:setup.getLocalIP(): %s", err.Error())
 		return err
 	}
 
 	// create docker container
-	display.StartTask("Starting docker container")
 	config := container_generator.ComponentConfig(componentModel)
 	container, err := docker.CreateContainer(config)
 	if err != nil {
@@ -92,15 +93,13 @@ func Setup(appModel *models.App, componentModel *models.Component, warehouseConf
 	payload := hook_generator.ConfigurePayload(appModel, componentModel)
 
 	//
-	display.StartTask("Configuring services")
+	display.StartTask("Starting services")
 	if _, err := hookit.RunConfigureHook(componentModel.ID, payload); err != nil {
 		display.ErrorTask()
 		return fmt.Errorf("failed to configure code: %s", err.Error())
 	}
-	display.StopTask()
 
 	// run start command
-	display.StartTask("Starting services")
 	if _, err := hookit.RunStartHook(componentModel.ID, payload); err != nil {
 		display.ErrorTask()
 		return err
@@ -119,9 +118,6 @@ func Setup(appModel *models.App, componentModel *models.Component, warehouseConf
 
 //  ...
 func reserveIps(componentModel *models.Component) error {
-	display.StartTask("Reserve IPs")
-	defer display.StopTask()
-
 	if componentModel.InternalIP == "" {
 		localIP, err := dhcp.ReserveLocal()
 		if err != nil {
@@ -145,9 +141,6 @@ func reserveIps(componentModel *models.Component) error {
 
 // attachNetwork attaches the component to the host network
 func attachNetwork(componentModel *models.Component) error {
-	display.StartTask("Attaching network")
-	defer display.StopTask()
-	
 	if err := provider.AddIP(componentModel.ExternalIP); err != nil {
 		display.ErrorTask()
 		lumber.Error("code:Setup:addIPToProvider:provider.AddIP(%s): %s", componentModel.ExternalIP, err.Error())
