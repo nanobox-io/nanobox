@@ -4,15 +4,17 @@ import (
 	"fmt"
 	"path/filepath"
 	"strings"
+	"io/ioutil"
+	"time"
 
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/provider"
+	"github.com/nanobox-io/nanobox/util"
 )
 
 var ignoreFile = []string{".git", ".hg", ".svn", ".bzr"}
-
+var changeList = []string{}
 // the watch package watches a folder and all its sub folders
 // in doing so it may run into open file errors or things of that nature
 // if it does, it will automatically fall back to a slower but still
@@ -31,7 +33,7 @@ type Watcher interface {
 }
 
 // watch a directory and report changes to nanobox
-func Watch(path string) error {
+func Watch(container, path string) error {
 	populateIgnore(path)
 	// try watching with the fast one
 	watcher := newNotifyWatcher(path)
@@ -51,17 +53,29 @@ func Watch(path string) error {
 	}
 	defer watcher.close()
 
+ 	go batchPublish(container)
 	// catch a kill signal
 	for e := range watcher.eventChan() {
-
-		providerFile := filepath.ToSlash(filepath.Join(fmt.Sprintf("%s%s/code", provider.HostShareDir(), config.EnvID()), strings.Replace(e.file, config.LocalDir(), "", 1)))
-		provider.Touch(providerFile)
+		containerFile := filepath.ToSlash(filepath.Join("/app", strings.Replace(e.file, config.LocalDir(), "", 1)))
+		changeList = append(changeList, containerFile)
 	}
 
 	// report any errors from either
-
+	fmt.Println("done??")
 	return nil
 }
+
+func batchPublish(container string) {
+	for {
+		<-time.After(time.Second)
+		if len(changeList) > 0 {
+			util.DockerExec(container, "touch", changeList, nil)
+			fmt.Println("updates!", changeList)
+			changeList = []string{}
+		}
+	}
+}
+
 
 // populate the ignore file from the nanoignore
 func populateIgnore(path string) {
@@ -70,7 +84,7 @@ func populateIgnore(path string) {
 		return 
 	}
 
-	stringFields := bytes.Fields(b)
+	stringFields := strings.Fields(string(b))
 	for _, str := range stringFields {
 		ignoreFile = append(ignoreFile, str)
 	}

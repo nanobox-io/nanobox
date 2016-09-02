@@ -25,12 +25,14 @@ var (
 	deployCmdFlags = struct {
 		app     string
 		message string
+		force   bool
 	}{}
 )
 
 //
 func init() {
-	DeployCmd.Flags().StringVarP(&deployCmdFlags.message, "app", "a", "", "message to accompany this command")
+	DeployCmd.Flags().BoolVarP(&deployCmdFlags.force, "force", "", false, "force the deploy even if you have used this build on a previous deploy")
+	DeployCmd.Flags().StringVarP(&deployCmdFlags.app, "app", "a", "", "message to accompany this command")
 	DeployCmd.Flags().StringVarP(&deployCmdFlags.message, "message", "m", "", "message to accompany this command")
 }
 
@@ -42,6 +44,7 @@ func deployFn(ccmd *cobra.Command, args []string) {
 	deployConfig := processors.DeployConfig{
 		App:     deployCmdFlags.app,
 		Message: deployCmdFlags.message,
+		Force: deployCmdFlags.force,
 	}
 
 	if deployConfig.App == "" {

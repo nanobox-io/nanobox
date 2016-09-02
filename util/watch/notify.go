@@ -3,6 +3,7 @@ package watch
 import (
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/jcelliott/lumber"
@@ -55,7 +56,7 @@ func (n *notify) walkFunc(path string, info os.FileInfo, err error) error {
 	}
 
 	for _, ignoreName := range ignoreFile {
-		if strings.Contains(path, ignoreName) {
+		if strings.HasSuffix(path, ignoreName) {
 			return filepath.SkipDir
 		}
 	}

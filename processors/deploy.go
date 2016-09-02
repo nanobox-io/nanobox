@@ -14,10 +14,12 @@ import (
 //
 func Deploy(envModel *models.Env, deployConfig DeployConfig) error {
 
-	if envModel.DeployedID != "" && envModel.BuiltID == envModel.DeployedID {
-		// shortcut if we have already deployed
-		return nil
-	}
+	// commented until we have the --force as a flag
+	// if envModel.DeployedID != "" && envModel.BuiltID == envModel.DeployedID {
+	// 	// shortcut if we have already deployed
+	// 	return nil
+	// }
+
 	// setup the environment (boot vm)
 	if err := provider.Setup(); err != nil {
 		return err

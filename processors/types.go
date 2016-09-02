@@ -3,6 +3,7 @@ package processors
 type DeployConfig struct {
 	App     string
 	Message string
+	Force   bool
 }
 
 type TunnelConfig struct {

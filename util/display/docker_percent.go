@@ -135,7 +135,7 @@ func (display *DockerPercentDisplay) Write(data []byte) (int, error) {
 			part.update(status)
 			display.parts[status.ID] = part
 		}
-		// fmt.Fprintf(display.Output, "%c[2K\r", 27)
+		fmt.Fprintf(display.Output, "%c[2K\r", 27)
 		fmt.Fprintf(display.Output, "%s %s", display.Prefix, display.show())
 		if strings.HasPrefix(status.Status, "Status:") {
 			// maybe we want to display the status line here
