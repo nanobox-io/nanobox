@@ -1,12 +1,11 @@
 package commands
 
 import (
-	"fmt"
 
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util/provider"
+	"github.com/nanobox-io/nanobox/processors"
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 var (
@@ -21,13 +20,5 @@ var (
 )
 
 func statusFn(ccmd *cobra.Command, args []string) {
-	fmt.Printf("Provider status: %s\n", provider.Status())
-	envs, _ := models.AllEnvs()
-	for _, env := range envs {
-		fmt.Printf("Environment: %s\n", env.Name)
-		apps, _ := models.AllAppsByEnv(env.ID)
-		for _, app := range apps {
-			fmt.Printf("  %s(%s): %s\n", app.Name, app.ID, app.Status)
-		}
-	}
+	display.CommandErr(processors.Status())
 }
