@@ -54,6 +54,12 @@ func (n *notify) walkFunc(path string, info os.FileInfo, err error) error {
 		return err
 	}
 
+	for _, ignoreName := range ignoreFile {
+		if strings.Contains(path, ignoreName) {
+			return filepath.SkipDir
+		}
+	}
+
 	return n.watcher.Add(path)
 }
 

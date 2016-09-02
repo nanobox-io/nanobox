@@ -20,6 +20,8 @@ var (
 	// display level trace
 	displayTraceMode bool
 
+	internalCommand  bool
+
 	// NanoboxCmd ...
 	NanoboxCmd = &cobra.Command{
 		Use:   "nanobox",
@@ -27,9 +29,8 @@ var (
 		Long:  ``,
 		PersistentPreRun: func(ccmd *cobra.Command, args []string) {
 
-			if debugMode {
-				registry.Set("debug", true)
-			}
+			registry.Set("internal", internalCommand)
+			registry.Set("debug", debugMode)
 
 			// setup the display output
 			if displayDebugMode {
@@ -59,6 +60,8 @@ func init() {
 
 	// commented because this part is changing
 	// // persistent flags
+	NanoboxCmd.PersistentFlags().BoolVarP(&internalCommand, "internal", "", false, "Increases display output and sets level to debug")
+	NanoboxCmd.PersistentFlags().MarkHidden("internal")
 	NanoboxCmd.PersistentFlags().BoolVarP(&debugMode, "debug", "", false, "Increases display output and sets level to debug")
 	NanoboxCmd.PersistentFlags().BoolVarP(&displayDebugMode, "verbose", "v", false, "Increases display output and sets level to debug")
 	NanoboxCmd.PersistentFlags().BoolVarP(&displayTraceMode, "veryverbose", "V", false, "Increases display output and sets level to trace")

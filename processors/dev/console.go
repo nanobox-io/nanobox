@@ -20,7 +20,7 @@ import (
 	"github.com/nanobox-io/nanobox/util/hookit"
 	"github.com/nanobox-io/nanobox/util/locker"
 	"github.com/nanobox-io/nanobox/util/provider"
-	"github.com/nanobox-io/nanobox/util/watch"
+	// "github.com/nanobox-io/nanobox/util/watch"
 )
 
 //
@@ -42,7 +42,7 @@ func Console(appModel *models.App, devRun bool) error {
 		return err
 	}
 
-	go watch.Watch(envModel.Directory)
+	// go watch.Watch(envModel.Directory)
 
 	// if run then start the run commands
 	// and log but do not continue to the regular console

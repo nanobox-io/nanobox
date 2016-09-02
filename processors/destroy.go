@@ -49,7 +49,9 @@ func Destroy() error {
 
 // reExecPrivilege re-execs the current process with a privileged user
 func reExecPrivilegedDestroy() error {
-
+	display.PauseTask()
+	defer display.ResumeTask()
+	
 	display.PrintRequiresPrivilege("to uninstall nanobox and configuration")
 
 	// call this command again, but as superuser

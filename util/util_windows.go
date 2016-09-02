@@ -67,7 +67,7 @@ func PrivilegeExec(command string) error {
 	process := fmt.Sprintf("& {Start-Process %s -ArgumentList '%s' -Verb RunAs -Wait}", executable, arguments)
 
 	// now we can generate a command to exec
-	cmd := exec.Command("PowerShell.exe", "-NoProfile", "-Command", process)
+	cmd := exec.Command("PowerShell.exe", "-NoProfile", "-Command", process, "--internal")
 
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout

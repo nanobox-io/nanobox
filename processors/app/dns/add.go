@@ -44,6 +44,9 @@ func Add(a *models.App, name string) error {
 
 // reExecPrivilegedAdd re-execs the current process with a privileged user
 func reExecPrivilegedAdd(a *models.App, name string) error {
+	display.PauseTask()
+	defer display.ResumeTask()
+
 	display.PrintRequiresPrivilege("to modify host dns entries")
 
 	// call 'dev dns add' with the original path and args

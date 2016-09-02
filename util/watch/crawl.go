@@ -55,6 +55,12 @@ func (c *crawl) walkFunc(path string, info os.FileInfo, err error) error {
 		return err
 	}
 
+	for _, ignoreName := range ignoreFile {
+		if strings.Contains(path, ignoreName) {
+			return filepath.SkipDir
+		}
+	}
+
 	// read the file with the md5 library and generate a hash
 	if !info.IsDir() {
 		val, ok := c.files[path]

@@ -11,6 +11,8 @@ import (
 	"github.com/nanobox-io/nanobox/util/provider"
 )
 
+var ignoreFile = []string{".git", ".hg", ".svn", ".bzr"}
+
 // the watch package watches a folder and all its sub folders
 // in doing so it may run into open file errors or things of that nature
 // if it does, it will automatically fall back to a slower but still
@@ -30,6 +32,7 @@ type Watcher interface {
 
 // watch a directory and report changes to nanobox
 func Watch(path string) error {
+	populateIgnore(path)
 	// try watching with the fast one
 	watcher := newNotifyWatcher(path)
 	err := watcher.watch()
@@ -58,4 +61,17 @@ func Watch(path string) error {
 	// report any errors from either
 
 	return nil
+}
+
+// populate the ignore file from the nanoignore
+func populateIgnore(path string) {
+	b, err := ioutil.ReadFile(filepath.ToSlash(filepath.Join(path, ".nanoignore")))
+	if err != nil {
+		return 
+	}
+
+	stringFields := bytes.Fields(b)
+	for _, str := range stringFields {
+		ignoreFile = append(ignoreFile, str)
+	}
 }

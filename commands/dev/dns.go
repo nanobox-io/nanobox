@@ -29,7 +29,7 @@ var (
 Lists a hostnames maped to your dev app. The domain provided is added
 to your local hosts file pointing the the IP of your dev app.
 		`,
-		PreRun: steps.Run("start", "build", "dev start", "dev deploy"),
+		PreRun: steps.Run("start", "dev start"),
 		Run: dnsListFn,
 	}
 
@@ -41,7 +41,7 @@ to your local hosts file pointing the the IP of your dev app.
 Adds a hostname map to your dev app. The domain provided is added
 to your local hosts file pointing the the IP of your dev app.
 		`,
-		PreRun: steps.Run("start", "build", "dev start", "dev deploy"),
+		PreRun: steps.Run("start", "dev start"),
 		Run: dnsAddFn,
 	}
 
@@ -53,7 +53,7 @@ to your local hosts file pointing the the IP of your dev app.
 Removes a hostname map from your dev app. The domain must perfectly
 match an DNS entry in your to your local hosts file.
 		`,
-		PreRun: steps.Run("start", "build", "dev start", "dev deploy"),
+		PreRun: steps.Run("start", "dev start"),
 		Run: dnsRmFn,
 	}
 
@@ -62,7 +62,7 @@ match an DNS entry in your to your local hosts file.
 		Use:    "rm-all",
 		Short:  "Removes all hostname mappings associated with your dev app.",
 		Long:   ``,
-		PreRun: steps.Run("start", "build", "dev start", "dev deploy"),
+		PreRun: steps.Run("start", "dev start"),
 		Run:    dnsRmAllFn,
 		Hidden: true,
 	}

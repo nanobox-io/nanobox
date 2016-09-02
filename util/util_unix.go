@@ -26,7 +26,7 @@ func IsPrivileged() bool {
 // PrivilegeExec runs a command as sudo
 func PrivilegeExec(command string) error {
 	//
-	cmd := exec.Command("/bin/sh", "-c", fmt.Sprintf("sudo %v", command))
+	cmd := exec.Command("/bin/sh", "-c", fmt.Sprintf("sudo %v --internal", command))
 
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout

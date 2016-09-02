@@ -61,6 +61,30 @@ func (s *Summarizer) Start() {
 	go s.run()
 }
 
+func (s *Summarizer) Pause() {
+	// create the 'stop' event
+	event := &sEventOp{
+		action: "pause",
+		res:    make(chan bool),
+	}
+
+	// send the event
+	s.chEvent <- event
+
+	// now wait until we get a response back
+	<-event.res	
+}
+
+// stop prints the "complete" label and toggles shutdown
+func (s *Summarizer) Resume() {
+	// generate and print the complete header
+	s.Label = s.Label + " (cont)"
+
+	// turn the ticker back on
+	s.shutdown = false
+	go s.run()
+}
+
 // Stop stops the summary process
 func (s *Summarizer) Stop() {
 	// create the 'stop' event
@@ -154,6 +178,8 @@ func (s *Summarizer) handleEvent(event *sEventOp) {
 		s.tick()
 	case "stop":
 		s.stop()
+	case "pause":
+		s.pause()
 	case "error":
 		s.error()
 	}
@@ -213,6 +239,19 @@ func (s *Summarizer) stop() {
 
 	// generate and print the complete header
 	header := fmt.Sprintf("%s%s %s\n", s.Prefix, TaskComplete, s.Label)
+	io.WriteString(s.Out, header)
+
+	// set the shutdown flag to ensure the loop ends
+	s.shutdown = true
+}
+
+// stop prints the "complete" label and toggles shutdown
+func (s *Summarizer) pause() {
+	// reset the screen
+	s.reset()
+
+	// generate and print the complete header
+	header := fmt.Sprintf("%s%s %s\n", s.Prefix, TaskPause, s.Label)
 	io.WriteString(s.Out, header)
 
 	// set the shutdown flag to ensure the loop ends

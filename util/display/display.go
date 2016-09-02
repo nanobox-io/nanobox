@@ -136,6 +136,20 @@ func StartTask(format string, args ...interface{}) error {
 	return nil
 }
 
+func PauseTask() {
+	// stop the task summarizer
+	if Summary && summarizer != nil {
+		summarizer.Pause()
+	}	
+}
+
+func ResumeTask() {
+	// resume task
+	if Summary && summarizer != nil {
+		summarizer.Resume()
+	}	
+}
+
 // StopTask stops the current task
 func StopTask() error {
 
