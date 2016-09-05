@@ -2,12 +2,13 @@ package processors
 
 import (
 	"fmt"
+	
+	printutil "github.com/sdomino/go-util/print"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/odin"
-
-	printutil "github.com/sdomino/go-util/print"
 )
 
 // Process ...
@@ -23,7 +24,6 @@ func Login(username, password string) error {
 		// ReadPassword prints Password: already
 		pass, err := util.ReadPassword()
 		if err != nil {
-			// TODO: print out the error to the log
 			return fmt.Errorf("failed to read password: %s", err.Error())
 		}
 		password = pass
@@ -32,16 +32,17 @@ func Login(username, password string) error {
 	// verify that the user exists
 	token, err := odin.Auth(username, password)
 	if err != nil {
-		return fmt.Errorf("unable to authenticate with nanobox: %s", err.Error())
+		fmt.Println("! Incorrect username or password")
+		return nil
 	}
 
 	// store the user token
 	auth := models.Auth{Key: token}
 	if auth.Save() != nil {
-		return fmt.Errorf("unable to save user")
+		return fmt.Errorf("unable to save user authentication")
 	}
 
-	fmt.Println("TODO: Message: user has been verified and granted access")
+	fmt.Printf("%s You've successfully logged in\n", display.TaskComplete)
 
 	return nil
 }
