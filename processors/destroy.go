@@ -20,15 +20,38 @@ func Destroy() error {
 		return reExecPrivilegedDestroy()
 	}
 
-	display.OpenContext("Uninstalling Nanobox and configuration")
+	display.OpenContext("Uninstalling Nanobox")
+	defer display.CloseContext()
+
+	// todo: we need to make this process a bit more robust once a VM isn't
+	// our only provider. We won't be able to just "destroy" the provider once
+	// we're dealing with native providers. The following todos will address
+	// this scenario:
+
+	// todo: iterate through the envs and destroy them
+	
+	// todo: unmount (and remove the share for the env)
+
+	// todo: purge the installed docker images
 
 	// destroy the provider (VM)
 	if err := provider.Destroy(); err != nil {
 		return fmt.Errorf("failed to uninstall the provider: %s", err.Error())
 	}
 
-	display.StartTask("Purging configuration")
+	// purge the installation
+	if err := purgeConfiguration(); err != nil {
+		return fmt.Errorf("failed to purge nanobox configuration: %s", err.Error())
+	}
 
+	return nil
+}
+
+// purges the config data and dns entries
+func purgeConfiguration() error {
+	display.StartTask("Purging configuration")
+	defer display.StopTask()
+	
 	// implode the global dir
 	if err := config.ImplodeGlobalDir(); err != nil {
 		lumber.Error("Destroy:Run:config.ImplodeGlobalDir(): %s", err.Error())
@@ -40,10 +63,7 @@ func Destroy() error {
 		lumber.Error("Destroy:Run:dns.RemoveAll(): %s", err.Error())
 		return fmt.Errorf("failed to remove dns entries: %s", err.Error())
 	}
-
-	display.StopTask()
-	display.CloseContext()
-
+	
 	return nil
 }
 
