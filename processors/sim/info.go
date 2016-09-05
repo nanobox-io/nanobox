@@ -5,11 +5,27 @@ import (
 	"strings"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/dns"
 )
 
 // Info ...
 func Info(env *models.Env, app *models.App) error {
+
+	if app.State != "active" {
+		fmt.Printf("\n------------------------------------------------------\n")
+		fmt.Printf("Whoops, it doesn't look like a sim environment has\n")
+		fmt.Printf("been setup for the current working directory:\n")
+
+		fmt.Printf("\n%s\n", config.LocalDir())
+
+		fmt.Printf("\nRun the following to set one up:\n")
+
+		fmt.Printf("\n$ nanobox sim deploy\n")
+		fmt.Printf("------------------------------------------------------\n\n")
+		
+		return nil
+	}
 
 	// print header
 	line := strings.Repeat("-", len(env.Name) + 32)

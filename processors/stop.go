@@ -84,7 +84,7 @@ func unmountEnvs() error {
 	defer display.CloseContext()
 
 	for _, e := range envs {
-		if err := env.Unmount(e, false); err != nil {
+		if err := env.Unmount(e, true); err != nil {
 			display.ErrorTask()
 			return fmt.Errorf("failed to unmount env: %s", err.Error())
 		}

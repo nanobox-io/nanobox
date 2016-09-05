@@ -57,7 +57,6 @@ func printMessage(prereqs []string) {
 	}
 	
 	fmt.Println()
-	fmt.Println("You're welcome ;)")
 	fmt.Println("------------------------------------")
 	fmt.Println()
 }
