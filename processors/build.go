@@ -16,7 +16,7 @@ func Build(envModel *models.Env) error {
 	locker.LocalLock()
 	defer locker.LocalUnlock()
 
-	// init docker client
+	// init docker client and env mounts
 	if err := env.Setup(envModel); err != nil {
 		return fmt.Errorf("failed to init docker client: %s", err.Error())
 	}
