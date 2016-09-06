@@ -20,8 +20,8 @@ type Env struct {
 }
 
 type Link struct {
-	Name string
 	ID string
+	Name string
 }
 
 // IsNew returns true if the Env hasn't been created yet

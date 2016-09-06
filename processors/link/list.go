@@ -10,6 +10,11 @@ import (
 // List ...
 func List(env *models.Env) error {
 
+	if len(env.Links) == 0 {
+		fmt.Printf("\n! This codebase is not linked to any apps\n\n")
+		return nil
+	}
+
 	// set the left column width to the longest name
 	leftColWidth := len(longestName(env)) + 2
 	
@@ -21,13 +26,13 @@ func List(env *models.Env) error {
 	// print the header
 	margin := strings.Repeat(" ", leftColWidth - 8)
 	fmt.Printf("\nApp Name%s: Alias\n", margin)
-	separater := strings.Repeat("-", leftColWidth + len(longestAlias(env)) + 1)
-	fmt.Printf("%s\n", separater)
+	separator := strings.Repeat("-", leftColWidth + len(longestAlias(env)) + 1)
+	fmt.Printf("%s\n", separator)
 	
 	// print the table
-	for name, link := range env.Links {
-		margin := strings.Repeat(" ", leftColWidth - len(name))
-		fmt.Printf("%s%s: %s\n", name, margin, link.Name)
+	for alias, link := range env.Links {
+		margin := strings.Repeat(" ", leftColWidth - len(link.Name))
+		fmt.Printf("%s%s: %s\n", link.Name, margin, alias)
 	}
 
 	// end with a newline
@@ -40,9 +45,9 @@ func List(env *models.Env) error {
 func longestName(env *models.Env) string {
   longest := ""
   
-  for name, _ := range env.Links {
-    if len(name) > len(longest) {
-      longest = name
+  for _, link := range env.Links {
+    if len(link.Name) > len(longest) {
+      longest = link.Name
     }
   }
   
@@ -53,9 +58,9 @@ func longestName(env *models.Env) string {
 func longestAlias(env *models.Env) string {
 	longest := ""
 	
-	for _, alias := range env.Links {
-		if len(alias.Name) > len(longest) {
-			longest = alias.Name
+	for alias, _ := range env.Links {
+		if len(alias) > len(longest) {
+			longest = alias
 		}
 	}
 	

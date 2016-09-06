@@ -38,16 +38,21 @@ func Add(envModel *models.Env, appName, alias string) error {
 		envModel.Links = map[string]models.Link{}
 	}
 
-	envModel.Links[alias] = models.Link{app.ID, app.Name}
+	envModel.Links[alias] = models.Link{
+		ID: app.ID, 
+		Name: app.Name,
+	}
 
 	if err := envModel.Save(); err != nil {
 		return fmt.Errorf("failed to save link: %s", err.Error())
 	}
 
-	fmt.Printf("%s Codebase linked to %s\n", display.TaskComplete, appName)
+	fmt.Printf("\n%s Codebase linked to %s\n", display.TaskComplete, appName)
 	
 	if alias != "default" {
-		fmt.Printf("  through the '%s' alias\n", alias)
+		fmt.Printf("  through the '%s' alias\n\n", alias)
+	} else {
+		fmt.Println()
 	}
 
 	return nil
