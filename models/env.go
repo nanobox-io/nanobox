@@ -12,11 +12,16 @@ type Env struct {
 	Name      string
 
 	// Links map a local app to multiple production apps, by an alias
-	Links map[string]string
+	Links map[string]Link
 	// the boxfile from the most recent build
 	BuiltBoxfile string
 	BuiltID      string
 	DeployedID   string
+}
+
+type Link struct {
+	Name string
+	ID string
 }
 
 // IsNew returns true if the Env hasn't been created yet

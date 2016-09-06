@@ -54,6 +54,7 @@ func Watch(container, path string) error {
 	defer watcher.close()
 
  	go batchPublish(container)
+
 	// catch a kill signal
 	for e := range watcher.eventChan() {
 		containerFile := filepath.ToSlash(filepath.Join("/app", strings.Replace(e.file, config.LocalDir(), "", 1)))
