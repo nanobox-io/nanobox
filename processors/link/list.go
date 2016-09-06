@@ -25,9 +25,9 @@ func List(env *models.Env) error {
 	fmt.Printf("%s\n", separater)
 	
 	// print the table
-	for name, alias := range env.Links {
+	for name, link := range env.Links {
 		margin := strings.Repeat(" ", leftColWidth - len(name))
-		fmt.Printf("%s%s: %s\n", name, margin, alias)
+		fmt.Printf("%s%s: %s\n", name, margin, link.Name)
 	}
 
 	// end with a newline
@@ -54,8 +54,8 @@ func longestAlias(env *models.Env) string {
 	longest := ""
 	
 	for _, alias := range env.Links {
-		if len(alias) > len(longest) {
-			longest = alias
+		if len(alias.Name) > len(longest) {
+			longest = alias.Name
 		}
 	}
 	

@@ -160,10 +160,10 @@ func AppIDByAlias(alias string) string {
 		alias = "default"
 	}
 	
-	appID, ok := env.Links[alias]
+	app, ok := env.Links[alias]
 	if !ok {
 		return ""
 	}
 
-	return appID
+	return app.ID
 }

@@ -35,10 +35,10 @@ func Add(envModel *models.Env, appName, alias string) error {
 
 	// ensure the links map is initialized
 	if envModel.Links == nil {
-		envModel.Links = map[string]string{}
+		envModel.Links = map[string]models.Link{}
 	}
 
-	envModel.Links[alias] = app.ID
+	envModel.Links[alias] = models.Link{app.ID, app.Name}
 
 	if err := envModel.Save(); err != nil {
 		return fmt.Errorf("failed to save link: %s", err.Error())

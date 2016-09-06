@@ -61,7 +61,7 @@ func (e *Env) Generate() error {
 	e.ID = config.EnvID()
 	e.Directory = config.LocalDir()
 	e.Name = config.LocalDirName()
-	e.Links = map[string]string{}
+	e.Links = map[string]Link{}
 
 	return e.Save()
 }
