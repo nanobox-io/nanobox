@@ -4,7 +4,6 @@ import (
 	"fmt"
 )
 
-
 // RunPlanHook runs the plan hook inside of the specified container
 func RunPlanHook(container, payload string) (string, error) {
 	// run the plan hook

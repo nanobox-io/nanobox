@@ -1,20 +1,20 @@
 package nanoagent
 
 import (
-  "fmt"
-  "io"
-  "net/http"
-  "os"
-  "os/signal"
+	"fmt"
+	"io"
+	"net/http"
+	"os"
+	"os/signal"
 
-  syscall "github.com/docker/docker/pkg/signal"
-  "github.com/docker/docker/pkg/term"
+	syscall "github.com/docker/docker/pkg/signal"
+	"github.com/docker/docker/pkg/term"
 )
 
 // establishes a remote docker client on a production app
 func Console(key, location, container string) error {
-  // establish connection to nanoagent
-  path := fmt.Sprintf("/exec?key=%s&container=%s", key, container)
+	// establish connection to nanoagent
+	path := fmt.Sprintf("/exec?key=%s&container=%s", key, container)
 	req, err := http.NewRequest("POST", path, nil)
 	if err != nil {
 		return fmt.Errorf("failed to generate a request for nanoagent: %s", err.Error())
@@ -40,10 +40,10 @@ func Console(key, location, container string) error {
 		go monitor(stdOutFD, location, key, container)
 
 		oldInState, err := term.SetRawTerminal(stdInFD)
-    if err == nil {
+		if err == nil {
 			defer term.RestoreTerminal(stdInFD, oldInState)
-		}    
-    
+		}
+
 		oldOutState, err := term.SetRawTerminalOutput(stdOutFD)
 		if err == nil {
 			defer term.RestoreTerminal(stdOutFD, oldOutState)
@@ -73,23 +73,23 @@ func monitor(stdOutFD uintptr, location, key, container string) {
 }
 
 func resizeTTY(fd uintptr, location, key, container string) error {
-  
-  ws, err := term.GetWinsize(fd)
-  if err != nil {
-    return fmt.Errorf("failed to get terminal size: %s", err.Error())
-  }
-  
-  // extract height and width
-  w := int(ws.Width)
-  h := int(ws.Height)
-  
-  // resize by posting to a path on nanoagent
-  url := fmt.Sprintf("https://%s/resizeexec?key=%s&container=%s&w=%d&h=%d", location, key, container, w, h)
-  
+
+	ws, err := term.GetWinsize(fd)
+	if err != nil {
+		return fmt.Errorf("failed to get terminal size: %s", err.Error())
+	}
+
+	// extract height and width
+	w := int(ws.Width)
+	h := int(ws.Height)
+
+	// resize by posting to a path on nanoagent
+	url := fmt.Sprintf("https://%s/resizeexec?key=%s&container=%s&w=%d&h=%d", location, key, container, w, h)
+
 	// POST
 	if _, err := http.Post(url, "plain/text", nil); err != nil {
 		return fmt.Errorf("Failed to resize the terminal: %s", err.Error())
 	}
-  
-  return nil
+
+	return nil
 }

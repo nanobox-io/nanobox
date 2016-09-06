@@ -17,7 +17,7 @@ var (
 Stops the Nanobox virtual machine as well as any running
 dev and sim platforms.
 		`,
-		Run:    stopFn,
+		Run: stopFn,
 	}
 )
 

@@ -30,7 +30,7 @@ func Clean(envModels []*models.Env) error {
 			}
 		}
 	}
-	
+
 	if !stale {
 		display.StartTask("Skipping (none detected)")
 		display.StopTask()

@@ -12,7 +12,7 @@ func Increment(id string) (int, error) {
 	defer locker.GlobalUnlock()
 
 	counter, _ := models.FindCounterByID(id)
-	
+
 	// set the ID in case the counter was empty
 	counter.ID = id
 
@@ -35,7 +35,7 @@ func Decrement(id string) (int, error) {
 	defer locker.GlobalUnlock()
 
 	counter, _ := models.FindCounterByID(id)
-	
+
 	// set the ID in case the counter was empty
 	counter.ID = id
 

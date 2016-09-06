@@ -13,7 +13,7 @@ import (
 func StartAll(a *models.App) error {
 	display.OpenContext("Starting components")
 	defer display.CloseContext()
-	
+
 	// get all the components that belong to this app
 	components, err := models.AllComponentsByApp(a.ID)
 	if err != nil {

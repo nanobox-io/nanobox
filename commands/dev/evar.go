@@ -6,9 +6,9 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/nanobox-io/nanobox/commands/steps"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/commands/steps"
 )
 
 var (
@@ -29,16 +29,16 @@ Adds environment variable(s) to your dev app. Multiple key-value
 pairs can be added simultaneously using a comma-delimited list.
 		`,
 		PreRun: steps.Run("start", "build", "dev start", "dev deploy"),
-		Run: envAddFn,
+		Run:    envAddFn,
 	}
 
 	// EnvListCmd ...
 	EnvListCmd = &cobra.Command{
-		Use:   "ls",
-		Short: "Lists all environment variables registered in your dev app.",
-		Long:  ``,
+		Use:    "ls",
+		Short:  "Lists all environment variables registered in your dev app.",
+		Long:   ``,
 		PreRun: steps.Run("start", "build", "dev start", "dev deploy"),
-		Run:   envListFn,
+		Run:    envListFn,
 	}
 
 	// EnvRemoveCmd ...
@@ -50,7 +50,7 @@ Removes environment variable(s) from your dev app. Multiple keys
 can be removed simultaneously using a comma-delimited list.
 		`,
 		PreRun: steps.Run("start", "build", "dev start", "dev deploy"),
-		Run: envRemoveFn,
+		Run:    envRemoveFn,
 	}
 )
 

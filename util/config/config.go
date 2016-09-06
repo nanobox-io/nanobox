@@ -2,10 +2,9 @@
 package config
 
 import (
-  "github.com/spf13/viper"
-  "github.com/jcelliott/lumber"
+	"github.com/jcelliott/lumber"
+	"github.com/spf13/viper"
 )
-
 
 //
 var config *viper.Viper

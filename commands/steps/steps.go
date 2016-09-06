@@ -1,5 +1,5 @@
 package steps
-	
+
 import "github.com/spf13/cobra"
 
 var (
@@ -12,8 +12,6 @@ type (
 
 	step struct {
 		complete CompleteCheckFunc
-		cmd   CmdFunc
+		cmd      CmdFunc
 	}
 )
-
-

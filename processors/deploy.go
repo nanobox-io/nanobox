@@ -2,7 +2,7 @@ package processors
 
 import (
 	"fmt"
-	
+
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/models"
@@ -68,11 +68,11 @@ func getWarehouseConfig(envModel *models.Env, appID string) (warehouseConfig cod
 		err = fmt.Errorf("failed to query previous deploys from nanobox: %s", err.Error())
 		return
 	}
-	
-	warehouseConfig.BuildID        = envModel.BuiltID
-	warehouseConfig.WarehouseURL   = url
+
+	warehouseConfig.BuildID = envModel.BuiltID
+	warehouseConfig.WarehouseURL = url
 	warehouseConfig.WarehouseToken = token
-	warehouseConfig.PreviousBuild  = prevBuild
-	
+	warehouseConfig.PreviousBuild = prevBuild
+
 	return
 }

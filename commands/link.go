@@ -5,22 +5,22 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/nanobox-io/nanobox/commands/steps"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/link"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/commands/steps"
 )
 
 var (
 
 	// LinkCmd ...
 	LinkCmd = &cobra.Command{
-		Use:   "link",
-		Short: "Manages links between local & production apps.",
-		Long:  ``,
+		Use:    "link",
+		Short:  "Manages links between local & production apps.",
+		Long:   ``,
 		PreRun: steps.Run("login"),
-		Run:   linkAddFn,
+		Run:    linkAddFn,
 	}
 
 	// LinkAddCmd ...
@@ -33,25 +33,25 @@ app can be linked to multiple production apps. Each link needs
 an alias. If no alias is provided, 'default' is assumed.
 		`,
 		PreRun: steps.Run("login"),
-		Run: linkAddFn,
+		Run:    linkAddFn,
 	}
 
 	// LinkListCmd ...
 	LinkListCmd = &cobra.Command{
-		Use:   "ls",
-		Short: "Lists all links for the current local app.",
-		Long:  ``,
+		Use:    "ls",
+		Short:  "Lists all links for the current local app.",
+		Long:   ``,
 		PreRun: steps.Run("login"),
-		Run:   linkListFn,
+		Run:    linkListFn,
 	}
 
 	// LinkRemoveCmd ...
 	LinkRemoveCmd = &cobra.Command{
-		Use:   "rm",
-		Short: "Removes a link between a local & production app.",
-		Long:  ``,
+		Use:    "rm",
+		Short:  "Removes a link between a local & production app.",
+		Long:   ``,
 		PreRun: steps.Run("login"),
-		Run:   linkRemoveFn,
+		Run:    linkRemoveFn,
 	}
 
 	// linkCmdFlags ...

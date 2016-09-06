@@ -154,12 +154,12 @@ func AllAppsByStatus(status string) ([]*App, error) {
 // lookup an app id from an alias
 func AppIDByAlias(alias string) string {
 	env, _ := FindEnvByID(config.EnvID())
-	
+
 	// set alias to default if none provided
 	if alias == "" {
 		alias = "default"
 	}
-	
+
 	app, ok := env.Links[alias]
 	if !ok {
 		return ""

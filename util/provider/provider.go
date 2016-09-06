@@ -45,7 +45,6 @@ func Register(name string, p Provider) {
 	providers[name] = p
 }
 
-
 // Display ...
 func Display(verb bool) {
 	verbose = verb

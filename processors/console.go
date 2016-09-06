@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util/odin"
 	"github.com/nanobox-io/nanobox/util/nanoagent"
+	"github.com/nanobox-io/nanobox/util/odin"
 )
 
 func Console(app, host string) error {
@@ -16,7 +16,7 @@ func Console(app, host string) error {
 		// todo: better messaging informing that we couldn't find a link
 		return fmt.Errorf("app is not linked")
 	}
-	
+
 	// initiate a console session with odin
 	key, location, container, err := odin.EstablishConsole(appID, host)
 	if err != nil {

@@ -39,7 +39,7 @@ func Add(envModel *models.Env, appName, alias string) error {
 	}
 
 	envModel.Links[alias] = models.Link{
-		ID: app.ID, 
+		ID:   app.ID,
 		Name: app.Name,
 	}
 
@@ -48,7 +48,7 @@ func Add(envModel *models.Env, appName, alias string) error {
 	}
 
 	fmt.Printf("\n%s Codebase linked to %s\n", display.TaskComplete, appName)
-	
+
 	if alias != "default" {
 		fmt.Printf("  through the '%s' alias\n\n", alias)
 	} else {

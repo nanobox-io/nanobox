@@ -1,14 +1,13 @@
 package steps
 
 import (
-	"os"
 	"fmt"
+	"os"
 
-	"github.com/spf13/cobra"
 	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/util/display"
-
-) 
+	"github.com/spf13/cobra"
+)
 
 func Run(stepNames ...string) func(ccmd *cobra.Command, args []string) {
 	//
@@ -20,10 +19,10 @@ func Run(stepNames ...string) func(ccmd *cobra.Command, args []string) {
 		// list that needs to be run
 		prereqs := []string{}
 
-		// 
+		//
 		for _, stepName := range stepNames {
 			step, ok := stepList[stepName]
-			if ok && !step.complete()	{
+			if ok && !step.complete() {
 				prereqs = append(prereqs, stepName)
 			}
 		}
@@ -32,7 +31,7 @@ func Run(stepNames ...string) func(ccmd *cobra.Command, args []string) {
 			return
 		}
 
-		// print the message if 
+		// print the message if
 		printMessage(prereqs)
 
 		// run the missing steps
@@ -55,7 +54,7 @@ func printMessage(prereqs []string) {
 	for _, dep := range prereqs {
 		fmt.Printf("$ %s %s\n", os.Args[0], dep)
 	}
-	
+
 	fmt.Println()
 	fmt.Println("------------------------------------")
 	fmt.Println()

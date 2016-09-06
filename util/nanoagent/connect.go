@@ -1,10 +1,10 @@
 package nanoagent
 
 import (
-  "fmt"
-  "crypto/tls"
-  "net"
-  "net/http"
+	"crypto/tls"
+	"fmt"
+	"net"
+	"net/http"
 )
 
 func connect(req *http.Request, location string) (net.Conn, error) {

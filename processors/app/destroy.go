@@ -66,7 +66,7 @@ func Destroy(appModel *models.App) error {
 func destroyComponents(appModel *models.App) error {
 	display.OpenContext("Removing components")
 	defer display.CloseContext()
-	
+
 	componentModels, err := appModel.Components()
 	if err != nil {
 		lumber.Error("app:destroyComponents:models.App{ID:%s}.Components() %s", appModel.ID, err.Error())
@@ -92,7 +92,7 @@ func destroyComponents(appModel *models.App) error {
 func releaseIPs(appModel *models.App) error {
 	display.StartTask("Releasing IPs")
 	defer display.StopTask()
-	
+
 	// release all of the external IPs
 	for _, ip := range appModel.GlobalIPs {
 		// release the IP

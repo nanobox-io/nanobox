@@ -2,19 +2,20 @@ package watch
 
 import (
 	"fmt"
+	"io/ioutil"
 	"path/filepath"
 	"strings"
-	"io/ioutil"
 	"time"
 
 	"github.com/jcelliott/lumber"
 
-	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 )
 
 var ignoreFile = []string{".git", ".hg", ".svn", ".bzr"}
 var changeList = []string{}
+
 // the watch package watches a folder and all its sub folders
 // in doing so it may run into open file errors or things of that nature
 // if it does, it will automatically fall back to a slower but still
@@ -53,7 +54,7 @@ func Watch(container, path string) error {
 	}
 	defer watcher.close()
 
- 	go batchPublish(container)
+	go batchPublish(container)
 
 	// catch a kill signal
 	for e := range watcher.eventChan() {
@@ -77,12 +78,11 @@ func batchPublish(container string) {
 	}
 }
 
-
 // populate the ignore file from the nanoignore
 func populateIgnore(path string) {
 	b, err := ioutil.ReadFile(filepath.ToSlash(filepath.Join(path, ".nanoignore")))
 	if err != nil {
-		return 
+		return
 	}
 
 	stringFields := strings.Fields(string(b))

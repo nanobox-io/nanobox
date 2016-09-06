@@ -23,7 +23,6 @@ type (
 		Prefix string    // the prefix to prepend to the summary
 		Out    io.Writer // writer to send output to
 
-
 		// internal
 		chEvent     chan *sEventOp // channel to receive stop/error/tick events
 		chLog       chan string    // channel to receive logs
@@ -50,9 +49,9 @@ func NewSummarizer(label string, prefix string) *Summarizer {
 		Prefix: prefix,
 		Out:    os.Stderr,
 
-		chEvent: make(chan *sEventOp),   // no buffering, block the sending process
-		chLog:   make(chan string, 100), // buffer up to 100 log messages before blocking
-		windowWidth: termWidth, 
+		chEvent:     make(chan *sEventOp),   // no buffering, block the sending process
+		chLog:       make(chan string, 100), // buffer up to 100 log messages before blocking
+		windowWidth: termWidth,
 	}
 }
 
@@ -72,7 +71,7 @@ func (s *Summarizer) Pause() {
 	s.chEvent <- event
 
 	// now wait until we get a response back
-	<-event.res	
+	<-event.res
 }
 
 // stop prints the "complete" label and toggles shutdown
@@ -206,7 +205,7 @@ func (s *Summarizer) handleLog(data string) {
 		}
 
 		if s.windowWidth > 0 && len(line) > s.windowWidth {
-			msg = msg[:s.windowWidth - (len(s.Prefix) + 10)] + "..."
+			msg = msg[:s.windowWidth-(len(s.Prefix)+10)] + "..."
 		}
 	}
 

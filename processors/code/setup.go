@@ -11,8 +11,8 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/util/provider"
 	"github.com/nanobox-io/nanobox/util/hookit"
+	"github.com/nanobox-io/nanobox/util/provider"
 )
 
 //
@@ -152,6 +152,6 @@ func attachNetwork(componentModel *models.Component) error {
 		display.ErrorTask()
 		return err
 	}
-	
+
 	return nil
 }

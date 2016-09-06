@@ -3,22 +3,22 @@ package commands
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/nanobox-io/nanobox/commands/steps"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/commands/steps"
 )
 
 var (
 
 	// DeployCmd ...
 	DeployCmd = &cobra.Command{
-		Use:   "deploy",
-		Short: "Deploys your generated build package to a production app.",
-		Long:  ``,
+		Use:    "deploy",
+		Short:  "Deploys your generated build package to a production app.",
+		Long:   ``,
 		PreRun: steps.Run("start", "build", "login"),
-		Run:   deployFn,
+		Run:    deployFn,
 	}
 
 	// deployCmdFlags ...
@@ -44,7 +44,7 @@ func deployFn(ccmd *cobra.Command, args []string) {
 	deployConfig := processors.DeployConfig{
 		App:     deployCmdFlags.app,
 		Message: deployCmdFlags.message,
-		Force: deployCmdFlags.force,
+		Force:   deployCmdFlags.force,
 	}
 
 	if deployConfig.App == "" {

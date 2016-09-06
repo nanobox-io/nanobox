@@ -19,7 +19,7 @@ var (
 		Long: `
 todo: write long description
 `,
-		Run:    cleanFn,
+		Run: cleanFn,
 	}
 )
 

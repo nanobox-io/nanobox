@@ -20,7 +20,7 @@ type Env struct {
 }
 
 type Link struct {
-	ID string
+	ID   string
 	Name string
 }
 

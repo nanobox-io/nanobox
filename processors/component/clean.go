@@ -22,7 +22,7 @@ func Clean(appModel *models.App) error {
 	if !areComponentsDirty(components) {
 		return nil
 	}
-	
+
 	display.OpenContext("Cleaning dirty components")
 	defer display.CloseContext()
 
@@ -58,7 +58,7 @@ func areComponentsDirty(componentModels []*models.Component) bool {
 			return true
 		}
 	}
-	
+
 	return false
 }
 

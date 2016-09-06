@@ -3,11 +3,11 @@ package sim
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/nanobox-io/nanobox/commands/steps"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/sim"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/commands/steps"
 )
 
 var (

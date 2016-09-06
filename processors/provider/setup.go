@@ -21,15 +21,15 @@ func Setup() error {
 	defer display.CloseContext()
 
 	if provider.IsReady() {
-		
+
 		display.StartTask("Skipping (already running)")
 		display.StopTask()
-		
+
 		// initialize the docker client
 		if err := Init(); err != nil {
 			return fmt.Errorf("failed to initialize docker for provider: %s", err.Error())
-		}	
-		
+		}
+
 		return nil
 	}
 
@@ -38,34 +38,34 @@ func Setup() error {
 		lumber.Error("provider:Setup:provider.Create(): %s", err.Error())
 		return fmt.Errorf("failed to create the provider: %s", err.Error())
 	}
-	
+
 	// start the provider (VM)
 	if err := provider.Start(); err != nil {
 		lumber.Error("provider:Setup:provider.Start(): %s", err.Error())
 		return fmt.Errorf("failed to start the provider: %s", err.Error())
 	}
-	
+
 	// fetch the provider model
 	providerModel, _ := models.LoadProvider()
-	
+
 	display.StartTask("Joining virtual network")
-	
+
 	// attach the network to the host stack
 	if err := setupNetwork(providerModel); err != nil {
 		return fmt.Errorf("failed to setup the provider network: %s", err.Error())
 	}
-	
+
 	// attach the network to the host stack
 	if err := setDefaultIP(providerModel); err != nil {
 		return fmt.Errorf("failed to setup the provider network: %s", err.Error())
 	}
-	
+
 	display.StopTask()
-	
+
 	// initialize the docker client
 	if err := Init(); err != nil {
 		return fmt.Errorf("failed to initialize docker for provider: %s", err.Error())
-	}	
+	}
 
 	return nil
 }

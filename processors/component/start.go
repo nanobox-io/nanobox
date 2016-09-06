@@ -45,12 +45,12 @@ func Start(componentModel *models.Component) error {
 func startContainer(id string) error {
 	display.StartTask("Start docker container")
 	defer display.StopTask()
-	
+
 	if err := docker.ContainerStart(id); err != nil {
 		lumber.Error("component:Start:docker.ContainerStart(%s): %s", id, err.Error())
 		return fmt.Errorf("failed to start docker container: %s", err.Error())
 	}
-	
+
 	return nil
 }
 
@@ -58,7 +58,7 @@ func startContainer(id string) error {
 func startNetwork(componentModel *models.Component) error {
 	display.StartTask("Attaching network")
 	defer display.StopTask()
-	
+
 	// add the IP to the provider
 	if err := provider.AddIP(componentModel.ExternalIP); err != nil {
 		display.ErrorTask()
@@ -72,6 +72,6 @@ func startNetwork(componentModel *models.Component) error {
 		lumber.Error("component:Start:attachNetwork:provider.AddNat(%s, %s): %s", componentModel.ExternalIP, componentModel.InternalIP, err.Error())
 		return fmt.Errorf("failed to setup NAT on the provider: %s", err.Error())
 	}
-	
+
 	return nil
 }

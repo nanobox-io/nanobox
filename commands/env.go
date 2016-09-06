@@ -8,8 +8,7 @@ import (
 
 var (
 
-	// currently a hidden command because its only used for one thing
-	// EnvCmd ...
+	// EnvCmd ...; currently a hidden command because its only used for one thing
 	EnvCmd = &cobra.Command{
 		Use:   "env",
 		Short: "Shared environment provisioning",

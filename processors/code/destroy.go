@@ -42,13 +42,13 @@ func Destroy(componentModel *models.Component) error {
 func destroyContainer(id string) error {
 	display.StartTask("Destroying docker container")
 	defer display.StopTask()
-	
+
 	if err := docker.ContainerRemove(id); err != nil {
 		lumber.Error("component:Destroy:docker.ContainerRemove(%s): %s", id, err.Error())
 		display.ErrorTask()
 		return fmt.Errorf("failed to remove docker container: %s", err.Error())
 	}
-	
+
 	return nil
 }
 
@@ -56,7 +56,7 @@ func destroyContainer(id string) error {
 func detachNetwork(componentModel *models.Component) error {
 	display.StartTask("Releasing IPs")
 	defer display.StopTask()
-	
+
 	//
 	if err := provider.RemoveNat(componentModel.ExternalIP, componentModel.InternalIP); err != nil {
 		lumber.Error("code:Destroy:provider.RemoveNat(%s, %s): %s", componentModel.ExternalIP, componentModel.InternalIP, err.Error())
@@ -84,6 +84,6 @@ func detachNetwork(componentModel *models.Component) error {
 		display.ErrorTask()
 		return fmt.Errorf(": %s", err.Error())
 	}
-	
+
 	return nil
 }

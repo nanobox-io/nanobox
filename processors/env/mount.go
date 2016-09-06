@@ -107,7 +107,7 @@ func addMount(src, dst string) error {
 	if provider.HasMount(dst) {
 		return nil
 	}
-	
+
 	// the mount type is configurable by the user
 	mountType := config.Viper().GetString("mount-type")
 

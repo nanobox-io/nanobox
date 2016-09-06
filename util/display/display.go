@@ -141,7 +141,7 @@ func PauseTask() {
 	if Summary && summarizer != nil {
 		summarizer.Pause()
 		fmt.Println()
-	}	
+	}
 }
 
 func ResumeTask() {
@@ -149,7 +149,7 @@ func ResumeTask() {
 	if Summary && summarizer != nil {
 		fmt.Println()
 		summarizer.Resume()
-	}	
+	}
 }
 
 // StopTask stops the current task

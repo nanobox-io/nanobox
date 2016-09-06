@@ -32,7 +32,7 @@ func Build(envModel *models.Env) error {
 	docker.ContainerRemove(container_generator.BuildName())
 
 	display.StartTask("Starting docker container")
-	
+
 	// reserve an IP for the build container
 	ip, err := dhcp.ReserveLocal()
 	if err != nil {
@@ -50,7 +50,7 @@ func Build(envModel *models.Env) error {
 		lumber.Error("code:Build:docker.CreateContainer(%+v): %s", config, err.Error())
 		return fmt.Errorf("failed to start docker container: %s", err.Error())
 	}
-	
+
 	display.StopTask()
 
 	// ensure we stop the container when we're done
@@ -83,7 +83,7 @@ func Build(envModel *models.Env) error {
 func prepareEnvironment(containerID string) error {
 	display.StartTask("Preparing environment for build")
 	defer display.StopTask()
-	
+
 	// run the user hook
 	if _, err := hookit.RunUserHook(containerID, hook_generator.UserPayload()); err != nil {
 		err = fmt.Errorf("failed to run user hook: %s", err.Error())
@@ -107,7 +107,7 @@ func prepareEnvironment(containerID string) error {
 		err = fmt.Errorf("failed to run setup hook: %s", err.Error())
 		return runDebugSession(containerID, err)
 	}
-	
+
 	return nil
 }
 
@@ -138,13 +138,13 @@ func gatherRequirements(envModel *models.Env, containerID string) error {
 func installRuntimes(containerID string) error {
 	display.StartTask("Installing binaries and runtimes")
 	defer display.StopTask()
-	
+
 	// run the prepare hook
 	if _, err := hookit.RunPrepareHook(containerID, hook_generator.PreparePayload()); err != nil {
 		err = fmt.Errorf("failed to run prepare hook: %s", err.Error())
 		return runDebugSession(containerID, err)
 	}
-	
+
 	return nil
 }
 
@@ -153,22 +153,22 @@ func compileCode(containerID string) error {
 	if registry.GetBool("skip-compile") {
 		return nil
 	}
-	
+
 	display.StartTask("Compiling code")
 	defer display.StopTask()
-	
+
 	// run the compile hook
 	if _, err := hookit.RunCompileHook(containerID, hook_generator.CompilePayload()); err != nil {
 		err = fmt.Errorf("failed to run compile hook: %s", err.Error())
 		return runDebugSession(containerID, err)
 	}
-	
+
 	// run the pack-app hook
 	if _, err := hookit.RunPackAppHook(containerID, hook_generator.PackAppPayload()); err != nil {
 		err = fmt.Errorf("failed to run pack-app hook: %s", err.Error())
 		return runDebugSession(containerID, err)
 	}
-	
+
 	return nil
 }
 
@@ -176,7 +176,7 @@ func compileCode(containerID string) error {
 func packageBuild(containerID string) error {
 	display.StartTask("Packaging build")
 	defer display.StopTask()
-	
+
 	// run the pack-build hook
 	if _, err := hookit.RunPackBuildHook(containerID, hook_generator.PackBuildPayload()); err != nil {
 		err = fmt.Errorf("failed to run pack-build hook: %s", err.Error())
@@ -186,7 +186,7 @@ func packageBuild(containerID string) error {
 	if registry.GetBool("skip-compile") {
 		return nil
 	}
-	
+
 	// run the clean hook
 	if _, err := hookit.RunCleanHook(containerID, hook_generator.CleanPayload()); err != nil {
 		err = fmt.Errorf("failed to run clean hook: %s", err.Error())
@@ -198,6 +198,6 @@ func packageBuild(containerID string) error {
 		err = fmt.Errorf("failed to run pack-deploy hook: %s", err.Error())
 		return runDebugSession(containerID, err)
 	}
-	
+
 	return nil
 }

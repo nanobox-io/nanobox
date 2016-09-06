@@ -29,7 +29,7 @@ func Destroy() error {
 	// this scenario:
 
 	// todo: iterate through the envs and destroy them
-	
+
 	// todo: unmount (and remove the share for the env)
 
 	// todo: purge the installed docker images
@@ -51,7 +51,7 @@ func Destroy() error {
 func purgeConfiguration() error {
 	display.StartTask("Purging configuration")
 	defer display.StopTask()
-	
+
 	// implode the global dir
 	if err := config.ImplodeGlobalDir(); err != nil {
 		lumber.Error("Destroy:Run:config.ImplodeGlobalDir(): %s", err.Error())
@@ -63,7 +63,7 @@ func purgeConfiguration() error {
 		lumber.Error("Destroy:Run:dns.RemoveAll(): %s", err.Error())
 		return fmt.Errorf("failed to remove dns entries: %s", err.Error())
 	}
-	
+
 	return nil
 }
 
@@ -71,7 +71,7 @@ func purgeConfiguration() error {
 func reExecPrivilegedDestroy() error {
 	display.PauseTask()
 	defer display.ResumeTask()
-	
+
 	display.PrintRequiresPrivilege("to uninstall nanobox and configuration")
 
 	// call this command again, but as superuser

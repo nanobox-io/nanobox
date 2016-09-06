@@ -47,13 +47,13 @@ func Destroy(appModel *models.App, componentModel *models.Component) error {
 func destroyContainer(id string) error {
 	display.StartTask("Destroying docker container")
 	defer display.StopTask()
-	
+
 	if err := docker.ContainerRemove(id); err != nil {
 		lumber.Error("component:Destroy:docker.ContainerRemove(%s): %s", id, err.Error())
 		display.ErrorTask()
 		return fmt.Errorf("failed to remove docker container: %s", err.Error())
 	}
-	
+
 	return nil
 }
 

@@ -25,7 +25,7 @@ func Stop(componentModel *models.Component) error {
 	if err := stopContainer(componentModel.ID); err != nil {
 		return err
 	}
-	
+
 	// stop from the virtual network
 	if err := stopNetwork(componentModel); err != nil {
 		return err
@@ -38,13 +38,13 @@ func Stop(componentModel *models.Component) error {
 func stopContainer(id string) error {
 	display.StartTask("Stopping docker container")
 	defer display.StopTask()
-	
+
 	if err := docker.ContainerStop(id); err != nil {
 		display.ErrorTask()
 		lumber.Error("component:Stop:docker.ContainerStop(%s): %s", id, err.Error())
 		return fmt.Errorf("failed to stop docker container: %s", err.Error())
 	}
-	
+
 	return nil
 }
 
@@ -52,7 +52,7 @@ func stopContainer(id string) error {
 func stopNetwork(componentModel *models.Component) error {
 	display.StartTask("Detaching network")
 	defer display.StopTask()
-	
+
 	// remove NAT
 	if err := provider.RemoveNat(componentModel.ExternalIP, componentModel.InternalIP); err != nil {
 		display.ErrorTask()
@@ -66,6 +66,6 @@ func stopNetwork(componentModel *models.Component) error {
 		lumber.Error("component:stopNetwork:provider.RemoveIP(%s): %s", componentModel.ExternalIP, err.Error())
 		return fmt.Errorf("failed to remove IP from the provider: %s", err.Error())
 	}
-	
+
 	return nil
 }

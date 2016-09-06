@@ -20,7 +20,7 @@ var (
 	// display level trace
 	displayTraceMode bool
 
-	internalCommand  bool
+	internalCommand bool
 
 	// NanoboxCmd ...
 	NanoboxCmd = &cobra.Command{
@@ -58,19 +58,15 @@ var (
 // init creates the list of available nanobox commands and sub commands
 func init() {
 
-	// commented because this part is changing
-	// // persistent flags
+	// persistent flags
 	NanoboxCmd.PersistentFlags().BoolVarP(&internalCommand, "internal", "", false, "Increases display output and sets level to debug")
 	NanoboxCmd.PersistentFlags().MarkHidden("internal")
 	NanoboxCmd.PersistentFlags().BoolVarP(&debugMode, "debug", "", false, "Increases display output and sets level to debug")
 	NanoboxCmd.PersistentFlags().BoolVarP(&displayDebugMode, "verbose", "v", false, "Increases display output and sets level to debug")
 	NanoboxCmd.PersistentFlags().BoolVarP(&displayTraceMode, "veryverbose", "V", false, "Increases display output and sets level to trace")
 
-	// // local flags
+	// local flags
 	// NanoboxCmd.Flags().BoolVarP(&version, "version", "", false, "Displays the current version of this CLI.")
-
-	// nanobox commands
-	NanoboxCmd.AddCommand(UpdateCmd)
 
 	// subcommands
 	NanoboxCmd.AddCommand(StatusCmd)

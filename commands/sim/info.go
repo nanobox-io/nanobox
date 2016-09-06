@@ -13,10 +13,10 @@ var (
 
 	// InfoCmd ...
 	InfoCmd = &cobra.Command{
-		Use:    "info",
-		Short:  "Displays information about the running sim app and its components.",
-		Long:   ``,
-		Run:    infoFn,
+		Use:   "info",
+		Short: "Displays information about the running sim app and its components.",
+		Long:  ``,
+		Run:   infoFn,
 	}
 )
 
@@ -24,6 +24,6 @@ var (
 func infoFn(ccmd *cobra.Command, args []string) {
 	env, _ := models.FindEnvByID(config.EnvID())
 	app, _ := models.FindAppBySlug(config.EnvID(), "sim")
-	
+
 	display.CommandErr(sim.Info(env, app))
 }

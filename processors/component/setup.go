@@ -12,13 +12,13 @@ import (
 	"github.com/nanobox-io/nanobox/util/boxfile"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/util/provider"
 	"github.com/nanobox-io/nanobox/util/hookit"
+	"github.com/nanobox-io/nanobox/util/provider"
 )
 
 // Setup sets up the component container and model data
 func Setup(appModel *models.App, componentModel *models.Component) error {
-	
+
 	// generate the missing component data
 	if err := componentModel.Generate(appModel, "data"); err != nil {
 		lumber.Error("component:Setup:models.Component:Generate(%s, data): %s", appModel.ID, componentModel.Name, err.Error())
@@ -110,7 +110,7 @@ func Setup(appModel *models.App, componentModel *models.Component) error {
 func reserveIPs(appModel *models.App, componentModel *models.Component) error {
 	display.StartTask("Reserve IPs")
 	defer display.StopTask()
-	
+
 	// dont reserve a new one if we already have this one
 	if componentModel.InternalIP == "" {
 		// first let's see if our local IP was reserved during app creation
@@ -188,7 +188,7 @@ func attachNetwork(componentModel *models.Component) error {
 func planComponent(appModel *models.App, componentModel *models.Component) error {
 	display.StartTask("Gathering requirements")
 	defer display.StopTask()
-	
+
 	planOutput, err := hookit.RunPlanHook(componentModel.ID, hook_generator.PlanPayload(componentModel))
 	if err != nil {
 		display.ErrorTask()
@@ -206,7 +206,7 @@ func planComponent(appModel *models.App, componentModel *models.Component) error
 		lumber.Error("component:Setup:models.Component.GenerateEvars(%+v): %s", appModel, err.Error())
 		return fmt.Errorf("failed to generate the component evars: %s", err.Error())
 	}
-	
+
 	return nil
 }
 
@@ -214,7 +214,7 @@ func planComponent(appModel *models.App, componentModel *models.Component) error
 func configureComponent(appModel *models.App, componentModel *models.Component) error {
 	display.StartTask("Configuring services")
 	defer display.StopTask()
-	
+
 	// run the update hook
 	if _, err := hookit.RunUpdateHook(componentModel.ID, hook_generator.UpdatePayload(componentModel)); err != nil {
 		display.ErrorTask()
@@ -232,6 +232,6 @@ func configureComponent(appModel *models.App, componentModel *models.Component) 
 		display.ErrorTask()
 		return fmt.Errorf("failed to run start hook: %s", err.Error())
 	}
-	
+
 	return nil
 }

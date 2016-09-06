@@ -61,7 +61,7 @@ func Setup(envModel *models.Env, appModel *models.App, name string) error {
 func reserveIPs(appModel *models.App) error {
 	display.StartTask("Reserving IPs")
 	defer display.StopTask()
-	
+
 	// reserve a dev ip
 	envIP, err := dhcp.ReserveGlobal()
 	if err != nil {

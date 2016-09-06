@@ -3,8 +3,8 @@ package watch
 import (
 	"os"
 	"path/filepath"
-	"time"
 	"strings"
+	"time"
 )
 
 type crawl struct {

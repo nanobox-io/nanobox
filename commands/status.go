@@ -1,7 +1,6 @@
 package commands
 
 import (
-
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/processors"
@@ -10,7 +9,7 @@ import (
 
 var (
 
-	// EnvCmd ...
+	// StatusCmd ...
 	StatusCmd = &cobra.Command{
 		Use:   "status",
 		Short: "Displays the status of your Nanobox VM & running platforms.",

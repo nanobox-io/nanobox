@@ -33,7 +33,7 @@ func UserPayload() string {
 		content, err := ioutil.ReadFile(keyFile)
 		if err != nil {
 			lumber.Error("hooks:ioutil.ReadFile(%s): %s", keyFile, err.Error())
-			// if this file cant be read continue on and give as many 
+			// if this file cant be read continue on and give as many
 			// of the ssh keys as we can
 			continue
 		}
@@ -60,6 +60,6 @@ func isValidKeyFile(file os.FileInfo) bool {
 
 	return !file.IsDir() &&
 		file.Name() != "authorized_keys" &&
-		file.Name() != "config" && 
+		file.Name() != "config" &&
 		file.Name() != "known_hosts"
 }

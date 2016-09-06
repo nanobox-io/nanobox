@@ -23,33 +23,33 @@ func Info(env *models.Env, app *models.App) error {
 
 		fmt.Printf("\n$ nanobox dev deploy\n")
 		fmt.Printf("------------------------------------------------------\n\n")
-		
+
 		return nil
 	}
 
 	// print header
-	line := strings.Repeat("-", len(env.Name) + 32)
+	line := strings.Repeat("-", len(env.Name)+32)
 	fmt.Printf("\n%s\n", line)
 	fmt.Printf("%s (%s)              Status: %s  \n", env.Name, app.Name, app.Status)
 	fmt.Printf("%s\n", line)
-	
+
 	fmt.Printf("\nMount Path: %s\n", env.Directory)
 	fmt.Printf("Console IP: %s\n", app.GlobalIPs["env"])
-	
+
 	components, _ := app.Components()
-	
+
 	for _, component := range components {
-		
+
 		// print the component header
 		if component.Name != component.Label {
 			fmt.Printf("\n%s (%s)\n", component.Name, component.Label)
 		} else {
 			fmt.Printf("\n%s\n", component.Name)
 		}
-		
+
 		// print the IP
 		fmt.Printf("  IP      : %s\n", component.ExternalIP)
-		
+
 		// print users
 		if len(component.Plan.Users) > 0 {
 			fmt.Printf("  User(s) :\n")
@@ -58,17 +58,17 @@ func Info(env *models.Env, app *models.App) error {
 			}
 		}
 	}
-	
+
 	// print environment variables
 	fmt.Printf("\nEnvironment Variables\n")
 	for key, val := range app.Evars {
 		fmt.Printf("  %s = %s\n", key, val)
 	}
-	
+
 	// print aliases
 	fmt.Printf("\nDNS Aliases\n")
 	entries := dns.List(app.ID)
-	
+
 	if len(entries) == 0 {
 		fmt.Printf("  none\n")
 	} else {

@@ -5,18 +5,18 @@ import (
 
 	"github.com/nanobox-io/nanobox/commands/steps"
 	"github.com/nanobox-io/nanobox/processors"
-	"github.com/nanobox-io/nanobox/util/provider"
 	"github.com/nanobox-io/nanobox/util/display"
+	"github.com/nanobox-io/nanobox/util/provider"
 )
 
 var (
 
 	// StartCmd ...
 	StartCmd = &cobra.Command{
-		Use:    "start",
-		Short:  "Starts the Nanobox virtual machine.",
-		Long:   ``,
-		Run:    startFn,
+		Use:   "start",
+		Short: "Starts the Nanobox virtual machine.",
+		Long:  ``,
+		Run:   startFn,
 	}
 )
 

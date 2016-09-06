@@ -30,7 +30,6 @@ func deployFn(ccmd *cobra.Command, args []string) {
 	display.CommandErr(dev.Deploy(env, app))
 }
 
-
 func deployCheck() bool {
 	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
 	return app.DeployedBoxfile != ""

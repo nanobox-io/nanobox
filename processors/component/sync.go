@@ -37,13 +37,13 @@ func Sync(envModel *models.Env, appModel *models.App) error {
 
 // purgeDeltaComponents purges components that have changed in the boxfile
 func purgeDeltaComponents(envModel *models.Env, appModel *models.App) error {
-	
+
 	display.OpenContext("Removing old")
 	defer display.CloseContext()
-	
+
 	// flag to determine if we display an up-to-date message
 	upToDate := true
-	
+
 	// parse the boxfiles
 	builtBoxfile := boxfile.New([]byte(envModel.BuiltBoxfile))
 	deployedBoxfile := boxfile.New([]byte(appModel.DeployedBoxfile))
@@ -90,10 +90,10 @@ func purgeDeltaComponents(envModel *models.Env, appModel *models.App) error {
 func provisionComponents(envModel *models.Env, appModel *models.App) error {
 	display.OpenContext("Launching new")
 	defer display.CloseContext()
-	
+
 	// flag to determine if we display an up-to-date message
 	upToDate := true
-	
+
 	// parse the boxfile
 	builtBoxfile := boxfile.New([]byte(envModel.BuiltBoxfile))
 
@@ -109,7 +109,7 @@ func provisionComponents(envModel *models.Env, appModel *models.App) error {
 
 		upToDate = false
 
-		componentModel.Name  = name
+		componentModel.Name = name
 		componentModel.Label = name
 		componentModel.Image = builtBoxfile.Node(name).StringValue("image")
 

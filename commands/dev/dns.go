@@ -5,11 +5,11 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/nanobox-io/nanobox/commands/steps"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/app/dns"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/commands/steps"
 )
 
 var (
@@ -30,7 +30,7 @@ Lists a hostnames maped to your dev app. The domain provided is added
 to your local hosts file pointing the the IP of your dev app.
 		`,
 		PreRun: steps.Run("start", "dev start"),
-		Run: dnsListFn,
+		Run:    dnsListFn,
 	}
 
 	// DNSAddCmd ...
@@ -42,7 +42,7 @@ Adds a hostname map to your dev app. The domain provided is added
 to your local hosts file pointing the the IP of your dev app.
 		`,
 		PreRun: steps.Run("start", "dev start"),
-		Run: dnsAddFn,
+		Run:    dnsAddFn,
 	}
 
 	// DNSRemoveCmd ...
@@ -54,7 +54,7 @@ Removes a hostname map from your dev app. The domain must perfectly
 match an DNS entry in your to your local hosts file.
 		`,
 		PreRun: steps.Run("start", "dev start"),
-		Run: dnsRmFn,
+		Run:    dnsRmFn,
 	}
 
 	// DNSRemoveCmd ...

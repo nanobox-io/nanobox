@@ -1,7 +1,7 @@
 package display
 
 var (
-  TaskSpinner  = []string{"\\", "|", "/", "-"}
-  TaskComplete = "√"
-  TaskPause    = "*"
+	TaskSpinner  = []string{"\\", "|", "/", "-"}
+	TaskComplete = "√"
+	TaskPause    = "*"
 )

@@ -1,7 +1,6 @@
 package display
 
-import (
-)
+import ()
 
 type Streamer struct {
 	logLevel string

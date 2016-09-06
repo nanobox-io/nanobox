@@ -33,6 +33,6 @@ func Tunnel(tunnelConfig TunnelConfig) error {
 	if err := nanoagent.Tunnel(key, location, tunnelConfig.Port); err != nil {
 		return fmt.Errorf("failed to connect to remote tunnel session: %s", err.Error())
 	}
-	
+
 	return nil
 }

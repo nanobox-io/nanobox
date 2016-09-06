@@ -26,7 +26,7 @@ func Publish(envModel *models.Env, WarehouseConfig WarehouseConfig) error {
 	}
 
 	display.StartTask("Starting docker container")
-	
+
 	// reserve an ip
 	ip, err := dhcp.ReserveLocal()
 	if err != nil {
@@ -45,7 +45,7 @@ func Publish(envModel *models.Env, WarehouseConfig WarehouseConfig) error {
 	}
 	// ensure we stop the container when we're done
 	defer docker.ContainerRemove(container.ID)
-	
+
 	display.StopTask()
 
 	lumber.Prefix("code:Publish")
@@ -65,10 +65,10 @@ func Publish(envModel *models.Env, WarehouseConfig WarehouseConfig) error {
 	}
 
 	buildWarehouseConfig := build.WarehouseConfig{
-		BuildID: WarehouseConfig.BuildID,
-		WarehouseURL: WarehouseConfig.WarehouseURL,
+		BuildID:        WarehouseConfig.BuildID,
+		WarehouseURL:   WarehouseConfig.WarehouseURL,
 		WarehouseToken: WarehouseConfig.WarehouseToken,
-		PreviousBuild: WarehouseConfig.PreviousBuild,
+		PreviousBuild:  WarehouseConfig.PreviousBuild,
 	}
 
 	payload = build.PublishPayload(envModel, buildWarehouseConfig)
@@ -82,7 +82,7 @@ func Publish(envModel *models.Env, WarehouseConfig WarehouseConfig) error {
 		err = fmt.Errorf("failed to run publish hook: %s", err.Error())
 		return runDebugSession(container.ID, err)
 	}
-	
+
 	display.StopTask()
 
 	return nil

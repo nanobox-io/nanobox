@@ -2,7 +2,7 @@ package build
 
 import (
 	"encoding/json"
-	
+
 	"github.com/nanobox-io/nanobox/models"
 )
 
@@ -15,10 +15,10 @@ type WarehouseConfig struct {
 
 func PublishPayload(envModel *models.Env, warehouseConfig WarehouseConfig) string {
 	pload := map[string]interface{}{
-		"build": warehouseConfig.BuildID,
-		"warehouse": warehouseConfig.WarehouseURL,
+		"build":           warehouseConfig.BuildID,
+		"warehouse":       warehouseConfig.WarehouseURL,
 		"warehouse_token": warehouseConfig.WarehouseToken,
-		"boxfile": envModel.BuiltBoxfile,
+		"boxfile":         envModel.BuiltBoxfile,
 	}
 
 	if warehouseConfig.PreviousBuild != "" {
