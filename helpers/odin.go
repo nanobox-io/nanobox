@@ -51,17 +51,17 @@ func ValidateOdinApp(slug string) (models.App, error) {
   if err != nil {
     
     if err.Error() == "Unauthorized" {
-      fmt.Printf("! Sorry, but you don't have access to %s\n", slug)
+      fmt.Printf("\n! Sorry, but you don't have access to %s\n\n", slug)
       return app, fmt.Errorf("Unauthorized access to app '%s': %s", slug, err.Error())
     }
     
     if err.Error() == "Not Found" {
-      fmt.Printf("! Sorry, the app '%s' doesn't exist\n", slug)
+      fmt.Printf("\n! Sorry, the app '%s' doesn't exist\n\n", slug)
       return app, fmt.Errorf("Unknown app '%s': %s", slug, err.Error())
     }
 
     // All other scenarios
-    fmt.Printf("! Oops, nanobox is temporarily unreachable. Try again in in just a bit.\n")
+    fmt.Printf("\n! Oops, nanobox is temporarily unreachable. Try again in in just a bit.\n\n")
     return app, fmt.Errorf("Failed to communicate with nanobox: %s", err.Error())
   }
   
