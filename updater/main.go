@@ -14,6 +14,7 @@ import (
 	fileutil "github.com/sdomino/go-util/file"
 
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 var (
@@ -45,7 +46,7 @@ func main() {
 	// before attempting to update, ensure nanobox is installed (on the path)
 	path, err := exec.LookPath(fileToDownload)
 	if err != nil {
-		fmt.Printf("Unable to update '%s' - %v\n", fileToDownload, err)
+		fmt.Printf("! Failed to update '%s' - %s\n", fileToDownload, err.Error())
 		os.Exit(1)
 	}
 
@@ -72,7 +73,7 @@ func main() {
 	// get the current users home dir
 	home, err := homedir.Dir()
 	if err != nil {
-		fmt.Println("Unable to determine home directory - ", err.Error())
+		fmt.Println("! Unable to determine home directory - ", err.Error())
 		os.Exit(1)
 	}
 
@@ -86,19 +87,19 @@ func main() {
 
 	// attempt to make a ~.nanobox/tmp directory just incase it doesn't exist
 	if err := os.MkdirAll(tmpDir, 0755); err != nil {
-		fmt.Printf("Failed to create '%v' - %v\n", tmpDir, err.Error())
+		fmt.Printf("! Failed to create '%v' - %v\n", tmpDir, err.Error())
 		os.Exit(1)
 	}
 
 	// create a tmp CLI in tmp dir
 	tmpFile, err := os.Create(tmpPath)
 	if err != nil {
-		fmt.Println("Failed to create temporary file - ", err.Error())
+		fmt.Println("! Failed to create temporary file - ", err.Error())
 		os.Exit(1)
 	}
 
 	// download the new CLI
-	fmt.Printf("Updating %s...\n", fileToDownload)
+	fmt.Printf("+ Updating %s...\n", fileToDownload)
 	pathLabel := filepath.ToSlash(fmt.Sprintf("%s/%s/%s/%s", pathToDownload, runtime.GOOS, runtime.GOARCH, fileToDownload))
 	fileutil.Progress(pathLabel, tmpFile)
 
@@ -108,7 +109,7 @@ func main() {
 	// ensure new CLI download matches the remote md5; if the download fails for any
 	// reason these md5's should NOT match.
 	if _, err = cryptoutil.MD5Match(tmpPath, fmt.Sprintf("%s/%s/%s/%s.md5", pathToDownload, runtime.GOOS, runtime.GOARCH, fileToDownload)); err != nil {
-		fmt.Printf("Nanobox was unable to correctly download the update. Please check your internet connection and try again.")
+		fmt.Printf("! Nanobox was unable to correctly download the update. Please check your internet connection and try again.")
 		os.Exit(1)
 	}
 
@@ -116,24 +117,21 @@ func main() {
 	if runtime.GOOS != "windows" {
 		// make new CLI executable
 		if err := os.Chmod(tmpPath, 0755); err != nil {
-			fmt.Println("Failed to set permissions - ", err.Error())
+			fmt.Println("! Failed to set permissions - ", err.Error())
 		}
 	}
 
 	// replace the old CLI with the new one
 	if err = os.Rename(tmpPath, path); err != nil {
-		fmt.Println("Failed to replace existing CLI with new one -", err.Error())
+		fmt.Println("! Failed to replace existing CLI with new one -", err.Error())
 		os.Exit(1)
 	}
 
-	// execute the new CLI printing the version to verify update
-	out, err := exec.Command(path, "-v").Output()
-
 	// if the new CLI fails to execute, just print a generic message and return
 	if err != nil {
-		fmt.Printf("[!] Update failed")
+		fmt.Printf("! Update failed\n")
 	} else {
-		fmt.Printf("[√] Now running %s", string(out))
+		fmt.Printf("%s Update was successful!\n", display.TaskComplete)
 	}
 
 	if runtime.GOOS == "windows" {

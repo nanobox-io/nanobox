@@ -38,13 +38,13 @@ func Check() error {
 
 		//
 		fmt.Printf(`
-# Update available
 ------------------------------------------------
-A newer version of the nanobox CLI is available. We highly recommend updating at
-your earliest convenience. Run the following command to update:
+Hey! A newer version of nanobox is available.
+Run the following command to update:
 
 $ nanobox-update
-------------------------------------------------`)
+------------------------------------------------
+`)
 
 		// renew the update
 		update.Renew()

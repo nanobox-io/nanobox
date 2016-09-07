@@ -38,7 +38,7 @@ func reExecPrivilegedRemove(path string) error {
 	display.PauseTask()
 	defer display.ResumeTask()
 
-	display.PrintRequiresPrivilege("modify network shares")
+	display.PrintRequiresPrivilege("to modify network shares")
 
 	// call 'dev netfs add' with the original path and args; config.NanoboxPath() will be the
 	// currently executing program, so this command will ultimately lead right back
