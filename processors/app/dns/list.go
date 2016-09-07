@@ -10,11 +10,15 @@ import (
 // List lists all dns entries for an app
 func List(a *models.App) error {
 
-	fmt.Printf("dns entries for %s(%s):\n", a.EnvID, a.Name)
-	entries := dns.List(a.ID)
-	for _, entry := range entries {
-		fmt.Printf("  %s\n", entry.Domain)
+	// print the header
+	fmt.Printf("\nDNS Aliases\n")
+	
+	// iterate
+	for _, domain := range dns.List(a.ID) {
+		fmt.Printf("  %s\n", domain.Domain)
 	}
+	
+	fmt.Println()
 
 	return nil
 }

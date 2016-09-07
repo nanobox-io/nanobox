@@ -38,6 +38,8 @@ func Remove(a *models.App, name string) error {
 		return fmt.Errorf("unable to add dns entry: %s", err.Error())
 	}
 
+	fmt.Printf("\n%s %s removed\n\n", display.TaskComplete, name)
+
 	return nil
 }
 
