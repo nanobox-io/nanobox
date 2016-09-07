@@ -20,7 +20,7 @@ import (
 	"github.com/nanobox-io/nanobox/util/hookit"
 	"github.com/nanobox-io/nanobox/util/locker"
 	"github.com/nanobox-io/nanobox/util/provider"
-	"github.com/nanobox-io/nanobox/util/watch"
+	// "github.com/nanobox-io/nanobox/util/watch"
 )
 
 // Start a dev container
@@ -40,7 +40,7 @@ func Console(envModel *models.Env, appModel *models.App, devRun bool) error {
 	}
 
 	// start a watcher to watch for changes and inform the vm
-	go watch.Watch(container_generator.DevName(), envModel.Directory)
+	// go watch.Watch(container_generator.DevName(), envModel.Directory)
 
 	// if run then start the run commands
 	if devRun {
