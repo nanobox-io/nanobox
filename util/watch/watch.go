@@ -8,9 +8,12 @@ import (
 	"time"
 
 	"github.com/jcelliott/lumber"
+	"github.com/nanobox-io/nanobox-boxfile"
 
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/models"
+
 )
 
 var ignoreFile = []string{".git", ".hg", ".svn", ".bzr"}
@@ -97,7 +100,7 @@ func populateIgnore(path string) {
 
 	// add pieces from the env
 	env, _ := models.FindEnvByID(config.EnvID())
-	box := boxfile.New(env.builtBoxfile)
+	box := boxfile.New([]byte(env.BuiltBoxfile))
 	for _, libDir := range box.Node("code.build").StringSliceValue("lib_dirs") {
 		ignoreFile = append(ignoreFile, libDir)
 	}
