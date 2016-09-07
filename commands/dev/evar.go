@@ -1,27 +1,28 @@
 package dev
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/commands/steps"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processors/app/evar"
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 var (
 
-	// EnvCmd ...
-	EnvCmd = &cobra.Command{
+	// EvarCmd ...
+	EvarCmd = &cobra.Command{
 		Use:   "evar",
 		Short: "Manages environment variables in your local dev app.",
 		Long:  ``,
 	}
 
-	// EnvAddCmd ...
-	EnvAddCmd = &cobra.Command{
+	// EvarAddCmd ...
+	EvarAddCmd = &cobra.Command{
 		Use:   "add",
 		Short: "Adds environment variable(s) to your dev app.",
 		Long: `
@@ -29,20 +30,20 @@ Adds environment variable(s) to your dev app. Multiple key-value
 pairs can be added simultaneously using a comma-delimited list.
 		`,
 		PreRun: steps.Run("start", "build", "dev start", "dev deploy"),
-		Run:    envAddFn,
+		Run:    evarAddFn,
 	}
 
-	// EnvListCmd ...
-	EnvListCmd = &cobra.Command{
+	// EvarListCmd ...
+	EvarListCmd = &cobra.Command{
 		Use:    "ls",
 		Short:  "Lists all environment variables registered in your dev app.",
 		Long:   ``,
 		PreRun: steps.Run("start", "build", "dev start", "dev deploy"),
-		Run:    envListFn,
+		Run:    evarListFn,
 	}
 
-	// EnvRemoveCmd ...
-	EnvRemoveCmd = &cobra.Command{
+	// EvarRemoveCmd ...
+	EvarRemoveCmd = &cobra.Command{
 		Use:   "rm",
 		Short: "Removes environment variable(s) from your dev app.",
 		Long: `
@@ -50,20 +51,22 @@ Removes environment variable(s) from your dev app. Multiple keys
 can be removed simultaneously using a comma-delimited list.
 		`,
 		PreRun: steps.Run("start", "build", "dev start", "dev deploy"),
-		Run:    envRemoveFn,
+		Run:    evarRemoveFn,
 	}
 )
 
 //
 func init() {
-	EnvCmd.AddCommand(EnvAddCmd)
-	EnvCmd.AddCommand(EnvRemoveCmd)
-	EnvCmd.AddCommand(EnvListCmd)
+	EvarCmd.AddCommand(EvarAddCmd)
+	EvarCmd.AddCommand(EvarRemoveCmd)
+	EvarCmd.AddCommand(EvarListCmd)
 }
 
-// envAddFn ...
-func envAddFn(ccmd *cobra.Command, args []string) {
+// evarAddFn ...
+func evarAddFn(ccmd *cobra.Command, args []string) {
 	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
+	evars := map[string]string{}
+	
 	for _, arg := range args {
 		// define a function that will allow us to
 		// split on ',' or ' '
@@ -78,29 +81,30 @@ func envAddFn(ccmd *cobra.Command, args []string) {
 				return c == ':' || c == '='
 			})
 			if len(parts) == 2 {
-				app.Evars[strings.ToUpper(parts[0])] = parts[1]
+				evars[strings.ToUpper(parts[0])] = parts[1]
 			}
 		}
 	}
-	fmt.Printf("app evars are update to: %+v\n", app.Evars)
 
-	app.Save()
+	display.CommandErr(evar.Add(app, evars))
 }
 
-// envListFn ...
-func envListFn(ccmd *cobra.Command, args []string) {
+// evarListFn ...
+func evarListFn(ccmd *cobra.Command, args []string) {
 	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
-	fmt.Println(app.Evars)
+	display.CommandErr(evar.List(app))
 }
 
-// envRemoveFn ...
-func envRemoveFn(ccmd *cobra.Command, args []string) {
+// evarRemoveFn ...
+func evarRemoveFn(ccmd *cobra.Command, args []string) {
 	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
+	keys := []string{}
+	
 	for _, arg := range args {
 		for _, key := range strings.Split(arg, ",") {
-			delete(app.Evars, strings.ToUpper(key))
+			keys = append(keys, strings.ToUpper(key))
 		}
 	}
-
-	app.Save()
+	
+	display.CommandErr(evar.Remove(app, keys))
 }

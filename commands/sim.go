@@ -27,6 +27,6 @@ func init() {
 	SimCmd.AddCommand(sim.InfoCmd)
 	SimCmd.AddCommand(sim.LogCmd)
 	SimCmd.AddCommand(sim.ConsoleCmd)
-	SimCmd.AddCommand(sim.EnvCmd)
+	SimCmd.AddCommand(sim.EvarCmd)
 	SimCmd.AddCommand(sim.DNSCmd)
 }
