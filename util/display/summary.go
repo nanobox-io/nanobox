@@ -11,6 +11,7 @@ import (
 	"github.com/nanobox-io/nanobox/util"
 )
 
+// ...
 var (
 	EscSeqRegex   = regexp.MustCompile("\\x1b[[][?0123456789]*;?[?0123456789]*[ABCDEFGHJKRSTfminsulhp]")
 	LogStripRegex = regexp.MustCompile("^[ \t-]*")
@@ -18,6 +19,8 @@ var (
 )
 
 type (
+
+	// Summarizer ...
 	Summarizer struct {
 		Label  string    // the task label to print as the header
 		Prefix string    // the prefix to prepend to the summary
@@ -64,6 +67,7 @@ func (s *Summarizer) Start() {
 	go s.run()
 }
 
+// Pause ...
 func (s *Summarizer) Pause() {
 	// create the 'stop' event
 	event := &sEventOp{
@@ -78,7 +82,7 @@ func (s *Summarizer) Pause() {
 	<-event.res
 }
 
-// stop prints the "complete" label and toggles shutdown
+// Resume prints the "complete" label and toggles shutdown
 func (s *Summarizer) Resume() {
 	// generate and print the complete header
 	s.Label = s.Label
@@ -223,7 +227,7 @@ func (s *Summarizer) handleLog(data string) {
 // tick updates the spinner index and refreshes the summary
 func (s *Summarizer) tick() {
 	// update the spinner index
-	s.spinIdx += 1
+	s.spinIdx++
 
 	// reset the index back to 0 if we've reached the top
 	if s.spinIdx == len(TaskSpinner) {

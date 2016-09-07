@@ -1,7 +1,6 @@
 package display
 
-import ()
-
+// Streamer ...
 type Streamer struct {
 	logLevel string
 	prefixer *Prefixer

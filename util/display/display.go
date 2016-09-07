@@ -15,25 +15,25 @@ import (
 )
 
 var (
-	// enable logging to a file
+	// Log - enable logging to a file
 	Log = true
 
-	// location of logfile
+	// LogFile - the location of logfile
 	LogFile = filepath.ToSlash(filepath.Join(config.GlobalDir(), "process.log"))
 
-	// summarize the output and hide log details
+	// Summary - summarize the output and hide log details
 	Summary = true
 
-	// re-draw the summary when updates occur
+	// Interactive - re-draw the summary when updates occur
 	Interactive = terminal.IsTerminal(int(os.Stderr.Fd()))
 
-	// info, warn, error, debug, trace
+	// Level - info, warn, error, debug, trace
 	Level = "info"
 
-	// text, json
+	// Mode - text, json
 	Mode = "text"
 
-	// writer to send output to
+	// Out - writer to send output to
 	Out = os.Stderr
 
 	// internal
@@ -54,11 +54,11 @@ func OpenContext(format string, args ...interface{}) error {
 
 	// if the current context is 0, let's increment the topContext
 	if context == 0 {
-		topContext += 1
+		topContext++
 	}
 
 	// increment the context level counter
-	context += 1
+	context++
 
 	// if this is a subsequent top-level context, let's prefix with a newline
 	if topContext > 1 && context == 1 {
@@ -86,7 +86,7 @@ func OpenContext(format string, args ...interface{}) error {
 func CloseContext() error {
 
 	// decrement the context level counter
-	context -= 1
+	context--
 
 	// ensure the context doesn't drop below zero
 	if context < 0 {
@@ -136,6 +136,7 @@ func StartTask(format string, args ...interface{}) error {
 	return nil
 }
 
+// PauseTask ...
 func PauseTask() {
 	// stop the task summarizer
 	if Summary && summarizer != nil {
@@ -144,6 +145,7 @@ func PauseTask() {
 	}
 }
 
+// ResumeTask ...
 func ResumeTask() {
 	// resume task
 	if Summary && summarizer != nil {

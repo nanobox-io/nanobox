@@ -12,8 +12,8 @@ import (
 	cryptoutil "github.com/sdomino/go-util/crypto"
 )
 
-// EXPIREAFTER is the time in hours after which we want to check for updates (168 hours or 7 days)
-const EXPIREAFTER = 168
+// ExpireAfter is the time in hours after which we want to check for updates (168 hours or 7 days)
+const ExpireAfter = 168
 
 // Check checks to see if there is an update available for the nanobox CLI
 func Check() error {
@@ -22,7 +22,7 @@ func Check() error {
 	update, _ := models.LoadUpdate()
 
 	// return early if it's not time to update yet
-	if !update.Expired(EXPIREAFTER) {
+	if !update.Expired(ExpireAfter) {
 		return nil
 	}
 

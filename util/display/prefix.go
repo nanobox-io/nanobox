@@ -5,6 +5,7 @@ import (
 	"fmt"
 )
 
+// Prefixer ...
 type Prefixer struct {
 	// a prefix to pre-pend to new lines
 	prefix string
@@ -37,7 +38,7 @@ func NewPrefixer(prefix string) *Prefixer {
 	}
 }
 
-// Prefix will prefix lines with a prefix
+// Parse ...
 func (p *Prefixer) Parse(data string) string {
 	// create an empty buffer to apply transformations onto
 	buffer := bytes.NewBufferString("")
