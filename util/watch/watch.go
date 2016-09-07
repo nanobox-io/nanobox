@@ -46,11 +46,11 @@ func Watch(container, path string) error {
 		// if it fails display a message and try the slow one
 		lumber.Info("Error occured in fast notify watcher: %s", err.Error())
 
-		// print the warning
-		fmt.Printf("\n-------------------------------------------------------\n\n")
-		fmt.Printf("Uh oh, the live filesystem watcher has panic'ed.\n")
-		fmt.Printf("We'll go ahead and rollover to a slower polling solution.\n")
-		fmt.Printf("\n-------------------------------------------------------\n\n")
+		// // print the warning
+		// fmt.Printf("\n-------------------------------------------------------\n\n")
+		// fmt.Printf("Uh oh, the live filesystem watcher has panic'ed.\n")
+		// fmt.Printf("We'll go ahead and rollover to a slower polling solution.\n")
+		// fmt.Printf("\n-------------------------------------------------------\n\n")
 
 		watcher.close()
 		watcher = newCrawlWatcher(path)
