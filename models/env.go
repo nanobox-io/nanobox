@@ -6,6 +6,7 @@ import (
 	"github.com/nanobox-io/nanobox/util/config"
 )
 
+// Env ...
 type Env struct {
 	ID        string
 	Directory string
@@ -19,6 +20,7 @@ type Env struct {
 	DeployedID   string
 }
 
+// Link ...
 type Link struct {
 	ID   string
 	Name string
@@ -66,7 +68,7 @@ func (e *Env) Generate() error {
 	return e.Save()
 }
 
-// get a list of the apps that belong to this
+// Apps get a list of the apps that belong to this
 func (e *Env) Apps() ([]*App, error) {
 	return AllAppsByEnv(e.ID)
 }

@@ -1,5 +1,6 @@
 package models
 
+// ComponentPlan ...
 type ComponentPlan struct {
 	IPs           []string            `json:"ips"`
 	Users         []ComponentPlanUser `json:"users"`
@@ -8,6 +9,7 @@ type ComponentPlan struct {
 	DefaultUser   string              `json:"user"`
 }
 
+// ComponentPlanUser ...
 type ComponentPlanUser struct {
 	Username string                 `json:"username"`
 	Password string                 `json:"password"`

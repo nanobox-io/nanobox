@@ -6,15 +6,25 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"time"
 
 	"github.com/kardianos/osext"
-	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/models"
 	cryptoutil "github.com/sdomino/go-util/crypto"
 )
 
+// EXPIREAFTER is the time in hours after which we want to check for updates (168 hours or 7 days)
+const EXPIREAFTER = 168
+
 // Check checks to see if there is an update available for the nanobox CLI
 func Check() error {
+
+	// load the update model
+	update, _ := models.LoadUpdate()
+
+	// return early if it's not time to update yet
+	if !update.Expired(EXPIREAFTER) {
+		return nil
+	}
 
 	//
 	updatable, err := updatable()
@@ -22,14 +32,9 @@ func Check() error {
 		return fmt.Errorf("Nanobox was unable to determine if updates are available - %s", err.Error())
 	}
 
-	// stat the update file to get ModTime(); an error here means the file doesn't
-	// exist, which is highly unlikely as this command creates it if it doesn't
-	// exist, so we skip the error
-	fi, _ := os.Stat(config.UpdateFile())
-
 	// if the md5s don't match and it's 'time' for an update (14 days) inform the
 	// user that updates are available
-	if updatable && time.Since(fi.ModTime()).Hours() >= 336.0 {
+	if updatable {
 
 		//
 		fmt.Printf(`
@@ -41,11 +46,8 @@ your earliest convenience. Run the following command to update:
 $ nanobox-update
 ------------------------------------------------`)
 
-		// update the mod time on the updateFile file so we won't check for updates
-		// again
-		if err := os.Chtimes(config.UpdateFile(), time.Now(), time.Now()); err != nil {
-			return err
-		}
+		// renew the update
+		update.Renew()
 	}
 
 	return nil

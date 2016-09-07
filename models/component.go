@@ -9,6 +9,8 @@ import (
 )
 
 type (
+
+	// Component ...
 	Component struct {
 		// the docker id
 		ID    string `json:"id"`
@@ -25,6 +27,7 @@ type (
 		State      string        `json:"state"`
 	}
 
+	// ComponentUser ...
 	ComponentUser struct {
 		Username string                 `json:"username"`
 		Password string                 `json:"password"`
@@ -154,7 +157,7 @@ func (c *Component) PurgeEvars(a *App) error {
 
 	// we loop over all environment variables and see if the key contains
 	// the prefix above. If so, we delete the item.
-	for key, _ := range a.Evars {
+	for key := range a.Evars {
 		if strings.HasPrefix(key, prefix) {
 			delete(a.Evars, key)
 		}
@@ -164,7 +167,7 @@ func (c *Component) PurgeEvars(a *App) error {
 	return a.Save()
 }
 
-// FindBySlug finds an app by an appID and name
+// FindComponentBySlug finds a component by an appID and name
 func FindComponentBySlug(appID, name string) (*Component, error) {
 
 	component := &Component{}
@@ -176,7 +179,7 @@ func FindComponentBySlug(appID, name string) (*Component, error) {
 	return component, nil
 }
 
-// AllApps loads all of the Apps in the database
+// AllComponentsByApp loads all of the components in the database
 func AllComponentsByApp(appID string) ([]*Component, error) {
 	// list of components to return
 	components := []*Component{}

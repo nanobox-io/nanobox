@@ -1,5 +1,6 @@
 package models
 
+// Inspect ...
 func Inspect(bucket, key string) interface{} {
 	if key == "" {
 		v := []interface{}{}

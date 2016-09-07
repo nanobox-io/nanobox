@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	// path to database
+	// DB is the path to the local nanobox database
 	DB = filepath.ToSlash(filepath.Join(config.GlobalDir(), "data.db"))
 )
 

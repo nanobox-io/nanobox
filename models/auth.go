@@ -4,6 +4,7 @@ import (
 	"fmt"
 )
 
+// Auth ...
 type Auth struct {
 	Key string //
 }
@@ -36,6 +37,7 @@ func LoadAuth() (*Auth, error) {
 	return auth, nil
 }
 
+// DeleteAuth ...
 func DeleteAuth() error {
 	// Since there is only ever a single auth value, we'll use the registry
 	if err := destroy("registry", "auth"); err != nil {

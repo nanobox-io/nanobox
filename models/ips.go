@@ -5,6 +5,7 @@ import (
 	"net"
 )
 
+// IPs ...
 type IPs []net.IP
 
 // Save persists the IPs to the database

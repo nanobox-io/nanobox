@@ -6,6 +6,7 @@ import (
 	"github.com/nanobox-io/nanobox/util/config"
 )
 
+// App ...
 type App struct {
 	EnvID string
 	ID    string
@@ -26,7 +27,7 @@ type App struct {
 	DeployedBoxfile string
 }
 
-// InNew returns true if the App hasn't been created yet
+// IsNew returns true if the App hasn't been created yet
 func (a *App) IsNew() bool {
 	return a.ID == ""
 }
@@ -77,15 +78,17 @@ func (a *App) Generate(env *Env, name string) error {
 	return a.Save()
 }
 
+// Env ...
 func (a *App) Env() (*Env, error) {
 	return FindEnvByID(a.EnvID)
 }
 
+// Components ...
 func (a *App) Components() ([]*Component, error) {
 	return AllComponentsByApp(a.ID)
 }
 
-// FindBySlug finds an app by an appID and name
+// FindAppBySlug finds an app by an appID and name
 func FindAppBySlug(envID, name string) (*App, error) {
 
 	app := &App{}
@@ -125,7 +128,7 @@ func AllApps() ([]*App, error) {
 	return apps, nil
 }
 
-// AllApps loads all of the Apps in the database
+// AllAppsByEnv loads all of the Apps in the database
 func AllAppsByEnv(envID string) ([]*App, error) {
 	// list of envs to return
 	apps := []*App{}
@@ -151,7 +154,7 @@ func AllAppsByStatus(status string) ([]*App, error) {
 	return apps, nil
 }
 
-// lookup an app id from an alias
+// AppIDByAlias looks up an app id from an alias
 func AppIDByAlias(alias string) string {
 	env, _ := FindEnvByID(config.EnvID())
 
