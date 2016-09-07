@@ -14,7 +14,7 @@ const (
 	UDP   = "udp"
 )
 
-// Component ...
+// PlatformComponent ...
 type PlatformComponent struct {
 	label string
 	name  string
