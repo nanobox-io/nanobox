@@ -18,27 +18,18 @@ import (
 const (
 	NANOBOX  = "https://api.nanobox.io/v1/"
 	BONESALT = "https://api.bonesalt.com/v1/"
-	DEV      = "https://api.nanobox.dev/v1/"
-	SIM      = "https://api.nanobox.sim/v1/"
+	DEV      = "http://api.nanobox.dev:8080/v1/"
+	SIM      = "http://api.nanobox.sim/v1/"
 )
 
 var (
 	// set the default endpoint to nanobox
-	endpoint = NANOBOX
+	endpoint = "nanobox"
 )
 
 // sets the odin endpoint
 func SetEndpoint(stage string) {
-	switch stage {
-	case "bonesalt":
-		endpoint = BONESALT
-	case "dev":
-		endpoint = DEV
-	case "sim":
-		endpoint = SIM
-	default:
-		endpoint = NANOBOX
-	}
+	endpoint = stage
 }
 
 // Auth ...
@@ -139,16 +130,19 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 		rbodyReader = bytes.NewBuffer(jsonBytes)
 	}
 
-	auth, _ := models.LoadAuth()
+	auth, _ := models.LoadAuthByEndpoint(endpoint)
 
 	if params == nil {
 		params = url.Values{}
 	}
 	params.Set("auth_token", auth.Key)
 
+	// fetch the correct url from the endpoint
+	url := odinURL()
+
 	//
-	lumber.Debug("%s%s?%s\n", endpoint, path, params.Encode())
-	req, err := http.NewRequest(method, fmt.Sprintf("%s%s?%s", endpoint, path, params.Encode()), rbodyReader)
+	lumber.Debug("%s%s?%s\n", url, path, params.Encode())
+	req, err := http.NewRequest(method, fmt.Sprintf("%s%s?%s", url, path, params.Encode()), rbodyReader)
 	if err != nil {
 		return err
 	}
@@ -191,4 +185,17 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 	}
 
 	return nil
+}
+
+func odinURL() string {
+	switch endpoint {
+	case "bonesalt":
+		return BONESALT
+	case "dev":
+		return DEV
+	case "sim":
+		return SIM
+	default:
+		return NANOBOX
+	}
 }
