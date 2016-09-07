@@ -14,7 +14,7 @@ import (
 var (
 	EscSeqRegex   = regexp.MustCompile("\\x1b[[][?0123456789]*;?[?0123456789]*[ABCDEFGHJKRSTfminsulhp]")
 	LogStripRegex = regexp.MustCompile("^[ \t-]*")
-	_, termWidth  = util.GetTerminalSize()
+	termWidth     = 0
 )
 
 type (
@@ -44,6 +44,10 @@ type (
 
 // NewSummarizer returns a new Summarizer
 func NewSummarizer(label string, prefix string) *Summarizer {
+	if termWidth == 0 {
+		_, termWidth = util.GetTerminalSize()
+	}
+
 	return &Summarizer{
 		Label:  label,
 		Prefix: prefix,

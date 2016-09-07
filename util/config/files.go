@@ -2,10 +2,13 @@ package config
 
 import (
 	"io"
+	"fmt"
 	"os"
 	"path/filepath"
 
 	"github.com/jcelliott/lumber"
+
+	"github.com/nanobox-io/nanobox/util"
 )
 
 // Boxfile ...
@@ -59,14 +62,15 @@ func configFile() (file string) {
 	defer f.Close()
 
 	//
-	contents := `
+	contents := fmt.Sprintf(`
 # provider configuration options
 provider: "docker_machine" # the name of the provider to use
 
 # mount type (native|netfs)
 mount-type: native
 
-  `
+token: %s
+  `, util.RandomString(30))
 
 	// populate the config.yml with reasonable defaults
 	io.WriteString(f, contents)

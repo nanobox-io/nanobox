@@ -5,6 +5,9 @@ import (
 	"os"
 
 	"github.com/jcelliott/lumber"
+	"github.com/bugsnag/bugsnag-go"
+	
+	"github.com/nanobox-io/nanobox/util/config"
 )
 
 // CommandErr ...
@@ -15,6 +18,11 @@ func CommandErr(err error) {
 	if err != nil {
 		lumber.Error("Command: %+s", err.Error())
 
+		bugsnagErr := bugsnag.Notify(err, bugsnag.User{Id: config.Viper().GetString("token")}, bugsnag.SeverityInfo)
+		if bugsnagErr != nil {
+			lumber.Error("Bugsnag error: %s", bugsnagErr)
+		}
+		
 		fmt.Printf(`
 
 Whoops, looks like we encountered a small error:

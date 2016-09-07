@@ -36,6 +36,7 @@ type Watcher interface {
 // watch a directory and report changes to nanobox
 func Watch(container, path string) error {
 	populateIgnore(path)
+
 	// try watching with the fast one
 	watcher := newNotifyWatcher(path)
 	err := watcher.watch()
@@ -62,17 +63,15 @@ func Watch(container, path string) error {
 		changeList = append(changeList, containerFile)
 	}
 
-	// report any errors from either
-	fmt.Println("done??")
 	return nil
 }
 
+// publish in batches so to save clock cycles
 func batchPublish(container string) {
 	for {
 		<-time.After(time.Second)
 		if len(changeList) > 0 {
 			util.DockerExec(container, "touch", changeList, nil)
-			fmt.Println("updates!", changeList)
 			changeList = []string{}
 		}
 	}
@@ -80,6 +79,7 @@ func batchPublish(container string) {
 
 // populate the ignore file from the nanoignore
 func populateIgnore(path string) {
+	// add parts from the nanoignore
 	b, err := ioutil.ReadFile(filepath.ToSlash(filepath.Join(path, ".nanoignore")))
 	if err != nil {
 		return
@@ -88,5 +88,12 @@ func populateIgnore(path string) {
 	stringFields := strings.Fields(string(b))
 	for _, str := range stringFields {
 		ignoreFile = append(ignoreFile, str)
+	}
+
+	// add pieces from the env
+	env, _ := models.FindEnvByID(config.EnvID())
+	box := boxfile.New(env.builtBoxfile)
+	for _, libDir := range box.Node("code.build").StringSliceValue("lib_dirs") {
+		ignoreFile = append(ignoreFile, libDir)
 	}
 }
