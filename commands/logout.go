@@ -24,15 +24,10 @@ var (
 )
 
 func init() {
-	LoginCmd.Flags().StringVarP(&logoutCmdFlags.endpoint, "endpoint", "e", "", "endpoint")
+	LogoutCmd.Flags().StringVarP(&logoutCmdFlags.endpoint, "endpoint", "e", "", "endpoint")
 }
 
 // logoutFn ...
 func logoutFn(ccmd *cobra.Command, args []string) {
-	// set default endpoint to nanobox
-	if logoutCmdFlags.endpoint == "" {
-		logoutCmdFlags.endpoint = "nanobox"
-	}
-	
 	display.CommandErr(processors.Logout(logoutCmdFlags.endpoint))
 }

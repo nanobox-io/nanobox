@@ -29,6 +29,10 @@ func Login(username, password, endpoint string) error {
 		password = pass
 	}
 
+	if endpoint == "" {
+		endpoint = "nanobox"
+	}
+
 	// set the odin endpoint
 	odin.SetEndpoint(endpoint)
 

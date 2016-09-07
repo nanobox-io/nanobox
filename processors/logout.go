@@ -10,6 +10,10 @@ import (
 // Process ...
 func Logout(endpoint string) error {
 
+	if endpoint == "" {
+		endpoint = "nanobox"
+	}
+
 	// lookup the auth by the endpoint
 	auth, _ := models.LoadAuthByEndpoint(endpoint)
 	

@@ -38,11 +38,6 @@ func init() {
 
 // loginFn ...
 func loginFn(ccmd *cobra.Command, args []string) {
-	// set default endpoint to nanobox
-	if loginCmdFlags.endpoint == "" {
-		loginCmdFlags.endpoint = "nanobox"
-	}
-	
 	err := processors.Login(loginCmdFlags.username, loginCmdFlags.password, loginCmdFlags.endpoint)
 	
 	display.CommandErr(err)
