@@ -5,6 +5,7 @@ import (
 
 	"github.com/jcelliott/lumber"
 
+	"github.com/nanobox-io/nanobox/helpers"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/code"
 	"github.com/nanobox-io/nanobox/util/odin"
@@ -13,19 +14,12 @@ import (
 //
 func Deploy(envModel *models.Env, deployConfig DeployConfig) error {
 
-	// commented until we have the --force as a flag
-	// if envModel.DeployedID != "" && envModel.BuiltID == envModel.DeployedID {
-	// 	// shortcut if we have already deployed
-	// 	return nil
-	// }
-
-	// find the app id
-	appID := models.AppIDByAlias(deployConfig.App)
-	if appID == "" {
-		// todo: better messaging informing that we couldn't find a link
-		return fmt.Errorf("app is not linked")
+	appID, err := helpers.OdinAppIDByAlias(deployConfig.App)
+	if err != nil {
+		// the message will have already been printed in the helper
+		return nil
 	}
-
+	
 	warehouseConfig, err := getWarehouseConfig(envModel, appID)
 	if err != nil {
 		return fmt.Errorf("unable to generate warehouse config: %s", err.Error())

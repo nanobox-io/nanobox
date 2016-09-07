@@ -9,6 +9,7 @@ import (
 	container_generator "github.com/nanobox-io/nanobox/generators/containers"
 	"github.com/nanobox-io/nanobox/generators/hooks/build"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processors/provider"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/hookit"
@@ -18,6 +19,12 @@ import (
 func Publish(envModel *models.Env, WarehouseConfig WarehouseConfig) error {
 	display.OpenContext("Publishing build")
 	defer display.CloseContext()
+
+	// initialize the docker client
+	// init docker client
+	if err := provider.Init(); err != nil {
+		return fmt.Errorf("failed to init docker client: %s", err.Error())
+	}
 
 	// pull the latest build image
 	buildImage, err := pullBuildImage()

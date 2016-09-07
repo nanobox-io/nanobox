@@ -140,6 +140,18 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 
 	lumber.Debug("res: %+v\n", res)
 
+	if res.StatusCode == 401 {
+		return fmt.Errorf("Unauthorized")
+	}
+
+	if res.StatusCode == 404 {
+		return fmt.Errorf("Not Found")
+	}
+	
+	if res.StatusCode == 500 {
+		return fmt.Errorf("Internal Server Error")
+	}
+
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
 		return fmt.Errorf("bad exit response(%+v)", res)
 	}
