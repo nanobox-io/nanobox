@@ -47,7 +47,7 @@ $ nanobox-update
 `)
 
 		// renew the update
-		update.Renew()
+		return update.Renew()
 	}
 
 	return nil
