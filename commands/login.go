@@ -23,6 +23,7 @@ var (
 	loginCmdFlags = struct {
 		username string
 		password string
+		endpoint string
 	}{}
 )
 
@@ -30,13 +31,21 @@ var (
 func init() {
 	LoginCmd.Flags().StringVarP(&loginCmdFlags.username, "username", "u", "", "username")
 	LoginCmd.Flags().StringVarP(&loginCmdFlags.password, "password", "p", "", "password")
+	LoginCmd.Flags().StringVarP(&loginCmdFlags.endpoint, "endpoint", "e", "", "endpoint")
 
 	steps.Build("login", loginCheck, loginFn)
 }
 
 // loginFn ...
 func loginFn(ccmd *cobra.Command, args []string) {
-	display.CommandErr(processors.Login(loginCmdFlags.username, loginCmdFlags.password))
+	// set default endpoint to nanobox
+	if loginCmdFlags.endpoint == "" {
+		loginCmdFlags.endpoint = "nanobox"
+	}
+	
+	err := processors.Login(loginCmdFlags.username, loginCmdFlags.password, loginCmdFlags.endpoint)
+	
+	display.CommandErr(err)
 }
 
 func loginCheck() bool {

@@ -9,7 +9,7 @@ import (
 	"github.com/nanobox-io/nanobox/util/odin"
 )
 
-func Add(envModel *models.Env, appName, alias string) error {
+func Add(envModel *models.Env, appName, alias, endpoint string) error {
 
 	// ensure the env model has been generated
 	if err := envModel.Generate(); err != nil {
@@ -25,6 +25,14 @@ func Add(envModel *models.Env, appName, alias string) error {
 	if appName == "" {
 		appName = config.LocalDirName()
 	}
+	
+	// set the endpoint to nanobox if it's missing
+	if endpoint == "" {
+		endpoint = "nanobox"
+	}
+
+	// set the odin endpoint
+	odin.SetEndpoint(endpoint)
 
 	// fetch the odin app
 	app, err := odin.App(appName)
@@ -39,8 +47,9 @@ func Add(envModel *models.Env, appName, alias string) error {
 	}
 
 	envModel.Links[alias] = models.Link{
-		ID:   app.ID,
-		Name: app.Name,
+		ID:   		app.ID,
+		Name: 		app.Name,
+		Endpoint: endpoint,
 	}
 
 	if err := envModel.Save(); err != nil {

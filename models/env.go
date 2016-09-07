@@ -22,8 +22,9 @@ type Env struct {
 
 // Link ...
 type Link struct {
-	ID   string
-	Name string
+	ID   			string
+	Name 			string
+	Endpoint 	string
 }
 
 // IsNew returns true if the Env hasn't been created yet

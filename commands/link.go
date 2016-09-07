@@ -56,13 +56,15 @@ an alias. If no alias is provided, 'default' is assumed.
 
 	// linkCmdFlags ...
 	linkCmdFlags = struct {
-		alias string
+		alias 		string
+		endpoint 	string
 	}{}
 )
 
 //
 func init() {
 	LinkCmd.PersistentFlags().StringVarP(&linkCmdFlags.alias, "alias", "a", "", "alias")
+	LinkCmd.PersistentFlags().StringVarP(&linkCmdFlags.endpoint, "endpoint", "e", "", "endpoint")
 
 	LinkCmd.AddCommand(LinkAddCmd)
 	LinkCmd.AddCommand(LinkListCmd)
@@ -72,12 +74,14 @@ func init() {
 // linkAddFn ...
 func linkAddFn(ccmd *cobra.Command, args []string) {
 	env, _ := models.FindEnvByID(config.EnvID())
-	// TODO: validate env?
+	
 	if len(args) != 1 {
-		fmt.Printf("TODO: message: i need an app name to link to")
+		fmt.Printf("\n! Please provide an app name to link to\n\n")
+		return
 	}
 
-	display.CommandErr(link.Add(env, args[0], linkCmdFlags.alias))
+	err := link.Add(env, args[0], linkCmdFlags.alias, linkCmdFlags.endpoint)
+	display.CommandErr(err)
 }
 
 // linkListFn ...

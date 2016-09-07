@@ -6,7 +6,9 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/commands/steps"
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
@@ -27,8 +29,9 @@ production data using your local client of choice.
 
 	// tunnelCmdFlags ...
 	tunnelCmdFlags = struct {
-		app  string
-		port string
+		app  			string
+		port 			string
+		endpoint 	string
 	}{}
 )
 
@@ -36,6 +39,7 @@ production data using your local client of choice.
 func init() {
 	TunnelCmd.Flags().StringVarP(&tunnelCmdFlags.app, "app", "a", "", "name or alias of a production app")
 	TunnelCmd.Flags().StringVarP(&tunnelCmdFlags.port, "port", "p", "", "local port to start listening on")
+	TunnelCmd.Flags().StringVarP(&tunnelCmdFlags.endpoint, "endpoint", "e", "", "api endpoint")
 }
 
 // tunnelFn ...
@@ -55,12 +59,15 @@ ex: nanobox tunnel <container>
 		return
 	}
 
+	env, _ := models.FindEnvByID(config.EnvID())
+
 	// set the meta arguments to be used in the processor and run the processor
 	tunnelConfig := processors.TunnelConfig{
-		App:       tunnelCmdFlags.app,
-		Port:      tunnelCmdFlags.port,
-		Container: args[0],
+		App:       	tunnelCmdFlags.app,
+		Port:      	tunnelCmdFlags.port,
+		Container: 	args[0],
+		Endpoint:		tunnelCmdFlags.endpoint,
 	}
 
-	display.CommandErr(processors.Tunnel(tunnelConfig))
+	display.CommandErr(processors.Tunnel(env, tunnelConfig))
 }

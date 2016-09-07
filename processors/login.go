@@ -12,7 +12,7 @@ import (
 )
 
 // Process ...
-func Login(username, password string) error {
+func Login(username, password, endpoint string) error {
 
 	// request Username/Password if missing
 	if username == "" {
@@ -29,6 +29,9 @@ func Login(username, password string) error {
 		password = pass
 	}
 
+	// set the odin endpoint
+	odin.SetEndpoint(endpoint)
+
 	// verify that the user exists
 	token, err := odin.Auth(username, password)
 	if err != nil {
@@ -37,7 +40,10 @@ func Login(username, password string) error {
 	}
 
 	// store the user token
-	auth := models.Auth{Key: token}
+	auth := models.Auth{
+		Endpoint: endpoint,
+		Key: token,
+	}
 	if auth.Save() != nil {
 		return fmt.Errorf("unable to save user authentication")
 	}

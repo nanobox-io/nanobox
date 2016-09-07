@@ -23,9 +23,10 @@ var (
 
 	// deployCmdFlags ...
 	deployCmdFlags = struct {
-		app     string
-		message string
-		force   bool
+		app     	string
+		message 	string
+		force   	bool
+		endpoint 	string
 	}{}
 )
 
@@ -34,6 +35,7 @@ func init() {
 	DeployCmd.Flags().BoolVarP(&deployCmdFlags.force, "force", "", false, "force the deploy even if you have used this build on a previous deploy")
 	DeployCmd.Flags().StringVarP(&deployCmdFlags.app, "app", "a", "", "message to accompany this command")
 	DeployCmd.Flags().StringVarP(&deployCmdFlags.message, "message", "m", "", "message to accompany this command")
+	DeployCmd.Flags().StringVarP(&deployCmdFlags.endpoint, "endpoint", "e", "", "api endpoint")
 }
 
 // deployFn ...
@@ -42,15 +44,16 @@ func deployFn(ccmd *cobra.Command, args []string) {
 	// TODO: make sure the environmetn is setup
 
 	deployConfig := processors.DeployConfig{
-		App:     deployCmdFlags.app,
-		Message: deployCmdFlags.message,
-		Force:   deployCmdFlags.force,
+		App:     	deployCmdFlags.app,
+		Message: 	deployCmdFlags.message,
+		Force:   	deployCmdFlags.force,
+		Endpoint: deployCmdFlags.endpoint,
 	}
 
 	if deployConfig.App == "" {
 		deployConfig.App = "default"
 	}
-
+	
 	// set the meta arguments to be used in the processor and run the processor
 	display.CommandErr(processors.Deploy(env, deployConfig))
 }

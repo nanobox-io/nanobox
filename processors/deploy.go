@@ -8,6 +8,7 @@ import (
 	"github.com/nanobox-io/nanobox/helpers"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/code"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/odin"
 )
@@ -15,9 +16,30 @@ import (
 //
 func Deploy(envModel *models.Env, deployConfig DeployConfig) error {
 
-	appID, err := helpers.OdinAppIDByAlias(deployConfig.App)
-	if err != nil {
-		// the message will have already been printed in the helper
+	appID := deployConfig.App
+
+	// fetch the link
+	link, ok := envModel.Links[deployConfig.App]
+	if ok {
+		// set the odin endpoint
+		odin.SetEndpoint(link.Endpoint)
+		// set the app id
+		appID = link.ID
+	}
+
+	// if an endpoint was provided as a flag, override the linked endpoint
+	if deployConfig.Endpoint != "" {
+		odin.SetEndpoint(deployConfig.Endpoint)
+	}
+	
+	// set the app id to the directory name if it's default
+	if appID == "default" {
+		appID = config.AppName()
+	}
+	
+	// validate access to the app
+	if err := helpers.ValidateOdinApp(appID); err != nil {
+		// the validation already printed the error
 		return nil
 	}
 

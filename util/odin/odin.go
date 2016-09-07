@@ -13,8 +13,33 @@ import (
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util/config"
 )
+
+const (
+	NANOBOX  = "https://api.nanobox.io/v1/"
+	BONESALT = "https://api.bonesalt.com/v1/"
+	DEV      = "https://api.nanobox.dev/v1/"
+	SIM      = "https://api.nanobox.sim/v1/"
+)
+
+var (
+	// set the default endpoint to nanobox
+	endpoint = NANOBOX
+)
+
+// sets the odin endpoint
+func SetEndpoint(stage string) {
+	switch stage {
+	case "bonesalt":
+		endpoint = BONESALT
+	case "dev":
+		endpoint = DEV
+	case "sim":
+		endpoint = SIM
+	default:
+		endpoint = NANOBOX
+	}
+}
 
 // Auth ...
 func Auth(username, password string) (string, error) {
@@ -114,7 +139,6 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 		rbodyReader = bytes.NewBuffer(jsonBytes)
 	}
 
-	productionUrl := config.Viper().GetString("production_url")
 	auth, _ := models.LoadAuth()
 
 	if params == nil {
@@ -123,8 +147,8 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 	params.Set("auth_token", auth.Key)
 
 	//
-	lumber.Debug("%s%s?%s\n", productionUrl, path, params.Encode())
-	req, err := http.NewRequest(method, fmt.Sprintf("%s%s?%s", productionUrl, path, params.Encode()), rbodyReader)
+	lumber.Debug("%s%s?%s\n", endpoint, path, params.Encode())
+	req, err := http.NewRequest(method, fmt.Sprintf("%s%s?%s", endpoint, path, params.Encode()), rbodyReader)
 	if err != nil {
 		return err
 	}
