@@ -9,7 +9,7 @@ import (
 	printutil "github.com/sdomino/go-util/print"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util/format"
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 // MistListen ...
@@ -44,7 +44,7 @@ waiting for output...
 	for {
 		select {
 		case msg := <-client.Messages():
-			printutil.Color(format.Message(msg))
+			printutil.Color(display.FormatLogMessage(msg))
 		case <-sigChan:
 			return nil
 		}

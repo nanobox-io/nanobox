@@ -1,5 +1,4 @@
-// Package format ...
-package format
+package display
 
 import (
 	"encoding/json"
@@ -10,8 +9,8 @@ import (
 	"github.com/nanopack/mist/core"
 )
 
-// Log represents the data comming back from a mist message (mist.Message.Data)
-type Log struct {
+// Entry represents the data comming back from a mist message (mist.Message.Data)
+type Entry struct {
 	Time     time.Time `json:"time"`     // "2016-09-07T20:33:34.446275741Z"
 	UTime    int       `json:"utime"`    // 1473280414446275741
 	ID       string    `json:"id"`       // "mist"
@@ -30,15 +29,15 @@ var (
 	logColors = [10]string{"green", "yellow", "blue", "magenta", "cyan", "light_green", "light_yellow", "light_blue", "light_magenta", "light_cyan"}
 )
 
-// Message takes a Logvac/Mist and formats it into a pretty message to be
+// FormatLogMessage takes a Logvac/Mist and formats it into a pretty message to be
 // output to the terminal
-func Message(msg mist.Message) string {
+func FormatLogMessage(msg mist.Message) string {
 
 	// set the time output format
 	layout := "Mon Jan 02 15:04:05 2006" // time.RFC822
 
-	// unmarshal the message data as a Log
-	log := Log{}
+	// unmarshal the message data as an Entry
+	log := Entry{}
 	if err := json.Unmarshal([]byte(msg.Data), &log); err != nil {
 		return fmt.Sprintf("[light_red]%s :: %s[reset]", time.Now().Format(layout), "Failed to process log...")
 	}
