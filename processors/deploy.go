@@ -20,7 +20,7 @@ func Deploy(envModel *models.Env, deployConfig DeployConfig) error {
 		// the message will have already been printed in the helper
 		return nil
 	}
-	
+
 	warehouseConfig, err := getWarehouseConfig(envModel, appID)
 	if err != nil {
 		return fmt.Errorf("unable to generate warehouse config: %s", err.Error())

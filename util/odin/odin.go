@@ -147,7 +147,7 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 	if res.StatusCode == 404 {
 		return fmt.Errorf("Not Found")
 	}
-	
+
 	if res.StatusCode == 500 {
 		return fmt.Errorf("Internal Server Error")
 	}

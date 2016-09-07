@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 	"runtime"
 	"runtime/debug"
+	"strings"
 
-	"github.com/jcelliott/lumber"
 	"github.com/bugsnag/bugsnag-go"
+	"github.com/jcelliott/lumber"
 	"github.com/timehop/go-mixpanel"
 
 	"github.com/nanobox-io/nanobox/commands"
@@ -23,13 +23,14 @@ var mixpanelToken string
 
 type mixLog struct {
 }
+
 func (mixLog) Printf(fmt string, v ...interface{}) {
 	lumber.Info(fmt, v...)
 }
 
 // main
 func main() {
-	
+
 	// setup a file logger, this will be replaced in verbose mode.
 	fileLogger, err := lumber.NewTruncateLogger(filepath.ToSlash(filepath.Join(config.GlobalDir(), "nanobox.log")))
 	if err != nil {
@@ -75,8 +76,8 @@ func main() {
 
 func setupBugsnag() {
 	bugsnag.Configure(bugsnag.Configuration{
-		APIKey: bugsnagToken,
-		Logger: mixLog{},
+		APIKey:      bugsnagToken,
+		Logger:      mixLog{},
 		Synchronous: true,
 	})
 }
@@ -88,11 +89,11 @@ func reportMixpanel() {
 	token := config.Viper().GetString("token")
 
 	err := mx.Track(token, "command", mixpanel.Properties{
-		"os": runtime.GOOS, 
-		"provider": config.Viper().GetString("provider"),
+		"os":         runtime.GOOS,
+		"provider":   config.Viper().GetString("provider"),
 		"mount-type": config.Viper().GetString("mount-type"),
-		"args": args,
-		"cpus": runtime.NumCPU(),
+		"args":       args,
+		"cpus":       runtime.NumCPU(),
 	})
 	if err != nil {
 		lumber.Error("reportMixpanel(): %s", err)

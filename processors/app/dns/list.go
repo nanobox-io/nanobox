@@ -12,12 +12,12 @@ func List(a *models.App) error {
 
 	// print the header
 	fmt.Printf("\nDNS Aliases\n")
-	
+
 	// iterate
 	for _, domain := range dns.List(a.ID) {
 		fmt.Printf("  %s\n", domain.Domain)
 	}
-	
+
 	fmt.Println()
 
 	return nil

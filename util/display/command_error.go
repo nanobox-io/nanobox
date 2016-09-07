@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jcelliott/lumber"
 	"github.com/bugsnag/bugsnag-go"
-	
+	"github.com/jcelliott/lumber"
+
 	"github.com/nanobox-io/nanobox/util/config"
 )
 
@@ -22,7 +22,7 @@ func CommandErr(err error) {
 		if bugsnagErr != nil {
 			lumber.Error("Bugsnag error: %s", bugsnagErr)
 		}
-		
+
 		fmt.Printf(`
 
 Whoops, looks like we encountered a small error:

@@ -10,10 +10,9 @@ import (
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox-boxfile"
 
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/models"
-
 )
 
 var ignoreFile = []string{".git", ".hg", ".svn", ".bzr"}
@@ -46,7 +45,7 @@ func Watch(container, path string) error {
 	if err != nil {
 		// if it fails display a message and try the slow one
 		lumber.Info("Error occured in fast notify watcher: %s", err.Error())
-		
+
 		// print the warning
 		fmt.Printf("\n-------------------------------------------------------\n\n")
 		fmt.Printf("Uh oh, the live filesystem watcher has panic'ed.\n")

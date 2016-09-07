@@ -66,7 +66,7 @@ func init() {
 func evarAddFn(ccmd *cobra.Command, args []string) {
 	app, _ := models.FindAppBySlug(config.EnvID(), "sim")
 	evars := map[string]string{}
-	
+
 	for _, arg := range args {
 		// define a function that will allow us to
 		// split on ',' or ' '
@@ -99,12 +99,12 @@ func evarListFn(ccmd *cobra.Command, args []string) {
 func evarRemoveFn(ccmd *cobra.Command, args []string) {
 	app, _ := models.FindAppBySlug(config.EnvID(), "sim")
 	keys := []string{}
-	
+
 	for _, arg := range args {
 		for _, key := range strings.Split(arg, ",") {
 			keys = append(keys, strings.ToUpper(key))
 		}
 	}
-	
+
 	display.CommandErr(evar.Remove(app, keys))
 }
