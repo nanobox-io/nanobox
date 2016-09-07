@@ -11,6 +11,7 @@ import (
 
 	"github.com/nanobox-io/nanobox/commands"
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util/update"
 )
 
 // main
@@ -44,6 +45,11 @@ func main() {
 			os.Exit(1)
 		}
 	}()
+
+	// check to see if nanobox needs to be updated
+	if err := update.Check(); err != nil {
+		fmt.Println("Nanobox was unable to update because of the following error:\n", err.Error())
+	}
 
 	//
 	commands.NanoboxCmd.Execute()

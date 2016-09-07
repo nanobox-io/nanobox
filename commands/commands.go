@@ -20,6 +20,7 @@ var (
 	// display level trace
 	displayTraceMode bool
 
+	//
 	internalCommand bool
 
 	// NanoboxCmd ...
@@ -85,5 +86,4 @@ func init() {
 	NanoboxCmd.AddCommand(DestroyCmd)
 	NanoboxCmd.AddCommand(StartCmd)
 	NanoboxCmd.AddCommand(StopCmd)
-
 }
