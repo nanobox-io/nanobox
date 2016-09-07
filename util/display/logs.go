@@ -37,20 +37,19 @@ func FormatLogMessage(msg mist.Message) string {
 	layout := "Mon Jan 02 15:04:05 2006" // time.RFC822
 
 	// unmarshal the message data as an Entry
-	log := Entry{}
-	if err := json.Unmarshal([]byte(msg.Data), &log); err != nil {
-		return fmt.Sprintf("[light_red]%s :: %s[reset]", time.Now().Format(layout), "Failed to process log...")
+	entry := Entry{}
+	if err := json.Unmarshal([]byte(msg.Data), &entry); err != nil {
+		return fmt.Sprintf("[light_red]%s :: %s[reset]", time.Now().Format(layout), "Failed to process entry...")
 	}
 
 	//
-	shortDateTime := fmt.Sprintf(log.Time.Format(layout))
-	entry := regexp.MustCompile(`\s?\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+Z|\s?\d{4}-\d{2}-\d{2}[_T]\d{2}:\d{2}:\d{2}.\d{5}|\s?\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}|\s?\[\d{2}\/\w{3}\/\d{4}\s\d{2}:\d{2}:\d{2}\]?`).ReplaceAllString(log.Message, "")
+	fmtMsg := regexp.MustCompile(`\s?\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d+Z|\s?\d{4}-\d{2}-\d{2}[_T]\d{2}:\d{2}:\d{2}.\d{5}|\s?\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}|\s?\[\d{2}\/\w{3}\/\d{4}\s\d{2}:\d{2}:\d{2}\]?`).ReplaceAllString(entry.Message, "")
 
-	// for each new log.Tag assign it a color to be used when output
-	if _, ok := logProcesses[log.Tag]; !ok {
-		logProcesses[log.Tag] = logColors[len(logProcesses)%len(logColors)]
+	// for each new entry.Tag assign it a color to be used when output
+	if _, ok := logProcesses[entry.Tag]; !ok {
+		logProcesses[entry.Tag] = logColors[len(logProcesses)%len(logColors)]
 	}
 
-	// return our pretty log
-	return fmt.Sprintf("[%s]%s %s (%s) :: %s[reset]", logProcesses[log.Tag], shortDateTime, log.ID, log.Tag, entry)
+	// return our pretty entry
+	return fmt.Sprintf("[%s]%s %s (%s) :: %s[reset]", logProcesses[entry.Tag], fmt.Sprintf(entry.Time.Format(layout)), entry.ID, entry.Tag, fmtMsg)
 }
