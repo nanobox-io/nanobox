@@ -8,6 +8,7 @@ import (
 	"github.com/nanobox-io/nanobox/helpers"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/code"
+	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/odin"
 )
 
@@ -41,6 +42,8 @@ func Deploy(envModel *models.Env, deployConfig DeployConfig) error {
 		lumber.Error("deploy:models:Env:Save(): %s", err.Error())
 		return fmt.Errorf("failed to save build ID: %s", err.Error())
 	}
+
+	fmt.Printf("%s Deploy was successufully submitted! Check your dashboard for progress.\n", display.TaskComplete)
 
 	return nil
 }

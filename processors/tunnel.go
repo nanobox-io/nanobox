@@ -3,18 +3,17 @@ package processors
 import (
 	"fmt"
 
-	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/helpers"
 	"github.com/nanobox-io/nanobox/util/nanoagent"
 	"github.com/nanobox-io/nanobox/util/odin"
 )
 
 func Tunnel(tunnelConfig TunnelConfig) error {
 
-	// find the app id
-	appID := models.AppIDByAlias(tunnelConfig.App)
-	if appID == "" {
-		// todo: better messaging informing that we couldn't find a link
-		return fmt.Errorf("app is not linked")
+	appID, err := helpers.OdinAppIDByAlias(tunnelConfig.App)
+	if err != nil {
+		// the message will have already been printed in the helper
+		return nil
 	}
 
 	// initiate a tunnel session with odin

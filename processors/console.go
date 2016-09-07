@@ -3,18 +3,17 @@ package processors
 import (
 	"fmt"
 
-	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/helpers"
 	"github.com/nanobox-io/nanobox/util/nanoagent"
 	"github.com/nanobox-io/nanobox/util/odin"
 )
 
 func Console(app, host string) error {
 
-	// lookup the app by the alias
-	appID := models.AppIDByAlias(app)
-	if appID == "" {
-		// todo: better messaging informing that we couldn't find a link
-		return fmt.Errorf("app is not linked")
+	appID, err := helpers.OdinAppIDByAlias(app)
+	if err != nil {
+		// the message will have already been printed in the helper
+		return nil
 	}
 
 	// initiate a console session with odin
