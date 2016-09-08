@@ -10,10 +10,12 @@ import (
 type Provider interface {
 	Status() string
 	IsReady() bool
+	IsInstalled() bool
 	HostShareDir() string
 	HostMntDir() string
 	HostIP() (string, error)
 	Valid() error
+	Install() error
 	Create() error
 	Reboot() error
 	Stop() error
@@ -77,6 +79,27 @@ func Status() string {
 	}
 
 	return p.Status()
+}
+
+func IsInstalled() bool {
+
+	p, err := fetchProvider()
+	if err != nil {
+		return false
+	}
+
+	return p.IsInstalled()
+}
+
+// Install ...
+func Install() error {
+
+	p, err := fetchProvider()
+	if err != nil {
+		return err
+	}
+
+	return p.Install()
 }
 
 // Create ...
@@ -319,7 +342,6 @@ func Run(command []string) ([]byte, error) {
 	return p.Run(command)
 }
 
-// Run a command inside of the provider context
 func IsReady() bool {
 
 	p, err := fetchProvider()

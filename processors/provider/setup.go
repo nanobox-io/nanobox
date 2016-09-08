@@ -33,6 +33,12 @@ func Setup() error {
 		return nil
 	}
 
+	// install the provider (VM)
+	if err := provider.Install(); err != nil {
+		lumber.Error("provider:Setup:provider.Install(): %s", err.Error())
+		return fmt.Errorf("failed to install the provider: %s", err.Error())
+	}
+
 	// create the provider (VM)
 	if err := provider.Create(); err != nil {
 		lumber.Error("provider:Setup:provider.Create(): %s", err.Error())

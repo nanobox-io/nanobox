@@ -6,18 +6,23 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"runtime"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"regexp"
 	"strings"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
+	"github.com/nanobox-io/nanobox/util/fileutil"
 	"github.com/nanobox-io/nanobox/util/vbox"
 )
 
 var (
-	vboxManageCmd = vbox.DetectVBoxManageCmd()
+	vboxManageCmd    = vbox.DetectVBoxManageCmd()
+	dockerMachineCmd = filepath.ToSlash(filepath.Join(config.BinDir(), "docker-machine"))
 )
 
 // DockerMachine ...
@@ -31,7 +36,7 @@ func init() {
 // Valid ensures docker-machine is installed and available
 func (machine DockerMachine) Valid() error {
 
-	cmd := exec.Command("docker-machine", "version")
+	cmd := exec.Command(dockerMachineCmd, "version")
 
 	//
 	if err := cmd.Run(); err != nil {
@@ -42,9 +47,64 @@ func (machine DockerMachine) Valid() error {
 }
 
 func (machine DockerMachine) Status() string {
-	cmd := exec.Command("docker-machine", "status", "nanobox")
+	cmd := exec.Command(dockerMachineCmd, "status", "nanobox")
 	output, _ := cmd.CombinedOutput()
 	return strings.TrimSpace(string(output))
+}
+
+// Returns true if dockermachine and docker are already installed
+func (machine DockerMachine) IsInstalled() bool {
+
+	cmd := dockerMachineCmd
+	
+	if runtime.GOOS == "windows" {
+		cmd = fmt.Sprintf("%s.exe", cmd)
+	}
+
+	// check to see if docker-machine is installed
+	if _, err := os.Stat(cmd); os.IsNotExist(err) {
+  	return false
+	}
+	
+	return true
+}
+
+// Installs docker-machine and docker binaries
+func (machine DockerMachine) Install() error {
+	
+	// short-circuit if we're already installed
+	if machine.IsInstalled() {
+		return nil
+	}
+	
+	display.StartTask("Downloading docker-machine")
+	defer display.StopTask()
+	
+	// download the binary
+	url := dockerMachineURL()
+	path := dockerMachineCmd
+	
+	// if windows, add an .exe
+	if runtime.GOOS == "windows" {
+		path = fmt.Sprintf("%s.exe", path)
+	}
+	
+	// download the executable
+	if err := fileutil.Download(url, path); err != nil {
+		display.ErrorTask()
+		return fmt.Errorf("failed to download docker-machine: %s", err.Error())
+	}
+	
+	// make it executable (unless it's windows)
+	if runtime.GOOS != "windows" {
+		// make new CLI executable
+		if err := os.Chmod(path, 0755); err != nil {
+			display.ErrorTask()
+			return fmt.Errorf("failed to set permissions: ", err.Error())
+		}
+	}
+	
+	return nil
 }
 
 // Create creates the docker-machine vm
@@ -56,7 +116,7 @@ func (machine DockerMachine) Create() error {
 	}
 
 	cmd := []string{
-		"docker-machine",
+		dockerMachineCmd,
 		"create",
 		"--driver",
 		"virtualbox",
@@ -99,7 +159,7 @@ func (machine DockerMachine) Stop() error {
 	}
 
 	cmd := []string{
-		"docker-machine",
+		dockerMachineCmd,
 		"stop",
 		"nanobox",
 	}
@@ -129,7 +189,7 @@ func (machine DockerMachine) Destroy() error {
 	}
 
 	cmd := []string{
-		"docker-machine",
+		dockerMachineCmd,
 		"rm",
 		"-f",
 		"nanobox",
@@ -159,7 +219,7 @@ func (machine DockerMachine) Start() error {
 	if !machine.IsReady() {
 
 		cmd := []string{
-			"docker-machine",
+			dockerMachineCmd,
 			"start",
 			"nanobox",
 		}
@@ -183,7 +243,7 @@ func (machine DockerMachine) Start() error {
 	if !machine.hasNetwork() {
 
 		cmd := []string{
-			"docker-machine",
+			dockerMachineCmd,
 			"ssh",
 			"nanobox",
 			"docker",
@@ -213,7 +273,7 @@ func (machine DockerMachine) Start() error {
 	}
 
 	cmd := []string{
-		"docker-machine",
+		dockerMachineCmd,
 		"ssh",
 		"nanobox",
 		"sudo",
@@ -276,7 +336,7 @@ func (machine DockerMachine) DockerEnv() error {
 	}{}
 
 	// fetch the docker-machine endpoint information
-	cmd := exec.Command("docker-machine", "inspect", "nanobox")
+	cmd := exec.Command(dockerMachineCmd, "inspect", "nanobox")
 	b, err := cmd.CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("%s: %s", b, err)
@@ -307,7 +367,7 @@ func (machine DockerMachine) DockerEnv() error {
 // Touch adds an IP into the docker-machine vm for host access
 func (machine DockerMachine) Touch(file string) error {
 	cmd := []string{
-		"docker-machine",
+		dockerMachineCmd,
 		"ssh",
 		"nanobox",
 		"sudo",
@@ -334,7 +394,7 @@ func (machine DockerMachine) AddIP(ip string) error {
 	}
 
 	cmd := []string{
-		"docker-machine",
+		dockerMachineCmd,
 		"ssh",
 		"nanobox",
 		"sudo",
@@ -366,7 +426,7 @@ func (machine DockerMachine) RemoveIP(ip string) error {
 	}
 
 	cmd := []string{
-		"docker-machine",
+		dockerMachineCmd,
 		"ssh",
 		"nanobox",
 		"sudo",
@@ -392,7 +452,7 @@ func (machine DockerMachine) RemoveIP(ip string) error {
 func (dockermachine DockerMachine) SetDefaultIP(ip string) error {
 
 	cmd := []string{
-		"docker-machine",
+		dockerMachineCmd,
 		"ssh",
 		"nanobox",
 		"sudo",
@@ -424,7 +484,7 @@ func (machine DockerMachine) AddNat(ip, containerIP string) error {
 	if !machine.hasNatPreroute(ip, containerIP) {
 
 		cmd := []string{
-			"docker-machine",
+			dockerMachineCmd,
 			"ssh",
 			"nanobox",
 			"sudo",
@@ -455,7 +515,7 @@ func (machine DockerMachine) AddNat(ip, containerIP string) error {
 	if !machine.hasNatPostroute(ip, containerIP) {
 
 		cmd := []string{
-			"docker-machine",
+			dockerMachineCmd,
 			"ssh",
 			"nanobox",
 			"sudo",
@@ -492,7 +552,7 @@ func (machine DockerMachine) RemoveNat(ip, containerIP string) error {
 	if machine.hasNatPreroute(ip, containerIP) {
 
 		cmd := []string{
-			"docker-machine",
+			dockerMachineCmd,
 			"ssh",
 			"nanobox",
 			"sudo",
@@ -523,7 +583,7 @@ func (machine DockerMachine) RemoveNat(ip, containerIP string) error {
 	if machine.hasNatPostroute(ip, containerIP) {
 
 		cmd := []string{
-			"docker-machine",
+			dockerMachineCmd,
 			"ssh",
 			"nanobox",
 			"sudo",
@@ -649,7 +709,7 @@ func (machine DockerMachine) RemoveShare(local, host string) error {
 func (machine DockerMachine) HasMount(mount string) bool {
 
 	cmd := []string{
-		"docker-machine",
+		dockerMachineCmd,
 		"ssh",
 		"nanobox",
 		"sudo",
@@ -677,7 +737,7 @@ func (machine DockerMachine) AddMount(local, host string) error {
 
 		// create folder
 		cmd := []string{
-			"docker-machine",
+			dockerMachineCmd,
 			"ssh",
 			"nanobox",
 			"sudo",
@@ -694,7 +754,7 @@ func (machine DockerMachine) AddMount(local, host string) error {
 
 		// mount
 		cmd = []string{
-			"docker-machine",
+			dockerMachineCmd,
 			"ssh",
 			"nanobox",
 			"sudo",
@@ -726,7 +786,7 @@ func (machine DockerMachine) RemoveMount(_, host string) error {
 	if machine.HasMount(host) {
 
 		cmd := []string{
-			"docker-machine",
+			dockerMachineCmd,
 			"ssh",
 			"nanobox",
 			"sudo",
@@ -757,7 +817,7 @@ func (machine DockerMachine) HostIP() (string, error) {
 	}{}
 
 	// fetch the docker-machine endpoint information
-	cmd := exec.Command("docker-machine", "inspect", "nanobox")
+	cmd := exec.Command(dockerMachineCmd, "inspect", "nanobox")
 	b, err := cmd.CombinedOutput()
 	if err != nil {
 		return "", fmt.Errorf("%s: %s", b, err)
@@ -776,7 +836,7 @@ func (machine DockerMachine) HostIP() (string, error) {
 func (machine DockerMachine) Run(command []string) ([]byte, error) {
 
 	// All commands need to be run in the docker machine, so we create a prefix
-	context := []string{"docker-machine", "ssh", "nanobox"}
+	context := []string{dockerMachineCmd, "ssh", "nanobox"}
 
 	// now we can generate a run command combining the context with the command
 	run := append(context, command...)
@@ -796,7 +856,7 @@ func (machine DockerMachine) regenerateCert() error {
 
 	display.StartTask("Regenerating Docker certs")
 
-	cmd := exec.Command("docker-machine", "regenerate-certs", "-f", "nanobox")
+	cmd := exec.Command(dockerMachineCmd, "regenerate-certs", "-f", "nanobox")
 	b, err := cmd.CombinedOutput()
 	if err != nil {
 		display.ErrorTask()
@@ -810,7 +870,7 @@ func (machine DockerMachine) regenerateCert() error {
 // isCreated ...
 func (machine DockerMachine) isCreated() bool {
 	// docker-machine status nanobox
-	cmd := exec.Command("docker-machine", "status", "nanobox")
+	cmd := exec.Command(dockerMachineCmd, "status", "nanobox")
 	output, err := cmd.CombinedOutput()
 
 	if err != nil {
@@ -828,7 +888,7 @@ func (machine DockerMachine) isCreated() bool {
 func (machine DockerMachine) hasNetwork() bool {
 
 	cmd := []string{
-		"docker-machine",
+		dockerMachineCmd,
 		"ssh",
 		"nanobox",
 		"docker",
@@ -853,8 +913,14 @@ func (machine DockerMachine) hasNetwork() bool {
 
 // IsReady ...
 func (machine DockerMachine) IsReady() bool {
+	
+	// return false right away if docker-machine isn't installed
+	if !machine.IsInstalled() {
+		return false
+	}
+	
 	// docker-machine status nanobox
-	cmd := exec.Command("docker-machine", "status", "nanobox")
+	cmd := exec.Command(dockerMachineCmd, "status", "nanobox")
 	output, err := cmd.CombinedOutput()
 	if err != nil {
 		return false
@@ -872,7 +938,7 @@ func (machine DockerMachine) IsReady() bool {
 func (machine DockerMachine) hasIP(ip string) bool {
 
 	cmd := []string{
-		"docker-machine",
+		dockerMachineCmd,
 		"ssh",
 		"nanobox",
 		"ip",
@@ -900,7 +966,7 @@ func (machine DockerMachine) hasIP(ip string) bool {
 func (machine DockerMachine) hasNatPreroute(hostIP, containerIP string) bool {
 
 	cmd := []string{
-		"docker-machine",
+		dockerMachineCmd,
 		"ssh",
 		"nanobox",
 		"sudo",
@@ -935,7 +1001,7 @@ func (machine DockerMachine) hasNatPreroute(hostIP, containerIP string) bool {
 func (machine DockerMachine) hasNatPostroute(hostIP, containerIP string) bool {
 
 	cmd := []string{
-		"docker-machine",
+		dockerMachineCmd,
 		"ssh",
 		"nanobox",
 		"sudo",
@@ -993,4 +1059,20 @@ func (machine DockerMachine) changedIP() bool {
 	}()
 
 	return provider.HostIP != newIP
+}
+
+func dockerMachineURL() string {
+	
+	download := "https://github.com/docker/machine/releases/download/v0.8.1"
+	
+	switch runtime.GOOS {
+	case "darwin":
+		download = fmt.Sprintf("%s/docker-machine-Darwin-x86_64", download)
+	case "linux":
+		download = fmt.Sprintf("%s/docker-machine-Linux-x86_64", download)
+	case "windows":
+		download = fmt.Sprintf("%s/docker-machine-Windows-x86_64.exe", download)
+	}
+	
+	return download
 }

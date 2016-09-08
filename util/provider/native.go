@@ -44,6 +44,14 @@ func (native Native) Status() string {
 	return "Running"
 }
 
+func (native Native) IsInstalled() bool {
+	return true
+}
+
+func (native Native) Install() error {
+	return nil
+}
+
 // Create does nothing for native
 func (native Native) Create() error {
 	// TODO: maybe some setup stuff???
