@@ -86,25 +86,25 @@ func prepareEnvironment(containerID string) error {
 
 	// run the user hook
 	if _, err := hookit.RunUserHook(containerID, hook_generator.UserPayload()); err != nil {
-		err = fmt.Errorf("failed to run user hook: %s", err.Error())
+		display.ErrorTask()
 		return runDebugSession(containerID, err)
 	}
 
 	// run the configure hook
 	if _, err := hookit.RunConfigureHook(containerID, hook_generator.ConfigurePayload()); err != nil {
-		err = fmt.Errorf("failed to run configure hook: %s", err.Error())
+		display.ErrorTask()
 		return runDebugSession(containerID, err)
 	}
 
 	// run the fetch hook
 	if _, err := hookit.RunFetchHook(containerID, hook_generator.FetchPayload()); err != nil {
-		err = fmt.Errorf("failed to run fetch hook: %s", err.Error())
+		display.ErrorTask()
 		return runDebugSession(containerID, err)
 	}
 
 	// run the setup hook
 	if _, err := hookit.RunSetupHook(containerID, hook_generator.SetupPayload()); err != nil {
-		err = fmt.Errorf("failed to run setup hook: %s", err.Error())
+		display.ErrorTask()
 		return runDebugSession(containerID, err)
 	}
 
@@ -119,7 +119,7 @@ func gatherRequirements(envModel *models.Env, containerID string) error {
 	// run the boxfile hook
 	boxOutput, err := hookit.RunBoxfileHook(containerID, hook_generator.BoxfilePayload())
 	if err != nil {
-		err = fmt.Errorf("failed to run boxfile hook: %s", err.Error())
+		display.ErrorTask()
 		return runDebugSession(containerID, err)
 	}
 
@@ -127,6 +127,7 @@ func gatherRequirements(envModel *models.Env, containerID string) error {
 	envModel.BuiltBoxfile = boxOutput
 	envModel.BuiltID = util.RandomString(30)
 	if err := envModel.Save(); err != nil {
+		display.ErrorTask()
 		lumber.Error("code:Build:models:Env:Save(): %s", err.Error())
 		return fmt.Errorf("failed to persist build boxfile to db: %s", err.Error())
 	}
@@ -141,7 +142,7 @@ func installRuntimes(containerID string) error {
 
 	// run the prepare hook
 	if _, err := hookit.RunPrepareHook(containerID, hook_generator.PreparePayload()); err != nil {
-		err = fmt.Errorf("failed to run prepare hook: %s", err.Error())
+		display.ErrorTask()
 		return runDebugSession(containerID, err)
 	}
 
@@ -159,13 +160,13 @@ func compileCode(containerID string) error {
 
 	// run the compile hook
 	if _, err := hookit.RunCompileHook(containerID, hook_generator.CompilePayload()); err != nil {
-		err = fmt.Errorf("failed to run compile hook: %s", err.Error())
+		display.ErrorTask()
 		return runDebugSession(containerID, err)
 	}
 
 	// run the pack-app hook
 	if _, err := hookit.RunPackAppHook(containerID, hook_generator.PackAppPayload()); err != nil {
-		err = fmt.Errorf("failed to run pack-app hook: %s", err.Error())
+		display.ErrorTask()
 		return runDebugSession(containerID, err)
 	}
 
@@ -179,7 +180,7 @@ func packageBuild(containerID string) error {
 
 	// run the pack-build hook
 	if _, err := hookit.RunPackBuildHook(containerID, hook_generator.PackBuildPayload()); err != nil {
-		err = fmt.Errorf("failed to run pack-build hook: %s", err.Error())
+		display.ErrorTask()
 		return runDebugSession(containerID, err)
 	}
 
@@ -189,13 +190,13 @@ func packageBuild(containerID string) error {
 
 	// run the clean hook
 	if _, err := hookit.RunCleanHook(containerID, hook_generator.CleanPayload()); err != nil {
-		err = fmt.Errorf("failed to run clean hook: %s", err.Error())
+		display.ErrorTask()
 		return runDebugSession(containerID, err)
 	}
 
 	// run the pack-deploy hook
 	if _, err := hookit.RunPackDeployHook(containerID, hook_generator.PackDeployPayload()); err != nil {
-		err = fmt.Errorf("failed to run pack-deploy hook: %s", err.Error())
+		display.ErrorTask()
 		return runDebugSession(containerID, err)
 	}
 
