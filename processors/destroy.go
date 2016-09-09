@@ -2,10 +2,14 @@ package processors
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/processors/provider"
+	"github.com/nanobox-io/nanobox/processors/env"
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
@@ -23,18 +27,27 @@ func Destroy() error {
 	display.OpenContext("Uninstalling Nanobox")
 	defer display.CloseContext()
 
-	// todo: we need to make this process a bit more robust once a VM isn't
-	// our only provider. We won't be able to just "destroy" the provider once
-	// we're dealing with native providers. The following todos will address
-	// this scenario:
+	// init docker client
+	if err := provider.Init(); err != nil {
+		return fmt.Errorf("failed to init docker client: %s", err.Error())
+	}
 
-	// todo: iterate through the envs and destroy them
+	envModels, _ := models.AllEnvs()
+	for _, envModel := range envModels {
+		// iterate through the envs and destroy them
+		if err := env.Destroy(envModel); err != nil {
+			return fmt.Errorf("unable to remove environment: %s", err)
+		}
 
-	// todo: unmount (and remove the share for the env)
+		// unmount (and remove the share for the env)
+		if err := env.Unmount(envModel, false); err != nil {
+			return fmt.Errorf("unable to remove mounts: %s", err)
+		}
 
-	// todo: purge the installed docker images
+	}
 
 	// destroy the provider (VM)
+	//   this should remove the docker images
 	if err := provider.Destroy(); err != nil {
 		return fmt.Errorf("failed to uninstall the provider: %s", err.Error())
 	}
@@ -53,7 +66,7 @@ func purgeConfiguration() error {
 	defer display.StopTask()
 
 	// implode the global dir
-	if err := config.ImplodeGlobalDir(); err != nil {
+	if err := clearData(); err != nil {
 		lumber.Error("Destroy:Run:config.ImplodeGlobalDir(): %s", err.Error())
 		return fmt.Errorf("failed to purge the data directory: %s", err.Error())
 	}
@@ -85,3 +98,15 @@ func reExecPrivilegedDestroy() error {
 
 	return nil
 }
+
+// clearData will remove the global dir and everything inside
+func clearData() error {
+	dataFile := filepath.ToSlash(filepath.Join(config.GlobalDir(), "data.db"))
+
+	// remove the data.db 
+	if err := os.Remove(dataFile); err != nil {
+		return fmt.Errorf("failed to remove %s: %s", dataFile, err.Error())
+	}
+
+	return nil
+}	
