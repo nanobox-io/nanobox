@@ -38,7 +38,7 @@ func Run(stepNames ...string) func(ccmd *cobra.Command, args []string) {
 		for _, nr := range prereqs {
 			step := stepList[nr]
 
-			display.OpenContext("(%s %s)", os.Args[0], nr)
+			display.OpenContext("(nanobox %s)", nr)
 			step.cmd(ccmd, args)
 			display.CloseContext()
 		}

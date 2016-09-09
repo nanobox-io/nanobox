@@ -61,12 +61,7 @@ func (machine DockerMachine) IsInstalled() bool {
 		cmd = fmt.Sprintf("%s.exe", cmd)
 	}
 
-	// check to see if docker-machine is installed
-	if _, err := os.Stat(cmd); os.IsNotExist(err) {
-  	return false
-	}
-	
-	return true
+	return fileutil.Exists(cmd)
 }
 
 // Installs docker-machine and docker binaries

@@ -5,9 +5,10 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strings"
 
 	"github.com/nanobox-io/nanobox-boxfile"
+	
+	"github.com/nanobox-io/nanobox/util/fileutil"
 )
 
 // AppName ...
@@ -35,16 +36,20 @@ func EnvID() string {
 
 // NanoboxPath ...
 func NanoboxPath() string {
+	
 	programName := os.Args[0]
-
-	// find out the full path
-	cmd := exec.Command("which", programName)
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		// if which doesnt work fall back to just the program name
+	
+	// if args[0] was a path to nanobox already
+	if fileutil.Exists(programName) {
 		return programName
 	}
+	
+	// lookup the full path to nanobox
+	path, err := exec.LookPath(programName)
+	if err == nil {
+		return path
+	}
 
-	// trim off any whitespace
-	return strings.TrimSpace(string(output))
+	// unable to find the full path, just return what was called
+	return programName
 }
