@@ -9,7 +9,7 @@ import (
 	"github.com/bugsnag/bugsnag-go"
 	"github.com/jcelliott/lumber"
 
-	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util"
 )
 
 var (
@@ -28,7 +28,7 @@ func CommandErr(err error) {
 	
 	lumber.Error("Command: %+s", err.Error())
 
-	bugsnagErr := bugsnag.Notify(err, bugsnag.User{Id: config.Viper().GetString("token")}, bugsnag.SeverityInfo)
+	bugsnagErr := bugsnag.Notify(err, bugsnag.User{Id: util.UniqueID()}, bugsnag.SeverityInfo)
 	if bugsnagErr != nil {
 		lumber.Error("Bugsnag error: %s", bugsnagErr)
 	}

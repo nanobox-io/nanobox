@@ -11,6 +11,7 @@ import (
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/commands"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 )
 
@@ -47,7 +48,7 @@ func main() {
 
 			stack := debug.Stack()
 
-			bugsnag.Notify(fmt.Errorf("panic"), bugsnag.SeverityError, bugsnag.User{Id: config.Viper().GetString("token")}, r, stack)
+			bugsnag.Notify(fmt.Errorf("panic"), bugsnag.SeverityError, bugsnag.User{Id: util.UniqueID()}, r, stack)
 
 			lumber.Fatal(fmt.Sprintf("Cause of failure: %v", r))
 			lumber.Fatal(fmt.Sprintf("Error output:\n%v\n", string(stack)))

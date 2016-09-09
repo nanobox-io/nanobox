@@ -33,7 +33,7 @@ var (
 		Short: "",
 		Long:  ``,
 		PersistentPreRun: func(ccmd *cobra.Command, args []string) {
-			mixpanel.Report(strings.Replace(ccmd.CommandPath(), "nanobox ", "", 1) )
+			mixpanel.Report(strings.Replace(ccmd.CommandPath(), "nanobox ", "", 1))
 
 			// alert the user if an update is needed
 			update.Check()

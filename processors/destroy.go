@@ -36,12 +36,12 @@ func Destroy() error {
 	for _, envModel := range envModels {
 		// iterate through the envs and destroy them
 		if err := env.Destroy(envModel); err != nil {
-			return fmt.Errorf("unable to remove environment: %s", err)
+			fmt.Printf("unable to remove environment: %s", err)
 		}
 
 		// unmount (and remove the share for the env)
 		if err := env.Unmount(envModel, false); err != nil {
-			return fmt.Errorf("unable to remove mounts: %s", err)
+			fmt.Printf("unable to remove mounts: %s", err)
 		}
 
 	}

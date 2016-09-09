@@ -15,7 +15,7 @@ func Console(envModel *models.Env, consoleConfig ConsoleConfig) error {
 	appID := consoleConfig.App
 
 	// fetch the link
-	link, ok := envModel.Links[consoleConfig.App]
+	link, ok := envModel.Links[appID]
 	if ok {
 		// set the odin endpoint
 		odin.SetEndpoint(link.Endpoint)
@@ -36,21 +36,25 @@ func Console(envModel *models.Env, consoleConfig ConsoleConfig) error {
 	// validate access to the app
 	if err := helpers.ValidateOdinApp(appID); err != nil {
 		// the validation already printed the error
-		return nil
+		return err
 	}
 
 	// initiate a console session with odin
-	key, location, container, err := odin.EstablishConsole(appID, consoleConfig.Host)
+	key, location, protocol, err := odin.EstablishConsole(appID, consoleConfig.Host)
 	if err != nil {
 		// todo: can we know if the request was rejected for authorization and print that?
 		return fmt.Errorf("failed to initiate a remote console session: %s", err.Error())
 	}
 
-	// todo: extract the protocol from above and run ssh or console
-
-	// connect up to the session
-	if err = nanoagent.Console(key, location, container); err != nil {
-		return fmt.Errorf("failed to connect to remote console session: %s", err.Error())
+	switch protocol {
+	case "docker":
+		if err := nanoagent.Console(key, location); err != nil {
+			return fmt.Errorf("failed to connect to remote console session: %s", err.Error())
+		}
+	case "ssh":
+		if err := nanoagent.SSH(key, location); err != nil {
+			return fmt.Errorf("fialed to connect to remote ssh server: %s", err)
+		}
 	}
 
 	return nil

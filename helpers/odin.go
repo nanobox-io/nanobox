@@ -3,6 +3,8 @@ package helpers
 import (
 	"fmt"
 
+	"github.com/jcelliott/lumber"
+
 	"github.com/nanobox-io/nanobox/util/odin"
 )
 
@@ -10,10 +12,12 @@ import (
 func ValidateOdinApp(slug string) error {
 	// fetch the app
 	_, err := odin.App(slug)
-
+	
 	// handle errors
 	if err != nil {
-
+		
+		lumber.Error("helpers: ValidateOdinApp(%s): %s", slug, err)
+		
 		if err.Error() == "Unauthorized" {
 			fmt.Printf("\n! Sorry, but you don't have access to %s\n\n", slug)
 			return fmt.Errorf("Unauthorized access to app '%s': %s", slug, err.Error())

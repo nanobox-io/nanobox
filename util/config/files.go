@@ -8,7 +8,7 @@ import (
 
 	"github.com/jcelliott/lumber"
 
-	"github.com/nanobox-io/nanobox/util"
+	// "github.com/nanobox-io/nanobox/util"
 )
 
 // Boxfile ...
@@ -45,9 +45,7 @@ provider: "docker_machine" # the name of the provider to use
 
 # mount type (native|netfs)
 mount-type: native
-
-token: %s
-  `, util.RandomString(30))
+  `)
 
 	// populate the config.yml with reasonable defaults
 	io.WriteString(f, contents)

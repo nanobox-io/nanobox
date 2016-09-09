@@ -40,7 +40,7 @@ func Tunnel(envModel *models.Env, tunnelConfig TunnelConfig) error {
 	}
 
 	// initiate a tunnel session with odin
-	key, location, _, port, err := odin.EstablishTunnel(appID, tunnelConfig.Container)
+	key, location, port, err := odin.EstablishTunnel(appID, tunnelConfig.Container)
 	if err != nil {
 		// todo: can we know if the request was rejected for authorization and print that?
 		return fmt.Errorf("failed to initiate a remote tunnel session: %s", err.Error())

@@ -31,7 +31,7 @@ var (
 //
 func init() {
 	ConsoleCmd.Flags().StringVarP(&consoleCmdFlags.app, "app", "a", "", "app name or alias")
-	ConsoleCmd.Flags().StringVarP(&consoleCmdFlags.app, "endpoint", "e", "", "api endpoint")
+	ConsoleCmd.Flags().StringVarP(&consoleCmdFlags.endpoint, "endpoint", "e", "", "api endpoint")
 }
 
 // consoleFn ...
@@ -56,6 +56,11 @@ ex: nanobox console [-a appname] <container>
 		App: consoleCmdFlags.app,
 		Host: args[0],
 		Endpoint: consoleCmdFlags.endpoint,
+	}
+
+	// if no app id is given use 'default'
+	if consoleConfig.App == "" {
+		consoleConfig.App = "default"
 	}
 
 	// set the meta arguments to be used in the processor and run the processor

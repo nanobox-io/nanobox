@@ -3,6 +3,7 @@ package update
 import (
 	"path/filepath"
 	"os"
+	"os/exec"
 	"net/http"
 
 	"github.com/nanobox-io/nanobox/models"
@@ -30,7 +31,12 @@ func Run() error {
 	dp.Copy(tmpFile, resp.Body)
 
 	// replace binary
-	if err := os.Rename(tmpFileName, config.NanoboxPath()); err != nil {
+	path, err := exec.LookPath("nanobox")
+	if err != nil {
+		return err
+	}
+
+	if err := os.Rename(tmpFileName, path); err != nil {
 		return err
 	}
 
