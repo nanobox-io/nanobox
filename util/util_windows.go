@@ -54,20 +54,13 @@ func PrivilegeExec(command string) error {
 	// the executable and the argument list (just like a command would be entered
 	// on the command prompt), we need to pop off the executable.
 
-	// split the command into pieces using a space delimiter
-	parts := strings.Split(command, " ")
-
-	// extract the executable (the first item)
-	executable := parts[0]
-
-	// assemble the argument list from the rest of the parts
-	arguments := strings.Join(parts[1:], " ")
+	executable, arguments := splitExecutableAndArgs(command)
 
 	// generate the powershell process
-	process := fmt.Sprintf("& {Start-Process %s -ArgumentList '%s' -Verb RunAs -Wait}", executable, arguments)
+	process := fmt.Sprintf("& {Start-Process '%s' -ArgumentList '%s --internal' -Verb RunAs -Wait}", executable, arguments)
 
 	// now we can generate a command to exec
-	cmd := exec.Command("PowerShell.exe", "-NoProfile", "-Command", process, "--internal")
+	cmd := exec.Command("PowerShell.exe", "-NoProfile", "-Command", process)
 
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
@@ -98,4 +91,26 @@ func ReadPassword() (string, error) {
 	fmt.Println("")
 
 	return string(pass), err
+}
+
+// extracts the executable from the args
+func splitExecutableAndArgs(cmd string) (executable, args string) {
+	
+	if strings.Contains(cmd, ".exe") {
+		// split the command by the .exe extension
+		parts := strings.Split(cmd, ".exe ")
+		// the first item is the executable
+		executable = fmt.Sprintf("%s.exe", parts[0])
+		// the second item are the args
+		args = parts[1]
+	} else {
+		// split the command by spaces
+		parts := strings.Split(cmd, " ")
+		// extract the executable (the first item)
+		executable = parts[0]
+		// the remaining are the args
+		args = strings.Join(parts[1:], " ")
+	}
+	
+	return
 }
