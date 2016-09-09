@@ -72,8 +72,8 @@ func (native Native) Stop() error {
 
 // Destroy does nothing on native
 func (native Native) Destroy() error {
+	// TODO: remove nanobox images
 
-	// TODO: clean up stuff??
 	if native.hasNetwork() {
 		fmt.Print(stylish.Bullet("Removing custom docker network..."))
 

@@ -2,11 +2,15 @@
 package commands
 
 import (
+	"strings"
+
 	"github.com/jcelliott/lumber"
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/util/display"
+	"github.com/nanobox-io/nanobox/util/mixpanel"
+	"github.com/nanobox-io/nanobox/util/update"
 )
 
 //
@@ -29,6 +33,10 @@ var (
 		Short: "",
 		Long:  ``,
 		PersistentPreRun: func(ccmd *cobra.Command, args []string) {
+			mixpanel.Report(strings.Replace(ccmd.CommandPath(), "nanobox ", "", 1) )
+
+			// alert the user if an update is needed
+			update.Check()
 
 			registry.Set("internal", internalCommand)
 			registry.Set("debug", debugMode)
@@ -47,6 +55,7 @@ var (
 			}
 
 		},
+
 		//
 		Run: func(ccmd *cobra.Command, args []string) {
 

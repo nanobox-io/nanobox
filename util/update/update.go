@@ -3,72 +3,44 @@ package update
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
 	"runtime"
+	"net/http"
+	"time"
+	"io/ioutil"
 
-	"github.com/kardianos/osext"
+	"github.com/jcelliott/lumber"
+
 	"github.com/nanobox-io/nanobox/models"
-	cryptoutil "github.com/sdomino/go-util/crypto"
 )
 
-// ExpireAfter is the time in hours after which we want to check for updates (168 hours or 7 days)
-const ExpireAfter = 168
 
-// Check checks to see if there is an update available for the nanobox CLI
-func Check() error {
-
-	// load the update model
-	update, _ := models.LoadUpdate()
-
-	// return early if it's not time to update yet
-	if !update.Expired(ExpireAfter) {
-		return nil
-	}
-
-	//
-	updatable, err := updatable()
-	if err != nil {
-		return fmt.Errorf("Nanobox was unable to determine if updates are available - %s", err.Error())
-	}
-
-	// if the md5s don't match and it's 'time' for an update (14 days) inform the
-	// user that updates are available
-	if updatable {
-
-		//
-		fmt.Printf(`
-------------------------------------------------
-Hey! A newer version of nanobox is available.
-Run the following command to update:
-
-$ nanobox-update
-------------------------------------------------
-`)
-
-		// renew the update
-		return update.Renew()
-	}
-
-	return nil
+func RemotePath() string {
+  return fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/nanobox/v1/%s/%s/%s", runtime.GOOS, runtime.GOARCH, name)
 }
 
-// updatable
-func updatable() (bool, error) {
+func RemoveMd5() string {
+	remotePath := RemotePath() + ".md5"
 
-	//
-	path, err := osext.Executable()
+	res, err := http.Get(remotePath)
 	if err != nil {
-		return false, err
+		lumber.Error("update:http.Get(%s): %s", remotePath, err)
+		return ""
 	}
 
-	// check the md5 of the current executing cli against the remote md5;
-	// os.Args[0] is used as the final interpolation to determine standard/dev versions
-	match, err := cryptoutil.MD5Match(path, fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/cli/%s/%s/%s.md5", runtime.GOOS, runtime.GOARCH, filepath.Base(os.Args[0])))
+	// read the remote md5 checksum
+	md5, err := ioutil.ReadAll(res.Body)
 	if err != nil {
-		return false, err
-	}
+		lumber.Error("update:ioutil.ReadAll(body): %s", err)
+		return ""
+	}	
+	defer res.Body.Close()
 
-	// if the MD5's DONT match we want to update
-	return !match, nil
+	return string(md5)
 }
+
+func populateUpdate(update *models.Update) {
+	update.CurrentVersion = RemoveMd5()
+	update.LastCheckAt = time.Now()
+	update.LastUpdatedAt = time.Now()
+}
+

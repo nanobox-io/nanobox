@@ -26,14 +26,19 @@ const (
 
 // runDebugSession drops the user in the build container to debug
 func runDebugSession(container string, err error) error {
-	if registry.GetBool("debug") && err != nil {
-		component := &models.Component{
-			ID: container,
+	if err != nil {
+		display.ErrorTask()
+
+		if registry.GetBool("debug") {
+			component := &models.Component{
+				ID: container,
+			}
+			err := env.Console(component, env.ConsoleConfig{})
+			if err != nil {
+				return fmt.Errorf("failed to establish a debug session: %s", err.Error())
+			}
 		}
-		err := env.Console(component, env.ConsoleConfig{})
-		if err != nil {
-			return fmt.Errorf("failed to establish a debug session: %s", err.Error())
-		}
+
 	}
 
 	return err

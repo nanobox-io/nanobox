@@ -20,7 +20,7 @@ import (
 	"github.com/nanobox-io/nanobox/util/hookit"
 	"github.com/nanobox-io/nanobox/util/locker"
 	"github.com/nanobox-io/nanobox/util/provider"
-	// "github.com/nanobox-io/nanobox/util/watch"
+	"github.com/nanobox-io/nanobox/util/watch"
 )
 
 // Start a dev container
@@ -40,7 +40,8 @@ func Console(envModel *models.Env, appModel *models.App, devRun bool) error {
 	}
 
 	// start a watcher to watch for changes and inform the vm
-	// go watch.Watch(container_generator.DevName(), envModel.Directory)
+	watchFiles(envModel, appModel)
+	
 
 	// if run then start the run commands
 	if devRun {
@@ -271,6 +272,13 @@ func runConsole(appModel *models.App) error {
 	}
 
 	return env.Console(component, consoleConfig)
+}
+
+func watchFiles(envModel *models.Env, appModel *models.App) {
+	boxfile := boxfile.New([]byte(appModel.DeployedBoxfile))
+	if boxfile.Node("dev").BoolValue("fs_watch") {
+		go watch.Watch(container_generator.DevName(), envModel.Directory)
+	}
 }
 
 // cwd sets the cwd from the boxfile or provides a sensible default

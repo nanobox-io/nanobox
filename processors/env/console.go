@@ -52,7 +52,7 @@ func Console(componentModel *models.Component, consoleConfig ConsoleConfig) erro
 	process.Stdout = os.Stdout
 	process.Stderr = os.Stderr
 
-	if err := process.Run(); err != nil && err.Error() != "exit status 137" {
+	if err := process.Run(); err != nil && err.Error() != "exit status 137" && err.Error() != "exit status 130" {
 		return err
 	}
 

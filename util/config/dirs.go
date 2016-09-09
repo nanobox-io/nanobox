@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 
@@ -24,18 +23,6 @@ func GlobalDir() string {
 	os.MkdirAll(globalDir, 0755)
 
 	return globalDir
-}
-
-// ImplodeGlobalDir will remove the global dir and everything inside
-func ImplodeGlobalDir() error {
-	globalDir := GlobalDir()
-
-	// blast the global directory
-	if err := os.RemoveAll(globalDir); err != nil {
-		return fmt.Errorf("failed to remove %s: %s", globalDir, err.Error())
-	}
-
-	return nil
 }
 
 // LocalDir ...

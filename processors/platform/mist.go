@@ -6,7 +6,6 @@ import (
 	"os/signal"
 
 	"github.com/nanopack/mist/clients"
-	printutil "github.com/sdomino/go-util/print"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/display"
@@ -44,7 +43,7 @@ waiting for output...
 	for {
 		select {
 		case msg := <-client.Messages():
-			printutil.Color(display.FormatLogMessage(msg))
+			display.FormatLogMessage(msg)
 		case <-sigChan:
 			return nil
 		}

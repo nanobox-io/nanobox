@@ -30,6 +30,7 @@ import (
 	"reflect"
 	"strings"
 	"time"
+	"sync"
 
 	"github.com/kr/pretty"
 	"github.com/mitchellh/mapstructure"
@@ -40,6 +41,8 @@ import (
 )
 
 var v *Viper
+
+var mutex sync.Mutex
 
 func init() {
 	v = New()
@@ -456,6 +459,9 @@ func (v *Viper) SetTypeByDefaultValue(enable bool) {
 // Get returns an interface. For a specific value use one of the Get____ methods.
 func Get(key string) interface{} { return v.Get(key) }
 func (v *Viper) Get(key string) interface{} {
+	mutex.Lock()
+	defer mutex.Unlock()
+	
 	path := strings.Split(key, v.keyDelim)
 
 	lcaseKey := strings.ToLower(key)
@@ -876,6 +882,9 @@ func (v *Viper) InConfig(key string) bool {
 // Default only used when no value is provided by the user via flag, config or ENV.
 func SetDefault(key string, value interface{}) { v.SetDefault(key, value) }
 func (v *Viper) SetDefault(key string, value interface{}) {
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	// If alias passed in, then set the proper default
 	key = v.realKey(strings.ToLower(key))
 	v.defaults[key] = value

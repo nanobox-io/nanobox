@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/nanopack/mist/core"
+	"github.com/mitchellh/colorstring"	
 )
 
 // Entry represents the data comming back from a mist message (mist.Message.Data)
@@ -31,7 +32,7 @@ var (
 
 // FormatLogMessage takes a Logvac/Mist and formats it into a pretty message to be
 // output to the terminal
-func FormatLogMessage(msg mist.Message) string {
+func FormatLogMessage(msg mist.Message) {
 
 	// set the time output format
 	layout := "Mon Jan 02 15:04:05 2006" // time.RFC822
@@ -39,7 +40,9 @@ func FormatLogMessage(msg mist.Message) string {
 	// unmarshal the message data as an Entry
 	entry := Entry{}
 	if err := json.Unmarshal([]byte(msg.Data), &entry); err != nil {
-		return fmt.Sprintf("[light_red]%s :: %s[reset]", time.Now().Format(layout), "Failed to process entry...")
+		message := fmt.Sprintf("[light_red]%s :: %s[reset]", time.Now().Format(layout), "Failed to process entry...")
+		fmt.Println(colorstring.Color(message))
+		return 
 	}
 
 	//
@@ -51,5 +54,7 @@ func FormatLogMessage(msg mist.Message) string {
 	}
 
 	// return our pretty entry
-	return fmt.Sprintf("[%s]%s %s (%s) :: %s[reset]", logProcesses[entry.Tag], fmt.Sprintf(entry.Time.Format(layout)), entry.ID, entry.Tag, fmtMsg)
+	message := fmt.Sprintf("[%s]%s %s (%s) :: %s[reset]", logProcesses[entry.Tag], fmt.Sprintf(entry.Time.Format(layout)), entry.ID, entry.Tag, fmtMsg)
+	fmt.Println(colorstring.Color(message))
+	return
 }
