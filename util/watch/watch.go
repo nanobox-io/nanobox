@@ -1,7 +1,7 @@
 package watch
 
 import (
-	"fmt"
+	// "fmt"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
@@ -78,6 +78,7 @@ func batchPublish(container string) {
 	for {
 		<-time.After(time.Second)
 		if len(changeList) > 0 {
+			lumber.Info("watcher: pushing: %+v", changeList)
 			util.DockerExec(container, "touch", changeList, nil)
 			changeList = []string{}
 		}

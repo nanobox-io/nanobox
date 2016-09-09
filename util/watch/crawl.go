@@ -58,7 +58,12 @@ func (c *crawl) walkFunc(path string, info os.FileInfo, err error) error {
 
 	for _, ignoreName := range ignoreFile {
 		if strings.HasSuffix(path, ignoreName) {
-			return filepath.SkipDir
+			if info.IsDir() {
+				// if the thing we are ignoring is a directory
+				return filepath.SkipDir
+			}
+			// if its not just skip the file
+			return nil
 		}
 	}
 
