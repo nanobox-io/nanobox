@@ -29,7 +29,7 @@ func Tunnel(key, location, port string) error {
 		return fmt.Errorf("failed to setup tcp listener: %s", err.Error())
 	}
 
-	// fmt.Println("listening on port", tunnelConfig.Port)
+	fmt.Println("listening on port", port)
 
 	// handle connections
 	for {

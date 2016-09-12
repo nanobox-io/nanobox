@@ -3,7 +3,6 @@ package dev
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"os/signal"
 
 	"github.com/jcelliott/lumber"
@@ -11,6 +10,7 @@ import (
 
 	container_generator "github.com/nanobox-io/nanobox/generators/containers"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
 )
 
 // Run ...
@@ -86,28 +86,18 @@ func runStart(name, command string) error {
 
 	// create the docker command
 	cmd := []string{
-		"docker",
-		"exec",
-		"-u",
-		"gonano",
-		container_generator.DevName(),
-		"/bin/bash",
 		"-lc",
 		fmt.Sprintf("cd /app/; %s", command),
 	}
 
 	lumber.Debug("run:runstarts: %+v", cmd)
-	process := exec.Command(cmd[0], cmd[1:]...)
 
-	// TODO: these will be replaced with something from the
+	// TODO: dont just use os.Stdout but something from display
 	// new print library
 	// we will also want to use 'name' to create some prefix
-	process.Stdout = os.Stdout
-	process.Stderr = os.Stderr
-
-	// run the process
-	if err := process.Run(); err != nil && err.Error() != "exit status 137" {
-		return err
+	output, err := util.DockerExec(container_generator.DevName(), "/bin/bash", cmd, os.Stdout)
+	if err != nil {
+		return fmt.Errorf("runstart error: %s, %s", output, err)
 	}
 
 	return nil

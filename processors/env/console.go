@@ -3,7 +3,12 @@ package env
 import (
 	"fmt"
 	"os"
-	"os/exec"
+	"io"
+
+	"github.com/nanobox-io/golang-docker-client"
+	"github.com/docker/docker/pkg/term"
+	"github.com/jcelliott/lumber"
+
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/provider"
@@ -22,15 +27,7 @@ func Console(componentModel *models.Component, consoleConfig ConsoleConfig) erro
 	}
 
 	// this is the default command to run in the container
-	cmd := []string{
-		"docker",
-		"exec",
-		"-u",
-		"gonano",
-		"-it",
-		componentModel.ID,
-		"/bin/bash",
-	}
+	cmd := []string{"/bin/bash"}
 
 	// check to see if there are any optional meta arguments that need to be handled
 	switch {
@@ -46,15 +43,33 @@ func Console(componentModel *models.Component, consoleConfig ConsoleConfig) erro
 		cmd = append(cmd, "-c", consoleConfig.Command)
 	}
 
-	process := exec.Command(cmd[0], cmd[1:]...)
+	// establish file descriptors for std streams
+	stdInFD, isTerminal := term.GetFdInfo(os.Stdin)
+	stdOutFD, _ := term.GetFdInfo(os.Stdout)
 
-	process.Stdin = os.Stdin
-	process.Stdout = os.Stdout
-	process.Stderr = os.Stderr
-
-	if err := process.Run(); err != nil && err.Error() != "exit status 137" && err.Error() != "exit status 130" {
+	// initiate a docker exec
+	_, resp, err := docker.ExecStart(componentModel.ID, cmd, true, true, true, isTerminal)
+	if err != nil {
+		lumber.Error("dockerexecerror: %s", err)
 		return err
 	}
+	defer resp.Conn.Close()
+
+	// if we are using a term, lets upgrade it to RawMode
+	if isTerminal {
+		oldInState, err := term.SetRawTerminal(stdInFD)
+		if err == nil {
+			defer term.RestoreTerminal(stdInFD, oldInState)
+		}
+
+		oldOutState, err := term.SetRawTerminalOutput(stdOutFD)
+		if err == nil {
+			defer term.RestoreTerminal(stdOutFD, oldOutState)
+		}
+	}
+
+	go io.Copy(resp.Conn, os.Stdin)
+	io.Copy(os.Stdout, resp.Reader)
 
 	return nil
 }

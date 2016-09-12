@@ -69,5 +69,10 @@ ex: nanobox tunnel <container>
 		Endpoint:		tunnelCmdFlags.endpoint,
 	}
 
+	// if no app id is given use 'default'
+	if tunnelConfig.App == "" {
+		tunnelConfig.App = "default"
+	}
+
 	display.CommandErr(processors.Tunnel(env, tunnelConfig))
 }

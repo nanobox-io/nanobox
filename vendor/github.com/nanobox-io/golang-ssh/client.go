@@ -23,9 +23,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
-	"os/signal"
 	"strings"
-	"syscall"
 
 	"github.com/docker/docker/pkg/term"
 	"github.com/docker/machine/libmachine/log"
@@ -283,20 +281,6 @@ func (client *NativeClient) Shell(args ...string) error {
 	}
 
 	return nil
-}
-
-// monWinCh watches for the system to signal a window resize and requests
-// a window-change from the server.
-func monWinCh(session *ssh.Session, fd uintptr) {
-	sigs := make(chan os.Signal, 1)
-
-	signal.Notify(sigs, syscall.SIGWINCH)
-	defer signal.Stop(sigs)
-
-	// resize the tty if any signals received
-	for range sigs {
-		session.SendRequest("window-change", false, termSize(fd))
-	}
 }
 
 // termSize gets the current window size and returns it in a window-change friendly
