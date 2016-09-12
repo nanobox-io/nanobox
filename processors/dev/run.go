@@ -95,7 +95,7 @@ func runStart(name, command string) error {
 	// TODO: dont just use os.Stdout but something from display
 	// new print library
 	// we will also want to use 'name' to create some prefix
-	output, err := util.DockerExec(container_generator.DevName(), "/bin/bash", cmd, os.Stdout)
+	output, err := util.DockerExec(container_generator.DevName(), "gonano", "/bin/bash", cmd, os.Stdout)
 	if err != nil {
 		return fmt.Errorf("runstart error: %s, %s", output, err)
 	}

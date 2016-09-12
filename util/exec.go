@@ -12,6 +12,7 @@ import (
 // Cmd ...
 type Cmd struct {
 	ID     string
+	User   string
 	Path   string
 	Args   []string
 	Stdout io.Writer
@@ -27,7 +28,7 @@ func (cmd *Cmd) Run() error {
 	run := append([]string{cmd.Path}, cmd.Args...)
 
 	// start the exec
-	exec, hj, err := docker.ExecStart(cmd.ID, run, false, true, true, false)
+	exec, hj, err := docker.ExecStart(cmd.ID, cmd.User, run, false, true, true, false)
 	if err != nil {
 		return err
 	}
@@ -83,9 +84,10 @@ func (cmd *Cmd) Output() (string, error) {
 }
 
 // DockerCommand generates a new Cmd struct
-func DockerCommand(id, path string, args []string) *Cmd {
+func DockerCommand(id, user, path string, args []string) *Cmd {
 	return &Cmd{
 		ID:   id,
+		User: user,
 		Path: path,
 		Args: args,
 	}
@@ -95,8 +97,8 @@ func DockerCommand(id, path string, args []string) *Cmd {
 // the recieved stream is used for display or error handling as the Stderr portion
 // while the Stdout is left blank to allow the run command to set a bytes buffer
 // which is then returned from the Output() function
-func DockerExec(id, name string, args []string, stream io.Writer) (string, error) {
-	cmd := DockerCommand(id, name, args)
+func DockerExec(id, user, name string, args []string, stream io.Writer) (string, error) {
+	cmd := DockerCommand(id, user, name, args)
 	cmd.Stderr = stream
 	return cmd.Output()
 }

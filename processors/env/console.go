@@ -51,7 +51,7 @@ func Console(componentModel *models.Component, consoleConfig ConsoleConfig) erro
 	stdOutFD, _ := term.GetFdInfo(os.Stdout)
 
 	// initiate a docker exec
-	exec, resp, err := docker.ExecStart(componentModel.ID, cmd, true, true, true, isTerminal)
+	exec, resp, err := docker.ExecStart(componentModel.ID, "gonano", cmd, true, true, true, isTerminal)
 	if err != nil {
 		lumber.Error("dockerexecerror: %s", err)
 		return err
