@@ -95,7 +95,7 @@ func (display *DockerPercentDisplay2) show() string {
 			return fmt.Sprintf("Layer %2d/%d: Extracted: %3d%%", count, len(display.parts), v.extracted)
 		}
 	}
-	return "complete???"
+	return ""
 }
 
 // Write ...

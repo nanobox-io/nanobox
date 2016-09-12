@@ -1,17 +1,17 @@
 package portal
 
-import (
-	"bytes"
+import(
 	"crypto/tls"
-	"encoding/json"
 	"fmt"
+	"net/http"
 	"io"
 	"io/ioutil"
-	"net/http"
+	"bytes"
+	"encoding/json"
 )
 
 type PortalClient struct {
-	host  string
+	host string
 	token string
 }
 
@@ -125,6 +125,7 @@ func (self PortalClient) DeleteCert(cert CertBundle) error {
 	return self.do("DELETE", "/certs", cert, nil)
 }
 
+
 func (self PortalClient) do(method, path string, requestBody, responseBody interface{}) error {
 	var rbodyReader io.Reader
 	if requestBody != nil {
@@ -157,3 +158,4 @@ func (self PortalClient) do(method, path string, requestBody, responseBody inter
 	}
 	return nil
 }
+
