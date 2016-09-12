@@ -25,7 +25,7 @@ func Add(envModel *models.Env, appName, alias, endpoint string) error {
 	if appName == "" {
 		appName = config.LocalDirName()
 	}
-	
+
 	// set the endpoint to nanobox if it's missing
 	if endpoint == "" {
 		endpoint = "nanobox"
@@ -47,8 +47,8 @@ func Add(envModel *models.Env, appName, alias, endpoint string) error {
 	}
 
 	envModel.Links[alias] = models.Link{
-		ID:   		app.ID,
-		Name: 		app.Name,
+		ID:       app.ID,
+		Name:     app.Name,
 		Endpoint: endpoint,
 	}
 

@@ -7,9 +7,9 @@ import (
 
 	"github.com/jcelliott/lumber"
 
-	"github.com/nanobox-io/nanobox/processors/provider"
-	"github.com/nanobox-io/nanobox/processors/env"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processors/env"
+	"github.com/nanobox-io/nanobox/processors/provider"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
@@ -103,10 +103,10 @@ func reExecPrivilegedDestroy() error {
 func clearData() error {
 	dataFile := filepath.ToSlash(filepath.Join(config.GlobalDir(), "data.db"))
 
-	// remove the data.db 
+	// remove the data.db
 	if err := os.Remove(dataFile); err != nil {
 		return fmt.Errorf("failed to remove %s: %s", dataFile, err.Error())
 	}
 
 	return nil
-}	
+}

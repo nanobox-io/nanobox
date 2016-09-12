@@ -46,7 +46,7 @@ func Login(username, password, endpoint string) error {
 	// store the user token
 	auth := models.Auth{
 		Endpoint: endpoint,
-		Key: token,
+		Key:      token,
 	}
 	if auth.Save() != nil {
 		return fmt.Errorf("unable to save user authentication")

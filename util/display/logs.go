@@ -6,8 +6,8 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/mitchellh/colorstring"
 	"github.com/nanopack/mist/core"
-	"github.com/mitchellh/colorstring"	
 )
 
 // Entry represents the data comming back from a mist message (mist.Message.Data)
@@ -42,7 +42,7 @@ func FormatLogMessage(msg mist.Message) {
 	if err := json.Unmarshal([]byte(msg.Data), &entry); err != nil {
 		message := fmt.Sprintf("[light_red]%s :: %s[reset]", time.Now().Format(layout), "Failed to process entry...")
 		fmt.Println(colorstring.Color(message))
-		return 
+		return
 	}
 
 	//

@@ -16,7 +16,7 @@ func Logout(endpoint string) error {
 
 	// lookup the auth by the endpoint
 	auth, _ := models.LoadAuthByEndpoint(endpoint)
-	
+
 	// short-circuit if the auth is already deleted
 	if auth.IsNew() {
 		fmt.Printf("%s Already logged out\n", display.TaskComplete)

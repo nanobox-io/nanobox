@@ -16,7 +16,7 @@ var (
 		Long:  ``,
 		Run:   logoutFn,
 	}
-	
+
 	// loginCmdFlags ...
 	logoutCmdFlags = struct {
 		endpoint string

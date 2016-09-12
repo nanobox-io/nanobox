@@ -23,8 +23,8 @@ var (
 
 	// consoleCmdFlags ...
 	consoleCmdFlags = struct {
-		app 			string
-		endpoint 	string
+		app      string
+		endpoint string
 	}{}
 )
 
@@ -49,12 +49,12 @@ ex: nanobox console [-a appname] <container>
 `, len(args))
 		return
 	}
-	
+
 	env, _ := models.FindEnvByID(config.EnvID())
-	
+
 	consoleConfig := processors.ConsoleConfig{
-		App: consoleCmdFlags.app,
-		Host: args[0],
+		App:      consoleCmdFlags.app,
+		Host:     args[0],
 		Endpoint: consoleCmdFlags.endpoint,
 	}
 

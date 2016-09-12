@@ -7,7 +7,7 @@ import (
 	"os/exec"
 
 	"github.com/nanobox-io/nanobox-boxfile"
-	
+
 	"github.com/nanobox-io/nanobox/util/fileutil"
 )
 
@@ -36,14 +36,14 @@ func EnvID() string {
 
 // NanoboxPath ...
 func NanoboxPath() string {
-	
+
 	programName := os.Args[0]
-	
+
 	// if args[0] was a path to nanobox already
 	if fileutil.Exists(programName) {
 		return programName
 	}
-	
+
 	// lookup the full path to nanobox
 	path, err := exec.LookPath(programName)
 	if err == nil {

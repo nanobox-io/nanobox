@@ -31,12 +31,12 @@ func Deploy(envModel *models.Env, deployConfig DeployConfig) error {
 	if deployConfig.Endpoint != "" {
 		odin.SetEndpoint(deployConfig.Endpoint)
 	}
-	
+
 	// set the app id to the directory name if it's default
 	if appID == "default" {
 		appID = config.AppName()
 	}
-	
+
 	// validate access to the app
 	if err := helpers.ValidateOdinApp(appID); err != nil {
 		// the validation already printed the error

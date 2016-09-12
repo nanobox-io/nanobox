@@ -6,12 +6,10 @@ import (
 	"os"
 	"os/signal"
 
-
-	"github.com/nanobox-io/golang-docker-client"
 	syscall "github.com/docker/docker/pkg/signal"
 	"github.com/docker/docker/pkg/term"
 	"github.com/jcelliott/lumber"
-
+	"github.com/nanobox-io/golang-docker-client"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/provider"
@@ -122,5 +120,3 @@ func resize(fd uintptr, execID string) {
 		return
 	}
 }
-
-

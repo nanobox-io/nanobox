@@ -56,8 +56,8 @@ an alias. If no alias is provided, 'default' is assumed.
 
 	// linkCmdFlags ...
 	linkCmdFlags = struct {
-		alias 		string
-		endpoint 	string
+		alias    string
+		endpoint string
 	}{}
 )
 
@@ -74,7 +74,7 @@ func init() {
 // linkAddFn ...
 func linkAddFn(ccmd *cobra.Command, args []string) {
 	env, _ := models.FindEnvByID(config.EnvID())
-	
+
 	if len(args) != 1 {
 		fmt.Printf("\n! Please provide an app name to link to\n\n")
 		return

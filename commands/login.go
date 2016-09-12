@@ -39,7 +39,7 @@ func init() {
 // loginFn ...
 func loginFn(ccmd *cobra.Command, args []string) {
 	err := processors.Login(loginCmdFlags.username, loginCmdFlags.password, loginCmdFlags.endpoint)
-	
+
 	display.CommandErr(err)
 }
 

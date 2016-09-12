@@ -9,7 +9,7 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 )
 
-// 
+//
 const checkFrequency = (168 * time.Hour)
 
 // Check checks to see if there is an update available for the nanobox CLI

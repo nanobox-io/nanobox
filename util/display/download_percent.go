@@ -1,10 +1,10 @@
 package display
 
 import (
-	"io"	
-	"strings"
-	"os"
 	"fmt"
+	"io"
+	"os"
+	"strings"
 )
 
 const bytesPerMB = 1024 * 1024
@@ -72,8 +72,8 @@ func (dp *DownloadPercent) UpdateDisplay() {
 	}
 
 	// show download progress: 0.0/0.0MB [*** progress *** 0.0%]
-	currentInMB := float64(dp.current)/bytesPerMB
-	totalInMB := float64(dp.Total)/bytesPerMB
+	currentInMB := float64(dp.current) / bytesPerMB
+	totalInMB := float64(dp.Total) / bytesPerMB
 	percent := (float64(dp.current) / float64(dp.Total)) * 100
 
 	fmt.Fprintf(dp.Output, "\r   %.2f/%.2fMB [%-41s %.2f%%]", currentInMB, totalInMB, strings.Repeat("*", int(percent/2.5)), percent)

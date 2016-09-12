@@ -1,10 +1,10 @@
 package update
 
 import (
-	"path/filepath"
+	"net/http"
 	"os"
 	"os/exec"
-	"net/http"
+	"path/filepath"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/config"

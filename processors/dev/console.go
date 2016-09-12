@@ -41,7 +41,6 @@ func Console(envModel *models.Env, appModel *models.App, devRun bool) error {
 
 	// start a watcher to watch for changes and inform the vm
 	watchFiles(envModel, appModel)
-	
 
 	// if run then start the run commands
 	if devRun {

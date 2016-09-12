@@ -3,19 +3,18 @@ package update
 
 import (
 	"fmt"
-	"runtime"
-	"net/http"
-	"time"
 	"io/ioutil"
+	"net/http"
+	"runtime"
+	"time"
 
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/models"
 )
 
-
 func RemotePath() string {
-  return fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/nanobox/v1/%s/%s/%s", runtime.GOOS, runtime.GOARCH, name)
+	return fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/nanobox/v1/%s/%s/%s", runtime.GOOS, runtime.GOARCH, name)
 }
 
 func RemoveMd5() string {
@@ -32,7 +31,7 @@ func RemoveMd5() string {
 	if err != nil {
 		lumber.Error("update:ioutil.ReadAll(body): %s", err)
 		return ""
-	}	
+	}
 	defer res.Body.Close()
 
 	return string(md5)
@@ -43,4 +42,3 @@ func populateUpdate(update *models.Update) {
 	update.LastCheckAt = time.Now()
 	update.LastUpdatedAt = time.Now()
 }
-

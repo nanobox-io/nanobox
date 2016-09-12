@@ -2,12 +2,12 @@ package mixpanel
 
 import (
 	"runtime"
-	
-	mp "github.com/timehop/go-mixpanel"
-	"github.com/jcelliott/lumber"
 
-	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/jcelliott/lumber"
+	mp "github.com/timehop/go-mixpanel"
+
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 )
 
 var token string

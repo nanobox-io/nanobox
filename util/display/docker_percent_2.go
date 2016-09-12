@@ -26,7 +26,7 @@ type (
 
 	// DockerPercentPart2 ...
 	DockerPercentPart2 struct {
-		id string
+		id         string
 		downloaded int
 		extracted  int
 	}

@@ -29,9 +29,9 @@ production data using your local client of choice.
 
 	// tunnelCmdFlags ...
 	tunnelCmdFlags = struct {
-		app  			string
-		port 			string
-		endpoint 	string
+		app      string
+		port     string
+		endpoint string
 	}{}
 )
 
@@ -63,10 +63,10 @@ ex: nanobox tunnel <container>
 
 	// set the meta arguments to be used in the processor and run the processor
 	tunnelConfig := processors.TunnelConfig{
-		App:       	tunnelCmdFlags.app,
-		Port:      	tunnelCmdFlags.port,
-		Container: 	args[0],
-		Endpoint:		tunnelCmdFlags.endpoint,
+		App:       tunnelCmdFlags.app,
+		Port:      tunnelCmdFlags.port,
+		Container: args[0],
+		Endpoint:  tunnelCmdFlags.endpoint,
 	}
 
 	// if no app id is given use 'default'

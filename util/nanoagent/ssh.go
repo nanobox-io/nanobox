@@ -1,10 +1,10 @@
 package nanoagent
 
 import (
-	"strings"
 	"fmt"
-	"strconv"
 	"github.com/nanobox-io/golang-ssh"
+	"strconv"
+	"strings"
 )
 
 func SSH(key, location string) error {

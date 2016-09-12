@@ -6,8 +6,8 @@ import (
 
 // Auth ...
 type Auth struct {
-	Endpoint 	string // nanobox, bonesalt, dev, sim
-	Key 			string // api_token from dashboard
+	Endpoint string // nanobox, bonesalt, dev, sim
+	Key      string // api_token from dashboard
 }
 
 // determines if the auth record is new
@@ -60,7 +60,7 @@ func LoadAuthByEndpoint(endpoint string) (*Auth, error) {
 
 // DeleteAuth ...
 func DeleteAuth(endpoint string) error {
-	
+
 	if err := destroy("auths", endpoint); err != nil {
 		return fmt.Errorf("failed to delete auth: %s", err.Error())
 	}

@@ -90,12 +90,12 @@ func TmpDir() string {
 // BinDir creates a directory where nanobox specific binaries can be downloaded
 // docker, dockermachine, etc
 func BinDir() string {
-	
+
 	binDir := filepath.ToSlash(filepath.Join(GlobalDir(), "bin"))
-	
+
 	if err := os.MkdirAll(binDir, 0755); err != nil {
 		lumber.Fatal("[config/config] os.Mkdir() failed", err.Error())
 	}
-	
+
 	return binDir
 }

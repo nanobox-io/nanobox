@@ -6,11 +6,11 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	"runtime"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strings"
 
 	"github.com/nanobox-io/nanobox/models"
@@ -56,7 +56,7 @@ func (machine DockerMachine) Status() string {
 func (machine DockerMachine) IsInstalled() bool {
 
 	cmd := dockerMachineCmd
-	
+
 	if runtime.GOOS == "windows" {
 		cmd = fmt.Sprintf("%s.exe", cmd)
 	}
@@ -66,30 +66,30 @@ func (machine DockerMachine) IsInstalled() bool {
 
 // Installs docker-machine and docker binaries
 func (machine DockerMachine) Install() error {
-	
+
 	// short-circuit if we're already installed
 	if machine.IsInstalled() {
 		return nil
 	}
-	
+
 	display.StartTask("Downloading docker-machine")
 	defer display.StopTask()
-	
+
 	// download the binary
 	url := dockerMachineURL()
 	path := dockerMachineCmd
-	
+
 	// if windows, add an .exe
 	if runtime.GOOS == "windows" {
 		path = fmt.Sprintf("%s.exe", path)
 	}
-	
+
 	// download the executable
 	if err := fileutil.Download(url, path); err != nil {
 		display.ErrorTask()
 		return fmt.Errorf("failed to download docker-machine: %s", err.Error())
 	}
-	
+
 	// make it executable (unless it's windows)
 	if runtime.GOOS != "windows" {
 		// make new CLI executable
@@ -98,7 +98,7 @@ func (machine DockerMachine) Install() error {
 			return fmt.Errorf("failed to set permissions: ", err.Error())
 		}
 	}
-	
+
 	return nil
 }
 
@@ -908,12 +908,12 @@ func (machine DockerMachine) hasNetwork() bool {
 
 // IsReady ...
 func (machine DockerMachine) IsReady() bool {
-	
+
 	// return false right away if docker-machine isn't installed
 	if !machine.IsInstalled() {
 		return false
 	}
-	
+
 	// docker-machine status nanobox
 	cmd := exec.Command(dockerMachineCmd, "status", "nanobox")
 	output, err := cmd.CombinedOutput()
@@ -1057,9 +1057,9 @@ func (machine DockerMachine) changedIP() bool {
 }
 
 func dockerMachineURL() string {
-	
+
 	download := "https://github.com/docker/machine/releases/download/v0.8.1"
-	
+
 	switch runtime.GOOS {
 	case "darwin":
 		download = fmt.Sprintf("%s/docker-machine-Darwin-x86_64", download)
@@ -1068,6 +1068,6 @@ func dockerMachineURL() string {
 	case "windows":
 		download = fmt.Sprintf("%s/docker-machine-Windows-x86_64.exe", download)
 	}
-	
+
 	return download
 }
