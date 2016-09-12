@@ -1,9 +1,9 @@
 package docker
 
 import (
+	"errors"
 	"io"
 	"io/ioutil"
-	"errors"
 
 	dockType "github.com/docker/engine-api/types"
 	"golang.org/x/net/context"

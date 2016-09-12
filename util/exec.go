@@ -28,7 +28,16 @@ func (cmd *Cmd) Run() error {
 	run := append([]string{cmd.Path}, cmd.Args...)
 
 	// start the exec
-	exec, hj, err := docker.ExecStart(cmd.ID, cmd.User, run, false, true, true, false)
+	execConfig := docker.ExecConfig{
+		ID:     cmd.ID,
+		User:   cmd.User,
+		Cmd:    run,
+		Stdin:  false,
+		Stdout: true,
+		Stderr: true,
+		Tty:    false,
+	}
+	exec, hj, err := docker.ExecStart(execConfig)
 	if err != nil {
 		return err
 	}

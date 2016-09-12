@@ -9,17 +9,24 @@ import (
 	"golang.org/x/net/context"
 )
 
-func ExecStart(containerID string, user string, cmd []string, stdIn, stdOut, stdErr, tty bool) (dockType.ContainerExecCreateResponse, dockType.HijackedResponse, error) {
+type ExecConfig struct {
+	ID                         string
+	User                       string
+	Cmd                        []string
+	Stdin, Stdout, Stderr, Tty bool
+}
+
+func ExecStart(execConfig ExecConfig) (dockType.ContainerExecCreateResponse, dockType.HijackedResponse, error) {
 	config := dockType.ExecConfig{
-		User:         user,
-		Tty:          tty,
-		Cmd:          cmd,
-		AttachStdin:  stdIn,
-		AttachStdout: stdOut,
-		AttachStderr: stdErr,
+		Tty:          execConfig.Tty,
+		User:         execConfig.User,
+		Cmd:          execConfig.Cmd,
+		AttachStdin:  execConfig.Stdin,
+		AttachStdout: execConfig.Stdout,
+		AttachStderr: execConfig.Stderr,
 	}
 
-	exec, err := client.ContainerExecCreate(context.Background(), containerID, config)
+	exec, err := client.ContainerExecCreate(context.Background(), execConfig.ID, config)
 	if err != nil {
 		return exec, dockType.HijackedResponse{}, err
 	}
