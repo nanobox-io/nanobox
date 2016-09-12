@@ -123,14 +123,16 @@ func splitExecutableAndArgs(cmd string) (executable, args string) {
 		executable = fmt.Sprintf("%s.exe", parts[0])
 		// the second item are the args
 		args = parts[1]
-	} else {
-		// split the command by spaces
-		parts := strings.Split(cmd, " ")
-		// extract the executable (the first item)
-		executable = parts[0]
-		// the remaining are the args
-		args = strings.Join(parts[1:], " ")
+		
+		return
 	}
+	
+	// split the command by spaces
+	parts := strings.Split(cmd, " ")
+	// extract the executable (the first item)
+	executable = parts[0]
+	// the remaining are the args
+	args = strings.Join(parts[1:], " ")
 
 	return
 }

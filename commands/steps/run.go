@@ -52,7 +52,7 @@ func printMessage(prereqs []string) {
 	fmt.Println()
 
 	for _, dep := range prereqs {
-		fmt.Printf("$ %s %s\n", os.Args[0], dep)
+		fmt.Printf("$ nanobox %s\n", dep)
 	}
 
 	fmt.Println()
