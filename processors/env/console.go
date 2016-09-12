@@ -2,10 +2,13 @@ package env
 
 import (
 	"fmt"
-	"os"
 	"io"
+	"os"
+	"os/signal"
+
 
 	"github.com/nanobox-io/golang-docker-client"
+	syscall "github.com/docker/docker/pkg/signal"
 	"github.com/docker/docker/pkg/term"
 	"github.com/jcelliott/lumber"
 
@@ -48,7 +51,7 @@ func Console(componentModel *models.Component, consoleConfig ConsoleConfig) erro
 	stdOutFD, _ := term.GetFdInfo(os.Stdout)
 
 	// initiate a docker exec
-	_, resp, err := docker.ExecStart(componentModel.ID, cmd, true, true, true, isTerminal)
+	exec, resp, err := docker.ExecStart(componentModel.ID, cmd, true, true, true, isTerminal)
 	if err != nil {
 		lumber.Error("dockerexecerror: %s", err)
 		return err
@@ -57,6 +60,8 @@ func Console(componentModel *models.Component, consoleConfig ConsoleConfig) erro
 
 	// if we are using a term, lets upgrade it to RawMode
 	if isTerminal {
+		go monitor(stdOutFD, exec.ID)
+
 		oldInState, err := term.SetRawTerminal(stdInFD)
 		if err == nil {
 			defer term.RestoreTerminal(stdInFD, oldInState)
@@ -73,3 +78,39 @@ func Console(componentModel *models.Component, consoleConfig ConsoleConfig) erro
 
 	return nil
 }
+
+// monitor ...
+func monitor(stdOutFD uintptr, execID string) {
+	sigs := make(chan os.Signal, 1)
+
+	signal.Notify(sigs, syscall.SIGWINCH)
+	defer signal.Stop(sigs)
+
+	// inform the server what the starting size is
+	resize(stdOutFD, execID)
+
+	// resize the tty for any signals received
+	for range sigs {
+		resize(stdOutFD, execID)
+	}
+}
+
+func resize(fd uintptr, execID string) {
+	ws, err := term.GetWinsize(fd)
+	if err != nil {
+		lumber.Error("env:console:resize():docker.ContainerExecResize(%d): %s", fd, err)
+		return
+	}
+
+	// extract height and width
+	w := int(ws.Width)
+	h := int(ws.Height)
+
+	err = docker.ContainerExecResize(execID, h, w)
+	if err != nil {
+		lumber.Error("env:console:resize():docker.ContainerExecResize(%s, %d, %d): %s", execID, h, w, err)
+		return
+	}
+}
+
+
