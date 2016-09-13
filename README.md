@@ -1,44 +1,54 @@
 [![nanoboxdesktop logo](http://nano-assets.gopagoda.io/readme-headers/nanoboxdesktop.png)](http://nanobox.io/open-source#nanoboxdesktop)
 [![Build Status](https://travis-ci.org/nanobox-io/nanobox.svg)](https://travis-ci.org/nanobox-io/nanobox)
 
-## Nanobox Desktop
+## Nanobox
 
-[Nanobox desktop](https://desktop.nanobox.io/) gets rid of conventional "environments", such as development and production, and creates one unified environment; a nanobox environment. [Engines](https://docs.nanobox.io/engines/) help nanobox create these isolated, shareable, disposable environments, ensuring that whatever environment is created with nanobox is the same no matter where it lives.
+[Nanobox](https://nanobox.io/) automates the creation of isolated, repeatable environments for local and production applications. When developing locally, Nanobox provisions your app's infrastructure inside of a virtual machine (VM) and mounts your local codebase into the VM. Any changes made to your codebase are reflected inside the virtual environment.
 
+Once code is built and tested locally, Nanobox provisions and deploys an identical infrastructure on a production platform.
 
 ## How It Works
 
-Leveraging Vagrant and Docker, nanobox creates a virtual machine and launches docker containers that represent each piece of your application. Your nanobox environment will have everything it needs to run your application. Once you are done with it, you can "throw it away", leaving your machine clean. You'll never have to worry about having the right version of a language installed or managing dependencies again.
-
+Nanobox uses [Virtual Box](http://virtualbox.org) and [Docker](https://www.docker.com/) to create virtual development environments on your local machine. App configuration is handled in the [boxfile.yml](https://docs.nanobnox.io/app-config/boxfile/), a small yaml config file used to provision and configure your apps' environments both locally and in production.
 
 ## Why Nanobox?
 
-Nanobox allows you to stop configuring environments and just code. It guarantees that any project you start will work the same for anyone else collaborating on the project. When it's time to launch the project, you'll know that your production app will work, because it already works on nanobox.
-
+Nanobox allows you to stop configuring environments and just code. It guarantees that any project you start will work the same for anyone else collaborating on the project. When it's time to launch the project, you'll know that your production app will work, because it already works locally.
 
 ### Installation
 
-[Nanobox desktop](https://desktop.nanobox.io/downloads/) can be installed in two different ways:
+Nanobox can be installed in two different ways:
 
-1. Just the nanobox desktop binary.
-2. The nanobox desktop installer which includes the binary and all its dependencies (Vagrant, and Virtualbox)
+1. By using the [Nanobox installer](https://nanobox.io/download). *(Recommended)* .The installer includes all required dependencies (Virtual Box & Docker).
+2. Manually installing the nanobox binaries.
 
 
-#### When using just the binary:
+#### Manually Installing Nanobox Binaries:
+Nanobox requires two binaries:
+
+- `nanobox` - The Nanobox CLI
+- `nanobox-update` - The Nanobox update manager
+
+*Nanobox needs Virtual Box and Docker in order to run. If you don't already have these installed, you'll need to install them.*
 
 ##### OSX and Linux:
 
-1. Place the binary in your $PATH (ex. ~/bin) and run "chmod 755 nanobox".
-3. Run "which nanobox" to ensure it's accessible from your $PATH.
-2. Type `nanobox` to view a list of available commands.
+1. Download the nanobox binaries.
+  ```
+  $ wget https://s3.amazonaws.com/tools.nanobox.io/nanobox/v1/linux/amd64/nanobox
+$ wget https://s3.amazonaws.com/tools.nanobox.io/nanobox/v1/linux/amd64/nanobox-update
+  ```
+
+2. Place the binaries in your $PATH (ex. ~/usr/bin) and run `chmod 755 nanobox`.
+3. Run `which nanobox` to ensure it's accessible from your $PATH.
+4. Type `nanobox` to view a list of available commands.
 
 
 ##### Windows
 
-It is _**highly recommended**_ that you use [git bash](http://git-scm.com/downloads) as your shell. Not only will this provide the git workflow you'll need for Nanobox, but it will also give the CLI what it needs for features such as tunneling and SSH access to servers.
-
-1. Place the nanobox.exe file in your $PATH (ex. C:/Windows), then you can either run it by clicking on it or using a shell.
-
+1. Place the nanobox.exe and nanobox-update.exe files in your $PATH (ex. C:\Program Files\Nanobox\).
+2. From a command line prompt, run `where nanobox` to ensure it's accessable from your $PATH.
+3. Type `nanobox` to view a list of available commands.
 
 ### Usage
 ```
@@ -47,46 +57,41 @@ Usage:
   nanobox [command]
 
 Available Commands:
-  run           Starts a nanobox, provisions the app, & runs the app's exec
-  dev           Starts the nanobox, provisions app, & opens an interactive terminal
-  info          Displays information about the nanobox and your app
-  console       Opens an interactive terminal from inside your app on nanobox
-  destroy       Destroys the nanobox
-  stop          Suspends the nanobox
-  update        Updates the CLI to the newest available version
-  update-images Updates the nanobox docker images
-  box           Subcommands for managing the nanobox/boot2docker.box
-  engine        Subcommands to aid in developing a custom engine
+  status      Displays the status of your Nanobox VM & running platforms.
+  deploy      Deploys your generated build package to a production app.
+  console     Opens an interactive console inside a production component.
+  link        Manages links between local & production apps.
+  login       Authenticates your nanobox client with your nanobox.io account.
+  logout      Removes your nanobox.io api token from your local nanobox client.
+  build       Generates a deployable build package.
+  clean       Clean out any environemnts that no longer exist
+  dev         Manages your 'development' environment.
+  sim         Manages your 'simulated' environment.
+  tunnel      Creates a secure tunnel between your local machine & a production component.
+  destroy     Destroys the Nanobox virtual machine.
+  start       Starts the Nanobox virtual machine.
+  stop        Stop the Nanobox virtual machine.
 
 Flags:
-      --background[=false]: Stops nanobox from auto-suspending.
-  -f, --force[=false]: Forces a command to run (effects vary per command).
-  -v, --verbose[=false]: Increase command output from 'info' to 'debug'.
-      --version[=false]: Display the current version of this CLI
-
-Additional help topics:
-  nanobox production
+      --debug         Increases display output and sets level to debug
+  -h, --help          help for nanobox
+  -v, --verbose       Increases display output and sets level to debug
+  -V, --veryverbose   Increases display output and sets level to trace
 
 Use "nanobox [command] --help" for more information about a command.
 ```
 
 ### Documentation
 
-- Usage documentation is available at [nanobox.io](https://docs.nanobox.io/cli/).
-- Source code documentation is available on [godoc](http://godoc.org/github.com/nanobox-io/nanobox).
-
-
-## Todo/Doing
-- Make it work on Windows
-- More tests (you can never have enough!)
+- Nanobox documentation is available at [nanobox.io](https://docs.nanobox.io/).
+- Guides for popular languages, frameworks and services are avaialble at[guides.nanobox.io](http://guides.nanobox.io).
 
 
 ## Contributing
-Contributing to nanobox desktop is easy, just follow this [guide](https://docs.nanobox.io/contributing/)
-
+Contributing to nanobox desktop is easy, just follow these [contribution guidelines](https://docs.nanobox.io/contributing/)
 
 ### Contact
 
-For help using nanobox desktop or if you have any questions/suggestions, please find us on IRC (freenode) at #nanobox.
+For help using nanobox desktop or if you have any questions/suggestions, please reach out to help@nanobox.io or find us on IRC at #nanobox (freenode).
 
 [![nanobox logo](http://nano-assets.gopagoda.io/open-src/nanobox-open-src.png)](http://nanobox.io/open-source)
