@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/docker/engine-api/types/blkiodev"
+	"github.com/docker/engine-api/types/mount"
 	"github.com/docker/engine-api/types/strslice"
 	"github.com/docker/go-connections/nat"
 	"github.com/docker/go-units"
@@ -308,8 +309,8 @@ type HostConfig struct {
 	UTSMode         UTSMode           // UTS namespace to use for the container
 	UsernsMode      UsernsMode        // The user namespace to use for the container
 	ShmSize         int64             // Total shm memory usage
-	Sysctls         map[string]string `json:",omitempty"`        // List of Namespaced sysctls used for the container
-	Runtime         string            `json:"runtime,omitempty"` // Runtime to use with this container
+	Sysctls         map[string]string `json:",omitempty"` // List of Namespaced sysctls used for the container
+	Runtime         string            `json:",omitempty"` // Runtime to use with this container
 
 	// Applicable to Windows
 	ConsoleSize [2]int    // Initial console size
@@ -317,4 +318,7 @@ type HostConfig struct {
 
 	// Contains container's resources (cgroups, ulimits)
 	Resources
+
+	// Mounts specs used by the container
+	Mounts []mount.Mount `json:",omitempty"`
 }

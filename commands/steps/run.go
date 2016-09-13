@@ -2,7 +2,6 @@ package steps
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/util/display"

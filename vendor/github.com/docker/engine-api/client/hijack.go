@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/docker/engine-api/client/transport"
 	"github.com/docker/engine-api/types"
 	"github.com/docker/go-connections/sockets"
 	"golang.org/x/net/context"
@@ -135,9 +136,8 @@ func tlsDialWithDialer(dialer *net.Dialer, network, addr string, config *tls.Con
 	// from the hostname we're connecting to.
 	if config.ServerName == "" {
 		// Make a copy to avoid polluting argument or default.
-		c := *config
-		c.ServerName = hostname
-		config = &c
+		config = transport.TLSConfigClone(config)
+		config.ServerName = hostname
 	}
 
 	conn := tls.Client(rawConn, config)
