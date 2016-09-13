@@ -7,15 +7,17 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"strings"
-	"sync/atomic"
+	"sync"
 )
 
 // DisableCache will disable caching of the home directory. Caching is enabled
 // by default.
 var DisableCache bool
 
-var homedirCache atomic.Value
+var homedirCache string
+var cacheLock sync.RWMutex
 
 // Dir returns the home directory for the executing user.
 //
@@ -23,11 +25,16 @@ var homedirCache atomic.Value
 // An error is returned if a home directory cannot be detected.
 func Dir() (string, error) {
 	if !DisableCache {
-		cached := homedirCache.Load()
-		if cached != nil && cached != "" {
-			return cached.(string), nil
+		cacheLock.RLock()
+		cached := homedirCache
+		cacheLock.RUnlock()
+		if cached != "" {
+			return cached, nil
 		}
 	}
+
+	cacheLock.Lock()
+	defer cacheLock.Unlock()
 
 	var result string
 	var err error
@@ -41,8 +48,7 @@ func Dir() (string, error) {
 	if err != nil {
 		return "", err
 	}
-
-	homedirCache.Store(result)
+	homedirCache = result
 	return result, nil
 }
 
@@ -76,9 +82,28 @@ func dirUnix() (string, error) {
 		return home, nil
 	}
 
-	// If that fails, try the shell
+	// If that fails, try getent
 	var stdout bytes.Buffer
-	cmd := exec.Command("sh", "-c", "eval echo ~$USER")
+	cmd := exec.Command("getent", "passwd", strconv.Itoa(os.Getuid()))
+	cmd.Stdout = &stdout
+	if err := cmd.Run(); err != nil {
+		// If "getent" is missing, ignore it
+		if err == exec.ErrNotFound {
+			return "", err
+		}
+	} else {
+		if passwd := strings.TrimSpace(stdout.String()); passwd != "" {
+			// username:password:uid:gid:gecos:home:shell
+			passwdParts := strings.SplitN(passwd, ":", 7)
+			if len(passwdParts) > 5 {
+				return passwdParts[5], nil
+			}
+		}
+	}
+
+	// If all else fails, try the shell
+	stdout.Reset()
+	cmd = exec.Command("sh", "-c", "cd && pwd")
 	cmd.Stdout = &stdout
 	if err := cmd.Run(); err != nil {
 		return "", err
@@ -93,6 +118,11 @@ func dirUnix() (string, error) {
 }
 
 func dirWindows() (string, error) {
+	// First prefer the HOME environmental variable
+	if home := os.Getenv("HOME"); home != "" {
+		return home, nil
+	}
+
 	drive := os.Getenv("HOMEDRIVE")
 	path := os.Getenv("HOMEPATH")
 	home := drive + path

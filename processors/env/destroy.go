@@ -18,14 +18,14 @@ func Destroy(env *models.Env) error {
 
 	// init docker client
 	if err := provider.Init(); err != nil {
-		return fmt.Errorf("failed to init docker client: %s", err.Error())
+		return fmt.Errorf("failed to init docker client: %s", err)
 	}
 
 	// find apps
 	apps, err := env.Apps()
 	if err != nil {
-		lumber.Error("env:Destroy:models.Env{ID:%s}.Apps(): %s", env.ID, err.Error())
-		return fmt.Errorf("failed to load app collection: %s", err.Error())
+		lumber.Error("env:Destroy:models.Env{ID:%s}.Apps(): %s", env.ID, err)
+		return fmt.Errorf("failed to load app collection: %s", err)
 	}
 
 	// destroy apps
@@ -33,8 +33,18 @@ func Destroy(env *models.Env) error {
 
 		err := app.Destroy(a)
 		if err != nil {
-			return fmt.Errorf("failed to remove app: %s", err.Error())
+			return fmt.Errorf("failed to remove app: %s", err)
 		}
+	}
+
+	// unmount the environemtn
+	if err := Unmount(env, false); err != nil {
+		return fmt.Errorf("failed to unmount env: %s", err)
+	}
+
+	// remove the environment 
+	if err := env.Delete(); err != nil {
+		return fmt.Errorf("failed to remove env: %s", err)
 	}
 
 	return nil

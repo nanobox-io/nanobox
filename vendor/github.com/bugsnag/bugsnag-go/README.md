@@ -86,33 +86,6 @@ There are two steps to get panic handling in [revel](https://revel.github.io) ap
     [dev]
     ```
 
-### Using with martini apps
-
-1. Add `bugsnagmartini.AutoNotify` immediately after the `martini.Recovery` middleware in `main.go`.
-This causes unhandled panics to notify bugsnag.
-
-    ```go
-
-    import "github.com/bugsnag/bugsnag-go/martini"
-
-    func main() {
-
-        m.Use(martini.Recover()
-
-        m.Use(bugsnagmartini.AutoNotify(bugsnag.Configuration{
-            APIKey: "YOUR_API_KEY_HERE",
-        }))
-    }
-    ```
-
-2. Use `bugsnag` from the context injection if you need to notify about non-fatal errors.
-
-    ```
-    func MyHandler(r *http.Request, bugsnag *bugsnag.Notifier) string {
-        bugsnag.Notify(err);
-    }
-    ```
-
 ### Using with Google App Engine
 
 1. Configure bugsnag at the start of your `init()` function:
@@ -361,8 +334,6 @@ bugsnag.Configure(bugsnag.Configuration{
 In order to determine where a crash happens Bugsnag needs to know which packages you consider to
 be part of your app (as opposed to a library). By default this is set to `[]string{"main*"}`. Strings
 are matched to package names using [`filepath.Match`](http://godoc.org/path/filepath#Match).
-
-For matching subpackages within a package you may use the `**` notation. For example, `github.com/domain/package/**` will match all subpackages under `package/`.
 
 ```go
 bugsnag.Configure(bugsnag.Configuration{

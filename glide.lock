@@ -1,0 +1,163 @@
+hash: 879abd756d7c6b260a901046fffdf05b928987f3fc63cac04b9d27e4a054233c
+updated: 2016-09-13T11:40:57.02590955-06:00
+imports:
+- name: github.com/Azure/go-ansiterm
+  version: fa152c58bc15761d0200cb75fe958b89a9d4888e
+  subpackages:
+  - winterm
+- name: github.com/boltdb/bolt
+  version: 583e8937c61f1af6513608ccc75c97b6abdf4ff9
+- name: github.com/bugsnag/bugsnag-go
+  version: 9ee24c1db7e2c5b87e7228acb3e587a35124a041
+  subpackages:
+  - errors
+- name: github.com/bugsnag/panicwrap
+  version: aa7703c9414b36d4e9b2e42e6c704d0bfae7db64
+- name: github.com/docker/distribution
+  version: 17fb0bb6b30838f3f80833c6522cb374549663ce
+  subpackages:
+  - digest
+  - reference
+- name: github.com/docker/docker
+  version: 23cf638307f030cd8d48c9efc21feec18a6f88f8
+  subpackages:
+  - pkg/signal
+  - pkg/stdcopy
+  - pkg/term
+  - pkg/term/windows
+- name: github.com/docker/engine-api
+  version: 4290f40c056686fcaa5c9caf02eac1dde9315adf
+  subpackages:
+  - client
+  - client/transport
+  - client/transport/cancellable
+  - types
+  - types/blkiodev
+  - types/container
+  - types/filters
+  - types/mount
+  - types/network
+  - types/reference
+  - types/registry
+  - types/strslice
+  - types/swarm
+  - types/time
+  - types/versions
+- name: github.com/docker/go-connections
+  version: 988efe982fdecb46f01d53465878ff1f2ff411ce
+  subpackages:
+  - nat
+  - sockets
+  - tlsconfig
+- name: github.com/docker/go-units
+  version: 0bbddae09c5a5419a8c6dcdd7ff90da3d450393b
+- name: github.com/docker/machine
+  version: 85bef344b7be221c79a1e0173acf44715075f0f9
+  subpackages:
+  - libmachine/log
+  - libmachine/mcnutils
+  - version
+- name: github.com/fsnotify/fsnotify
+  version: a8a77c9133d2d6fd8334f3260d06f60e8d80a5fb
+- name: github.com/hashicorp/hcl
+  version: 99df0eb941dd8ddbc83d3f3605a34f6a686ac85e
+  subpackages:
+  - hcl/ast
+  - hcl/parser
+  - hcl/scanner
+  - hcl/strconv
+  - hcl/token
+  - json/parser
+  - json/scanner
+  - json/token
+- name: github.com/howeyc/gopass
+  version: 26c6e1184fd5255fa5f5289d0b789a4819c203a4
+- name: github.com/inconshreveable/mousetrap
+  version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
+- name: github.com/jcelliott/lumber
+  version: dd349441af25132d146d7095c6693a15431fc9b1
+- name: github.com/kardianos/osext
+  version: c2c54e542fb797ad986b31721e1baedf214ca413
+- name: github.com/kr/fs
+  version: 2788f0dbd16903de03cb8186e5c7d97b69ad387b
+- name: github.com/magiconair/properties
+  version: 0723e352fa358f9322c938cc2dadda874e9151a9
+- name: github.com/Microsoft/go-winio
+  version: ce2922f643c8fd76b46cadc7f404a06282678b34
+- name: github.com/mitchellh/colorstring
+  version: 8631ce90f28644f54aeedcb3e389a85174e067d1
+- name: github.com/mitchellh/go-homedir
+  version: 756f7b183b7ab78acdbbee5c7f392838ed459dda
+- name: github.com/mitchellh/mapstructure
+  version: ca63d7c062ee3c9f34db231e352b60012b4fd0c1
+- name: github.com/nanobox-io/golang-docker-client
+  version: e8a9fec6d638f6f76301044c0c6a647199ae94c0
+- name: github.com/nanobox-io/golang-portal-client
+  version: 552531bd5ea2289c042c0c4836affb9313ed84a0
+- name: github.com/nanobox-io/golang-ssh
+  version: b42e3bb3b407c94193734f85d2f2f37067651d78
+- name: github.com/nanopack/mist
+  version: d7ecdb275cbb147f68f44e379f8c81b3d5c15211
+  subpackages:
+  - clients
+  - core
+- name: github.com/opencontainers/runc
+  version: f516b5d0821f90515d38e79c4f5d4d221dc0c331
+  subpackages:
+  - libcontainer/user
+- name: github.com/pelletier/go-buffruneio
+  version: df1e16fde7fc330a0ca68167c23bf7ed6ac31d6d
+- name: github.com/pelletier/go-toml
+  version: 31055c2ff0bb0c7f9095aec0d220aed21108121e
+- name: github.com/pkg/errors
+  version: 17b591df37844cde689f4d5813e5cea0927d8dd2
+- name: github.com/pkg/sftp
+  version: 8197a2e580736b78d704be0fc47b2324c0591a32
+- name: github.com/sdomino/go-util
+  version: 1ca3b1e3b179725f7683700e6829aea136d6b084
+  subpackages:
+  - print
+- name: github.com/Sirupsen/logrus
+  version: 3ec0642a7fb6488f65b06f9040adc67e3990296a
+- name: github.com/spf13/afero
+  version: 20500e2abd0d1f4564a499e83d11d6c73cd58c27
+  subpackages:
+  - mem
+  - sftp
+- name: github.com/spf13/cast
+  version: e31f36ffc91a2ba9ddb72a4b6a607ff9b3d3cb63
+- name: github.com/spf13/cobra
+  version: 9c28e4bbd74e5c3ed7aacbc552b2cab7cfdfe744
+- name: github.com/spf13/jwalterweatherman
+  version: 33c24e77fb80341fe7130ee7c594256ff08ccc46
+- name: github.com/spf13/pflag
+  version: 7b17cc4658ef5ca157b986ea5c0b43af7938532b
+- name: github.com/spf13/viper
+  version: 16990631d4aa7e38f73dbbbf37fa13e67c648531
+- name: github.com/timehop/go-mixpanel
+  version: 9b81eaf1f33eda1d280d59adbd1fe9d3ad3da08f
+- name: golang.org/x/crypto
+  version: beef0f4390813b96e8e68fd78570396d0f4751fc
+  subpackages:
+  - curve25519
+  - ssh
+  - ssh/terminal
+- name: golang.org/x/net
+  version: 4f2fc6c1e69d41baf187332ee08fbd2b296f21ed
+  subpackages:
+  - context
+  - proxy
+- name: golang.org/x/sys
+  version: 30de6d19a3bd89a5f38ae4028e23aaa5582648af
+  subpackages:
+  - unix
+  - windows
+  - windows/registry
+- name: golang.org/x/text
+  version: 1e65e9bf72c307081cea196f47ef37aed17eb316
+  subpackages:
+  - transform
+  - unicode/norm
+- name: gopkg.in/yaml.v2
+  version: 31c299268d302dd0aa9a0dcf765a3d58971ac83f
+testImports: []

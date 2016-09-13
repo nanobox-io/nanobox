@@ -1,0 +1,12 @@
+language: go
+go:
+  - 1.6
+
+addons:
+  postgresql: "9.3"
+
+services:
+  - postgresql
+
+install: go get -t -v .
+script: go test -v ./... -cover
