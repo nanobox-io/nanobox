@@ -83,15 +83,15 @@ Use "nanobox [command] --help" for more information about a command.
 
 ### Documentation
 
-- Nanobox documentation is available at [nanobox.io](https://docs.nanobox.io/).
-- Guides for popular languages, frameworks and services are avaialble at[guides.nanobox.io](http://guides.nanobox.io).
+- Nanobox documentation is available at [docs.nanobox.io](https://docs.nanobox.io/).
+- Guides for popular languages, frameworks and services are avaialble at [guides.nanobox.io](http://guides.nanobox.io).
 
 
 ## Contributing
-Contributing to nanobox desktop is easy, just follow these [contribution guidelines](https://docs.nanobox.io/contributing/)
+Contributing to Nanobox is easy. Just follow these [contribution guidelines](https://docs.nanobox.io/contributing/).
 
 ### Contact
 
-For help using nanobox desktop or if you have any questions/suggestions, please reach out to help@nanobox.io or find us on IRC at #nanobox (freenode).
+For help using Nanobox or if you have any questions/suggestions, please reach out to help@nanobox.io or find us on IRC at #nanobox (freenode). You can also [create a new issue on this project](https://github.com/nanobox-io/nanobox/issues/new).
 
 [![nanobox logo](http://nano-assets.gopagoda.io/open-src/nanobox-open-src.png)](http://nanobox.io/open-source)
