@@ -12,8 +12,7 @@ var (
 	// already open.
 	ErrDatabaseOpen = errors.New("database already open")
 
-	// ErrInvalid is returned when both meta pages on a database are invalid.
-	// This typically occurs when a file is not a bolt database.
+	// ErrInvalid is returned when a data file is not a Bolt-formatted database.
 	ErrInvalid = errors.New("invalid database")
 
 	// ErrVersionMismatch is returned when the data file was created with a

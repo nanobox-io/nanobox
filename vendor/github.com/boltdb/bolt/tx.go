@@ -5,7 +5,6 @@ import (
 	"io"
 	"os"
 	"sort"
-	"strings"
 	"time"
 	"unsafe"
 )
@@ -169,8 +168,6 @@ func (tx *Tx) Commit() error {
 	// Free the old root bucket.
 	tx.meta.root.root = tx.root.root
 
-	opgid := tx.meta.pgid
-
 	// Free the freelist and allocate new pages for it. This will overestimate
 	// the size of the freelist but not underestimate the size (which would be bad).
 	tx.db.freelist.free(tx.meta.txid, tx.db.page(tx.meta.freelist))
@@ -185,14 +182,6 @@ func (tx *Tx) Commit() error {
 	}
 	tx.meta.freelist = p.id
 
-	// If the high water mark has moved up then attempt to grow the database.
-	if tx.meta.pgid > opgid {
-		if err := tx.db.grow(int(tx.meta.pgid+1) * tx.db.pageSize); err != nil {
-			tx.rollback()
-			return err
-		}
-	}
-
 	// Write dirty pages to disk.
 	startTime = time.Now()
 	if err := tx.write(); err != nil {
@@ -203,17 +192,8 @@ func (tx *Tx) Commit() error {
 	// If strict mode is enabled then perform a consistency check.
 	// Only the first consistency error is reported in the panic.
 	if tx.db.StrictMode {
-		ch := tx.Check()
-		var errs []string
-		for {
-			err, ok := <-ch
-			if !ok {
-				break
-			}
-			errs = append(errs, err.Error())
-		}
-		if len(errs) > 0 {
-			panic("check fail: " + strings.Join(errs, "\n"))
+		if err, ok := <-tx.Check(); ok {
+			panic("check fail: " + err.Error())
 		}
 	}
 
@@ -291,7 +271,7 @@ func (tx *Tx) close() {
 }
 
 // Copy writes the entire database to a writer.
-// This function exists for backwards compatibility. Use WriteTo() instead.
+// This function exists for backwards compatibility. Use WriteTo() in
 func (tx *Tx) Copy(w io.Writer) error {
 	_, err := tx.WriteTo(w)
 	return err
@@ -305,36 +285,14 @@ func (tx *Tx) WriteTo(w io.Writer) (n int64, err error) {
 	if err != nil {
 		return 0, err
 	}
-	defer func() { _ = f.Close() }()
+	defer f.Close()
 
-	// Generate a meta page. We use the same page data for both meta pages.
-	buf := make([]byte, tx.db.pageSize)
-	page := (*page)(unsafe.Pointer(&buf[0]))
-	page.flags = metaPageFlag
-	*page.meta() = *tx.meta
-
-	// Write meta 0.
-	page.id = 0
-	page.meta().checksum = page.meta().sum64()
-	nn, err := w.Write(buf)
-	n += int64(nn)
+	// Copy the meta pages.
+	tx.db.metalock.Lock()
+	n, err = io.CopyN(w, f, int64(tx.db.pageSize*2))
+	tx.db.metalock.Unlock()
 	if err != nil {
-		return n, fmt.Errorf("meta 0 copy: %s", err)
-	}
-
-	// Write meta 1 with a lower transaction id.
-	page.id = 1
-	page.meta().txid -= 1
-	page.meta().checksum = page.meta().sum64()
-	nn, err = w.Write(buf)
-	n += int64(nn)
-	if err != nil {
-		return n, fmt.Errorf("meta 1 copy: %s", err)
-	}
-
-	// Move past the meta pages in the file.
-	if _, err := f.Seek(int64(tx.db.pageSize*2), os.SEEK_SET); err != nil {
-		return n, fmt.Errorf("seek: %s", err)
+		return n, fmt.Errorf("meta copy: %s", err)
 	}
 
 	// Copy data pages.
@@ -473,8 +431,6 @@ func (tx *Tx) write() error {
 	for _, p := range tx.pages {
 		pages = append(pages, p)
 	}
-	// Clear out page cache early.
-	tx.pages = make(map[pgid]*page)
 	sort.Sort(pages)
 
 	// Write pages to disk in order.
@@ -519,22 +475,8 @@ func (tx *Tx) write() error {
 		}
 	}
 
-	// Put small pages back to page pool.
-	for _, p := range pages {
-		// Ignore page sizes over 1 page.
-		// These are allocated using make() instead of the page pool.
-		if int(p.overflow) != 0 {
-			continue
-		}
-
-		buf := (*[maxAllocSize]byte)(unsafe.Pointer(p))[:tx.db.pageSize]
-
-		// See https://go.googlesource.com/go/+/f03c9202c43e0abb130669852082117ca50aa9b1
-		for i := range buf {
-			buf[i] = 0
-		}
-		tx.db.pagePool.Put(buf)
-	}
+	// Clear out page cache.
+	tx.pages = make(map[pgid]*page)
 
 	return nil
 }
@@ -563,7 +505,7 @@ func (tx *Tx) writeMeta() error {
 }
 
 // page returns a reference to the page with a given id.
-// If page has been written to then a temporary buffered page is returned.
+// If page has been written to then a temporary bufferred page is returned.
 func (tx *Tx) page(id pgid) *page {
 	// Check the dirty pages first.
 	if tx.pages != nil {

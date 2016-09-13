@@ -1,15 +1,16 @@
 Overview [![Build Status](https://travis-ci.org/magiconair/properties.svg?branch=master)](https://travis-ci.org/magiconair/properties)
 ========
 
-#### Current version: 1.7.0
+#### Current version: 1.6.0
 
 properties is a Go library for reading and writing properties files.
 
-It supports reading from multiple files or URLs and Spring style recursive
-property expansion of expressions like `${key}` to their corresponding value.
-Value expressions can refer to other keys like in `${key}` or to environment
-variables like in `${USER}`.  Filenames can also contain environment variables
-like in `/home/${USER}/myapp.properties`.
+It supports reading from multiple files and Spring style recursive property
+expansion of expressions like `${key}` to their corresponding value.
+Value expressions can refer to other keys like in `${key}` or to
+environment variables like in `${USER}`.
+Filenames can also contain environment variables like in
+`/home/${USER}/myapp.properties`.
 
 Properties can be decoded into structs, maps, arrays and values through
 struct tags.
@@ -29,10 +30,7 @@ Getting Started
 ---------------
 
 ```go
-import (
-	"flag"
-	"github.com/magiconair/properties"
-)
+import "github.com/magiconair/properties"
 
 func main() {
 	p := properties.MustLoadFile("${HOME}/config.properties", properties.UTF8)
@@ -41,7 +39,7 @@ func main() {
 	host := p.MustGetString("host")
 	port := p.GetInt("port", 8080)
 
-	// or via decode
+    // or via decode
 	type Config struct {
 		Host    string        `properties:"host"`
 		Port    int           `properties:"port,default=9000"`
@@ -52,12 +50,6 @@ func main() {
 	if err := p.Decode(&cfg); err != nil {
 		log.Fatal(err)
 	}
-
-	// or via flags
-	p.MustFlag(flag.CommandLine)
-
-	// or via url
-	p = properties.MustLoadURL("http://host/path")
 }
 
 ```

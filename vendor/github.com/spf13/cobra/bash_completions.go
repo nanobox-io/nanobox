@@ -11,8 +11,7 @@ import (
 )
 
 const (
-	BashCompFilenameExt     = "cobra_annotation_bash_completion_filename_extensions"
-	BashCompCustom          = "cobra_annotation_bash_completion_custom"
+	BashCompFilenameExt     = "cobra_annotation_bash_completion_filename_extentions"
 	BashCompOneRequiredFlag = "cobra_annotation_bash_completion_one_required_flag"
 	BashCompSubdirsInDir    = "cobra_annotation_bash_completion_subdirs_in_dir"
 )
@@ -22,7 +21,7 @@ func preamble(out io.Writer, name string) error {
 	if err != nil {
 		return err
 	}
-	_, err = fmt.Fprint(out, `
+	_, err = fmt.Fprintf(out, `
 __debug()
 {
     if [[ -n ${BASH_COMP_DEBUG_FILE} ]]; then
@@ -35,7 +34,7 @@ __debug()
 __my_init_completion()
 {
     COMPREPLY=()
-    _get_comp_words_by_ref "$@" cur prev words cword
+    _get_comp_words_by_ref cur prev words cword
 }
 
 __index_of_word()
@@ -61,7 +60,7 @@ __contains_word()
 
 __handle_reply()
 {
-    __debug "${FUNCNAME[0]}"
+    __debug "${FUNCNAME}"
     case $cur in
         -*)
             if [[ $(type -t compopt) = "builtin" ]]; then
@@ -75,28 +74,7 @@ __handle_reply()
             fi
             COMPREPLY=( $(compgen -W "${allflags[*]}" -- "$cur") )
             if [[ $(type -t compopt) = "builtin" ]]; then
-                [[ "${COMPREPLY[0]}" == *= ]] || compopt +o nospace
-            fi
-
-            # complete after --flag=abc
-            if [[ $cur == *=* ]]; then
-                if [[ $(type -t compopt) = "builtin" ]]; then
-                    compopt +o nospace
-                fi
-
-                local index flag
-                flag="${cur%%=*}"
-                __index_of_word "${flag}" "${flags_with_completion[@]}"
-                if [[ ${index} -ge 0 ]]; then
-                    COMPREPLY=()
-                    PREFIX=""
-                    cur="${cur#*=}"
-                    ${flags_completion[${index}]}
-                    if [ -n "${ZSH_VERSION}" ]; then
-                        # zfs completion needs --flag= prefix
-                        eval "COMPREPLY=( \"\${COMPREPLY[@]/#/${flag}=}\" )"
-                    fi
-                fi
+                [[ $COMPREPLY == *= ]] || compopt +o nospace
             fi
             return 0;
             ;;
@@ -116,18 +94,14 @@ __handle_reply()
     fi
 
     local completions
-    completions=("${commands[@]}")
-    if [[ ${#must_have_one_noun[@]} -ne 0 ]]; then
-        completions=("${must_have_one_noun[@]}")
-    fi
     if [[ ${#must_have_one_flag[@]} -ne 0 ]]; then
-        completions+=("${must_have_one_flag[@]}")
+        completions=("${must_have_one_flag[@]}")
+    elif [[ ${#must_have_one_noun[@]} -ne 0 ]]; then
+        completions=("${must_have_one_noun[@]}")
+    else
+        completions=("${commands[@]}")
     fi
     COMPREPLY=( $(compgen -W "${completions[*]}" -- "$cur") )
-
-    if [[ ${#COMPREPLY[@]} -eq 0 && ${#noun_aliases[@]} -gt 0 && ${#must_have_one_noun[@]} -ne 0 ]]; then
-        COMPREPLY=( $(compgen -W "${noun_aliases[*]}" -- "$cur") )
-    fi
 
     if [[ ${#COMPREPLY[@]} -eq 0 ]]; then
         declare -F __custom_func >/dev/null && __custom_func
@@ -151,7 +125,7 @@ __handle_subdirs_in_dir_flag()
 
 __handle_flag()
 {
-    __debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
+    __debug "${FUNCNAME}: c is $c words[c] is ${words[c]}"
 
     # if a command required a flag, and we found it, unset must_have_one_flag()
     local flagname=${words[c]}
@@ -162,20 +136,15 @@ __handle_flag()
         flagname=${flagname%%=*} # strip everything after the =
         flagname="${flagname}=" # but put the = back
     fi
-    __debug "${FUNCNAME[0]}: looking for ${flagname}"
+    __debug "${FUNCNAME}: looking for ${flagname}"
     if __contains_word "${flagname}" "${must_have_one_flag[@]}"; then
         must_have_one_flag=()
     fi
 
-    # if you set a flag which only applies to this command, don't show subcommands
-    if __contains_word "${flagname}" "${local_nonpersistent_flags[@]}"; then
-      commands=()
-    fi
-
     # keep flag value with flagname as flaghash
-    if [ -n "${flagvalue}" ] ; then
+    if [ ${flagvalue} ] ; then
         flaghash[${flagname}]=${flagvalue}
-    elif [ -n "${words[ $((c+1)) ]}" ] ; then
+    elif [ ${words[ $((c+1)) ]} ] ; then
         flaghash[${flagname}]=${words[ $((c+1)) ]}
     else
         flaghash[${flagname}]="true" # pad "true" for bool flag
@@ -196,11 +165,9 @@ __handle_flag()
 
 __handle_noun()
 {
-    __debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
+    __debug "${FUNCNAME}: c is $c words[c] is ${words[c]}"
 
     if __contains_word "${words[c]}" "${must_have_one_noun[@]}"; then
-        must_have_one_noun=()
-    elif __contains_word "${words[c]}" "${noun_aliases[@]}"; then
         must_have_one_noun=()
     fi
 
@@ -210,20 +177,16 @@ __handle_noun()
 
 __handle_command()
 {
-    __debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
+    __debug "${FUNCNAME}: c is $c words[c] is ${words[c]}"
 
     local next_command
     if [[ -n ${last_command} ]]; then
         next_command="_${last_command}_${words[c]//:/__}"
     else
-        if [[ $c -eq 0 ]]; then
-            next_command="_$(basename "${words[c]//:/__}")"
-        else
-            next_command="_${words[c]//:/__}"
-        fi
+        next_command="_${words[c]//:/__}"
     fi
     c=$((c+1))
-    __debug "${FUNCNAME[0]}: looking for ${next_command}"
+    __debug "${FUNCNAME}: looking for ${next_command}"
     declare -F $next_command >/dev/null && $next_command
 }
 
@@ -233,12 +196,10 @@ __handle_word()
         __handle_reply
         return
     fi
-    __debug "${FUNCNAME[0]}: c is $c words[c] is ${words[c]}"
+    __debug "${FUNCNAME}: c is $c words[c] is ${words[c]}"
     if [[ "${words[c]}" == -* ]]; then
         __handle_flag
     elif __contains_word "${words[c]}" "${commands[@]}"; then
-        __handle_command
-    elif [[ $c -eq 0 ]] && __contains_word "$(basename "${words[c]}")" "${commands[@]}"; then
         __handle_command
     else
         __handle_noun
@@ -258,17 +219,16 @@ func postscript(w io.Writer, name string) error {
 	}
 	_, err = fmt.Fprintf(w, `{
     local cur prev words cword
-    declare -A flaghash 2>/dev/null || :
+    declare -A flaghash
     if declare -F _init_completion >/dev/null 2>&1; then
         _init_completion -s || return
     else
-        __my_init_completion -n "=" || return
+        __my_init_completion || return
     fi
 
     local c=0
     local flags=()
     local two_word_flags=()
-    local local_nonpersistent_flags=()
     local flags_with_completion=()
     local flags_completion=()
     local commands=("%s")
@@ -333,20 +293,6 @@ func writeFlagHandler(name string, annotations map[string][]string, w io.Writer)
 			if err != nil {
 				return err
 			}
-		case BashCompCustom:
-			_, err := fmt.Fprintf(w, "    flags_with_completion+=(%q)\n", name)
-			if err != nil {
-				return err
-			}
-			if len(value) > 0 {
-				handlers := strings.Join(value, "; ")
-				_, err = fmt.Fprintf(w, "    flags_completion+=(%q)\n", handlers)
-			} else {
-				_, err = fmt.Fprintf(w, "    flags_completion+=(:)\n")
-			}
-			if err != nil {
-				return err
-			}
 		case BashCompSubdirsInDir:
 			_, err := fmt.Fprintf(w, "    flags_with_completion+=(%q)\n", name)
 
@@ -366,7 +312,7 @@ func writeFlagHandler(name string, annotations map[string][]string, w io.Writer)
 }
 
 func writeShortFlag(flag *pflag.Flag, w io.Writer) error {
-	b := (len(flag.NoOptDefVal) > 0)
+	b := (flag.Value.Type() == "bool")
 	name := flag.Shorthand
 	format := "    "
 	if !b {
@@ -380,7 +326,7 @@ func writeShortFlag(flag *pflag.Flag, w io.Writer) error {
 }
 
 func writeFlag(flag *pflag.Flag, w io.Writer) error {
-	b := (len(flag.NoOptDefVal) > 0)
+	b := (flag.Value.Type() == "bool")
 	name := flag.Name
 	format := "    flags+=(\"--%s"
 	if !b {
@@ -393,22 +339,9 @@ func writeFlag(flag *pflag.Flag, w io.Writer) error {
 	return writeFlagHandler("--"+name, flag.Annotations, w)
 }
 
-func writeLocalNonPersistentFlag(flag *pflag.Flag, w io.Writer) error {
-	b := (len(flag.NoOptDefVal) > 0)
-	name := flag.Name
-	format := "    local_nonpersistent_flags+=(\"--%s"
-	if !b {
-		format += "="
-	}
-	format += "\")\n"
-	_, err := fmt.Fprintf(w, format, name)
-	return err
-}
-
 func writeFlags(cmd *Command, w io.Writer) error {
 	_, err := fmt.Fprintf(w, `    flags=()
     two_word_flags=()
-    local_nonpersistent_flags=()
     flags_with_completion=()
     flags_completion=()
 
@@ -416,12 +349,8 @@ func writeFlags(cmd *Command, w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	localNonPersistentFlags := cmd.LocalNonPersistentFlags()
 	var visitErr error
 	cmd.NonInheritedFlags().VisitAll(func(flag *pflag.Flag) {
-		if nonCompletableFlag(flag) {
-			return
-		}
 		if err := writeFlag(flag, w); err != nil {
 			visitErr = err
 			return
@@ -432,20 +361,11 @@ func writeFlags(cmd *Command, w io.Writer) error {
 				return
 			}
 		}
-		if localNonPersistentFlags.Lookup(flag.Name) != nil {
-			if err := writeLocalNonPersistentFlag(flag, w); err != nil {
-				visitErr = err
-				return
-			}
-		}
 	})
 	if visitErr != nil {
 		return visitErr
 	}
 	cmd.InheritedFlags().VisitAll(func(flag *pflag.Flag) {
-		if nonCompletableFlag(flag) {
-			return
-		}
 		if err := writeFlag(flag, w); err != nil {
 			visitErr = err
 			return
@@ -472,9 +392,6 @@ func writeRequiredFlag(cmd *Command, w io.Writer) error {
 	flags := cmd.NonInheritedFlags()
 	var visitErr error
 	flags.VisitAll(func(flag *pflag.Flag) {
-		if nonCompletableFlag(flag) {
-			return
-		}
 		for key := range flag.Annotations {
 			switch key {
 			case BashCompOneRequiredFlag:
@@ -501,26 +418,13 @@ func writeRequiredFlag(cmd *Command, w io.Writer) error {
 	return visitErr
 }
 
-func writeRequiredNouns(cmd *Command, w io.Writer) error {
+func writeRequiredNoun(cmd *Command, w io.Writer) error {
 	if _, err := fmt.Fprintf(w, "    must_have_one_noun=()\n"); err != nil {
 		return err
 	}
 	sort.Sort(sort.StringSlice(cmd.ValidArgs))
 	for _, value := range cmd.ValidArgs {
 		if _, err := fmt.Fprintf(w, "    must_have_one_noun+=(%q)\n", value); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func writeArgAliases(cmd *Command, w io.Writer) error {
-	if _, err := fmt.Fprintf(w, "    noun_aliases=()\n"); err != nil {
-		return err
-	}
-	sort.Sort(sort.StringSlice(cmd.ArgAliases))
-	for _, value := range cmd.ArgAliases {
-		if _, err := fmt.Fprintf(w, "    noun_aliases+=(%q)\n", value); err != nil {
 			return err
 		}
 	}
@@ -554,10 +458,7 @@ func gen(cmd *Command, w io.Writer) error {
 	if err := writeRequiredFlag(cmd, w); err != nil {
 		return err
 	}
-	if err := writeRequiredNouns(cmd, w); err != nil {
-		return err
-	}
-	if err := writeArgAliases(cmd, w); err != nil {
+	if err := writeRequiredNoun(cmd, w); err != nil {
 		return err
 	}
 	if _, err := fmt.Fprintf(w, "}\n\n"); err != nil {
@@ -579,10 +480,6 @@ func (cmd *Command) GenBashCompletion(w io.Writer) error {
 		return err
 	}
 	return postscript(w, cmd.Name())
-}
-
-func nonCompletableFlag(flag *pflag.Flag) bool {
-	return flag.Hidden || len(flag.Deprecated) > 0
 }
 
 func (cmd *Command) GenBashCompletionFile(filename string) error {
@@ -616,12 +513,6 @@ func (cmd *Command) MarkFlagFilename(name string, extensions ...string) error {
 	return MarkFlagFilename(cmd.Flags(), name, extensions...)
 }
 
-// MarkFlagCustom adds the BashCompCustom annotation to the named flag, if it exists.
-// Generated bash autocompletion will call the bash function f for the flag.
-func (cmd *Command) MarkFlagCustom(name string, f string) error {
-	return MarkFlagCustom(cmd.Flags(), name, f)
-}
-
 // MarkPersistentFlagFilename adds the BashCompFilenameExt annotation to the named persistent flag, if it exists.
 // Generated bash autocompletion will select filenames for the flag, limiting to named extensions if provided.
 func (cmd *Command) MarkPersistentFlagFilename(name string, extensions ...string) error {
@@ -632,10 +523,4 @@ func (cmd *Command) MarkPersistentFlagFilename(name string, extensions ...string
 // Generated bash autocompletion will select filenames for the flag, limiting to named extensions if provided.
 func MarkFlagFilename(flags *pflag.FlagSet, name string, extensions ...string) error {
 	return flags.SetAnnotation(name, BashCompFilenameExt, extensions)
-}
-
-// MarkFlagCustom adds the BashCompCustom annotation to the named flag in the flag set, if it exists.
-// Generated bash autocompletion will call the bash function f for the flag.
-func MarkFlagCustom(flags *pflag.FlagSet, name string, f string) error {
-	return flags.SetAnnotation(name, BashCompCustom, []string{f})
 }

@@ -2,7 +2,10 @@ package mist
 
 import "sort"
 
+// interfaces
 type (
+
+	//
 	subscriptions interface {
 		Add([]string)
 		Remove([]string)

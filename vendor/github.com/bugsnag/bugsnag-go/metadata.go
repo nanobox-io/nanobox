@@ -85,7 +85,7 @@ func (s sanitizer) Sanitize(data interface{}) interface{} {
 
 	t := reflect.TypeOf(data)
 	v := reflect.ValueOf(data)
-	
+
 	if t == nil {
 		return "<nil>"
 	}

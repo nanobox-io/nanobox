@@ -27,11 +27,6 @@ func ToFloat64(i interface{}) float64 {
 	return v
 }
 
-func ToInt64(i interface{}) int64 {
-	v, _ := ToInt64E(i)
-	return v
-}
-
 func ToInt(i interface{}) int {
 	v, _ := ToIntE(i)
 	return v

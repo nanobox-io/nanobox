@@ -118,6 +118,12 @@ func (config *Configuration) clone() *Configuration {
 
 func (config *Configuration) isProjectPackage(pkg string) bool {
 	for _, p := range config.ProjectPackages {
+		if d, f := filepath.Split(p); f == "**" {
+			if strings.HasPrefix(pkg, d) {
+				return true
+			}
+		}
+
 		if match, _ := filepath.Match(p, pkg); match {
 			return true
 		}
@@ -129,6 +135,8 @@ func (config *Configuration) stripProjectPackages(file string) string {
 	for _, p := range config.ProjectPackages {
 		if len(p) > 2 && p[len(p)-2] == '/' && p[len(p)-1] == '*' {
 			p = p[:len(p)-1]
+		} else if p[len(p)-1] == '*' && p[len(p)-2] == '*' {
+			p = p[:len(p)-2]
 		} else {
 			p = p + "/"
 		}

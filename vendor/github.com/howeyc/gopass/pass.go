@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 var defaultGetCh = func() (byte, error) {
@@ -38,14 +40,11 @@ func getPasswd(masked bool) ([]byte, error) {
 		mask = []byte("*")
 	}
 
-	if isTerminal(os.Stdin.Fd()) {
-		if oldState, err := makeRaw(os.Stdin.Fd()); err != nil {
+	if terminal.IsTerminal(int(os.Stdin.Fd())) {
+		if oldState, err := terminal.MakeRaw(int(os.Stdin.Fd())); err != nil {
 			return pass, err
 		} else {
-			defer func() {
-				restore(os.Stdin.Fd(), oldState)
-				fmt.Println()
-			}()
+			defer terminal.Restore(int(os.Stdin.Fd()), oldState)
 		}
 	}
 
@@ -77,6 +76,7 @@ func getPasswd(masked bool) ([]byte, error) {
 		err = ErrMaxLengthExceeded
 	}
 
+	fmt.Println()
 	return pass, err
 }
 
