@@ -3,7 +3,6 @@ package processors
 import (
 	"fmt"
 
-
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/odin"

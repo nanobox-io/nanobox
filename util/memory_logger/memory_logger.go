@@ -82,7 +82,7 @@ func (m *memoryLogger) Level(n int) {
 }
 
 func (m *memoryLogger) Prefix(str string) {
-	m.prefix = str	
+	m.prefix = str
 }
 
 func (m *memoryLogger) TimeFormat(string) {
@@ -95,4 +95,3 @@ func (m *memoryLogger) Close() {
 func (m *memoryLogger) output(msg *lumber.Message) {
 
 }
-

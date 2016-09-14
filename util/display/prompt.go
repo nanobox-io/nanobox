@@ -16,4 +16,3 @@ func ReadUsername() (string, error) {
 
 	return strings.TrimSpace(str), err
 }
-

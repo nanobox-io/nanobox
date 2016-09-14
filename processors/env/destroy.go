@@ -42,7 +42,7 @@ func Destroy(env *models.Env) error {
 		return fmt.Errorf("failed to unmount env: %s", err)
 	}
 
-	// remove the environment 
+	// remove the environment
 	if err := env.Delete(); err != nil {
 		return fmt.Errorf("failed to remove env: %s", err)
 	}
