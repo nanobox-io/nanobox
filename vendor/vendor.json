@@ -291,12 +291,6 @@
 			"revisionTime": "2016-01-19T20:27:37Z"
 		},
 		{
-			"checksumSHA1": "WI+JevQX15p9zqngb1BMHvrPAgU=",
-			"path": "github.com/howeyc/gopass",
-			"revision": "66487b23f2880ba32e185121d2cd51a338ea069a",
-			"revisionTime": "2016-03-03T20:01:16Z"
-		},
-		{
 			"checksumSHA1": "40vJyUB4ezQSn/NSadsKEOrudMc=",
 			"path": "github.com/inconshreveable/mousetrap",
 			"revision": "76626ae9c91c4f2a10f34cad8ce83ea42c93bb75",
@@ -397,12 +391,6 @@
 			"path": "github.com/opencontainers/runc/libcontainer/user",
 			"revision": "0107c7fb6cef8d2f302f299039cc2f9a903880ac",
 			"revisionTime": "2016-02-19T03:27:39Z"
-		},
-		{
-			"checksumSHA1": "pXPa+JNgjOClKEFtVCVPdpNZjDs=",
-			"path": "github.com/sdomino/go-util/print",
-			"revision": "1ca3b1e3b179725f7683700e6829aea136d6b084",
-			"revisionTime": "2016-06-08T17:43:39Z"
 		},
 		{
 			"checksumSHA1": "65+hx0QlLzpWe5pnjAzteKBnC10=",
