@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util/boxfile"
 )
 
 type updatePayload struct {
@@ -13,7 +12,7 @@ type updatePayload struct {
 
 // UpdatePayload returns a string for the update hook payload
 func UpdatePayload(c *models.Component) string {
-	config, err := boxfile.ComponentConfig(c)
+	config, err := componentConfig(c)
 	if err != nil {
 		// log the failure
 		return "{}"

@@ -4,12 +4,11 @@ import (
 	"encoding/json"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util/boxfile"
 )
 
 // PlanPayload returns a string for the user hook payload
 func PlanPayload(component *models.Component) string {
-	config, err := boxfile.ComponentConfig(component)
+	config, err := componentConfig(component)
 	if err != nil {
 		return "{}"
 	}

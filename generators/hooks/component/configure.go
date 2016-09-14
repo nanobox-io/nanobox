@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util/boxfile"
 )
 
 // member ...
@@ -35,7 +34,7 @@ type configPayload struct {
 
 // ConfigurePayload returns a string for the configure hook payload
 func ConfigurePayload(appModel *models.App, componentModel *models.Component) string {
-	config, err := boxfile.ComponentConfig(componentModel)
+	config, err := componentConfig(componentModel)
 	if err != nil {
 		// lumber.Error("unable to fetch component config: %s", err.Error())
 		return "{}"

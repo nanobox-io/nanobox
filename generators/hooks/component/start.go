@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util/boxfile"
 )
 
 type startPayload struct {
@@ -13,7 +12,7 @@ type startPayload struct {
 
 // StartPayload returns a string for the start hook payload
 func StartPayload(c *models.Component) string {
-	config, err := boxfile.ComponentConfig(c)
+	config, err := componentConfig(c)
 	if err != nil {
 		return "{}"
 	}

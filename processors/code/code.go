@@ -6,12 +6,13 @@ import (
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
+	"github.com/nanobox-io/nanobox-boxfile"
 
 	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/env"
-	"github.com/nanobox-io/nanobox/util/boxfile"
 	"github.com/nanobox-io/nanobox/util/display"
+	"github.com/nanobox-io/nanobox/util/config"
 )
 
 // these constants represent different potential names a service can have
@@ -46,7 +47,7 @@ func runDebugSession(container string, err error) error {
 
 func pullBuildImage() (string, error) {
 	// extract the build image from the boxfile
-	buildImage := boxfile.BuildImage()
+	buildImage := buildImage()
 
 	display.StartTask("Pulling %s image", buildImage)
 	defer display.StopTask()
@@ -65,4 +66,18 @@ func pullBuildImage() (string, error) {
 	}
 
 	return buildImage, nil
+}
+
+// BuildImage fetches the build image from the boxfile
+func buildImage() string {
+	// first let's see if the user has a custom build image they want to use
+	box := boxfile.NewFromPath(config.Boxfile())
+	image := box.Node("build").StringValue("image")
+
+	// then let's set the default if the user hasn't specified
+	if image == "" {
+		image = "nanobox/build"
+	}
+
+	return image
 }

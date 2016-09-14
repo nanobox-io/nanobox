@@ -95,7 +95,7 @@ func codeComponentModels(appModel *models.App) []*models.Component {
 
 		image := box.Node(componentName).StringValue("image")
 		if image == "" {
-			image = "nanobox/code:v1"
+			image = "nanobox/code"
 		}
 
 		componentModel := &models.Component{

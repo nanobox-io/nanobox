@@ -9,7 +9,6 @@ import (
 	container_generator "github.com/nanobox-io/nanobox/generators/containers"
 	hook_generator "github.com/nanobox-io/nanobox/generators/hooks/component"
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util/boxfile"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/hookit"
@@ -36,7 +35,7 @@ func Setup(appModel *models.App, componentModel *models.Component) error {
 	// if the image was not provided
 	if componentModel.Image == "" {
 		// extract the image from the boxfile node
-		image, err := boxfile.ComponentImage(componentModel)
+		image, err := componentImage(componentModel)
 		if err != nil {
 			lumber.Error("component:Setup:boxfile.ComponentImage(%+v): %s", componentModel, err.Error())
 			return fmt.Errorf("unable to retrieve component image: %s", err.Error())

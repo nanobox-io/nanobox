@@ -19,7 +19,7 @@ func DevConfig(appModel *models.App) docker.ContainerConfig {
 	image := boxfile.Node("build").StringValue("image")
 
 	if image == "" {
-		image = "nanobox/build:v1"
+		image = "nanobox/build"
 	}
 
 	config := docker.ContainerConfig{
