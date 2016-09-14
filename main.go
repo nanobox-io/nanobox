@@ -13,6 +13,7 @@ import (
 	"github.com/nanobox-io/nanobox/commands"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
+	// "github.com/nanobox-io/nanobox/util/memory_logger"
 )
 
 var bugsnagToken string
@@ -32,6 +33,10 @@ func main() {
 	if err != nil {
 		fmt.Println("logging error:", err)
 	}
+
+	// commented out until we have control of the lumber project
+	// multiLogger := lumber.NewMultiLogger()
+	// multiLogger.AddLoggers(fileLogger, memory_logger.Logger)
 
 	//
 	lumber.SetLogger(fileLogger)

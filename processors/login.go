@@ -3,10 +3,8 @@ package processors
 import (
 	"fmt"
 
-	printutil "github.com/sdomino/go-util/print"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/odin"
 )
@@ -16,13 +14,16 @@ func Login(username, password, endpoint string) error {
 
 	// request Username/Password if missing
 	if username == "" {
-		// add in tylers display system for prompting
-		username = printutil.Prompt("Username: ")
+		user, err := display.ReadUsername()
+		if err != nil {
+			return fmt.Errorf("unable to retrieve username: %s", err)
+		}
+		username = user
 	}
 
 	if password == "" {
 		// ReadPassword prints Password: already
-		pass, err := util.ReadPassword()
+		pass, err := display.ReadPassword()
 		if err != nil {
 			return fmt.Errorf("failed to read password: %s", err.Error())
 		}

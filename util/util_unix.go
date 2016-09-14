@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-
-	"golang.org/x/crypto/ssh/terminal"
 )
 
 // IsPrivileged will return true if the current process is running under a
@@ -34,13 +32,4 @@ func PrivilegeExec(command string) error {
 
 	// run command
 	return cmd.Run()
-}
-
-// ReadPassword reads a password from the terminal and masks the input
-func ReadPassword() (string, error) {
-	fmt.Print("Password: ")
-	pass, err := terminal.ReadPassword(int(os.Stdin.Fd()))
-	fmt.Println("")
-
-	return string(pass), err
 }

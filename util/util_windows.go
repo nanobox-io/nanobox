@@ -8,8 +8,6 @@ import (
 	"os"
 	"os/exec"
 	"strings"
-
-	"golang.org/x/crypto/ssh/terminal"
 )
 
 // IsPrivileged will return true if the current process is running as the
@@ -82,35 +80,6 @@ func PowerShell(command string) ([]byte, error) {
 	cmd := exec.Command("PowerShell.exe", "-NoProfile", "-Command", process)
 
 	return cmd.CombinedOutput()
-}
-
-// ReadPassword reads a password from the terminal and masks the input
-func ReadPassword() (string, error) {
-
-	// Fetch the current state of the terminal so it can be restored later
-	oldState, err := terminal.GetState(int(os.Stdin.Fd()))
-	if err != nil {
-		return "", err
-	}
-	// Turn off echo and make stdin blank
-	terminal.MakeRaw(int(os.Stdin.Fd()))
-	// Restore echo after the function exits
-	defer terminal.Restore(int(os.Stdin.Fd()), oldState)
-
-	fmt.Printf("Password: ")
-
-	// Read the password from stdin
-	t := terminal.NewTerminal(os.Stdin, "")
-	pass, err := t.ReadPassword("")
-
-	// Add a newline so the next output isn't next to the Password:
-	fmt.Println("")
-
-	if err != nil {
-		return "", err
-	}
-
-	return pass, nil
 }
 
 // extracts the executable from the args
