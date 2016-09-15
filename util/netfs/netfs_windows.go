@@ -9,11 +9,12 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/jcelliott/lumber"
 
-	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/provider"
 )
 
@@ -120,12 +121,20 @@ func Mount(_, mountPath string) error {
 	appID := config.EnvID()
 	user := os.Getenv("USERNAME")
 
+	// pause the current task
+	display.PauseTask()
+	// wait a bit to ensure the output doesn't get messed up
+	<-time.After(time.Second * 1)
+	
 	// fetch the password from the user
-	fmt.Printf("%s's password is required to mount a Windows share.\r\n", user)
+	fmt.Printf("%s's password is required to mount a Windows share.\n", user)
 	pass, err := display.ReadPassword()
 	if err != nil {
 		return err
 	}
+	
+	// resume the task
+	display.ResumeTask()
 
 	// ensure the destination directory exists
 	cmd := []string{"sudo", "/bin/mkdir", "-p", mountPath}

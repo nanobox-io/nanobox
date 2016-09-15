@@ -13,6 +13,7 @@ import (
 	"github.com/nanobox-io/nanobox/commands"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util/display"
 	// "github.com/nanobox-io/nanobox/util/memory_logger"
 )
 
@@ -27,6 +28,11 @@ func (bugLog) Printf(fmt string, v ...interface{}) {
 
 // main
 func main() {
+	// make sure we're running in a valid terminal
+	if !util.IsValidTerminal() {
+		display.InvalidTerminal()
+		os.Exit(1)
+	}
 
 	// setup a file logger, this will be replaced in verbose mode.
 	fileLogger, err := lumber.NewTruncateLogger(filepath.ToSlash(filepath.Join(config.GlobalDir(), "nanobox.log")))

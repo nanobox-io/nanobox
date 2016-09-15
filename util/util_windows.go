@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"regexp"
 	"strings"
 )
 
@@ -47,15 +48,26 @@ func PrivilegeExec(command string) error {
 
 	// The process is constructed by passing the executable as a single argument
 	// and the argument list as a space-delimited string in a single argument.
-	//
-	// Since the command is provided as a space-delimited string containing both
-	// the executable and the argument list (just like a command would be entered
-	// on the command prompt), we need to pop off the executable.
+	
+	// ensure the command is prepared to be used in powershell escalation
+	command = preparePrivilegeCmd(command)
 
-	executable, arguments := splitExecutableAndArgs(command)
+	// add the --internal flag if the command is nanobox
+	if strings.Contains(command, "nanobox") {
+		command = fmt.Sprintf("%s --internal", command)
+	}
+
+	// fetch the current working directory
+	cwd, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("failed to determine current working directory: %s", cwd)
+	}
+
+	// we need to cd into the current directory before running our command
+	command = fmt.Sprintf("cd %s & %s", cwd, command)
 
 	// generate the powershell process
-	process := fmt.Sprintf("& {Start-Process '%s' -ArgumentList '%s --internal' -Verb RunAs -Wait}", executable, arguments)
+	process := fmt.Sprintf("& {Start-Process 'cmd' -ArgumentList '/c %s' -Verb RunAs -Wait}", command)
 
 	// now we can generate a command to exec
 	cmd := exec.Command("PowerShell.exe", "-NoProfile", "-Command", process)
@@ -72,36 +84,38 @@ func PrivilegeExec(command string) error {
 	return nil
 }
 
-// PowerShell will run a specified command in a powershell and return the result
-func PowerShell(command string) ([]byte, error) {
-
-	process := fmt.Sprintf("& {%s}", command)
-
-	cmd := exec.Command("PowerShell.exe", "-NoProfile", "-Command", process)
-
-	return cmd.CombinedOutput()
+// verify that the terminal is valid and can run nanobox
+func IsValidTerminal() bool {
+	// at this point, only the command prompt will work fully.
+	
+	// so far, the only way to determine the command prompt is the
+	// existence of the PROMPT environment variable
+	if os.Getenv("PROMPT") != "" {
+		return true
+	}
+	
+	return false
 }
 
-// extracts the executable from the args
-func splitExecutableAndArgs(cmd string) (executable, args string) {
-
-	if strings.Contains(cmd, ".exe") {
-		// split the command by the .exe extension
-		parts := strings.Split(cmd, ".exe ")
-		// the first item is the executable
-		executable = fmt.Sprintf("%s.exe", parts[0])
-		// the second item are the args
-		args = parts[1]
-
-		return
+// make sure the command is escaped and prepared to be used in powershell
+func preparePrivilegeCmd(command string) string {
+	
+	// return the command if an .exe wasn't provided
+	if !strings.Contains(command, ".exe") {
+		return command
 	}
-
-	// split the command by spaces
-	parts := strings.Split(cmd, " ")
-	// extract the executable (the first item)
-	executable = parts[0]
-	// the remaining are the args
-	args = strings.Join(parts[1:], " ")
-
-	return
+	
+	// split the command into two parts
+	parts := strings.Split(command, ".exe")
+	
+	r, err := regexp.Compile("([a-zA-Z]+)$")
+	if err != nil {
+		return command
+	}
+	
+	// extract the executable from the command
+	executable := r.FindString(parts[0])
+	
+	// generate a new command without the absolute path to the .exe
+	return fmt.Sprintf("%s%s", executable, parts[1])
 }

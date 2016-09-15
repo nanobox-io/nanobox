@@ -33,6 +33,7 @@ var (
 		Short: "",
 		Long:  ``,
 		PersistentPreRun: func(ccmd *cobra.Command, args []string) {
+			// report the command usage to mixpanel
 			mixpanel.Report(strings.Replace(ccmd.CommandPath(), "nanobox ", "", 1))
 
 			// alert the user if an update is needed
@@ -69,14 +70,11 @@ var (
 func init() {
 
 	// persistent flags
-	NanoboxCmd.PersistentFlags().BoolVarP(&internalCommand, "internal", "", false, "Increases display output and sets level to debug")
+	NanoboxCmd.PersistentFlags().BoolVarP(&internalCommand, "internal", "", false, "Skip pre-requisite checks")
 	NanoboxCmd.PersistentFlags().MarkHidden("internal")
-	NanoboxCmd.PersistentFlags().BoolVarP(&debugMode, "debug", "", false, "Increases display output and sets level to debug")
+	NanoboxCmd.PersistentFlags().BoolVarP(&debugMode, "debug", "", false, "In the event of a failure, drop into debug context")
 	NanoboxCmd.PersistentFlags().BoolVarP(&displayDebugMode, "verbose", "v", false, "Increases display output and sets level to debug")
-	NanoboxCmd.PersistentFlags().BoolVarP(&displayTraceMode, "veryverbose", "V", false, "Increases display output and sets level to trace")
-
-	// local flags
-	// NanoboxCmd.Flags().BoolVarP(&version, "version", "", false, "Displays the current version of this CLI.")
+	NanoboxCmd.PersistentFlags().BoolVarP(&displayTraceMode, "trace", "t", false, "Increases display output and sets level to trace")
 
 	// subcommands
 	NanoboxCmd.AddCommand(StatusCmd)
