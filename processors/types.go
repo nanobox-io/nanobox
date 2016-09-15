@@ -8,9 +8,9 @@ type DeployConfig struct {
 }
 
 type ConsoleConfig struct {
-	App      string
-	Host     string
-	Endpoint string
+	App      	string
+	Host     	string
+	Endpoint 	string
 }
 
 type TunnelConfig struct {

@@ -5,6 +5,8 @@ import (
 	"github.com/nanobox-io/golang-ssh"
 	"strconv"
 	"strings"
+	
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 func SSH(key, location string) error {
@@ -27,6 +29,10 @@ func SSH(key, location string) error {
 	if err != nil {
 		return fmt.Errorf("Failed to create new client - %s", err)
 	}
+
+	// printMOTD and warning
+	display.MOTD()
+	display.InfoProductionHost()
 
 	// establish the ssh client connection and shell
 	err = client.Shell()
