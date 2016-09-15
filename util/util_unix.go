@@ -33,3 +33,9 @@ func PrivilegeExec(command string) error {
 	// run command
 	return cmd.Run()
 }
+
+// verify that the terminal is valid and can run nanobox
+func IsValidTerminal() bool {
+	// so far, all of the unix terminals work
+	return true
+}

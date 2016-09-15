@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"runtime"
 	"strings"
 
 	"github.com/bugsnag/bugsnag-go"
@@ -39,6 +40,15 @@ func CommandErr(err error) {
 	fmt.Printf("Error   : %s\n", cause)
 	fmt.Printf("Context : %s\n", context)
 	fmt.Println()
+
+	if runtime.GOOS == "windows" {
+		// The update process was spawned in a separate window, which will
+		// close as soon as this command is finished. To ensure they see the
+		// message, we need to hold open the process until they hit enter.
+		fmt.Println("Enter to continue:")
+		var input string
+		fmt.Scanln(&input)
+	}
 
 	os.Exit(1)
 }
