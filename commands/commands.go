@@ -2,14 +2,12 @@
 package commands
 
 import (
-	"os"
 	"strings"
 
 	"github.com/jcelliott/lumber"
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/commands/registry"
-	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/mixpanel"
 	"github.com/nanobox-io/nanobox/util/update"
@@ -35,12 +33,6 @@ var (
 		Short: "",
 		Long:  ``,
 		PersistentPreRun: func(ccmd *cobra.Command, args []string) {
-			// make sure we're running in a valid terminal
-			if !util.IsValidTerminal() {
-				display.InvalidTerminal()
-				os.Exit(1)
-			}
-			
 			// report the command usage to mixpanel
 			mixpanel.Report(strings.Replace(ccmd.CommandPath(), "nanobox ", "", 1))
 
