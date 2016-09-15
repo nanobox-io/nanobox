@@ -19,11 +19,6 @@ import (
 // Destroy destroys the provider and cleans nanobox off of the system
 func Destroy() error {
 
-	// ensure we're running as the administrator for this
-	if !util.IsPrivileged() {
-		return reExecPrivilegedDestroy()
-	}
-
 	display.OpenContext("Uninstalling Nanobox")
 	defer display.CloseContext()
 
@@ -75,25 +70,6 @@ func purgeConfiguration() error {
 	if err := dns.RemoveAll(); err != nil {
 		lumber.Error("Destroy:Run:dns.RemoveAll(): %s", err.Error())
 		return fmt.Errorf("failed to remove dns entries: %s", err.Error())
-	}
-
-	return nil
-}
-
-// reExecPrivilege re-execs the current process with a privileged user
-func reExecPrivilegedDestroy() error {
-	display.PauseTask()
-	defer display.ResumeTask()
-
-	display.PrintRequiresPrivilege("to uninstall nanobox and configuration")
-
-	// call this command again, but as superuser
-	cmd := fmt.Sprintf("%s destroy", config.NanoboxPath())
-
-	// if the sudo'ed subprocess fails, we need to return error to stop the process
-	if err := util.PrivilegeExec(cmd); err != nil {
-		lumber.Error("Destroy:reExecPrivilege:util.PrivilegeExec(%s): %s", cmd, err)
-		return err
 	}
 
 	return nil

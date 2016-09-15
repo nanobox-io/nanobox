@@ -213,7 +213,7 @@ func (s *Summarizer) handleLog(data string) {
 		}
 
 		if s.windowWidth > 0 && len(line) > s.windowWidth {
-			msg = msg[:s.windowWidth-(len(s.Prefix)+10)] + "..."
+			msg = msg[:s.windowWidth-(len(s.Label)+len(s.Prefix)+10)] + "..."
 		}
 	}
 
