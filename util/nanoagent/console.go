@@ -9,6 +9,8 @@ import (
 
 	syscall "github.com/docker/docker/pkg/signal"
 	"github.com/docker/docker/pkg/term"
+	
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 // establishes a remote docker client on a production app
@@ -20,13 +22,17 @@ func Console(key, location string) error {
 		return fmt.Errorf("failed to generate a request for nanoagent: %s", err.Error())
 	}
 
+	// printMOTD and warning
+	display.MOTD()
+	display.InfoProductionContainer()
+
 	// connect to remote machine
 	remoteConn, err := connect(req, location)
 	if err != nil {
 		return err
 	}
 	defer remoteConn.Close()
-
+	
 	stdIn, stdOut, _ := term.StdStreams()
 
 	// establish file descriptors

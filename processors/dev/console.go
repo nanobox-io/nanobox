@@ -3,7 +3,6 @@ package dev
 import (
 	"fmt"
 	"net"
-	"os"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
@@ -45,11 +44,6 @@ func Console(envModel *models.Env, appModel *models.App, devRun bool) error {
 	// if run then start the run commands
 	if devRun {
 		return Run(appModel)
-	}
-
-	// print the MOTD before dropping into the container
-	if err := printMOTD(appModel); err != nil {
-		return fmt.Errorf("failed to print MOTD: %s", err.Error())
 	}
 
 	// console into the newly created container
@@ -224,40 +218,6 @@ func downloadImage(image string) error {
 	return nil
 }
 
-// printMOTD prints the motd with information for the user to connect
-func printMOTD(appModel *models.App) error {
-
-	// fetch the dev ip
-	devIP := appModel.GlobalIPs["env"]
-
-	os.Stderr.WriteString(fmt.Sprintf(`
-                                   **
-                                ********
-                             ***************
-                          *********************
-                            *****************
-                          ::    *********    ::
-                             ::    ***    ::
-                           ++   :::   :::   ++
-                              ++   :::   ++
-                                 ++   ++
-                                    +
-                    _  _ ____ _  _ ____ ___  ____ _  _
-                    |\ | |__| |\ | |  | |__) |  |  \/
-                    | \| |  | | \| |__| |__) |__| _/\_
-
---------------------------------------------------------------------------------
-+ You are in a Linux container
-+ Your local source code has been mounted into the container
-+ Changes to your code in either the container or desktop will be mirrored
-+ If you run a server, access it at >> %s
---------------------------------------------------------------------------------
-
-`, devIP))
-
-	return nil
-}
-
 // runConsole will establish a console within the dev container
 func runConsole(appModel *models.App) error {
 
@@ -268,6 +228,8 @@ func runConsole(appModel *models.App) error {
 
 	consoleConfig := env.ConsoleConfig{
 		Cwd: cwd(appModel),
+		IsDev: true,
+		DevIP: appModel.GlobalIPs["env"],
 	}
 
 	return env.Console(component, consoleConfig)

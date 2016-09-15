@@ -53,7 +53,7 @@ func Console(envModel *models.Env, consoleConfig ConsoleConfig) error {
 		}
 	case "ssh":
 		if err := nanoagent.SSH(key, location); err != nil {
-			return fmt.Errorf("fialed to connect to remote ssh server: %s", err)
+			return fmt.Errorf("failed to connect to remote ssh server: %s", err)
 		}
 	}
 
