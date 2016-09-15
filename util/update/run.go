@@ -30,8 +30,11 @@ func Run() error {
 	dp := display.DownloadPercent{Total: resp.ContentLength}
 	dp.Copy(tmpFile, resp.Body)
 
+	// close the tmp file
+	tmpFile.Close()
+
 	// replace binary
-	path, err := exec.LookPath("nanobox")
+	path, err := exec.LookPath(name)
 	if err != nil {
 		return err
 	}
