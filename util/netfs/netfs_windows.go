@@ -12,7 +12,7 @@ import (
 
 	"github.com/jcelliott/lumber"
 
-	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/provider"
 )
@@ -122,7 +122,7 @@ func Mount(_, mountPath string) error {
 
 	// fetch the password from the user
 	fmt.Printf("%s's password is required to mount a Windows share.\r\n", user)
-	pass, err := util.ReadPassword()
+	pass, err := display.ReadPassword()
 	if err != nil {
 		return err
 	}
