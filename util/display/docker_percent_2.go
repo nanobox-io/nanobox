@@ -90,9 +90,9 @@ func (display *DockerPercentDisplay2) show() string {
 	for _, v := range display.parts {
 		count++
 		if v.downloaded != 100 {
-			return fmt.Sprintf("Layer %2d/%d: Downloaded: %3d%%", count, len(display.parts), v.downloaded)
+			return fmt.Sprintf("Layer %2d/%d: Downloaded: %2d%%", count, len(display.parts), v.downloaded)
 		} else if count == len(display.parts) {
-			return fmt.Sprintf("Layer %2d/%d: Extracted: %3d%%", count, len(display.parts), v.extracted)
+			return fmt.Sprintf("Layer %2d/%d: Extracted: %2d%%", count, len(display.parts), v.extracted)
 		}
 	}
 	return ""
