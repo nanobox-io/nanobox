@@ -72,6 +72,10 @@ func Console(componentModel *models.Component, consoleConfig ConsoleConfig) erro
 	}
 	defer resp.Conn.Close()
 
+	console := models.Console{exec.ID, componentModel.ID}
+	console.Save()
+	defer console.Delete()
+
 	// if we are using a term, lets upgrade it to RawMode
 	if isTerminal {
 		go monitor(stdOutFD, exec.ID)
