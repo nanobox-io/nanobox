@@ -11,6 +11,7 @@ import (
 	container_generator "github.com/nanobox-io/nanobox/generators/containers"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 // Run ...
@@ -44,7 +45,6 @@ func Run(appModel *models.App) error {
 func loadStarts(appModel *models.App) map[string]string {
 	boxfile := boxfile.New([]byte(appModel.DeployedBoxfile))
 	starts := map[string]string{}
-
 	// loop through the nodes and get there start commands
 	for _, node := range boxfile.Nodes("code") {
 
@@ -69,6 +69,13 @@ func loadStarts(appModel *models.App) map[string]string {
 					starts[fmt.Sprintf("%s.%s", node, k)] = v
 				}
 			}
+		case map[string]interface{}:
+			for key, val := range values.(map[string]interface{}) {
+				v, valOk := val.(string)
+				if valOk {
+					starts[fmt.Sprintf("%s.%s", node, key)] = v
+				}
+			}
 		}
 	}
 	return starts
@@ -84,6 +91,8 @@ func runStarts(starts map[string]string) error {
 
 func runStart(name, command string) error {
 
+	fmt.Printf("running '%s'\n", command)
+
 	// create the docker command
 	cmd := []string{
 		"-lc",
@@ -92,10 +101,8 @@ func runStart(name, command string) error {
 
 	lumber.Debug("run:runstarts: %+v", cmd)
 
-	// TODO: dont just use os.Stdout but something from display
-	// new print library
-	// we will also want to use 'name' to create some prefix
-	output, err := util.DockerExec(container_generator.DevName(), "gonano", "/bin/bash", cmd, os.Stdout)
+	streamer := display.NewPrefixedStreamer("info", fmt.Sprintf("[%s]", name))
+	output, err := util.DockerExec(container_generator.DevName(), "gonano", "/bin/bash", cmd, streamer)
 	if err != nil {
 		return fmt.Errorf("runstart error: %s, %s", output, err)
 	}
