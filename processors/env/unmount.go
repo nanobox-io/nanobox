@@ -12,11 +12,16 @@ import (
 
 // Unmount unmounts the env shares
 func Unmount(env *models.Env, keepShare bool) error {
+	// break early if we're not mounted
+	if !mounted(env) {
+		return nil
+	}
+	
 	// break early if there is still an environemnt using the mounts
 	if mountsInUse(env) {
 		return nil
 	}
-
+	
 	display.StartTask(env.Name)
 	defer display.StopTask()
 
@@ -104,4 +109,21 @@ func mountsInUse(env *models.Env) bool {
 	devApp, _ := models.FindAppBySlug(env.ID, "dev")
 	simApp, _ := models.FindAppBySlug(env.ID, "sim")
 	return devApp.Status == "up" || simApp.Status == "up"
+}
+
+// returns true if the app or engine is mounted
+func mounted(env *models.Env) bool {
+	
+	// if the engine is mounted, check that
+	if config.EngineDir() != "" {
+		dst := fmt.Sprintf("%s%s/engine", provider.HostShareDir(), env.ID)
+		
+		if provider.HasMount(dst) {
+			return true
+		}
+	}
+	
+	// check to see if the code is mounted
+	dst := fmt.Sprintf("%s%s/code", provider.HostShareDir(), env.ID)
+	return provider.HasMount(dst)
 }

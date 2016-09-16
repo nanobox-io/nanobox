@@ -89,12 +89,14 @@ func (display *DockerPercentDisplay2) show() string {
 	//
 	for _, v := range display.parts {
 		count++
+		
 		if v.downloaded != 100 {
-			return fmt.Sprintf("Layer %2d/%d: Downloaded: %2d%%", count, len(display.parts), v.downloaded)
+			return fmt.Sprintf("Downloading layer %2d/%d: %2d%%", count, len(display.parts), v.downloaded)
 		} else if count == len(display.parts) {
-			return fmt.Sprintf("Layer %2d/%d: Extracted: %2d%%", count, len(display.parts), v.extracted)
+			return fmt.Sprintf("Extracting layer %2d/%d: %2d%%", count, len(display.parts), v.extracted)
 		}
 	}
+	
 	return ""
 }
 
@@ -104,17 +106,20 @@ func (display *DockerPercentDisplay2) Write(data []byte) (int, error) {
 	if display.parts == nil {
 		display.parts = []*DockerPercentPart2{}
 	}
+	
 	// create a buffer with the old leftovers and the new data
 	buffer := bytes.NewBuffer(append(display.leftover, data...))
 	// clear out the leftovers
 	display.leftover = []byte{}
 
 	for {
+		
 		line, err := buffer.ReadBytes('\n')
 		if err == io.EOF {
 			display.leftover = line
 			break
 		}
+		
 		// take the line and turn it into a status
 		status := Status{}
 		json.Unmarshal(line, &status)
@@ -122,8 +127,10 @@ func (display *DockerPercentDisplay2) Write(data []byte) (int, error) {
 			fmt.Println(err)
 			continue
 		}
+		
 		if status.ID != "latest" && status.ID != "" {
 			found := false
+			
 			for _, part := range display.parts {
 				if part.id == status.ID {
 					part.update(status)
@@ -131,14 +138,17 @@ func (display *DockerPercentDisplay2) Write(data []byte) (int, error) {
 					break
 				}
 			}
+			
 			if !found {
 				part := &DockerPercentPart2{id: status.ID}
 				part.update(status)
 				display.parts = append(display.parts, part)
 			}
 		}
+		
 		fmt.Fprintf(display.Output, "\r\x1b[K")
 		fmt.Fprintf(display.Output, "%s %s", display.Prefix, display.show())
+		
 		if strings.HasPrefix(status.Status, "Status:") {
 			// maybe we want to display the status line here
 		}
