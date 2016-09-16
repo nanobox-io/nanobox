@@ -8,16 +8,27 @@ import (
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox-boxfile"
 
-	container_generator "github.com/nanobox-io/nanobox/generators/containers"
+	generator "github.com/nanobox-io/nanobox/generators/containers"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 // Run ...
 func Run(appModel *models.App) error {
 
+	fmt.Printf("\nRunning start commands (ctrl+c to stop)\n")
+	fmt.Printf("---------------------------------------\n")
+
 	// load the start commands from the boxfile
 	starts := loadStarts(appModel)
+	
+	if len(starts) == 0 {
+		display.DevRunEmpty()
+		return nil
+	}
+
+	fmt.Println()
 
 	// run the start commands in from the boxfile
 	// in the dev container
@@ -44,21 +55,26 @@ func Run(appModel *models.App) error {
 func loadStarts(appModel *models.App) map[string]string {
 	boxfile := boxfile.New([]byte(appModel.DeployedBoxfile))
 	starts := map[string]string{}
-
 	// loop through the nodes and get there start commands
 	for _, node := range boxfile.Nodes("code") {
+
+		// print the node header
+		fmt.Println(node)
 
 		values := boxfile.Node(node).Value("start")
 
 		switch values.(type) {
 		case string:
-			starts[node] = values.(string)
+			str := values.(string)
+			starts[node] = str
+			fmt.Printf("  $ %s\n", str)
 		case []interface{}:
 			// if it is an array we need the keys to be
 			// web.site.2 where 2 is the index of the element
 			for index, iFace := range values.([]interface{}) {
 				if str, ok := iFace.(string); ok {
 					starts[fmt.Sprintf("%s.%d", node, index)] = str
+					fmt.Printf("  $ %s\n", str)
 				}
 			}
 		case map[interface{}]interface{}:
@@ -67,6 +83,15 @@ func loadStarts(appModel *models.App) map[string]string {
 				v, valOk := val.(string)
 				if keyOk && valOk {
 					starts[fmt.Sprintf("%s.%s", node, k)] = v
+					fmt.Printf("  $ %s\n", v)
+				}
+			}
+		case map[string]interface{}:
+			for key, val := range values.(map[string]interface{}) {
+				v, valOk := val.(string)
+				if valOk {
+					starts[fmt.Sprintf("%s.%s", node, key)] = v
+					fmt.Printf("  $ %s\n", v)
 				}
 			}
 		}
@@ -92,10 +117,8 @@ func runStart(name, command string) error {
 
 	lumber.Debug("run:runstarts: %+v", cmd)
 
-	// TODO: dont just use os.Stdout but something from display
-	// new print library
-	// we will also want to use 'name' to create some prefix
-	output, err := util.DockerExec(container_generator.DevName(), "gonano", "/bin/bash", cmd, os.Stdout)
+	streamer := display.NewPrefixedStreamer("info", fmt.Sprintf("[%s] ", name))
+	output, err := util.DockerExec(generator.DevName(), "gonano", "/bin/bash", cmd, streamer)
 	if err != nil {
 		return fmt.Errorf("runstart error: %s, %s", output, err)
 	}

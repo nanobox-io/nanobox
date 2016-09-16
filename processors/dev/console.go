@@ -133,6 +133,7 @@ func teardown(appModel *models.App) error {
 
 	// remove the container
 	if err := docker.ContainerRemove(container.ID); err != nil {
+		lumber.Error("dev:console:teardown:docker.ContainerRemove(%s): %s", container.ID, err)
 		return fmt.Errorf("failed to remove dev container: %s", err.Error())
 	}
 
@@ -146,6 +147,8 @@ func teardown(appModel *models.App) error {
 
 	// return the container IP back to the IP pool
 	if err := dhcp.ReturnIP(net.ParseIP(ip)); err != nil {
+		lumber.Error("dev:console:teardown:dhcp.ReturnIP(%s): %s", ip, err)
+
 		lumber.Error("An error occurred durring dev console teadown:%s", err.Error())
 		return fmt.Errorf("failed to return unused IP back to pool: %s", err.Error())
 	}
