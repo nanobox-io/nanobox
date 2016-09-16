@@ -30,5 +30,4 @@ func init() {
 	DevCmd.AddCommand(dev.ConsoleCmd)
 	DevCmd.AddCommand(dev.RunCmd)
 	DevCmd.AddCommand(dev.EvarCmd)
-	DevCmd.AddCommand(dev.ResetCmd)
 }
