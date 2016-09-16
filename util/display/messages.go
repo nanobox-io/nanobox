@@ -71,3 +71,15 @@ func InfoDevContainer(ip string) {
 
 `, ip))
 }
+
+func DevRunEmpty() {
+  os.Stderr.WriteString(fmt.Sprintf(`
+! You don't have any web or worker
+  start commands specified in your
+  boxfile.yml. More information about
+  start commands is available here:
+  
+  docs.nanobox.io/app-config/boxfile/web/#start-command
+
+`))
+}
