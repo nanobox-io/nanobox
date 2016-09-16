@@ -13,7 +13,6 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/env"
-	"github.com/nanobox-io/nanobox/util/counter"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/hookit"
@@ -61,9 +60,6 @@ func setup(appModel *models.App) error {
 	// dev container. Also, we need to ensure the lock is released even in we error
 	locker.LocalLock()
 	defer locker.LocalUnlock()
-
-	// let anyone else know we're using the dev container
-	counter.Increment(appModel.ID)
 
 	// we don't need to setup if dev is already running
 	if isDevRunning() {
@@ -117,9 +113,8 @@ func teardown(appModel *models.App) error {
 	locker.LocalLock()
 	defer locker.LocalUnlock()
 
-	counter.Decrement(appModel.ID)
 
-	if !devIsUnused(appModel.ID) {
+	if devInUse("nanobox_" + appModel.ID) {
 		return nil
 	}
 
@@ -257,10 +252,27 @@ func cwd(appModel *models.App) string {
 	return "/app"
 }
 
-// devIsUnused returns true if the dev isn't being used by any other session
-func devIsUnused(ID string) bool {
-	count, err := counter.Get(ID)
-	return count == 0 && err == nil
+// devInUse returns true if the dev isn't being used by any other session
+func devInUse(ID string) bool {
+	consoles, _ := models.AllConsoles()
+	for _, console := range consoles {
+		// continue if the console isnt mine
+		if console.ContainerID != ID {
+			continue
+		}
+
+		// check to see if this one is still running
+		exec, err :=  docker.ExecInspect(console.ID)
+		if err == nil && exec.Running {
+			return true
+		}
+
+		// if we have a crufty exec delete it
+		if err != nil || (err == nil && !exec.Running) {
+			console.Delete()
+		}
+	}
+	return false
 }
 
 // isDevRunning returns true if a service is already running
