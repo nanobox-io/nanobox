@@ -69,6 +69,7 @@ func (a *App) Generate(env *Env, name string) error {
 	a.ID = fmt.Sprintf("%s_%s", env.ID, name)
 	a.Name = name
 	a.State = "initialized"
+	a.Status = "up"
 	a.GlobalIPs = map[string]string{}
 	a.LocalIPs = map[string]string{}
 	a.Evars = map[string]string{
