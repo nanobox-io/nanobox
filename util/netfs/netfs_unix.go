@@ -78,12 +78,12 @@ func Add(path string) error {
 func Remove(path string) error {
 
 	// generate the entry
-	entry, err := entry(path)
-	if err != nil {
-		return err
-	}
+	// entry, err := entry(path)
+	// if err != nil {
+	// 	return err
+	// }
 
-	if err := removeEntry(entry); err != nil {
+	if err := removeEntry(path); err != nil {
 		return err
 	}
 
@@ -221,7 +221,7 @@ func removeEntry(entry string) error {
 	for scanner.Scan() {
 
 		// if the line contain the entry skip it
-		if scanner.Text() == entry {
+		if strings.Contains(scanner.Text(), entry) {
 			continue
 		}
 
