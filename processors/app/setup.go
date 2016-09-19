@@ -23,14 +23,14 @@ func Setup(envModel *models.Env, appModel *models.App, name string) error {
 		return nil
 	}
 
-	display.OpenContext("%s (%s)", envModel.Name, appModel.Name)
-	defer display.CloseContext()
-
 	// generate the app data
 	if err := appModel.Generate(envModel, name); err != nil {
 		lumber.Error("app:Setup:models.App:Generate(): %s", err.Error())
 		return fmt.Errorf("failed to generate app data: %s", err.Error())
 	}
+
+	display.OpenContext("%s (%s)", envModel.Name, appModel.Name)
+	defer display.CloseContext()
 
 	// reserve IPs
 	if err := reserveIPs(appModel); err != nil {
