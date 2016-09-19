@@ -113,7 +113,6 @@ func teardown(appModel *models.App) error {
 	locker.LocalLock()
 	defer locker.LocalUnlock()
 
-
 	if devInUse(container_generator.DevName()) {
 		return nil
 	}
@@ -225,7 +224,7 @@ func runConsole(appModel *models.App) error {
 	}
 
 	consoleConfig := env.ConsoleConfig{
-		Cwd: cwd(appModel),
+		Cwd:   cwd(appModel),
 		IsDev: true,
 		DevIP: appModel.GlobalIPs["env"],
 	}
@@ -265,7 +264,7 @@ func devInUse(ID string) bool {
 		}
 
 		// check to see if this one is still running
-		exec, err :=  docker.ExecInspect(console.ID)
+		exec, err := docker.ExecInspect(console.ID)
 		if err == nil && exec.Running {
 			return true
 		}

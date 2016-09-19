@@ -22,7 +22,7 @@ func Run(appModel *models.App) error {
 
 	// load the start commands from the boxfile
 	starts := loadStarts(appModel)
-	
+
 	if len(starts) == 0 {
 		display.DevRunEmpty()
 		return nil
@@ -124,7 +124,7 @@ func runStart(name, command string) error {
 	streamer := display.NewPrefixedStreamer("info", fmt.Sprintf("[%s] ", name))
 	output, err := util.DockerExec(generator.DevName(), "gonano", "/bin/bash", cmd, streamer)
 	if err != nil {
-		lumber.Error("dev:runStart:util.DockerExec(%s, %s, %s, %s): %s",generator.DevName(), "gonano", "/bin/bash", cmd, err)
+		lumber.Error("dev:runStart:util.DockerExec(%s, %s, %s, %s): %s", generator.DevName(), "gonano", "/bin/bash", cmd, err)
 		return fmt.Errorf("runstart error: %s, %s", output, err)
 	}
 

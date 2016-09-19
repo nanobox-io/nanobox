@@ -9,7 +9,7 @@ import (
 
 	syscall "github.com/docker/docker/pkg/signal"
 	"github.com/docker/docker/pkg/term"
-	
+
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
@@ -32,7 +32,7 @@ func Console(key, location string) error {
 		return err
 	}
 	defer remoteConn.Close()
-	
+
 	stdIn, stdOut, _ := term.StdStreams()
 
 	// establish file descriptors

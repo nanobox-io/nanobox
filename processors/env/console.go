@@ -102,13 +102,13 @@ func printMOTD(consoleConfig ConsoleConfig) error {
 
 	// print the MOTD
 	display.MOTD()
-	
+
 	if consoleConfig.IsDev {
 		// print the dev message
 		display.InfoDevContainer(consoleConfig.DevIP)
 		return nil
 	}
-	
+
 	// print the generic message
 	display.InfoLocalContainer()
 	return nil

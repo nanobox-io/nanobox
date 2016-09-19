@@ -1,12 +1,12 @@
 package display
 
 import (
-  "fmt"
-  "os"
+	"fmt"
+	"os"
 )
 
 func MOTD() {
-  os.Stderr.WriteString(fmt.Sprintf(`
+	os.Stderr.WriteString(fmt.Sprintf(`
     
                                    **
                                 ********
@@ -26,7 +26,7 @@ func MOTD() {
 }
 
 func InfoProductionHost() {
-  os.Stderr.WriteString(fmt.Sprintf(`
+	os.Stderr.WriteString(fmt.Sprintf(`
 --------------------------------------------------------------------------------
 + WARNING:
 + You are on a live, production Linux server.
@@ -39,7 +39,7 @@ func InfoProductionHost() {
 }
 
 func InfoProductionContainer() {
-  os.Stderr.WriteString(fmt.Sprintf(`
+	os.Stderr.WriteString(fmt.Sprintf(`
 --------------------------------------------------------------------------------
 + WARNING:
 + You are in a live, production Linux container.
@@ -51,7 +51,7 @@ func InfoProductionContainer() {
 }
 
 func InfoLocalContainer() {
-  os.Stderr.WriteString(fmt.Sprintf(`
+	os.Stderr.WriteString(fmt.Sprintf(`
 --------------------------------------------------------------------------------
 + You are inside a Linux container on your local machine.
 + Anything here can be undone, so have fun and explore!
@@ -61,7 +61,7 @@ func InfoLocalContainer() {
 }
 
 func InfoDevContainer(ip string) {
-  os.Stderr.WriteString(fmt.Sprintf(`
+	os.Stderr.WriteString(fmt.Sprintf(`
 --------------------------------------------------------------------------------
 + You are in a Linux container
 + Your local source code has been mounted into the container
@@ -73,7 +73,7 @@ func InfoDevContainer(ip string) {
 }
 
 func DevRunEmpty() {
-  os.Stderr.WriteString(fmt.Sprintf(`
+	os.Stderr.WriteString(fmt.Sprintf(`
 ! You don't have any web or worker
   start commands specified in your
   boxfile.yml. More information about

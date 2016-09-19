@@ -125,14 +125,14 @@ func Mount(_, mountPath string) error {
 	display.PauseTask()
 	// wait a bit to ensure the output doesn't get messed up
 	<-time.After(time.Second * 1)
-	
+
 	// fetch the password from the user
 	fmt.Printf("%s's password is required to mount a Windows share.\n", user)
 	pass, err := display.ReadPassword()
 	if err != nil {
 		return err
 	}
-	
+
 	// resume the task
 	display.ResumeTask()
 

@@ -48,7 +48,7 @@ func PrivilegeExec(command string) error {
 
 	// The process is constructed by passing the executable as a single argument
 	// and the argument list as a space-delimited string in a single argument.
-	
+
 	// ensure the command is prepared to be used in powershell escalation
 	command = preparePrivilegeCmd(command)
 
@@ -87,35 +87,35 @@ func PrivilegeExec(command string) error {
 // verify that the terminal is valid and can run nanobox
 func IsValidTerminal() bool {
 	// at this point, only the command prompt will work fully.
-	
+
 	// so far, the only way to determine the command prompt is the
 	// existence of the PROMPT environment variable
 	if os.Getenv("PROMPT") != "" {
 		return true
 	}
-	
+
 	return false
 }
 
 // make sure the command is escaped and prepared to be used in powershell
 func preparePrivilegeCmd(command string) string {
-	
+
 	// return the command if an .exe wasn't provided
 	if !strings.Contains(command, ".exe") {
 		return command
 	}
-	
+
 	// split the command into two parts
 	parts := strings.Split(command, ".exe")
-	
+
 	r, err := regexp.Compile("([a-zA-Z]+)$")
 	if err != nil {
 		return command
 	}
-	
+
 	// extract the executable from the command
 	executable := r.FindString(parts[0])
-	
+
 	// generate a new command without the absolute path to the .exe
 	return fmt.Sprintf("%s%s", executable, parts[1])
 }

@@ -5,7 +5,7 @@ import (
 	"github.com/nanobox-io/golang-ssh"
 	"strconv"
 	"strings"
-	
+
 	"github.com/nanobox-io/nanobox/util/display"
 )
 

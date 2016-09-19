@@ -143,13 +143,13 @@ func PauseTask() {
 	// stop the task summarizer
 	if Summary && summarizer != nil {
 		summarizer.Pause()
-		
+
 		// windows sometimes has a timing issue with output, so let's
 		// give the terminal some time reset the lines
 		if runtime.GOOS == "windows" {
 			<-time.After(time.Second * 1)
 		}
-		
+
 		fmt.Println()
 	}
 }
