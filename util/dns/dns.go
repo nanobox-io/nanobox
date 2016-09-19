@@ -63,7 +63,9 @@ func List(filter string) []DomainName {
 	for scanner.Scan() {
 		if strings.Contains(scanner.Text(), filter) {
 			fields := strings.Fields(scanner.Text())
-			entries = append(entries, DomainName{IP: fields[0], Domain: fields[1]})
+			if len(fields) >= 2 {
+				entries = append(entries, DomainName{IP: fields[0], Domain: fields[1]})
+			}
 		}
 	}
 
