@@ -148,15 +148,24 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 	}
 
 	req.Header.Set("Content-Type", "application/json")
-	lumber.Debug("req: %+v\n", req)
+	lumber.Trace("REQ: %s %s %s", req.Method, req.URL, req.Proto)
 
-	//
 	res, err := http.DefaultClient.Do(req)
 	if err != nil {
 		return err
 	}
 
-	lumber.Debug("res: %+v\n", res)
+	lumber.Debug("RES: %d %s %s %s (%s)", res.StatusCode, req.Method, req.URL, req.Proto, res.Header.Get("Content-Length"))
+
+	// print the body even if status is not 2XX
+	if responseBody != nil {
+		b, err := ioutil.ReadAll(res.Body)
+		lumber.Debug("response body: '%s'\n", b)
+		err = json.Unmarshal(b, responseBody)
+		if err != nil {
+			return err
+		}
+	}
 
 	if res.StatusCode == 401 {
 		return fmt.Errorf("Unauthorized")
@@ -171,17 +180,7 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 	}
 
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
-		return fmt.Errorf("bad exit response(%+v)", res)
-	}
-
-	//
-	if responseBody != nil {
-		b, err := ioutil.ReadAll(res.Body)
-		lumber.Debug("response body: '%s'\n", b)
-		err = json.Unmarshal(b, responseBody)
-		if err != nil {
-			return err
-		}
+		return fmt.Errorf("bad exit response(%d %s %s %s (%s))", res.StatusCode, req.Method, req.URL, req.Proto, res.Header.Get("Content-Length"))
 	}
 
 	return nil
