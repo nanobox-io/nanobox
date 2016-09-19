@@ -114,7 +114,7 @@ func teardown(appModel *models.App) error {
 	defer locker.LocalUnlock()
 
 
-	if devInUse("nanobox_" + appModel.ID) {
+	if devInUse(container_generator.DevName()) {
 		return nil
 	}
 
@@ -259,6 +259,9 @@ func devInUse(ID string) bool {
 		// continue if the console isnt mine
 		if console.ContainerID != ID {
 			continue
+		}
+		if console.ID == "run" {
+			return true
 		}
 
 		// check to see if this one is still running
