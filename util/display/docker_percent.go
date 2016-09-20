@@ -167,6 +167,6 @@ func displaySize(part *DockerPercentPart) string {
 		return fmt.Sprintf("%.2fKB/%.2fKB", float64(part.downloadCurrent)  / float64(1024), float64(part.downloadTotal)  / float64(1024))
 	default:
 		// bps
-		return fmt.Sprintf("%.2fB/%.2fB", float64(part.downloadCurrent), float64(part.downloadTotal))
+		return fmt.Sprintf("%.0fB/%.0fB", float64(part.downloadCurrent), float64(part.downloadTotal))
 	}
 }
