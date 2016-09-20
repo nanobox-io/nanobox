@@ -62,7 +62,7 @@ func Deploy(appID, id, boxfile, message string) error {
 
 	//
 	body := map[string]map[string]string{
-		"deploy": map[string]string{
+		"deploy": {
 			"boxfile_content": boxfile,
 			"build_id":        id,
 			"commit_message":  message,

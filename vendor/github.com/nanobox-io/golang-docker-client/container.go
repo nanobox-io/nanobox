@@ -68,7 +68,7 @@ func CreateContainer(conf ContainerConfig) (dockType.ContainerJSON, error) {
 	if conf.Network == "virt" || conf.IP != "" {
 		hostConfig.NetworkMode = "nanobox"
 		netConfig.EndpointsConfig = map[string]*dockNetwork.EndpointSettings{
-			"nanobox": &dockNetwork.EndpointSettings{
+			"nanobox": {
 				IPAMConfig: &dockNetwork.EndpointIPAMConfig{IPv4Address: conf.IP},
 			},
 		}

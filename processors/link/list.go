@@ -58,7 +58,7 @@ func longestName(env *models.Env) string {
 func longestAlias(env *models.Env) string {
 	longest := ""
 
-	for alias, _ := range env.Links {
+	for alias := range env.Links {
 		if len(alias) > len(longest) {
 			longest = alias
 		}

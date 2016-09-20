@@ -160,14 +160,14 @@ func (b Boxfile) BoolValue(name string) bool {
 // allow the user to specify which types of nodes your interested in
 func (b Boxfile) Nodes(types ...string) (rtn []string) {
 	if len(types) == 0 {
-		for key, _ := range b.Parsed {
+		for key := range b.Parsed {
 			rtn = append(rtn, key)
 		}
 		return
 	}
 
 	for _, t := range types {
-		for key, _ := range b.Parsed {
+		for key := range b.Parsed {
 			nodeType := regexp.MustCompile(`\..+`).ReplaceAllString(key, "")
 			switch t {
 			case "container":
