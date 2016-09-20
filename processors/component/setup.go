@@ -44,9 +44,9 @@ func Setup(appModel *models.App, componentModel *models.Component) error {
 	}
 
 	// generate a docker percent display
-	dockerPercent := &display.DockerPercentDisplay2{
+	dockerPercent := &display.DockerPercentDisplay{
 		Output: display.NewStreamer("info"),
-		Prefix: componentModel.Image,
+		// Prefix: componentModel.Image,
 	}
 
 	// pull the component image
