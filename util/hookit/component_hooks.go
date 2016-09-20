@@ -29,7 +29,7 @@ func RunStartHook(container, payload string) (string, error) {
 // RunUpdateHook runs the update hook inside of the specified container
 func RunUpdateHook(container, payload string) (string, error) {
 	// run the update hook
-	res, err := Exec(container, "update", payload, "info")
+	res, err := Exec(container, "update", payload, "debug")
 	if err != nil {
 		return "", fmt.Errorf("failed to execute update hook: %s", err.Error())
 	}

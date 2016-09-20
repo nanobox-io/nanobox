@@ -83,3 +83,14 @@ func DevRunEmpty() {
 
 `))
 }
+
+func FirstDeploy() {
+	os.Stderr.WriteString(fmt.Sprintf(`
+--------------------------------------------------------------------------------
++ HEADS UP:
++ This is the first deploy to this app and the upload takes longer than usual.
++ Future deploys only upload differences and will be much faster.
+--------------------------------------------------------------------------------
+
+`))
+}
