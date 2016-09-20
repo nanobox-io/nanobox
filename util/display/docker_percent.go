@@ -91,7 +91,7 @@ func (display *DockerPercentDisplay) show() string {
 		count++
 
 		if v.downloaded != 100 {
-			return fmt.Sprintf("Downloading layer %2d/%d: %2d%% %s", count, len(display.parts), v.downloaded, displaySize(v))
+			return fmt.Sprintf("Downloading layer %2d/%d: %s %2d%% ", count, len(display.parts), displaySize(v), v.downloaded)
 		} else if count == len(display.parts) {
 			return fmt.Sprintf("Extracting layer %2d/%d: %2d%%", count, len(display.parts), v.extracted)
 		}
@@ -161,12 +161,12 @@ func displaySize(part *DockerPercentPart) string {
 	switch {
 	case part.downloadTotal > 1024*1024:
 		// mbps
-		return fmt.Sprintf("%.2fMB/%.2fMB", float64(part.downloadCurrent)  / float64(1024*1024), float64(part.downloadTotal)  / float64(1024*1024))
+		return fmt.Sprintf("%.2f MB/%.2f MB", float64(part.downloadCurrent)  / float64(1024*1024), float64(part.downloadTotal)  / float64(1024*1024))
 	case part.downloadTotal > 1024:
 		// kbps
-		return fmt.Sprintf("%.2fKB/%.2fKB", float64(part.downloadCurrent)  / float64(1024), float64(part.downloadTotal)  / float64(1024))
+		return fmt.Sprintf("%.2f KB/%.2f KB", float64(part.downloadCurrent)  / float64(1024), float64(part.downloadTotal)  / float64(1024))
 	default:
 		// bps
-		return fmt.Sprintf("%.0fB/%.0fB", float64(part.downloadCurrent), float64(part.downloadTotal))
+		return fmt.Sprintf("%.0f B/%.0f B", float64(part.downloadCurrent), float64(part.downloadTotal))
 	}
 }

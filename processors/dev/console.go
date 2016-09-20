@@ -203,7 +203,7 @@ func downloadImage(image string) error {
 	// generate a docker percent display
 	dockerPercent := &display.DockerPercentDisplay{
 		Output: display.NewStreamer("info"),
-		Prefix: image,
+		// Prefix: image,
 	}
 
 	if _, err := docker.ImagePull(image, dockerPercent); err != nil {

@@ -55,7 +55,7 @@ func pullBuildImage() (string, error) {
 	// generate a docker percent display
 	dockerPercent := &display.DockerPercentDisplay{
 		Output: display.NewStreamer("info"),
-		Prefix: buildImage,
+		// Prefix: buildImage,
 	}
 
 	// pull the build image
