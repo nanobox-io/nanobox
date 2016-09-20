@@ -53,7 +53,7 @@ func pullBuildImage() (string, error) {
 	defer display.StopTask()
 
 	// generate a docker percent display
-	dockerPercent := &display.DockerPercentDisplay2{
+	dockerPercent := &display.DockerPercentDisplay{
 		Output: display.NewStreamer("info"),
 		Prefix: buildImage,
 	}

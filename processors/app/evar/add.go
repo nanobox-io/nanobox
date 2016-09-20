@@ -21,7 +21,7 @@ func Add(appModel *models.App, evars map[string]string) error {
 
 	// iterate one more time for display
 	fmt.Println()
-	for key, _ := range evars {
+	for key := range evars {
 		fmt.Printf("%s %s added\n", display.TaskComplete, key)
 	}
 	fmt.Println()

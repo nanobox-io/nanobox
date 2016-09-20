@@ -54,7 +54,7 @@ func buildComponentServices(boxfile boxfile.Boxfile, component *models.Component
 				Type:      protocol,
 				Scheduler: "rr",
 				Servers: []portal.Server{
-					portal.Server{
+					{
 						Host:      component.InternalIP,
 						Port:      toInt,
 						Forwarder: "m",
@@ -84,8 +84,8 @@ func duplicateService(services []portal.Service, service portal.Service) bool {
 func ports(box boxfile.Boxfile) map[string]map[string]string {
 	// we allow tcp and udp ports
 	rtn := map[string]map[string]string{
-		"tcp": map[string]string{},
-		"udp": map[string]string{},
+		"tcp": {},
+		"udp": {},
 	}
 
 	// get the boxfiles ports section
