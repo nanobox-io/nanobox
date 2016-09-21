@@ -46,13 +46,13 @@ var (
 			if displayDebugMode {
 				lumber.Level(lumber.DEBUG)
 				display.Summary = false
-				display.Mode = "debug"
+				display.Level = "debug"
 			}
 
 			if displayTraceMode {
 				lumber.Level(lumber.TRACE)
 				display.Summary = false
-				display.Mode = "trace"
+				display.Level = "trace"
 			}
 
 		},
