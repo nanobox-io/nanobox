@@ -8,6 +8,7 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/app"
 	"github.com/nanobox-io/nanobox/processors/provider"
+	util_provider "github.com/nanobox-io/nanobox/util/provider"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
 
@@ -40,6 +41,11 @@ func Destroy(env *models.Env) error {
 	// unmount the environemtn
 	if err := Unmount(env, false); err != nil {
 		return fmt.Errorf("failed to unmount env: %s", err)
+	}
+
+	// TODO: remove folder from host /mnt/sda1/env_id
+	if err := util_provider.RemoveEnvDir(env.ID); err != nil {
+		return fmt.Errorf("failed to remove the environment from host: %s", err)
 	}
 
 	// remove the environment

@@ -245,6 +245,12 @@ func (native Native) Run(command []string) ([]byte, error) {
 	return cmd.CombinedOutput()
 }
 
+// 
+func (native Native) RemoveEnvDir(id string) error {
+	// TODO: figure this out??
+	return nil
+}
+
 // hasNetwork ...
 func (native Native) hasNetwork() bool {
 
