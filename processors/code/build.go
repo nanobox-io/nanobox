@@ -7,7 +7,6 @@ import (
 	"github.com/nanobox-io/golang-docker-client"
 
 	"github.com/nanobox-io/nanobox-boxfile"
-	"github.com/nanobox-io/nanobox/commands/registry"
 	container_generator "github.com/nanobox-io/nanobox/generators/containers"
 	hook_generator "github.com/nanobox-io/nanobox/generators/hooks/build"
 
@@ -145,9 +144,6 @@ func installRuntimes(containerID string) error {
 
 // compileCode runs the hooks to compile the codebase
 func compileCode(containerID string) error {
-	if registry.GetBool("skip-compile") {
-		return nil
-	}
 
 	display.StartTask("Compiling code")
 	defer display.StopTask()
@@ -176,10 +172,6 @@ func packageBuild(containerID string) error {
 	if _, err := hookit.RunPackBuildHook(containerID, hook_generator.PackBuildPayload()); err != nil {
 		display.ErrorTask()
 		return runDebugSession(containerID, err)
-	}
-
-	if registry.GetBool("skip-compile") {
-		return nil
 	}
 
 	// run the clean hook
