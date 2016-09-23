@@ -30,6 +30,10 @@ func New(raw []byte) Boxfile {
 	return box
 }
 
+func (self Boxfile) String() string {
+	return string(self.raw)
+}
+
 func (self Boxfile) SaveToPath(path string) error {
 	return ioutil.WriteFile(path, self.raw, 0755)
 }

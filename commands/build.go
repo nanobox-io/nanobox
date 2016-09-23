@@ -3,6 +3,8 @@ package commands
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/nanobox-io/nanobox-boxfile"
+
 	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/commands/steps"
 	"github.com/nanobox-io/nanobox/models"
@@ -31,7 +33,7 @@ deployed into dev, sim, or production platforms.
 func init() {
 	BuildCmd.PersistentFlags().BoolVarP(&buildSkipCompile, "skip-compile", "", false, "dont compile the build")
 
-	steps.Build("build", buildCheck, buildFn)
+	steps.Build("build", buildComplete, buildFn)
 }
 
 // buildFn ...
@@ -45,7 +47,9 @@ func buildFn(ccmd *cobra.Command, args []string) {
 	display.CommandErr(processors.Build(env))
 }
 
-func buildCheck() bool {
+func buildComplete() bool {
 	env, _ := models.FindEnvByID(config.EnvID())
-	return env.BuiltBoxfile != ""
+	box := boxfile.NewFromPath(config.Boxfile())
+
+	return env.UserBoxfile != "" && env.UserBoxfile == box.String()
 }

@@ -10,7 +10,6 @@ import (
 	"github.com/nanobox-io/nanobox/generators/hooks/build"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/provider"
-	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/hookit"
 )
@@ -34,16 +33,8 @@ func Publish(envModel *models.Env, WarehouseConfig WarehouseConfig) error {
 
 	display.StartTask("Starting docker container")
 
-	// reserve an ip
-	ip, err := dhcp.ReserveLocal()
-	if err != nil {
-		lumber.Error("code:Publish:dhcp.ReserveLocal(): %s", err.Error())
-		return err
-	}
-	defer dhcp.ReturnIP(ip)
-
 	// start the container
-	config := container_generator.BuildConfig(buildImage, ip.String())
+	config := container_generator.BuildConfig(buildImage)
 	container, err := docker.CreateContainer(config)
 	if err != nil {
 		lumber.Error("code:Build:docker.CreateContainer(%+v): %s", config, err.Error())

@@ -6,13 +6,14 @@ import (
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
 
+	"github.com/nanobox-io/nanobox-boxfile"
 	"github.com/nanobox-io/nanobox/commands/registry"
 	container_generator "github.com/nanobox-io/nanobox/generators/containers"
 	hook_generator "github.com/nanobox-io/nanobox/generators/hooks/build"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
-	"github.com/nanobox-io/nanobox/util/dhcp"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/hookit"
 )
@@ -33,18 +34,8 @@ func Build(envModel *models.Env) error {
 
 	display.StartTask("Starting docker container")
 
-	// reserve an IP for the build container
-	ip, err := dhcp.ReserveLocal()
-	if err != nil {
-		lumber.Error("code:Build:dhcp.ReserveLocal(): %s", err.Error())
-		return fmt.Errorf("failed to reserve an ip for the build container: %s", err.Error())
-	}
-
-	// ensure we release the IP when we're done
-	defer dhcp.ReturnIP(ip)
-
 	// start the container
-	config := container_generator.BuildConfig(buildImage, ip.String())
+	config := container_generator.BuildConfig(buildImage)
 	container, err := docker.CreateContainer(config)
 	if err != nil {
 		lumber.Error("code:Build:docker.CreateContainer(%+v): %s", config, err.Error())
@@ -123,7 +114,10 @@ func gatherRequirements(envModel *models.Env, containerID string) error {
 		return runDebugSession(containerID, err)
 	}
 
+	box := boxfile.NewFromPath(config.Boxfile())
+
 	// persist the boxfile output to the env model
+	envModel.UserBoxfile = box.String()
 	envModel.BuiltBoxfile = boxOutput
 	envModel.BuiltID = util.RandomString(30)
 	if err := envModel.Save(); err != nil {
