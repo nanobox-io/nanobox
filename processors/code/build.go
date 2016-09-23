@@ -40,8 +40,6 @@ func Build(envModel *models.Env) error {
 		return fmt.Errorf("failed to reserve an ip for the build container: %s", err.Error())
 	}
 
-	// ensure we release the IP when we're done
-	defer dhcp.ReturnIP(ip)
 
 	// start the container
 	config := container_generator.BuildConfig(buildImage, ip.String())
@@ -53,8 +51,6 @@ func Build(envModel *models.Env) error {
 
 	display.StopTask()
 
-	// ensure we stop the container when we're done
-	defer docker.ContainerRemove(container_generator.BuildName())
 
 	if err := prepareEnvironment(container.ID); err != nil {
 		return err
@@ -75,6 +71,17 @@ func Build(envModel *models.Env) error {
 	if err := packageBuild(container.ID); err != nil {
 		return err
 	}
+
+	// ensure we stop the container when we're done
+	if err := docker.ContainerRemove(container_generator.BuildName()); err != nil {
+		return fmt.Errorf("unable to remove docker contianer: %s", err)
+	}
+
+	// ensure we release the IP when we're done
+	if err := dhcp.ReturnIP(ip); err != nil {
+		return fmt.Errorf("unable to release ip: %s", err)
+	}
+
 
 	return nil
 }

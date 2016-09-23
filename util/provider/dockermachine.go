@@ -807,6 +807,7 @@ func (machine DockerMachine) RemoveEnvDir(id string) error {
 		cmd := []string{
 			dockerMachineCmd,
 			"ssh",
+			"nanobox",
 			"rm",
 			"-f",
 			machine.HostMntDir()+id,
