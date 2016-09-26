@@ -810,21 +810,25 @@ func (machine DockerMachine) RemoveMount(_, host string) error {
 
 // 
 func (machine DockerMachine) RemoveEnvDir(id string) error {
-		cmd := []string{
-			dockerMachineCmd,
-			"ssh",
-			"nanobox",
-			"sudo",
-			"rm",
-			"-rf",
-			machine.HostMntDir()+id,
-		}
+	if id == "" {
+		return fmt.Errorf("invalid env id")
+	}
 
-		process := exec.Command(cmd[0], cmd[1:]...)
-		b, err := process.CombinedOutput()
-		if err != nil {
-			return fmt.Errorf("%s: %s", b, err)
-		}
+	cmd := []string{
+		dockerMachineCmd,
+		"ssh",
+		"nanobox",
+		"sudo",
+		"rm",
+		"-rf",
+		machine.HostMntDir()+id,
+	}
+
+	process := exec.Command(cmd[0], cmd[1:]...)
+	b, err := process.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("%s: %s", b, err)
+	}
 
 	return nil
 }
