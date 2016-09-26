@@ -13,8 +13,11 @@ var (
 	// ImplodeCmd ...
 	ImplodeCmd = &cobra.Command{
 		Use:    "implode",
-		Short:  "remove all nanobox created files and vms",
-		Long:   ``,
+		Short:  "Removes all Nanobox-created containers, files, & data",
+		Long:   `
+Removes the Nanobox container, all projects, filesystem mounts,
+& local data. All that will remain is nanobox binaries.
+		`,
 		PreRun: steps.Run("start"),
 		Run:    implodeFn,
 	}
