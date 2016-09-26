@@ -808,6 +808,26 @@ func (machine DockerMachine) RemoveMount(_, host string) error {
 	return nil
 }
 
+// 
+func (machine DockerMachine) RemoveEnvDir(id string) error {
+		cmd := []string{
+			dockerMachineCmd,
+			"ssh",
+			"nanobox",
+			"rm",
+			"-f",
+			machine.HostMntDir()+id,
+		}
+
+		process := exec.Command(cmd[0], cmd[1:]...)
+		b, err := process.CombinedOutput()
+		if err != nil {
+			return fmt.Errorf("%s: %s", b, err)
+		}
+
+	return nil
+}
+
 // HostIP inspects docker-machine to return the IP address of the vm
 func (machine DockerMachine) HostIP() (string, error) {
 	// create an anonymous struct that we will populate after running inspect

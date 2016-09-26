@@ -35,6 +35,7 @@ type Provider interface {
 	HasMount(mount string) bool
 	AddMount(local, host string) error
 	RemoveMount(local, host string) error
+	RemoveEnvDir(id string) error
 	Run(command []string) ([]byte, error)
 }
 
@@ -343,6 +344,16 @@ func RemoveMount(local, host string) error {
 	return p.RemoveMount(local, host)
 }
 
+// RemoveEnvDir ...
+func RemoveEnvDir(id string) error {
+
+	p, err := fetchProvider()
+	if err != nil {
+		return err
+	}
+
+	return p.RemoveEnvDir(id)
+}
 // Run a command inside of the provider context
 func Run(command []string) ([]byte, error) {
 

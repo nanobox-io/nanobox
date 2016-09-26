@@ -74,6 +74,9 @@ func List(filter string) []DomainName {
 
 // Add ...
 func Add(entry string) error {
+	if entry == "" {
+		return nil
+	}
 
 	// open hosts file
 	f, err := os.OpenFile(hostsFile, os.O_RDWR|os.O_APPEND, 0644)
@@ -92,7 +95,9 @@ func Add(entry string) error {
 
 // Remove ...
 func Remove(entry string) error {
-
+	if entry == "" {
+		return nil
+	}
 	// "contents" will end up storing the entire contents of the file excluding the
 	// entry that is trying to be removed
 	var contents string
