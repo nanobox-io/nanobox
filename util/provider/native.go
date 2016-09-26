@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox-golang-stylish"
@@ -68,6 +69,33 @@ func (native Native) Reboot() error {
 func (native Native) Stop() error {
 	// TODO: stop what??
 	return nil
+}
+
+// implode loops through the docker containers we created
+// and removes each one
+func (native Native) Implode() error {
+	cmd := exec.Command("docker", "ps", "-a")
+	bytes, err := cmd.CombinedOutput()
+	if err != nil {
+		return err
+	}
+
+	s := string(bytes)
+	parts := strings.Split(s, "\n")
+	containers := []string{}
+
+	for _, part := range parts {
+		if strings.Contains(part, "nanobox_") {
+			containers = append(containers, strings.Fields(part)[0]) 
+		}
+	}
+	
+	cmdParts := append([]string{"rm", "-f"}, containers...)
+	cmd = exec.Command("docker", cmdParts...)
+	cmd.Stdout = display.NewStreamer("  ")
+	cmd.Stderr = display.NewStreamer("  ")
+
+	return cmd.Run()
 }
 
 // Destroy does nothing on native

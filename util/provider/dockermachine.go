@@ -176,6 +176,12 @@ func (machine DockerMachine) Stop() error {
 	return nil
 }
 
+// imploding the docker-machine provider 
+// is the same as destroying it
+func (machine DockerMachine) Implode() error {
+	return Destroy()
+}
+
 // Destroy destroys the docker-machine vm
 func (machine DockerMachine) Destroy() error {
 
