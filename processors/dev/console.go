@@ -30,7 +30,7 @@ func Console(envModel *models.Env, appModel *models.App, devRun bool) error {
 	}
 
 	// whatever happens next, ensure we teardown this container
-	defer teardown(appModel)
+
 
 	// setup the dev container
 	if err := setup(appModel); err != nil {
@@ -48,6 +48,10 @@ func Console(envModel *models.Env, appModel *models.App, devRun bool) error {
 	// console into the newly created container
 	if err := runConsole(appModel); err != nil {
 		return fmt.Errorf("failed to console into dev container: %s", err.Error())
+	}
+
+	if err := teardown(appModel); err != nil {
+		return fmt.Errorf("unable to teardown dev: %s", err)
 	}
 
 	return nil
