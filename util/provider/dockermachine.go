@@ -814,8 +814,9 @@ func (machine DockerMachine) RemoveEnvDir(id string) error {
 			dockerMachineCmd,
 			"ssh",
 			"nanobox",
+			"sudo",
 			"rm",
-			"-f",
+			"-rf",
 			machine.HostMntDir()+id,
 		}
 
