@@ -43,8 +43,6 @@ func Build(envModel *models.Env) error {
 
 	display.StopTask()
 
-	// ensure we stop the container when we're done
-	defer docker.ContainerRemove(container_generator.BuildName())
 
 	if err := prepareEnvironment(container.ID); err != nil {
 		return err
@@ -64,6 +62,11 @@ func Build(envModel *models.Env) error {
 
 	if err := packageBuild(container.ID); err != nil {
 		return err
+	}
+
+	// ensure we stop the container when we're done
+	if err := docker.ContainerRemove(container_generator.BuildName()); err != nil {
+		return fmt.Errorf("unable to remove docker contianer: %s", err)
 	}
 
 	return nil
