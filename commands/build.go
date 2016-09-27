@@ -17,10 +17,10 @@ var (
 	// BuildCmd ...
 	BuildCmd = &cobra.Command{
 		Use:   "build",
-		Short: "Generates a deployable build package.",
+		Short: "Builds a deployable runtime.",
 		Long: `
-Generates a deployable build package that can be
-deployed into dev, sim, or production platforms.
+Generates a deployable runtime that can be
+deployed into dev, sim, or production environments.
 		`,
 		PreRun: steps.Run("start"),
 		Run:    buildFn,

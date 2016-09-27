@@ -76,7 +76,7 @@ func buildImage() string {
 
 	// then let's set the default if the user hasn't specified
 	if image == "" {
-		image = "nanobox/build"
+		image = "nanobox/build:proto"
 	}
 
 	return image

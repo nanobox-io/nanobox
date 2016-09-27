@@ -85,6 +85,7 @@ func init() {
 	NanoboxCmd.AddCommand(LoginCmd)
 	NanoboxCmd.AddCommand(LogoutCmd)
 	NanoboxCmd.AddCommand(BuildCmd)
+	NanoboxCmd.AddCommand(CompileCmd)
 	NanoboxCmd.AddCommand(CleanCmd)
 	NanoboxCmd.AddCommand(DevCmd)
 	NanoboxCmd.AddCommand(SimCmd)

@@ -34,12 +34,6 @@ func DevConfig(appModel *models.App) docker.ContainerConfig {
 		},
 	}
 
-	//
-	for _, libDir := range boxfile.Node("code.build").StringSliceValue("lib_dirs") {
-		path := fmt.Sprintf("/mnt/sda1/%s/cache/lib_dirs/%s:/app/%s", appModel.EnvID, libDir, libDir)
-		config.Binds = append(config.Binds, path)
-	}
-
 	return config
 }
 
