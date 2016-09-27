@@ -16,6 +16,7 @@ type Env struct {
 	Links map[string]Link
 	// the boxfile from the most recent build
 	BuiltBoxfile string
+	UserBoxfile  string
 	BuiltID      string
 	DeployedID   string
 }

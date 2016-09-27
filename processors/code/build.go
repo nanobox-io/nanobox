@@ -6,13 +6,13 @@ import (
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
 
-	"github.com/nanobox-io/nanobox/commands/registry"
+	"github.com/nanobox-io/nanobox-boxfile"
 	container_generator "github.com/nanobox-io/nanobox/generators/containers"
 	hook_generator "github.com/nanobox-io/nanobox/generators/hooks/build"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
-	"github.com/nanobox-io/nanobox/util/dhcp"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/hookit"
 )
@@ -33,16 +33,8 @@ func Build(envModel *models.Env) error {
 
 	display.StartTask("Starting docker container")
 
-	// reserve an IP for the build container
-	ip, err := dhcp.ReserveLocal()
-	if err != nil {
-		lumber.Error("code:Build:dhcp.ReserveLocal(): %s", err.Error())
-		return fmt.Errorf("failed to reserve an ip for the build container: %s", err.Error())
-	}
-
-
 	// start the container
-	config := container_generator.BuildConfig(buildImage, ip.String())
+	config := container_generator.BuildConfig(buildImage)
 	container, err := docker.CreateContainer(config)
 	if err != nil {
 		lumber.Error("code:Build:docker.CreateContainer(%+v): %s", config, err.Error())
@@ -76,12 +68,6 @@ func Build(envModel *models.Env) error {
 	if err := docker.ContainerRemove(container_generator.BuildName()); err != nil {
 		return fmt.Errorf("unable to remove docker contianer: %s", err)
 	}
-
-	// ensure we release the IP when we're done
-	if err := dhcp.ReturnIP(ip); err != nil {
-		return fmt.Errorf("unable to release ip: %s", err)
-	}
-
 
 	return nil
 }
@@ -125,7 +111,10 @@ func gatherRequirements(envModel *models.Env, containerID string) error {
 		return err
 	}
 
+	box := boxfile.NewFromPath(config.Boxfile())
+
 	// persist the boxfile output to the env model
+	envModel.UserBoxfile = box.String()
 	envModel.BuiltBoxfile = boxOutput
 	envModel.BuiltID = util.RandomString(30)
 	if err := envModel.Save(); err != nil {
@@ -152,9 +141,6 @@ func installRuntimes(containerID string) error {
 
 // compileCode runs the hooks to compile the codebase
 func compileCode(containerID string) error {
-	if registry.GetBool("skip-compile") {
-		return nil
-	}
 
 	display.StartTask("Compiling code")
 	defer display.StopTask()
@@ -181,10 +167,6 @@ func packageBuild(containerID string) error {
 	if _, err := hookit.DebugExec(containerID, "pack-build", hook_generator.PackBuildPayload(), "info"); err != nil {
 		display.ErrorTask()
 		return runDebugSession(containerID, err)
-	}
-
-	if registry.GetBool("skip-compile") {
-		return nil
 	}
 
 	// run the clean hook
