@@ -14,14 +14,15 @@ import (
 
 // RemoveAll removes all dns entries for an app
 func RemoveAll(a *models.App) error {
-	// shortcut if we dont have any entries for this app
-	if len(dns.List(a.ID)) == 0 {
-		return nil
-	}
 
 	// ensure we're running as the administrator for this
 	if !util.IsPrivileged() {
 		return reExecPrivilegedRemoveAll(a)
+	}
+
+	// shortcut if we dont have any entries for this app
+	if len(dns.List(a.ID)) == 0 {
+		return nil
 	}
 
 	if err := dns.Remove(a.ID); err != nil {
