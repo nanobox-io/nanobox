@@ -16,7 +16,7 @@ import (
 
 // Publish ...
 func Publish(envModel *models.Env, WarehouseConfig WarehouseConfig) error {
-	display.OpenContext("Publishing build")
+	display.OpenContext("Publishing app")
 	defer display.CloseContext()
 
 	// initialize the docker client
@@ -34,7 +34,7 @@ func Publish(envModel *models.Env, WarehouseConfig WarehouseConfig) error {
 	display.StartTask("Starting docker container")
 
 	// start the container
-	config := container_generator.BuildConfig(buildImage)
+	config := container_generator.PublishConfig(buildImage)
 	container, err := docker.CreateContainer(config)
 	if err != nil {
 		lumber.Error("code:Build:docker.CreateContainer(%+v): %s", config, err.Error())
