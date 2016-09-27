@@ -8,6 +8,7 @@ import (
 	"github.com/nanobox-io/nanobox/processors/dev"
 	"github.com/nanobox-io/nanobox/processors/env"
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util/console"
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
@@ -32,7 +33,7 @@ func consoleFn(ccmd *cobra.Command, args []string) {
 	if len(args) > 0 {
 		component, _ := models.FindComponentBySlug(appModel.ID, args[0])
 
-		display.CommandErr(env.Console(component, env.ConsoleConfig{}))
+		display.CommandErr(env.Console(component, console.ConsoleConfig{}))
 		return
 	}
 

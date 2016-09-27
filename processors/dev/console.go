@@ -13,6 +13,7 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/env"
+	"github.com/nanobox-io/nanobox/util/console"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/hookit"
@@ -227,7 +228,7 @@ func runConsole(appModel *models.App) error {
 		ID: "nanobox_" + appModel.ID,
 	}
 
-	consoleConfig := env.ConsoleConfig{
+	consoleConfig := console.ConsoleConfig{
 		Cwd:   cwd(appModel),
 		IsDev: true,
 		DevIP: appModel.GlobalIPs["env"],

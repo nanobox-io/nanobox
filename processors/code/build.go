@@ -165,20 +165,17 @@ func packageBuild(containerID string) error {
 
 	// run the pack-build hook
 	if _, err := hookit.DebugExec(containerID, "pack-build", hook_generator.PackBuildPayload(), "info"); err != nil {
-		display.ErrorTask()
-		return runDebugSession(containerID, err)
+		return err
 	}
 
 	// run the clean hook
-	if _, err := hookit.RunCleanHook(containerID, hook_generator.CleanPayload()); err != nil {
-		display.ErrorTask()
-		return runDebugSession(containerID, err)
+	if _, err := hookit.DebugExec(containerID, "clean", hook_generator.CleanPayload(), "info"); err != nil {
+		return err
 	}
 
 	// run the pack-deploy hook
-	if _, err := hookit.RunPackDeployHook(containerID, hook_generator.PackDeployPayload()); err != nil {
-		display.ErrorTask()
-		return runDebugSession(containerID, err)
+	if _, err := hookit.DebugExec(containerID, "pack-deploy", hook_generator.PackDeployPayload(), "info"); err != nil {
+		return err
 	}
 
 	return nil

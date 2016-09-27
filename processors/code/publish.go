@@ -58,8 +58,8 @@ func Publish(envModel *models.Env, WarehouseConfig WarehouseConfig) error {
 		lumber.Error("code:Publish:build.UserPayload(): %s", err.Error())
 		return fmt.Errorf("unable to retrieve user payload: %s", err.Error())
 	}
-	if _, err := hookit.Exec(container.ID, "user", payload, "info"); err != nil {
-		return runDebugSession(container.ID, err)
+	if _, err := hookit.DebugExec(container.ID, "user", payload, "info"); err != nil {
+		return err
 	}
 
 	buildWarehouseConfig := build.WarehouseConfig{
@@ -75,10 +75,8 @@ func Publish(envModel *models.Env, WarehouseConfig WarehouseConfig) error {
 		display.ErrorTask()
 		return fmt.Errorf("unable to retrieve user payload: %s", err.Error())
 	}
-	if _, err := hookit.Exec(container.ID, "publish", payload, "info"); err != nil {
-		display.ErrorTask()
-		err = fmt.Errorf("failed to run publish hook: %s", err.Error())
-		return runDebugSession(container.ID, err)
+	if _, err := hookit.DebugExec(container.ID, "publish", payload, "info"); err != nil {
+		return fmt.Errorf("failed to run publish hook: %s", err.Error())
 	}
 
 	display.StopTask()
