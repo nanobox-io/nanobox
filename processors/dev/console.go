@@ -100,13 +100,11 @@ func setup(appModel *models.App) error {
 
 	display.StartTask("Configuring")
 	userPayload := build_generator.UserPayload()
-	if _, err := hookit.Exec(container.ID, "user", userPayload, "debug"); err != nil {
-		display.ErrorTask()
+	if _, err := hookit.DebugExec(container.ID, "user", userPayload, "debug"); err != nil {
 		return fmt.Errorf("failed to run the user hook: %s", err.Error())
 	}
 
-	if _, err := hookit.Exec(container.ID, "dev", build_generator.DevPayload(appModel), "info"); err != nil {
-		display.ErrorTask()
+	if _, err := hookit.DebugExec(container.ID, "dev", build_generator.DevPayload(appModel), "info"); err != nil {
 		return fmt.Errorf("failed to run the dev hook: %s", err.Error())
 	}
 	display.StopTask()

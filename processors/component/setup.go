@@ -188,9 +188,8 @@ func planComponent(appModel *models.App, componentModel *models.Component) error
 	display.StartTask("Gathering requirements")
 	defer display.StopTask()
 
-	planOutput, err := hookit.RunPlanHook(componentModel.ID, hook_generator.PlanPayload(componentModel))
+	planOutput, err := hookit.DebugExec(componentModel.ID, "plan", hook_generator.PlanPayload(componentModel), "info")
 	if err != nil {
-		display.ErrorTask()
 		return fmt.Errorf("failed to run plan hook: %s", err.Error())
 	}
 
@@ -215,20 +214,18 @@ func configureComponent(appModel *models.App, componentModel *models.Component) 
 	defer display.StopTask()
 
 	// run the update hook
-	if _, err := hookit.RunUpdateHook(componentModel.ID, hook_generator.UpdatePayload(componentModel)); err != nil {
+	if _, err := hookit.DebugExec(componentModel.ID, "update", hook_generator.UpdatePayload(componentModel), "info"); err != nil {
 		display.ErrorTask()
 		return fmt.Errorf("failed to run update hook: %s", err.Error())
 	}
 
 	// run the configure hook
-	if _, err := hookit.RunConfigureHook(componentModel.ID, hook_generator.ConfigurePayload(appModel, componentModel)); err != nil {
-		display.ErrorTask()
+	if _, err := hookit.DebugExec(componentModel.ID, "configure", hook_generator.ConfigurePayload(appModel, componentModel), "info"); err != nil {
 		return fmt.Errorf("failed to run configure hook: %s", err.Error())
 	}
 
 	// run the start hook
-	if _, err := hookit.RunStartHook(componentModel.ID, hook_generator.UpdatePayload(componentModel)); err != nil {
-		display.ErrorTask()
+	if _, err := hookit.DebugExec(componentModel.ID, "start", hook_generator.UpdatePayload(componentModel), "info"); err != nil {
 		return fmt.Errorf("failed to run start hook: %s", err.Error())
 	}
 
