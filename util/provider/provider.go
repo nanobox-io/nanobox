@@ -19,6 +19,7 @@ type Provider interface {
 	Create() error
 	Reboot() error
 	Stop() error
+	Implode() error
 	Destroy() error
 	Start() error
 	DockerEnv() error
@@ -134,6 +135,17 @@ func Stop() error {
 	}
 
 	return p.Stop()
+}
+
+// Implode ..
+func Implode() error {
+
+	p, err := fetchProvider()
+	if err != nil {
+		return err
+	}
+
+	return p.Implode()
 }
 
 // Destroy ..
