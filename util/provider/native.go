@@ -163,6 +163,11 @@ func (native Native) HostIP() (string, error) {
 	return "127.0.0.1", nil
 }
 
+func (native Native) ReservedIPs() (rtn []string) {
+	return []string{}
+}
+
+
 // DockerEnv docker env should already be configured if docker is installed
 func (native Native) DockerEnv() error {
 	// ensure setup??

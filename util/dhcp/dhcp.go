@@ -9,6 +9,7 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/locker"
+	"github.com/nanobox-io/nanobox/util/provider"
 )
 
 var (
@@ -153,13 +154,20 @@ func getIPSpace() (IPSpace, error) {
 
 // contains ...
 func contains(ips []net.IP, ip net.IP) bool {
-
-	//
+	// check against the ips in the data set
 	for _, setIP := range ips {
 		if setIP.Equal(ip) {
 			return true
 		}
 	}
+
+	// check against the ips the provider needs
+	for _, providerIP := range provider.ReservedIPs() {
+		if ip.String() == providerIP {
+			return true
+		}
+	}
+
 	return false
 }
 

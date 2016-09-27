@@ -858,6 +858,13 @@ func (machine DockerMachine) HostIP() (string, error) {
 	return inspect.Driver.IPAddress, nil
 }
 
+func (machine DockerMachine) ReservedIPs() (rtn []string) {
+	for i := 0; i < 20; i++ {
+		rtn = append(rtn, fmt.Sprintf("192.168.99.%d", 100+i))
+	}
+	return
+}
+
 // Run a command in the vm
 func (machine DockerMachine) Run(command []string) ([]byte, error) {
 

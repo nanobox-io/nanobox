@@ -14,6 +14,7 @@ type Provider interface {
 	HostShareDir() string
 	HostMntDir() string
 	HostIP() (string, error)
+	ReservedIPs() []string
 	Valid() error
 	Install() error
 	Create() error
@@ -201,6 +202,17 @@ func HostIP() (string, error) {
 	}
 
 	return p.HostIP()
+}
+
+// ReservedIPs ..
+func ReservedIPs() []string {
+
+	p, err := fetchProvider()
+	if err != nil {
+		return []string{}
+	}
+
+	return p.ReservedIPs()
 }
 
 // DockerEnv ..
