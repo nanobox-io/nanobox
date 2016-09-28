@@ -12,7 +12,7 @@ import (
 	util_provider "github.com/nanobox-io/nanobox/util/provider"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/util/dns"
+	"github.com/nanobox-io/nanobox/processors/app/dns"
 )
 
 // Implode destroys the provider and cleans nanobox off of the system
@@ -24,6 +24,15 @@ func Implode() error {
 	// init docker client
 	if err := provider.Init(); err != nil {
 		return fmt.Errorf("failed to init docker client: %s", err.Error())
+	}
+
+	// remove all the dns entries
+	apps, _ := models.AllApps()
+	for _, app := range apps {
+		if err := dns.RemoveAll(app); err != nil {
+			lumber.Error("Destroy:Run:dns.RemoveAll(): %s", err.Error())
+			fmt.Printf("failed to remove dns entries: %s\n", err.Error())
+		}
 	}
 
 	envModels, _ := models.AllEnvs()
@@ -57,12 +66,6 @@ func purgeConfiguration() error {
 	if err := clearData(); err != nil {
 		lumber.Error("Destroy:Run:config.ImplodeGlobalDir(): %s", err.Error())
 		return fmt.Errorf("failed to purge the data directory: %s", err.Error())
-	}
-
-	// remove all the dns entries
-	if err := dns.RemoveAll(); err != nil {
-		lumber.Error("Destroy:Run:dns.RemoveAll(): %s", err.Error())
-		return fmt.Errorf("failed to remove dns entries: %s", err.Error())
 	}
 
 	return nil
