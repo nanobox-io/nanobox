@@ -10,14 +10,13 @@ import (
 	"github.com/nanobox-io/nanobox/generators/hooks/build"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/provider"
-	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/hookit"
 )
 
 // Publish ...
 func Publish(envModel *models.Env, WarehouseConfig WarehouseConfig) error {
-	display.OpenContext("Publishing build")
+	display.OpenContext("Deploying app")
 	defer display.CloseContext()
 
 	// initialize the docker client
@@ -33,17 +32,12 @@ func Publish(envModel *models.Env, WarehouseConfig WarehouseConfig) error {
 	}
 
 	display.StartTask("Starting docker container")
-
-	// reserve an ip
-	ip, err := dhcp.ReserveLocal()
-	if err != nil {
-		lumber.Error("code:Publish:dhcp.ReserveLocal(): %s", err.Error())
-		return err
-	}
-	defer dhcp.ReturnIP(ip)
+	
+	// if a publish container was leftover from a previous publish, let's remove it
+	docker.ContainerRemove(container_generator.PublishName())
 
 	// start the container
-	config := container_generator.BuildConfig(buildImage, ip.String())
+	config := container_generator.PublishConfig(buildImage)
 	container, err := docker.CreateContainer(config)
 	if err != nil {
 		lumber.Error("code:Build:docker.CreateContainer(%+v): %s", config, err.Error())

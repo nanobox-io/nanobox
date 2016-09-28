@@ -59,12 +59,12 @@ func RunBoxfileHook(container, payload string) (string, error) {
 	return res, nil
 }
 
-// RunPrepareHook runs the prepare hook inside of the specified container
-func RunPrepareHook(container, payload string) (string, error) {
+// RunBuildHook runs the build hook inside of the specified container
+func RunBuildHook(container, payload string) (string, error) {
 	// run the prepare hook
-	res, err := Exec(container, "prepare", payload, "info")
+	res, err := Exec(container, "build", payload, "info")
 	if err != nil {
-		return "", fmt.Errorf("failed to execute prepare hook: %s", err.Error())
+		return "", fmt.Errorf("failed to execute build hook: %s", err.Error())
 	}
 
 	return res, nil

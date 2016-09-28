@@ -6,20 +6,20 @@ import (
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
 
-	"github.com/nanobox-io/nanobox/commands/registry"
+	"github.com/nanobox-io/nanobox-boxfile"
 	container_generator "github.com/nanobox-io/nanobox/generators/containers"
 	hook_generator "github.com/nanobox-io/nanobox/generators/hooks/build"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
-	"github.com/nanobox-io/nanobox/util/dhcp"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/hookit"
 )
 
 // Build builds the codebase that can then be deployed
 func Build(envModel *models.Env) error {
-	display.OpenContext("Building application")
+	display.OpenContext("Building runtime")
 	defer display.CloseContext()
 
 	// pull the latest build image
@@ -33,16 +33,8 @@ func Build(envModel *models.Env) error {
 
 	display.StartTask("Starting docker container")
 
-	// reserve an IP for the build container
-	ip, err := dhcp.ReserveLocal()
-	if err != nil {
-		lumber.Error("code:Build:dhcp.ReserveLocal(): %s", err.Error())
-		return fmt.Errorf("failed to reserve an ip for the build container: %s", err.Error())
-	}
-
-
 	// start the container
-	config := container_generator.BuildConfig(buildImage, ip.String())
+	config := container_generator.BuildConfig(buildImage)
 	container, err := docker.CreateContainer(config)
 	if err != nil {
 		lumber.Error("code:Build:docker.CreateContainer(%+v): %s", config, err.Error())
@@ -52,7 +44,7 @@ func Build(envModel *models.Env) error {
 	display.StopTask()
 
 
-	if err := prepareEnvironment(container.ID); err != nil {
+	if err := prepareBuildEnvironment(container.ID); err != nil {
 		return err
 	}
 
@@ -61,10 +53,6 @@ func Build(envModel *models.Env) error {
 	}
 
 	if err := installRuntimes(container.ID); err != nil {
-		return err
-	}
-
-	if err := compileCode(container.ID); err != nil {
 		return err
 	}
 
@@ -77,17 +65,11 @@ func Build(envModel *models.Env) error {
 		return fmt.Errorf("unable to remove docker contianer: %s", err)
 	}
 
-	// ensure we release the IP when we're done
-	if err := dhcp.ReturnIP(ip); err != nil {
-		return fmt.Errorf("unable to release ip: %s", err)
-	}
-
-
 	return nil
 }
 
-// prepareEnvironment runs hooks to prepare the build environment
-func prepareEnvironment(containerID string) error {
+// prepareBuildEnvironment runs hooks to prepare the build environment
+func prepareBuildEnvironment(containerID string) error {
 	display.StartTask("Preparing environment for build")
 	defer display.StopTask()
 
@@ -130,7 +112,10 @@ func gatherRequirements(envModel *models.Env, containerID string) error {
 		return runDebugSession(containerID, err)
 	}
 
+	box := boxfile.NewFromPath(config.Boxfile())
+
 	// persist the boxfile output to the env model
+	envModel.UserBoxfile = box.String()
 	envModel.BuiltBoxfile = boxOutput
 	envModel.BuiltID = util.RandomString(30)
 	if err := envModel.Save(); err != nil {
@@ -148,31 +133,7 @@ func installRuntimes(containerID string) error {
 	defer display.StopTask()
 
 	// run the prepare hook
-	if _, err := hookit.RunPrepareHook(containerID, hook_generator.PreparePayload()); err != nil {
-		display.ErrorTask()
-		return runDebugSession(containerID, err)
-	}
-
-	return nil
-}
-
-// compileCode runs the hooks to compile the codebase
-func compileCode(containerID string) error {
-	if registry.GetBool("skip-compile") {
-		return nil
-	}
-
-	display.StartTask("Compiling code")
-	defer display.StopTask()
-
-	// run the compile hook
-	if _, err := hookit.RunCompileHook(containerID, hook_generator.CompilePayload()); err != nil {
-		display.ErrorTask()
-		return runDebugSession(containerID, err)
-	}
-
-	// run the pack-app hook
-	if _, err := hookit.RunPackAppHook(containerID, hook_generator.PackAppPayload()); err != nil {
+	if _, err := hookit.RunBuildHook(containerID, hook_generator.BuildPayload()); err != nil {
 		display.ErrorTask()
 		return runDebugSession(containerID, err)
 	}
@@ -189,10 +150,6 @@ func packageBuild(containerID string) error {
 	if _, err := hookit.RunPackBuildHook(containerID, hook_generator.PackBuildPayload()); err != nil {
 		display.ErrorTask()
 		return runDebugSession(containerID, err)
-	}
-
-	if registry.GetBool("skip-compile") {
-		return nil
 	}
 
 	// run the clean hook
