@@ -23,7 +23,7 @@ func Build(envModel *models.Env) error {
 	}
 
 	// print a warning if this is the first build
-	if envModel.BuiltBoxfile != "" {
+	if envModel.BuiltBoxfile == "" {
 		display.FirstBuild()
 	}
 
