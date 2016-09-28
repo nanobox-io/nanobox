@@ -16,7 +16,7 @@ import (
 
 // Publish ...
 func Publish(envModel *models.Env, WarehouseConfig WarehouseConfig) error {
-	display.OpenContext("Publishing app")
+	display.OpenContext("Deploying app")
 	defer display.CloseContext()
 
 	// initialize the docker client
