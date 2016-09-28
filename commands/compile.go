@@ -15,10 +15,10 @@ var (
 	// CompileCmd ...
 	CompileCmd = &cobra.Command{
 		Use:   "compile",
-		Short: "compile the runtime.",
+		Short: "compile the application.",
 		Long: `
-Generates a deployable runtime package that can be
-deployed into dev, sim, or production platforms.
+Compiles the application source that can be
+deployed into dev, sim, or production environments.
 		`,
 		PreRun: steps.Run("start", "build"),
 		Run:    compileFn,

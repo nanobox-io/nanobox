@@ -19,7 +19,7 @@ import (
 
 // Build builds the codebase that can then be deployed
 func Build(envModel *models.Env) error {
-	display.OpenContext("Building application")
+	display.OpenContext("Building runtime")
 	defer display.CloseContext()
 
 	// pull the latest build image
@@ -44,7 +44,7 @@ func Build(envModel *models.Env) error {
 	display.StopTask()
 
 
-	if err := prepareEnvironment(container.ID); err != nil {
+	if err := prepareBuildEnvironment(container.ID); err != nil {
 		return err
 	}
 
@@ -53,10 +53,6 @@ func Build(envModel *models.Env) error {
 	}
 
 	if err := installRuntimes(container.ID); err != nil {
-		return err
-	}
-
-	if err := compileCode(container.ID); err != nil {
 		return err
 	}
 
@@ -72,8 +68,8 @@ func Build(envModel *models.Env) error {
 	return nil
 }
 
-// prepareEnvironment runs hooks to prepare the build environment
-func prepareEnvironment(containerID string) error {
+// prepareBuildEnvironment runs hooks to prepare the build environment
+func prepareBuildEnvironment(containerID string) error {
 	display.StartTask("Preparing environment for build")
 	defer display.StopTask()
 
@@ -131,27 +127,8 @@ func installRuntimes(containerID string) error {
 	display.StartTask("Installing binaries and runtimes")
 	defer display.StopTask()
 
-	// run the prepare hook
-	if _, err := hookit.DebugExec(containerID, "prepare", hook_generator.PreparePayload(), "info"); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// compileCode runs the hooks to compile the codebase
-func compileCode(containerID string) error {
-
-	display.StartTask("Compiling code")
-	defer display.StopTask()
-
-	// run the compile hook
-	if _, err := hookit.DebugExec(containerID, "compile", hook_generator.CompilePayload(), "info"); err != nil {
-		return err
-	}
-
-	// run the pack-app hook
-	if _, err := hookit.DebugExec(containerID, "pack-app", hook_generator.PackAppPayload(), "info"); err != nil {
+	// run the build hook
+	if _, err := hookit.DebugExec(containerID, "build", hook_generator.BuildPayload(), "info"); err != nil {
 		return err
 	}
 

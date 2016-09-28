@@ -25,7 +25,7 @@ func Compile(envModel *models.Env) error {
 		return fmt.Errorf("failed to pull the compile image: %s", err.Error())
 	}
 
-	// if a build container was leftover from a previous build, let's remove it
+	// if a compile container was leftover from a previous compile, let's remove it
 	docker.ContainerRemove(container_generator.CompileName())
 
 	display.StartTask("Starting docker container")
@@ -43,19 +43,19 @@ func Compile(envModel *models.Env) error {
 	// ensure we stop the container when we're done
 	defer docker.ContainerRemove(container_generator.CompileName())
 
-	if err := prepareSimpleEnvironment(container.ID); err != nil {
+	if err := prepareCompileEnvironment(container.ID); err != nil {
 		return err
 	}
 
-	if err := runCompile(container.ID); err != nil {
+	if err := compileCode(container.ID); err != nil {
 		return err
 	}
 
 	return nil
 }
 
-// prepareSimpleEnvironment runs hooks to prepare the build environment
-func prepareSimpleEnvironment(containerID string) error {
+// prepareCompileEnvironment runs hooks to prepare the build environment
+func prepareCompileEnvironment(containerID string) error {
 	display.StartTask("Preparing environment for compile")
 	defer display.StopTask()
 
@@ -63,17 +63,24 @@ func prepareSimpleEnvironment(containerID string) error {
 	if _, err := hookit.DebugExec(containerID, "user", hook_generator.UserPayload(), "info"); err != nil {
 		return err
 	}
-
-	// run the fetch hook
-	if _, err := hookit.DebugExec(containerID, "fetch", hook_generator.FetchPayload(), "info"); err != nil {
-		return err
+	
+	// run the configure hook
+	if _, err := hookit.DebugExec(containerID, "configure", hook_generator.ConfigurePayload(), "info"); err != nil {
+		display.ErrorTask()
+		return runDebugSession(containerID, err)
+	}
+	
+	// run the boxfile hook
+	if _, err := hookit.DebugExec(containerID, "boxfile", hook_generator.BoxfilePayload(), "info"); err != nil {
+		display.ErrorTask()
+		return runDebugSession(containerID, err)
 	}
 
 	return nil
 }
 
-// runCompile runs the hooks to compile the codebase
-func runCompile(containerID string) error {
+// compileCode runs the hooks to compile the codebase
+func compileCode(containerID string) error {
 
 	display.StartTask("Compiling code")
 	defer display.StopTask()

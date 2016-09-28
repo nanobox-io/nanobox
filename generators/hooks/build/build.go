@@ -1,8 +1,7 @@
 package build
 
-// an empty payload function
-// this is here so if we redefine 'empty'
-// then we can modify it in one place
-func emptyPayload() string {
-	return "{}"
+// BuildPayload returns a string for the build hook payload
+func BuildPayload() string {
+	// currently, this payload is empty. This may change at some point
+	return emptyPayload()
 }
