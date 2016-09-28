@@ -17,7 +17,7 @@ func BuildConfig(image string) docker.ContainerConfig {
 		Image:   image,
 		Network: "host",
 		Binds: []string{
-			fmt.Sprintf("%s%s/code:/app", provider.HostShareDir(), env),
+			fmt.Sprintf("%s%s/code:/share/code", provider.HostShareDir(), env),
 			fmt.Sprintf("%s%s/engine:/share/engine", provider.HostShareDir(), env),
 			fmt.Sprintf("%s%s/build:/mnt/build", provider.HostMntDir(), env),
 			fmt.Sprintf("%s%s/deploy:/mnt/deploy", provider.HostMntDir(), env),
