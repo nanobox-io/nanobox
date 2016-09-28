@@ -54,6 +54,9 @@ func Deploy(envModel *models.Env, appModel *models.App) error {
 		return fmt.Errorf("failed to finalize deploy: %s", err.Error())
 	}
 
+	// give the user some helpful information
+	display.InfoSimDeploy(appModel.GlobalIPs["env"])
+
 	return nil
 }
 

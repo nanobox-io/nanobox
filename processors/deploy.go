@@ -47,6 +47,11 @@ func Deploy(envModel *models.Env, deployConfig DeployConfig) error {
 	if err != nil {
 		return fmt.Errorf("unable to generate warehouse config: %s", err.Error())
 	}
+	
+	// print the first deploy message if this is the first deploy for the app
+	if warehouseConfig.PreviousBuild == "" {
+		display.FirstDeploy()
+	}
 
 	// publish to remote warehouse
 	if err := code.Publish(envModel, warehouseConfig); err != nil {
@@ -65,7 +70,7 @@ func Deploy(envModel *models.Env, deployConfig DeployConfig) error {
 		return fmt.Errorf("failed to save build ID: %s", err.Error())
 	}
 
-	fmt.Printf("%s Deploy was successufully submitted! Check your dashboard for progress.\n", display.TaskComplete)
+	fmt.Printf("\n%s Success, this deploy is on the way!\n  Check your dashboard for progress.\n\n", display.TaskComplete)
 
 	return nil
 }

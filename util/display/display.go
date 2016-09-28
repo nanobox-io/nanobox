@@ -7,7 +7,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
 	"time"
 
@@ -144,11 +143,9 @@ func PauseTask() {
 	if Summary && summarizer != nil {
 		summarizer.Pause()
 
-		// windows sometimes has a timing issue with output, so let's
+		// there's a timing issue with output across goroutines, so let's
 		// give the terminal some time reset the lines
-		if runtime.GOOS == "windows" {
-			<-time.After(time.Second * 1)
-		}
+		<-time.After(time.Second * 1)
 
 		fmt.Println()
 	}

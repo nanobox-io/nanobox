@@ -72,14 +72,44 @@ func InfoDevContainer(ip string) {
 `, ip))
 }
 
+func InfoSimDeploy(ip string) {
+	os.Stderr.WriteString(fmt.Sprintf(`
+--------------------------------------------------------------------------------
++ Your app is running in simulated production environment
++ Access your app at >> %s
+--------------------------------------------------------------------------------
+
+`, ip))
+}
+
 func DevRunEmpty() {
 	os.Stderr.WriteString(fmt.Sprintf(`
-! You don't have any web or worker
-  start commands specified in your
-  boxfile.yml. More information about
-  start commands is available here:
+! You don't have any web or worker start commands specified in your
+  boxfile.yml. More information about start commands is available here:
   
   docs.nanobox.io/app-config/boxfile/web/#start-command
+
+`))
+}
+
+func FirstDeploy() {
+	os.Stderr.WriteString(fmt.Sprintf(`
+--------------------------------------------------------------------------------
++ HEADS UP:
++ This is the first deploy to this app and the upload takes longer than usual.
++ Future deploys only sync the differences and will be much faster.
+--------------------------------------------------------------------------------
+
+`))
+}
+
+func FirstBuild() {
+	os.Stderr.WriteString(fmt.Sprintf(`
+--------------------------------------------------------------------------------
++ HEADS UP:
++ This is the first build for this project and will take longer than usual.
++ Future builds will pull from the cache and will be much faster.
+--------------------------------------------------------------------------------
 
 `))
 }
