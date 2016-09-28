@@ -46,13 +46,13 @@ var (
 			if displayDebugMode {
 				lumber.Level(lumber.DEBUG)
 				display.Summary = false
-				display.Mode = "debug"
+				display.Level = "debug"
 			}
 
 			if displayTraceMode {
 				lumber.Level(lumber.TRACE)
 				display.Summary = false
-				display.Mode = "trace"
+				display.Level = "trace"
 			}
 
 		},
@@ -90,6 +90,7 @@ func init() {
 	NanoboxCmd.AddCommand(SimCmd)
 	NanoboxCmd.AddCommand(EnvCmd)
 	NanoboxCmd.AddCommand(TunnelCmd)
+	NanoboxCmd.AddCommand(ImplodeCmd)
 	NanoboxCmd.AddCommand(DestroyCmd)
 	NanoboxCmd.AddCommand(StartCmd)
 	NanoboxCmd.AddCommand(StopCmd)

@@ -30,7 +30,7 @@ func Console(envModel *models.Env, appModel *models.App, devRun bool) error {
 	}
 
 	// whatever happens next, ensure we teardown this container
-	defer teardown(appModel)
+
 
 	// setup the dev container
 	if err := setup(appModel); err != nil {
@@ -48,6 +48,10 @@ func Console(envModel *models.Env, appModel *models.App, devRun bool) error {
 	// console into the newly created container
 	if err := runConsole(appModel); err != nil {
 		return fmt.Errorf("failed to console into dev container: %s", err.Error())
+	}
+
+	if err := teardown(appModel); err != nil {
+		return fmt.Errorf("unable to teardown dev: %s", err)
 	}
 
 	return nil
@@ -100,7 +104,7 @@ func setup(appModel *models.App) error {
 		return fmt.Errorf("failed to run the user hook: %s", err.Error())
 	}
 
-	if _, err := hookit.Exec(container.ID, "dev", build_generator.DevPayload(appModel), "debug"); err != nil {
+	if _, err := hookit.Exec(container.ID, "dev", build_generator.DevPayload(appModel), "info"); err != nil {
 		display.ErrorTask()
 		return fmt.Errorf("failed to run the dev hook: %s", err.Error())
 	}
@@ -201,9 +205,9 @@ func downloadImage(image string) error {
 	defer display.StopTask()
 
 	// generate a docker percent display
-	dockerPercent := &display.DockerPercentDisplay2{
+	dockerPercent := &display.DockerPercentDisplay{
 		Output: display.NewStreamer("info"),
-		Prefix: image,
+		// Prefix: image,
 	}
 
 	if _, err := docker.ImagePull(image, dockerPercent); err != nil {

@@ -21,6 +21,7 @@ func newCrawlWatcher(path string) Watcher {
 	return &crawl{
 		path:   path,
 		events: make(chan event, 10),
+		done: make(chan struct{}),
 		files:  map[string]time.Time{},
 	}
 }
@@ -53,7 +54,7 @@ func (c *crawl) populateFiles() error {
 // add a file that is being walked to the watch system
 func (c *crawl) walkFunc(path string, info os.FileInfo, err error) error {
 	if err != nil {
-		return err
+		return nil
 	}
 
 	for _, ignoreName := range ignoreFile {

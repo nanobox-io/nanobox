@@ -3,22 +3,22 @@ package processors
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/env"
 	"github.com/nanobox-io/nanobox/processors/provider"
+	util_provider "github.com/nanobox-io/nanobox/util/provider"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/dns"
 )
 
-// Destroy destroys the provider and cleans nanobox off of the system
-func Destroy() error {
+// Implode destroys the provider and cleans nanobox off of the system
+func Implode() error {
 
-	display.OpenContext("Uninstalling Nanobox")
+	display.OpenContext("Imploding Nanobox")
 	defer display.CloseContext()
 
 	// init docker client
@@ -28,11 +28,6 @@ func Destroy() error {
 
 	envModels, _ := models.AllEnvs()
 	for _, envModel := range envModels {
-		// iterate through the envs and destroy them
-		if err := env.Destroy(envModel); err != nil {
-			fmt.Printf("unable to remove environment: %s", err)
-		}
-
 		// unmount (and remove the share for the env)
 		if err := env.Unmount(envModel, false); err != nil {
 			fmt.Printf("unable to remove mounts: %s", err)
@@ -40,10 +35,9 @@ func Destroy() error {
 
 	}
 
-	// destroy the provider (VM)
-	//   this should remove the docker images
-	if err := provider.Destroy(); err != nil {
-		return fmt.Errorf("failed to uninstall the provider: %s", err.Error())
+	// destroy the provider (VM), remove images, remove containers
+	if err := util_provider.Implode(); err != nil {
+		return fmt.Errorf("failed to implode the provider: %s", err.Error())
 	}
 
 	// purge the installation
@@ -76,11 +70,10 @@ func purgeConfiguration() error {
 
 // clearData will remove the global dir and everything inside
 func clearData() error {
-	dataFile := filepath.ToSlash(filepath.Join(config.GlobalDir(), "data.db"))
 
-	// remove the data.db
-	if err := os.Remove(dataFile); err != nil {
-		return fmt.Errorf("failed to remove %s: %s", dataFile, err.Error())
+	// remove the .nanobox/ folder
+	if err := os.RemoveAll(config.GlobalDir()); err != nil {
+		return fmt.Errorf("failed to remove %s: %s", config.GlobalDir(), err.Error())
 	}
 
 	return nil

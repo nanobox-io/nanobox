@@ -14,11 +14,13 @@ type Provider interface {
 	HostShareDir() string
 	HostMntDir() string
 	HostIP() (string, error)
+	ReservedIPs() []string
 	Valid() error
 	Install() error
 	Create() error
 	Reboot() error
 	Stop() error
+	Implode() error
 	Destroy() error
 	Start() error
 	DockerEnv() error
@@ -34,6 +36,7 @@ type Provider interface {
 	HasMount(mount string) bool
 	AddMount(local, host string) error
 	RemoveMount(local, host string) error
+	RemoveEnvDir(id string) error
 	Run(command []string) ([]byte, error)
 }
 
@@ -135,6 +138,17 @@ func Stop() error {
 	return p.Stop()
 }
 
+// Implode ..
+func Implode() error {
+
+	p, err := fetchProvider()
+	if err != nil {
+		return err
+	}
+
+	return p.Implode()
+}
+
 // Destroy ..
 func Destroy() error {
 
@@ -188,6 +202,17 @@ func HostIP() (string, error) {
 	}
 
 	return p.HostIP()
+}
+
+// ReservedIPs ..
+func ReservedIPs() []string {
+
+	p, err := fetchProvider()
+	if err != nil {
+		return []string{}
+	}
+
+	return p.ReservedIPs()
 }
 
 // DockerEnv ..
@@ -331,6 +356,16 @@ func RemoveMount(local, host string) error {
 	return p.RemoveMount(local, host)
 }
 
+// RemoveEnvDir ...
+func RemoveEnvDir(id string) error {
+
+	p, err := fetchProvider()
+	if err != nil {
+		return err
+	}
+
+	return p.RemoveEnvDir(id)
+}
 // Run a command inside of the provider context
 func Run(command []string) ([]byte, error) {
 

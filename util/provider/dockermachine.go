@@ -176,6 +176,12 @@ func (machine DockerMachine) Stop() error {
 	return nil
 }
 
+// imploding the docker-machine provider 
+// is the same as destroying it
+func (machine DockerMachine) Implode() error {
+	return Destroy()
+}
+
 // Destroy destroys the docker-machine vm
 func (machine DockerMachine) Destroy() error {
 
@@ -802,6 +808,31 @@ func (machine DockerMachine) RemoveMount(_, host string) error {
 	return nil
 }
 
+// 
+func (machine DockerMachine) RemoveEnvDir(id string) error {
+	if id == "" {
+		return fmt.Errorf("invalid env id")
+	}
+
+	cmd := []string{
+		dockerMachineCmd,
+		"ssh",
+		"nanobox",
+		"sudo",
+		"rm",
+		"-rf",
+		machine.HostMntDir()+id,
+	}
+
+	process := exec.Command(cmd[0], cmd[1:]...)
+	b, err := process.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("%s: %s", b, err)
+	}
+
+	return nil
+}
+
 // HostIP inspects docker-machine to return the IP address of the vm
 func (machine DockerMachine) HostIP() (string, error) {
 	// create an anonymous struct that we will populate after running inspect
@@ -825,6 +856,13 @@ func (machine DockerMachine) HostIP() (string, error) {
 	}
 
 	return inspect.Driver.IPAddress, nil
+}
+
+func (machine DockerMachine) ReservedIPs() (rtn []string) {
+	for i := 0; i < 20; i++ {
+		rtn = append(rtn, fmt.Sprintf("192.168.99.%d", 100+i))
+	}
+	return
 }
 
 // Run a command in the vm
