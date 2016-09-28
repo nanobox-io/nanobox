@@ -1,5 +1,5 @@
 code.build:
-  engine: "golang#refactor/v1"
+  engine: "golang"
   config:
     package: "github.com/nanobox-io/nanobox"
     

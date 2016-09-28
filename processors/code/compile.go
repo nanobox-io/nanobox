@@ -66,14 +66,12 @@ func prepareCompileEnvironment(containerID string) error {
 	
 	// run the configure hook
 	if _, err := hookit.DebugExec(containerID, "configure", hook_generator.ConfigurePayload(), "info"); err != nil {
-		display.ErrorTask()
-		return runDebugSession(containerID, err)
+		return err
 	}
 	
 	// run the boxfile hook
 	if _, err := hookit.DebugExec(containerID, "boxfile", hook_generator.BoxfilePayload(), "info"); err != nil {
-		display.ErrorTask()
-		return runDebugSession(containerID, err)
+		return err
 	}
 
 	return nil

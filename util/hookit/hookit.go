@@ -20,6 +20,11 @@ func DebugExec(container, hook, payload, displayLevel string) (string, error) {
 		display.ErrorTask()
 		err = fmt.Errorf("failed to execute %s hook: %s", hook, err.Error())
  		if registry.GetBool("debug") {
+ 			fmt.Printf("An error has occurred: %s\n", err)
+ 			fmt.Println("Entering Debug Mode")
+ 			fmt.Printf("  container: %s\n", container)
+ 			fmt.Printf("  hook:      %s\n", hook)
+ 			fmt.Printf("  payload:   %s\n", payload)
 			err := console.Run(container, console.ConsoleConfig{})
 			if err != nil {
 				return res, fmt.Errorf("failed to establish a debug session: %s", err.Error())
