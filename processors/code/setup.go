@@ -83,7 +83,7 @@ func Setup(appModel *models.App, componentModel *models.Component, warehouseConf
 	fetchPayload := hook_generator.FetchPayload(componentModel, warehouseConfig.WarehouseURL)
 
 	display.StartTask("Fetching build from warehouse")
-	if _, err := hookit.RunFetchHook(componentModel.ID, fetchPayload); err != nil {
+	if _, err := hookit.DebugExec(componentModel.ID, "fetch", fetchPayload, "info"); err != nil {
 		display.ErrorTask()
 		return err
 	}
@@ -94,13 +94,13 @@ func Setup(appModel *models.App, componentModel *models.Component, warehouseConf
 
 	//
 	display.StartTask("Starting services")
-	if _, err := hookit.RunConfigureHook(componentModel.ID, payload); err != nil {
+	if _, err := hookit.DebugExec(componentModel.ID, "configure", payload, "info"); err != nil {
 		display.ErrorTask()
 		return fmt.Errorf("failed to configure code: %s", err.Error())
 	}
 
 	// run start command
-	if _, err := hookit.RunStartHook(componentModel.ID, payload); err != nil {
+	if _, err := hookit.DebugExec(componentModel.ID, "start", payload, "info"); err != nil {
 		display.ErrorTask()
 		return err
 	}

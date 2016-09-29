@@ -60,21 +60,18 @@ func prepareCompileEnvironment(containerID string) error {
 	defer display.StopTask()
 
 	// run the user hook
-	if _, err := hookit.RunUserHook(containerID, hook_generator.UserPayload()); err != nil {
-		display.ErrorTask()
-		return runDebugSession(containerID, err)
+	if _, err := hookit.DebugExec(containerID, "user", hook_generator.UserPayload(), "info"); err != nil {
+		return err
 	}
 	
 	// run the configure hook
-	if _, err := hookit.RunConfigureHook(containerID, hook_generator.ConfigurePayload()); err != nil {
-		display.ErrorTask()
-		return runDebugSession(containerID, err)
+	if _, err := hookit.DebugExec(containerID, "configure", hook_generator.ConfigurePayload(), "info"); err != nil {
+		return err
 	}
 	
 	// run the boxfile hook
-	if _, err := hookit.RunBoxfileHook(containerID, hook_generator.BoxfilePayload()); err != nil {
-		display.ErrorTask()
-		return runDebugSession(containerID, err)
+	if _, err := hookit.DebugExec(containerID, "boxfile", hook_generator.BoxfilePayload(), "info"); err != nil {
+		return err
 	}
 
 	return nil
@@ -87,15 +84,13 @@ func compileCode(containerID string) error {
 	defer display.StopTask()
 
 	// run the compile hook
-	if _, err := hookit.RunCompileHook(containerID, hook_generator.CompilePayload()); err != nil {
-		display.ErrorTask()
-		return runDebugSession(containerID, err)
+	if _, err := hookit.DebugExec(containerID, "compile", hook_generator.CompilePayload(), "info"); err != nil {
+		return err
 	}
 
 	// run the pack-app hook
-	if _, err := hookit.RunPackAppHook(containerID, hook_generator.PackAppPayload()); err != nil {
-		display.ErrorTask()
-		return runDebugSession(containerID, err)
+	if _, err := hookit.DebugExec(containerID, "pack-app", hook_generator.PackAppPayload(), "info"); err != nil {
+		return err
 	}
 
 	return nil

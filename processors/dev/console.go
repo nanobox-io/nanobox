@@ -13,6 +13,7 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/env"
+	"github.com/nanobox-io/nanobox/util/console"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/hookit"
@@ -99,13 +100,11 @@ func setup(appModel *models.App) error {
 
 	display.StartTask("Configuring")
 	userPayload := build_generator.UserPayload()
-	if _, err := hookit.Exec(container.ID, "user", userPayload, "debug"); err != nil {
-		display.ErrorTask()
+	if _, err := hookit.DebugExec(container.ID, "user", userPayload, "debug"); err != nil {
 		return fmt.Errorf("failed to run the user hook: %s", err.Error())
 	}
 
-	if _, err := hookit.Exec(container.ID, "dev", build_generator.DevPayload(appModel), "info"); err != nil {
-		display.ErrorTask()
+	if _, err := hookit.DebugExec(container.ID, "dev", build_generator.DevPayload(appModel), "info"); err != nil {
 		return fmt.Errorf("failed to run the dev hook: %s", err.Error())
 	}
 	display.StopTask()
@@ -227,7 +226,7 @@ func runConsole(appModel *models.App) error {
 		ID: "nanobox_" + appModel.ID,
 	}
 
-	consoleConfig := env.ConsoleConfig{
+	consoleConfig := console.ConsoleConfig{
 		Cwd:   cwd(appModel),
 		IsDev: true,
 		DevIP: appModel.GlobalIPs["env"],

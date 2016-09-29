@@ -5,12 +5,14 @@ import (
 
 	"github.com/nanobox-io/nanobox-boxfile"
 
+	generator "github.com/nanobox-io/nanobox/generators/hooks/code"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/code"
 	"github.com/nanobox-io/nanobox/processors/component"
 	"github.com/nanobox-io/nanobox/processors/platform"
 	"github.com/nanobox-io/nanobox/processors/provider"
 	"github.com/nanobox-io/nanobox/util/display"
+	"github.com/nanobox-io/nanobox/util/hookit"
 )
 
 // deploys the code to the warehouse and builds
@@ -104,7 +106,7 @@ func runDeployHook(appModel *models.App, hookType string) error {
 			continue
 		}
 
-		if err := DeployHook(appModel, component, hookType); err != nil {
+		if _, err := hookit.DebugExec(component.ID, hookType, generator.DeployPayload(appModel, component), "info"); err != nil {
 			return err
 		}
 	}

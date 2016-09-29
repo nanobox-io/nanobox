@@ -8,9 +8,6 @@ import (
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox-boxfile"
 
-	"github.com/nanobox-io/nanobox/commands/registry"
-	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/processors/env"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 )
@@ -24,26 +21,6 @@ const (
 const (
 	ACTIVE = "active"
 )
-
-// runDebugSession drops the user in the build container to debug
-func runDebugSession(container string, err error) error {
-	if err != nil {
-		display.ErrorTask()
-
-		if registry.GetBool("debug") {
-			component := &models.Component{
-				ID: container,
-			}
-			err := env.Console(component, env.ConsoleConfig{})
-			if err != nil {
-				return fmt.Errorf("failed to establish a debug session: %s", err.Error())
-			}
-		}
-
-	}
-
-	return err
-}
 
 func pullBuildImage() (string, error) {
 	// extract the build image from the boxfile

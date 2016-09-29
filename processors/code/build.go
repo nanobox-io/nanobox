@@ -74,27 +74,23 @@ func prepareBuildEnvironment(containerID string) error {
 	defer display.StopTask()
 
 	// run the user hook
-	if _, err := hookit.RunUserHook(containerID, hook_generator.UserPayload()); err != nil {
-		display.ErrorTask()
-		return runDebugSession(containerID, err)
+	if _, err := hookit.DebugExec(containerID, "user", hook_generator.UserPayload(), "info"); err != nil {
+		return err
 	}
 
 	// run the configure hook
-	if _, err := hookit.RunConfigureHook(containerID, hook_generator.ConfigurePayload()); err != nil {
-		display.ErrorTask()
-		return runDebugSession(containerID, err)
+	if _, err := hookit.DebugExec(containerID, "configure", hook_generator.ConfigurePayload(), "info"); err != nil {
+		return err
 	}
 
 	// run the fetch hook
-	if _, err := hookit.RunFetchHook(containerID, hook_generator.FetchPayload()); err != nil {
-		display.ErrorTask()
-		return runDebugSession(containerID, err)
+	if _, err := hookit.DebugExec(containerID, "fetch", hook_generator.FetchPayload(), "info"); err != nil {
+		return err
 	}
 
 	// run the setup hook
-	if _, err := hookit.RunSetupHook(containerID, hook_generator.SetupPayload()); err != nil {
-		display.ErrorTask()
-		return runDebugSession(containerID, err)
+	if _, err := hookit.DebugExec(containerID, "setup", hook_generator.SetupPayload(), "info"); err != nil {
+		return err
 	}
 
 	return nil
@@ -106,10 +102,9 @@ func gatherRequirements(envModel *models.Env, containerID string) error {
 	defer display.StopTask()
 
 	// run the boxfile hook
-	boxOutput, err := hookit.RunBoxfileHook(containerID, hook_generator.BoxfilePayload())
+	boxOutput, err := hookit.DebugExec(containerID, "boxfile", hook_generator.BoxfilePayload(), "info")
 	if err != nil {
-		display.ErrorTask()
-		return runDebugSession(containerID, err)
+		return err
 	}
 
 	box := boxfile.NewFromPath(config.Boxfile())
@@ -132,10 +127,9 @@ func installRuntimes(containerID string) error {
 	display.StartTask("Installing binaries and runtimes")
 	defer display.StopTask()
 
-	// run the prepare hook
-	if _, err := hookit.RunBuildHook(containerID, hook_generator.BuildPayload()); err != nil {
-		display.ErrorTask()
-		return runDebugSession(containerID, err)
+	// run the build hook
+	if _, err := hookit.DebugExec(containerID, "build", hook_generator.BuildPayload(), "info"); err != nil {
+		return err
 	}
 
 	return nil
@@ -147,21 +141,18 @@ func packageBuild(containerID string) error {
 	defer display.StopTask()
 
 	// run the pack-build hook
-	if _, err := hookit.RunPackBuildHook(containerID, hook_generator.PackBuildPayload()); err != nil {
-		display.ErrorTask()
-		return runDebugSession(containerID, err)
+	if _, err := hookit.DebugExec(containerID, "pack-build", hook_generator.PackBuildPayload(), "info"); err != nil {
+		return err
 	}
 
 	// run the clean hook
-	if _, err := hookit.RunCleanHook(containerID, hook_generator.CleanPayload()); err != nil {
-		display.ErrorTask()
-		return runDebugSession(containerID, err)
+	if _, err := hookit.DebugExec(containerID, "clean", hook_generator.CleanPayload(), "info"); err != nil {
+		return err
 	}
 
 	// run the pack-deploy hook
-	if _, err := hookit.RunPackDeployHook(containerID, hook_generator.PackDeployPayload()); err != nil {
-		display.ErrorTask()
-		return runDebugSession(containerID, err)
+	if _, err := hookit.DebugExec(containerID, "pack-deploy", hook_generator.PackDeployPayload(), "info"); err != nil {
+		return err
 	}
 
 	return nil
