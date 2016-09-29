@@ -51,6 +51,10 @@ func Build(envModel *models.Env) error {
 	if err := gatherRequirements(envModel, container.ID); err != nil {
 		return err
 	}
+	
+	if err := setupBuildMounts(container.ID); err != nil {
+		return err
+	}
 
 	if err := installRuntimes(container.ID); err != nil {
 		return err
@@ -117,6 +121,19 @@ func gatherRequirements(envModel *models.Env, containerID string) error {
 		display.ErrorTask()
 		lumber.Error("code:Build:models:Env:Save(): %s", err.Error())
 		return fmt.Errorf("failed to persist build boxfile to db: %s", err.Error())
+	}
+
+	return nil
+}
+
+// setupBuildMounts prepares the environment for the build
+func setupBuildMounts(containerID string) error {
+	display.StartTask("Mounting lib_dirs")
+	defer display.StopTask()
+
+	// run the build hook
+	if _, err := hookit.DebugExec(containerID, "mount", hook_generator.MountPayload(), "info"); err != nil {
+		return err
 	}
 
 	return nil
