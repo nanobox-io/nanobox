@@ -72,21 +72,6 @@ func EngineDir() string {
 	return ""
 }
 
-// TmpDir creates a temporary directory where nanobox specific files can be
-// downloaded (updated versions of nanobox, md5's, etc.)
-func TmpDir() string {
-
-	//
-	tmpDir := filepath.ToSlash(filepath.Join(GlobalDir(), "tmp"))
-
-	//
-	if err := os.MkdirAll(tmpDir, 0755); err != nil {
-		lumber.Fatal("[config/config] os.Mkdir() failed", err.Error())
-	}
-
-	return tmpDir
-}
-
 // BinDir creates a directory where nanobox specific binaries can be downloaded
 // docker, dockermachine, etc
 func BinDir() string {
