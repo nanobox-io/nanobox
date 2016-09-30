@@ -116,7 +116,7 @@ func runStart(name, command string) error {
 	// create the docker command
 	cmd := []string{
 		"-lc",
-		fmt.Sprintf("cd /app/; %s", command),
+		fmt.Sprintf("cd /app/; exec %s", command),
 	}
 
 	lumber.Debug("run:runstarts: %+v", cmd)
