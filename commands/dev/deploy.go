@@ -20,7 +20,7 @@ var DeployCmd = &cobra.Command{
 }
 
 func init() {
-	steps.Build("dev deploy", deployCheck, deployFn)
+	steps.Build("dev deploy", deployComplete, deployFn)
 }
 
 // deployFn ...
@@ -30,7 +30,8 @@ func deployFn(ccmd *cobra.Command, args []string) {
 	display.CommandErr(dev.Deploy(env, app))
 }
 
-func deployCheck() bool {
+func deployComplete() bool {
 	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
-	return app.DeployedBoxfile != ""
+	env, _ := app.Env()
+ 	return app.DeployedBoxfile != "" && env.BuiltBoxfile == app.DeployedBoxfile
 }
