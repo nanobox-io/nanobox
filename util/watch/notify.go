@@ -57,6 +57,7 @@ func (n *notify) walkFunc(path string, info os.FileInfo, err error) error {
 
 	for _, ignoreName := range ignoreFile {
 		if strings.HasSuffix(path, ignoreName) {
+			lumber.Info("watcher: skipping %s", path)
 			if info.IsDir() {
 				// if the thing we are ignoring is a directory
 				return filepath.SkipDir

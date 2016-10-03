@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/jcelliott/lumber"
 )
 
 type crawl struct {
@@ -59,6 +61,7 @@ func (c *crawl) walkFunc(path string, info os.FileInfo, err error) error {
 
 	for _, ignoreName := range ignoreFile {
 		if strings.HasSuffix(path, ignoreName) {
+			lumber.Info("watcher: skipping %s", path)
 			if info.IsDir() {
 				// if the thing we are ignoring is a directory
 				return filepath.SkipDir
@@ -71,14 +74,14 @@ func (c *crawl) walkFunc(path string, info os.FileInfo, err error) error {
 	// read the file with the md5 library and generate a hash
 	if !info.IsDir() {
 		val, ok := c.files[path]
-		if c.started && (!ok || !val.Equal(info.ModTime().Round(5*time.Second))) {
+		if c.started && (!ok || info.ModTime().Sub(val) > 10*time.Second) {
 			// this is a new file or the file has been changed
 			c.events <- event{file: path}
 		}
 
 		// update my cached files
 		// the rounding is so we dont detect the change that we make
-		c.files[path] = info.ModTime().Round(5 * time.Second)
+		c.files[path] = info.ModTime()
 	}
 
 	return nil
