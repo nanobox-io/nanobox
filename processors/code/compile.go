@@ -73,6 +73,11 @@ func prepareCompileEnvironment(containerID string) error {
 	if _, err := hookit.DebugExec(containerID, "boxfile", hook_generator.BoxfilePayload(), "info"); err != nil {
 		return err
 	}
+	
+	// run the mount hook
+	if _, err := hookit.DebugExec(containerID, "mount", hook_generator.MountPayload(), "info"); err != nil {
+		return err
+	}
 
 	return nil
 }
