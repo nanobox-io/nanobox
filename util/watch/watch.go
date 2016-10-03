@@ -88,6 +88,13 @@ func batchPublish(container string) {
 
 // populate the ignore file from the nanoignore
 func populateIgnore(path string) {
+	// add pieces from the env
+	env, err := models.FindEnvByID(config.EnvID())
+	box := boxfile.New([]byte(env.BuiltBoxfile))
+	for _, libDir := range box.Node("code.build").StringSliceValue("lib_dirs") {
+		ignoreFile = append(ignoreFile, libDir)
+	}
+
 	// add parts from the nanoignore
 	b, err := ioutil.ReadFile(filepath.ToSlash(filepath.Join(path, ".nanoignore")))
 	if err != nil {
@@ -99,10 +106,4 @@ func populateIgnore(path string) {
 		ignoreFile = append(ignoreFile, str)
 	}
 
-	// add pieces from the env
-	env, _ := models.FindEnvByID(config.EnvID())
-	box := boxfile.New([]byte(env.BuiltBoxfile))
-	for _, libDir := range box.Node("code.build").StringSliceValue("lib_dirs") {
-		ignoreFile = append(ignoreFile, libDir)
-	}
 }
