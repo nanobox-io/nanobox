@@ -14,7 +14,7 @@ func TestGlobalDir(t *testing.T) {
 
 func TestLocalDir(t *testing.T) {
 	dir := LocalDir()
-	if !strings.Contains(dir, "nanobox/util/config") {
+	if !strings.Contains(dir, "nanobox") {
 		t.Errorf("missing nanobox suffix")
 	}
 }
