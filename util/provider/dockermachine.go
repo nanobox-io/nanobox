@@ -635,7 +635,7 @@ func (machine DockerMachine) HasShare(local, host string) bool {
 		return false
 	}
 
-	return strings.Contains(output, name)
+	return strings.Contains(string(output), name)
 }
 
 // AddShare adds the provided path as a shareable filesystem
