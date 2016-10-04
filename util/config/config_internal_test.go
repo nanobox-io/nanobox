@@ -14,13 +14,13 @@ func TestGlobalDir(t *testing.T) {
 
 func TestLocalDir(t *testing.T) {
 	dir := LocalDir()
-	if !strings.Contains(dir, "nanobox") {
+	if !strings.HasSuffix(dir, "nanobox") {
 		t.Errorf("missing nanobox suffix")
 	}
 }
 
 func TestLocalDirName(t *testing.T) {
-	if LocalDirName() != "config" {
+	if LocalDirName() != "nanobox" {
 		t.Errorf("local dir name mismatch")
 	}
 }
