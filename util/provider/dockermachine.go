@@ -614,8 +614,13 @@ func (machine DockerMachine) RemoveNat(ip, containerIP string) error {
 	return nil
 }
 
+
 // HasShare checks to see if the share exists
-func (machine DockerMachine) HasShare(local, _ string) bool {
+func (machine DockerMachine) HasShare(local, host string) bool {
+	h := sha256.New()
+	h.Write([]byte(local))
+	h.Write([]byte(host))
+	name := hex.EncodeToString(h.Sum(nil))
 
 	cmd := []string{
 		vboxManageCmd,
@@ -630,12 +635,7 @@ func (machine DockerMachine) HasShare(local, _ string) bool {
 		return false
 	}
 
-	matched, regerr := regexp.Match(local, output)
-	if regerr != nil {
-		return false
-	}
-
-	return matched
+	return strings.Contains(string(output), name)
 }
 
 // AddShare adds the provided path as a shareable filesystem

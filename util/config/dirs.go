@@ -29,12 +29,34 @@ func GlobalDir() string {
 func LocalDir() string {
 
 	//
-	p, err := os.Getwd()
+	cwd, err := os.Getwd()
 	if err != nil {
 		return ""
 	}
 
-	return filepath.ToSlash(p)
+	boxfilePresent := func(path string) bool {
+		boxfile := filepath.ToSlash(filepath.Join(path, "boxfile.yml"))
+		fi, err := os.Stat(boxfile)
+		if err != nil {
+			return false
+		}
+		return !fi.IsDir()
+	}
+
+	path := cwd
+	for !boxfilePresent(path) {
+		if path == "" || path == "/" {
+			// return the current working directory if we cant find a path
+			return cwd
+		}
+		// eliminate the most child directory and then check it
+		path = filepath.Dir(path)
+	}
+
+	// recursively check for boxfile
+
+
+	return filepath.ToSlash(path)
 }
 
 // LocalDirName ...

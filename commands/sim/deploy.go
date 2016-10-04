@@ -24,7 +24,7 @@ deploy locally, before deploying into production.
 }
 
 func init() {
-	steps.Build("sim deploy", deployCheck, deployFn)
+	steps.Build("sim deploy", deployComplete, deployFn)
 }
 
 // deployFn ...
@@ -36,7 +36,7 @@ func deployFn(ccmd *cobra.Command, args []string) {
 	display.CommandErr(sim.Deploy(env, app))
 }
 
-func deployCheck() bool {
-	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
+func deployComplete() bool {
+	app, _ := models.FindAppBySlug(config.EnvID(), "sim")
 	return app.DeployedBoxfile != ""
 }

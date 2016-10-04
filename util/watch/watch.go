@@ -1,7 +1,7 @@
 package watch
 
 import (
-	// "fmt"
+	"fmt"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
@@ -39,6 +39,7 @@ type Watcher interface {
 func Watch(container, path string) error {
 	populateIgnore(path)
 
+	lumber.Debug("watch: ignored dirs: %+v", ignoreFile)
 	// try watching with the fast one
 	watcher := newNotifyWatcher(path)
 	err := watcher.watch()
@@ -46,11 +47,11 @@ func Watch(container, path string) error {
 		// if it fails display a message and try the slow one
 		lumber.Info("Error occured in fast notify watcher: %s", err.Error())
 
-		// // print the warning
-		// fmt.Printf("\n-------------------------------------------------------\n\n")
-		// fmt.Printf("Uh oh, the live filesystem watcher has panic'ed.\n")
-		// fmt.Printf("We'll go ahead and rollover to a slower polling solution.\n")
-		// fmt.Printf("\n-------------------------------------------------------\n\n")
+		// print the warning
+		fmt.Printf("\n-------------------------------------------------------\n\n")
+		fmt.Printf("Uh oh, the live filesystem watcher has panic'ed.\n")
+		fmt.Printf("We'll go ahead and rollover to a slower polling solution.\n")
+		fmt.Printf("\n-------------------------------------------------------\n\n")
 
 		watcher.close()
 		watcher = newCrawlWatcher(path)
@@ -87,6 +88,13 @@ func batchPublish(container string) {
 
 // populate the ignore file from the nanoignore
 func populateIgnore(path string) {
+	// add pieces from the env
+	env, err := models.FindEnvByID(config.EnvID())
+	box := boxfile.New([]byte(env.BuiltBoxfile))
+	for _, libDir := range box.Node("code.build").StringSliceValue("lib_dirs") {
+		ignoreFile = append(ignoreFile, libDir)
+	}
+
 	// add parts from the nanoignore
 	b, err := ioutil.ReadFile(filepath.ToSlash(filepath.Join(path, ".nanoignore")))
 	if err != nil {
@@ -98,10 +106,4 @@ func populateIgnore(path string) {
 		ignoreFile = append(ignoreFile, str)
 	}
 
-	// add pieces from the env
-	env, _ := models.FindEnvByID(config.EnvID())
-	box := boxfile.New([]byte(env.BuiltBoxfile))
-	for _, libDir := range box.Node("code.build").StringSliceValue("lib_dirs") {
-		ignoreFile = append(ignoreFile, libDir)
-	}
 }
