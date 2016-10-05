@@ -1,9 +1,9 @@
 package watch
 
 import (
-	"testing"
 	"io/ioutil"
 	"os"
+	"testing"
 	"time"
 )
 

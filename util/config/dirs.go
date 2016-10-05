@@ -55,7 +55,6 @@ func LocalDir() string {
 
 	// recursively check for boxfile
 
-
 	return filepath.ToSlash(path)
 }
 

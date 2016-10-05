@@ -40,5 +40,3 @@ func printMOTD(consoleConfig console.ConsoleConfig) error {
 	display.InfoLocalContainer()
 	return nil
 }
-
-
