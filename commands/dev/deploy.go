@@ -33,5 +33,5 @@ func deployFn(ccmd *cobra.Command, args []string) {
 func deployComplete() bool {
 	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
 	env, _ := app.Env()
- 	return app.DeployedBoxfile != "" && env.BuiltBoxfile == app.DeployedBoxfile
+	return app.DeployedBoxfile != "" && env.BuiltBoxfile == app.DeployedBoxfile
 }

@@ -1,9 +1,9 @@
 package watch
 
 import (
-	"testing"
-	"os/exec"
 	"os"
+	"os/exec"
+	"testing"
 )
 
 func TestCrawlFiles(t *testing.T) {

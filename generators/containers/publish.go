@@ -17,8 +17,8 @@ func PublishConfig(image string) docker.ContainerConfig {
 		Image:   image,
 		Network: "host",
 		Binds: []string{
-      fmt.Sprintf("%s%s/app:/mnt/app", provider.HostMntDir(), env),
-      fmt.Sprintf("%s%s/cache:/mnt/cache", provider.HostMntDir(), env),
+			fmt.Sprintf("%s%s/app:/mnt/app", provider.HostMntDir(), env),
+			fmt.Sprintf("%s%s/cache:/mnt/cache", provider.HostMntDir(), env),
 			fmt.Sprintf("%s%s/deploy:/mnt/deploy", provider.HostMntDir(), env),
 		},
 	}

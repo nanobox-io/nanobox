@@ -44,7 +44,6 @@ func Build(envModel *models.Env) error {
 
 	display.StopTask()
 
-
 	if err := prepareBuildEnvironment(container.ID); err != nil {
 		return err
 	}
@@ -52,7 +51,7 @@ func Build(envModel *models.Env) error {
 	if err := gatherRequirements(envModel, container.ID); err != nil {
 		return err
 	}
-	
+
 	if err := setupBuildMounts(container.ID); err != nil {
 		return err
 	}

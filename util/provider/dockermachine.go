@@ -176,7 +176,7 @@ func (machine DockerMachine) Stop() error {
 	return nil
 }
 
-// imploding the docker-machine provider 
+// imploding the docker-machine provider
 // is the same as destroying it
 func (machine DockerMachine) Implode() error {
 	return Destroy()
@@ -614,7 +614,6 @@ func (machine DockerMachine) RemoveNat(ip, containerIP string) error {
 	return nil
 }
 
-
 // HasShare checks to see if the share exists
 func (machine DockerMachine) HasShare(local, host string) bool {
 	h := sha256.New()
@@ -808,7 +807,7 @@ func (machine DockerMachine) RemoveMount(_, host string) error {
 	return nil
 }
 
-// 
+//
 func (machine DockerMachine) RemoveEnvDir(id string) error {
 	if id == "" {
 		return fmt.Errorf("invalid env id")
@@ -821,7 +820,7 @@ func (machine DockerMachine) RemoveEnvDir(id string) error {
 		"sudo",
 		"rm",
 		"-rf",
-		machine.HostMntDir()+id,
+		machine.HostMntDir() + id,
 	}
 
 	process := exec.Command(cmd[0], cmd[1:]...)

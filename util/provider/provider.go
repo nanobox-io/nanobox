@@ -366,6 +366,7 @@ func RemoveEnvDir(id string) error {
 
 	return p.RemoveEnvDir(id)
 }
+
 // Run a command inside of the provider context
 func Run(command []string) ([]byte, error) {
 

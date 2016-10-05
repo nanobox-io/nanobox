@@ -36,7 +36,7 @@ func DevConfig(appModel *models.App) docker.ContainerConfig {
 
 	// add lib_dirs into the container binds
 	libDirs := boxfile.Node("code.build").StringSliceValue("lib_dirs")
-	
+
 	for _, libDir := range libDirs {
 		// TODO: the cache source should come from the provider
 		path := fmt.Sprintf("/mnt/sda1/%s/cache/lib_dirs/%s:/app/%s", appModel.EnvID, libDir, libDir)

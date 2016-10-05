@@ -32,7 +32,7 @@ func Publish(envModel *models.Env, WarehouseConfig WarehouseConfig) error {
 	}
 
 	display.StartTask("Starting docker container")
-	
+
 	// if a publish container was leftover from a previous publish, let's remove it
 	docker.ContainerRemove(container_generator.PublishName())
 

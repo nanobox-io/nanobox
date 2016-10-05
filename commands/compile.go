@@ -2,7 +2,7 @@ package commands
 
 import (
 	"time"
-	
+
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/commands/steps"
@@ -25,13 +25,11 @@ deployed into dev, sim, or production environments.
 		PreRun: steps.Run("start", "build"),
 		Run:    compileFn,
 	}
-
 )
 
 func init() {
 	steps.Build("compile", compileComplete, compileFn)
 }
-
 
 // compileFn ...
 func compileFn(ccmd *cobra.Command, args []string) {

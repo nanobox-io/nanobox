@@ -1,6 +1,6 @@
 package console
 
-import(
+import (
 	"fmt"
 	"io"
 	"os"
@@ -12,10 +12,7 @@ import(
 	"github.com/nanobox-io/golang-docker-client"
 
 	"github.com/nanobox-io/nanobox/models"
-
 )
-
-
 
 type ConsoleConfig struct {
 	Command string
@@ -26,7 +23,7 @@ type ConsoleConfig struct {
 }
 
 func Run(id string, consoleConfig ConsoleConfig) error {
-	
+
 	// set the default shell
 	if consoleConfig.Shell == "" {
 		consoleConfig.Shell = "bash"
@@ -93,7 +90,7 @@ func Run(id string, consoleConfig ConsoleConfig) error {
 	go io.Copy(resp.Conn, os.Stdin)
 	io.Copy(os.Stdout, resp.Reader)
 
-	return nil	
+	return nil
 }
 
 // monitor ...
