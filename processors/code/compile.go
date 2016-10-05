@@ -2,6 +2,7 @@ package code
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
@@ -51,7 +52,9 @@ func Compile(envModel *models.Env) error {
 		return err
 	}
 
-	return nil
+	// update the compiled flag
+	envModel.LastCompile = time.Now()
+	return envModel.Save()
 }
 
 // prepareCompileEnvironment runs hooks to prepare the build environment
