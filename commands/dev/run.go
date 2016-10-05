@@ -15,7 +15,7 @@ var RunCmd = &cobra.Command{
 	Use:    "run",
 	Short:  "Opens an dev container and starts all the code commands init.",
 	Long:   ``,
-	PreRun: steps.Run("start", "build", "dev start", "dev deploy"),
+	PreRun: steps.Run("start", "build", "compile", "dev start", "dev deploy"),
 	Run:    runFn,
 }
 

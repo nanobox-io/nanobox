@@ -19,7 +19,7 @@ Deploys a build package into your sim platform and
 starts all services. This is used to simulate a full
 deploy locally, before deploying into production.
 		`,
-	PreRun: steps.Run("start", "build", "sim start"),
+	PreRun: steps.Run("start", "build", "compile", "sim start"),
 	Run:    deployFn,
 }
 

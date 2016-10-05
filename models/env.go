@@ -19,6 +19,7 @@ type Env struct {
 	UserBoxfile  string
 	BuiltID      string
 	DeployedID   string
+	Compiled     bool
 }
 
 // Link ...

@@ -51,7 +51,9 @@ func Compile(envModel *models.Env) error {
 		return err
 	}
 
-	return nil
+	// update the compiled flag
+	envModel.Compiled = true
+	return envModel.Save()
 }
 
 // prepareCompileEnvironment runs hooks to prepare the build environment

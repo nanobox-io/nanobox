@@ -26,8 +26,18 @@ deployed into dev, sim, or production environments.
 
 )
 
+func init() {
+	steps.Build("compile", compileComplete, compileFn)
+}
+
+
 // compileFn ...
 func compileFn(ccmd *cobra.Command, args []string) {
 	env, _ := models.FindEnvByID(config.EnvID())
 	display.CommandErr(processors.Compile(env))
+}
+
+func compileComplete() bool {
+	env, _ := models.FindEnvByID(config.EnvID())
+	return env.Compiled
 }
