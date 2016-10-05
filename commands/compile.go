@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"time"
+	
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/commands/steps"
@@ -39,5 +41,6 @@ func compileFn(ccmd *cobra.Command, args []string) {
 
 func compileComplete() bool {
 	env, _ := models.FindEnvByID(config.EnvID())
-	return env.Compiled
+	// if the last compile has been set and it is after the last build
+	return !env.LastCompile.Equal(time.Time{}) && env.LastCompile.After(env.LastBuild)
 }

@@ -17,7 +17,7 @@ var (
 		Use:    "deploy",
 		Short:  "Deploys your generated build package to a production app.",
 		Long:   ``,
-		PreRun: steps.Run("start", "build", "login"),
+		PreRun: steps.Run("start", "build", "compile", "login"),
 		Run:    deployFn,
 	}
 
