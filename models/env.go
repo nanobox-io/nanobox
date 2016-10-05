@@ -2,6 +2,7 @@ package models
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/nanobox-io/nanobox/util/config"
 )
@@ -19,6 +20,8 @@ type Env struct {
 	UserBoxfile  string
 	BuiltID      string
 	DeployedID   string
+	LastBuild    time.Time
+	LastCompile  time.Time
 }
 
 // Link ...
