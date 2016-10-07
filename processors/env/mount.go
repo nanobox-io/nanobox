@@ -2,6 +2,7 @@ package env
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/nanobox-io/nanobox/models"
 	netfs_processors "github.com/nanobox-io/nanobox/processors/env/netfs"
@@ -19,7 +20,7 @@ func Mount(env *models.Env) error {
 	// mount the engine if it's a local directory
 	if config.EngineDir() != "" {
 		src := config.EngineDir()
-		dst := fmt.Sprintf("%s%s/engine", provider.HostShareDir(), env.ID)
+		dst := filepath.Join(provider.HostShareDir(), env.ID, "engine")
 
 		// first export the env on the workstation
 		if err := addShare(src, dst); err != nil {
@@ -36,7 +37,7 @@ func Mount(env *models.Env) error {
 
 	// mount the app src
 	src := env.Directory
-	dst := fmt.Sprintf("%s%s/code", provider.HostShareDir(), env.ID)
+	dst := filepath.Join(provider.HostShareDir(), env.ID, "code")
 
 	// first export the env on the workstation
 	if err := addShare(src, dst); err != nil {
