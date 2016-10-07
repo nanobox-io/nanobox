@@ -21,7 +21,7 @@ func TestMain(m *testing.M) {
   os.Exit(exitCode)
 }
 
-func TestNetfs(t *testing.T) {
+func TestShare(t *testing.T) {
   
   path := config.LocalDir()
   if share.Exists(path) {
