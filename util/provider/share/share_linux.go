@@ -3,6 +3,7 @@ package share
 import (
 	"bufio"
 	"fmt"
+	"flag"
 	"io/ioutil"
 	"os"
 	"os/exec"
