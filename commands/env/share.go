@@ -5,47 +5,47 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox/processors/env/netfs"
+	"github.com/nanobox-io/nanobox/processors/env/share"
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
 var (
 
-	// NetfsCmd ...
-	NetfsCmd = &cobra.Command{
+	// ShareCmd ...
+	ShareCmd = &cobra.Command{
 		Hidden: true,
-		Use:    "netfs",
-		Short:  "Add or remove netfs directories.",
+		Use:    "share",
+		Short:  "Add or remove share directories.",
 		Long:   ``,
 	}
 
-	// NetfsAddCmd ...
-	NetfsAddCmd = &cobra.Command{
+	// ShareAddCmd ...
+	ShareAddCmd = &cobra.Command{
 		Hidden: true,
 		Use:    "add",
-		Short:  "Add a netfs export.",
+		Short:  "Add a share export.",
 		Long:   ``,
-		Run:    netfsAddFn,
+		Run:    shareAddFn,
 	}
 
-	// NetfsRmCmd ...
-	NetfsRmCmd = &cobra.Command{
+	// ShareRmCmd ...
+	ShareRmCmd = &cobra.Command{
 		Hidden: true,
 		Use:    "rm",
-		Short:  "Remove a netfs export.",
+		Short:  "Remove a share export.",
 		Long:   ``,
-		Run:    netfsRmFn,
+		Run:    shareRmFn,
 	}
 )
 
 //
 func init() {
-	NetfsCmd.AddCommand(NetfsAddCmd)
-	NetfsCmd.AddCommand(NetfsRmCmd)
+	ShareCmd.AddCommand(ShareAddCmd)
+	ShareCmd.AddCommand(ShareRmCmd)
 }
 
-// netfsAddFn will run the netfs processor for adding a netfs export
-func netfsAddFn(ccmd *cobra.Command, args []string) {
+// shareAddFn will run the share processor for adding a share export
+func shareAddFn(ccmd *cobra.Command, args []string) {
 
 	// validate we have args required to set the meta we'll need; if we don't have
 	// the required args this will return with instructions
@@ -54,18 +54,18 @@ func netfsAddFn(ccmd *cobra.Command, args []string) {
 Wrong number of arguments (expecting 1 got %v). Run the command again with the
 path of the exports entry you would like to add:
 
-ex: nanobox env netfs add <path>
+ex: nanobox env share add <path>
 
 `, len(args))
 
 		return
 	}
 
-	display.CommandErr(netfs.Add(args[0]))
+	display.CommandErr(share.Add(args[0]))
 }
 
-// netfsRmFn will run the netfs processor for removing a netfs export
-func netfsRmFn(ccmd *cobra.Command, args []string) {
+// shareRmFn will run the share processor for removing a share export
+func shareRmFn(ccmd *cobra.Command, args []string) {
 
 	// validate we have args required to set the meta we'll need; if we don't have
 	// the required args this will return with instructions
@@ -74,12 +74,12 @@ func netfsRmFn(ccmd *cobra.Command, args []string) {
 Wrong number of arguments (expecting 1 got %v). Run the command again with the
 path of the exports entry you would like to remove:
 
-ex: nanobox env netfs rm <path>
+ex: nanobox env share rm <path>
 
 `, len(args))
 
 		return
 	}
 
-	display.CommandErr(netfs.Remove(args[0]))
+	display.CommandErr(share.Remove(args[0]))
 }

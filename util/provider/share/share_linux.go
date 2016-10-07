@@ -213,6 +213,11 @@ func removeEntry(entry string) error {
 
 // reloadServer reloads the nfs server with the new export configuration
 func reloadServer() error {
+	// dont reload the server when testing
+	if flag.Lookup("test.v") != nil {
+      return nil
+  }
+	
 	// reload nfs server
 	//  TODO: provide a clear error message for a direction to fix
 	cmd := exec.Command("exportfs", "-ra")

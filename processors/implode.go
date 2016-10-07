@@ -38,7 +38,7 @@ func Implode() error {
 	envModels, _ := models.AllEnvs()
 	for _, envModel := range envModels {
 		// unmount (and remove the share for the env)
-		if err := env.Unmount(envModel, false); err != nil {
+		if err := env.Unmount(envModel); err != nil {
 			fmt.Printf("unable to remove mounts: %s", err)
 		}
 

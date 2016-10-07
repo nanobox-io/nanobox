@@ -7,6 +7,7 @@ import(
 	"strings"
 	"os/exec"
 
+	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/processors/env/share"
 )
@@ -43,6 +44,7 @@ func (machine DockerMachine) AddMount(local, host string) error {
 	switch config.Viper().GetString("mount-type") {
 
 	case "netfs":
+
 		// add netfs share
 		// here we use the processor so we can do privilage exec
 		if err := share.Add(local); err != nil  {
@@ -75,9 +77,14 @@ func (machine DockerMachine) RemoveMount(local, host string) error {
 		return nil
 	}
 
-	// unmount all mounts as if they are native
+	// all mounts are removed as if they are native
 	if err := machine.removeNativeMount(local, host); err != nil {
 		return err
+	}
+
+	// if we are supposed to keep the shares return here
+	if registry.GetBool("keep-share") {
+		return nil
 	}
 
 	// remove any netfs shares
