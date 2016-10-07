@@ -34,5 +34,5 @@ func (machine DockerMachine) addNetfsMount(local, host string) error {
 	}
 
 	return nil
-	
+
 }

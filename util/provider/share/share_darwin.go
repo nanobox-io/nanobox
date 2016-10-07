@@ -1,9 +1,9 @@
 package share
 
 import (
-	"fmt"
-	"flag"
 	"bytes"
+	"flag"
+	"fmt"
 	"io/ioutil"
 	"os/exec"
 	"strings"
@@ -23,7 +23,7 @@ func Exists(path string) bool {
 		return false
 	}
 	// check to see if the path is in the file
-	return bytes.Contains(b, []byte(path + " "))
+	return bytes.Contains(b, []byte(path+" "))
 }
 
 func Add(path string) error {
@@ -55,9 +55,9 @@ func Add(path string) error {
 		}
 	}
 	if !found {
-	  lines = append(lines, fmt.Sprintf("%s %s", path, lineCheck))
+		lines = append(lines, fmt.Sprintf("%s %s", path, lineCheck))
 	}
-	
+
 	// save
 	if err := ioutil.WriteFile(EXPORTSFILE, []byte(strings.Join(lines, "\n")), 0644); err != nil {
 		return err
@@ -97,12 +97,12 @@ func Remove(path string) error {
 			newLines = append(newLines, line)
 		}
 	}
-	
+
 	// save
 	if err := ioutil.WriteFile(EXPORTSFILE, []byte(strings.Join(newLines, "\n")), 0644); err != nil {
 		return err
 	}
-	
+
 	return reloadServer()
 }
 
@@ -111,23 +111,23 @@ func reloadServer() error {
 
 	// dont reload the server when testing
 	if flag.Lookup("test.v") != nil {
-      return nil
-  }
+		return nil
+	}
 	// TODO: make sure nfsd is enabled
 
 	// check the exports to make sure a reload will be successful; TODO: provide a
 	// clear message for a direction to fix
 	cmd := exec.Command("nfsd", "checkexports")
 	if b, err := cmd.CombinedOutput(); err != nil {
-	       lumber.Debug("checkexports: %s", b)
-	       return fmt.Errorf("checkexports: %s %s", b, err.Error())
+		lumber.Debug("checkexports: %s", b)
+		return fmt.Errorf("checkexports: %s %s", b, err.Error())
 	}
 
 	// update exports; TODO: provide a clear error message for a direction to fix
 	cmd = exec.Command("nfsd", "update")
 	if b, err := cmd.CombinedOutput(); err != nil {
-	       lumber.Debug("update: %s", b)
-	       return fmt.Errorf("update: %s %s", b, err.Error())
+		lumber.Debug("update: %s", b)
+		return fmt.Errorf("update: %s %s", b, err.Error())
 	}
 
 	return nil

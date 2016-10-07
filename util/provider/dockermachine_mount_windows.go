@@ -1,17 +1,16 @@
 package provider
 
-import(
+import (
 	"fmt"
 	"os"
-	"time"
 	"strings"
+	"time"
 
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 )
-
 
 // add mounts using cifs for windows development
 func (machine DockerMachine) addNetfsMount(local, host string) error {

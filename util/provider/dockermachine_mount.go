@@ -1,15 +1,15 @@
 package provider
 
-import(
+import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	"strings"
 	"os/exec"
+	"strings"
 
 	"github.com/nanobox-io/nanobox/commands/registry"
-	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/processors/env/share"
+	"github.com/nanobox-io/nanobox/util/config"
 )
 
 // HasMount checks to see if the mount exists in the vm
@@ -47,7 +47,7 @@ func (machine DockerMachine) AddMount(local, host string) error {
 
 		// add netfs share
 		// here we use the processor so we can do privilage exec
-		if err := share.Add(local); err != nil  {
+		if err := share.Add(local); err != nil {
 			return err
 		}
 		// add netfs mount
@@ -56,7 +56,7 @@ func (machine DockerMachine) AddMount(local, host string) error {
 		}
 
 	default:
-		
+
 		// add share
 		if err := machine.addShare(local, host); err != nil {
 			return err
@@ -99,8 +99,6 @@ func (machine DockerMachine) RemoveMount(local, host string) error {
 	return nil
 }
 
-
-
 // hasShare checks to see if the share exists
 func (machine DockerMachine) hasShare(local, host string) bool {
 	h := sha256.New()
@@ -135,7 +133,6 @@ func (machine DockerMachine) addShare(local, host string) error {
 	h.Write([]byte(local))
 	h.Write([]byte(host))
 	name := hex.EncodeToString(h.Sum(nil))
-
 
 	cmd := []string{
 		vboxManageCmd,
@@ -191,10 +188,8 @@ func (machine DockerMachine) removeShare(local, host string) error {
 
 	// todo: check output for failures
 
-
 	return nil
 }
-
 
 func (machine DockerMachine) addNativeMount(local, host string) error {
 	h := sha256.New()

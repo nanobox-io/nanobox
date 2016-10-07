@@ -20,7 +20,6 @@ func Mount(env *models.Env) error {
 		src := config.EngineDir()
 		dst := filepath.Join(provider.HostShareDir(), env.ID, "engine")
 
-
 		// first export the env on the workstation
 		if err := provider.AddMount(src, dst); err != nil {
 			display.ErrorTask()

@@ -215,9 +215,9 @@ func removeEntry(entry string) error {
 func reloadServer() error {
 	// dont reload the server when testing
 	if flag.Lookup("test.v") != nil {
-      return nil
-  }
-	
+		return nil
+	}
+
 	// reload nfs server
 	//  TODO: provide a clear error message for a direction to fix
 	cmd := exec.Command("exportfs", "-ra")

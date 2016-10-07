@@ -51,7 +51,6 @@ func Unmount(env *models.Env) error {
 	return nil
 }
 
-
 // mountsInUse returns true if any of the env's apps are running
 func mountsInUse(env *models.Env) bool {
 	devApp, _ := models.FindAppBySlug(env.ID, "dev")
