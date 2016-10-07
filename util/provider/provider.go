@@ -291,38 +291,6 @@ func RemoveNat(host, container string) error {
 	return p.RemoveNat(host, container)
 }
 
-// func HasShare(local, host string) bool {
-
-// 	p, err := fetchProvider()
-// 	if err != nil {
-// 		return false
-// 	}
-
-// 	return p.HasShare(local, host)
-// }
-
-// // AddShare ...
-// func AddShare(local, host string) error {
-
-// 	p, err := fetchProvider()
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	return p.AddShare(local, host)
-// }
-
-// // RemoveShare ...
-// func RemoveShare(local, host string) error {
-
-// 	p, err := fetchProvider()
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	return p.RemoveShare(local, host)
-// }
-
 // HasMount ...
 func HasMount(path string) bool {
 
