@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/model"
 
 	"github.com/nanobox-io/nanobox/util/provider/share"
 )
@@ -14,10 +15,18 @@ import (
 func TestMain(m *testing.M) {
 	// dont modify the actual exports
 	// now we shouldnt need root :)
+	provider := models.Provider{
+		HostIP: "192.168.1.2",
+		MountIP: "192.168.1.4",
+	}
+
+	provider.Save()
+
 	exec.Command("touch", "/tmp/exports").Run()
 	share.EXPORTSFILE = "/tmp/exports"
 	exitCode := m.Run()
-	// os.Remove("/tmp/exports")
+	os.Remove("/tmp/exports")
+	provider.Destroy()
 	os.Exit(exitCode)
 }
 
