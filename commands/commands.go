@@ -95,4 +95,5 @@ func init() {
 	NanoboxCmd.AddCommand(DestroyCmd)
 	NanoboxCmd.AddCommand(StartCmd)
 	NanoboxCmd.AddCommand(StopCmd)
+	NanoboxCmd.AddCommand(UpdateCmd)
 }
