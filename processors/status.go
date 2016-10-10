@@ -15,7 +15,6 @@ func Status() error {
 	nameLength := longestName()
 	pathLength := longestPath()
 
-	// Status         : Running
 	fmt.Println()
 	fmtString := fmt.Sprintf("%%-%ds : %%-7s : %%%ds\n", nameLength+6, pathLength)
 	header := fmt.Sprintf(fmtString, "Status", "Running", "directory")
