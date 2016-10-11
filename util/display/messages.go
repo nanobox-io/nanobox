@@ -71,6 +71,16 @@ func InfoDevContainer(ip string) {
 
 `, ip))
 }
+func InfoDevRunContainer(ip string) {
+  os.Stderr.WriteString(fmt.Sprintf(`
+--------------------------------------------------------------------------------
++ Running your start commands in a development environment
++ The environment can be reached at >> %s
++ (ctrl+c to stop)
+--------------------------------------------------------------------------------
+
+`, ip))
+}
 
 func InfoSimDeploy(ip string) {
 	os.Stderr.WriteString(fmt.Sprintf(`

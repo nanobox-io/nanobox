@@ -17,8 +17,8 @@ import (
 // Run ...
 func Run(appModel *models.App) error {
 
-	fmt.Printf("\nRunning start commands (ctrl+c to stop)\n")
-	fmt.Printf("---------------------------------------\n")
+
+	display.InfoDevRunContainer(appModel.GlobalIPs["env"])
 
 	// load the start commands from the boxfile
 	starts := loadStarts(appModel)
