@@ -26,6 +26,10 @@ func pullBuildImage() (string, error) {
 	// extract the build image from the boxfile
 	buildImage := buildImage()
 
+	if docker.ImageExists(buildImage) {
+		return buildImage, nil
+	}
+
 	display.StartTask("Pulling %s image", buildImage)
 	defer display.StopTask()
 

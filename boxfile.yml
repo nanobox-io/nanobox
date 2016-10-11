@@ -2,4 +2,6 @@ code.build:
   engine: "golang"
   config:
     package: "github.com/nanobox-io/nanobox"
+  dev_packages:
+    - py27-awscli
     

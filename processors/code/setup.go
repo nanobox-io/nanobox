@@ -37,15 +37,18 @@ func Setup(appModel *models.App, componentModel *models.Component, warehouseConf
 		// Prefix: componentModel.Image,
 	}
 
-	// pull the component image
-	display.StartTask("Pulling %s image", componentModel.Image)
-	if _, err := docker.ImagePull(componentModel.Image, dockerPercent); err != nil {
-		lumber.Error("component:Setup:docker.ImagePull(%s, nil): %s", componentModel.Image, err.Error())
-		display.ErrorTask()
-		return fmt.Errorf("failed to pull docker image (%s): %s", componentModel.Image, err.Error())
+
+	if !docker.ImageExists(componentModel.Image) {
+		// pull the component image
+		display.StartTask("Pulling %s image", componentModel.Image)
+		if _, err := docker.ImagePull(componentModel.Image, dockerPercent); err != nil {
+			lumber.Error("component:Setup:docker.ImagePull(%s, nil): %s", componentModel.Image, err.Error())
+			display.ErrorTask()
+			return fmt.Errorf("failed to pull docker image (%s): %s", componentModel.Image, err.Error())
+		}
+		display.StopTask()
+	
 	}
-	display.StopTask()
-	//
 
 	display.StartTask("Starting docker container")
 	if err := reserveIps(componentModel); err != nil {

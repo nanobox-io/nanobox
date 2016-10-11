@@ -199,6 +199,10 @@ func detachNetwork(appModel *models.App, containerIP string) error {
 // downloadImage downloads the dev docker image
 func downloadImage(image string) error {
 
+	if docker.ImageExists(image) {
+		return nil
+	}
+
 	display.StartTask("Pulling %s image", image)
 	defer display.StopTask()
 
