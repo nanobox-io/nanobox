@@ -39,6 +39,8 @@ var (
 			// alert the user if an update is needed
 			update.Check()
 
+			// TODO: look into global messaging
+
 			registry.Set("internal", internalCommand)
 			registry.Set("debug", debugMode)
 

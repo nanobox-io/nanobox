@@ -2,7 +2,7 @@
 set -e
 
 # try and use the correct MD5 lib (depending on user OS darwin/linux)
-MD5=$(which md5 || echo "$(which md5sum) | cut -f 1" )
+MD5=$(which md5 || echo "$(which md5sum) --tag" )
 
 echo "Generating md5s..."
 
