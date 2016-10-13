@@ -7,6 +7,8 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/jcelliott/lumber"
+
 	"github.com/nanobox-io/nanobox/util/config"
 )
 
@@ -17,14 +19,16 @@ func Exists(path string) bool {
 	// windows machine. This can be run as a non-administrator.
 	cmd := exec.Command("net", "share")
 	output, err := cmd.CombinedOutput()
-
+	lumber.Debug("net share output: %s", output)
 	// if there was an error, we'll short-circuit and return false
 	if err != nil {
+		lumber.Debug("err from net share: %s", err)
 		return false
 	}
 
 	// return true if we find the path in the output
 	if bytes.Contains(output, []byte(path)) {
+		lumber.Debug("output contains path: %s", path)
 		return true
 	}
 
@@ -48,9 +52,10 @@ func Add(path string) error {
 		fmt.Sprintf("/GRANT:%s,FULL", user),
 	}
 
+	lumber.Debug("share add: %v", cmd)
 	process := exec.Command(cmd[0], cmd[1:]...)
 	output, err := process.CombinedOutput()
-
+	lumber.Debug("share add output: %s", output)
 	// if there was an error, we'll short-circuit and return false
 	if err != nil {
 		return err

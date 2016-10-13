@@ -7,6 +7,8 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/jcelliott/lumber"
+
 	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/processors/env/share"
 	"github.com/nanobox-io/nanobox/util/config"
@@ -38,6 +40,7 @@ func (machine DockerMachine) AddMount(local, host string) error {
 
 	// stop early if already mounted
 	if machine.HasMount(host) {
+		lumber.Info("mount exists for %s", host)
 		return nil
 	}
 
@@ -47,10 +50,13 @@ func (machine DockerMachine) AddMount(local, host string) error {
 
 		// add netfs share
 		// here we use the processor so we can do privilage exec
+		lumber.Info("adding share in netfs for %s", local)
 		if err := share.Add(local); err != nil {
 			return err
 		}
 		// add netfs mount
+
+		lumber.Info("adding mount in for netfs %s -> %s", local, host)
 		if err := machine.addNetfsMount(local, host); err != nil {
 			return err
 		}
@@ -58,11 +64,13 @@ func (machine DockerMachine) AddMount(local, host string) error {
 	default:
 
 		// add share
+		lumber.Info("adding share for native %s", local)
 		if err := machine.addShare(local, host); err != nil {
 			return err
 		}
 
 		// add mount
+		lumber.Info("adding mount for  native %s -> %s", local, host)
 		if err := machine.addNativeMount(local, host); err != nil {
 			return err
 		}
@@ -146,6 +154,7 @@ func (machine DockerMachine) addShare(local, host string) error {
 		"--transient",
 	}
 
+	lumber.Info("add share native cmd: %v", cmd)
 	process := exec.Command(cmd[0], cmd[1:]...)
 	b, err := process.CombinedOutput()
 	if err != nil {
@@ -198,6 +207,7 @@ func (machine DockerMachine) addNativeMount(local, host string) error {
 	name := hex.EncodeToString(h.Sum(nil))
 
 	// create folder
+
 	cmd := []string{
 		dockerMachineCmd,
 		"ssh",
@@ -208,8 +218,10 @@ func (machine DockerMachine) addNativeMount(local, host string) error {
 		host,
 	}
 
+	lumber.Info("add mount native cmd (mkdir): %v", cmd)
 	process := exec.Command(cmd[0], cmd[1:]...)
 	b, err := process.CombinedOutput()
+	lumber.Info("mkdir data: %s", b)
 	if err != nil {
 		return fmt.Errorf("%s: %s", b, err)
 	}
@@ -229,8 +241,10 @@ func (machine DockerMachine) addNativeMount(local, host string) error {
 		host,
 	}
 
+	lumber.Info("add mount native cmd: %v", cmd)
 	process = exec.Command(cmd[0], cmd[1:]...)
 	b, err = process.CombinedOutput()
+	lumber.Info("mount data: %s", b)
 	if err != nil {
 		return fmt.Errorf("%s: %s", b, err)
 	}
