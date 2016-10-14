@@ -50,9 +50,7 @@ func Implode() error {
 	}
 
 	// purge the installation
-	if err := purgeConfiguration(); err != nil {
-		return fmt.Errorf("failed to purge nanobox configuration: %s", err.Error())
-	}
+	purgeConfiguration()
 
 	return nil
 }
