@@ -35,21 +35,21 @@ func (machine DockerMachine) addNetfsMount(local, host string) error {
 	// ensure the destination directory exists
 	cmd := []string{"sudo", "/bin/mkdir", "-p", host}
 	if b, err := Run(cmd); err != nil {
-		lumber.Debug("output: %s", b)
+		lumber.Debug("mkdir output: %s", b)
 		return fmt.Errorf("mkdir:%s", err.Error())
 	}
 
 	// ensure cifs/samba utilities are installed
-	cmd = []string{"bash", "-c", setupCifsUtilsScript()}
+	cmd = []string{"sh", "-c", setupCifsUtilsScript()}
 	if b, err := Run(cmd); err != nil {
-		lumber.Debug("output: %s", b)
-		return fmt.Errorf("mkdir:%s", err.Error())
+		lumber.Debug("cifs output: %s", b)
+		return fmt.Errorf("cifs:%s", err.Error())
 	}
 
 	// mount!
 	// mount -t cifs -o username=USER,password=PASSWORD //192.168.99.1/APP /PATH
 	source := fmt.Sprintf("//192.168.99.1/nanobox-%s", appID)
-	opts := fmt.Sprintf("username=%s,password=%s,uid=1000,gid=1000", user, pass)
+	opts := fmt.Sprintf("user='%s',password='%s',uid=1000,gid=1000", user, pass)
 	cmd = []string{
 		"sudo",
 		"/bin/mount",
@@ -60,8 +60,9 @@ func (machine DockerMachine) addNetfsMount(local, host string) error {
 		source,
 		host,
 	}
+	lumber.Debug("cifs mount cmd: %v", cmd)
 	if b, err := Run(cmd); err != nil {
-		lumber.Debug("output: %s", b)
+		lumber.Debug("mount output: %s", b)
 		return fmt.Errorf("mount: output: %s err:%s", b, err.Error())
 	}
 
@@ -72,13 +73,11 @@ func (machine DockerMachine) addNetfsMount(local, host string) error {
 func setupCifsUtilsScript() string {
 	script := `
 		if [ ! -f /sbin/mount.cifs ]; then
-			wget -O /mnt/sda1/tmp/tce/optional/samba-libs.tcz 
-				http://repo.tinycorelinux.net/7.x/x86_64/tcz/samba-libs.tcz &&
-			wget -O /mnt/sda1/tmp/tce/optional/cifs-utils.tcz 
-				http://repo.tinycorelinux.net/7.x/x86_64/tcz/cifs-utils.tcz &&
+			wget -O /mnt/sda1/tmp/tce/optional/samba-libs.tcz http://repo.tinycorelinux.net/7.x/x86_64/tcz/samba-libs.tcz &&
+			wget -O /mnt/sda1/tmp/tce/optional/cifs-utils.tcz http://repo.tinycorelinux.net/7.x/x86_64/tcz/cifs-utils.tcz &&
 
 			tce-load -i samba-libs &&
-			tce-load -i cifs-utils
+			tce-load -i cifs-utils;
 		fi
 	`
 

@@ -2,7 +2,6 @@ package env
 
 import (
 	"fmt"
-	"path/filepath"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/config"
@@ -18,7 +17,7 @@ func Mount(env *models.Env) error {
 	// mount the engine if it's a local directory
 	if config.EngineDir() != "" {
 		src := config.EngineDir()
-		dst := filepath.Join(provider.HostShareDir(), env.ID, "engine")
+		dst := fmt.Sprintf("%s%s/engine", provider.HostShareDir(), env.ID)
 
 		// first export the env on the workstation
 		if err := provider.AddMount(src, dst); err != nil {
@@ -29,7 +28,7 @@ func Mount(env *models.Env) error {
 
 	// mount the app src
 	src := env.Directory
-	dst := filepath.Join(provider.HostShareDir(), env.ID, "code")
+	dst := fmt.Sprintf("%s%s/code", provider.HostShareDir(), env.ID)
 
 	// first export the env on the workstation
 	if err := provider.AddMount(src, dst); err != nil {

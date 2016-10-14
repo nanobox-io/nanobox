@@ -43,7 +43,7 @@ func reExecPrivilegedAdd(path string) error {
 	// call 'dev share add' with the original path and args; config.NanoboxPath() will be the
 	// currently executing program, so this command will ultimately lead right back
 	// here
-	cmd := fmt.Sprintf("%s env share add %s", config.NanoboxPath(), path)
+	cmd := fmt.Sprintf("%s env share add \"%s\"", config.NanoboxPath(), path)
 
 	// if the escalated subprocess fails, we need to return error to stop the process
 	if err := util.PrivilegeExec(cmd); err != nil {
