@@ -55,7 +55,7 @@ func parseConfig() error {
 
 	// parse config file; we attempt to parse the config.yml and pull out any values
 	// that the user has provided (or one is generated with defaults; see ./files.go)
-	config.SetConfigFile(configFile())
+	config.SetConfigFile(ConfigFile(nil))
 
 	// merge with defaults
 	if err := config.MergeInConfig(); err != nil {
