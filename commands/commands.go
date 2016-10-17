@@ -39,6 +39,8 @@ var (
 			// alert the user if an update is needed
 			update.Check()
 
+			// TODO: look into global messaging
+
 			registry.Set("internal", internalCommand)
 			registry.Set("debug", debugMode)
 
@@ -95,5 +97,6 @@ func init() {
 	NanoboxCmd.AddCommand(DestroyCmd)
 	NanoboxCmd.AddCommand(StartCmd)
 	NanoboxCmd.AddCommand(StopCmd)
+	NanoboxCmd.AddCommand(UpdateCmd)
 	NanoboxCmd.AddCommand(versionCmd)
 }

@@ -8,8 +8,8 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/app"
 	"github.com/nanobox-io/nanobox/processors/provider"
-	util_provider "github.com/nanobox-io/nanobox/util/provider"
 	"github.com/nanobox-io/nanobox/util/locker"
+	util_provider "github.com/nanobox-io/nanobox/util/provider"
 )
 
 // Destroy brings down the environment setup
@@ -38,8 +38,8 @@ func Destroy(env *models.Env) error {
 		}
 	}
 
-	// unmount the environemtn
-	if err := Unmount(env, false); err != nil {
+	// unmount the environment
+	if err := Unmount(env); err != nil {
 		return fmt.Errorf("failed to unmount env: %s", err)
 	}
 

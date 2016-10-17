@@ -86,10 +86,10 @@ func (native Native) Implode() error {
 
 	for _, part := range parts {
 		if strings.Contains(part, "nanobox_") {
-			containers = append(containers, strings.Fields(part)[0]) 
+			containers = append(containers, strings.Fields(part)[0])
 		}
 	}
-	
+
 	cmdParts := append([]string{"rm", "-f"}, containers...)
 	cmd = exec.Command("docker", cmdParts...)
 	cmd.Stdout = display.NewStreamer("  ")
@@ -166,7 +166,6 @@ func (native Native) HostIP() (string, error) {
 func (native Native) ReservedIPs() (rtn []string) {
 	return []string{}
 }
-
 
 // DockerEnv docker env should already be configured if docker is installed
 func (native Native) DockerEnv() error {
@@ -278,7 +277,7 @@ func (native Native) Run(command []string) ([]byte, error) {
 	return cmd.CombinedOutput()
 }
 
-// 
+//
 func (native Native) RemoveEnvDir(id string) error {
 	// TODO: figure this out??
 	return nil

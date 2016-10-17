@@ -5,29 +5,28 @@ import (
 	"strings"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util/provider"
+	// "github.com/nanobox-io/nanobox/util/provider"
 )
 
 // displays status about provider status and running apps
 func Status() error {
 
 	// print the header
-	leftWidth := len(longestName()) + 7
-	margin := strings.Repeat(" ", leftWidth-5)
-	fmt.Printf("\nStatus%s: %s\n", margin, provider.Status())
+	nameLength := longestName()
+	pathLength := longestPath()
 
-	margin = strings.Repeat("-", leftWidth+10)
-	fmt.Printf("%s\n", margin)
+	fmt.Println()
+	fmtString := fmt.Sprintf("%%-%ds : %%-7s : %%%ds\n", nameLength+6, pathLength)
+	header := fmt.Sprintf(fmtString, "Status", "Running", "directory")
+	fmt.Printf(header)
+	fmt.Println(strings.Repeat("-", len(header)))
 
 	envs, _ := models.AllEnvs()
 	for _, env := range envs {
 
-		// calculate a margin
-		margin := strings.Repeat(" ", leftWidth-len(env.Name)-5)
-
 		apps, _ := env.Apps()
 		for _, app := range apps {
-			fmt.Printf("%s (%s)%s: %s\n", env.Name, app.Name, margin, app.Status)
+			fmt.Printf(fmtString, fmt.Sprintf("%s (%s)", env.Name, app.Name), app.Status, env.Directory)
 		}
 	}
 
@@ -38,7 +37,7 @@ func Status() error {
 }
 
 // returns the longest name
-func longestName() string {
+func longestName() int {
 	longest := ""
 
 	envs, _ := models.AllEnvs()
@@ -48,5 +47,19 @@ func longestName() string {
 		}
 	}
 
-	return longest
+	return len(longest)
+}
+
+// returns the longest name
+func longestPath() int {
+	longest := ""
+
+	envs, _ := models.AllEnvs()
+	for _, env := range envs {
+		if len(env.Directory) > len(longest) {
+			longest = env.Name
+		}
+	}
+
+	return len(longest)
 }

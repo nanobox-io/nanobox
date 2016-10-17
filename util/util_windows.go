@@ -84,19 +84,6 @@ func PrivilegeExec(command string) error {
 	return nil
 }
 
-// verify that the terminal is valid and can run nanobox
-func IsValidTerminal() bool {
-	// at this point, only the command prompt will work fully.
-
-	// so far, the only way to determine the command prompt is the
-	// existence of the PROMPT environment variable
-	if os.Getenv("PROMPT") != "" {
-		return true
-	}
-
-	return false
-}
-
 // make sure the command is escaped and prepared to be used in powershell
 func preparePrivilegeCmd(command string) string {
 

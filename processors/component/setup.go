@@ -49,15 +49,17 @@ func Setup(appModel *models.App, componentModel *models.Component) error {
 		// Prefix: componentModel.Image,
 	}
 
-	// pull the component image
-	display.StartTask("Pulling %s image", componentModel.Image)
-	if _, err := docker.ImagePull(componentModel.Image, dockerPercent); err != nil {
-		lumber.Error("component:Setup:docker.ImagePull(%s, nil): %s", componentModel.Image, err.Error())
-		display.ErrorTask()
-		return fmt.Errorf("failed to pull docker image (%s): %s", componentModel.Image, err.Error())
-	}
-	display.StopTask()
+	if !docker.ImageExists(componentModel.Image) {
 
+		// pull the component image
+		display.StartTask("Pulling %s image", componentModel.Image)
+		if _, err := docker.ImagePull(componentModel.Image, dockerPercent); err != nil {
+			lumber.Error("component:Setup:docker.ImagePull(%s, nil): %s", componentModel.Image, err.Error())
+			display.ErrorTask()
+			return fmt.Errorf("failed to pull docker image (%s): %s", componentModel.Image, err.Error())
+		}
+		display.StopTask()
+	}
 	// reserve IPs
 	if err := reserveIPs(appModel, componentModel); err != nil {
 		return fmt.Errorf("failed to reserve IPs for component: %s", err.Error())

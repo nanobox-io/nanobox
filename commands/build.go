@@ -25,7 +25,6 @@ deployed into dev, sim, or production environments.
 		PreRun: steps.Run("start"),
 		Run:    buildFn,
 	}
-
 )
 
 func init() {

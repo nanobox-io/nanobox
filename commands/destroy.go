@@ -6,17 +6,17 @@ import (
 	"github.com/nanobox-io/nanobox/commands/steps"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/env"
-	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 var (
 
 	// DestroyCmd ...
 	DestroyCmd = &cobra.Command{
-		Use:    "destroy",
-		Short:  "Destroys the current project and removes it from Nanobox",
-		Long:   `
+		Use:   "destroy",
+		Short: "Destroys the current project and removes it from Nanobox",
+		Long: `
 Destroys the current project and removes it from Nanobox, destroying
 the filesystem mount, associated dns aliases, and local app data.
 		`,

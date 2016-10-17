@@ -19,12 +19,12 @@ Deploys a build package into your sim platform and
 starts all services. This is used to simulate a full
 deploy locally, before deploying into production.
 		`,
-	PreRun: steps.Run("start", "build", "sim start"),
+	PreRun: steps.Run("start", "build", "compile", "sim start"),
 	Run:    deployFn,
 }
 
 func init() {
-	steps.Build("sim deploy", deployCheck, deployFn)
+	steps.Build("sim deploy", deployComplete, deployFn)
 }
 
 // deployFn ...
@@ -36,7 +36,7 @@ func deployFn(ccmd *cobra.Command, args []string) {
 	display.CommandErr(sim.Deploy(env, app))
 }
 
-func deployCheck() bool {
-	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
+func deployComplete() bool {
+	app, _ := models.FindAppBySlug(config.EnvID(), "sim")
 	return app.DeployedBoxfile != ""
 }

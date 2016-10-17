@@ -7,12 +7,12 @@ import (
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processors/app/dns"
 	"github.com/nanobox-io/nanobox/processors/env"
 	"github.com/nanobox-io/nanobox/processors/provider"
-	util_provider "github.com/nanobox-io/nanobox/util/provider"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/processors/app/dns"
+	util_provider "github.com/nanobox-io/nanobox/util/provider"
 )
 
 // Implode destroys the provider and cleans nanobox off of the system
@@ -38,7 +38,7 @@ func Implode() error {
 	envModels, _ := models.AllEnvs()
 	for _, envModel := range envModels {
 		// unmount (and remove the share for the env)
-		if err := env.Unmount(envModel, false); err != nil {
+		if err := env.Unmount(envModel); err != nil {
 			fmt.Printf("unable to remove mounts: %s", err)
 		}
 
@@ -50,9 +50,7 @@ func Implode() error {
 	}
 
 	// purge the installation
-	if err := purgeConfiguration(); err != nil {
-		return fmt.Errorf("failed to purge nanobox configuration: %s", err.Error())
-	}
+	purgeConfiguration()
 
 	return nil
 }

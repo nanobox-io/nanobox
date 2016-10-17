@@ -32,7 +32,6 @@ func Console(envModel *models.Env, appModel *models.App, devRun bool) error {
 
 	// whatever happens next, ensure we teardown this container
 
-
 	// setup the dev container
 	if err := setup(appModel); err != nil {
 		return fmt.Errorf("failed to setup dev container: %s", err.Error())
@@ -43,13 +42,17 @@ func Console(envModel *models.Env, appModel *models.App, devRun bool) error {
 
 	// if run then start the run commands
 	if devRun {
-		return Run(appModel)
+		if err := Run(appModel); err != nil {
+			return fmt.Errorf("failed to run your start commands: %s", err)
+		}
+	} else {
+		// console into the newly created container
+		if err := runConsole(appModel); err != nil {
+			return fmt.Errorf("failed to console into dev container: %s", err.Error())
+		}
+
 	}
 
-	// console into the newly created container
-	if err := runConsole(appModel); err != nil {
-		return fmt.Errorf("failed to console into dev container: %s", err.Error())
-	}
 
 	if err := teardown(appModel); err != nil {
 		return fmt.Errorf("unable to teardown dev: %s", err)
@@ -199,6 +202,10 @@ func detachNetwork(appModel *models.App, containerIP string) error {
 
 // downloadImage downloads the dev docker image
 func downloadImage(image string) error {
+
+	if docker.ImageExists(image) {
+		return nil
+	}
 
 	display.StartTask("Pulling %s image", image)
 	defer display.StopTask()

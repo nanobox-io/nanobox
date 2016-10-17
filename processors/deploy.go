@@ -47,7 +47,7 @@ func Deploy(envModel *models.Env, deployConfig DeployConfig) error {
 	if err != nil {
 		return fmt.Errorf("unable to generate warehouse config: %s", err.Error())
 	}
-	
+
 	// print the first deploy message if this is the first deploy for the app
 	if warehouseConfig.PreviousBuild == "" {
 		display.FirstDeploy()

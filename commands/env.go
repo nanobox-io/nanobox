@@ -22,5 +22,5 @@ A namespaced collection of hidded subcommands used primarily as share provisioni
 //
 func init() {
 	// hidden subcommands
-	EnvCmd.AddCommand(env.NetfsCmd)
+	EnvCmd.AddCommand(env.ShareCmd)
 }

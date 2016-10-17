@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"time"
+
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/commands/steps"
@@ -23,11 +25,20 @@ deployed into dev, sim, or production environments.
 		PreRun: steps.Run("start", "build"),
 		Run:    compileFn,
 	}
-
 )
+
+func init() {
+	steps.Build("compile", compileComplete, compileFn)
+}
 
 // compileFn ...
 func compileFn(ccmd *cobra.Command, args []string) {
 	env, _ := models.FindEnvByID(config.EnvID())
 	display.CommandErr(processors.Compile(env))
+}
+
+func compileComplete() bool {
+	env, _ := models.FindEnvByID(config.EnvID())
+	// if the last compile has been set and it is after the last build
+	return !env.LastCompile.Equal(time.Time{}) && env.LastCompile.After(env.LastBuild)
 }

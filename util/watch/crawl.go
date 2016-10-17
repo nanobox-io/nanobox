@@ -23,7 +23,7 @@ func newCrawlWatcher(path string) Watcher {
 	return &crawl{
 		path:   path,
 		events: make(chan event, 10),
-		done: make(chan struct{}),
+		done:   make(chan struct{}),
 		files:  map[string]time.Time{},
 	}
 }

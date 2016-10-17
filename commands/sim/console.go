@@ -16,7 +16,7 @@ var ConsoleCmd = &cobra.Command{
 	Use:    "console",
 	Short:  "Opens an interactive console inside your sim platform.",
 	Long:   ``,
-	PreRun: steps.Run("start", "build", "sim start", "sim deploy"),
+	PreRun: steps.Run("start", "build", "compile", "sim start", "sim deploy"),
 	Run:    consoleFn,
 }
 

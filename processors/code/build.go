@@ -2,6 +2,7 @@ package code
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
@@ -43,7 +44,6 @@ func Build(envModel *models.Env) error {
 
 	display.StopTask()
 
-
 	if err := prepareBuildEnvironment(container.ID); err != nil {
 		return err
 	}
@@ -51,7 +51,7 @@ func Build(envModel *models.Env) error {
 	if err := gatherRequirements(envModel, container.ID); err != nil {
 		return err
 	}
-	
+
 	if err := setupBuildMounts(container.ID); err != nil {
 		return err
 	}
@@ -63,6 +63,9 @@ func Build(envModel *models.Env) error {
 	if err := packageBuild(container.ID); err != nil {
 		return err
 	}
+
+	envModel.LastBuild = time.Now()
+	envModel.Save()
 
 	// ensure we stop the container when we're done
 	if err := docker.ContainerRemove(container_generator.BuildName()); err != nil {

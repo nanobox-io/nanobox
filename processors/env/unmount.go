@@ -2,16 +2,16 @@ package env
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/processors/env/netfs"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/provider"
 )
 
 // Unmount unmounts the env shares
-func Unmount(env *models.Env, keepShare bool) error {
+func Unmount(env *models.Env) error {
 	// break early if we're not mounted
 	if !mounted(env) {
 		return nil
@@ -28,77 +28,24 @@ func Unmount(env *models.Env, keepShare bool) error {
 	// unmount the engine if it's a local directory
 	if config.EngineDir() != "" {
 		src := config.EngineDir()
-		dst := fmt.Sprintf("%s%s/engine", provider.HostShareDir(), env.ID)
+		dst := filepath.Join(provider.HostShareDir(), env.ID, "engine")
 
 		// unmount the env on the provider
-		if err := removeMount(src, dst); err != nil {
+		if err := provider.RemoveMount(src, dst); err != nil {
 			display.ErrorTask()
 			return fmt.Errorf("failed to remove engine mount: %s", err.Error())
 		}
 
-		// remove the share
-		if !keepShare {
-			if err := removeShare(src, dst); err != nil {
-				display.ErrorTask()
-				return fmt.Errorf("failed to remove engine share: %s", err.Error())
-			}
-		}
 	}
 
 	// unmount the app src
 	src := env.Directory
-	dst := fmt.Sprintf("%s%s/code", provider.HostShareDir(), env.ID)
+	dst := filepath.Join(provider.HostShareDir(), env.ID, "code")
 
 	// unmount the env on the provider
-	if err := removeMount(src, dst); err != nil {
+	if err := provider.RemoveMount(src, dst); err != nil {
 		display.ErrorTask()
 		return fmt.Errorf("failed to remove code mount: %s", err.Error())
-	}
-
-	// then remove the share from the workstation
-	if !keepShare {
-		if err := removeShare(src, dst); err != nil {
-			display.ErrorTask()
-			return fmt.Errorf("failed to remove code share: %s", err.Error())
-		}
-	}
-
-	return nil
-}
-
-func removeMount(src, dst string) error {
-
-	// short-circuit if the mount doesnt exist
-	if !provider.HasMount(dst) {
-		return nil
-	}
-
-	if err := provider.RemoveMount(src, dst); err != nil {
-		return fmt.Errorf("failed to remove mount: %s", err.Error())
-	}
-
-	return nil
-}
-
-// removeShare will add a filesystem env on the host machine
-func removeShare(src, dst string) error {
-
-	// the mount type is configurable by the user
-	mountType := config.Viper().GetString("mount-type")
-
-	switch mountType {
-
-	case "native":
-		// remove the native mount using the provider
-		if err := provider.RemoveShare(src, dst); err != nil {
-			return fmt.Errorf("failed to remove native mount: %s", err.Error())
-		}
-
-	case "netfs":
-		// remove the netfs mount using its processor
-		if err := netfs.Remove(src); err != nil {
-			return fmt.Errorf("failed to remove netfs share: %s", err.Error())
-		}
 	}
 
 	return nil
@@ -116,7 +63,7 @@ func mounted(env *models.Env) bool {
 
 	// if the engine is mounted, check that
 	if config.EngineDir() != "" {
-		dst := fmt.Sprintf("%s%s/engine", provider.HostShareDir(), env.ID)
+		dst := filepath.Join(provider.HostShareDir(), env.ID, "engine")
 
 		if provider.HasMount(dst) {
 			return true
@@ -124,6 +71,6 @@ func mounted(env *models.Env) bool {
 	}
 
 	// check to see if the code is mounted
-	dst := fmt.Sprintf("%s%s/code", provider.HostShareDir(), env.ID)
+	dst := filepath.Join(provider.HostShareDir(), env.ID, "code")
 	return provider.HasMount(dst)
 }

@@ -29,7 +29,7 @@ var (
 Adds environment variable(s) to your sim app. Multiple key-value
 pairs can be added simultaneously using a comma-delimited list.
 		`,
-		PreRun: steps.Run("start", "build", "sim start", "sim deploy"),
+		PreRun: steps.Run("start", "build", "compile", "sim start", "sim deploy"),
 		Run:    evarAddFn,
 	}
 
@@ -38,7 +38,7 @@ pairs can be added simultaneously using a comma-delimited list.
 		Use:    "ls",
 		Short:  "Lists all environment variables registered in your sim app.",
 		Long:   ``,
-		PreRun: steps.Run("start", "build", "sim start", "sim deploy"),
+		PreRun: steps.Run("start", "build", "compile", "sim start", "sim deploy"),
 		Run:    evarListFn,
 	}
 
@@ -50,7 +50,7 @@ pairs can be added simultaneously using a comma-delimited list.
 Removes environment variable(s) from your sim app. Multiple keys
 can be removed simultaneously using a comma-delimited list.
 		`,
-		PreRun: steps.Run("start", "build", "sim start", "sim deploy"),
+		PreRun: steps.Run("start", "build", "compile", "sim start", "sim deploy"),
 		Run:    evarRemoveFn,
 	}
 )
