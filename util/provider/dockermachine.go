@@ -108,14 +108,34 @@ func (machine DockerMachine) Create() error {
 		return nil
 	}
 
+	// load the configuration for docker-machine
+	conf := config.Viper()
+
+	// load the cpus setting
+	cpus := conf.GetInt("cpus")
+	if cpus < 1 {
+		cpus = 1
+	}
+
+	// load the ram setting
+	ram := conf.GetInt("ram")
+	if ram < 1 {
+		ram = 1
+	}
+
 	cmd := []string{
 		dockerMachineCmd,
 		"create",
 		"--driver",
 		"virtualbox",
+		"--virtualbox-cpu-count",
+		fmt.Sprintf(`%d"`, cpus),
+		"--virtualbox-memory",
+		fmt.Sprintf(`"%d"`, ram * 1024),
 		"nanobox",
 	}
 
+	fmt.Println(cmd)
 	process := exec.Command(cmd[0], cmd[1:]...)
 
 	process.Stdout = display.NewStreamer("info")
