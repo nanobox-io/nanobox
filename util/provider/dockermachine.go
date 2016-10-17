@@ -28,7 +28,7 @@ type DockerMachine struct{}
 
 // init ...
 func init() {
-	Register("docker_machine", DockerMachine{})
+	Register("docker-machine", DockerMachine{})
 }
 
 // Valid ensures docker-machine is installed and available
