@@ -904,7 +904,10 @@ func dockerMachineURL() string {
 
 	switch runtime.GOOS {
 	case "darwin":
-		download = fmt.Sprintf("%s/docker-machine-Darwin-x86_64", download)
+		// temporarily replace the docker-machine version with a custom one until
+		// docker fixes the issues created by Sierra
+		// download = fmt.Sprintf("%s/docker-machine-Darwin-x86_64", download)
+		download = "https://s3.amazonaws.com/tools.nanobox.io/docker-machine/darwin/docker-machine"
 	case "linux":
 		download = fmt.Sprintf("%s/docker-machine-Linux-x86_64", download)
 	case "windows":
