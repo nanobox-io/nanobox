@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"regexp"
+	"path/filepath"
 	"strings"
 )
 
@@ -64,7 +65,7 @@ func PrivilegeExec(command string) error {
 	}
 
 	// we need to cd into the current directory before running our command
-	command = fmt.Sprintf("cd %s & %s", cwd, command)
+	command = fmt.Sprintf("%s & cd %s & %s", filepath.VolumeName(cwd), cwd, command)
 
 	// generate the powershell process
 	process := fmt.Sprintf("& {Start-Process 'cmd' -ArgumentList '/c %s' -Verb RunAs -Wait}", command)

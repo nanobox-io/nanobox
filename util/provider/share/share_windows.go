@@ -89,10 +89,10 @@ func Remove(path string) error {
 		"/delete",
 		"/y",
 	}
-
+	lumber.Debug("share remove: %v", cmd)
 	process := exec.Command(cmd[0], cmd[1:]...)
 	output, err := process.CombinedOutput()
-
+	lumber.Debug("share remove output: %s", output)
 	// if there was an error, we'll short-circuit and return false
 	if err != nil {
 		return err
