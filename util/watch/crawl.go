@@ -80,6 +80,7 @@ func (c *crawl) walkFunc(path string, info os.FileInfo, err error) error {
 			c.events <- event{file: path}
 		}
 
+
 		// update my cached files
 		// the rounding is so we dont detect the change that we make
 		c.files[path] = info.ModTime()
