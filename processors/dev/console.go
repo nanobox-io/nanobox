@@ -245,6 +245,7 @@ func runConsole(appModel *models.App) error {
 func watchFiles(envModel *models.Env, appModel *models.App) {
 	boxfile := boxfile.New([]byte(appModel.DeployedBoxfile))
 	if boxfile.Node("dev").BoolValue("fs_watch") {
+		lumber.Info("watcher starting")
 		go watch.Watch(container_generator.DevName(), envModel.Directory)
 	}
 }

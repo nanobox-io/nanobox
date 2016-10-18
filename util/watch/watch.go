@@ -67,6 +67,10 @@ func Watch(container, path string) error {
 
 	// catch a kill signal
 	for e := range watcher.eventChan() {
+		efile := e.file
+		if runtime.GOOS == "windows" {
+			efile = strings.Replace(efile, "\\", "/", -1)
+		}
 		containerFile := filepath.ToSlash(filepath.Join("/app", strings.Replace(e.file, config.LocalDir(), "", 1)))
 		changeList = append(changeList, containerFile)
 	}
