@@ -2,7 +2,7 @@
 set -e
 
 # try and use the correct MD5 lib (depending on user OS darwin/linux)
-MD5=$(which md5 || echo "$(which md5sum) --tag" )
+MD5=$(which md5 || which md5sum )
 
 echo "Generating md5s..."
 
@@ -10,7 +10,7 @@ echo "Generating md5s..."
 for os in $(ls ./.build/v1); do
   for arch in $(ls ./.build/v1/${os}); do
     for file in $(ls ./.build/v1/${os}/${arch}); do
-      cat "./.build/v1/${os}/${arch}/${file}" | ${MD5} >> "./.build/v1/${os}/${arch}/${file}.md5"
+      cat "./.build/v1/${os}/${arch}/${file}" | ${MD5} | awk '{print $1}' >> "./.build/v1/${os}/${arch}/${file}.md5"
     done
   done
 done
