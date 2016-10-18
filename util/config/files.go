@@ -42,7 +42,7 @@ func ConfigFile(setup *SetupConf) (file string) {
 	file = filepath.ToSlash(filepath.Join(GlobalDir(), "config.yml"))
 
 	// return the filepath if it's already created...
-	if _, err := os.Stat(file); err == nil {
+	if _, err := os.Stat(file); err == nil && setup == nil {
 		return
 	}
 
@@ -59,6 +59,7 @@ func ConfigFile(setup *SetupConf) (file string) {
 
 	//
 	contents := fmt.Sprintf(`
+
 # provider configuration options
 provider: "%s" # the name of the provider to use
 
@@ -70,9 +71,9 @@ mount-type: %s
 # number of cpus you want docker-machine to have access to
 cpus: %d
 
-# number of gigabytes of ram you want docker-machien to use
+# number of gigabytes of ram you want docker-machine to use
 ram: %d
-  `, setup.Provider, setup.Mount, setup.CPUs, setup.RAM)
+`, setup.Provider, setup.Mount, setup.CPUs, setup.RAM)
 
 	// populate the config.yml with reasonable defaults
 	ioutil.WriteFile(file, []byte(contents), 0666)

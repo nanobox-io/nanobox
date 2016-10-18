@@ -13,6 +13,7 @@ import (
 
 func Run() error {
 
+
 	// create a temporary file
 	tmpFileName := filepath.ToSlash(filepath.Join(config.GlobalDir(), "nanobox.tmp"))
 	tmpFile, err := os.OpenFile(tmpFileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
@@ -33,12 +34,14 @@ func Run() error {
 	// close the tmp file
 	tmpFile.Close()
 
-	// replace binary
+	// get the location of the current nanobox
 	path, err := exec.LookPath(name)
 	if err != nil {
 		return err
 	}
 
+
+	// replace binary
 	if err := os.Rename(tmpFileName, path); err != nil {
 		return err
 	}

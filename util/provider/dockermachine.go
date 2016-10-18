@@ -129,13 +129,12 @@ func (machine DockerMachine) Create() error {
 		"--driver",
 		"virtualbox",
 		"--virtualbox-cpu-count",
-		fmt.Sprintf(`%d"`, cpus),
+		fmt.Sprintf("%d", cpus),
 		"--virtualbox-memory",
-		fmt.Sprintf(`"%d"`, ram * 1024),
+		fmt.Sprintf("%d", ram * 1024),
 		"nanobox",
 	}
 
-	fmt.Println(cmd)
 	process := exec.Command(cmd[0], cmd[1:]...)
 
 	process.Stdout = display.NewStreamer("info")
