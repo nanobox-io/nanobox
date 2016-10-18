@@ -1,5 +1,3 @@
-dev:
-  fs_watch: true
 code.build:
   engine: "golang"
   config:
