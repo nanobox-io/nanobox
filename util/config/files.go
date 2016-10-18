@@ -60,8 +60,8 @@ func ConfigFile(setup *SetupConf) (file string) {
 	//
 	contents := fmt.Sprintf(`
 
-# provider configuration options
-provider: "%s" # the name of the provider to use
+# provider configuration options (docker-machine|native)
+provider: "%s" 
 
 # This next section is used by the docker-machine setup only
 

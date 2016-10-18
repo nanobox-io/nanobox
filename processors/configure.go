@@ -53,7 +53,8 @@ How many CPU cores would you like to make available to the VM (1-%d)?
 Answer: `,runtime.NumCPU()), runtime.NumCPU())
 
 	// ask about ram
-	setupConf.RAM = intAsker(`How many GB of RAM would you like to make available to the VM (2-4)?
+	setupConf.RAM = intAsker(`
+How many GB of RAM would you like to make available to the VM (2-4)?
 
 Answer: `, 4)
 
