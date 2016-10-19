@@ -7,15 +7,21 @@ import (
 	"path/filepath"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util/config"
+	// "github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
 func Run() error {
 
+	// get the location of the current nanobox
+	path, err := exec.LookPath(name)
+	if err != nil {
+		return err
+	}
 
 	// create a temporary file
-	tmpFileName := filepath.ToSlash(filepath.Join(config.GlobalDir(), "nanobox.tmp"))
+
+	tmpFileName := filepath.Join(filepath.Dir(path), tmpName)
 	tmpFile, err := os.OpenFile(tmpFileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 	if err != nil {
 		return err
@@ -33,13 +39,6 @@ func Run() error {
 
 	// close the tmp file
 	tmpFile.Close()
-
-	// get the location of the current nanobox
-	path, err := exec.LookPath(name)
-	if err != nil {
-		return err
-	}
-
 
 	// replace binary
 	if err := os.Rename(tmpFileName, path); err != nil {
