@@ -2,6 +2,7 @@ package dev
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/nanobox-io/nanobox-boxfile"
 
 	"github.com/nanobox-io/nanobox/commands/steps"
 	"github.com/nanobox-io/nanobox/models"
@@ -33,5 +34,12 @@ func deployFn(ccmd *cobra.Command, args []string) {
 func deployComplete() bool {
 	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
 	env, _ := app.Env()
-	return app.DeployedBoxfile != "" && env.BuiltBoxfile == app.DeployedBoxfile
+	return app.DeployedBoxfile != "" && env.BuiltBoxfile == app.DeployedBoxfile && buildComplete()
+}
+
+func buildComplete() bool {
+	env, _ := models.FindEnvByID(config.EnvID())
+	box := boxfile.NewFromPath(config.Boxfile())
+
+	return env.UserBoxfile != "" && env.UserBoxfile == box.String()
 }

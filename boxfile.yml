@@ -6,3 +6,5 @@ code.build:
     - py27-awscli
     - coreutils
     
+# data.redis:
+#   image: suckyiamgesadsf
