@@ -50,7 +50,7 @@ func parseConfig() error {
 	// configurable options (via ~.nanobox/config.yml); these defaults are set here
 	// incase for some reason an incomplete or invalid config.yml is parsed, nanobox
 	// will have values to fall back on
-	config.SetDefault("provider", "docker_machine")
+	config.SetDefault("provider", "docker-machine")
 	config.SetDefault("mount-type", "native")
 
 	// parse config file; we attempt to parse the config.yml and pull out any values

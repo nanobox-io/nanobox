@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"os/exec"
 	"strings"
 
@@ -32,6 +33,11 @@ func Add(path string) error {
 	provider, err := models.LoadProvider()
 	if err != nil {
 		return err
+	}
+
+	// make sure the /etc/exports file exists
+	if _, err := os.Stat(EXPORTSFILE); err != nil {
+		ioutil.WriteFile(EXPORTSFILE, []byte(""), 0644)
 	}
 
 	// read exports file
@@ -76,6 +82,7 @@ func Remove(path string) error {
 	existingFile, err := ioutil.ReadFile(EXPORTSFILE)
 	if err != nil {
 		// if the error exists the file didnt exist.
+		lumber.Error("failed to read etc/exports: %s", err)
 		return nil
 	}
 
@@ -116,10 +123,10 @@ func reloadServer() error {
 	}
 
 	// make sure nfsd is running
-	cmd := exec.Command("nfsd", "start")
+	cmd := exec.Command("nfsd", "enable")
 	if b, err := cmd.CombinedOutput(); err != nil {
-		lumber.Debug("start nfs: %s", b)
-		return fmt.Errorf("start nfs: %s %s", b, err.Error())
+		lumber.Debug("enable nfs: %s", b)
+		return fmt.Errorf("enable nfs: %s %s", b, err.Error())
 	}
 
 	// check the exports to make sure a reload will be successful; TODO: provide a
