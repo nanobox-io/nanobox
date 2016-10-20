@@ -53,7 +53,6 @@ func Console(envModel *models.Env, appModel *models.App, devRun bool) error {
 
 	}
 
-
 	if err := teardown(appModel); err != nil {
 		return fmt.Errorf("unable to teardown dev: %s", err)
 	}

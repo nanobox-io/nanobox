@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"regexp"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 

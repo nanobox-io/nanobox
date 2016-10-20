@@ -2,8 +2,8 @@ package share
 
 import (
 	"bufio"
-	"fmt"
 	"flag"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"os/exec"

@@ -19,7 +19,7 @@ var (
 Configures the application source that can be
 deployed into dev, sim, or production environments.
 		`,
-		Run:    configureFn,
+		Run: configureFn,
 	}
 )
 

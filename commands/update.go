@@ -12,11 +12,11 @@ var (
 
 	// UpdateCmd ...
 	UpdateCmd = &cobra.Command{
-		Use:   "update",
-		Short: "Updates the Nanobox virtual machine, docker images and checks to see if the nanobox binary needs an update.",
-		Long:  ``,
+		Use:    "update",
+		Short:  "Updates the Nanobox virtual machine, docker images and checks to see if the nanobox binary needs an update.",
+		Long:   ``,
 		PreRun: steps.Run("start"),
-		Run:   updateFn,
+		Run:    updateFn,
 	}
 )
 

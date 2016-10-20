@@ -131,7 +131,7 @@ func (machine DockerMachine) Create() error {
 		"--virtualbox-cpu-count",
 		fmt.Sprintf("%d", cpus),
 		"--virtualbox-memory",
-		fmt.Sprintf("%d", ram * 1024),
+		fmt.Sprintf("%d", ram*1024),
 		"nanobox",
 	}
 

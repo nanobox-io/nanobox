@@ -1,10 +1,10 @@
 package processors
 
 import (
-	"time"
-	"os"
 	"fmt"
+	"os"
 	"runtime"
+	"time"
 
 	"github.com/nanobox-io/nanobox/util/config"
 )
@@ -12,7 +12,7 @@ import (
 func Configure() error {
 
 	<-time.After(time.Second)
-	
+
 	setupConf := &config.SetupConf{
 		Provider: "docker-machine",
 		Mount:    "native",
@@ -29,7 +29,6 @@ time by running: 'nanobox configure'
 
 (Learn more at : http://docs.nanobox.io/configure)
 `)
-
 
 	// ask about provider
 	// currently ignoring the input here
@@ -50,7 +49,7 @@ Answer: `, map[string]string{"a": "docker-machine", "b": "native"})
 	setupConf.CPUs = intAsker(fmt.Sprintf(`
 How many CPU cores would you like to make available to the VM (1-%d)?
 
-Answer: `,runtime.NumCPU()), runtime.NumCPU())
+Answer: `, runtime.NumCPU()), runtime.NumCPU())
 
 	// ask about ram
 	setupConf.RAM = intAsker(`
@@ -64,7 +63,6 @@ Would you like to enable netfs for faster filesystem access (y/n)?
 (we highly recommend using this option, but this will prompt for password)
 
 Answer: `, map[string]string{"y": "netfs", "n": "native"})
-
 
 	config.ConfigFile(setupConf)
 	return nil
