@@ -43,6 +43,10 @@ func destroyContainer(id string) error {
 	display.StartTask("Destroying docker container")
 	defer display.StopTask()
 
+	if id == "" {
+		return nil
+	}
+
 	if err := docker.ContainerRemove(id); err != nil {
 		lumber.Error("component:Destroy:docker.ContainerRemove(%s): %s", id, err.Error())
 		display.ErrorTask()
