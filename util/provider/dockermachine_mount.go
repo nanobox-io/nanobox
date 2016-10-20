@@ -261,7 +261,7 @@ func (machine DockerMachine) removeNativeMount(local, host string) error {
 		"nanobox",
 		"sudo",
 		"umount",
-		"-f"
+		"-f",
 		host,
 	}
 
