@@ -75,7 +75,8 @@ func Remove(path string) error {
 	// read exports file
 	existingFile, err := ioutil.ReadFile(EXPORTSFILE)
 	if err != nil {
-		return err
+		// if the error exists the file didnt exist.
+		return nil
 	}
 
 	lineCheck := fmt.Sprintf("%s -alldirs -mapall=%v:%v", provider.MountIP, uid(), gid())
@@ -113,11 +114,17 @@ func reloadServer() error {
 	if flag.Lookup("test.v") != nil {
 		return nil
 	}
-	// TODO: make sure nfsd is enabled
+
+	// make sure nfsd is running
+	cmd := exec.Command("nfsd", "start")
+	if b, err := cmd.CombinedOutput(); err != nil {
+		lumber.Debug("start nfs: %s", b)
+		return fmt.Errorf("start nfs: %s %s", b, err.Error())
+	}
 
 	// check the exports to make sure a reload will be successful; TODO: provide a
 	// clear message for a direction to fix
-	cmd := exec.Command("nfsd", "checkexports")
+	cmd = exec.Command("nfsd", "checkexports")
 	if b, err := cmd.CombinedOutput(); err != nil {
 		lumber.Debug("checkexports: %s", b)
 		return fmt.Errorf("checkexports: %s %s", b, err.Error())
