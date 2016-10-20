@@ -35,15 +35,11 @@ func Add(path string) error {
 		return err
 	}
 
-	// make sure the /etc/exports file exists
-	if _, err := os.Stat(EXPORTSFILE); err != nil {
-		ioutil.WriteFile(EXPORTSFILE, []byte(""), 0644)
-	}
-
 	// read exports file
 	existingFile, err := ioutil.ReadFile(EXPORTSFILE)
 	if err != nil {
-		return err
+		// if the file didnt exist lets create an empty existingFile
+		existingFile = []byte("")
 	}
 
 	lineCheck := fmt.Sprintf("%s -alldirs -mapall=%v:%v", provider.MountIP, uid(), gid())
