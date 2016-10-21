@@ -5,6 +5,7 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"syscall"
 )
 
 func Tunnel(key, location, port string) error {
@@ -26,6 +27,9 @@ func Tunnel(key, location, port string) error {
 	// setup a tcp listener
 	serv, err := net.Listen("tcp4", fmt.Sprintf(":%s", port))
 	if err != nil {
+		if err == syscall.EADDRINUSE {
+			return fmt.Errorf("it appears your local port (%s) is in use please specify a different port", port)
+		}
 		return fmt.Errorf("failed to setup tcp listener: %s", err.Error())
 	}
 

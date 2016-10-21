@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-
 	// "github.com/jcelliott/lumber"
 	// "github.com/nanobox-io/nanobox/util"
 )
@@ -22,14 +21,13 @@ func Boxfile() string {
 	return filepath.ToSlash(filepath.Join(LocalDir(), "boxfile.yml"))
 }
 
-
 func ConfigExists() bool {
 	file := filepath.ToSlash(filepath.Join(GlobalDir(), "config.yml"))
 
 	// if i can stat the file exists
 	_, err := os.Stat(file)
 	return err == nil
-	
+
 }
 
 // configFile returns the path/to/config.yml file or creates one if it doesn't
@@ -46,13 +44,13 @@ func ConfigFile(setup *SetupConf) (file string) {
 		return
 	}
 
-	// 
+	//
 	if setup == nil {
 		setup = &SetupConf{
 			Provider: "docker-machine",
-			Mount: "native",
-			CPUs: 1,
-			RAM: 1,
+			Mount:    "native",
+			CPUs:     1,
+			RAM:      1,
 		}
 	}
 	// ...otherwise create the file

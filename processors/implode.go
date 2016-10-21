@@ -21,11 +21,6 @@ func Implode() error {
 	display.OpenContext("Imploding Nanobox")
 	defer display.CloseContext()
 
-	// init docker client
-	if err := provider.Init(); err != nil {
-		return fmt.Errorf("failed to init docker client: %s", err.Error())
-	}
-
 	// remove all the dns entries
 	apps, _ := models.AllApps()
 	for _, app := range apps {
@@ -35,11 +30,20 @@ func Implode() error {
 		}
 	}
 
-	envModels, _ := models.AllEnvs()
-	for _, envModel := range envModels {
-		// unmount (and remove the share for the env)
-		if err := env.Unmount(envModel); err != nil {
-			fmt.Printf("unable to remove mounts: %s", err)
+	// only unmount if the env is up and running.
+	if util_provider.IsReady() {
+		// init docker client
+		if err := provider.Init(); err != nil {
+			return fmt.Errorf("failed to init docker client: %s", err.Error())
+		}
+
+		envModels, _ := models.AllEnvs()
+		for _, envModel := range envModels {
+			// unmount (and remove the share for the env)
+			if err := env.Unmount(envModel); err != nil {
+				fmt.Printf("unable to remove mounts: %s", err)
+			}
+
 		}
 
 	}

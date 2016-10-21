@@ -7,10 +7,9 @@ import (
 	"github.com/nanobox-io/golang-docker-client"
 
 	process_provider "github.com/nanobox-io/nanobox/processors/provider"
-	"github.com/nanobox-io/nanobox/util/update"
-	"github.com/nanobox-io/nanobox/util/provider"
 	"github.com/nanobox-io/nanobox/util/display"
-
+	"github.com/nanobox-io/nanobox/util/provider"
+	"github.com/nanobox-io/nanobox/util/update"
 )
 
 func Update() error {
@@ -30,7 +29,7 @@ func Update() error {
 	return provider.Install()
 }
 
-func pullImages() error{
+func pullImages() error {
 	images, err := docker.ImageList()
 	if err != nil {
 		return err

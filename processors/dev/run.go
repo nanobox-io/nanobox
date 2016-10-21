@@ -17,7 +17,6 @@ import (
 // Run ...
 func Run(appModel *models.App) error {
 
-
 	display.InfoDevRunContainer(appModel.GlobalIPs["env"])
 
 	// load the start commands from the boxfile

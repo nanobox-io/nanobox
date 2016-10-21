@@ -13,17 +13,21 @@ import (
 // main ...
 func main() {
 
-	if runtime.GOOS == "windows" && !util.IsPrivileged() {
-		// re-run this command as the administrative user
-		fmt.Println()
-		fmt.Println("The update process requires Administrator privileges.")
-		fmt.Println("Another window will be opened as the Administrator to continue this process.")
+	if !util.IsPrivileged() {
 
-		// block here until the user hits enter. It's not ideal, but we need to make
-		// sure they see the new window open.
-		fmt.Println("Enter to continue:")
-		var input string
-		fmt.Scanln(&input)
+		if runtime.GOOS == "windows" {
+			// re-run this command as the administrative user
+			fmt.Println()
+			fmt.Println("The update process requires Administrator privileges.")
+			fmt.Println("Another window will be opened as the Administrator to continue this process.")
+
+			// block here until the user hits enter. It's not ideal, but we need to make
+			// sure they see the new window open.
+			fmt.Println("Enter to continue:")
+			var input string
+			fmt.Scanln(&input)
+
+		}
 
 		cmd := fmt.Sprintf("%s", os.Args[0])
 		if err := util.PrivilegeExec(cmd); err != nil {

@@ -105,6 +105,3 @@ func init() {
 	NanoboxCmd.AddCommand(UpdateCmd)
 	NanoboxCmd.AddCommand(ConfigureCmd)
 }
-
-
-

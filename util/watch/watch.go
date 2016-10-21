@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
-	"runtime"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox-boxfile"

@@ -37,7 +37,6 @@ func Setup(appModel *models.App, componentModel *models.Component, warehouseConf
 		// Prefix: componentModel.Image,
 	}
 
-
 	if !docker.ImageExists(componentModel.Image) {
 		// pull the component image
 		display.StartTask("Pulling %s image", componentModel.Image)
@@ -47,7 +46,7 @@ func Setup(appModel *models.App, componentModel *models.Component, warehouseConf
 			return fmt.Errorf("failed to pull docker image (%s): %s", componentModel.Image, err.Error())
 		}
 		display.StopTask()
-	
+
 	}
 
 	display.StartTask("Starting docker container")
