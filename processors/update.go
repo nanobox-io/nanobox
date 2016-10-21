@@ -30,6 +30,9 @@ func Update() error {
 }
 
 func pullImages() error {
+	display.OpenContext("Updating Images")
+	defer display.CloseContext()
+	
 	images, err := docker.ImageList()
 	if err != nil {
 		return err
@@ -52,5 +55,6 @@ func pullImages() error {
 		}
 		display.StopTask()
 	}
+	
 	return nil
 }

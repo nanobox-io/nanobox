@@ -218,7 +218,7 @@ func configureComponent(appModel *models.App, componentModel *models.Component) 
 	defer display.StopTask()
 
 	// run the update hook
-	if _, err := hookit.DebugExec(componentModel.ID, "update", hook_generator.UpdatePayload(componentModel), "info"); err != nil {
+	if _, err := hookit.DebugExec(componentModel.ID, "update", hook_generator.UpdatePayload(componentModel), "debug"); err != nil {
 		display.ErrorTask()
 		return fmt.Errorf("failed to run update hook: %s", err.Error())
 	}
