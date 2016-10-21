@@ -358,8 +358,11 @@ func IsReady() bool {
 
 // fetchProvider fetches the registered provider from the configured name
 func fetchProvider() (Provider, error) {
-
-	p, ok := providers[config.Viper().GetString("provider")]
+	prov := config.Viper().GetString("provider")
+	if prov == "docker_machine" {
+		prov = "docker-machine"
+	}
+	p, ok := providers[prov]
 	if !ok {
 		return nil, errors.New("invalid provider")
 	}
