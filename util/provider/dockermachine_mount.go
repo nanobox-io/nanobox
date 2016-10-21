@@ -30,9 +30,28 @@ func (machine DockerMachine) HasMount(mount string) bool {
 	output, err := process.CombinedOutput()
 	if err != nil {
 		return false
+	
+}
+	return strings.Contains(string(output), mount) && !machine.staleMount(mount)
+}
+
+func (machine DockerMachine) staleMount(mount string) bool {
+
+	// ensure stat is installed
+	cmd := []string{"sh", "-c", setupCoreUtilsScript()}
+	if b, err := Run(cmd); err != nil {
+		lumber.Error("stat install output: %s", b)
+		return true
 	}
 
-	return strings.Contains(string(output), mount)
+	cmd = []string{"stat", mount}
+
+	output, err := Run(cmd)
+	if err != nil {
+		return true
+	}
+
+	return strings.Contains(string(output), "stale")
 }
 
 // AddMount adds a virtualbox mount into the docker-machine vm
@@ -42,6 +61,12 @@ func (machine DockerMachine) AddMount(local, host string) error {
 	if machine.HasMount(host) {
 		lumber.Info("mount exists for %s", host)
 		return nil
+	}
+
+	if machine.staleMount(host) {
+		if err := machine.RemoveMount(local, host); err != nil {
+			return fmt.Errorf("failed to clean up stale mount: %s", err)
+		}
 	}
 
 	switch config.Viper().GetString("mount-type") {
@@ -274,4 +299,17 @@ func (machine DockerMachine) removeNativeMount(local, host string) error {
 	// todo: check output for failures
 
 	return nil
+}
+
+// setupCoreUtilsScript returns a string containing the script to setup cifs
+func setupCoreUtilsScript() string {
+	script := `
+		if [ ! -f /usr/local/bin/stat ]; then
+			wget -O /mnt/sda1/tmp/tce/optional/coreutils.tcz http://repo.tinycorelinux.net/7.x/x86_64/tcz/coreutils.tcz &&
+
+			tce-load -i coreutils;
+		fi
+	`
+
+	return strings.Replace(script, "\n", "", -1)
 }
