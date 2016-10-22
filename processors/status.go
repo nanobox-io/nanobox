@@ -17,7 +17,7 @@ func Status() error {
 
 	fmt.Println()
 	fmtString := fmt.Sprintf("%%-%ds : %%-7s : %%%ds\n", nameLength+6, pathLength)
-	header := fmt.Sprintf(fmtString, "Status", "Running", "directory")
+	header := fmt.Sprintf(fmtString, "Status", "Running", "Path")
 	fmt.Printf(header)
 	fmt.Println(strings.Repeat("-", len(header)))
 
