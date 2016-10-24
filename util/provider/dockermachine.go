@@ -128,6 +128,8 @@ func (machine DockerMachine) Create() error {
 		"create",
 		"--driver",
 		"virtualbox",
+		"--virtualbox-boot2docker-url",
+		"https://s3.amazonaws.com/tools.nanobox.io/boot2docker/v1/boot2docker.iso",
 		"--virtualbox-cpu-count",
 		fmt.Sprintf("%d", cpus),
 		"--virtualbox-memory",
