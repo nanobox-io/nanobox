@@ -54,7 +54,7 @@ func PrivilegeExec(command string) error {
 	command = preparePrivilegeCmd(command)
 
 	// add the --internal flag if the command is nanobox
-	if strings.Contains(command, "nanobox") {
+	if strings.HasPrefix(command, "nanobox ") {
 		command = fmt.Sprintf("%s --internal", command)
 	}
 
@@ -88,8 +88,11 @@ func PrivilegeExec(command string) error {
 // make sure the command is escaped and prepared to be used in powershell
 func preparePrivilegeCmd(command string) string {
 
+	// take the first argument out
+	cmdParts := strings.Split(command, " ")
+
 	// return the command if an .exe wasn't provided
-	if !strings.Contains(command, ".exe") {
+	if !strings.Contains(cmdParts[0], ".exe") {
 		return command
 	}
 
