@@ -1,9 +1,9 @@
 package update
 
 import (
+	"fmt"
 	"net/http"
 	"os"
-	"os/exec"
 	"path/filepath"
 
 	"github.com/nanobox-io/nanobox/models"
@@ -11,16 +11,12 @@ import (
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
-func Run() error {
-
-	// get the location of the current nanobox
-	path, err := exec.LookPath(name)
-	if err != nil {
-		return err
+func Run(path string) error {
+	if path == "" {
+		fmt.Errorf("invalid path")
 	}
 
 	// create a temporary file
-
 	tmpFileName := filepath.Join(filepath.Dir(path), tmpName)
 	tmpFile, err := os.OpenFile(tmpFileName, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 	if err != nil {
