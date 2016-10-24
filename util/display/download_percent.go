@@ -16,6 +16,7 @@ type DownloadPercent struct {
 }
 
 func (dp *DownloadPercent) Copy(writer io.Writer, reader io.Reader) (err error) {
+	fmt.Println()
 	// initialize variables
 	buf := make([]byte, 32*1024)
 	dp.current = 0
@@ -59,6 +60,7 @@ func (dp *DownloadPercent) Copy(writer io.Writer, reader io.Reader) (err error) 
 		dp.current = dp.Total
 		dp.UpdateDisplay()
 	}
+	fmt.Println()
 	return err
 }
 

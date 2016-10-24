@@ -14,7 +14,7 @@ import (
 )
 
 func RemotePath() string {
-	return fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/nanobox/v1/%s/%s/%s", runtime.GOOS, runtime.GOARCH, name)
+	return fmt.Sprintf("https://s3.amazonaws.com/tools.nanobox.io/nanobox/v1/%s/%s/%s", runtime.GOOS, runtime.GOARCH, Name)
 }
 
 func RemoveMd5() string {

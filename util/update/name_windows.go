@@ -1,4 +1,4 @@
 package update
 
-const name = "nanobox.exe"
+const Name = "nanobox.exe"
 const tmpName = "nanobox-tmp.exe"

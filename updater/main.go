@@ -4,6 +4,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"runtime"
 
 	"github.com/nanobox-io/nanobox/util"
@@ -12,6 +13,18 @@ import (
 
 // main ...
 func main() {
+
+	path := ""
+	var err error
+	if len(os.Args) > 1 {
+		path = os.Args[1]
+	} else {
+		// get the location of the current nanobox
+		path, err = exec.LookPath(update.Name)
+		if err != nil {
+			fmt.Printf("Cannot find %s: %s\n", update.Name, err)
+		}
+	}
 
 	if !util.IsPrivileged() {
 
@@ -29,7 +42,7 @@ func main() {
 
 		}
 
-		cmd := fmt.Sprintf("%s", os.Args[0])
+		cmd := fmt.Sprintf("%s %s", os.Args[0], path)
 		if err := util.PrivilegeExec(cmd); err != nil {
 			os.Exit(1)
 		}
@@ -39,7 +52,7 @@ func main() {
 	}
 
 	// run the update
-	err := update.Run()
+	err = update.Run(path)
 	if err != nil {
 		fmt.Println("error: %s", err)
 	}
