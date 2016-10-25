@@ -17,7 +17,7 @@ var (
 		Use:    "log",
 		Short:  "Displays logs from the running dev app and its components.",
 		Long:   ``,
-		PreRun: steps.Run("start", "build", "dev start", "dev deploy"),
+		PreRun: steps.Run("start", "build-runtime", "dev start", "dev deploy"),
 		Run:    logFn,
 	}
 )

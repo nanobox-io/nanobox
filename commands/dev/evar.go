@@ -29,7 +29,7 @@ var (
 Adds environment variable(s) to your dev app. Multiple key-value
 pairs can be added simultaneously using a comma-delimited list.
 		`,
-		PreRun: steps.Run("start", "build", "dev start", "dev deploy"),
+		PreRun: steps.Run("start", "build-runtime", "dev start", "dev deploy"),
 		Run:    evarAddFn,
 	}
 
@@ -38,7 +38,7 @@ pairs can be added simultaneously using a comma-delimited list.
 		Use:    "ls",
 		Short:  "Lists all environment variables registered in your dev app.",
 		Long:   ``,
-		PreRun: steps.Run("start", "build", "dev start", "dev deploy"),
+		PreRun: steps.Run("start", "build-runtime", "dev start", "dev deploy"),
 		Run:    evarListFn,
 	}
 
@@ -50,7 +50,7 @@ pairs can be added simultaneously using a comma-delimited list.
 Removes environment variable(s) from your dev app. Multiple keys
 can be removed simultaneously using a comma-delimited list.
 		`,
-		PreRun: steps.Run("start", "build", "dev start", "dev deploy"),
+		PreRun: steps.Run("start", "build-runtime", "dev start", "dev deploy"),
 		Run:    evarRemoveFn,
 	}
 )

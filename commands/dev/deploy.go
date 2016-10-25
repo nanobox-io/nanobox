@@ -16,7 +16,7 @@ var DeployCmd = &cobra.Command{
 	Use:    "deploy",
 	Short:  "Deploys a build package into your dev platform and starts all data services.",
 	Long:   ``,
-	PreRun: steps.Run("start", "build", "dev start"),
+	PreRun: steps.Run("start", "build-runtime", "dev start"),
 	Run:    deployFn,
 }
 
