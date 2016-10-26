@@ -16,7 +16,7 @@ var (
 
 	// BuildCmd ...
 	BuildCmd = &cobra.Command{
-		Use:   "build",
+		Use:   "build-runtime",
 		Short: "Builds a deployable runtime.",
 		Long: `
 Generates a deployable runtime that can be
@@ -24,11 +24,12 @@ deployed into dev, sim, or production environments.
 		`,
 		PreRun: steps.Run("start"),
 		Run:    buildFn,
+		Aliases: []string{"build"},
 	}
 )
 
 func init() {
-	steps.Build("build", buildComplete, buildFn)
+	steps.Build("build-runtime", buildComplete, buildFn)
 }
 
 // buildFn ...

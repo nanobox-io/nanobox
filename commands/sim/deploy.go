@@ -5,27 +5,40 @@ import (
 	"github.com/nanobox-io/nanobox-boxfile"
 
 	"github.com/nanobox-io/nanobox/commands/steps"
+	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/sim"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
-// DeployCmd ...
-var DeployCmd = &cobra.Command{
-	Use:   "deploy",
-	Short: "Deploys a build package into your sim platform and starts all services.",
-	Long: `
-Deploys a build package into your sim platform and
-starts all services. This is used to simulate a full
-deploy locally, before deploying into production.
-		`,
-	PreRun: steps.Run("start", "build", "compile", "sim start"),
-	Run:    deployFn,
-}
+var (
+	// DeployCmd ...
+	DeployCmd = &cobra.Command{
+		Use:   "deploy",
+		Short: "Deploys a build package into your sim platform and starts all services.",
+		Long: `
+	Deploys a build package into your sim platform and
+	starts all services. This is used to simulate a full
+	deploy locally, before deploying into production.
+	`,
+		PreRun: func(ccmd *cobra.Command, args []string) {
+			registry.Set("skip-compile", deployCmdFlags.skipCompile)
+			steps.Run("start", "build-runtime", "compile-app", "sim start")(ccmd, args)
+		},
+		Run:    deployFn,
+	}
+
+	// deployCmdFlags ...
+	deployCmdFlags = struct {
+		skipCompile bool
+	}{}
+)
+
 
 func init() {
 	steps.Build("sim deploy", deployComplete, deployFn)
+	DeployCmd.Flags().BoolVarP(&deployCmdFlags.skipCompile, "skip-compile", "", false, "skip compiling the app")
 }
 
 // deployFn ...

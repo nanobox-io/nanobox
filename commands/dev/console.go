@@ -17,7 +17,7 @@ var ConsoleCmd = &cobra.Command{
 	Use:    "console",
 	Short:  "Opens an interactive console inside your dev platform.",
 	Long:   ``,
-	PreRun: steps.Run("start", "build", "dev start", "dev deploy"),
+	PreRun: steps.Run("start", "build-runtime", "dev start", "dev deploy"),
 	Run:    consoleFn,
 }
 
