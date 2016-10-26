@@ -42,7 +42,7 @@ func main() {
 
 		}
 
-		cmd := fmt.Sprintf("%s %s", os.Args[0], path)
+		cmd := fmt.Sprintf("%s \"%s\"", os.Args[0], path)
 		if err := util.PrivilegeExec(cmd); err != nil {
 			os.Exit(1)
 		}

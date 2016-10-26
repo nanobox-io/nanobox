@@ -87,12 +87,9 @@ func PrivilegeExec(command string) error {
 
 // make sure the command is escaped and prepared to be used in powershell
 func preparePrivilegeCmd(command string) string {
-
-	// take the first argument out
-	cmdParts := strings.Split(command, " ")
-
+	fmt.Printf("cmd: %q\n", command)
 	// return the command if an .exe wasn't provided
-	if !strings.Contains(cmdParts[0], ".exe") {
+	if !strings.Contains(command, ".exe") || strings.HasSuffix(command, ".exe\""){
 		return command
 	}
 

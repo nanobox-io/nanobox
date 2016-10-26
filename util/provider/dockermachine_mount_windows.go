@@ -36,7 +36,7 @@ func (machine DockerMachine) addNetfsMount(local, host string) error {
 	cmd := []string{"sudo", "/bin/mkdir", "-p", host}
 	if b, err := Run(cmd); err != nil {
 		lumber.Debug("mkdir output: %s", b)
-		return fmt.Errorf("mkdir:%s", err.Error())
+		return fmt.Errorf("mkdir:%s, %s", b, err.Error())
 	}
 
 	// ensure cifs/samba utilities are installed
