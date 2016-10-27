@@ -11,11 +11,11 @@ import (
 // Mount mounts a share on a guest machine
 func (machine DockerMachine) addNetfsMount(local, host string) error {
 
-	// ensure portmap is running
-	cmd := []string{"sudo", "/usr/local/sbin/portmap"}
+	// ensure nfs-client is running
+	cmd := []string{"sudo", "/usr/local/etc/init.d/nfs-client", "start"}
 	if b, err := Run(cmd); err != nil {
 		lumber.Debug("output: %s", b)
-		return fmt.Errorf("portmap:%s", err.Error())
+		return fmt.Errorf("nfs-client:%s", err.Error())
 	}
 
 	// ensure the destination directory exists
