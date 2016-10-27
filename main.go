@@ -27,16 +27,15 @@ func (bugLog) Printf(fmt string, v ...interface{}) {
 
 // main
 func main() {
+	// build the viper config because viper cannot handle concurrency
+	// so it has to be done at the beginning even if we dont need it
+	config.Viper()
 
 	// setup a file logger, this will be replaced in verbose mode.
 	fileLogger, err := lumber.NewTruncateLogger(filepath.ToSlash(filepath.Join(config.GlobalDir(), "nanobox.log")))
 	if err != nil {
 		fmt.Println("logging error:", err)
 	}
-
-	// commented out until we have control of the lumber project
-	// multiLogger := lumber.NewMultiLogger()
-	// multiLogger.AddLoggers(fileLogger, memory_logger.Logger)
 
 	//
 	lumber.SetLogger(fileLogger)
