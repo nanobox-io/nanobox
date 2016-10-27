@@ -158,8 +158,12 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 	lumber.Debug("RES: %d %s %s %s (%s)", res.StatusCode, req.Method, req.URL, req.Proto, res.Header.Get("Content-Length"))
 
 	// print the body even if status is not 2XX
+	b, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return err
+	}
+
 	if responseBody != nil {
-		b, err := ioutil.ReadAll(res.Body)
 		lumber.Debug("response body: '%s'\n", b)
 		err = json.Unmarshal(b, responseBody)
 		if err != nil {
@@ -180,7 +184,7 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 	}
 
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
-		return fmt.Errorf("bad exit response(%d %s %s %s (%s))", res.StatusCode, req.Method, req.URL, req.Proto, res.Header.Get("Content-Length"))
+		return fmt.Errorf("bad exit response(%d %s %s %s (%s) %s)", res.StatusCode, req.Method, req.URL, req.Proto, res.Header.Get("Content-Length"), b)
 	}
 
 	return nil
