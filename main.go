@@ -2,6 +2,7 @@
 package main
 
 import (
+	"crypto/md5"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -74,5 +75,11 @@ func setupBugsnag() {
 		APIKey:      bugsnagToken,
 		Logger:      bugLog{},
 		Synchronous: true,
+	})
+
+	bugsnag.OnBeforeNotify(func(event *bugsnag.Event, config *bugsnag.Configuration) error {
+		// set the grouping hash to a md5 of the message. which should seperate the grouping in the dashboard
+		event.GroupingHash = fmt.Sprintf("%x", md5.Sum(event.Message))
+		return nil
 	})
 }
