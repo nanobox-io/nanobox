@@ -3,12 +3,14 @@ package commands
 
 import (
 	"strings"
+	"path/filepath"
 
 	"github.com/jcelliott/lumber"
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/commands/steps"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/mixpanel"
 	"github.com/nanobox-io/nanobox/util/update"
@@ -45,8 +47,13 @@ var (
 			update.Check()
 
 			// TODO: look into global messaging
+			if internalCommand {
+				registry.Set("internal", internalCommand)
+				// setup a file logger, this will be replaced in verbose mode.
+				fileLogger, _ := lumber.NewAppendLogger(filepath.ToSlash(filepath.Join(config.GlobalDir(), "nanobox.log")))
+				lumber.SetLogger(fileLogger)
 
-			registry.Set("internal", internalCommand)
+			}
 			registry.Set("debug", debugMode)
 
 			// setup the display output
