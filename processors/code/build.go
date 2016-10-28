@@ -116,15 +116,11 @@ func gatherRequirements(envModel *models.Env, containerID string) error {
 
 	box := boxfile.NewFromPath(config.Boxfile())
 
-	// persist the boxfile output to the env model
+	// set the boxfile data but do not save
+	// if something else here fails we want to only save at the end
 	envModel.UserBoxfile = box.String()
 	envModel.BuiltBoxfile = boxOutput
 	envModel.BuiltID = util.RandomString(30)
-	if err := envModel.Save(); err != nil {
-		display.ErrorTask()
-		lumber.Error("code:Build:models:Env:Save(): %s", err.Error())
-		return fmt.Errorf("failed to persist build boxfile to db: %s", err.Error())
-	}
 
 	return nil
 }
