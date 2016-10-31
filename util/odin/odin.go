@@ -72,6 +72,22 @@ func Deploy(appID, id, boxfile, message string) error {
 	return doRequest("POST", fmt.Sprintf("apps/%s/deploys", appID), nil, body, nil)
 }
 
+func ListEvar(appID string) (map[string]string, error) {
+	result := map[string]string{}
+	return result, doRequest("GET", fmt("apps/%s/evars", appID), nil, nil, &result)
+}
+
+func AddEvar(appID, key, val string) error {
+	body := map[string]map[string]string{
+		"evar": {
+			"title": key,
+			"value": val,
+		},
+	}
+
+	return doRequest("POST", fmt.Sprintf("apps/%s/evars", appID), nil, body, nil)
+}
+
 // EstablishTunnel ...
 func EstablishTunnel(appID, id string) (string, string, int, error) {
 	r := struct {
