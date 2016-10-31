@@ -1,11 +1,11 @@
 package sim
 
 import (
-	"github.com/spf13/cobra"
 	"github.com/nanobox-io/nanobox-boxfile"
+	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox/commands/steps"
 	"github.com/nanobox-io/nanobox/commands/registry"
+	"github.com/nanobox-io/nanobox/commands/steps"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/sim"
 	"github.com/nanobox-io/nanobox/util/config"
@@ -26,7 +26,7 @@ var (
 			registry.Set("skip-compile", deployCmdFlags.skipCompile)
 			steps.Run("start", "build-runtime", "compile-app", "sim start")(ccmd, args)
 		},
-		Run:    deployFn,
+		Run: deployFn,
 	}
 
 	// deployCmdFlags ...
@@ -34,7 +34,6 @@ var (
 		skipCompile bool
 	}{}
 )
-
 
 func init() {
 	steps.Build("sim deploy", deployComplete, deployFn)

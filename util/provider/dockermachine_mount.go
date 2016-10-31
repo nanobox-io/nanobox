@@ -30,8 +30,8 @@ func (machine DockerMachine) HasMount(mount string) bool {
 	output, err := process.CombinedOutput()
 	if err != nil {
 		return false
-	
-}
+
+	}
 	return strings.Contains(string(output), mount) && !machine.staleMount(mount)
 }
 

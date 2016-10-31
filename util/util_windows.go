@@ -89,7 +89,7 @@ func PrivilegeExec(command string) error {
 func preparePrivilegeCmd(command string) string {
 
 	// return the command if an .exe wasn't provided
-	if !strings.Contains(command, ".exe") || strings.HasSuffix(command, ".exe\""){
+	if !strings.Contains(command, ".exe") || strings.HasSuffix(command, ".exe\"") {
 		return command
 	}
 

@@ -22,8 +22,8 @@ var (
 Generates a deployable runtime that can be
 deployed into dev, sim, or production environments.
 		`,
-		PreRun: steps.Run("start"),
-		Run:    buildFn,
+		PreRun:  steps.Run("start"),
+		Run:     buildFn,
 		Aliases: []string{"build"},
 	}
 )

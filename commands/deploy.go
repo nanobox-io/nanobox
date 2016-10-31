@@ -3,8 +3,8 @@ package commands
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox/commands/steps"
 	"github.com/nanobox-io/nanobox/commands/registry"
+	"github.com/nanobox-io/nanobox/commands/steps"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors"
 	"github.com/nanobox-io/nanobox/util/config"
@@ -15,23 +15,23 @@ var (
 
 	// DeployCmd ...
 	DeployCmd = &cobra.Command{
-		Use:    "deploy",
-		Short:  "Deploys your generated build package to a production app.",
-		Long:   ``,
+		Use:   "deploy",
+		Short: "Deploys your generated build package to a production app.",
+		Long:  ``,
 		PreRun: func(ccmd *cobra.Command, args []string) {
 			registry.Set("skip-compile", deployCmdFlags.skipCompile)
 			steps.Run("start", "build-runtime", "compile-app", "login")(ccmd, args)
 		},
-		Run:    deployFn,
+		Run: deployFn,
 	}
 
 	// deployCmdFlags ...
 	deployCmdFlags = struct {
 		skipCompile bool
-		app      string
-		message  string
-		force    bool
-		endpoint string
+		app         string
+		message     string
+		force       bool
+		endpoint    string
 	}{}
 )
 

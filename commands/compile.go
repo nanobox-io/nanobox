@@ -5,8 +5,8 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox/commands/steps"
 	"github.com/nanobox-io/nanobox/commands/registry"
+	"github.com/nanobox-io/nanobox/commands/steps"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors"
 	"github.com/nanobox-io/nanobox/util/config"
@@ -23,8 +23,8 @@ var (
 Compiles the application source that can be
 deployed into dev, sim, or production environments.
 		`,
-		PreRun: steps.Run("start", "build-runtime"),
-		Run:    compileFn,
+		PreRun:  steps.Run("start", "build-runtime"),
+		Run:     compileFn,
 		Aliases: []string{"compile"},
 	}
 )

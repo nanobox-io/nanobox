@@ -2,8 +2,8 @@
 package commands
 
 import (
-	"strings"
 	"path/filepath"
+	"strings"
 
 	"github.com/jcelliott/lumber"
 	"github.com/spf13/cobra"
