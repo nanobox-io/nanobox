@@ -1,4 +1,4 @@
-package dev
+package commands
 
 import (
 	"strings"
@@ -53,6 +53,8 @@ can be removed simultaneously using a comma-delimited list.
 		PreRun: steps.Run("login"),
 		Run:    evarRemoveFn,
 	}
+
+	app string
 )
 
 //
@@ -60,11 +62,12 @@ func init() {
 	EvarCmd.AddCommand(EvarAddCmd)
 	EvarCmd.AddCommand(EvarRemoveCmd)
 	EvarCmd.AddCommand(EvarListCmd)
+	EvarCmd.PersistentFlags().StringVarP(&deployCmdFlags.app, "app", "a", "default", "message to accompany this command")
 }
 
 // evarAddFn ...
 func evarAddFn(ccmd *cobra.Command, args []string) {
-	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
+	env, _ := models.FindEnvByID(config.EnvID())
 	evars := map[string]string{}
 
 	for _, arg := range args {
@@ -87,25 +90,37 @@ func evarAddFn(ccmd *cobra.Command, args []string) {
 		}
 	}
 
-	display.CommandErr(evar.Add(app, evars))
+	if app == "" {
+		app = "default"
+	}
+
+	display.CommandErr(evar.Add(env, app, evars))
 }
 
 // evarListFn ...
 func evarListFn(ccmd *cobra.Command, args []string) {
-	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
-	display.CommandErr(evar.List(app))
+	env, _ := models.FindEnvByID(config.EnvID())
+	if app == "" {
+		app = "default"
+	}
+
+	display.CommandErr(evar.List(env, app))
 }
 
 // evarRemoveFn ...
 func evarRemoveFn(ccmd *cobra.Command, args []string) {
-	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
+	env, _ := models.FindEnvByID(config.EnvID())
 	keys := []string{}
 
 	for _, arg := range args {
 		for _, key := range strings.Split(arg, ",") {
-			keys = append(keys, strings.ToUpper(key))
+			keys = append(keys, key)
 		}
 	}
 
-	display.CommandErr(evar.Remove(app, keys))
+	if app == "" {
+		app = "default"
+	}
+
+	display.CommandErr(evar.Remove(env, app, keys))
 }

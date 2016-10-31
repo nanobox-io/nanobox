@@ -26,6 +26,13 @@ var (
 	// set the default endpoint to nanobox
 	endpoint = "nanobox"
 )
+type (
+	evar struct {
+		ID     string `json:"id"`
+		Key    string `json:"title"`
+		Value  string `json:"value"`
+	}
+)
 
 // sets the odin endpoint
 func SetEndpoint(stage string) {
@@ -72,9 +79,9 @@ func Deploy(appID, id, boxfile, message string) error {
 	return doRequest("POST", fmt.Sprintf("apps/%s/deploys", appID), nil, body, nil)
 }
 
-func ListEvar(appID string) (map[string]string, error) {
-	result := map[string]string{}
-	return result, doRequest("GET", fmt("apps/%s/evars", appID), nil, nil, &result)
+func ListEvars(appID string) ([]evar, error) {
+	evars := []evar{}
+	return evars, doRequest("GET", fmt.Sprintf("apps/%s/evars", appID), nil, nil, &evars)
 }
 
 func AddEvar(appID, key, val string) error {
@@ -86,6 +93,10 @@ func AddEvar(appID, key, val string) error {
 	}
 
 	return doRequest("POST", fmt.Sprintf("apps/%s/evars", appID), nil, body, nil)
+}
+
+func RemoveEvar(appId, id string) error {
+	return doRequest("DELETE", fmt.Sprintf("apps/%s/evars/%s", appId, id), nil, nil, nil)
 }
 
 // EstablishTunnel ...

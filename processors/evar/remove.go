@@ -4,25 +4,41 @@ import (
 	"fmt"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util/odin"	
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
-func Remove(appModel *models.App, keys []string) error {
+func Remove(envModel *models.Env, appID string, keys []string) error {
+
+	// fetch the link
+	link, ok := envModel.Links[appID]
+	if ok {
+		// set the odin endpoint
+		odin.SetEndpoint(link.Endpoint)
+		// set the app id
+		appID = link.ID
+	}
+
+	evars, err := odin.ListEvars(appID)
+	if err != nil {
+		return err
+	}
 
 	// delete the evars
 	for _, key := range keys {
-		delete(appModel.Evars, key)
-	}
-
-	// persist the app model
-	if err := appModel.Save(); err != nil {
-		return fmt.Errorf("failed to delete evars: %s", err.Error())
-	}
-
-	// print the deleted keys
-	fmt.Println()
-	for _, key := range keys {
-		fmt.Printf("%s %s removed\n", display.TaskComplete, key)
+		removed := false
+		for _, evar := range evars {
+			if evar.Key == key {
+				if err := odin.RemoveEvar(appID, evar.ID); err != nil {
+					return err
+				}
+				removed = true
+				fmt.Printf("%s %s removed\n", display.TaskComplete, key)				
+			}
+		}
+		if !removed {
+			fmt.Printf("%s %s not found\n", display.TaskPause, key)
+		}
 	}
 	fmt.Println()
 
