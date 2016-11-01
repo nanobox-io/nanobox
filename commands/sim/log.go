@@ -17,7 +17,7 @@ var (
 		Use:    "log",
 		Short:  "Displays logs from the running sim app and its components.",
 		Long:   ``,
-		PreRun: steps.Run("start", "build-runtime", "compile-app", "sim start", "sim deploy"),
+		PreRun: steps.Run("start", "sim start"),
 		Run:    logFn,
 	}
 )
