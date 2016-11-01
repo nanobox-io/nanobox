@@ -97,6 +97,7 @@ func init() {
 	NanoboxCmd.AddCommand(ConsoleCmd)
 	NanoboxCmd.AddCommand(LinkCmd)
 	NanoboxCmd.AddCommand(LoginCmd)
+	NanoboxCmd.AddCommand(EvarCmd)
 	NanoboxCmd.AddCommand(LogoutCmd)
 	NanoboxCmd.AddCommand(BuildCmd)
 	NanoboxCmd.AddCommand(CompileCmd)
