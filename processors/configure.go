@@ -37,6 +37,7 @@ How would you like to run nanobox?
   a) Inside a lightweight VM
   b) Via Docker Native (coming)
 
+(recommended a)
 Answer: `, map[string]string{"a": "docker-machine", "b": "native"})
 
 	// if provider == docker-machine ask more questions
@@ -49,12 +50,14 @@ Answer: `, map[string]string{"a": "docker-machine", "b": "native"})
 	setupConf.CPUs = intAsker(fmt.Sprintf(`
 How many CPU cores would you like to make available to the VM (1-%d)?
 
+(recommended > 2)
 Answer: `, runtime.NumCPU()), runtime.NumCPU())
 
 	// ask about ram
 	setupConf.RAM = intAsker(`
 How many GB of RAM would you like to make available to the VM (2-4)?
 
+(recommended > 1)
 Answer: `, 4)
 
 	// ask about mount types
@@ -62,6 +65,7 @@ Answer: `, 4)
 Would you like to enable netfs for faster filesystem access (y/n)?
 (we highly recommend using this option, but this will prompt for password)
 
+(recommended y)
 Answer: `, map[string]string{"y": "netfs", "n": "native"})
 
 	config.ConfigFile(setupConf)
