@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
+	"runtime"
 	"runtime/debug"
 
 	"github.com/bugsnag/bugsnag-go"
@@ -28,6 +30,14 @@ func (bugLog) Printf(fmt string, v ...interface{}) {
 
 // main
 func main() {
+
+	// verify that we support the prompt they are using
+	if badTerminal() {
+		fmt.Println("This console is currently not supported by nanobox")
+		fmt.Println("Please refer to the docs for more information")
+		os.Exit(1)
+	}
+
 	// build the viper config because viper cannot handle concurrency
 	// so it has to be done at the beginning even if we dont need it
 	config.Viper()
@@ -81,4 +91,8 @@ func setupBugsnag() {
 		event.GroupingHash = fmt.Sprintf("%x", md5.Sum([]byte(event.Message)))
 		return nil
 	})
+}
+
+func badTerminal() bool {
+	return runtime.GOOS == "windows" && strings.Contains(os.Getenv("shell"), "bash")
 }
