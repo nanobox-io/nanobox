@@ -4,8 +4,8 @@ import (
 	"fmt"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util/odin"	
 	"github.com/nanobox-io/nanobox/util/display"
+	"github.com/nanobox-io/nanobox/util/odin"
 )
 
 func Remove(envModel *models.Env, appID string, keys []string) error {
@@ -33,7 +33,7 @@ func Remove(envModel *models.Env, appID string, keys []string) error {
 					return err
 				}
 				removed = true
-				fmt.Printf("%s %s removed\n", display.TaskComplete, key)				
+				fmt.Printf("%s %s removed\n", display.TaskComplete, key)
 			}
 		}
 		if !removed {

@@ -9,7 +9,7 @@ import (
 	process_provider "github.com/nanobox-io/nanobox/processors/provider"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/provider"
-	"github.com/nanobox-io/nanobox/util/update"
+	//	"github.com/nanobox-io/nanobox/util/update"
 )
 
 func Update() error {

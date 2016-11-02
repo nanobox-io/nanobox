@@ -26,11 +26,12 @@ var (
 	// set the default endpoint to nanobox
 	endpoint = "nanobox"
 )
+
 type (
 	evar struct {
-		ID     string `json:"id"`
-		Key    string `json:"title"`
-		Value  string `json:"value"`
+		ID    string `json:"id"`
+		Key   string `json:"title"`
+		Value string `json:"value"`
 	}
 )
 

@@ -3,8 +3,8 @@ package evar
 import (
 	"fmt"
 
-	"github.com/nanobox-io/nanobox/util/odin"	
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util/odin"
 )
 
 func List(envModel *models.Env, appID string) error {

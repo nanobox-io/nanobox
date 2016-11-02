@@ -5,7 +5,7 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/util/odin"	
+	"github.com/nanobox-io/nanobox/util/odin"
 )
 
 func Add(envModel *models.Env, appID string, evars map[string]string) error {

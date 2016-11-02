@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 	"runtime"
 	"runtime/debug"
+	"strings"
 
 	"github.com/bugsnag/bugsnag-go"
 	"github.com/jcelliott/lumber"
