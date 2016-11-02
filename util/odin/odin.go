@@ -190,14 +190,6 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 		return err
 	}
 
-	if responseBody != nil {
-		lumber.Debug("response body: '%s'\n", b)
-		err = json.Unmarshal(b, responseBody)
-		if err != nil {
-			return err
-		}
-	}
-
 	if res.StatusCode == 401 {
 		return fmt.Errorf("Unauthorized")
 	}
@@ -212,6 +204,14 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
 		return fmt.Errorf("bad exit response(%d %s %s %s (%s) %s)", res.StatusCode, req.Method, req.URL, req.Proto, res.Header.Get("Content-Length"), b)
+	}
+
+	if responseBody != nil {
+		lumber.Debug("response body: '%s'\n", b)
+		err = json.Unmarshal(b, responseBody)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
