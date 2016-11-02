@@ -29,6 +29,10 @@ func (machine DockerMachine) addNetfsMount(local, host string) error {
 		return err
 	}
 
+	if len(pass) == 0 {
+		return fmt.Errorf("currently we do not support passwordless windows accounts")
+	}
+
 	// resume the task
 	display.ResumeTask()
 
