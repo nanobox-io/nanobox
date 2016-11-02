@@ -19,13 +19,13 @@ func Update() error {
 		return fmt.Errorf("failed to init docker client: %s", err.Error())
 	}
 
-	// check to see if nanobox needs to update
-	update.Check()
-
-	// pull the latest docker-machine image
-	pullImages()
+	// // check to see if nanobox needs to update
+	// update.Check()
 
 	// update all the nanobox images
+	pullImages()
+
+	// pull the latest docker-machine image
 	return provider.Install()
 }
 

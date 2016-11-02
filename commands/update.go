@@ -12,8 +12,9 @@ var (
 
 	// UpdateCmd ...
 	UpdateCmd = &cobra.Command{
-		Use:    "update",
-		Short:  "Updates docker images and checks to see if the nanobox binary needs an update.",
+		Use:    "update-images",
+		Short:  "Updates docker images.",
+		// Short:  "Updates docker images and checks to see if the nanobox binary needs an update.",
 		Long:   ``,
 		PreRun: steps.Run("start"),
 		Run:    updateFn,
