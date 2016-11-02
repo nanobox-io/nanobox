@@ -32,7 +32,7 @@ func (machine DockerMachine) HasMount(mount string) bool {
 		return false
 
 	}
-	return strings.Contains(string(output), mount) && !machine.staleMount(mount)
+	return strings.Contains(string(output), mount) // && !machine.staleMount(mount)
 }
 
 func (machine DockerMachine) staleMount(mount string) bool {
