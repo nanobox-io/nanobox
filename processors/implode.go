@@ -30,23 +30,24 @@ func Implode() error {
 		}
 	}
 
-	// only unmount if the env is up and running.
-	if util_provider.IsReady() {
-		// init docker client
-		if err := provider.Init(); err != nil {
-			return fmt.Errorf("failed to init docker client: %s", err.Error())
-		}
+	// remove unmounting because it shouldnt be necessary anymore
+	// // only unmount if the env is up and running.
+	// if util_provider.IsReady() {
+	// 	// init docker client
+	// 	if err := provider.Init(); err != nil {
+	// 		return fmt.Errorf("failed to init docker client: %s", err.Error())
+	// 	}
 
-		envModels, _ := models.AllEnvs()
-		for _, envModel := range envModels {
-			// unmount (and remove the share for the env)
-			if err := env.Unmount(envModel); err != nil {
-				fmt.Printf("unable to remove mounts: %s", err)
-			}
+	// 	envModels, _ := models.AllEnvs()
+	// 	for _, envModel := range envModels {
+	// 		// unmount (and remove the share for the env)
+	// 		if err := env.Unmount(envModel); err != nil {
+	// 			fmt.Printf("unable to remove mounts: %s", err)
+	// 		}
 
-		}
+	// 	}
 
-	}
+	// }
 
 	// destroy the provider (VM), remove images, remove containers
 	if err := util_provider.Implode(); err != nil {
