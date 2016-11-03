@@ -70,7 +70,12 @@ func setup(appModel *models.App) error {
 
 	// we don't need to setup if dev is already running
 	if isDevRunning() {
-		return nil
+		if devInUse(container_generator.DevName()) {
+			return nil
+		} else {
+			// if it isnt being used lets wipe it out and start again
+			teardown(appModel)
+		}
 	}
 
 	display.OpenContext("Building dev environment")
