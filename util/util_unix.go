@@ -26,8 +26,8 @@ func IsPrivileged() bool {
 func PrivilegeExec(command string) error {
 	//
 	if !sudoExists() {
-		fmt.Println("We could not find the 'sudo' in your path")
-		fmt.Println("please run the following command then press enter when its complete")
+		fmt.Println("We could not find 'sudo' in your path")
+		fmt.Println("Please run the following command in a separate console, then press enter to continue once its complete:")
 		fmt.Printf("sudo %v --internal", command)
 		reader := bufio.NewReader(os.Stdin)
 		reader.ReadString('\n')
