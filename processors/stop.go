@@ -25,10 +25,11 @@ func Stop() error {
 		return fmt.Errorf("failed to stop running apps: %s", err.Error())
 	}
 
-	// unmount envs
-	if err := unmountEnvs(); err != nil {
-		return fmt.Errorf("failed to unmount envs: %s", err.Error())
-	}
+	// env unmounting shouldnt be a problem any more
+	// // unmount envs
+	// if err := unmountEnvs(); err != nil {
+	// 	return fmt.Errorf("failed to unmount envs: %s", err.Error())
+	// }
 
 	// stop the provider
 	if err := provider.Stop(); err != nil {
