@@ -8,8 +8,8 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/app/dns"
-	"github.com/nanobox-io/nanobox/processors/env"
-	"github.com/nanobox-io/nanobox/processors/provider"
+	// "github.com/nanobox-io/nanobox/processors/env"
+	// "github.com/nanobox-io/nanobox/processors/provider"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 	util_provider "github.com/nanobox-io/nanobox/util/provider"
