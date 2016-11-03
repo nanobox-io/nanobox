@@ -219,9 +219,15 @@ func reloadServer() error {
 		return nil
 	}
 
+	// make sure nfsd is running
+	cmd := exec.Command("service", "nfs-server", "start")
+	if b, err := cmd.CombinedOutput(); err != nil {
+		lumber.Debug("enable nfs: %s err: %s", b, err)
+	}
+
 	// reload nfs server
 	//  TODO: provide a clear error message for a direction to fix
-	cmd := exec.Command("exportfs", "-ra")
+	cmd = exec.Command("exportfs", "-ra")
 	if b, err := cmd.CombinedOutput(); err != nil {
 		lumber.Debug("update: %s", b)
 		return fmt.Errorf("update: %s %s", b, err.Error())
