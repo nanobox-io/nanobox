@@ -2,10 +2,12 @@ package provider
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/locker"
@@ -34,19 +36,19 @@ func Setup() error {
 	}
 
 	// install the provider (VM)
-	if err := provider.Install(); err != nil {
+	if err := util.Retry(provider.Install, 2, 10*time.Second); err != nil {
 		lumber.Error("provider:Setup:provider.Install(): %s", err.Error())
 		return fmt.Errorf("failed to install the provider: %s", err.Error())
 	}
 
 	// create the provider (VM)
-	if err := provider.Create(); err != nil {
+	if err := util.Retry(provider.Create, 2, 10*time.Second); err != nil {
 		lumber.Error("provider:Setup:provider.Create(): %s", err.Error())
 		return fmt.Errorf("failed to create the provider: %s", err.Error())
 	}
 
 	// start the provider (VM)
-	if err := provider.Start(); err != nil {
+	if err := util.Retry(provider.Start, 2, 10*time.Second); err != nil {
 		lumber.Error("provider:Setup:provider.Start(): %s", err.Error())
 		return fmt.Errorf("failed to start the provider: %s", err.Error())
 	}
