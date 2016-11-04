@@ -2,11 +2,13 @@ package processors
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
 
 	process_provider "github.com/nanobox-io/nanobox/processors/provider"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/provider"
 	//	"github.com/nanobox-io/nanobox/util/update"
@@ -48,11 +50,17 @@ func pullImages() error {
 		}
 
 		// pull the build image
-		if _, err := docker.ImagePull(image.Slug, dockerPercent); err != nil {
+		imagePullFunc := func() error {
+			_, err := docker.ImagePull(image.Slug, dockerPercent)
+			return err
+		}
+
+		if err := util.Retry(imagePullFunc, 5, time.Second); err != nil {
 			lumber.Error("code:pullBuildImage:docker.ImagePull(%s, nil): %s", image.Slug, err.Error())
 			display.ErrorTask()
 			return fmt.Errorf("failed to pull docker image (%s): %s", image.Slug, err.Error())
 		}
+
 		display.StopTask()
 	}
 

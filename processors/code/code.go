@@ -3,11 +3,13 @@ package code
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox-boxfile"
 
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 )
@@ -40,7 +42,11 @@ func pullBuildImage() (string, error) {
 	}
 
 	// pull the build image
-	if _, err := docker.ImagePull(buildImage, dockerPercent); err != nil {
+	imagePull := func() error {
+		_, err := docker.ImagePull(buildImage, dockerPercent)
+		return err
+	}
+	if err := util.Retry(imagePull, 5, time.Second); err != nil {
 		lumber.Error("code:pullBuildImage:docker.ImagePull(%s, nil): %s", buildImage, err.Error())
 		display.ErrorTask()
 		return "", fmt.Errorf("failed to pull docker image (%s): %s", buildImage, err.Error())
