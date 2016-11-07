@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"os/exec"
 	"strings"
 
@@ -51,6 +52,7 @@ func Add(path string) error {
 		if strings.Contains(line, lineCheck) {
 			// add our path to the line
 			lines[i] = fmt.Sprintf("%s %s", path, line)
+			lines[i] = cleanLine(lines[i], lineCheck)
 			found = true
 			break
 		}
@@ -140,4 +142,19 @@ func reloadServer() error {
 	}
 
 	return nil
+}
+
+
+func cleanLine(line, lineCheck string) string {
+	paths := strings.Split(strings.Replace(line, lineCheck, "", 1), " ")
+	goodPaths := []string{}
+	for _, path := range paths {
+		fileInfo, err := os.Stat(path)
+		if err != nil || !fileInfo.IsDir() {
+			// continue on if the file doest exist or if it is not a directory
+			continue
+		}
+		goodPaths = append(goodPaths, path)
+	}
+	return fmt.Sprintf("%s %s", strings.Join(goodPaths, " "), lineCheck)
 }
