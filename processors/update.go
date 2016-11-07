@@ -43,6 +43,9 @@ func pullImages() error {
 	}
 
 	for _, image := range images {
+		if image.Slug == "" {
+			continue
+		}
 		display.StartTask("Pulling %s image", image.Slug)
 
 		// generate a docker percent display
