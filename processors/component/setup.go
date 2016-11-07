@@ -2,6 +2,7 @@ package component
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
@@ -9,6 +10,7 @@ import (
 	container_generator "github.com/nanobox-io/nanobox/generators/containers"
 	hook_generator "github.com/nanobox-io/nanobox/generators/hooks/component"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/hookit"
@@ -53,7 +55,11 @@ func Setup(appModel *models.App, componentModel *models.Component) error {
 
 		// pull the component image
 		display.StartTask("Pulling %s image", componentModel.Image)
-		if _, err := docker.ImagePull(componentModel.Image, dockerPercent); err != nil {
+		imagePull := func() error {
+			_, err := docker.ImagePull(componentModel.Image, dockerPercent)
+			return err
+		}
+		if err := util.Retry(imagePull, 5, time.Second); err != nil {
 			lumber.Error("component:Setup:docker.ImagePull(%s, nil): %s", componentModel.Image, err.Error())
 			// remove the component because it doesnt need to be cleaned up at this point
 			componentModel.Delete()
