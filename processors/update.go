@@ -25,7 +25,9 @@ func Update() error {
 	// update.Check()
 
 	// update all the nanobox images
-	pullImages()
+	if err := pullImages(); err != nil {
+		return fmt.Errorf("failed to pull images: %s", err)
+	}
 
 	// pull the latest docker-machine image
 	return provider.Install()
