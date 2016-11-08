@@ -1,12 +1,16 @@
 package commands
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/commands/steps"
+	"github.com/nanobox-io/nanobox/helpers"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors"
+	"github.com/nanobox-io/nanobox/processors/sim"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 )
@@ -20,7 +24,7 @@ var (
 		Long:  ``,
 		PreRun: func(ccmd *cobra.Command, args []string) {
 			registry.Set("skip-compile", deployCmdFlags.skipCompile)
-			steps.Run("start", "build-runtime", "compile-app", "login")(ccmd, args)
+			steps.Run("start", "build-runtime", "compile-app")(ccmd, args)
 		},
 		Run: deployFn,
 	}
@@ -28,10 +32,8 @@ var (
 	// deployCmdFlags ...
 	deployCmdFlags = struct {
 		skipCompile bool
-		app         string
 		message     string
 		force       bool
-		endpoint    string
 	}{}
 )
 
@@ -39,27 +41,35 @@ var (
 func init() {
 	DeployCmd.Flags().BoolVarP(&deployCmdFlags.skipCompile, "skip-compile", "", false, "skip compiling the app")
 	DeployCmd.Flags().BoolVarP(&deployCmdFlags.force, "force", "", false, "force the deploy even if you have used this build on a previous deploy")
-	DeployCmd.Flags().StringVarP(&deployCmdFlags.app, "app", "a", "", "message to accompany this command")
 	DeployCmd.Flags().StringVarP(&deployCmdFlags.message, "message", "m", "", "message to accompany this command")
-	DeployCmd.Flags().StringVarP(&deployCmdFlags.endpoint, "endpoint", "e", "", "api endpoint")
 }
 
 // deployFn ...
 func deployFn(ccmd *cobra.Command, args []string) {
 	env, _ := models.FindEnvByID(config.EnvID())
-	// TODO: make sure the environmetn is setup
+	args, location, name := helpers.Endpoint(env, args)
 
-	deployConfig := processors.DeployConfig{
-		App:      deployCmdFlags.app,
-		Message:  deployCmdFlags.message,
-		Force:    deployCmdFlags.force,
-		Endpoint: deployCmdFlags.endpoint,
+	switch location {
+	case "local":
+		switch name {
+		case "dev":
+			fmt.Println("deploying is not necessary in this context, 'nanobox run' instead")
+			return
+		case "sim":
+			steps.Run("sim start")(ccmd, args)
+			app, _ := models.FindAppBySlug(env.ID, "sim")
+			display.CommandErr(sim.Deploy(env, app))
+			steps.Run("sim stop")(ccmd, args)
+		}
+	case "production":
+		steps.Run("login")(ccmd, args)
+		deployConfig := processors.DeployConfig{
+			App:      name,
+			Message:  deployCmdFlags.message,
+			Force:    deployCmdFlags.force,
+		}
+
+		// set the meta arguments to be used in the processor and run the processor
+		display.CommandErr(processors.Deploy(env, deployConfig))
 	}
-
-	if deployConfig.App == "" {
-		deployConfig.App = "default"
-	}
-
-	// set the meta arguments to be used in the processor and run the processor
-	display.CommandErr(processors.Deploy(env, deployConfig))
 }

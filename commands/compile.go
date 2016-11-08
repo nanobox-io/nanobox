@@ -30,7 +30,7 @@ deployed into dev, sim, or production environments.
 )
 
 func init() {
-	steps.Build("compile-app", compileComplete, compileFn)
+	steps.Build("compile-app", false, compileComplete, compileFn)
 }
 
 // compileFn ...

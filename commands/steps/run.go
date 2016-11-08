@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/nanobox-io/nanobox/commands/registry"
-	"github.com/nanobox-io/nanobox/util/display"
+	// "github.com/nanobox-io/nanobox/util/display"
 	"github.com/spf13/cobra"
 )
 
@@ -17,16 +17,19 @@ func Run(stepNames ...string) func(ccmd *cobra.Command, args []string) {
 		}
 		// list that needs to be run
 		prereqs := []string{}
-
+		steps := []step{}
 		//
 		for _, stepName := range stepNames {
 			step, ok := stepList[stepName]
 			if ok && !step.complete() {
-				prereqs = append(prereqs, stepName)
+				steps = append(steps, step)
+				if !step.private {
+					prereqs = append(prereqs, stepName)
+				}
 			}
 		}
 
-		if len(prereqs) == 0 {
+		if len(steps) == 0 {
 			return
 		}
 
@@ -34,17 +37,16 @@ func Run(stepNames ...string) func(ccmd *cobra.Command, args []string) {
 		printMessage(prereqs)
 
 		// run the missing steps
-		for _, nr := range prereqs {
-			step := stepList[nr]
-
-			display.OpenContext("(nanobox %s)", nr)
+		for _, step := range steps {
 			step.cmd(ccmd, args)
-			display.CloseContext()
 		}
 	}
 }
 
 func printMessage(prereqs []string) {
+	if len(prereqs) == 0 {
+		return
+	}
 	fmt.Println()
 	fmt.Println("------------------------------------")
 	fmt.Println("Running the following prerequisites:")

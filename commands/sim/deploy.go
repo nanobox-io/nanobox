@@ -36,7 +36,7 @@ var (
 )
 
 func init() {
-	steps.Build("sim deploy", deployComplete, deployFn)
+	steps.Build("sim deploy", true, deployComplete, deployFn)
 	DeployCmd.Flags().BoolVarP(&deployCmdFlags.skipCompile, "skip-compile", "", false, "skip compiling the app")
 }
 

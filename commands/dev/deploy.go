@@ -21,7 +21,7 @@ var DeployCmd = &cobra.Command{
 }
 
 func init() {
-	steps.Build("dev deploy", deployComplete, deployFn)
+	steps.Build("dev deploy", true, deployComplete, deployFn)
 }
 
 // deployFn ...

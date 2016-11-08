@@ -14,18 +14,13 @@ func Tunnel(envModel *models.Env, tunnelConfig TunnelConfig) error {
 
 	appID := tunnelConfig.App
 
-	// fetch the link
-	link, ok := envModel.Links[tunnelConfig.App]
+	// fetch the remote
+	remote, ok := envModel.Remotes[tunnelConfig.App]
 	if ok {
 		// set the odin endpoint
-		odin.SetEndpoint(link.Endpoint)
+		odin.SetEndpoint(remote.Endpoint)
 		// set the app id
-		appID = link.ID
-	}
-
-	// if an endpoint was provided as a flag, override the linked endpoint
-	if tunnelConfig.Endpoint != "" {
-		odin.SetEndpoint(tunnelConfig.Endpoint)
+		appID = remote.ID
 	}
 
 	// set the app id to the directory name if it's default

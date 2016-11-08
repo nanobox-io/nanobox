@@ -1,4 +1,4 @@
-package link
+package remote
 
 import (
 	"fmt"
@@ -10,8 +10,8 @@ import (
 // List ...
 func List(env *models.Env) error {
 
-	if len(env.Links) == 0 {
-		fmt.Printf("\n! This codebase is not linked to any apps\n\n")
+	if len(env.Remotes) == 0 {
+		fmt.Printf("\n! This codebase is not connected to any apps\n\n")
 		return nil
 	}
 
@@ -30,9 +30,9 @@ func List(env *models.Env) error {
 	fmt.Printf("%s\n", separator)
 
 	// print the table
-	for alias, link := range env.Links {
-		margin := strings.Repeat(" ", leftColWidth-len(link.Name))
-		fmt.Printf("%s%s: %s\n", link.Name, margin, alias)
+	for alias, remote := range env.Remotes {
+		margin := strings.Repeat(" ", leftColWidth-len(remote.Name))
+		fmt.Printf("%s%s: %s\n", remote.Name, margin, alias)
 	}
 
 	// end with a newline
@@ -45,9 +45,9 @@ func List(env *models.Env) error {
 func longestName(env *models.Env) string {
 	longest := ""
 
-	for _, link := range env.Links {
-		if len(link.Name) > len(longest) {
-			longest = link.Name
+	for _, remote := range env.Remotes {
+		if len(remote.Name) > len(longest) {
+			longest = remote.Name
 		}
 	}
 
@@ -58,7 +58,7 @@ func longestName(env *models.Env) string {
 func longestAlias(env *models.Env) string {
 	longest := ""
 
-	for alias := range env.Links {
+	for alias := range env.Remotes {
 		if len(alias) > len(longest) {
 			longest = alias
 		}

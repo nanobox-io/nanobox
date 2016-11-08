@@ -27,7 +27,7 @@ and deploy it into your sim platform (nanobox sim deploy).
 )
 
 func init() {
-	steps.Build("sim start", startCheck, startFn)
+	steps.Build("sim start", true, startCheck, startFn)
 }
 
 // startFn ...

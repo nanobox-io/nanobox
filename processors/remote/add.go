@@ -1,15 +1,16 @@
-package link
+package remote
 
 import (
 	"fmt"
 
+	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/odin"
 )
 
-func Add(envModel *models.Env, appName, alias, endpoint string) error {
+func Add(envModel *models.Env, appName, alias string) error {
 
 	// ensure the env model has been generated
 	if err := envModel.Generate(); err != nil {
@@ -26,6 +27,7 @@ func Add(envModel *models.Env, appName, alias, endpoint string) error {
 		appName = config.LocalDirName()
 	}
 
+	endpoint := registry.GetString("endpoint")
 	// set the endpoint to nanobox if it's missing
 	if endpoint == "" {
 		endpoint = "nanobox"
@@ -42,18 +44,18 @@ func Add(envModel *models.Env, appName, alias, endpoint string) error {
 	}
 
 	// ensure the links map is initialized
-	if envModel.Links == nil {
-		envModel.Links = map[string]models.Link{}
+	if envModel.Remotes == nil {
+		envModel.Remotes = map[string]models.Remote{}
 	}
 
-	envModel.Links[alias] = models.Link{
+	envModel.Remotes[alias] = models.Remote{
 		ID:       app.ID,
 		Name:     app.Name,
 		Endpoint: endpoint,
 	}
 
 	if err := envModel.Save(); err != nil {
-		return fmt.Errorf("failed to save link: %s", err.Error())
+		return fmt.Errorf("failed to save remote: %s", err)
 	}
 
 	fmt.Printf("\n%s Codebase linked to %s\n", display.TaskComplete, appName)

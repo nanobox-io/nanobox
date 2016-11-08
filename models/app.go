@@ -164,7 +164,7 @@ func AppIDByAlias(alias string) string {
 		alias = "default"
 	}
 
-	app, ok := env.Links[alias]
+	app, ok := env.Remotes[alias]
 	if !ok {
 		return ""
 	}

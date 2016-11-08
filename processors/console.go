@@ -14,20 +14,15 @@ func Console(envModel *models.Env, consoleConfig ConsoleConfig) error {
 
 	appID := consoleConfig.App
 
-	// fetch the link
-	link, ok := envModel.Links[appID]
+	// fetch the remote
+	remote, ok := envModel.Remotes[appID]
 	if ok {
 		// set the odin endpoint
-		odin.SetEndpoint(link.Endpoint)
+		odin.SetEndpoint(remote.Endpoint)
 		// set the app id
-		appID = link.ID
+		appID = remote.ID
 	}
-
-	// if an endpoint was provided as a flag, override the linked endpoint
-	if consoleConfig.Endpoint != "" {
-		odin.SetEndpoint(consoleConfig.Endpoint)
-	}
-
+	
 	// set the app id to the directory name if it's default
 	if appID == "default" {
 		appID = config.AppName()

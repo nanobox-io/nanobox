@@ -30,6 +30,9 @@ var (
 	//
 	internalCommand bool
 
+	// 
+	endpoint string
+
 	// NanoboxCmd ...
 	NanoboxCmd = &cobra.Command{
 		Use:   "nanobox",
@@ -54,6 +57,11 @@ var (
 				lumber.SetLogger(fileLogger)
 
 			}
+
+			if endpoint != "" {
+				registry.Set("endpoint", endpoint)
+			}
+
 			registry.Set("debug", debugMode)
 
 			// setup the display output
@@ -84,6 +92,8 @@ var (
 func init() {
 
 	// persistent flags
+	NanoboxCmd.PersistentFlags().StringVarP(&endpoint, "endpoint", "e", "", "production endpoint")	
+	NanoboxCmd.PersistentFlags().MarkHidden("endpoint")
 	NanoboxCmd.PersistentFlags().BoolVarP(&internalCommand, "internal", "", false, "Skip pre-requisite checks")
 	NanoboxCmd.PersistentFlags().MarkHidden("internal")
 	NanoboxCmd.PersistentFlags().BoolVarP(&debugMode, "debug", "", false, "In the event of a failure, drop into debug context")
@@ -95,7 +105,7 @@ func init() {
 	NanoboxCmd.AddCommand(InspectCmd)
 	NanoboxCmd.AddCommand(DeployCmd)
 	NanoboxCmd.AddCommand(ConsoleCmd)
-	NanoboxCmd.AddCommand(LinkCmd)
+	NanoboxCmd.AddCommand(RemoteCmd)
 	NanoboxCmd.AddCommand(LoginCmd)
 	NanoboxCmd.AddCommand(EvarCmd)
 	NanoboxCmd.AddCommand(LogoutCmd)
@@ -112,5 +122,10 @@ func init() {
 	NanoboxCmd.AddCommand(StopCmd)
 	NanoboxCmd.AddCommand(UpdateCmd)
 	NanoboxCmd.AddCommand(VersionCmd)
+	NanoboxCmd.AddCommand(RunCmd)
+	NanoboxCmd.AddCommand(InfoCmd)
+	NanoboxCmd.AddCommand(DnsCmd)
+	NanoboxCmd.AddCommand(EvarCmd)
+
 	NanoboxCmd.AddCommand(ConfigureCmd)
 }

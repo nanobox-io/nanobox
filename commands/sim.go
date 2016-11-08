@@ -13,6 +13,7 @@ var (
 		Use:   "sim",
 		Short: "Manages your 'simulated' environment.",
 		Long:  ``,
+		Hidden: true,
 	}
 )
 
@@ -24,9 +25,4 @@ func init() {
 	SimCmd.AddCommand(sim.StopCmd)
 	SimCmd.AddCommand(sim.DeployCmd)
 	SimCmd.AddCommand(sim.DestroyCmd)
-	SimCmd.AddCommand(sim.InfoCmd)
-	SimCmd.AddCommand(sim.LogCmd)
-	SimCmd.AddCommand(sim.ConsoleCmd)
-	SimCmd.AddCommand(sim.EvarCmd)
-	SimCmd.AddCommand(sim.DNSCmd)
 }

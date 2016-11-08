@@ -27,7 +27,7 @@ and deploy it into your dev platform (nanobox dev deploy).
 )
 
 func init() {
-	steps.Build("dev start", startCheck, devStart)
+	steps.Build("dev start", true, startCheck, devStart)
 }
 
 // devStart ...

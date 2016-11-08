@@ -25,9 +25,18 @@ will be preserved in its current state.
 	}
 )
 
+func init() {
+	steps.Build("sim stop", true, stopCheck, stopFn)
+}
+
 //
 // stopFn ...
 func stopFn(ccmd *cobra.Command, args []string) {
 	app, _ := models.FindAppBySlug(config.EnvID(), "sim")
 	display.CommandErr(sim.Stop(app))
+}
+
+func stopCheck() bool {
+	// currently we always stop if we are asking weather to stop
+	return false
 }

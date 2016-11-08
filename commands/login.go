@@ -33,7 +33,7 @@ func init() {
 	LoginCmd.Flags().StringVarP(&loginCmdFlags.password, "password", "p", "", "password")
 	LoginCmd.Flags().StringVarP(&loginCmdFlags.endpoint, "endpoint", "e", "", "endpoint")
 
-	steps.Build("login", loginCheck, loginFn)
+	steps.Build("login", false, loginCheck, loginFn)
 }
 
 // loginFn ...

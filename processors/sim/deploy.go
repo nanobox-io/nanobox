@@ -59,7 +59,7 @@ func Deploy(envModel *models.Env, appModel *models.App) error {
 	// give the user some helpful information
 	display.InfoSimDeploy(appModel.GlobalIPs["env"])
 
-	return nil
+	return platform.MistListen(appModel)
 }
 
 // update the router and run deploy hooks

@@ -24,7 +24,7 @@ deployed into dev, sim, or production environments.
 )
 
 func init() {
-	steps.Build("configure", configureComplete, configureFn)
+	steps.Build("configure", false, configureComplete, configureFn)
 }
 
 // configureFn ...

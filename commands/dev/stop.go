@@ -2,7 +2,9 @@ package dev
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/nanobox-io/golang-docker-client"
 
+	container_generator "github.com/nanobox-io/nanobox/generators/containers"
 	"github.com/nanobox-io/nanobox/commands/steps"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/dev"
@@ -24,6 +26,9 @@ Stops your dev platform. All data will be preserved in its current state.
 	}
 )
 
+func init() {
+	steps.Build("dev stop", true, stopCheck, stopFn)
+}
 //
 // stopFn ...
 func stopFn(ccmd *cobra.Command, args []string) {
@@ -31,4 +36,11 @@ func stopFn(ccmd *cobra.Command, args []string) {
 	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
 
 	display.CommandErr(dev.Stop(app))
+}
+
+func stopCheck() bool {
+	container, err := docker.GetContainer(container_generator.DevName())
+
+	// if the container doesn't exist then just return false
+	return err == nil && container.State.Status == "running"
 }

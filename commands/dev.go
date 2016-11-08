@@ -13,6 +13,7 @@ var (
 		Use:   "dev",
 		Short: "Manages your 'development' environment.",
 		Long:  ``,
+		Hidden: true,
 	}
 )
 
@@ -24,10 +25,4 @@ func init() {
 	DevCmd.AddCommand(dev.StopCmd)
 	DevCmd.AddCommand(dev.DeployCmd)
 	DevCmd.AddCommand(dev.DestroyCmd)
-	DevCmd.AddCommand(dev.DNSCmd)
-	DevCmd.AddCommand(dev.InfoCmd)
-	DevCmd.AddCommand(dev.LogCmd)
-	DevCmd.AddCommand(dev.ConsoleCmd)
-	DevCmd.AddCommand(dev.RunCmd)
-	DevCmd.AddCommand(dev.EvarCmd)
 }
