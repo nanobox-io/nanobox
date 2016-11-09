@@ -43,7 +43,6 @@ func Run(id string, consoleConfig ConsoleConfig) error {
 	}
 	cmd = append(cmd, cmdPart)
 
-	fmt.Println("CMD:", cmd)
 	// establish file descriptors for std streams
 	stdInFD, isTerminal := term.GetFdInfo(os.Stdin)
 	stdOutFD, _ := term.GetFdInfo(os.Stdout)

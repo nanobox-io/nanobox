@@ -4,10 +4,15 @@ import (
 	"fmt"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processors/app"
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
-func Add(appModel *models.App, evars map[string]string) error {
+func Add(envModel *models.Env, appModel *models.App, evars map[string]string) error {
+
+	if err := app.Setup(envModel, appModel, appModel.Name); err != nil {
+		return fmt.Errorf("failed to setup app: %s", err)
+	}
 
 	// iterate through the evars and add them to the app
 	for key, val := range evars {

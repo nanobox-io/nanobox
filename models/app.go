@@ -36,7 +36,7 @@ func (a *App) IsNew() bool {
 func (a *App) Save() error {
 
 	if err := put(a.EnvID, a.ID, a); err != nil {
-		return fmt.Errorf("failed to save app %s", err.Error())
+		return fmt.Errorf("failed to save app: %s", err.Error())
 	}
 
 	return nil
@@ -62,9 +62,10 @@ func (a *App) Generate(env *Env, name string) error {
 
 	// if no env is present we will need to create one
 	if env == nil {
-		env = &Env{ID: config.EnvID()}
+		env = &Env{}
 	}
-
+	env.Generate()
+	
 	a.EnvID = env.ID
 	a.ID = fmt.Sprintf("%s_%s", env.ID, name)
 	a.Name = name
@@ -92,7 +93,7 @@ func (a *App) Components() ([]*Component, error) {
 // FindAppBySlug finds an app by an appID and name
 func FindAppBySlug(envID, name string) (*App, error) {
 
-	app := &App{}
+	app := &App{Name: name}
 
 	key := fmt.Sprintf("%s_%s", envID, name)
 

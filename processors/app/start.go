@@ -7,24 +7,35 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/component"
+	"github.com/nanobox-io/nanobox/processors/platform"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
 
 // Start will start all services associated with an app
-func Start(appModel *models.App) error {
-	locker.LocalLock()
-	defer locker.LocalUnlock()
-
-	// load the env for the display context
-	envModel, err := appModel.Env()
-	if err != nil {
-		lumber.Error("app:Start:models.App.Env(): %s", err.Error())
-		return fmt.Errorf("failed to load app env: %s", err.Error())
+func Start(envModel *models.Env, appModel *models.App, name string) error {
+	// if the app been initialized run the setup
+	if appModel.State != "active" {
+		if err := Setup(envModel, appModel, name); err != nil {
+			return fmt.Errorf("failed to setup the app: %s", err)
+		}
 	}
 
 	display.OpenContext("%s (%s)", envModel.Name, appModel.Name)
 	defer display.CloseContext()
+
+	locker.LocalLock()
+	defer locker.LocalUnlock()
+
+	// clean crufty components
+	if err := component.Clean(appModel); err != nil {
+		return fmt.Errorf("failed to clean crufty components: %s", err.Error())
+	}
+
+	// setup the platform services
+	if err := platform.Setup(appModel); err != nil {
+		return fmt.Errorf("failed to setup platform services: %s", err.Error())
+	}
 
 	// start all the app components
 	if err := component.StartAll(appModel); err != nil {

@@ -6,8 +6,6 @@ import (
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/processors/component"
-	"github.com/nanobox-io/nanobox/processors/platform"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/locker"
@@ -29,22 +27,13 @@ func Setup(envModel *models.Env, appModel *models.App, name string) error {
 		return fmt.Errorf("failed to generate app data: %s", err.Error())
 	}
 
+	fmt.Printf("app: %+v\n", appModel)
 	display.OpenContext("%s (%s)", envModel.Name, appModel.Name)
 	defer display.CloseContext()
 
 	// reserve IPs
 	if err := reserveIPs(appModel); err != nil {
 		return fmt.Errorf("failed to reserve app IPs: %s", err.Error())
-	}
-
-	// clean crufty components
-	if err := component.Clean(appModel); err != nil {
-		return fmt.Errorf("failed to clean crufty components: %s", err.Error())
-	}
-
-	// setup the platform services
-	if err := platform.Setup(appModel); err != nil {
-		return fmt.Errorf("failed to setup platform services: %s", err.Error())
 	}
 
 	// set app state to active

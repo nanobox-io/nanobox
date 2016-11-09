@@ -7,23 +7,9 @@ import (
 	container_generator "github.com/nanobox-io/nanobox/generators/containers"
 	"github.com/nanobox-io/nanobox/commands/steps"
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/processors/dev"
+	"github.com/nanobox-io/nanobox/processors/app"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
-)
-
-var (
-
-	// StopCmd ...
-	StopCmd = &cobra.Command{
-		Use:   "stop",
-		Short: "Stops your dev platform.",
-		Long: `
-Stops your dev platform. All data will be preserved in its current state.
-		`,
-		PreRun: steps.Run("start", "dev start"),
-		Run:    stopFn,
-	}
 )
 
 func init() {
@@ -34,9 +20,9 @@ func init() {
 // stopFn ...
 func stopFn(ccmd *cobra.Command, args []string) {
 	// TODO: check the app and return some message
-	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
+	appModel, _ := models.FindAppBySlug(config.EnvID(), "dev")
 
-	display.CommandErr(dev.Stop(app))
+	display.CommandErr(app.Stop(appModel))
 }
 
 func stopCheck() bool {

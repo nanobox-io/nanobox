@@ -37,7 +37,7 @@ func addFn(ccmd *cobra.Command, args []string) {
 	case "local":
 		app, _ := models.FindAppBySlug(config.EnvID(), name)
 		app.Generate(env, name)
-		display.CommandErr(app_dns.Add(app, args[0]))
+		display.CommandErr(app_dns.Add(env, app, args[0]))
 	case "production":
 		fmt.Println("not yet implemented")
 	}

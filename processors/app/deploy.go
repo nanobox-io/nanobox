@@ -13,14 +13,13 @@ import (
 	"github.com/nanobox-io/nanobox/processors/provider"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/hookit"
-	"github.com/nanobox-io/nanobox/processors/env"
 )
 
 // Deploy ...
 func Deploy(envModel *models.Env, appModel *models.App) error {
 
 	// init docker client
-	if err := env.Setup(envModel); err != nil {
+	if err := provider.Init(); err != nil {
 		return fmt.Errorf("failed to init docker client: %s", err.Error())
 	}
 

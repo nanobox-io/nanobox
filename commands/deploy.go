@@ -10,9 +10,12 @@ import (
 	"github.com/nanobox-io/nanobox/helpers"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors"
-	"github.com/nanobox-io/nanobox/processors/sim"
+	"github.com/nanobox-io/nanobox/processors/app"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
+
+	// added because we need its steps
+	_ "github.com/nanobox-io/nanobox/commands/sim"
 )
 
 var (
@@ -24,7 +27,7 @@ var (
 		Long:  ``,
 		PreRun: func(ccmd *cobra.Command, args []string) {
 			registry.Set("skip-compile", deployCmdFlags.skipCompile)
-			steps.Run("start", "build-runtime", "compile-app")(ccmd, args)
+			steps.Run("configure", "start", "build-runtime", "compile-app")(ccmd, args)
 		},
 		Run: deployFn,
 	}
@@ -46,8 +49,8 @@ func init() {
 
 // deployFn ...
 func deployFn(ccmd *cobra.Command, args []string) {
-	env, _ := models.FindEnvByID(config.EnvID())
-	args, location, name := helpers.Endpoint(env, args)
+	envModel, _ := models.FindEnvByID(config.EnvID())
+	args, location, name := helpers.Endpoint(envModel, args)
 
 	switch location {
 	case "local":
@@ -57,8 +60,8 @@ func deployFn(ccmd *cobra.Command, args []string) {
 			return
 		case "sim":
 			steps.Run("sim start")(ccmd, args)
-			app, _ := models.FindAppBySlug(env.ID, "sim")
-			display.CommandErr(sim.Deploy(env, app))
+			appModel, _ := models.FindAppBySlug(envModel.ID, "sim")
+			display.CommandErr(app.Deploy(envModel, appModel))
 			steps.Run("sim stop")(ccmd, args)
 		}
 	case "production":
@@ -70,6 +73,6 @@ func deployFn(ccmd *cobra.Command, args []string) {
 		}
 
 		// set the meta arguments to be used in the processor and run the processor
-		display.CommandErr(processors.Deploy(env, deployConfig))
+		display.CommandErr(processors.Deploy(envModel, deployConfig))
 	}
 }

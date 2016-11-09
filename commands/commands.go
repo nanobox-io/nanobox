@@ -126,6 +126,4 @@ func init() {
 	// hidden subcommands
 	NanoboxCmd.AddCommand(EnvCmd)
 	NanoboxCmd.AddCommand(InspectCmd)
-	NanoboxCmd.AddCommand(DevCmd)
-	NanoboxCmd.AddCommand(SimCmd)
 }

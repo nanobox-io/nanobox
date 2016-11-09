@@ -7,8 +7,7 @@ import (
 
 	"github.com/nanobox-io/nanobox/helpers"
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/processors/dev"
-	"github.com/nanobox-io/nanobox/processors/sim"
+	"github.com/nanobox-io/nanobox/processors/app"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 )
@@ -35,14 +34,8 @@ func infoFn(ccmd *cobra.Command, args []string) {
 
 	switch location {
 	case "local":
-		switch name {
-		case "dev":
-			app, _ := models.FindAppBySlug(config.EnvID(), "dev")
-			display.CommandErr(dev.Info(env, app))
-		case "sim":
-			app, _ := models.FindAppBySlug(config.EnvID(), "sim")
-			display.CommandErr(sim.Info(env, app))
-		}
+		appModel, _ := models.FindAppBySlug(config.EnvID(), name)
+		display.CommandErr(app.Info(env, appModel))	
 	case "production":
 		fmt.Println("not yet implemented")
 	}
