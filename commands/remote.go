@@ -17,19 +17,21 @@ var (
 	// RemoteCmd ...
 	RemoteCmd = &cobra.Command{
 		Use:    "remote",
-		Short:  "Manages remotes between local & production apps.",
-		Long:   ``,
+		Short:  "Manage application remotes.",
+		Long:   `
+Manages connections between your local codebase and
+remote, live applications created with Nanobox.
+		`,
 		PreRun: steps.Run("login"),
 	}
 
 	// RemoteAddCmd ...
 	RemoteAddCmd = &cobra.Command{
 		Use:   "add",
-		Short: "Adds a new remote between a local & production app.",
+		Short: "Add a new remote.",
 		Long: `
-Adds a new remote between a local and production app. A local
-app can be remoted to multiple production apps. Each remote needs
-an alias. If no alias is provided, 'default' is assumed.
+Adds a new remote. A local app can have multiple remotes. Each
+remote needs an alias. If no alias is provided, 'default' is assumed.
 		`,
 		PreRun: steps.Run("login"),
 		Run:    remoteAddFn,
@@ -38,7 +40,7 @@ an alias. If no alias is provided, 'default' is assumed.
 	// RemoteListCmd ...
 	RemoteListCmd = &cobra.Command{
 		Use:    "ls",
-		Short:  "Lists all remotes for the current local app.",
+		Short:  "List all remotes for the current local app.",
 		Long:   ``,
 		PreRun: steps.Run("login"),
 		Run:    remoteListFn,
@@ -47,7 +49,7 @@ an alias. If no alias is provided, 'default' is assumed.
 	// RemoteRemoveCmd ...
 	RemoteRemoveCmd = &cobra.Command{
 		Use:    "rm",
-		Short:  "Removes a remote between a local & production app.",
+		Short:  "Remove a remote.",
 		Long:   ``,
 		PreRun: steps.Run("login"),
 		Run:    remoteRemoveFn,
@@ -67,7 +69,7 @@ func remoteAddFn(ccmd *cobra.Command, args []string) {
 	env, _ := models.FindEnvByID(config.EnvID())
 
 	if len(args) < 1 {
-		fmt.Printf("\n! Please provide an app name to remote to\n\n")
+		fmt.Printf("\n! Please provide the app name for your remote\n\n")
 		return
 	}
 	alias := ""

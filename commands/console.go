@@ -19,7 +19,7 @@ var (
 	// ConsoleCmd ...
 	ConsoleCmd = &cobra.Command{
 		Use:   "console",
-		Short: "Opens an interactive console inside a production component.",
+		Short: "Open an interactive console inside a component.",
 		Long:  ``,
 		Run:   consoleFn,
 	}

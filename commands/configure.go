@@ -14,10 +14,10 @@ var (
 	// ConfigureCmd ...
 	ConfigureCmd = &cobra.Command{
 		Use:   "configure",
-		Short: "configure the application.",
+		Short: "Configure Nanobox.",
 		Long: `
-Configures the application source that can be
-deployed into dev, sim, or production environments.
+Walks through a series of question prompts that modify your local
+Nanobox configuration (~/.nanobox/config.yml).
 		`,
 		Run: configureFn,
 	}

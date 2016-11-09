@@ -14,8 +14,8 @@ import (
 
 // LogCmd ...
 var LogCmd = &cobra.Command{
-	Use:   "add",
-	Short: "Adds environment variable(s)",
+	Use:   "log",
+	Short: "View and streams application logs.",
 	Long: ``,
 	// PreRun: steps.Run("login"),
 	Run:    logFn,

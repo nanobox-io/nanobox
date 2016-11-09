@@ -20,7 +20,7 @@ var (
 	// DeployCmd ...
 	DeployCmd = &cobra.Command{
 		Use:   "deploy",
-		Short: "Deploys your generated build package to a production app.",
+		Short: "Deploy your application to a live remote or a dry-run environment.",
 		Long:  ``,
 		PreRun: func(ccmd *cobra.Command, args []string) {
 			registry.Set("skip-compile", deployCmdFlags.skipCompile)

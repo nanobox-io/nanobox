@@ -2,7 +2,7 @@ package commands
 
 import (
 	"strings"
-	
+
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/commands/steps"
@@ -17,8 +17,15 @@ import (
 // RunCmd ...
 var RunCmd = &cobra.Command{
 	Use:    "run",
-	Short:  "Opens an interactive console inside your dev platform.",
-	Long:   ``,
+	Short:  "Start your local development environment.",
+	Long:   `
+Starts your local development enviroment and opens an
+interactive console inside the environment.
+
+You can also pass a command into 'run'. Nanobox will
+run the command without dropping you into a console
+in your local environment.
+	`,
 	PreRun: steps.Run("start", "build-runtime", "dev start", "dev deploy"),
 	Run:    runFn,
 	PostRun: steps.Run("dev stop"),

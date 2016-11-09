@@ -11,8 +11,11 @@ var (
 	// DnsCmd ...
 	DnsCmd = &cobra.Command{
 		Use:   "dns",
-		Short: "Manages dns",
-		Long:  ``,
+		Short: "Manage dns aliases for local applications.",
+		Long:  `
+Manages dns aliases for local applications. This modifies
+your local hosts file, requiring administrative privileges.
+		`,
 	}
 )
 

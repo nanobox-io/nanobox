@@ -14,7 +14,7 @@ var (
 	// VersionCmd ...
 	VersionCmd = &cobra.Command{
 		Use:   "version",
-		Short: "version",
+		Short: "Show the current Nanobox version.",
 		Long:  ``,
 		Run:   versionFn,
 	}

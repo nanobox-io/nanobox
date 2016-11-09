@@ -18,9 +18,10 @@ var (
 	// InfoCmd ...
 	InfoCmd = &cobra.Command{
 		Use:   "info",
-		Short: "Show information context required",
+		Short: "Show information about the specified environment.",
 		Long: `
-todo: write long description
+Shows information about the specified environment. You must
+specify which environment you would like information about.
 `,
 		Run: infoFn,
 	}
@@ -37,10 +38,10 @@ func infoFn(ccmd *cobra.Command, args []string) {
 		switch name {
 		case "dev":
 			app, _ := models.FindAppBySlug(config.EnvID(), "dev")
-			display.CommandErr(dev.Info(env, app))	
+			display.CommandErr(dev.Info(env, app))
 		case "sim":
 			app, _ := models.FindAppBySlug(config.EnvID(), "sim")
-			display.CommandErr(sim.Info(env, app))	
+			display.CommandErr(sim.Info(env, app))
 		}
 	case "production":
 		fmt.Println("not yet implemented")

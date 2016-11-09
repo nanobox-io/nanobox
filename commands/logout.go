@@ -12,7 +12,7 @@ var (
 	// LogoutCmd ...
 	LogoutCmd = &cobra.Command{
 		Use:   "logout",
-		Short: "Removes your nanobox.io api token from your local nanobox client.",
+		Short: "Remove your nanobox.io api token from your local nanobox client.",
 		Long:  ``,
 		Run:   logoutFn,
 	}

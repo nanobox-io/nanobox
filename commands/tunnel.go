@@ -18,11 +18,11 @@ var (
 	// TunnelCmd ...
 	TunnelCmd = &cobra.Command{
 		Use:   "tunnel",
-		Short: "Creates a secure tunnel between your local machine & a production component.",
+		Short: "Create a secure tunnel between your local machine & a live component.",
 		Long: `
-Creates a secure tunnel between your local machine & a
-production component. The tunnel allows you to manage
-production data using your local client of choice.
+Creates a secure tunnel between your local machine &
+a live component. The tunnel allows you to manage
+live data using your local client of choice.
 		`,
 		PreRun: steps.Run("login"),
 		Run:    tunnelFn,

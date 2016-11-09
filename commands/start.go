@@ -14,7 +14,7 @@ var (
 	// StartCmd ...
 	StartCmd = &cobra.Command{
 		Use:   "start",
-		Short: "Starts the Nanobox virtual machine.",
+		Short: "Start the Nanobox virtual machine.",
 		Long:  ``,
 		Run:   startFn,
 	}
