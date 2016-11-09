@@ -1,4 +1,4 @@
-package dev
+package processors
 
 import (
 	"fmt"
@@ -24,8 +24,8 @@ import (
 	"github.com/nanobox-io/nanobox/util/watch"
 )
 
-// Start a dev container
-func Console(envModel *models.Env, appModel *models.App, consoleConfig console.ConsoleConfig) error {
+// Run a code container with your runtime installed
+func Run(envModel *models.Env, appModel *models.App, consoleConfig console.ConsoleConfig) error {
 
 	// ensure the environment is setup
 	if err := env.Setup(envModel); err != nil {

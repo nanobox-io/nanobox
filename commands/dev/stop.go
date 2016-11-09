@@ -29,6 +29,7 @@ Stops your dev platform. All data will be preserved in its current state.
 func init() {
 	steps.Build("dev stop", true, stopCheck, stopFn)
 }
+
 //
 // stopFn ...
 func stopFn(ccmd *cobra.Command, args []string) {
