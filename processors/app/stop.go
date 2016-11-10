@@ -34,7 +34,7 @@ func Stop(appModel *models.App) error {
 		return fmt.Errorf("failed to load app env: %s", err.Error())
 	}
 
-	display.OpenContext("%s (%s)", envModel.Name, appModel.Name)
+	display.OpenContext("%s (%s)", envModel.Name, appModel.DisplayName())
 	defer display.CloseContext()
 
 	// initialize docker for the provider

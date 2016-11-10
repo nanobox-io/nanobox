@@ -37,7 +37,7 @@ func Destroy(appModel *models.App) error {
 		return fmt.Errorf("failed to load app env: %s", err.Error())
 	}
 
-	display.OpenContext("%s (%s)", envModel.Name, appModel.Name)
+	display.OpenContext("%s (%s)", envModel.Name, appModel.DisplayName())
 	defer display.CloseContext()
 
 	// remove the dev container if there is one

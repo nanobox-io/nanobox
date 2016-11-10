@@ -27,8 +27,7 @@ func Setup(envModel *models.Env, appModel *models.App, name string) error {
 		return fmt.Errorf("failed to generate app data: %s", err.Error())
 	}
 
-	fmt.Printf("app: %+v\n", appModel)
-	display.OpenContext("%s (%s)", envModel.Name, appModel.Name)
+	display.OpenContext("%s (%s)", envModel.Name, appModel.DisplayName())
 	defer display.CloseContext()
 
 	// reserve IPs
@@ -59,27 +58,31 @@ func reserveIPs(appModel *models.App) error {
 		return fmt.Errorf("failed to reserve an env IP: %s", err.Error())
 	}
 
-	// reserve a logvac ip
-	logvacIP, err := dhcp.ReserveLocal()
-	if err != nil {
-		display.ErrorTask()
-		lumber.Error("app:reserveIPs:dhcp.ReserveLocal(): %s", err.Error())
-		return fmt.Errorf("failed to reserve a logvac IP: %s", err.Error())
-	}
-
-	// reserve a mist ip
-	mistIP, err := dhcp.ReserveLocal()
-	if err != nil {
-		display.ErrorTask()
-		lumber.Error("app:reserveIPs:dhcp.ReserveLocal(): %s", err.Error())
-		return fmt.Errorf("failed to reserve a mist IP: %s", err.Error())
-	}
-
 	// now assign the IPs onto the app model
 	appModel.GlobalIPs["env"] = envIP.String()
 
-	appModel.LocalIPs["logvac"] = logvacIP.String()
-	appModel.LocalIPs["mist"] = mistIP.String()
+
+	if appModel.Name == "sim" {
+		// reserve a logvac ip
+		logvacIP, err := dhcp.ReserveLocal()
+		if err != nil {
+			display.ErrorTask()
+			lumber.Error("app:reserveIPs:dhcp.ReserveLocal(): %s", err.Error())
+			return fmt.Errorf("failed to reserve a logvac IP: %s", err.Error())
+		}
+
+		// reserve a mist ip
+		mistIP, err := dhcp.ReserveLocal()
+		if err != nil {
+			display.ErrorTask()
+			lumber.Error("app:reserveIPs:dhcp.ReserveLocal(): %s", err.Error())
+			return fmt.Errorf("failed to reserve a mist IP: %s", err.Error())
+		}
+
+		appModel.LocalIPs["logvac"] = logvacIP.String()
+		appModel.LocalIPs["mist"] = mistIP.String()
+		
+	}
 
 	// save the app
 	if err := appModel.Save(); err != nil {

@@ -52,6 +52,16 @@ func (a *App) Delete() error {
 	return nil
 }
 
+func (a *App) DisplayName() string {
+	switch a.Name {
+	case "dev":
+		return "local"
+	case "sim":
+		return "dry-run"
+	}
+	return a.Name
+}
+
 // Generate populates an App with data and persists the record
 func (a *App) Generate(env *Env, name string) error {
 

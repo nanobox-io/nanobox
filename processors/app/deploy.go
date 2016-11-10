@@ -33,8 +33,9 @@ func Deploy(envModel *models.Env, appModel *models.App) error {
 		return nil
 	}
 
-	if err := platform.Deploy(appModel); err != nil {
-		return err
+	// setup the platform services
+	if err := platform.Setup(appModel); err != nil {
+		return fmt.Errorf("failed to setup platform services: %s", err.Error())
 	}
 
 	// create the warehouse config for child processes

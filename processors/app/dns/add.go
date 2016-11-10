@@ -57,7 +57,7 @@ func reExecPrivilegedAdd(appModel *models.App, name string) error {
 	display.PrintRequiresPrivilege("to modify host dns entries")
 
 	// call 'dev dns add' with the original path and args
-	cmd := fmt.Sprintf("%s %s dns add %s", config.NanoboxPath(), appModel.Name, name)
+	cmd := fmt.Sprintf("%s dns add %s %s", config.NanoboxPath(), appModel.DisplayName(), name)
 
 	// if the sudo'ed subprocess fails, we need to return error to stop the process
 	if err := util.PrivilegeExec(cmd); err != nil {

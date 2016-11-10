@@ -7,7 +7,6 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/component"
-	"github.com/nanobox-io/nanobox/processors/platform"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
@@ -21,7 +20,7 @@ func Start(envModel *models.Env, appModel *models.App, name string) error {
 		}
 	}
 
-	display.OpenContext("%s (%s)", envModel.Name, appModel.Name)
+	display.OpenContext("%s (%s)", envModel.Name, appModel.DisplayName())
 	defer display.CloseContext()
 
 	locker.LocalLock()
@@ -30,11 +29,6 @@ func Start(envModel *models.Env, appModel *models.App, name string) error {
 	// clean crufty components
 	if err := component.Clean(appModel); err != nil {
 		return fmt.Errorf("failed to clean crufty components: %s", err.Error())
-	}
-
-	// setup the platform services
-	if err := platform.Setup(appModel); err != nil {
-		return fmt.Errorf("failed to setup platform services: %s", err.Error())
 	}
 
 	// start all the app components
