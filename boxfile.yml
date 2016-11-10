@@ -5,6 +5,3 @@ code.build:
   dev_packages:
     - py27-awscli
     - coreutils
-
-data.db:
-  image: nanobox/postgresql:9.5
