@@ -9,8 +9,8 @@ import (
 	"github.com/nanobox-io/nanobox/commands/steps"
 	"github.com/nanobox-io/nanobox/helpers"
 	"github.com/nanobox-io/nanobox/models"
-	production_evar "github.com/nanobox-io/nanobox/processors/evar"
 	app_evar "github.com/nanobox-io/nanobox/processors/app/evar"
+	production_evar "github.com/nanobox-io/nanobox/processors/evar"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 )
@@ -19,9 +19,9 @@ import (
 var AddCmd = &cobra.Command{
 	Use:   "add",
 	Short: "Adds environment variable(s)",
-	Long: ``,
+	Long:  ``,
 	// PreRun: steps.Run("login"),
-	Run:    addFn,
+	Run: addFn,
 }
 
 // addFn ...

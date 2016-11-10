@@ -35,7 +35,7 @@ func infoFn(ccmd *cobra.Command, args []string) {
 	switch location {
 	case "local":
 		appModel, _ := models.FindAppBySlug(config.EnvID(), name)
-		display.CommandErr(app.Info(env, appModel))	
+		display.CommandErr(app.Info(env, appModel))
 	case "production":
 		fmt.Println("not yet implemented")
 	}

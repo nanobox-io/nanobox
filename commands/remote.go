@@ -16,9 +16,9 @@ var (
 
 	// RemoteCmd ...
 	RemoteCmd = &cobra.Command{
-		Use:    "remote",
-		Short:  "Manage application remotes.",
-		Long:   `
+		Use:   "remote",
+		Short: "Manage application remotes.",
+		Long: `
 Manages connections between your local codebase and
 remote, live applications created with Nanobox.
 		`,
@@ -54,7 +54,6 @@ remote needs an alias. If no alias is provided, 'default' is assumed.
 		PreRun: steps.Run("login"),
 		Run:    remoteRemoveFn,
 	}
-
 )
 
 //

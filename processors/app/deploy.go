@@ -30,7 +30,7 @@ func Deploy(envModel *models.Env, appModel *models.App) error {
 
 	// if the app is a dev app then we should leave here
 	if appModel.Name == "dev" {
-		return nil	
+		return nil
 	}
 
 	if err := platform.Deploy(appModel); err != nil {

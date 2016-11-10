@@ -12,7 +12,7 @@ var (
 	EvarCmd = &cobra.Command{
 		Use:   "evar",
 		Short: "Manage environment variables.",
-		Long:  `
+		Long: `
 Manages environment variables in your different environments.
 		`,
 	}

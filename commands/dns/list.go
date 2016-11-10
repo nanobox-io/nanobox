@@ -16,9 +16,9 @@ import (
 var ListCmd = &cobra.Command{
 	Use:   "ls",
 	Short: "list environment variable(s)",
-	Long: ``,
+	Long:  ``,
 	// PreRun: steps.Run("login"),
-	Run:    listFn,
+	Run: listFn,
 }
 
 // listFn ...

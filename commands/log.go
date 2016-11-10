@@ -16,9 +16,9 @@ import (
 var LogCmd = &cobra.Command{
 	Use:   "log",
 	Short: "View and streams application logs.",
-	Long: ``,
+	Long:  ``,
 	// PreRun: steps.Run("login"),
-	Run:    logFn,
+	Run: logFn,
 }
 
 // logFn ...

@@ -30,7 +30,7 @@ var (
 	//
 	internalCommand bool
 
-	// 
+	//
 	endpoint string
 
 	// NanoboxCmd ...
@@ -92,7 +92,7 @@ var (
 func init() {
 
 	// persistent flags
-	NanoboxCmd.PersistentFlags().StringVarP(&endpoint, "endpoint", "e", "", "production endpoint")	
+	NanoboxCmd.PersistentFlags().StringVarP(&endpoint, "endpoint", "e", "", "production endpoint")
 	NanoboxCmd.PersistentFlags().MarkHidden("endpoint")
 	NanoboxCmd.PersistentFlags().BoolVarP(&internalCommand, "internal", "", false, "Skip pre-requisite checks")
 	NanoboxCmd.PersistentFlags().MarkHidden("internal")

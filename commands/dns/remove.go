@@ -17,9 +17,9 @@ import (
 var RemoveCmd = &cobra.Command{
 	Use:   "rm",
 	Short: "Remove environment variable(s)",
-	Long: ``,
+	Long:  ``,
 	// PreRun: steps.Run("login"),
-	Run:    removeFn,
+	Run: removeFn,
 }
 
 // removeFn ...

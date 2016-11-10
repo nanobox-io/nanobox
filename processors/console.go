@@ -22,7 +22,7 @@ func Console(envModel *models.Env, consoleConfig ConsoleConfig) error {
 		// set the app id
 		appID = remote.ID
 	}
-	
+
 	// set the app id to the directory name if it's default
 	if appID == "default" {
 		appID = config.AppName()

@@ -1,11 +1,11 @@
 package dev
 
 import (
-	"github.com/spf13/cobra"
 	"github.com/nanobox-io/golang-docker-client"
+	"github.com/spf13/cobra"
 
-	container_generator "github.com/nanobox-io/nanobox/generators/containers"
 	"github.com/nanobox-io/nanobox/commands/steps"
+	container_generator "github.com/nanobox-io/nanobox/generators/containers"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/app"
 	"github.com/nanobox-io/nanobox/util/config"

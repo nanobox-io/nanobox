@@ -67,9 +67,9 @@ func deployFn(ccmd *cobra.Command, args []string) {
 	case "production":
 		steps.Run("login")(ccmd, args)
 		deployConfig := processors.DeployConfig{
-			App:      name,
-			Message:  deployCmdFlags.message,
-			Force:    deployCmdFlags.force,
+			App:     name,
+			Message: deployCmdFlags.message,
+			Force:   deployCmdFlags.force,
 		}
 
 		// set the meta arguments to be used in the processor and run the processor

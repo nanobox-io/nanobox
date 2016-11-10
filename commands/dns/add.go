@@ -17,9 +17,9 @@ import (
 var AddCmd = &cobra.Command{
 	Use:   "add",
 	Short: "Adds dns",
-	Long: ``,
+	Long:  ``,
 	// PreRun: steps.Run("login"),
-	Run:    addFn,
+	Run: addFn,
 }
 
 // addFn ...

@@ -22,7 +22,7 @@ Clean out any apps whose working directory no longer exists. This
 will remove all associated app information from your Nanobox database.
 `,
 		PreRun: steps.Run("start"),
-		Run: cleanFn,
+		Run:    cleanFn,
 	}
 )
 

@@ -23,7 +23,6 @@ var (
 		Long:  ``,
 		Run:   consoleFn,
 	}
-
 )
 
 // consoleFn ...
@@ -59,8 +58,8 @@ ex: nanobox console local web.site
 	case "production":
 
 		consoleConfig := processors.ConsoleConfig{
-			App:      name,
-			Host:     args[0],
+			App:  name,
+			Host: args[0],
 		}
 
 		// set the meta arguments to be used in the processor and run the processor

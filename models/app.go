@@ -65,7 +65,7 @@ func (a *App) Generate(env *Env, name string) error {
 		env = &Env{}
 	}
 	env.Generate()
-	
+
 	a.EnvID = env.ID
 	a.ID = fmt.Sprintf("%s_%s", env.ID, name)
 	a.Name = name

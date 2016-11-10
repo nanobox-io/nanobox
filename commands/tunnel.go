@@ -6,8 +6,8 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/commands/steps"
-	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/helpers"
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
@@ -30,7 +30,7 @@ live data using your local client of choice.
 
 	// tunnelCmdFlags ...
 	tunnelCmdFlags = struct {
-		port     string
+		port string
 	}{}
 )
 
@@ -58,7 +58,6 @@ ex: nanobox tunnel <container>
 
 		return
 	}
-
 
 	switch location {
 	case "local":

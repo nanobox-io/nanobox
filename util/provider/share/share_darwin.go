@@ -144,7 +144,6 @@ func reloadServer() error {
 	return nil
 }
 
-
 func cleanLine(line, lineCheck string) string {
 	paths := strings.Split(strings.Replace(line, lineCheck, "", 1), " ")
 	goodPaths := []string{}

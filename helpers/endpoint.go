@@ -13,7 +13,7 @@ func Endpoint(envModel *models.Env, args []string) ([]string, string, string) {
 	case "dry-run":
 		return args[1:], "local", "sim"
 	default:
-		_, ok :=envModel.Remotes[args[0]]
+		_, ok := envModel.Remotes[args[0]]
 		if ok {
 			return args[1:], "production", args[0]
 		}
