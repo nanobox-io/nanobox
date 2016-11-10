@@ -35,7 +35,7 @@ var (
 	Mode = "text"
 
 	// Out - writer to send output to
-	Out = os.Stderr
+	Out = os.Stdout
 
 	// internal
 	logFile *os.File // open file descriptor of the log file

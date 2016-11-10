@@ -16,7 +16,7 @@ func Status() error {
 	pathLength := longestPath()
 
 	fmt.Println()
-	fmtString := fmt.Sprintf("%%-%ds : %%-7s : %%%ds\n", nameLength+6, pathLength)
+	fmtString := fmt.Sprintf("%%-%ds : %%-7s : %%%ds\n", nameLength+10, pathLength)
 	header := fmt.Sprintf(fmtString, "Status", "Running", "Path")
 	fmt.Printf(header)
 	fmt.Println(strings.Repeat("-", len(header)))
@@ -26,7 +26,7 @@ func Status() error {
 
 		apps, _ := env.Apps()
 		for _, app := range apps {
-			fmt.Printf(fmtString, fmt.Sprintf("%s (%s)", env.Name, app.Name), app.Status, env.Directory)
+			fmt.Printf(fmtString, fmt.Sprintf("%s (%s)", env.Name, app.DisplayName()), app.Status, env.Directory)
 		}
 	}
 
