@@ -29,7 +29,7 @@ func Run(id string, consoleConfig ConsoleConfig) error {
 	}
 
 	// this is the default command to run in the container
-	cmd := []string{"/bin/bash", "-c"}
+	cmd := []string{"/bin/bash", "-cl"}
 
 	cmdPart := "exec "
 	if consoleConfig.Cwd != "" {

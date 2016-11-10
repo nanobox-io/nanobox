@@ -46,7 +46,7 @@ ex: nanobox console local web.site
 	switch location {
 	case "local":
 		appModel, _ := models.FindAppBySlug(config.EnvID(), name)
-		if appModel.Status == "up" {
+		if appModel.Status != "up" {
 			fmt.Println("unable to continue until the app is up")
 			return
 		}
