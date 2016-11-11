@@ -13,15 +13,20 @@ import (
 
 // Start will start all services associated with an app
 func Start(envModel *models.Env, appModel *models.App, name string) error {
+
+	display.OpenContext("%s (%s)", envModel.Name, appModel.DisplayName())
+	defer display.CloseContext()
+
 	// if the app been initialized run the setup
 	if appModel.State != "active" {
 		if err := Setup(envModel, appModel, name); err != nil {
 			return fmt.Errorf("failed to setup the app: %s", err)
 		}
+	} else {
+		// restoring app
+		display.StartTask("Restoring App")
+		display.StopTask()
 	}
-
-	display.OpenContext("%s (%s)", envModel.Name, appModel.DisplayName())
-	defer display.CloseContext()
 
 	locker.LocalLock()
 	defer locker.LocalUnlock()

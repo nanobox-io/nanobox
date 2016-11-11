@@ -73,6 +73,7 @@ func InfoDevContainer(ip string) {
 }
 func InfoDevRunContainer(cmd, ip string) {
 	os.Stderr.WriteString(fmt.Sprintf(`
+
       **            
    *********        RUNNING > %s
 ***************     ----------------------------------------------------------------
@@ -81,6 +82,8 @@ func InfoDevRunContainer(cmd, ip string) {
   ""  :::  ""       ----------------------------------------------------------------
     "" " ""         If you run a server, access it at >> %s
        "
+
+       
 `, cmd, ip))
 }
 

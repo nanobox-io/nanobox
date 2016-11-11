@@ -47,6 +47,9 @@ func Stop(appModel *models.App) error {
 		return fmt.Errorf("failed to stop all app components: %s", err.Error())
 	}
 
+	display.StartTask("Pausing App")
+	display.StopTask()
+
 	// stop any dev containers
 	stopDevContainer(appModel)
 
