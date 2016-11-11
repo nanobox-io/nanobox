@@ -235,7 +235,7 @@ func downloadImage(image string) error {
 
 func watchFiles(envModel *models.Env, appModel *models.App) {
 	boxfile := boxfile.New([]byte(appModel.DeployedBoxfile))
-	if boxfile.Node("dev").BoolValue("fs_watch") {
+	if boxfile.Node("run.config").BoolValue("fs_watch") {
 		lumber.Info("watcher starting")
 		go watch.Watch(container_generator.DevName(), envModel.Directory)
 	}
@@ -246,8 +246,8 @@ func cwd(appModel *models.App) string {
 	boxfile := boxfile.New([]byte(appModel.DeployedBoxfile))
 	// parse the boxfile data
 
-	if boxfile.Node("dev").StringValue("cwd") != "" {
-		return boxfile.Node("dev").StringValue("cwd")
+	if boxfile.Node("run.config").StringValue("cwd") != "" {
+		return boxfile.Node("run.config").StringValue("cwd")
 	}
 
 	return "/app"
