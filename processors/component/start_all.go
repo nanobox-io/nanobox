@@ -11,8 +11,6 @@ import (
 
 // StartAll starts all app components
 func StartAll(a *models.App) error {
-	display.OpenContext("Starting components")
-	defer display.CloseContext()
 
 	// get all the components that belong to this app
 	components, err := models.AllComponentsByApp(a.ID)
@@ -20,6 +18,13 @@ func StartAll(a *models.App) error {
 		lumber.Error("component:StartAll:models.AllComponentsByApp(%s): %s", a.ID, err.Error())
 		return fmt.Errorf("unable to retrieve app components: %s", err)
 	}
+
+	if len(components) == 0 {
+		return nil
+	}
+	
+	display.OpenContext("Starting components")
+	defer display.CloseContext()
 
 	// start each component
 	for _, component := range components {

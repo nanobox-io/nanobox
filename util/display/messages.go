@@ -71,15 +71,17 @@ func InfoDevContainer(ip string) {
 
 `, ip))
 }
-func InfoDevRunContainer(ip string) {
+func InfoDevRunContainer(cmd, ip string) {
 	os.Stderr.WriteString(fmt.Sprintf(`
---------------------------------------------------------------------------------
-+ Running your start commands in a development environment
-+ The environment can be reached at >> %s
-+ (ctrl+c to stop)
---------------------------------------------------------------------------------
-
-`, ip))
+      **            
+   *********        RUNNING > %s
+***************     ----------------------------------------------------------------
+:: ********* ::     Your command is running in an isolated Linux container. 
+" ::: *** ::: "     Code changes in either the container or desktop will be mirrored.
+  ""  :::  ""       ----------------------------------------------------------------
+    "" " ""         If you run a server, access it at >> %s
+       "
+`, cmd, ip))
 }
 
 func InfoSimDeploy(ip string) {

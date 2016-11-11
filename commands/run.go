@@ -41,7 +41,6 @@ func runFn(ccmd *cobra.Command, args []string) {
 	appModel, _ := models.FindAppBySlug(config.EnvID(), "dev")
 
 	consoleConfig := console.ConsoleConfig{
-		IsDev: true,
 		DevIP: appModel.GlobalIPs["env"],
 	}
 
