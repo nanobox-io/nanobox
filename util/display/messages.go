@@ -3,6 +3,7 @@ package display
 import (
 	"fmt"
 	"os"
+  "strings"
 )
 
 func MOTD() {
@@ -74,17 +75,20 @@ func InfoDevContainer(ip string) {
 func InfoDevRunContainer(cmd, ip string) {
 	os.Stderr.WriteString(fmt.Sprintf(`
 
-      **            
-   *********        RUNNING > %s
-***************     ----------------------------------------------------------------
-:: ********* ::     Your command is running in an isolated Linux container. 
-" ::: *** ::: "     Code changes in either the container or desktop will be mirrored.
-  ""  :::  ""       ----------------------------------------------------------------
-    "" " ""         If you run a server, access it at >> %s
+      **          
+   *********      
+***************   Your command will run in an isolated Linux container
+:: ********* ::   Code changes in either the container or desktop are mirrored
+" ::: *** ::: "   ------------------------------------------------------------
+  ""  :::  ""     If you run a server, access it at >> %s  
+    "" " ""       
        "
 
-       
-`, cmd, ip))
+RUNNING > %s
+`, ip, cmd))
+
+  os.Stderr.WriteString(fmt.Sprintf("%s\n", strings.Repeat("-", len(cmd)+10)))
+
 }
 
 func InfoSimDeploy(ip string) {

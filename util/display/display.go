@@ -74,7 +74,7 @@ func OpenContext(format string, args ...interface{}) error {
 		prefix = strings.Repeat("  ", context-1)
 	}
 
-	header := fmt.Sprintf("%s+ %s :\n", prefix, label)
+	header := fmt.Sprintf("%s%s :\n", prefix, label)
 
 	if err := printAll(header); err != nil {
 		return err
@@ -117,7 +117,7 @@ func StartTask(format string, args ...interface{}) error {
 
 	// generate a header
 	prefix := strings.Repeat("  ", context)
-	header := fmt.Sprintf("%s+ %s :\n", prefix, label)
+	header := fmt.Sprintf("%s%s :\n", prefix, label)
 
 	// print the header to the logfile
 	if err := printLogFile(header); err != nil {
