@@ -15,7 +15,7 @@ func Console(componentModel *models.Component, consoleConfig console.ConsoleConf
 	}
 
 	switch  {
-	case consoleConfig.Command != "":		
+	case consoleConfig.Command != "":
 		display.InfoDevRunContainer(consoleConfig.Command, consoleConfig.DevIP)
 	default:
 		display.MOTD()

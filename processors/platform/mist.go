@@ -33,6 +33,7 @@ func MistListen(appModel *models.App) error {
 
 	fmt.Printf(`
 Connected to streaming logs:
+ctrl + c to quit
 ------------------------------------------------
 waiting for output...
 
