@@ -59,7 +59,7 @@ func pullBuildImage() (string, error) {
 func buildImage() string {
 	// first let's see if the user has a custom build image they want to use
 	box := boxfile.NewFromPath(config.Boxfile())
-	image := box.Node("code.build").StringValue("image")
+	image := box.Node("run.config").StringValue("image")
 
 	// then let's set the default if the user hasn't specified
 	if image == "" {

@@ -34,8 +34,8 @@ func DevConfig(appModel *models.App) docker.ContainerConfig {
 		},
 	}
 
-	// add cache_dirs into the container binds
-	libDirs := boxfile.Node("code.build").StringSliceValue("cache_dirs")
+	// add lib_dirs into the container binds
+	libDirs := boxfile.Node("run.config").StringSliceValue("cache_dirs")
 
 	for _, libDir := range libDirs {
 		// TODO: the cache source should come from the provider
