@@ -15,12 +15,10 @@ type status struct {
 	directory string
 }
 
-
 // displays status about provider status and running apps
 func Status() error {
 	fmt.Printf("Status: %s\n", provider.Status())
 	fmt.Println()
-
 
 	statuses := []status{}
 
@@ -34,14 +32,13 @@ func Status() error {
 				appName:   app.DisplayName(),
 				status:    app.Status,
 				directory: env.Directory,
-				})
+			})
 		}
 	}
 
 	if len(statuses) == 0 {
 		return nil
 	}
-
 
 	// print the header
 	nameLength := longestName(statuses)
@@ -53,7 +50,7 @@ func Status() error {
 	fmt.Println(strings.Repeat("-", nameLength+pathLength+13))
 
 	for _, status := range statuses {
-		fmt.Printf(fmtString, fmt.Sprintf("%s (%s)", status.envName,  status.appName), status.status,  status.directory)
+		fmt.Printf(fmtString, fmt.Sprintf("%s (%s)", status.envName, status.appName), status.status, status.directory)
 	}
 
 	// end with a newline
@@ -66,8 +63,8 @@ func Status() error {
 func longestName(statuses []status) (rtn int) {
 
 	for _, status := range statuses {
-		name := fmt.Sprintf("%s (%s)", status.envName,  status.appName)
-		if len(name)> rtn {
+		name := fmt.Sprintf("%s (%s)", status.envName, status.appName)
+		if len(name) > rtn {
 			rtn = len(name)
 		}
 	}
@@ -79,7 +76,7 @@ func longestName(statuses []status) (rtn int) {
 func longestPath(statuses []status) (rtn int) {
 
 	for _, status := range statuses {
-		if len(status.directory)> rtn {
+		if len(status.directory) > rtn {
 			rtn = len(status.directory)
 		}
 	}

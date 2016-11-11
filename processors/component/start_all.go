@@ -22,7 +22,7 @@ func StartAll(a *models.App) error {
 	if len(components) == 0 {
 		return nil
 	}
-	
+
 	display.OpenContext("Starting components")
 	defer display.CloseContext()
 

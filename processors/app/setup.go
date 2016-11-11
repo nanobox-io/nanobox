@@ -61,7 +61,6 @@ func reserveIPs(appModel *models.App) error {
 	// now assign the IPs onto the app model
 	appModel.GlobalIPs["env"] = envIP.String()
 
-
 	if appModel.Name == "sim" {
 		// reserve a logvac ip
 		logvacIP, err := dhcp.ReserveLocal()
@@ -81,7 +80,7 @@ func reserveIPs(appModel *models.App) error {
 
 		appModel.LocalIPs["logvac"] = logvacIP.String()
 		appModel.LocalIPs["mist"] = mistIP.String()
-		
+
 	}
 
 	// save the app

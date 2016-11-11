@@ -12,7 +12,6 @@ import (
 // StopAll stops all app components
 func StopAll(appModel *models.App) error {
 
-
 	// get all the components that belong to this app
 	componentModels, err := appModel.Components()
 	if err != nil {

@@ -14,7 +14,7 @@ func Console(componentModel *models.Component, consoleConfig console.ConsoleConf
 		return err
 	}
 
-	switch  {
+	switch {
 	case consoleConfig.Command != "":
 		display.InfoDevRunContainer(consoleConfig.Command, consoleConfig.DevIP)
 	default:
@@ -24,6 +24,3 @@ func Console(componentModel *models.Component, consoleConfig console.ConsoleConf
 
 	return console.Run(componentModel.ID, consoleConfig)
 }
-
-
-

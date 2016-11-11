@@ -1,7 +1,6 @@
 package evar
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -35,7 +34,6 @@ func addFn(ccmd *cobra.Command, args []string) {
 	switch location {
 	case "local":
 		app, _ := models.FindAppBySlug(config.EnvID(), name)
-		fmt.Printf("app: %+v\n", app)
 		display.CommandErr(app_evar.Add(env, app, evars))
 	case "production":
 		steps.Run("login")(ccmd, args)

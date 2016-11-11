@@ -7,8 +7,8 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/provider"
-	util_provider "github.com/nanobox-io/nanobox/util/provider"
 	"github.com/nanobox-io/nanobox/util/display"
+	util_provider "github.com/nanobox-io/nanobox/util/provider"
 )
 
 // Setup sets up the provider and the env mounts
@@ -25,8 +25,8 @@ func Setup(envModel *models.Env) error {
 		return fmt.Errorf("failed to initialize the env data: %s", err.Error())
 	}
 
-	if  util_provider.HasMount(fmt.Sprintf("%s%s/code", util_provider.HostShareDir(), envModel.ID)) {
-		return  nil
+	if util_provider.HasMount(fmt.Sprintf("%s%s/code", util_provider.HostShareDir(), envModel.ID)) {
+		return nil
 	}
 
 	display.OpenContext("Preparing environment")
