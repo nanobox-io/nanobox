@@ -96,7 +96,7 @@ func populateIgnore(path string) {
 	// add pieces from the env
 	env, err := models.FindEnvByID(config.EnvID())
 	box := boxfile.New([]byte(env.BuiltBoxfile))
-	for _, libDir := range box.Node("code.build").StringSliceValue("lib_dirs") {
+	for _, libDir := range box.Node("code.build").StringSliceValue("cache_dirs") {
 		ignoreFile = append(ignoreFile, libDir)
 	}
 

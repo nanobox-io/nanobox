@@ -127,7 +127,7 @@ func gatherRequirements(envModel *models.Env, containerID string) error {
 
 // setupBuildMounts prepares the environment for the build
 func setupBuildMounts(containerID string) error {
-	display.StartTask("Mounting lib_dirs")
+	display.StartTask("Mounting cache_dirs")
 	defer display.StopTask()
 
 	// run the build hook

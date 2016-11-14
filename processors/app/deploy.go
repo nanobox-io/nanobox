@@ -72,8 +72,8 @@ func finalizeDeploy(appModel *models.App) error {
 	display.OpenContext("Finalizing deploy")
 	defer display.CloseContext()
 
-	display.StartTask("Running before_deploy hooks")
-	if err := runDeployHook(appModel, "before_deploy"); err != nil {
+	display.StartTask("Running before_live hooks")
+	if err := runDeployHook(appModel, "before_live"); err != nil {
 		display.ErrorTask()
 		return fmt.Errorf("failed to run before deploy hooks: %s", err.Error())
 	}
@@ -87,8 +87,8 @@ func finalizeDeploy(appModel *models.App) error {
 	}
 	display.StopTask()
 
-	display.StartTask("Running after_deploy hooks")
-	if err := runDeployHook(appModel, "after_deploy"); err != nil {
+	display.StartTask("Running after_live hooks")
+	if err := runDeployHook(appModel, "after_live"); err != nil {
 		display.ErrorTask()
 		return fmt.Errorf("failed to run after deloy hooks: %s", err.Error())
 	}

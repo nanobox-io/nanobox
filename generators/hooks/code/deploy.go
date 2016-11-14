@@ -33,10 +33,10 @@ func DeployPayload(appModel *models.App, componentModel *models.Component) strin
 			UID:  componentModel.Name,
 			ID:   componentModel.ID,
 		},
-		BeforeDeploy:    boxfile.Node("code.deploy").Node("before_deploy").Value(componentModel.Name),
-		BeforeDeployAll: boxfile.Node("code.deploy").Node("before_deploy_all").Value(componentModel.Name),
-		AfterDeploy:     boxfile.Node("code.deploy").Node("after_deploy").Value(componentModel.Name),
-		AfterDeployAll:  boxfile.Node("code.deploy").Node("after_deploy_all").Value(componentModel.Name),
+		BeforeDeploy:    boxfile.Node("code.deploy").Node("before_live").Value(componentModel.Name),
+		BeforeDeployAll: boxfile.Node("code.deploy").Node("before_live_all").Value(componentModel.Name),
+		AfterDeploy:     boxfile.Node("code.deploy").Node("after_live").Value(componentModel.Name),
+		AfterDeployAll:  boxfile.Node("code.deploy").Node("after_live_all").Value(componentModel.Name),
 	}
 
 	// turn it into json
