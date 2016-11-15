@@ -1,7 +1,8 @@
-code.build:
-  engine: "golang"
-  config:
-    package: "github.com/nanobox-io/nanobox"
+run.config:
+  image: nanobox/build:beta
+  engine: "golang#feature/workflow-refactor"
+  engine.config:
+    package: github.com/nanobox-io/nanobox
   dev_packages:
     - py27-awscli
     - coreutils

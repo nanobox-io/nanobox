@@ -38,6 +38,8 @@ func main() {
 		os.Exit(1)
 	}
 
+	fixRunArgs()
+
 	// build the viper config because viper cannot handle concurrency
 	// so it has to be done at the beginning even if we dont need it
 	config.Viper()
@@ -95,4 +97,33 @@ func setupBugsnag() {
 
 func badTerminal() bool {
 	return runtime.GOOS == "windows" && strings.Contains(os.Getenv("shell"), "bash")
+}
+
+func fixRunArgs() {
+	found := false
+	lastLocation := 0
+LOOP:
+	for i, arg := range os.Args {
+		switch arg {
+		case "run":
+			found = true
+			lastLocation = i
+		case "--debug", "--trace", "--verbose", "-t", "-v":
+			// if we hit a argument of ours after 'found'
+			// we will reset the last location
+			if found == true {
+				lastLocation = i
+			}
+		default:
+			// if we hit this after we have found run
+			// we are done
+			if found == true {
+				break LOOP
+			}
+		}
+
+	}
+	if found {
+		os.Args = append(os.Args[:lastLocation+1], strings.Join(os.Args[lastLocation+1:], " "))
+	}
 }

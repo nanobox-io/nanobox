@@ -13,10 +13,10 @@ type (
 		Platform        string         `json:"platform"`
 		Member          map[string]int `json:"member"`
 		Component       component      `json:"component"`
-		BeforeLive    interface{}    `json:"before_deploy,omitempty"`
-		BeforeLiveAll interface{}    `json:"before_deploy_all,omitempty"`
-		AfterLive     interface{}    `json:"after_deploy,omitempty"`
-		AfterLiveAll  interface{}    `json:"after_deploy_all,omitempty"`
+		BeforeLive    interface{}    `json:"before_live,omitempty"`
+		BeforeLiveAll interface{}    `json:"before_live_all,omitempty"`
+		AfterLive     interface{}    `json:"after_live,omitempty"`
+		AfterLiveAll  interface{}    `json:"after_live_all,omitempty"`
 	}
 )
 
@@ -33,10 +33,10 @@ func DeployPayload(appModel *models.App, componentModel *models.Component) strin
 			UID:  componentModel.Name,
 			ID:   componentModel.ID,
 		},
-		BeforeDeploy:    boxfile.Node("deploy.config").Node("before_live").Value(componentModel.Name),
-		BeforeDeployAll: boxfile.Node("deploy.config").Node("before_live_all").Value(componentModel.Name),
-		AfterDeploy:     boxfile.Node("deploy.config").Node("after_live").Value(componentModel.Name),
-		AfterDeployAll:  boxfile.Node("deploy.config").Node("after_live_all").Value(componentModel.Name),
+		BeforeLive:    boxfile.Node("deploy.config").Node("before_live").Value(componentModel.Name),
+		BeforeLiveAll: boxfile.Node("deploy.config").Node("before_live_all").Value(componentModel.Name),
+		AfterLive:     boxfile.Node("deploy.config").Node("after_live").Value(componentModel.Name),
+		AfterLiveAll:  boxfile.Node("deploy.config").Node("after_live_all").Value(componentModel.Name),
 	}
 
 	// turn it into json
