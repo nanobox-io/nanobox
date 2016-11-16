@@ -23,7 +23,7 @@ func (machine DockerMachine) addNetfsMount(local, host string) error {
 	<-time.After(time.Second * 1)
 
 	// fetch the password from the user
-	fmt.Printf("%s's password is required to mount a Windows share.\n", user)
+	fmt.Printf("%s's password is required to mount a Windows share. (must be your Windows Live password if linked)\n", user)
 	pass, err := display.ReadPassword()
 	if err != nil {
 		return err
