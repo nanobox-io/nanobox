@@ -53,7 +53,7 @@ func runFn(ccmd *cobra.Command, args []string) {
 }
 
 func init() {
-	steps.Build("dev deploy", true, devDeployComplete, devDeploy)
+	steps.Build("dev deploy", devDeployComplete, devDeploy)
 }
 
 // devDeploy ...

@@ -34,7 +34,7 @@ func DevConfig(appModel *models.App) docker.ContainerConfig {
 		},
 	}
 
-	// add lib_dirs into the container binds
+	// add cache_dirs into the container binds
 	libDirs := boxfile.Node("run.config").StringSliceValue("cache_dirs")
 
 	for _, libDir := range libDirs {

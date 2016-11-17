@@ -12,7 +12,7 @@ import (
 )
 
 func init() {
-	steps.Build("dev start", true, startCheck, devStart)
+	steps.Build("dev start", startCheck, devStart)
 }
 
 // devStart ...

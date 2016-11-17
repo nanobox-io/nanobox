@@ -11,7 +11,6 @@ type (
 	CmdFunc           func(ccmd *cobra.Command, args []string)
 
 	step struct {
-		private  bool
 		complete CompleteCheckFunc
 		cmd      CmdFunc
 	}

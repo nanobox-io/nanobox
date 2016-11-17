@@ -13,7 +13,7 @@ import (
 )
 
 func init() {
-	steps.Build("dev stop", true, stopCheck, stopFn)
+	steps.Build("dev stop", stopCheck, stopFn)
 }
 
 //

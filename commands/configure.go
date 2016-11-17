@@ -24,7 +24,7 @@ Nanobox configuration (~/.nanobox/config.yml).
 )
 
 func init() {
-	steps.Build("configure", false, configureComplete, configureFn)
+	steps.Build("configure", configureComplete, configureFn)
 }
 
 // configureFn ...

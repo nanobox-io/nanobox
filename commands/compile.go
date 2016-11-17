@@ -29,7 +29,7 @@ Compiles your application source code into a deployable package.
 )
 
 func init() {
-	steps.Build("compile-app", false, compileComplete, compileFn)
+	steps.Build("compile-app", compileComplete, compileFn)
 }
 
 // compileFn ...

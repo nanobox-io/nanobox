@@ -12,7 +12,7 @@ import (
 )
 
 func init() {
-	steps.Build("sim stop", true, stopCheck, stopFn)
+	steps.Build("sim stop", stopCheck, stopFn)
 }
 
 // stopFn ...

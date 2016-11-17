@@ -21,7 +21,7 @@ var (
 )
 
 func init() {
-	steps.Build("start", false, startCheck, startFn)
+	steps.Build("start", startCheck, startFn)
 }
 
 // startFn ...

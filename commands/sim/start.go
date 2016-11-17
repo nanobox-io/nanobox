@@ -12,7 +12,7 @@ import (
 )
 
 func init() {
-	steps.Build("sim start", true, startCheck, simStart)
+	steps.Build("sim start", startCheck, simStart)
 }
 
 // simStart ...

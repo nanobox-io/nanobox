@@ -29,7 +29,7 @@ locally and in live environments.
 )
 
 func init() {
-	steps.Build("build-runtime", false, buildComplete, buildFn)
+	steps.Build("build-runtime", buildComplete, buildFn)
 }
 
 // buildFn ...
