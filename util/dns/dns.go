@@ -98,6 +98,7 @@ func Remove(entry string) error {
 	if entry == "" {
 		return nil
 	}
+
 	// "contents" will end up storing the entire contents of the file excluding the
 	// entry that is trying to be removed
 	var contents string

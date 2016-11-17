@@ -6,10 +6,15 @@ import (
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processors/app/dns"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
+
+func init() {
+	dns.AppSetup = Setup
+}
 
 // Setup sets up the app on the provider and in the database
 func Setup(envModel *models.Env, appModel *models.App, name string) error {

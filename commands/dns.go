@@ -23,5 +23,6 @@ your local hosts file, requiring administrative privileges.
 func init() {
 	DnsCmd.AddCommand(dns.AddCmd)
 	DnsCmd.AddCommand(dns.RemoveCmd)
+	DnsCmd.AddCommand(dns.RemoveAllCmd)
 	DnsCmd.AddCommand(dns.ListCmd)
 }

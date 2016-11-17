@@ -8,6 +8,7 @@ import (
 	"github.com/nanobox-io/golang-docker-client"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processors/app/dns"
 	"github.com/nanobox-io/nanobox/processors/component"
 	"github.com/nanobox-io/nanobox/processors/provider"
 	"github.com/nanobox-io/nanobox/util/dhcp"
@@ -35,6 +36,10 @@ func Destroy(appModel *models.App) error {
 	if err != nil {
 		lumber.Error("app:Start:models.App.Env(): %s", err.Error())
 		return fmt.Errorf("failed to load app env: %s", err.Error())
+	}
+
+	if err := dns.RemoveAll(appModel); err != nil {
+		return fmt.Errorf("failed to remove dns aliases")	
 	}
 
 	display.OpenContext("%s (%s)", envModel.Name, appModel.DisplayName())
