@@ -6,17 +6,18 @@ import (
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/processors/app"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/dns"
 )
 
+var AppSetup func(envModel *models.Env, appModel *models.App, name string) error
+
 // Add adds a dns entry to the local hosts file
 func Add(envModel *models.Env, appModel *models.App, name string) error {
 
-	if err := app.Setup(envModel, appModel, appModel.Name); err != nil {
+	if err := AppSetup(envModel, appModel, appModel.Name); err != nil {
 		return fmt.Errorf("failed to setup app: %s", err)
 	}
 
