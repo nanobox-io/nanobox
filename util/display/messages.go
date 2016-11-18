@@ -3,7 +3,7 @@ package display
 import (
 	"fmt"
 	"os"
-  "strings"
+	"strings"
 )
 
 func MOTD() {
@@ -87,7 +87,7 @@ func InfoDevRunContainer(cmd, ip string) {
 RUNNING > %s
 `, ip, cmd))
 
-  os.Stderr.WriteString(fmt.Sprintf("%s\n", strings.Repeat("-", len(cmd)+10)))
+	os.Stderr.WriteString(fmt.Sprintf("%s\n", strings.Repeat("-", len(cmd)+10)))
 
 }
 

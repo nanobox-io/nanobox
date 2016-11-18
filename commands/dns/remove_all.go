@@ -15,10 +15,10 @@ import (
 
 // RemoveAllCmd ...
 var RemoveAllCmd = &cobra.Command{
-	Use:   "rm-all",
-	Short: "remove all the dns vars",
-	Long:  ``,
-	Run: removeAllFn,
+	Use:    "rm-all",
+	Short:  "remove all the dns vars",
+	Long:   ``,
+	Run:    removeAllFn,
 	Hidden: true,
 }
 

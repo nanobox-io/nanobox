@@ -9,8 +9,8 @@ import (
 	"github.com/nanopack/mist/clients"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 // MistListen ...
@@ -24,7 +24,7 @@ func MistListen(appModel *models.App) error {
 	var client *clients.TCP
 	clientConnect := func() (err error) {
 		client, err = clients.New(mist.ExternalIP+":1445", "123")
-		return err	
+		return err
 	}
 	if err := util.Retry(clientConnect, 3, time.Second); err != nil {
 		return err

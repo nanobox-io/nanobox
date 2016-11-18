@@ -31,7 +31,7 @@ func Setup(envModel *models.Env, appModel *models.App, name string) error {
 		lumber.Error("app:Setup:models.App:Generate(): %s", err.Error())
 		return fmt.Errorf("failed to generate app data: %s", err.Error())
 	}
-	
+
 	// reserve IPs
 	if err := reserveIPs(appModel); err != nil {
 		return fmt.Errorf("failed to reserve app IPs: %s", err.Error())

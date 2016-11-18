@@ -26,7 +26,6 @@ func RemoveAll(a *models.App) error {
 		return reExecPrivilegedRemoveAll(a)
 	}
 
-
 	if err := dns.Remove(a.ID); err != nil {
 		lumber.Error("dns:RemoveAll:dns.Remove(%s): %s", a.ID, err.Error())
 		return fmt.Errorf("failed to remove all dns entries: %s", err.Error())

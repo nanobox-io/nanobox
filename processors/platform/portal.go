@@ -21,7 +21,7 @@ func UpdatePortal(appModel *models.App) error {
 	updateRoute := func() error {
 		return client.UpdateRoutes(routes)
 	}
-	
+
 	// use the retry method here because there is a chance the portal server isnt responding yet
 	if err := util.Retry(updateRoute, 2, time.Second); err != nil {
 		lumber.Error("platform:UpdatePortal:UpdateRoutes(%+v): %s", routes, err.Error())

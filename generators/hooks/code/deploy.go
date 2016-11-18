@@ -9,10 +9,10 @@ import (
 
 type (
 	deploy struct {
-		LogvacHost      string         `json:"logvac_host"`
-		Platform        string         `json:"platform"`
-		Member          map[string]int `json:"member"`
-		Component       component      `json:"component"`
+		LogvacHost    string         `json:"logvac_host"`
+		Platform      string         `json:"platform"`
+		Member        map[string]int `json:"member"`
+		Component     component      `json:"component"`
 		BeforeLive    interface{}    `json:"before_live,omitempty"`
 		BeforeLiveAll interface{}    `json:"before_live_all,omitempty"`
 		AfterLive     interface{}    `json:"after_live,omitempty"`

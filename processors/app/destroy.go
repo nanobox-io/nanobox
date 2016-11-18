@@ -39,7 +39,7 @@ func Destroy(appModel *models.App) error {
 	}
 
 	if err := dns.RemoveAll(appModel); err != nil {
-		return fmt.Errorf("failed to remove dns aliases")	
+		return fmt.Errorf("failed to remove dns aliases")
 	}
 
 	display.OpenContext("%s (%s)", envModel.Name, appModel.DisplayName())
