@@ -14,6 +14,7 @@ import (
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/commands"
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	// "github.com/nanobox-io/nanobox/util/memory_logger"
@@ -37,6 +38,8 @@ func main() {
 		fmt.Println("Please refer to the docs for more information")
 		os.Exit(1)
 	}
+
+	fixRunArgs()
 
 	// build the viper config because viper cannot handle concurrency
 	// so it has to be done at the beginning even if we dont need it
@@ -80,10 +83,18 @@ func main() {
 }
 
 func setupBugsnag() {
+	update, _ := models.LoadUpdate()
+	md5Parts := strings.Fields(update.CurrentVersion)
+	version := ""
+	if len(md5Parts) > 1 {
+		version = md5Parts[len(md5Parts)-1]
+	}
+
 	bugsnag.Configure(bugsnag.Configuration{
 		APIKey:      bugsnagToken,
 		Logger:      bugLog{},
 		Synchronous: true,
+		AppVersion:  version,
 	})
 
 	bugsnag.OnBeforeNotify(func(event *bugsnag.Event, config *bugsnag.Configuration) error {
@@ -95,4 +106,33 @@ func setupBugsnag() {
 
 func badTerminal() bool {
 	return runtime.GOOS == "windows" && strings.Contains(os.Getenv("shell"), "bash")
+}
+
+func fixRunArgs() {
+	found := false
+	lastLocation := 0
+LOOP:
+	for i, arg := range os.Args {
+		switch arg {
+		case "run":
+			found = true
+			lastLocation = i
+		case "--debug", "--trace", "--verbose", "-t", "-v":
+			// if we hit a argument of ours after 'found'
+			// we will reset the last location
+			if found == true {
+				lastLocation = i
+			}
+		default:
+			// if we hit this after we have found run
+			// we are done
+			if found == true {
+				break LOOP
+			}
+		}
+
+	}
+	if found {
+		os.Args = append(os.Args[:lastLocation+1], strings.Join(os.Args[lastLocation+1:], " "))
+	}
 }

@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/nanobox-io/nanobox/commands/steps"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors"
 	"github.com/nanobox-io/nanobox/util/display"
@@ -15,11 +16,13 @@ var (
 	// CleanCmd ...
 	CleanCmd = &cobra.Command{
 		Use:   "clean",
-		Short: "Clean out any environemnts that no longer exist",
+		Short: "Clean out any apps that no longer exist.",
 		Long: `
-todo: write long description
+Clean out any apps whose working directory no longer exists. This
+will remove all associated app information from your Nanobox database.
 `,
-		Run: cleanFn,
+		PreRun: steps.Run("start"),
+		Run:    cleanFn,
 	}
 )
 

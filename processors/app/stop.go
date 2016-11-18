@@ -34,7 +34,7 @@ func Stop(appModel *models.App) error {
 		return fmt.Errorf("failed to load app env: %s", err.Error())
 	}
 
-	display.OpenContext("%s (%s)", envModel.Name, appModel.Name)
+	display.OpenContext("%s (%s)", envModel.Name, appModel.DisplayName())
 	defer display.CloseContext()
 
 	// initialize docker for the provider
@@ -46,6 +46,9 @@ func Stop(appModel *models.App) error {
 	if err := component.StopAll(appModel); err != nil {
 		return fmt.Errorf("failed to stop all app components: %s", err.Error())
 	}
+
+	display.StartTask("Pausing App")
+	display.StopTask()
 
 	// stop any dev containers
 	stopDevContainer(appModel)

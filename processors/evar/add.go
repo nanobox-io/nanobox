@@ -10,13 +10,13 @@ import (
 
 func Add(envModel *models.Env, appID string, evars map[string]string) error {
 
-	// fetch the link
-	link, ok := envModel.Links[appID]
+	// fetch the remote
+	remote, ok := envModel.Remotes[appID]
 	if ok {
 		// set the odin endpoint
-		odin.SetEndpoint(link.Endpoint)
+		odin.SetEndpoint(remote.Endpoint)
 		// set the app id
-		appID = link.ID
+		appID = remote.ID
 	}
 
 	// iterate through the evars and add them to the app

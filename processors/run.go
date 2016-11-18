@@ -1,4 +1,4 @@
-package dev
+package processors
 
 import (
 	"fmt"
@@ -24,8 +24,8 @@ import (
 	"github.com/nanobox-io/nanobox/util/watch"
 )
 
-// Start a dev container
-func Console(envModel *models.Env, appModel *models.App, devRun bool) error {
+// Run a code container with your runtime installed
+func Run(envModel *models.Env, appModel *models.App, consoleConfig console.ConsoleConfig) error {
 
 	// ensure the environment is setup
 	if err := env.Setup(envModel); err != nil {
@@ -42,17 +42,15 @@ func Console(envModel *models.Env, appModel *models.App, devRun bool) error {
 	// start a watcher to watch for changes and inform the vm
 	watchFiles(envModel, appModel)
 
-	// if run then start the run commands
-	if devRun {
-		if err := Run(appModel); err != nil {
-			return fmt.Errorf("failed to run your start commands: %s", err)
-		}
-	} else {
-		// console into the newly created container
-		if err := runConsole(appModel); err != nil {
-			return fmt.Errorf("failed to console into dev container: %s", err.Error())
-		}
+	// create a dummy component using the appname
+	component := &models.Component{
+		ID: "nanobox_" + appModel.ID,
+	}
 
+	consoleConfig.Cwd = cwd(appModel)
+
+	if err := env.Console(component, consoleConfig); err != nil {
+		return fmt.Errorf("failed to console into dev container: %s", err)
 	}
 
 	if err := teardown(appModel); err != nil {
@@ -235,26 +233,9 @@ func downloadImage(image string) error {
 	return nil
 }
 
-// runConsole will establish a console within the dev container
-func runConsole(appModel *models.App) error {
-
-	// create a dummy component using the appname
-	component := &models.Component{
-		ID: "nanobox_" + appModel.ID,
-	}
-
-	consoleConfig := console.ConsoleConfig{
-		Cwd:   cwd(appModel),
-		IsDev: true,
-		DevIP: appModel.GlobalIPs["env"],
-	}
-
-	return env.Console(component, consoleConfig)
-}
-
 func watchFiles(envModel *models.Env, appModel *models.App) {
 	boxfile := boxfile.New([]byte(appModel.DeployedBoxfile))
-	if boxfile.Node("dev").BoolValue("fs_watch") {
+	if boxfile.Node("run.config").BoolValue("fs_watch") {
 		lumber.Info("watcher starting")
 		go watch.Watch(container_generator.DevName(), envModel.Directory)
 	}
@@ -265,8 +246,8 @@ func cwd(appModel *models.App) string {
 	boxfile := boxfile.New([]byte(appModel.DeployedBoxfile))
 	// parse the boxfile data
 
-	if boxfile.Node("dev").StringValue("cwd") != "" {
-		return boxfile.Node("dev").StringValue("cwd")
+	if boxfile.Node("run.config").StringValue("cwd") != "" {
+		return boxfile.Node("run.config").StringValue("cwd")
 	}
 
 	return "/app"

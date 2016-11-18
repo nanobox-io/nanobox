@@ -1,4 +1,4 @@
-package sim
+package app
 
 import (
 	"fmt"
@@ -15,17 +15,27 @@ import (
 	"github.com/nanobox-io/nanobox/util/hookit"
 )
 
-// deploys the code to the warehouse and builds
-// webs, workers, and updates services
-// then updates the router with the new code services
+// Deploy ...
 func Deploy(envModel *models.Env, appModel *models.App) error {
+
 	// init docker client
 	if err := provider.Init(); err != nil {
 		return fmt.Errorf("failed to init docker client: %s", err.Error())
 	}
 
-	if err := platform.Deploy(appModel); err != nil {
-		return err
+	// syncronize the services as per the new boxfile
+	if err := component.Sync(envModel, appModel); err != nil {
+		return fmt.Errorf("failed to sync components: %s", err.Error())
+	}
+
+	// if the app is a dev app then we should leave here
+	if appModel.Name == "dev" {
+		return nil
+	}
+
+	// setup the platform services
+	if err := platform.Setup(appModel); err != nil {
+		return fmt.Errorf("failed to setup platform services: %s", err.Error())
 	}
 
 	// create the warehouse config for child processes
@@ -42,11 +52,6 @@ func Deploy(envModel *models.Env, appModel *models.App) error {
 		return fmt.Errorf("unable to publish code: %s", err.Error())
 	}
 
-	// syncronize the services as per the new boxfile
-	if err := component.Sync(envModel, appModel); err != nil {
-		return fmt.Errorf("unable to synchronize data components: %s", err.Error())
-	}
-
 	// start code
 	if err := code.Sync(appModel, warehouseConfig); err != nil {
 		return fmt.Errorf("failed to add code components: %s", err.Error())
@@ -59,7 +64,7 @@ func Deploy(envModel *models.Env, appModel *models.App) error {
 	// give the user some helpful information
 	display.InfoSimDeploy(appModel.GlobalIPs["env"])
 
-	return nil
+	return platform.MistListen(appModel)
 }
 
 // update the router and run deploy hooks
@@ -67,8 +72,8 @@ func finalizeDeploy(appModel *models.App) error {
 	display.OpenContext("Finalizing deploy")
 	defer display.CloseContext()
 
-	display.StartTask("Running before_deploy hooks")
-	if err := runDeployHook(appModel, "before_deploy"); err != nil {
+	display.StartTask("Running before_live hooks")
+	if err := runDeployHook(appModel, "before_live"); err != nil {
 		display.ErrorTask()
 		return fmt.Errorf("failed to run before deploy hooks: %s", err.Error())
 	}
@@ -82,8 +87,8 @@ func finalizeDeploy(appModel *models.App) error {
 	}
 	display.StopTask()
 
-	display.StartTask("Running after_deploy hooks")
-	if err := runDeployHook(appModel, "after_deploy"); err != nil {
+	display.StartTask("Running after_live hooks")
+	if err := runDeployHook(appModel, "after_live"); err != nil {
 		display.ErrorTask()
 		return fmt.Errorf("failed to run after deloy hooks: %s", err.Error())
 	}

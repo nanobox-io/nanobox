@@ -6,12 +6,15 @@ import (
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/processors/component"
-	"github.com/nanobox-io/nanobox/processors/platform"
+	"github.com/nanobox-io/nanobox/processors/app/dns"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
+
+func init() {
+	dns.AppSetup = Setup
+}
 
 // Setup sets up the app on the provider and in the database
 func Setup(envModel *models.Env, appModel *models.App, name string) error {
@@ -28,23 +31,10 @@ func Setup(envModel *models.Env, appModel *models.App, name string) error {
 		lumber.Error("app:Setup:models.App:Generate(): %s", err.Error())
 		return fmt.Errorf("failed to generate app data: %s", err.Error())
 	}
-
-	display.OpenContext("%s (%s)", envModel.Name, appModel.Name)
-	defer display.CloseContext()
-
+	
 	// reserve IPs
 	if err := reserveIPs(appModel); err != nil {
 		return fmt.Errorf("failed to reserve app IPs: %s", err.Error())
-	}
-
-	// clean crufty components
-	if err := component.Clean(appModel); err != nil {
-		return fmt.Errorf("failed to clean crufty components: %s", err.Error())
-	}
-
-	// setup the platform services
-	if err := platform.Setup(appModel); err != nil {
-		return fmt.Errorf("failed to setup platform services: %s", err.Error())
 	}
 
 	// set app state to active
@@ -70,27 +60,30 @@ func reserveIPs(appModel *models.App) error {
 		return fmt.Errorf("failed to reserve an env IP: %s", err.Error())
 	}
 
-	// reserve a logvac ip
-	logvacIP, err := dhcp.ReserveLocal()
-	if err != nil {
-		display.ErrorTask()
-		lumber.Error("app:reserveIPs:dhcp.ReserveLocal(): %s", err.Error())
-		return fmt.Errorf("failed to reserve a logvac IP: %s", err.Error())
-	}
-
-	// reserve a mist ip
-	mistIP, err := dhcp.ReserveLocal()
-	if err != nil {
-		display.ErrorTask()
-		lumber.Error("app:reserveIPs:dhcp.ReserveLocal(): %s", err.Error())
-		return fmt.Errorf("failed to reserve a mist IP: %s", err.Error())
-	}
-
 	// now assign the IPs onto the app model
 	appModel.GlobalIPs["env"] = envIP.String()
 
-	appModel.LocalIPs["logvac"] = logvacIP.String()
-	appModel.LocalIPs["mist"] = mistIP.String()
+	if appModel.Name == "sim" {
+		// reserve a logvac ip
+		logvacIP, err := dhcp.ReserveLocal()
+		if err != nil {
+			display.ErrorTask()
+			lumber.Error("app:reserveIPs:dhcp.ReserveLocal(): %s", err.Error())
+			return fmt.Errorf("failed to reserve a logvac IP: %s", err.Error())
+		}
+
+		// reserve a mist ip
+		mistIP, err := dhcp.ReserveLocal()
+		if err != nil {
+			display.ErrorTask()
+			lumber.Error("app:reserveIPs:dhcp.ReserveLocal(): %s", err.Error())
+			return fmt.Errorf("failed to reserve a mist IP: %s", err.Error())
+		}
+
+		appModel.LocalIPs["logvac"] = logvacIP.String()
+		appModel.LocalIPs["mist"] = mistIP.String()
+
+	}
 
 	// save the app
 	if err := appModel.Save(); err != nil {

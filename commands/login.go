@@ -14,7 +14,7 @@ var (
 	// LoginCmd ...
 	LoginCmd = &cobra.Command{
 		Use:   "login",
-		Short: "Authenticates your nanobox client with your nanobox.io account.",
+		Short: "Authenticate your nanobox client with your nanobox.io account.",
 		Long:  ``,
 		Run:   loginFn,
 	}

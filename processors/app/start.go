@@ -12,19 +12,29 @@ import (
 )
 
 // Start will start all services associated with an app
-func Start(appModel *models.App) error {
+func Start(envModel *models.Env, appModel *models.App, name string) error {
+
+	display.OpenContext("%s (%s)", envModel.Name, appModel.DisplayName())
+	defer display.CloseContext()
+
+	// if the app been initialized run the setup
+	if appModel.State != "active" {
+		if err := Setup(envModel, appModel, name); err != nil {
+			return fmt.Errorf("failed to setup the app: %s", err)
+		}
+	} else {
+		// restoring app
+		display.StartTask("Restoring App")
+		display.StopTask()
+	}
+
 	locker.LocalLock()
 	defer locker.LocalUnlock()
 
-	// load the env for the display context
-	envModel, err := appModel.Env()
-	if err != nil {
-		lumber.Error("app:Start:models.App.Env(): %s", err.Error())
-		return fmt.Errorf("failed to load app env: %s", err.Error())
+	// clean crufty components
+	if err := component.Clean(appModel); err != nil {
+		return fmt.Errorf("failed to clean crufty components: %s", err.Error())
 	}
-
-	display.OpenContext("%s (%s)", envModel.Name, appModel.Name)
-	defer display.CloseContext()
 
 	// start all the app components
 	if err := component.StartAll(appModel); err != nil {

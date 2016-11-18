@@ -10,6 +10,7 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/app/dns"
 	"github.com/nanobox-io/nanobox/processors/component"
+	"github.com/nanobox-io/nanobox/processors/provider"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/locker"
@@ -17,6 +18,11 @@ import (
 
 // Destroy removes the app from the provider and the database
 func Destroy(appModel *models.App) error {
+	// init docker client
+	if err := provider.Init(); err != nil {
+		return fmt.Errorf("failed to init docker client: %s", err.Error())
+	}
+
 	locker.LocalLock()
 	defer locker.LocalUnlock()
 
@@ -32,7 +38,11 @@ func Destroy(appModel *models.App) error {
 		return fmt.Errorf("failed to load app env: %s", err.Error())
 	}
 
-	display.OpenContext("%s (%s)", envModel.Name, appModel.Name)
+	if err := dns.RemoveAll(appModel); err != nil {
+		return fmt.Errorf("failed to remove dns aliases")	
+	}
+
+	display.OpenContext("%s (%s)", envModel.Name, appModel.DisplayName())
 	defer display.CloseContext()
 
 	// remove the dev container if there is one
@@ -46,11 +56,6 @@ func Destroy(appModel *models.App) error {
 	// release IPs
 	if err := releaseIPs(appModel); err != nil {
 		return fmt.Errorf("failed to release IPs: %s", err.Error())
-	}
-
-	// remove dns entries for this app
-	if err := dns.RemoveAll(appModel); err != nil {
-		return fmt.Errorf("failed to clean dns entries: %s", err.Error())
 	}
 
 	// destroy the app model

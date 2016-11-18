@@ -54,7 +54,7 @@ func NewSummarizer(label string, prefix string) *Summarizer {
 	return &Summarizer{
 		Label:  label,
 		Prefix: prefix,
-		Out:    os.Stderr,
+		Out:    os.Stdout,
 
 		chEvent:     make(chan *sEventOp),   // no buffering, block the sending process
 		chLog:       make(chan string, 100), // buffer up to 100 log messages before blocking

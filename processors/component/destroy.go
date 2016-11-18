@@ -21,7 +21,7 @@ func Destroy(appModel *models.App, componentModel *models.Component) error {
 	// remove the docker container
 	if err := destroyContainer(componentModel.ID); err != nil {
 		// report the error but continue on
-		lumber.Error("component:Destroy:destroyContainer(%s): %s",componentModel.ID, err)
+		lumber.Error("component:Destroy:destroyContainer(%s): %s", componentModel.ID, err)
 		// return err
 	}
 

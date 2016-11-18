@@ -23,7 +23,7 @@ func (machine DockerMachine) addNetfsMount(local, host string) error {
 	<-time.After(time.Second * 1)
 
 	// fetch the password from the user
-	fmt.Printf("%s's password is required to mount a Windows share.\n", user)
+	fmt.Printf("%s's password is required to mount a Windows share. (must be your Windows Live password if linked)\n", user)
 	pass, err := display.ReadPassword()
 	if err != nil {
 		return err
@@ -53,7 +53,7 @@ func (machine DockerMachine) addNetfsMount(local, host string) error {
 	// mount!
 	// mount -t cifs -o username=USER,password=PASSWORD //192.168.99.1/APP /PATH
 	source := fmt.Sprintf("//192.168.99.1/nanobox-%s", appID)
-	opts := fmt.Sprintf("user='%s',password='%s',uid=1000,gid=1000", user, pass)
+	opts := fmt.Sprintf("sec=ntlmssp,user='%s',password='%s',uid=1000,gid=1000", user, pass)
 	cmd = []string{
 		"sudo",
 		"/bin/mount",

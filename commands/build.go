@@ -17,10 +17,10 @@ var (
 	// BuildCmd ...
 	BuildCmd = &cobra.Command{
 		Use:   "build-runtime",
-		Short: "Builds a deployable runtime.",
+		Short: "Build your app's runtime.",
 		Long: `
-Generates a deployable runtime that can be
-deployed into dev, sim, or production environments.
+Builds your app's runtime, which is used both
+locally and in live environments.
 		`,
 		PreRun:  steps.Run("start"),
 		Run:     buildFn,

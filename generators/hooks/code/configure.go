@@ -55,7 +55,7 @@ func ConfigurePayload(appModel *models.App, componentModel *models.Component) st
 		Member:       map[string]int{"uid": 1},
 		Mounts:       mounts(appModel, componentModel),
 		WritableDirs: boxfile.Node(componentModel.Name).Value("writable_dirs"),
-		Transform:    boxfile.Node("code.deploy").Value("transform"),
+		Transform:    boxfile.Node("deploy.config").Value("transform"),
 		Env:          appModel.Evars,
 		LogWatches:   boxfile.Node(componentModel.Name).Value("log_watch"),
 		Start:        boxfile.Node(componentModel.Name).Value("start"),

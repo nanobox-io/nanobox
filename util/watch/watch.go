@@ -85,7 +85,7 @@ func batchPublish(container string) {
 		<-time.After(time.Second)
 		if len(changeList) > 0 {
 			lumber.Info("watcher: pushing: %+v", changeList)
-			util.DockerExec(container, "root", "touch", changeList, nil)
+			util.DockerExec(container, "root", "touch", append([]string{"-c"}, changeList...), nil)
 			changeList = []string{}
 		}
 	}
@@ -96,7 +96,7 @@ func populateIgnore(path string) {
 	// add pieces from the env
 	env, err := models.FindEnvByID(config.EnvID())
 	box := boxfile.New([]byte(env.BuiltBoxfile))
-	for _, libDir := range box.Node("code.build").StringSliceValue("lib_dirs") {
+	for _, libDir := range box.Node("run.config").StringSliceValue("cache_dirs") {
 		ignoreFile = append(ignoreFile, libDir)
 	}
 

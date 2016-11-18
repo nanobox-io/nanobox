@@ -1,4 +1,4 @@
-package link
+package remote
 
 import (
 	"fmt"
@@ -10,14 +10,14 @@ import (
 // Remove ...
 func Remove(envModel *models.Env, alias string) error {
 
-	delete(envModel.Links, alias)
+	delete(envModel.Remotes, alias)
 
 	// persist the model
 	if err := envModel.Save(); err != nil {
-		return fmt.Errorf("failed to remove link: %s", err.Error())
+		return fmt.Errorf("failed to remove remote: %s", err.Error())
 	}
 
-	fmt.Printf("\n%s %s link removed\n\n", display.TaskComplete, alias)
+	fmt.Printf("\n%s %s remote removed\n\n", display.TaskComplete, alias)
 
 	return nil
 }

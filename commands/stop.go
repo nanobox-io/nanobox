@@ -15,8 +15,8 @@ var (
 		Use:   "stop",
 		Short: "Stop the Nanobox virtual machine.",
 		Long: `
-Stops the Nanobox virtual machine as well as any running
-dev and sim platforms.
+Stops the Nanobox virtual machine as well as
+any running local or dry-run environments.
 		`,
 		Run: stopFn,
 	}

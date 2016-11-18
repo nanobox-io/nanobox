@@ -1,4 +1,4 @@
-code.build:
+run.config:
   engine: golang#refactor/v1
   config:
     package: 'github.com/nanobox-io/nanobox-golang-stylish'

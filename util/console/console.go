@@ -18,33 +18,29 @@ type ConsoleConfig struct {
 	Command string
 	Cwd     string
 	Shell   string
-	IsDev   bool
 	DevIP   string
 }
 
 func Run(id string, consoleConfig ConsoleConfig) error {
-
 	// set the default shell
 	if consoleConfig.Shell == "" {
 		consoleConfig.Shell = "bash"
 	}
 
 	// this is the default command to run in the container
-	cmd := []string{"/bin/bash"}
+	cmd := []string{"/bin/bash", "-cl"}
 
-	// check to see if there are any optional meta arguments that need to be handled
-	switch {
-
-	// if a current working directory (cwd) is provided then modify the command to
-	// change into that directory before executing
-	case consoleConfig.Cwd != "":
-		cmd = append(cmd, "-c", fmt.Sprintf("cd %s; exec \"%s\"", consoleConfig.Cwd, consoleConfig.Shell))
-
-	// if a command is provided then modify the command to exec that command after
-	// running the base command
-	case consoleConfig.Command != "":
-		cmd = append(cmd, "-c", consoleConfig.Command)
+	cmdPart := "exec "
+	if consoleConfig.Cwd != "" {
+		cmdPart = fmt.Sprintf("cd %s; %s", consoleConfig.Cwd, cmdPart)
 	}
+
+	if consoleConfig.Command != "" {
+		cmdPart = cmdPart + consoleConfig.Command
+	} else {
+		cmdPart = cmdPart + consoleConfig.Shell
+	}
+	cmd = append(cmd, cmdPart)
 
 	// establish file descriptors for std streams
 	stdInFD, isTerminal := term.GetFdInfo(os.Stdin)

@@ -12,7 +12,7 @@ var (
 	// StatusCmd ...
 	StatusCmd = &cobra.Command{
 		Use:   "status",
-		Short: "Displays the status of your Nanobox VM & running platforms.",
+		Short: "Display the status of your Nanobox VM & apps.",
 		Long:  ``,
 		Run:   statusFn,
 	}

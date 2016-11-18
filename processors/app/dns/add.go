@@ -12,16 +12,22 @@ import (
 	"github.com/nanobox-io/nanobox/util/dns"
 )
 
+var AppSetup func(envModel *models.Env, appModel *models.App, name string) error
+
 // Add adds a dns entry to the local hosts file
-func Add(a *models.App, name string) error {
+func Add(envModel *models.Env, appModel *models.App, name string) error {
+
+	if err := AppSetup(envModel, appModel, appModel.Name); err != nil {
+		return fmt.Errorf("failed to setup app: %s", err)
+	}
 
 	// fetch the IP
 	// env in dev is used in the dev container
 	// env in sim is used for portal
-	envIP := a.GlobalIPs["env"]
+	envIP := appModel.GlobalIPs["env"]
 
 	// generate the dns entry
-	entry := dns.Entry(envIP, name, a.ID)
+	entry := dns.Entry(envIP, name, appModel.ID)
 
 	// short-circuit if this entry already exists
 	if dns.Exists(entry) {
@@ -30,7 +36,7 @@ func Add(a *models.App, name string) error {
 
 	// ensure we're running as the administrator for this
 	if !util.IsPrivileged() {
-		return reExecPrivilegedAdd(a, name)
+		return reExecPrivilegedAdd(appModel, name)
 	}
 
 	// add the entry
@@ -45,14 +51,14 @@ func Add(a *models.App, name string) error {
 }
 
 // reExecPrivilegedAdd re-execs the current process with a privileged user
-func reExecPrivilegedAdd(a *models.App, name string) error {
+func reExecPrivilegedAdd(appModel *models.App, name string) error {
 	display.PauseTask()
 	defer display.ResumeTask()
 
 	display.PrintRequiresPrivilege("to modify host dns entries")
 
 	// call 'dev dns add' with the original path and args
-	cmd := fmt.Sprintf("%s %s dns add %s", config.NanoboxPath(), a.Name, name)
+	cmd := fmt.Sprintf("%s dns add %s %s", config.NanoboxPath(), appModel.DisplayName(), name)
 
 	// if the sudo'ed subprocess fails, we need to return error to stop the process
 	if err := util.PrivilegeExec(cmd); err != nil {

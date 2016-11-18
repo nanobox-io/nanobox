@@ -16,9 +16,9 @@ var (
 	// DestroyCmd ...
 	DestroyCmd = &cobra.Command{
 		Use:   "destroy",
-		Short: "Destroys the current project and removes it from Nanobox",
+		Short: "Destroy the current project and remove it from Nanobox.",
 		Long: `
-Destroys the current project and removes it from Nanobox, destroying
+Destroys the current project and removes it from Nanobox – destroying
 the filesystem mount, associated dns aliases, and local app data.
 		`,
 		PreRun: steps.Run("start"),

@@ -14,16 +14,18 @@ import (
 
 // RemoveAll removes all dns entries for an app
 func RemoveAll(a *models.App) error {
+	fmt.Println(dns.List(a.ID))
+	// shortcut if we dont have any entries for this app
+	if len(dns.List(a.ID)) == 0 {
+
+		return nil
+	}
 
 	// ensure we're running as the administrator for this
 	if !util.IsPrivileged() {
 		return reExecPrivilegedRemoveAll(a)
 	}
 
-	// shortcut if we dont have any entries for this app
-	if len(dns.List(a.ID)) == 0 {
-		return nil
-	}
 
 	if err := dns.Remove(a.ID); err != nil {
 		lumber.Error("dns:RemoveAll:dns.Remove(%s): %s", a.ID, err.Error())
@@ -41,7 +43,7 @@ func reExecPrivilegedRemoveAll(a *models.App) error {
 	display.PrintRequiresPrivilege("to modify host dns entries")
 
 	// call 'dev dns add' with the original path and args
-	cmd := fmt.Sprintf("%s %s dns rm-all", config.NanoboxPath(), a.Name)
+	cmd := fmt.Sprintf("%s dns rm-all %s", config.NanoboxPath(), a.DisplayName())
 
 	// if the sudo'ed subprocess fails, we need to return error to stop the process
 	if err := util.PrivilegeExec(cmd); err != nil {

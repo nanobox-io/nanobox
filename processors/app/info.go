@@ -1,4 +1,4 @@
-package sim
+package app
 
 import (
 	"fmt"
@@ -14,14 +14,9 @@ func Info(env *models.Env, app *models.App) error {
 
 	if app.State != "active" {
 		fmt.Printf("\n------------------------------------------------------\n")
-		fmt.Printf("Whoops, it doesn't look like a sim environment has\n")
+		fmt.Printf("Whoops, it doesn't look like a dev environment has\n")
 		fmt.Printf("been setup for the current working directory:\n")
-
 		fmt.Printf("\n%s\n", config.LocalDir())
-
-		fmt.Printf("\nRun the following to set one up:\n")
-
-		fmt.Printf("\n$ nanobox sim deploy\n")
 		fmt.Printf("------------------------------------------------------\n\n")
 
 		return nil
@@ -33,7 +28,8 @@ func Info(env *models.Env, app *models.App) error {
 	fmt.Printf("%s (%s)              Status: %s  \n", env.Name, app.Name, app.Status)
 	fmt.Printf("%s\n", line)
 
-	fmt.Printf("\nRouter  IP: %s\n", app.GlobalIPs["env"])
+	fmt.Printf("\nMount Path: %s\n", env.Directory)
+	fmt.Printf("Env IP: %s\n", app.GlobalIPs["env"])
 
 	components, _ := app.Components()
 
