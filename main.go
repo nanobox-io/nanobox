@@ -14,6 +14,7 @@ import (
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/commands"
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	// "github.com/nanobox-io/nanobox/util/memory_logger"
@@ -82,10 +83,18 @@ func main() {
 }
 
 func setupBugsnag() {
+	update, _ := models.LoadUpdate()
+	md5Parts := strings.Fields(update.CurrentVersion)
+	version := ""
+	if len(md5Parts) > 1 {
+		version = md5Parts[len(md5Parts)-1]
+	}
+
 	bugsnag.Configure(bugsnag.Configuration{
 		APIKey:      bugsnagToken,
 		Logger:      bugLog{},
 		Synchronous: true,
+		AppVersion:  version,
 	})
 
 	bugsnag.OnBeforeNotify(func(event *bugsnag.Event, config *bugsnag.Configuration) error {
