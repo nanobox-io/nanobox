@@ -1,6 +1,6 @@
 run.config:
-  image: nanobox/build:beta
-  engine: "golang#feature/workflow-refactor"
+  image: nanobox/build
+  engine: golang
   engine.config:
     package: github.com/nanobox-io/nanobox
   dev_packages:

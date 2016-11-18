@@ -16,7 +16,7 @@ import (
 func DevConfig(appModel *models.App) docker.ContainerConfig {
 	boxfile := boxfile.New([]byte(appModel.DeployedBoxfile))
 
-	image := boxfile.Node("build").StringValue("image")
+	image := boxfile.Node("run.config").StringValue("image")
 
 	if image == "" {
 		image = "nanobox/build"
