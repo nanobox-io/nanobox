@@ -25,7 +25,7 @@ var ListCmd = &cobra.Command{
 func listFn(ccmd *cobra.Command, args []string) {
 
 	env, _ := models.FindEnvByID(config.EnvID())
-	args, location, name := helpers.Endpoint(env, args)
+	args, location, name := helpers.Endpoint(env, args, 0)
 
 	switch location {
 	case "local":

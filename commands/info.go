@@ -30,7 +30,7 @@ specify which environment you would like information about.
 func infoFn(ccmd *cobra.Command, args []string) {
 
 	env, _ := models.FindEnvByID(config.EnvID())
-	args, location, name := helpers.Endpoint(env, args)
+	args, location, name := helpers.Endpoint(env, args, 0)
 
 	switch location {
 	case "local":

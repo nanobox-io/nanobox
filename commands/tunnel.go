@@ -43,7 +43,7 @@ func init() {
 func tunnelFn(ccmd *cobra.Command, args []string) {
 
 	env, _ := models.FindEnvByID(config.EnvID())
-	args, location, name := helpers.Endpoint(env, args)
+	args, location, name := helpers.Endpoint(env, args, 2)
 
 	// validate we have args required to set the meta we'll need; if we don't have
 	// the required args this will return with instructions

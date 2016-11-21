@@ -14,7 +14,7 @@ import (
 
 // RemoveAll removes all dns entries for an app
 func RemoveAll(a *models.App) error {
-	fmt.Println(dns.List(a.ID))
+
 	// shortcut if we dont have any entries for this app
 	if len(dns.List(a.ID)) == 0 {
 

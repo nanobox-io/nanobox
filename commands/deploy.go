@@ -50,7 +50,7 @@ func init() {
 // deployFn ...
 func deployFn(ccmd *cobra.Command, args []string) {
 	envModel, _ := models.FindEnvByID(config.EnvID())
-	args, location, name := helpers.Endpoint(envModel, args)
+	args, location, name := helpers.Endpoint(envModel, args, 1)
 
 	switch location {
 	case "local":

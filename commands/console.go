@@ -28,7 +28,7 @@ var (
 // consoleFn ...
 func consoleFn(ccmd *cobra.Command, args []string) {
 	envModel, _ := models.FindEnvByID(config.EnvID())
-	args, location, name := helpers.Endpoint(envModel, args)
+	args, location, name := helpers.Endpoint(envModel, args, 2)
 
 	// validate we have args required to set the meta we'll need; if we don't have
 	// the required args this will os.Exit(1) with an error message

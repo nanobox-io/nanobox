@@ -26,7 +26,7 @@ var RemoveAllCmd = &cobra.Command{
 func removeAllFn(ccmd *cobra.Command, args []string) {
 	// parse the dnss excluding the context
 	env, _ := models.FindEnvByID(config.EnvID())
-	_, location, name := helpers.Endpoint(env, args)
+	_, location, name := helpers.Endpoint(env, args, 0)
 
 	switch location {
 	case "local":

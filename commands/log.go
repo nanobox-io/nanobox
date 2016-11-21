@@ -26,7 +26,7 @@ func logFn(ccmd *cobra.Command, args []string) {
 
 	// parse the evars excluding the context
 	env, _ := models.FindEnvByID(config.EnvID())
-	args, location, name := helpers.Endpoint(env, args)
+	args, location, name := helpers.Endpoint(env, args, 1)
 
 	switch location {
 	case "local":
