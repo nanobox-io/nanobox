@@ -43,8 +43,9 @@ func Run(id string, consoleConfig ConsoleConfig) error {
 	cmd = append(cmd, cmdPart)
 
 	// establish file descriptors for std streams
-	stdInFD, isTerminal := term.GetFdInfo(os.Stdin)
-	stdOutFD, _ := term.GetFdInfo(os.Stdout)
+	stdin, stdout, _ := term.StdStreams()
+	stdInFD, isTerminal := term.GetFdInfo(stdin)
+	stdOutFD, _ := term.GetFdInfo(stdout)
 
 	// initiate a docker exec
 	execConfig := docker.ExecConfig{
