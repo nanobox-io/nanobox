@@ -13,19 +13,12 @@ func Run(stepNames ...string) func(ccmd *cobra.Command, args []string) {
 		if registry.GetBool("internal") {
 			return
 		}
-		// list that needs to be run
-		steps := []step{}
 		//
 		for _, stepName := range stepNames {
 			step, ok := stepList[stepName]
 			if ok && !step.complete() {
-				steps = append(steps, step)
+				step.cmd(ccmd, args)
 			}
-		}
-
-		// run the missing steps
-		for _, step := range steps {
-			step.cmd(ccmd, args)
 		}
 	}
 }
