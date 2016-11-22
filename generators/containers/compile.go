@@ -23,6 +23,7 @@ func CompileConfig(image string) docker.ContainerConfig {
 			fmt.Sprintf("%s%s/app:/mnt/app", provider.HostMntDir(), env),
 			fmt.Sprintf("%s%s/cache:/mnt/cache", provider.HostMntDir(), env),
 		},
+		RestartPolicy: "no",
 	}
 
 	return config

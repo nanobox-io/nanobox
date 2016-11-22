@@ -32,6 +32,7 @@ func DevConfig(appModel *models.App) docker.ContainerConfig {
 			fmt.Sprintf("%s%s/build:/data", provider.HostMntDir(), appModel.EnvID),
 			fmt.Sprintf("%s%s/cache:/mnt/cache", provider.HostMntDir(), appModel.EnvID),
 		},
+		RestartPolicy: "no",
 	}
 
 	// add cache_dirs into the container binds

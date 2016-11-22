@@ -345,10 +345,10 @@
 			"revisionTime": "2015-07-17T05:11:58Z"
 		},
 		{
-			"checksumSHA1": "s8BlLoR45rhRQPVR4boTtzZl9X4=",
+			"checksumSHA1": "4fz0GmDsDExAtaEH3cG4+TtOcEk=",
 			"path": "github.com/nanobox-io/golang-docker-client",
-			"revision": "e8a9fec6d638f6f76301044c0c6a647199ae94c0",
-			"revisionTime": "2016-09-13T16:07:39Z"
+			"revision": "2db421c551ba58075b9c7e1689a86d6c0176a06c",
+			"revisionTime": "2016-11-21T22:22:47Z"
 		},
 		{
 			"checksumSHA1": "CElLaU1k46jjoU8KB5jKMONmqYw=",
