@@ -2,11 +2,13 @@ package dev
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/nanobox-io/golang-docker-client"
 
 	"github.com/nanobox-io/nanobox/commands/steps"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/app"
 	"github.com/nanobox-io/nanobox/processors/env"
+	"github.com/nanobox-io/nanobox/processors/provider"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 )
@@ -26,5 +28,16 @@ func devStart(ccmd *cobra.Command, args []string) {
 
 func startCheck() bool {
 	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
-	return app.Status == "up"
+	if app.Status != "up" {
+		return false
+	}
+	provider.Init()
+	components, _ := app.Components()
+	for _, component := range components {
+		info, _ := docker.ContainerInspect(component.ID)
+		if !info.State.Running {
+			return false
+		}
+	}
+	return true
 }

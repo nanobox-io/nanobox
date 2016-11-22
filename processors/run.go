@@ -69,7 +69,7 @@ func setup(appModel *models.App) error {
 	defer locker.LocalUnlock()
 
 	// we don't need to setup if dev is already running
-	if isDevRunning() {
+	if isDevExists() {
 		if devInUse(container_generator.DevName()) {
 			return nil
 		} else {
@@ -279,11 +279,11 @@ func devInUse(ID string) bool {
 	return false
 }
 
-// isDevRunning returns true if a service is already running
-func isDevRunning() bool {
+// isDevExists returns true if a service is already running
+func isDevExists() bool {
 
-	container, err := docker.GetContainer(container_generator.DevName())
+	_, err := docker.GetContainer(container_generator.DevName())
 
 	// if the container doesn't exist then just return false
-	return err == nil && container.State.Status == "running"
+	return err == nil
 }

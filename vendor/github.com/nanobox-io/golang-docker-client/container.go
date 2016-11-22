@@ -14,6 +14,7 @@ import (
 type ContainerConfig struct {
 	ID         string            `json:"id"`
 	Network    string            `json:"network"`
+	NetName    string            `json:"networkname"`
 	Name       string            `json:"name"`
 	Labels     map[string]string `json:"labels"`
 	Hostname   string            `json:"hostname"`
@@ -26,6 +27,9 @@ type ContainerConfig struct {
 	MemorySwap int64             `json:"memory_swap"`
 	Status     string            `json:"status"`
 	CPUShares  int64             `json:"cpu_shares"`
+	RestartPolicy string
+	RestartAttempts int
+
 }
 
 // create a container from the user specification
@@ -33,6 +37,16 @@ func CreateContainer(conf ContainerConfig) (dockType.ContainerJSON, error) {
 	// if len(conf.Cmd) == 0 {
 	// 	conf.Cmd = []string{"/bin/sleep", "3650d"}
 	// }
+
+	// create a configurable restart policy with a default 'unless stopped' behavior
+	restartPolicy := dockContainer.RestartPolicy{Name: "unless-stopped"}
+	switch	conf.RestartPolicy {
+	case "no", "", "always", "on-failure":
+		restartPolicy = dockContainer.RestartPolicy{
+			Name: conf.RestartPolicy, 
+			MaximumRetryCount: conf.RestartAttempts,
+		}
+	}
 
 	config := &dockContainer.Config{
 		Hostname:        conf.Hostname,
@@ -49,7 +63,7 @@ func CreateContainer(conf ContainerConfig) (dockType.ContainerJSON, error) {
 		// NetworkMode:   "host",
 		CapAdd:        strslice.StrSlice([]string{"NET_ADMIN"}),
 		NetworkMode:   "bridge",
-		RestartPolicy: dockContainer.RestartPolicy{Name: "unless-stopped"},
+		RestartPolicy: restartPolicy,
 		Resources: dockContainer.Resources{
 			Memory:     conf.Memory,
 			MemorySwap: conf.MemorySwap,
@@ -66,9 +80,17 @@ func CreateContainer(conf ContainerConfig) (dockType.ContainerJSON, error) {
 	}
 
 	if conf.Network == "virt" || conf.IP != "" {
-		hostConfig.NetworkMode = "nanobox"
+		// allow for using a different network name
+		netName := ""
+		if conf.NetName == "" {
+			netName = "nanobox"
+		} else {
+			netName = conf.NetName
+		}
+
+		hostConfig.NetworkMode = dockContainer.NetworkMode(netName)
 		netConfig.EndpointsConfig = map[string]*dockNetwork.EndpointSettings{
-			"nanobox": {
+			netName: &dockNetwork.EndpointSettings{
 				IPAMConfig: &dockNetwork.EndpointIPAMConfig{IPv4Address: conf.IP},
 			},
 		}
