@@ -54,7 +54,11 @@ func (machine DockerMachine) addNetfsMount(local, host string) error {
 	// mount -t cifs -o username=USER,password=PASSWORD //192.168.99.1/APP /PATH
 	source := fmt.Sprintf("//192.168.99.1/nanobox-%s", appID)
 	// mfsymlinks,
+	additionalOptions := config.Viper().GetString("netfs_mount_opts")
 	opts := fmt.Sprintf("sec=ntlmssp,user='%s',password='%s',uid=1000,gid=1000", user, pass)
+	if additionalOptions != "" {
+		opts = fmt.Sprintf("%s,%s", additionalOptions, opts)
+	}
 	cmd = []string{
 		"sudo",
 		"/bin/mount",
