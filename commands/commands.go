@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/commands/registry"
-	"github.com/nanobox-io/nanobox/commands/steps"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/mixpanel"
@@ -39,9 +38,6 @@ var (
 		Short: "",
 		Long:  ``,
 		PersistentPreRun: func(ccmd *cobra.Command, args []string) {
-			// always do the configure check
-			fn := steps.Run("configure")
-			fn(ccmd, args)
 
 			// report the command usage to mixpanel
 			mixpanel.Report(strings.Replace(ccmd.CommandPath(), "nanobox ", "", 1))

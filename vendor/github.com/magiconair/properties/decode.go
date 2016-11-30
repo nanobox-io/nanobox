@@ -219,7 +219,7 @@ func dec(p *Properties, key string, def *string, opts map[string]string, v refle
 	case isMap(t):
 		valT := t.Elem()
 		m := reflect.MakeMap(t)
-		for postfix := range p.FilterStripPrefix(key + ".").m {
+		for postfix, _ := range p.FilterStripPrefix(key + ".").m {
 			pp := strings.SplitN(postfix, ".", 2)
 			mk, mv := pp[0], reflect.New(valT)
 			if err := dec(p, key+"."+mk, nil, nil, mv); err != nil {

@@ -2,6 +2,8 @@ package containers
 
 import (
 	"fmt"
+	"os"
+	"runtime"
 
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox-boxfile"
@@ -33,6 +35,16 @@ func DevConfig(appModel *models.App) docker.ContainerConfig {
 			fmt.Sprintf("%s%s/cache:/mnt/cache", provider.HostMntDir(), appModel.EnvID),
 		},
 		RestartPolicy: "no",
+	}
+
+	// set the terminal veriable
+	if runtime.GOOS == "windows" {
+		config.Env = []string{"TERM=cygwin"}
+	}
+
+	termEvar := os.Getenv("TERM")
+	if termEvar != "" {
+		config.Env = []string{"TERM="+termEvar}
 	}
 
 	// add cache_dirs into the container binds

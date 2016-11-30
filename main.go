@@ -17,6 +17,7 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/processors"
 	// "github.com/nanobox-io/nanobox/util/memory_logger"
 )
 
@@ -40,6 +41,11 @@ func main() {
 	}
 
 	fixRunArgs()
+
+	// do the commands configure check here because we need it to happen before setupBugsnag creates the config
+	if !config.ConfigExists() {
+		processors.Configure()
+	}
 
 	// build the viper config because viper cannot handle concurrency
 	// so it has to be done at the beginning even if we dont need it
@@ -76,6 +82,8 @@ func main() {
 		}
 	}()
 
+
+	// get the bugsnag variables ready
 	setupBugsnag()
 
 	//
