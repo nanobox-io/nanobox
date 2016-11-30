@@ -17,6 +17,7 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/processors"
 	// "github.com/nanobox-io/nanobox/util/memory_logger"
 )
 
@@ -76,7 +77,13 @@ func main() {
 		}
 	}()
 
-	setupBugsnag()
+	// do the commands configure check here because we need it to happen before setupBugsnag creates the config
+	if !config.ConfigExists() {
+		processors.Configure()
+	}
+
+	// get the bugsnag variables ready
+	go setupBugsnag()
 
 	//
 	commands.NanoboxCmd.Execute()

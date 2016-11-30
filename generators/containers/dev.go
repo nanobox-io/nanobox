@@ -24,8 +24,6 @@ func DevConfig(appModel *models.App) docker.ContainerConfig {
 		image = "nanobox/build"
 	}
 
-
-
 	config := docker.ContainerConfig{
 		Name:    fmt.Sprintf("nanobox_%s", appModel.ID),
 		Image:   image, // this will need to be configurable some time
