@@ -42,6 +42,11 @@ func main() {
 
 	fixRunArgs()
 
+	// do the commands configure check here because we need it to happen before setupBugsnag creates the config
+	if !config.ConfigExists() {
+		processors.Configure()
+	}
+
 	// build the viper config because viper cannot handle concurrency
 	// so it has to be done at the beginning even if we dont need it
 	config.Viper()
@@ -77,13 +82,9 @@ func main() {
 		}
 	}()
 
-	// do the commands configure check here because we need it to happen before setupBugsnag creates the config
-	if !config.ConfigExists() {
-		processors.Configure()
-	}
 
 	// get the bugsnag variables ready
-	go setupBugsnag()
+	setupBugsnag()
 
 	//
 	commands.NanoboxCmd.Execute()
