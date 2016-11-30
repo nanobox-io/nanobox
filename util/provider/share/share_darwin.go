@@ -99,6 +99,7 @@ func Remove(path string) error {
 		line = strings.Replace(line, fmt.Sprintf("%s ", path), "", 1)
 		if line != lineCheck {
 			// if there is still any paths left in our line
+			line = cleanLine(line, lineCheck)
 			newLines = append(newLines, line)
 		}
 	}
