@@ -9,6 +9,7 @@ import (
 
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/update"
+	"github.com/nanobox-io/nanobox/models"
 )
 
 // main ...
@@ -41,6 +42,9 @@ func main() {
 			fmt.Scanln(&input)
 
 		}
+
+		// make sure the .nanobox folder is created by our user
+		models.LoadUpdate()
 
 		cmd := fmt.Sprintf("%s \"%s\"", os.Args[0], path)
 		if err := util.PrivilegeExec(cmd); err != nil {
