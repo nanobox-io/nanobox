@@ -29,7 +29,7 @@ You can also pass a command into 'run'. Nanobox will
 run the command without dropping you into a console
 in your local environment.
 	`,
-	PreRun:  steps.Run("configure", "start", "build-runtime", "dev start", "dev deploy"),
+	PreRun:  steps.Run("start", "build-runtime", "dev start", "dev deploy"),
 	Run:     runFn,
 	PostRun: steps.Run("dev stop"),
 }

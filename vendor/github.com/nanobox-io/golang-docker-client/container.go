@@ -12,24 +12,24 @@ import (
 )
 
 type ContainerConfig struct {
-	ID         string            `json:"id"`
-	Network    string            `json:"network"`
-	NetName    string            `json:"networkname"`
-	Name       string            `json:"name"`
-	Labels     map[string]string `json:"labels"`
-	Hostname   string            `json:"hostname"`
-	Domainname string            `json:"domainname"`
-	Cmd        []string          `json:"cmd"`
-	Image      string            `json:"image_slug"`
-	IP         string            `json:"ip"`
-	Binds      []string          `json:"binds"`
-	Memory     int64             `json:"memory"`
-	MemorySwap int64             `json:"memory_swap"`
-	Status     string            `json:"status"`
-	CPUShares  int64             `json:"cpu_shares"`
-	RestartPolicy string
-	RestartAttempts int
-
+	ID              string            `json:"id"`
+	Network         string            `json:"network"`
+	NetName         string            `json:"networkname"`
+	Name            string            `json:"name"`
+	Labels          map[string]string `json:"labels"`
+	Hostname        string            `json:"hostname"`
+	Domainname      string            `json:"domainname"`
+	Cmd             []string          `json:"cmd"`
+	Env             []string          `json:"env"`
+	Image           string            `json:"image_slug"`
+	IP              string            `json:"ip"`
+	Binds           []string          `json:"binds"`
+	Memory          int64             `json:"memory"`
+	MemorySwap      int64             `json:"memory_swap"`
+	Status          string            `json:"status"`
+	CPUShares       int64             `json:"cpu_shares"`
+	RestartPolicy   string            `json:"restart_policy"`
+	RestartAttempts int               `json:"restart_attempts"`
 }
 
 // create a container from the user specification
@@ -40,10 +40,10 @@ func CreateContainer(conf ContainerConfig) (dockType.ContainerJSON, error) {
 
 	// create a configurable restart policy with a default 'unless stopped' behavior
 	restartPolicy := dockContainer.RestartPolicy{Name: "unless-stopped"}
-	switch	conf.RestartPolicy {
+	switch conf.RestartPolicy {
 	case "no", "", "always", "on-failure":
 		restartPolicy = dockContainer.RestartPolicy{
-			Name: conf.RestartPolicy, 
+			Name:              conf.RestartPolicy,
 			MaximumRetryCount: conf.RestartAttempts,
 		}
 	}
@@ -52,6 +52,7 @@ func CreateContainer(conf ContainerConfig) (dockType.ContainerJSON, error) {
 		Hostname:        conf.Hostname,
 		Domainname:      conf.Domainname,
 		Cmd:             conf.Cmd,
+		Env:             conf.Env,
 		Labels:          conf.Labels,
 		NetworkDisabled: false,
 		Image:           conf.Image,
