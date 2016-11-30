@@ -34,6 +34,7 @@ type (
 		detail      string         // the current line of detail to print
 		shutdown    bool           // toggle to inform the run loop to exit
 		windowWidth int
+		leftover    string
 	}
 
 	// Sending events to the summarizer needs to block the caller until
@@ -198,10 +199,17 @@ func (s *Summarizer) handleEvent(event *sEventOp) {
 // handleLog sets the detail line and refreshes the summary
 func (s *Summarizer) handleLog(data string) {
 
-	msg := ""
+	msg := s.leftover
+	s.leftover = ""
+
+	// a function to decide where to split
+	f := func(c rune) bool {
+		return c == '\n' || c == '\r'
+	}
 
 	// iterate through the lines, we'll keep the last line that has data
-	for _, line := range strings.Split(data, "\n") {
+	lines := strings.FieldsFunc(data, f)
+	for _, line := range lines {
 		// first we need to remove escape sequences
 		line = EscSeqRegex.ReplaceAllString(line, "")
 
@@ -215,6 +223,12 @@ func (s *Summarizer) handleLog(data string) {
 		if s.windowWidth > 0 && len(line) > s.windowWidth {
 			msg = msg[:s.windowWidth-(len(s.Label)+len(s.Prefix)+10)] + "..."
 		}
+	}
+
+	// if there is any data and it doesnt end with a newline
+	if len(lines) > 0 && (!strings.HasSuffix(data, "\n") || !strings.HasSuffix(data, "\r")) {
+		// place it in the leftovers
+		s.leftover = lines[len(lines) - 1]
 	}
 
 	if len(msg) > 0 {
