@@ -14,6 +14,7 @@ type ExecConfig struct {
 	User                       string
 	Cmd                        []string
 	Stdin, Stdout, Stderr, Tty bool
+	Env                        []string
 }
 
 func ExecStart(execConfig ExecConfig) (dockType.ContainerExecCreateResponse, dockType.HijackedResponse, error) {
@@ -24,6 +25,7 @@ func ExecStart(execConfig ExecConfig) (dockType.ContainerExecCreateResponse, doc
 		AttachStdin:  execConfig.Stdin,
 		AttachStdout: execConfig.Stdout,
 		AttachStderr: execConfig.Stderr,
+		Env:          execConfig.Env,
 	}
 
 	exec, err := client.ContainerExecCreate(context.Background(), execConfig.ID, config)
