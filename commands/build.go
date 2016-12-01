@@ -51,7 +51,8 @@ func buildComplete() bool {
 	}
 
 	// now check to see if any of the build triggers have changed
-	for _, trigger := range box.Node("run.config").StringSliceValue("build_triggers") {
+  lastBuildsBoxfile := boxfile.New([]byte(env.BuiltBoxfile))
+	for _, trigger := range lastBuildsBoxfile.Node("run.config").StringSliceValue("build_triggers") {
 		if env.BuildTriggers[trigger] != util.FileMD5(trigger) {
 			return false
 		}

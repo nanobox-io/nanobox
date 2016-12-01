@@ -8,6 +8,9 @@ import (
 	"math/rand"
 	"os"
 	"time"
+	"path/filepath"
+	
+	"github.com/nanobox-io/nanobox/util/config"
 )
 
 const (
@@ -43,7 +46,12 @@ func FolderExists(folderName string) bool {
 func FileMD5(name string) string {
 	data, err := ioutil.ReadFile(name)
 	if err != nil {
-		return ""
+		// give the relative path a chance
+		// but if it doesnt attach the filename given to the absolute path
+		data, err = ioutil.ReadFile(filepath.ToSlash(filepath.Join(config.LocalDir(), name)))
+		if err != nil {
+			return ""
+		}
 	}
 	return fmt.Sprintf("%x", md5.Sum(data))
 }
