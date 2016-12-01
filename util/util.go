@@ -2,6 +2,9 @@
 package util
 
 import (
+	"crypto/md5"
+	"fmt"
+	"io/ioutil"
 	"math/rand"
 	"os"
 	"time"
@@ -35,4 +38,12 @@ func FolderExists(folderName string) bool {
 		return false
 	}
 	return dir.IsDir()
+}
+
+func FileMD5(name string) string {
+	data, err := ioutil.ReadFile(name)
+	if err != nil {
+		return ""
+	}
+	return fmt.Sprintf("%x", md5.Sum(data))
 }

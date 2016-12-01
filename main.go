@@ -15,9 +15,9 @@ import (
 
 	"github.com/nanobox-io/nanobox/commands"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processors"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/processors"
 	// "github.com/nanobox-io/nanobox/util/memory_logger"
 )
 
@@ -81,7 +81,6 @@ func main() {
 			os.Exit(1)
 		}
 	}()
-
 
 	// get the bugsnag variables ready
 	setupBugsnag()

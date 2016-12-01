@@ -8,6 +8,7 @@ import (
 	"github.com/nanobox-io/nanobox/commands/steps"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 )
@@ -40,8 +41,20 @@ func buildFn(ccmd *cobra.Command, args []string) {
 }
 
 func buildComplete() bool {
+	// check the boxfile to be sure it hasnt changed
 	env, _ := models.FindEnvByID(config.EnvID())
 	box := boxfile.NewFromPath(config.Boxfile())
 
-	return env.UserBoxfile != "" && env.UserBoxfile == box.String()
+	// we need to rebuild if this isnt true without going to check triggers
+	if env.UserBoxfile == "" || env.UserBoxfile != box.String() {
+		return false
+	}
+
+	// now check to see if any of the build triggers have changed
+	for _, trigger := range box.Node("run.config").StringSliceValue("build_triggers") {
+		if env.BuildTriggers[trigger] != util.FileMD5(trigger) {
+			return false
+		}
+	}
+	return true
 }

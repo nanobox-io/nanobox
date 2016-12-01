@@ -1,8 +1,8 @@
 package dev
 
 import (
-	"github.com/spf13/cobra"
 	"github.com/nanobox-io/golang-docker-client"
+	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/commands/steps"
 	"github.com/nanobox-io/nanobox/models"

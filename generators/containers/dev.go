@@ -44,7 +44,7 @@ func DevConfig(appModel *models.App) docker.ContainerConfig {
 
 	termEvar := os.Getenv("TERM")
 	if termEvar != "" {
-		config.Env = []string{"TERM="+termEvar}
+		config.Env = []string{"TERM=" + termEvar}
 	}
 
 	// add cache_dirs into the container binds

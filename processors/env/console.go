@@ -23,7 +23,7 @@ func Console(componentModel *models.Component, consoleConfig console.ConsoleConf
 		display.MOTD()
 		display.InfoDevContainer(consoleConfig.DevIP)
 	}
-	<-time.After(100*time.Millisecond)
+	<-time.After(100 * time.Millisecond)
 
 	return console.Run(componentModel.ID, consoleConfig)
 }

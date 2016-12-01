@@ -52,6 +52,8 @@ func Build(envModel *models.Env) error {
 		return err
 	}
 
+	populateBuildTriggers(envModel)
+
 	if err := setupBuildMounts(container.ID); err != nil {
 		return err
 	}
@@ -65,6 +67,7 @@ func Build(envModel *models.Env) error {
 	}
 
 	envModel.LastBuild = time.Now()
+
 	envModel.Save()
 
 	// ensure we stop the container when we're done
@@ -123,6 +126,17 @@ func gatherRequirements(envModel *models.Env, containerID string) error {
 	envModel.BuiltID = util.RandomString(30)
 
 	return nil
+}
+
+// populate the build triggers so we can know next time if a change has happened
+func populateBuildTriggers(envModel *models.Env) {
+	if envModel.BuildTriggers == nil {
+		envModel.BuildTriggers = map[string]string{}
+	}
+	box := boxfile.New([]byte(envModel.UserBoxfile))
+	for _, trigger := range box.Node("run.config").StringSliceValue("build_triggers") {
+		envModel.BuildTriggers[trigger] = util.FileMD5(trigger)
+	}
 }
 
 // setupBuildMounts prepares the environment for the build
