@@ -7,9 +7,9 @@ import (
 	"os/exec"
 	"runtime"
 
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/update"
-	"github.com/nanobox-io/nanobox/models"
 )
 
 // main ...

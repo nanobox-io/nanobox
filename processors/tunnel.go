@@ -3,7 +3,6 @@ package processors
 import (
 	"fmt"
 
-
 	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/helpers"
 	"github.com/nanobox-io/nanobox/models"
@@ -24,7 +23,7 @@ func Tunnel(envModel *models.Env, tunnelConfig TunnelConfig) error {
 		// set the app id
 		appID = remote.ID
 	}
-	
+
 	// set odins endpoint if the arguement is passed
 	if endpoint := registry.GetString("endpoint"); endpoint != "" {
 		odin.SetEndpoint(endpoint)

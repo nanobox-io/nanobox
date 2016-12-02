@@ -228,7 +228,7 @@ func (s *Summarizer) handleLog(data string) {
 	// if there is any data and it doesnt end with a newline
 	if len(lines) > 0 && (!strings.HasSuffix(data, "\n") || !strings.HasSuffix(data, "\r")) {
 		// place it in the leftovers
-		s.leftover = lines[len(lines) - 1]
+		s.leftover = lines[len(lines)-1]
 	}
 
 	if len(msg) > 0 {
