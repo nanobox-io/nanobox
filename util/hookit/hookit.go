@@ -22,21 +22,26 @@ func Exec(container, hook, payload, displayLevel string) (string, error) {
 
 func DebugExec(container, hook, payload, displayLevel string) (string, error) {
 	res, err := Exec(container, hook, payload, displayLevel)
-	if err != nil {
-		display.ErrorTask()
-		err = fmt.Errorf("failed to execute %s hook: %s", hook, err.Error())
-		if registry.GetBool("debug") {
-			fmt.Printf("An error has occurred: \"%s\"\n", err)
-			fmt.Println("Entering Debug Mode")
-			fmt.Printf("  container: %s\n", container)
-			fmt.Printf("  hook:      %s\n", hook)
-			fmt.Printf("  payload:   %s\n", payload)
-			err := console.Run(container, console.ConsoleConfig{})
-			if err != nil {
-				return res, fmt.Errorf("failed to establish a debug session: %s", err.Error())
-			}
+
+	// leave early if no error
+	if err == nil {
+		return res, err
+	}
+
+	display.ErrorTask()
+	err = fmt.Errorf("failed to execute %s hook: %s", hook, err.Error())
+	if registry.GetBool("debug") {
+		fmt.Printf("An error has occurred: \"%s\"\n", err)
+		fmt.Println("Entering Debug Mode")
+		fmt.Printf("  container: %s\n", container)
+		fmt.Printf("  hook:      %s\n", hook)
+		fmt.Printf("  payload:   %s\n", payload)
+		err := console.Run(container, console.ConsoleConfig{})
+		if err != nil {
+			return res, fmt.Errorf("failed to establish a debug session: %s", err.Error())
 		}
 	}
 
-	return res, err
+	// try running the exec one more time. 
+	return Exec(container, hook, payload, displayLevel)
 }
