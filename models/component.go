@@ -21,6 +21,7 @@ type (
 		Label      string        `json:"label"`
 		Image      string        `json:"image"`
 		Type       string        `json:"type"`
+		IP         string        `json:"ip"`
 		ExternalIP string        `json:"external_ip"`
 		InternalIP string        `json:"internal_ip"`
 		Plan       ComponentPlan `json:"plan"`
@@ -148,6 +149,15 @@ func (c *Component) GenerateEvars(app *App) error {
 	}
 
 	return app.Save()
+}
+
+// backword compatibility function so we can transition
+// to the new single ip system
+func (c *Component) IPAddr() string {
+	if c.IP != "" {
+		return c.IP
+	}
+	return c.InternalIP
 }
 
 // PurgeEvars purges the generated evars for a component

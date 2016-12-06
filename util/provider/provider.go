@@ -24,15 +24,11 @@ type Provider interface {
 	Destroy() error
 	Start() error
 	DockerEnv() error
-	Touch(file string) error
 	AddIP(ip string) error
 	RemoveIP(ip string) error
 	SetDefaultIP(ip string) error
 	AddNat(host, container string) error
 	RemoveNat(host, container string) error
-	// HasShare(local, host string) bool
-	// AddShare(local, host string) error
-	// RemoveShare(local, host string) error
 	HasMount(mount string) bool
 	AddMount(local, host string) error
 	RemoveMount(local, host string) error
@@ -224,17 +220,6 @@ func DockerEnv() error {
 	}
 
 	return p.DockerEnv()
-}
-
-// Touch ..
-func Touch(file string) error {
-
-	p, err := fetchProvider()
-	if err != nil {
-		return err
-	}
-
-	return p.Touch(file)
 }
 
 // AddIP ..

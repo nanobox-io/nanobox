@@ -46,7 +46,12 @@ func (native Native) Status() string {
 }
 
 func (native Native) IsInstalled() bool {
-	return true
+	cmd := exec.Command("docker", "version")
+
+	//
+	err := cmd.Run()
+
+	return err == nil
 }
 
 func (native Native) Install() error {
@@ -139,7 +144,7 @@ func (native Native) Start() error {
 }
 
 func (native Native) IsReady() bool {
-	return true
+	return native.hasNetwork()
 }
 
 // HostShareDir ...
@@ -173,12 +178,6 @@ func (native Native) DockerEnv() error {
 	return nil
 }
 
-// Touch touches a file on the host
-func (native Native) Touch(file string) error {
-	// TODO: ???
-	return nil
-}
-
 // AddIP adds an IP into the host for host access
 func (native Native) AddIP(ip string) error {
 	// TODO: ???
@@ -192,7 +191,7 @@ func (native Native) RemoveIP(ip string) error {
 }
 
 func (native Native) SetDefaultIP(ip string) error {
-	// nothing is necessary ehre
+	// nothing is necessary here
 	return nil
 }
 
@@ -205,21 +204,6 @@ func (native Native) AddNat(ip, containerIP string) error {
 // RemoveNat removes nat from making a container inaccessible to the host network stack
 func (native Native) RemoveNat(ip, containerIP string) error {
 	// TODO: ???
-	return nil
-}
-
-// HasShare is not applicable for the native adapter, so will return false
-func (native Native) HasShare(_, _ string) bool {
-	return false
-}
-
-// AddShare is not applicable for the native adapter, so will return nil
-func (native Native) AddShare(_, _ string) error {
-	return nil
-}
-
-// RemoveShare is not applicable for the native adapter, so will return nil
-func (native Native) RemoveShare(_, _ string) error {
 	return nil
 }
 
@@ -279,8 +263,11 @@ func (native Native) Run(command []string) ([]byte, error) {
 
 //
 func (native Native) RemoveEnvDir(id string) error {
-	// TODO: figure this out??
-	return nil
+	if id == "" {
+		return nil
+	}
+
+	return os.RemoveAll(native.HostMntDir() + id)
 }
 
 // hasNetwork ...

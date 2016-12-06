@@ -384,29 +384,6 @@ func (machine DockerMachine) DockerEnv() error {
 	return nil
 }
 
-// Touch adds an IP into the docker-machine vm for host access
-func (machine DockerMachine) Touch(file string) error {
-	cmd := []string{
-		dockerMachineCmd,
-		"ssh",
-		"nanobox",
-		"sudo",
-		"touch",
-		file,
-	}
-
-	process := exec.Command(cmd[0], cmd[1:]...)
-
-	b, err := process.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("%s: %s", b, err)
-	}
-
-	// todo: check output for failures
-
-	return nil
-}
-
 // AddIP adds an IP into the docker-machine vm for host access
 func (machine DockerMachine) AddIP(ip string) error {
 	if machine.hasIP(ip) {
