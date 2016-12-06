@@ -13,19 +13,20 @@ type Env struct {
 	Directory string
 	Name      string
 
-	// Links map a local app to multiple production apps, by an alias
-	Links map[string]Link
+	// Remotes map a local app to multiple production apps, by an alias
+	Remotes map[string]Remote
 	// the boxfile from the most recent build
-	BuiltBoxfile string
-	UserBoxfile  string
-	BuiltID      string
-	DeployedID   string
-	LastBuild    time.Time
-	LastCompile  time.Time
+	BuiltBoxfile  string
+	UserBoxfile   string
+	BuiltID       string
+	DeployedID    string
+	LastBuild     time.Time
+	LastCompile   time.Time
+	BuildTriggers map[string]string
 }
 
-// Link ...
-type Link struct {
+// Remote ...
+type Remote struct {
 	ID       string
 	Name     string
 	Endpoint string
@@ -68,7 +69,7 @@ func (e *Env) Generate() error {
 	e.ID = config.EnvID()
 	e.Directory = config.LocalDir()
 	e.Name = config.LocalDirName()
-	e.Links = map[string]Link{}
+	e.Remotes = map[string]Remote{}
 
 	return e.Save()
 }

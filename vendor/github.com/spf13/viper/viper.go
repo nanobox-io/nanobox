@@ -1125,32 +1125,32 @@ func AllKeys() []string { return v.AllKeys() }
 func (v *Viper) AllKeys() []string {
 	m := map[string]struct{}{}
 
-	for key := range v.defaults {
+	for key, _ := range v.defaults {
 		m[strings.ToLower(key)] = struct{}{}
 	}
 
-	for key := range v.pflags {
+	for key, _ := range v.pflags {
 		m[strings.ToLower(key)] = struct{}{}
 	}
 
-	for key := range v.env {
+	for key, _ := range v.env {
 		m[strings.ToLower(key)] = struct{}{}
 	}
 
-	for key := range v.config {
+	for key, _ := range v.config {
 		m[strings.ToLower(key)] = struct{}{}
 	}
 
-	for key := range v.kvstore {
+	for key, _ := range v.kvstore {
 		m[strings.ToLower(key)] = struct{}{}
 	}
 
-	for key := range v.override {
+	for key, _ := range v.override {
 		m[strings.ToLower(key)] = struct{}{}
 	}
 
 	a := []string{}
-	for x := range m {
+	for x, _ := range m {
 		a = append(a, x)
 	}
 

@@ -3,6 +3,7 @@ package commands
 import (
 	"github.com/spf13/cobra"
 
+	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/processors"
 	"github.com/nanobox-io/nanobox/util/display"
 )
@@ -14,8 +15,8 @@ var (
 		Use:   "stop",
 		Short: "Stop the Nanobox virtual machine.",
 		Long: `
-Stops the Nanobox virtual machine as well as any running
-dev and sim platforms.
+Stops the Nanobox virtual machine as well as
+any running local or dry-run environments.
 		`,
 		Run: stopFn,
 	}
@@ -23,5 +24,6 @@ dev and sim platforms.
 
 // stopFn ...
 func stopFn(ccmd *cobra.Command, args []string) {
+	registry.Set("keep-share", true)
 	display.CommandErr(processors.Stop())
 }

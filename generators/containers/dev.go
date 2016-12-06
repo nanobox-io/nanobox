@@ -2,6 +2,8 @@ package containers
 
 import (
 	"fmt"
+	"os"
+	"runtime"
 
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox-boxfile"
@@ -16,7 +18,7 @@ import (
 func DevConfig(appModel *models.App) docker.ContainerConfig {
 	boxfile := boxfile.New([]byte(appModel.DeployedBoxfile))
 
-	image := boxfile.Node("build").StringValue("image")
+	image := boxfile.Node("run.config").StringValue("image")
 
 	if image == "" {
 		image = "nanobox/build"
@@ -32,14 +34,25 @@ func DevConfig(appModel *models.App) docker.ContainerConfig {
 			fmt.Sprintf("%s%s/build:/data", provider.HostMntDir(), appModel.EnvID),
 			fmt.Sprintf("%s%s/cache:/mnt/cache", provider.HostMntDir(), appModel.EnvID),
 		},
+		RestartPolicy: "no",
 	}
 
-	// add lib_dirs into the container binds
-	libDirs := boxfile.Node("code.build").StringSliceValue("lib_dirs")
+	// set the terminal veriable
+	if runtime.GOOS == "windows" {
+		config.Env = []string{"TERM=cygwin"}
+	}
+
+	termEvar := os.Getenv("TERM")
+	if termEvar != "" {
+		config.Env = []string{"TERM=" + termEvar}
+	}
+
+	// add cache_dirs into the container binds
+	libDirs := boxfile.Node("run.config").StringSliceValue("cache_dirs")
 
 	for _, libDir := range libDirs {
 		// TODO: the cache source should come from the provider
-		path := fmt.Sprintf("/mnt/sda1/%s/cache/lib_dirs/%s:/app/%s", appModel.EnvID, libDir, libDir)
+		path := fmt.Sprintf("/mnt/sda1/%s/cache/cache_dirs/%s:/app/%s", appModel.EnvID, libDir, libDir)
 		config.Binds = append(config.Binds, path)
 	}
 

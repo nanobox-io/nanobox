@@ -52,6 +52,8 @@ func Build(envModel *models.Env) error {
 		return err
 	}
 
+	populateBuildTriggers(envModel)
+
 	if err := setupBuildMounts(container.ID); err != nil {
 		return err
 	}
@@ -65,6 +67,7 @@ func Build(envModel *models.Env) error {
 	}
 
 	envModel.LastBuild = time.Now()
+
 	envModel.Save()
 
 	// ensure we stop the container when we're done
@@ -116,22 +119,29 @@ func gatherRequirements(envModel *models.Env, containerID string) error {
 
 	box := boxfile.NewFromPath(config.Boxfile())
 
-	// persist the boxfile output to the env model
+	// set the boxfile data but do not save
+	// if something else here fails we want to only save at the end
 	envModel.UserBoxfile = box.String()
 	envModel.BuiltBoxfile = boxOutput
 	envModel.BuiltID = util.RandomString(30)
-	if err := envModel.Save(); err != nil {
-		display.ErrorTask()
-		lumber.Error("code:Build:models:Env:Save(): %s", err.Error())
-		return fmt.Errorf("failed to persist build boxfile to db: %s", err.Error())
-	}
 
 	return nil
 }
 
+// populate the build triggers so we can know next time if a change has happened
+func populateBuildTriggers(envModel *models.Env) {
+	if envModel.BuildTriggers == nil {
+		envModel.BuildTriggers = map[string]string{}
+	}
+	box := boxfile.New([]byte(envModel.UserBoxfile))
+	for _, trigger := range box.Node("run.config").StringSliceValue("build_triggers") {
+		envModel.BuildTriggers[trigger] = util.FileMD5(trigger)
+	}
+}
+
 // setupBuildMounts prepares the environment for the build
 func setupBuildMounts(containerID string) error {
-	display.StartTask("Mounting lib_dirs")
+	display.StartTask("Mounting cache_dirs")
 	defer display.StopTask()
 
 	// run the build hook

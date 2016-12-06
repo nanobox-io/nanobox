@@ -3,11 +3,13 @@ package code
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox-boxfile"
 
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 )
@@ -26,6 +28,10 @@ func pullBuildImage() (string, error) {
 	// extract the build image from the boxfile
 	buildImage := buildImage()
 
+	if docker.ImageExists(buildImage) {
+		return buildImage, nil
+	}
+
 	display.StartTask("Pulling %s image", buildImage)
 	defer display.StopTask()
 
@@ -36,7 +42,11 @@ func pullBuildImage() (string, error) {
 	}
 
 	// pull the build image
-	if _, err := docker.ImagePull(buildImage, dockerPercent); err != nil {
+	imagePull := func() error {
+		_, err := docker.ImagePull(buildImage, dockerPercent)
+		return err
+	}
+	if err := util.Retry(imagePull, 5, time.Second); err != nil {
 		lumber.Error("code:pullBuildImage:docker.ImagePull(%s, nil): %s", buildImage, err.Error())
 		display.ErrorTask()
 		return "", fmt.Errorf("failed to pull docker image (%s): %s", buildImage, err.Error())
@@ -49,7 +59,7 @@ func pullBuildImage() (string, error) {
 func buildImage() string {
 	// first let's see if the user has a custom build image they want to use
 	box := boxfile.NewFromPath(config.Boxfile())
-	image := box.Node("code.build").StringValue("image")
+	image := box.Node("run.config").StringValue("image")
 
 	// then let's set the default if the user hasn't specified
 	if image == "" {

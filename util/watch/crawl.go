@@ -76,6 +76,7 @@ func (c *crawl) walkFunc(path string, info os.FileInfo, err error) error {
 		val, ok := c.files[path]
 		if c.started && (!ok || info.ModTime().Sub(val) > 10*time.Second) {
 			// this is a new file or the file has been changed
+			lumber.Debug("file changed", info.Name())
 			c.events <- event{file: path}
 		}
 

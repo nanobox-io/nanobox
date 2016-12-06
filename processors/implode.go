@@ -8,8 +8,8 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/app/dns"
-	"github.com/nanobox-io/nanobox/processors/env"
-	"github.com/nanobox-io/nanobox/processors/provider"
+	// "github.com/nanobox-io/nanobox/processors/env"
+	// "github.com/nanobox-io/nanobox/processors/provider"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 	util_provider "github.com/nanobox-io/nanobox/util/provider"
@@ -21,11 +21,6 @@ func Implode() error {
 	display.OpenContext("Imploding Nanobox")
 	defer display.CloseContext()
 
-	// init docker client
-	if err := provider.Init(); err != nil {
-		return fmt.Errorf("failed to init docker client: %s", err.Error())
-	}
-
 	// remove all the dns entries
 	apps, _ := models.AllApps()
 	for _, app := range apps {
@@ -35,14 +30,24 @@ func Implode() error {
 		}
 	}
 
-	envModels, _ := models.AllEnvs()
-	for _, envModel := range envModels {
-		// unmount (and remove the share for the env)
-		if err := env.Unmount(envModel, false); err != nil {
-			fmt.Printf("unable to remove mounts: %s", err)
-		}
+	// remove unmounting because it shouldnt be necessary anymore
+	// // only unmount if the env is up and running.
+	// if util_provider.IsReady() {
+	// 	// init docker client
+	// 	if err := provider.Init(); err != nil {
+	// 		return fmt.Errorf("failed to init docker client: %s", err.Error())
+	// 	}
 
-	}
+	// 	envModels, _ := models.AllEnvs()
+	// 	for _, envModel := range envModels {
+	// 		// unmount (and remove the share for the env)
+	// 		if err := env.Unmount(envModel); err != nil {
+	// 			fmt.Printf("unable to remove mounts: %s", err)
+	// 		}
+
+	// 	}
+
+	// }
 
 	// destroy the provider (VM), remove images, remove containers
 	if err := util_provider.Implode(); err != nil {
@@ -50,9 +55,7 @@ func Implode() error {
 	}
 
 	// purge the installation
-	if err := purgeConfiguration(); err != nil {
-		return fmt.Errorf("failed to purge nanobox configuration: %s", err.Error())
-	}
+	purgeConfiguration()
 
 	return nil
 }

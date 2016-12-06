@@ -4,8 +4,10 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"runtime"
 
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/update"
 )
@@ -13,19 +15,38 @@ import (
 // main ...
 func main() {
 
-	if runtime.GOOS == "windows" && !util.IsPrivileged() {
-		// re-run this command as the administrative user
-		fmt.Println()
-		fmt.Println("The update process requires Administrator privileges.")
-		fmt.Println("Another window will be opened as the Administrator to continue this process.")
+	path := ""
+	var err error
+	if len(os.Args) > 1 {
+		path = os.Args[1]
+	} else {
+		// get the location of the current nanobox
+		path, err = exec.LookPath(update.Name)
+		if err != nil {
+			fmt.Printf("Cannot find %s: %s\n", update.Name, err)
+		}
+	}
 
-		// block here until the user hits enter. It's not ideal, but we need to make
-		// sure they see the new window open.
-		fmt.Println("Enter to continue:")
-		var input string
-		fmt.Scanln(&input)
+	if !util.IsPrivileged() {
 
-		cmd := fmt.Sprintf("%s", os.Args[0])
+		if runtime.GOOS == "windows" {
+			// re-run this command as the administrative user
+			fmt.Println()
+			fmt.Println("The update process requires Administrator privileges.")
+			fmt.Println("Another window will be opened as the Administrator to continue this process.")
+
+			// block here until the user hits enter. It's not ideal, but we need to make
+			// sure they see the new window open.
+			fmt.Println("Enter to continue:")
+			var input string
+			fmt.Scanln(&input)
+
+		}
+
+		// make sure the .nanobox folder is created by our user
+		models.LoadUpdate()
+
+		cmd := fmt.Sprintf("%s \"%s\"", os.Args[0], path)
 		if err := util.PrivilegeExec(cmd); err != nil {
 			os.Exit(1)
 		}
@@ -35,7 +56,7 @@ func main() {
 	}
 
 	// run the update
-	err := update.Run()
+	err = update.Run(path)
 	if err != nil {
 		fmt.Println("error: %s", err)
 	}

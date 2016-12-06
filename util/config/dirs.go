@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/jcelliott/lumber"
 	"github.com/mitchellh/go-homedir"
@@ -45,7 +46,7 @@ func LocalDir() string {
 
 	path := cwd
 	for !boxfilePresent(path) {
-		if path == "" || path == "/" {
+		if path == "" || path == "/" || strings.HasSuffix(path, ":\\") {
 			// return the current working directory if we cant find a path
 			return cwd
 		}

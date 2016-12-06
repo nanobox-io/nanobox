@@ -12,20 +12,24 @@ import (
 )
 
 type ContainerConfig struct {
-	ID         string            `json:"id"`
-	Network    string            `json:"network"`
-	Name       string            `json:"name"`
-	Labels     map[string]string `json:"labels"`
-	Hostname   string            `json:"hostname"`
-	Domainname string            `json:"domainname"`
-	Cmd        []string          `json:"cmd"`
-	Image      string            `json:"image_slug"`
-	IP         string            `json:"ip"`
-	Binds      []string          `json:"binds"`
-	Memory     int64             `json:"memory"`
-	MemorySwap int64             `json:"memory_swap"`
-	Status     string            `json:"status"`
-	CPUShares  int64             `json:"cpu_shares"`
+	ID              string            `json:"id"`
+	Network         string            `json:"network"`
+	NetName         string            `json:"networkname"`
+	Name            string            `json:"name"`
+	Labels          map[string]string `json:"labels"`
+	Hostname        string            `json:"hostname"`
+	Domainname      string            `json:"domainname"`
+	Cmd             []string          `json:"cmd"`
+	Env             []string          `json:"env"`
+	Image           string            `json:"image_slug"`
+	IP              string            `json:"ip"`
+	Binds           []string          `json:"binds"`
+	Memory          int64             `json:"memory"`
+	MemorySwap      int64             `json:"memory_swap"`
+	Status          string            `json:"status"`
+	CPUShares       int64             `json:"cpu_shares"`
+	RestartPolicy   string            `json:"restart_policy"`
+	RestartAttempts int               `json:"restart_attempts"`
 }
 
 // create a container from the user specification
@@ -34,10 +38,21 @@ func CreateContainer(conf ContainerConfig) (dockType.ContainerJSON, error) {
 	// 	conf.Cmd = []string{"/bin/sleep", "3650d"}
 	// }
 
+	// create a configurable restart policy with a default 'unless stopped' behavior
+	restartPolicy := dockContainer.RestartPolicy{Name: "unless-stopped"}
+	switch conf.RestartPolicy {
+	case "no", "", "always", "on-failure":
+		restartPolicy = dockContainer.RestartPolicy{
+			Name:              conf.RestartPolicy,
+			MaximumRetryCount: conf.RestartAttempts,
+		}
+	}
+
 	config := &dockContainer.Config{
 		Hostname:        conf.Hostname,
 		Domainname:      conf.Domainname,
 		Cmd:             conf.Cmd,
+		Env:             conf.Env,
 		Labels:          conf.Labels,
 		NetworkDisabled: false,
 		Image:           conf.Image,
@@ -49,7 +64,7 @@ func CreateContainer(conf ContainerConfig) (dockType.ContainerJSON, error) {
 		// NetworkMode:   "host",
 		CapAdd:        strslice.StrSlice([]string{"NET_ADMIN"}),
 		NetworkMode:   "bridge",
-		RestartPolicy: dockContainer.RestartPolicy{Name: "unless-stopped"},
+		RestartPolicy: restartPolicy,
 		Resources: dockContainer.Resources{
 			Memory:     conf.Memory,
 			MemorySwap: conf.MemorySwap,
@@ -66,9 +81,17 @@ func CreateContainer(conf ContainerConfig) (dockType.ContainerJSON, error) {
 	}
 
 	if conf.Network == "virt" || conf.IP != "" {
-		hostConfig.NetworkMode = "nanobox"
+		// allow for using a different network name
+		netName := ""
+		if conf.NetName == "" {
+			netName = "nanobox"
+		} else {
+			netName = conf.NetName
+		}
+
+		hostConfig.NetworkMode = dockContainer.NetworkMode(netName)
 		netConfig.EndpointsConfig = map[string]*dockNetwork.EndpointSettings{
-			"nanobox": {
+			netName: &dockNetwork.EndpointSettings{
 				IPAMConfig: &dockNetwork.EndpointIPAMConfig{IPv4Address: conf.IP},
 			},
 		}

@@ -6,6 +6,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/commands/steps"
+	"github.com/nanobox-io/nanobox/helpers"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors"
 	"github.com/nanobox-io/nanobox/util/config"
@@ -17,11 +18,11 @@ var (
 	// TunnelCmd ...
 	TunnelCmd = &cobra.Command{
 		Use:   "tunnel",
-		Short: "Creates a secure tunnel between your local machine & a production component.",
+		Short: "Create a secure tunnel between your local machine & a live component.",
 		Long: `
-Creates a secure tunnel between your local machine & a
-production component. The tunnel allows you to manage
-production data using your local client of choice.
+Creates a secure tunnel between your local machine &
+a live component. The tunnel allows you to manage
+live data using your local client of choice.
 		`,
 		PreRun: steps.Run("login"),
 		Run:    tunnelFn,
@@ -29,21 +30,20 @@ production data using your local client of choice.
 
 	// tunnelCmdFlags ...
 	tunnelCmdFlags = struct {
-		app      string
-		port     string
-		endpoint string
+		port string
 	}{}
 )
 
 //
 func init() {
-	TunnelCmd.Flags().StringVarP(&tunnelCmdFlags.app, "app", "a", "", "name or alias of a production app")
 	TunnelCmd.Flags().StringVarP(&tunnelCmdFlags.port, "port", "p", "", "local port to start listening on")
-	TunnelCmd.Flags().StringVarP(&tunnelCmdFlags.endpoint, "endpoint", "e", "", "api endpoint")
 }
 
 // tunnelFn ...
 func tunnelFn(ccmd *cobra.Command, args []string) {
+
+	env, _ := models.FindEnvByID(config.EnvID())
+	args, location, name := helpers.Endpoint(env, args, 2)
 
 	// validate we have args required to set the meta we'll need; if we don't have
 	// the required args this will return with instructions
@@ -59,20 +59,19 @@ ex: nanobox tunnel <container>
 		return
 	}
 
-	env, _ := models.FindEnvByID(config.EnvID())
+	switch location {
+	case "local":
+		fmt.Println("tunneling is not required for local development")
+		return
+	case "production":
+		// set the meta arguments to be used in the processor and run the processor
+		tunnelConfig := processors.TunnelConfig{
+			App:       name,
+			Port:      tunnelCmdFlags.port,
+			Container: args[0],
+		}
 
-	// set the meta arguments to be used in the processor and run the processor
-	tunnelConfig := processors.TunnelConfig{
-		App:       tunnelCmdFlags.app,
-		Port:      tunnelCmdFlags.port,
-		Container: args[0],
-		Endpoint:  tunnelCmdFlags.endpoint,
+		display.CommandErr(processors.Tunnel(env, tunnelConfig))
 	}
 
-	// if no app id is given use 'default'
-	if tunnelConfig.App == "" {
-		tunnelConfig.App = "default"
-	}
-
-	display.CommandErr(processors.Tunnel(env, tunnelConfig))
 }

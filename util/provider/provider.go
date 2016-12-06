@@ -30,9 +30,9 @@ type Provider interface {
 	SetDefaultIP(ip string) error
 	AddNat(host, container string) error
 	RemoveNat(host, container string) error
-	HasShare(local, host string) bool
-	AddShare(local, host string) error
-	RemoveShare(local, host string) error
+	// HasShare(local, host string) bool
+	// AddShare(local, host string) error
+	// RemoveShare(local, host string) error
 	HasMount(mount string) bool
 	AddMount(local, host string) error
 	RemoveMount(local, host string) error
@@ -291,38 +291,6 @@ func RemoveNat(host, container string) error {
 	return p.RemoveNat(host, container)
 }
 
-func HasShare(local, host string) bool {
-
-	p, err := fetchProvider()
-	if err != nil {
-		return false
-	}
-
-	return p.HasShare(local, host)
-}
-
-// AddShare ...
-func AddShare(local, host string) error {
-
-	p, err := fetchProvider()
-	if err != nil {
-		return err
-	}
-
-	return p.AddShare(local, host)
-}
-
-// RemoveShare ...
-func RemoveShare(local, host string) error {
-
-	p, err := fetchProvider()
-	if err != nil {
-		return err
-	}
-
-	return p.RemoveShare(local, host)
-}
-
 // HasMount ...
 func HasMount(path string) bool {
 
@@ -390,8 +358,11 @@ func IsReady() bool {
 
 // fetchProvider fetches the registered provider from the configured name
 func fetchProvider() (Provider, error) {
-
-	p, ok := providers[config.Viper().GetString("provider")]
+	prov := config.Viper().GetString("provider")
+	if prov == "docker_machine" {
+		prov = "docker-machine"
+	}
+	p, ok := providers[prov]
 	if !ok {
 		return nil, errors.New("invalid provider")
 	}

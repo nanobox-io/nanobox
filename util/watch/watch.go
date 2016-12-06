@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -67,6 +68,10 @@ func Watch(container, path string) error {
 
 	// catch a kill signal
 	for e := range watcher.eventChan() {
+		efile := e.file
+		if runtime.GOOS == "windows" {
+			efile = strings.Replace(efile, "\\", "/", -1)
+		}
 		containerFile := filepath.ToSlash(filepath.Join("/app", strings.Replace(e.file, config.LocalDir(), "", 1)))
 		changeList = append(changeList, containerFile)
 	}
@@ -80,7 +85,7 @@ func batchPublish(container string) {
 		<-time.After(time.Second)
 		if len(changeList) > 0 {
 			lumber.Info("watcher: pushing: %+v", changeList)
-			util.DockerExec(container, "root", "touch", changeList, nil)
+			util.DockerExec(container, "root", "touch", append([]string{"-c"}, changeList...), nil)
 			changeList = []string{}
 		}
 	}
@@ -91,7 +96,7 @@ func populateIgnore(path string) {
 	// add pieces from the env
 	env, err := models.FindEnvByID(config.EnvID())
 	box := boxfile.New([]byte(env.BuiltBoxfile))
-	for _, libDir := range box.Node("code.build").StringSliceValue("lib_dirs") {
+	for _, libDir := range box.Node("run.config").StringSliceValue("cache_dirs") {
 		ignoreFile = append(ignoreFile, libDir)
 	}
 

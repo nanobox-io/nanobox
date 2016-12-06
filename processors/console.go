@@ -3,6 +3,7 @@ package processors
 import (
 	"fmt"
 
+	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/helpers"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/config"
@@ -14,18 +15,18 @@ func Console(envModel *models.Env, consoleConfig ConsoleConfig) error {
 
 	appID := consoleConfig.App
 
-	// fetch the link
-	link, ok := envModel.Links[appID]
+	// fetch the remote
+	remote, ok := envModel.Remotes[appID]
 	if ok {
 		// set the odin endpoint
-		odin.SetEndpoint(link.Endpoint)
+		odin.SetEndpoint(remote.Endpoint)
 		// set the app id
-		appID = link.ID
+		appID = remote.ID
 	}
 
-	// if an endpoint was provided as a flag, override the linked endpoint
-	if consoleConfig.Endpoint != "" {
-		odin.SetEndpoint(consoleConfig.Endpoint)
+	// set odins endpoint if the arguement is passed
+	if endpoint := registry.GetString("endpoint"); endpoint != "" {
+		odin.SetEndpoint(endpoint)
 	}
 
 	// set the app id to the directory name if it's default

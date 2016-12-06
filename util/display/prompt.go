@@ -9,10 +9,15 @@ import (
 
 // get the username
 func ReadUsername() (string, error) {
-	fmt.Print("Username: ")
+	return Ask("Username")
+}
+
+func Ask(question string) (string, error) {
+	fmt.Printf("%s: ", question)
 
 	reader := bufio.NewReader(os.Stdin)
 	str, err := reader.ReadString('\n')
 
 	return strings.TrimSpace(str), err
+
 }

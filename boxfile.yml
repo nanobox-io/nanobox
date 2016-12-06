@@ -1,5 +1,11 @@
-code.build:
-  engine: "golang"
-  config:
-    package: "github.com/nanobox-io/nanobox"
-    
+run.config:
+  image: nanobox/build
+  engine: golang
+  engine.config:
+    package: github.com/nanobox-io/nanobox
+  dev_packages:
+    - py27-awscli
+    - coreutils  
+  extra_steps:
+    - "go get github.com/mitchellh/gox"
+    - "go get github.com/kardianos/govendor"

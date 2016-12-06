@@ -2,4 +2,5 @@
 
 package update
 
-const name = "nanobox"
+const Name = "nanobox"
+const tmpName = "nanobox.tmp"

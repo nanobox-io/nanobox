@@ -33,10 +33,6 @@ var setupComponents = []PlatformComponent{
 		name:  "mist",
 		image: "nanobox/mist",
 	},
-}
-
-// Components ...
-var deployComponents = []PlatformComponent{
 	{
 		label: "Router",
 		name:  "portal",

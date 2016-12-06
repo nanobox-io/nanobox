@@ -18,18 +18,13 @@ func Deploy(envModel *models.Env, deployConfig DeployConfig) error {
 
 	appID := deployConfig.App
 
-	// fetch the link
-	link, ok := envModel.Links[deployConfig.App]
+	// fetch the remote
+	remote, ok := envModel.Remotes[deployConfig.App]
 	if ok {
 		// set the odin endpoint
-		odin.SetEndpoint(link.Endpoint)
+		odin.SetEndpoint(remote.Endpoint)
 		// set the app id
-		appID = link.ID
-	}
-
-	// if an endpoint was provided as a flag, override the linked endpoint
-	if deployConfig.Endpoint != "" {
-		odin.SetEndpoint(deployConfig.Endpoint)
+		appID = remote.ID
 	}
 
 	// set the app id to the directory name if it's default

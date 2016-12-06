@@ -20,7 +20,9 @@ func Destroy(appModel *models.App, componentModel *models.Component) error {
 
 	// remove the docker container
 	if err := destroyContainer(componentModel.ID); err != nil {
-		return err
+		// report the error but continue on
+		lumber.Error("component:Destroy:destroyContainer(%s): %s", componentModel.ID, err)
+		// return err
 	}
 
 	// detach from the host network
@@ -48,6 +50,11 @@ func destroyContainer(id string) error {
 	display.StartTask("Destroying docker container")
 	defer display.StopTask()
 
+	// if i dont know the id then i cant remove it
+	if id == "" {
+		return nil
+	}
+
 	if err := docker.ContainerRemove(id); err != nil {
 		lumber.Error("component:Destroy:docker.ContainerRemove(%s): %s", id, err.Error())
 		display.ErrorTask()
@@ -61,6 +68,10 @@ func destroyContainer(id string) error {
 func detachNetwork(appModel *models.App, componentModel *models.Component) error {
 	display.StartTask("Releasing IPs")
 	defer display.StopTask()
+
+	if componentModel.ExternalIP == "" || componentModel.InternalIP == "" {
+		return nil
+	}
 
 	// remove NAT
 	if err := provider.RemoveNat(componentModel.ExternalIP, componentModel.InternalIP); err != nil {

@@ -11,10 +11,11 @@ import (
 // ComponentConfig generates the container configuration for a component container
 func ComponentConfig(componentModel *models.Component) docker.ContainerConfig {
 	config := docker.ContainerConfig{
-		Name:    ComponentName(componentModel),
-		Image:   componentModel.Image,
-		Network: "virt",
-		IP:      componentModel.InternalIP,
+		Name:          ComponentName(componentModel),
+		Image:         componentModel.Image,
+		Network:       "virt",
+		IP:            componentModel.InternalIP,
+		RestartPolicy: "no",
 	}
 
 	return config

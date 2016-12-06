@@ -17,7 +17,7 @@ var (
 	// InspectCmd ...
 	InspectCmd = &cobra.Command{
 		Use:    "inspect",
-		Short:  "show element from the nanobox database",
+		Short:  "Show element from the nanobox database.",
 		Long:   ``,
 		Run:    inspectFunc,
 		Hidden: true,

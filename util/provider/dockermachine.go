@@ -2,8 +2,6 @@ package provider
 
 import (
 	"bytes"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -30,7 +28,7 @@ type DockerMachine struct{}
 
 // init ...
 func init() {
-	Register("docker_machine", DockerMachine{})
+	Register("docker-machine", DockerMachine{})
 }
 
 // Valid ensures docker-machine is installed and available
@@ -110,11 +108,32 @@ func (machine DockerMachine) Create() error {
 		return nil
 	}
 
+	// load the configuration for docker-machine
+	conf := config.Viper()
+
+	// load the cpus setting
+	cpus := conf.GetInt("cpus")
+	if cpus < 1 {
+		cpus = 1
+	}
+
+	// load the ram setting
+	ram := conf.GetInt("ram")
+	if ram < 1 {
+		ram = 1
+	}
+
 	cmd := []string{
 		dockerMachineCmd,
 		"create",
 		"--driver",
 		"virtualbox",
+		"--virtualbox-boot2docker-url",
+		"https://s3.amazonaws.com/tools.nanobox.io/boot2docker/v1/boot2docker.iso",
+		"--virtualbox-cpu-count",
+		fmt.Sprintf("%d", cpus),
+		"--virtualbox-memory",
+		fmt.Sprintf("%d", ram*1024),
 		"nanobox",
 	}
 
@@ -614,199 +633,6 @@ func (machine DockerMachine) RemoveNat(ip, containerIP string) error {
 	return nil
 }
 
-// HasShare checks to see if the share exists
-func (machine DockerMachine) HasShare(local, host string) bool {
-	h := sha256.New()
-	h.Write([]byte(local))
-	h.Write([]byte(host))
-	name := hex.EncodeToString(h.Sum(nil))
-
-	cmd := []string{
-		vboxManageCmd,
-		"showvminfo",
-		"nanobox",
-		"--machinereadable",
-	}
-
-	process := exec.Command(cmd[0], cmd[1:]...)
-	output, err := process.CombinedOutput()
-	if err != nil {
-		return false
-	}
-
-	return strings.Contains(string(output), name)
-}
-
-// AddShare adds the provided path as a shareable filesystem
-func (machine DockerMachine) AddShare(local, host string) error {
-	h := sha256.New()
-	h.Write([]byte(local))
-	h.Write([]byte(host))
-	name := hex.EncodeToString(h.Sum(nil))
-
-	if !machine.HasShare(local, host) {
-
-		cmd := []string{
-			vboxManageCmd,
-			"sharedfolder",
-			"add",
-			"nanobox",
-			"--name",
-			name,
-			"--hostpath",
-			local,
-			"--transient",
-		}
-
-		process := exec.Command(cmd[0], cmd[1:]...)
-		b, err := process.CombinedOutput()
-		if err != nil {
-			return fmt.Errorf("%s: %s", b, err)
-		}
-
-		// todo: check output for failures
-
-	}
-
-	return nil
-}
-
-// RemoveShare removes the provided path as a shareable filesystem; we don't care
-// what the user has configured, we need to remove any shares that may have been
-// setup previously
-func (machine DockerMachine) RemoveShare(local, host string) error {
-	h := sha256.New()
-	h.Write([]byte(local))
-	h.Write([]byte(host))
-	name := hex.EncodeToString(h.Sum(nil))
-
-	if machine.HasShare(local, host) {
-
-		cmd := []string{
-			vboxManageCmd,
-			"sharedfolder",
-			"remove",
-			"nanobox",
-			"--name",
-			name,
-			"--transient",
-		}
-
-		process := exec.Command(cmd[0], cmd[1:]...)
-		b, err := process.CombinedOutput()
-		if err != nil {
-			return fmt.Errorf("%s: %s", b, err)
-		}
-
-		// todo: check output for failures
-
-	}
-
-	return nil
-}
-
-// HasMount checks to see if the mount exists in the vm
-func (machine DockerMachine) HasMount(mount string) bool {
-
-	cmd := []string{
-		dockerMachineCmd,
-		"ssh",
-		"nanobox",
-		"sudo",
-		"cat",
-		"/proc/mounts",
-	}
-
-	process := exec.Command(cmd[0], cmd[1:]...)
-	output, err := process.CombinedOutput()
-	if err != nil {
-		return false
-	}
-
-	return strings.Contains(string(output), mount)
-}
-
-// AddMount adds a virtualbox mount into the docker-machine vm
-func (machine DockerMachine) AddMount(local, host string) error {
-	h := sha256.New()
-	h.Write([]byte(local))
-	h.Write([]byte(host))
-	name := hex.EncodeToString(h.Sum(nil))
-
-	if !machine.HasMount(host) {
-
-		// create folder
-		cmd := []string{
-			dockerMachineCmd,
-			"ssh",
-			"nanobox",
-			"sudo",
-			"mkdir",
-			"-p",
-			host,
-		}
-
-		process := exec.Command(cmd[0], cmd[1:]...)
-		b, err := process.CombinedOutput()
-		if err != nil {
-			return fmt.Errorf("%s: %s", b, err)
-		}
-
-		// mount
-		cmd = []string{
-			dockerMachineCmd,
-			"ssh",
-			"nanobox",
-			"sudo",
-			"mount",
-			"-t",
-			"vboxsf",
-			"-o",
-			"uid=1000,gid=1000",
-			name,
-			host,
-		}
-
-		process = exec.Command(cmd[0], cmd[1:]...)
-		b, err = process.CombinedOutput()
-		if err != nil {
-			return fmt.Errorf("%s: %s", b, err)
-		}
-
-		// todo: check output for failures
-
-	}
-
-	return nil
-}
-
-// RemoveMount removes a mount from the docker-machine vm
-func (machine DockerMachine) RemoveMount(_, host string) error {
-
-	if machine.HasMount(host) {
-
-		cmd := []string{
-			dockerMachineCmd,
-			"ssh",
-			"nanobox",
-			"sudo",
-			"umount",
-			host,
-		}
-
-		process := exec.Command(cmd[0], cmd[1:]...)
-		b, err := process.CombinedOutput()
-		if err != nil {
-			return fmt.Errorf("%s: %s", b, err)
-		}
-
-		// todo: check output for failures
-
-	}
-
-	return nil
-}
-
 //
 func (machine DockerMachine) RemoveEnvDir(id string) error {
 	if id == "" {
@@ -1099,7 +925,10 @@ func dockerMachineURL() string {
 
 	switch runtime.GOOS {
 	case "darwin":
-		download = fmt.Sprintf("%s/docker-machine-Darwin-x86_64", download)
+		// temporarily replace the docker-machine version with a custom one until
+		// docker fixes the issues created by Sierra
+		// download = fmt.Sprintf("%s/docker-machine-Darwin-x86_64", download)
+		download = "https://s3.amazonaws.com/tools.nanobox.io/docker-machine/darwin/docker-machine"
 	case "linux":
 		download = fmt.Sprintf("%s/docker-machine-Linux-x86_64", download)
 	case "windows":

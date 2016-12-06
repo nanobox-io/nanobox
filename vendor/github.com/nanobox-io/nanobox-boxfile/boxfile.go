@@ -33,7 +33,6 @@ func New(raw []byte) Boxfile {
 func (self Boxfile) String() string {
 	return string(self.raw)
 }
-
 func (self Boxfile) SaveToPath(path string) error {
 	return ioutil.WriteFile(path, self.raw, 0755)
 }
@@ -164,14 +163,14 @@ func (b Boxfile) BoolValue(name string) bool {
 // allow the user to specify which types of nodes your interested in
 func (b Boxfile) Nodes(types ...string) (rtn []string) {
 	if len(types) == 0 {
-		for key := range b.Parsed {
+		for key, _ := range b.Parsed {
 			rtn = append(rtn, key)
 		}
 		return
 	}
 
 	for _, t := range types {
-		for key := range b.Parsed {
+		for key, _ := range b.Parsed {
 			nodeType := regexp.MustCompile(`\..+`).ReplaceAllString(key, "")
 			switch t {
 			case "container":

@@ -2,12 +2,14 @@ package platform
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/golang-portal-client"
 	generator "github.com/nanobox-io/nanobox/generators/router"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
 )
 
 // UpdatePortal ...
@@ -16,9 +18,14 @@ func UpdatePortal(appModel *models.App) error {
 
 	// update routes
 	routes := generator.BuildRoutes(appModel)
-	if err := client.UpdateRoutes(routes); err != nil {
+	updateRoute := func() error {
+		return client.UpdateRoutes(routes)
+	}
+
+	// use the retry method here because there is a chance the portal server isnt responding yet
+	if err := util.Retry(updateRoute, 2, time.Second); err != nil {
 		lumber.Error("platform:UpdatePortal:UpdateRoutes(%+v): %s", routes, err.Error())
-		return fmt.Errorf("failed to sending routing updates to the router: %s", err.Error())
+		return fmt.Errorf("failed to send routing updates to the router: %s", err.Error())
 	}
 
 	// update services

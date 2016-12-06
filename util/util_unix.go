@@ -3,6 +3,7 @@
 package util
 
 import (
+	"bufio"
 	"fmt"
 	"os"
 	"os/exec"
@@ -24,6 +25,15 @@ func IsPrivileged() bool {
 // PrivilegeExec runs a command as sudo
 func PrivilegeExec(command string) error {
 	//
+	if !sudoExists() {
+		fmt.Println("We could not find 'sudo' in your path")
+		fmt.Println("Please run the following command in a separate console, then press enter to continue once its complete:")
+		fmt.Printf("sudo %v --internal", command)
+		reader := bufio.NewReader(os.Stdin)
+		reader.ReadString('\n')
+		return nil
+	}
+
 	cmd := exec.Command("/bin/sh", "-c", fmt.Sprintf("sudo %v --internal", command))
 
 	cmd.Stdin = os.Stdin
@@ -34,8 +44,7 @@ func PrivilegeExec(command string) error {
 	return cmd.Run()
 }
 
-// verify that the terminal is valid and can run nanobox
-func IsValidTerminal() bool {
-	// so far, all of the unix terminals work
-	return true
+func sudoExists() bool {
+	_, err := exec.LookPath("sudo")
+	return err == nil
 }

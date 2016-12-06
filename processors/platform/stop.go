@@ -11,7 +11,7 @@ import (
 
 // Stop stops all platform components
 func Stop(a *models.App) error {
-	for _, pc := range append(setupComponents, deployComponents...) {
+	for _, pc := range setupComponents {
 		if err := stopComponent(a, pc); err != nil {
 			return fmt.Errorf("failed to stop platform component: %s", err.Error())
 		}

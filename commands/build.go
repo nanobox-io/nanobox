@@ -8,6 +8,7 @@ import (
 	"github.com/nanobox-io/nanobox/commands/steps"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 )
@@ -16,19 +17,20 @@ var (
 
 	// BuildCmd ...
 	BuildCmd = &cobra.Command{
-		Use:   "build",
-		Short: "Builds a deployable runtime.",
+		Use:   "build-runtime",
+		Short: "Build your app's runtime.",
 		Long: `
-Generates a deployable runtime that can be
-deployed into dev, sim, or production environments.
+Builds your app's runtime, which is used both
+locally and in live environments.
 		`,
-		PreRun: steps.Run("start"),
-		Run:    buildFn,
+		PreRun:  steps.Run("start"),
+		Run:     buildFn,
+		Aliases: []string{"build"},
 	}
 )
 
 func init() {
-	steps.Build("build", buildComplete, buildFn)
+	steps.Build("build-runtime", buildComplete, buildFn)
 }
 
 // buildFn ...
@@ -39,8 +41,21 @@ func buildFn(ccmd *cobra.Command, args []string) {
 }
 
 func buildComplete() bool {
+	// check the boxfile to be sure it hasnt changed
 	env, _ := models.FindEnvByID(config.EnvID())
 	box := boxfile.NewFromPath(config.Boxfile())
 
-	return env.UserBoxfile != "" && env.UserBoxfile == box.String()
+	// we need to rebuild if this isnt true without going to check triggers
+	if env.UserBoxfile == "" || env.UserBoxfile != box.String() {
+		return false
+	}
+
+	// now check to see if any of the build triggers have changed
+  lastBuildsBoxfile := boxfile.New([]byte(env.BuiltBoxfile))
+	for _, trigger := range lastBuildsBoxfile.Node("run.config").StringSliceValue("build_triggers") {
+		if env.BuildTriggers[trigger] != util.FileMD5(trigger) {
+			return false
+		}
+	}
+	return true
 }

@@ -27,6 +27,14 @@ var (
 	endpoint = "nanobox"
 )
 
+type (
+	evar struct {
+		ID    string `json:"id"`
+		Key   string `json:"title"`
+		Value string `json:"value"`
+	}
+)
+
 // sets the odin endpoint
 func SetEndpoint(stage string) {
 	endpoint = stage
@@ -70,6 +78,26 @@ func Deploy(appID, id, boxfile, message string) error {
 	}
 
 	return doRequest("POST", fmt.Sprintf("apps/%s/deploys", appID), nil, body, nil)
+}
+
+func ListEvars(appID string) ([]evar, error) {
+	evars := []evar{}
+	return evars, doRequest("GET", fmt.Sprintf("apps/%s/evars", appID), nil, nil, &evars)
+}
+
+func AddEvar(appID, key, val string) error {
+	body := map[string]map[string]string{
+		"evar": {
+			"title": key,
+			"value": val,
+		},
+	}
+
+	return doRequest("POST", fmt.Sprintf("apps/%s/evars", appID), nil, body, nil)
+}
+
+func RemoveEvar(appId, id string) error {
+	return doRequest("DELETE", fmt.Sprintf("apps/%s/evars/%s", appId, id), nil, nil, nil)
 }
 
 // EstablishTunnel ...
@@ -158,13 +186,9 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 	lumber.Debug("RES: %d %s %s %s (%s)", res.StatusCode, req.Method, req.URL, req.Proto, res.Header.Get("Content-Length"))
 
 	// print the body even if status is not 2XX
-	if responseBody != nil {
-		b, err := ioutil.ReadAll(res.Body)
-		lumber.Debug("response body: '%s'\n", b)
-		err = json.Unmarshal(b, responseBody)
-		if err != nil {
-			return err
-		}
+	b, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return err
 	}
 
 	if res.StatusCode == 401 {
@@ -180,7 +204,15 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 	}
 
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
-		return fmt.Errorf("bad exit response(%d %s %s %s (%s))", res.StatusCode, req.Method, req.URL, req.Proto, res.Header.Get("Content-Length"))
+		return fmt.Errorf("bad exit response(%d %s %s %s (%s) %s)", res.StatusCode, req.Method, req.URL, req.Proto, res.Header.Get("Content-Length"), b)
+	}
+
+	if responseBody != nil {
+		lumber.Debug("response body: '%s'\n", b)
+		err = json.Unmarshal(b, responseBody)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
