@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/nanobox-io/nanobox/model"
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/config"
 
 	"github.com/nanobox-io/nanobox/util/provider/share"
@@ -26,7 +26,7 @@ func TestMain(m *testing.M) {
 	share.EXPORTSFILE = "/tmp/exports"
 	exitCode := m.Run()
 	os.Remove("/tmp/exports")
-	provider.Destroy()
+	provider.Delete()
 	os.Exit(exitCode)
 }
 
