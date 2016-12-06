@@ -10,6 +10,17 @@ go:
 before_install:
   - sudo apt-get -y purge docker-engine
   - bash <(curl -fsSL https://get.docker.com/)
+  - docker version
+  - ifconfig
 
 install: go get github.com/kardianos/govendor
+
 script: govendor test +local -v
+
+after_success:
+  - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)
+  - if [ "$BRANCH" == "master" ]; then
+    git clone https://github.com/nanobox-io/nanobox-installers.git
+    cd nanobox-installers
+    make
+    fi
