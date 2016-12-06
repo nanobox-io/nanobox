@@ -8,7 +8,7 @@ import (
 
 func MOTD() {
 	os.Stderr.WriteString(fmt.Sprintf(`
-    
+
                                    **
                                 ********
                              ***************
@@ -75,13 +75,13 @@ func InfoDevContainer(ip string) {
 func InfoDevRunContainer(cmd, ip string) {
 	os.Stderr.WriteString(fmt.Sprintf(`
 
-      **          
-   *********      
+      **
+   *********
 ***************   Your command will run in an isolated Linux container
 :: ********* ::   Code changes in either the container or desktop are mirrored
 " ::: *** ::: "   ------------------------------------------------------------
-  ""  :::  ""     If you run a server, access it at >> %s  
-    "" " ""       
+  ""  :::  ""     If you run a server, access it at >> %s
+    "" " ""
        "
 
 RUNNING > %s
@@ -105,8 +105,8 @@ func DevRunEmpty() {
 	os.Stderr.WriteString(fmt.Sprintf(`
 ! You don't have any web or worker start commands specified in your
   boxfile.yml. More information about start commands is available here:
-  
-  docs.nanobox.io/app-config/boxfile/web/#start-command
+
+  https://docs.nanobox.io/boxfile/web/#start-command
 
 `))
 }
