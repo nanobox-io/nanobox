@@ -28,4 +28,5 @@ after_success:
     git clone https://github.com/nanobox-io/nanobox-installers.git;
     cd nanobox-installers;
     make;
+    make publish;
     fi
