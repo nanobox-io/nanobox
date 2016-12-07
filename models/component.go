@@ -157,7 +157,7 @@ func (c *Component) IPAddr() string {
 	if c.IP != "" {
 		return c.IP
 	}
-	return c.IPAddr()
+	return c.InternalIP
 }
 
 // PurgeEvars purges the generated evars for a component
