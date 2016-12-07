@@ -10,7 +10,6 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/util/provider"
 )
 
 // Destroy destroys a component from the provider and database
@@ -69,39 +68,14 @@ func detachNetwork(appModel *models.App, componentModel *models.Component) error
 	display.StartTask("Releasing IPs")
 	defer display.StopTask()
 
-	if componentModel.ExternalIP == "" || componentModel.InternalIP == "" {
+	if componentModel.IPAddr() == "" {
 		return nil
-	}
-
-	// remove NAT
-	if err := provider.RemoveNat(componentModel.ExternalIP, componentModel.InternalIP); err != nil {
-		lumber.Error("component:detachNetwork:provider.RemoveNat(%s, %s): %s", componentModel.ExternalIP, componentModel.InternalIP, err.Error())
-		display.ErrorTask()
-		return fmt.Errorf("failed to remove NAT from provider: %s", err.Error())
-	}
-
-	// remove IP
-	if err := provider.RemoveIP(componentModel.ExternalIP); err != nil {
-		lumber.Error("component:detachNetwork:provider.RemoveIP(%s): %s", componentModel.ExternalIP, err.Error())
-		display.ErrorTask()
-		return fmt.Errorf("failed to remove IP from provider: %s", err.Error())
 	}
 
 	// return the external IP
 	// don't return the external IP if this is portal
-	if componentModel.Name != "portal" && appModel.GlobalIPs[componentModel.Name] == "" {
-		ip := net.ParseIP(componentModel.ExternalIP)
-		if err := dhcp.ReturnIP(ip); err != nil {
-			lumber.Error("component:detachNetwork:dhcp.ReturnIP(%s): %s", ip, err.Error())
-			display.ErrorTask()
-			return fmt.Errorf("failed to release IP back to pool: %s", err.Error())
-		}
-	}
-
-	// return the internal IP
-	// don't return the internal IP if it's an app-level cache
-	if appModel.LocalIPs[componentModel.Name] == "" {
-		ip := net.ParseIP(componentModel.InternalIP)
+	if componentModel.Name != "portal" && appModel.LocalIPs[componentModel.Name] == "" {
+		ip := net.ParseIP(componentModel.IPAddr())
 		if err := dhcp.ReturnIP(ip); err != nil {
 			lumber.Error("component:detachNetwork:dhcp.ReturnIP(%s): %s", ip, err.Error())
 			display.ErrorTask()

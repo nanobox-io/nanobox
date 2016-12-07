@@ -2,7 +2,6 @@ package processors
 
 import (
 	"fmt"
-	"net"
 	"time"
 
 	"github.com/jcelliott/lumber"
@@ -16,11 +15,9 @@ import (
 	"github.com/nanobox-io/nanobox/processors/env"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/console"
-	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/hookit"
 	"github.com/nanobox-io/nanobox/util/locker"
-	"github.com/nanobox-io/nanobox/util/provider"
 	"github.com/nanobox-io/nanobox/util/watch"
 )
 
@@ -47,6 +44,7 @@ func Run(envModel *models.Env, appModel *models.App, consoleConfig console.Conso
 		ID: "nanobox_" + appModel.ID,
 	}
 
+	consoleConfig.DevIP = appModel.LocalIPs["env"]
 	consoleConfig.Cwd = cwd(appModel)
 
 	if err := env.Console(component, consoleConfig); err != nil {
@@ -97,11 +95,6 @@ func setup(appModel *models.App) error {
 	}
 	display.StopTask()
 
-	//
-	if err := attachNetwork(appModel, config.IP); err != nil {
-		return fmt.Errorf("unable to attach container to network: %s", err.Error())
-	}
-
 	lumber.Prefix("dev:Console")
 	defer lumber.Prefix("")
 
@@ -139,66 +132,6 @@ func teardown(appModel *models.App) error {
 	if err := docker.ContainerRemove(container.ID); err != nil {
 		lumber.Error("dev:console:teardown:docker.ContainerRemove(%s): %s", container.ID, err)
 		return fmt.Errorf("failed to remove dev container: %s", err.Error())
-	}
-
-	// extract the container IP
-	ip := docker.GetIP(container)
-
-	// detach dev container from the network
-	if err := detachNetwork(appModel, ip); err != nil {
-		return fmt.Errorf("failed to detach dev container from network: %s", err.Error())
-	}
-
-	// return the container IP back to the IP pool
-	if err := dhcp.ReturnIP(net.ParseIP(ip)); err != nil {
-		lumber.Error("dev:console:teardown:dhcp.ReturnIP(%s): %s", ip, err)
-
-		lumber.Error("An error occurred durring dev console teadown:%s", err.Error())
-		return fmt.Errorf("failed to return unused IP back to pool: %s", err.Error())
-	}
-
-	return nil
-}
-
-// attachNetwork attaches the container to the host network
-func attachNetwork(appModel *models.App, containerIP string) error {
-	display.StartTask("Attaching network")
-	defer display.StopTask()
-
-	// fetch the devIP
-	devIP := appModel.GlobalIPs["env"]
-
-	//
-	if err := provider.AddIP(devIP); err != nil {
-		lumber.Error("dev:attachNetwork:provider.AddIP(%s):%s", devIP, err.Error())
-		return fmt.Errorf("failed to add IP to the provider: %s", err.Error())
-	}
-
-	//
-	if err := provider.AddNat(devIP, containerIP); err != nil {
-		lumber.Error("dev:attachNetwork:provider.AddNat(%s, %s):%s", devIP, containerIP, err.Error())
-		return fmt.Errorf("failed to add NAT from container: %s", err.Error())
-	}
-
-	return nil
-}
-
-// detachNetwork detaches the container from the host network
-func detachNetwork(appModel *models.App, containerIP string) error {
-
-	// fetch the devIP
-	devIP := appModel.GlobalIPs["env"]
-
-	// remove nat
-	if err := provider.RemoveNat(devIP, containerIP); err != nil {
-		lumber.Error("dev:detachNetwork:provider.RemoveNat(%s, %s):%s", devIP, containerIP, err.Error())
-		return fmt.Errorf("failed to remove NAT from container: %s", err.Error())
-	}
-
-	// remove the IP from the provider
-	if err := provider.RemoveIP(devIP); err != nil {
-		lumber.Error("dev:detachNetwork:provider.RemoveIP(%s):%s", devIP, err.Error())
-		return fmt.Errorf("failed to remove the IP from the provider: %s", err.Error())
 	}
 
 	return nil

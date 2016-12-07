@@ -47,7 +47,7 @@ func ConfigurePayload(appModel *models.App, componentModel *models.Component) st
 		Platform:   "local",
 		Config:     config,
 		Member: member{
-			LocalIP: componentModel.InternalIP,
+			LocalIP: componentModel.IPAddr(),
 			UID:     1,
 			Role:    "primary",
 		},

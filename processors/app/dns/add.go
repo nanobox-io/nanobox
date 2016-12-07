@@ -24,7 +24,7 @@ func Add(envModel *models.Env, appModel *models.App, name string) error {
 	// fetch the IP
 	// env in dev is used in the dev container
 	// env in sim is used for portal
-	envIP := appModel.GlobalIPs["env"]
+	envIP := appModel.LocalIPs["env"]
 
 	// generate the dns entry
 	entry := dns.Entry(envIP, name, appModel.ID)

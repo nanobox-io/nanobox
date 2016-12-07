@@ -51,10 +51,10 @@ func showIPTree() {
 		fmt.Printf("%s\n", env.Name)
 		apps, _ := env.Apps()
 		for _, app := range apps {
-			fmt.Printf("  %s global: %v local: %v\n", app.Name, app.GlobalIPs, app.LocalIPs)
+			fmt.Printf("  %s local: %v\n", app.Name, app.LocalIPs)
 			components, _ := app.Components()
 			for _, component := range components {
-				fmt.Printf("    %-15s external: %s internal: %s\n", component.Name, component.ExternalIP, component.InternalIP)
+				fmt.Printf("    %-15s IP: %s\n", component.Name, component.IPAddr())
 			}
 		}
 	}

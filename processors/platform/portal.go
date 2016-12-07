@@ -40,5 +40,5 @@ func UpdatePortal(appModel *models.App) error {
 
 //
 func portalClient(appModel *models.App) portal.PortalClient {
-	return portal.New(appModel.GlobalIPs["env"]+":8443", "123")
+	return portal.New(appModel.LocalIPs["env"]+":8443", "123")
 }

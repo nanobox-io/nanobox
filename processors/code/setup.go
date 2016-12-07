@@ -14,7 +14,6 @@ import (
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/hookit"
-	"github.com/nanobox-io/nanobox/util/provider"
 )
 
 //
@@ -79,11 +78,6 @@ func Setup(appModel *models.App, componentModel *models.Component, warehouseConf
 		return err
 	}
 
-	// attach container to the host network
-	if err := attachNetwork(componentModel); err != nil {
-		return fmt.Errorf("failed to attach container to host network: %s", err.Error())
-	}
-
 	lumber.Prefix("code:Setup")
 	defer lumber.Prefix("")
 
@@ -126,39 +120,13 @@ func Setup(appModel *models.App, componentModel *models.Component, warehouseConf
 
 //  ...
 func reserveIps(componentModel *models.Component) error {
-	if componentModel.InternalIP == "" {
+	if componentModel.IPAddr() == "" {
 		localIP, err := dhcp.ReserveLocal()
 		if err != nil {
 			lumber.Error("code:Setup:dhcp.ReserveLocal(): %s", err.Error())
 			return err
 		}
-		componentModel.InternalIP = localIP.String()
-	}
-
-	if componentModel.ExternalIP == "" {
-		ip, err := dhcp.ReserveGlobal()
-		if err != nil {
-			lumber.Error("code:Setup:dhcp.ReserveGlobal(): %s", err.Error())
-			return err
-		}
-		componentModel.ExternalIP = ip.String()
-	}
-
-	return nil
-}
-
-// attachNetwork attaches the component to the host network
-func attachNetwork(componentModel *models.Component) error {
-	if err := provider.AddIP(componentModel.ExternalIP); err != nil {
-		display.ErrorTask()
-		lumber.Error("code:Setup:addIPToProvider:provider.AddIP(%s): %s", componentModel.ExternalIP, err.Error())
-		return err
-	}
-
-	if err := provider.AddNat(componentModel.ExternalIP, componentModel.InternalIP); err != nil {
-		lumber.Error("code:Setup:addIPToProvider:provider.AddNat(%s, %s): %s", componentModel.ExternalIP, componentModel.InternalIP, err.Error())
-		display.ErrorTask()
-		return err
+		componentModel.IP = localIP.String()
 	}
 
 	return nil

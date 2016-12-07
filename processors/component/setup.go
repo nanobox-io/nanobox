@@ -14,7 +14,6 @@ import (
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/hookit"
-	"github.com/nanobox-io/nanobox/util/provider"
 )
 
 // Setup sets up the component container and model data
@@ -69,7 +68,7 @@ func Setup(appModel *models.App, componentModel *models.Component) error {
 		display.StopTask()
 	}
 	// reserve IPs
-	if err := reserveIPs(appModel, componentModel); err != nil {
+	if err := reserveIP(appModel, componentModel); err != nil {
 		return fmt.Errorf("failed to reserve IPs for component: %s", err.Error())
 	}
 
@@ -91,11 +90,6 @@ func Setup(appModel *models.App, componentModel *models.Component) error {
 		return fmt.Errorf("failed to persist container ID: %s", err.Error())
 	}
 
-	// attach container to the host network
-	if err := attachNetwork(componentModel); err != nil {
-		return fmt.Errorf("failed to attach container to host network: %s", err.Error())
-	}
-
 	// plan the component
 	if err := planComponent(appModel, componentModel); err != nil {
 		return err
@@ -115,18 +109,20 @@ func Setup(appModel *models.App, componentModel *models.Component) error {
 	return nil
 }
 
-// reserveIPs reserves IP addresses for this component
-func reserveIPs(appModel *models.App, componentModel *models.Component) error {
-	display.StartTask("Reserve IPs")
+// reserveIP reserves IP addresses for this component
+func reserveIP(appModel *models.App, componentModel *models.Component) error {
+	display.StartTask("Reserve IP")
 	defer display.StopTask()
 
 	// dont reserve a new one if we already have this one
-	if componentModel.InternalIP == "" {
+	if componentModel.IPAddr() == "" {
 		// first let's see if our local IP was reserved during app creation
-		if appModel.LocalIPs[componentModel.Name] != "" {
+		if componentModel.Name == "portal" {
+			componentModel.IP = appModel.LocalIPs["env"]
+		} else if appModel.LocalIPs[componentModel.Name] != "" {
 
 			// assign the localIP from the pre-generated app cache
-			componentModel.InternalIP = appModel.LocalIPs[componentModel.Name]
+			componentModel.IP = appModel.LocalIPs[componentModel.Name]
 		} else {
 
 			localIP, err := dhcp.ReserveLocal()
@@ -136,29 +132,7 @@ func reserveIPs(appModel *models.App, componentModel *models.Component) error {
 				return fmt.Errorf("failed to reserve local IP address: %s", err.Error())
 			}
 
-			componentModel.InternalIP = localIP.String()
-		}
-	}
-
-	// dont reserve a new global ip if i already have one
-	if componentModel.ExternalIP == "" {
-		// only if this service is portal, we need to use the preview IP
-		// in a dev environment there will be no portal installed
-		// so the env ip should be available
-		// in dev the env ip is used for the dev container
-		if componentModel.Name == "portal" {
-			// portal's global ip is the preview ip
-			componentModel.ExternalIP = appModel.GlobalIPs["env"]
-		} else {
-
-			globalIP, err := dhcp.ReserveGlobal()
-			if err != nil {
-				display.StopTask()
-				lumber.Error("component.reserveIPs:dhcp.ReserveGlobal(): %s", err.Error())
-				return fmt.Errorf("failed to reserve global IP address: %s", err.Error())
-			}
-
-			componentModel.ExternalIP = globalIP.String()
+			componentModel.IP = localIP.String()
 		}
 	}
 
@@ -166,28 +140,6 @@ func reserveIPs(appModel *models.App, componentModel *models.Component) error {
 		display.StopTask()
 		lumber.Error("component.reserveIPs:models.Component.Save(): %s", err.Error())
 		return fmt.Errorf("failed to persist component IPs: %s", err.Error())
-	}
-
-	return nil
-}
-
-// attachNetwork attaches the component to the host network
-func attachNetwork(componentModel *models.Component) error {
-	display.StartTask("Attaching network")
-	defer display.StopTask()
-
-	// add the IP to the provider
-	if err := provider.AddIP(componentModel.ExternalIP); err != nil {
-		lumber.Error("component:Setup:attachNetwork:provider.AddIP(%s): %s", componentModel.ExternalIP, err.Error())
-		display.ErrorTask()
-		return fmt.Errorf("failed to add IP to provider: %s", err.Error())
-	}
-
-	// nat traffic from the external IP to the internal
-	if err := provider.AddNat(componentModel.ExternalIP, componentModel.InternalIP); err != nil {
-		lumber.Error("component:Setup:attachNetwork:provider.AddNat(%s, %s): %s", componentModel.ExternalIP, componentModel.InternalIP, err.Error())
-		display.ErrorTask()
-		return fmt.Errorf("failed to nat IP on provider: %s", err.Error())
 	}
 
 	return nil

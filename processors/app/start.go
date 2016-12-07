@@ -28,6 +28,10 @@ func Start(envModel *models.Env, appModel *models.App, name string) error {
 		display.StopTask()
 	}
 
+	// we reserver here only while people are transitioning
+	// this can go away once everyone is on the new natless method
+	reserveIPs(appModel)
+
 	locker.LocalLock()
 	defer locker.LocalUnlock()
 

@@ -23,7 +23,7 @@ func FetchPayload(componentModel *models.Component, warehouse string) string {
 	logvac, _ := models.FindComponentBySlug(componentModel.AppID, "logvac")
 
 	pload := fetch{
-		LogvacHost: logvac.InternalIP,
+		LogvacHost: logvac.IPAddr(),
 		Component: component{
 			Name: componentModel.Name,
 			UID:  componentModel.Name,

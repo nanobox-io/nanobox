@@ -43,7 +43,7 @@ func Deploy(envModel *models.Env, appModel *models.App) error {
 
 	warehouseConfig := code.WarehouseConfig{
 		BuildID:        "1234",
-		WarehouseURL:   hoarder.InternalIP,
+		WarehouseURL:   hoarder.IPAddr(),
 		WarehouseToken: "123",
 	}
 
@@ -62,7 +62,7 @@ func Deploy(envModel *models.Env, appModel *models.App) error {
 	}
 
 	// give the user some helpful information
-	display.InfoSimDeploy(appModel.GlobalIPs["env"])
+	display.InfoSimDeploy(appModel.LocalIPs["env"])
 
 	return platform.MistListen(appModel)
 }

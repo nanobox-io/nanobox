@@ -22,7 +22,7 @@ type (
 		Image      string        `json:"image"`
 		Type       string        `json:"type"`
 		IP         string        `json:"ip"`
-		ExternalIP string        `json:"external_ip"`
+		// ExternalIP string        `json:"external_ip"`
 		InternalIP string        `json:"internal_ip"`
 		Plan       ComponentPlan `json:"plan"`
 		State      string        `json:"state"`
@@ -103,7 +103,7 @@ func (c *Component) GenerateEvars(app *App) error {
 	prefix := strings.ToUpper(strings.Replace(c.Name, ".", "_", -1))
 
 	// we need to create an host evar that holds the IP of the service
-	app.Evars[fmt.Sprintf("%s_HOST", prefix)] = c.InternalIP
+	app.Evars[fmt.Sprintf("%s_HOST", prefix)] = c.IPAddr()
 
 	// we need to create evars that contain usernames and passwords
 	//
@@ -157,7 +157,7 @@ func (c *Component) IPAddr() string {
 	if c.IP != "" {
 		return c.IP
 	}
-	return c.InternalIP
+	return c.IPAddr()
 }
 
 // PurgeEvars purges the generated evars for a component

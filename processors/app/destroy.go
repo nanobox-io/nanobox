@@ -98,16 +98,6 @@ func releaseIPs(appModel *models.App) error {
 	display.StartTask("Releasing IPs")
 	defer display.StopTask()
 
-	// release all of the external IPs
-	for _, ip := range appModel.GlobalIPs {
-		// release the IP
-		if err := dhcp.ReturnIP(net.ParseIP(ip)); err != nil {
-			display.ErrorTask()
-			lumber.Error("app:Destroy:releaseIPs:dhcp.ReturnIP(%s): %s", ip, err.Error())
-			return fmt.Errorf("failed to release IP: %s", err.Error())
-		}
-	}
-
 	// release all of the local IPs
 	for _, ip := range appModel.LocalIPs {
 		// release the IP

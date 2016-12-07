@@ -24,11 +24,12 @@ type Provider interface {
 	Destroy() error
 	Start() error
 	DockerEnv() error
+	// we might be able to remove ip stuff as well
 	AddIP(ip string) error
 	RemoveIP(ip string) error
 	SetDefaultIP(ip string) error
-	AddNat(host, container string) error
-	RemoveNat(host, container string) error
+	// AddNat(host, container string) error
+	// RemoveNat(host, container string) error
 	HasMount(mount string) bool
 	AddMount(local, host string) error
 	RemoveMount(local, host string) error
@@ -254,27 +255,27 @@ func SetDefaultIP(ip string) error {
 	return p.SetDefaultIP(ip)
 }
 
-// AddNat ..
-func AddNat(host, container string) error {
+// // AddNat ..
+// func AddNat(host, container string) error {
 
-	p, err := fetchProvider()
-	if err != nil {
-		return err
-	}
+// 	p, err := fetchProvider()
+// 	if err != nil {
+// 		return err
+// 	}
 
-	return p.AddNat(host, container)
-}
+// 	return p.AddNat(host, container)
+// }
 
-// RemoveNat ..
-func RemoveNat(host, container string) error {
+// // RemoveNat ..
+// func RemoveNat(host, container string) error {
 
-	p, err := fetchProvider()
-	if err != nil {
-		return err
-	}
+// 	p, err := fetchProvider()
+// 	if err != nil {
+// 		return err
+// 	}
 
-	return p.RemoveNat(host, container)
-}
+// 	return p.RemoveNat(host, container)
+// }
 
 // HasMount ...
 func HasMount(path string) bool {
