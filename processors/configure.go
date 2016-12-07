@@ -21,13 +21,13 @@ func Configure() error {
 	}
 
 	fmt.Print(`
-CONFIGURE NANOBOX 
+CONFIGURE NANOBOX
 ---------------------------------------------------------------
 Please answer the following questions so we can customize your
-nanobox configuration. Feel free to update your config at any 
+nanobox configuration. Feel free to update your config at any
 time by running: 'nanobox configure'
 
-(Learn more at : http://docs.nanobox.io/configure)
+(Learn more at : https://docs.nanobox.io/local-config/nanobox-config-yml/)
 `)
 
 	// ask about provider

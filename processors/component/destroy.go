@@ -57,7 +57,7 @@ func destroyContainer(id string) error {
 	if err := docker.ContainerRemove(id); err != nil {
 		lumber.Error("component:Destroy:docker.ContainerRemove(%s): %s", id, err.Error())
 		display.ErrorTask()
-		return fmt.Errorf("failed to remove docker container: %s", err.Error())
+		// return fmt.Errorf("failed to remove docker container: %s", err.Error())
 	}
 
 	return nil
