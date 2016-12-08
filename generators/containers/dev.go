@@ -10,7 +10,6 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/provider"
 )
 
@@ -57,12 +56,6 @@ func DevConfig(appModel *models.App) docker.ContainerConfig {
 	}
 
 	return config
-}
-
-// reserveIP reserves a local IP for the build container
-func reserveIP() string {
-	ip, _ := dhcp.ReserveLocal()
-	return ip.String()
 }
 
 // DevName returns the name of the build container

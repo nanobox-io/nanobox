@@ -29,8 +29,6 @@ func Run(envModel *models.Env, appModel *models.App, consoleConfig console.Conso
 		return fmt.Errorf("failed to setup environment: %s", err.Error())
 	}
 
-	// whatever happens next, ensure we teardown this container
-
 	// setup the dev container
 	if err := setup(appModel); err != nil {
 		return fmt.Errorf("failed to setup dev container: %s", err.Error())

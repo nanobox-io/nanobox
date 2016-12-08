@@ -7,6 +7,7 @@ import (
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processors/provider/bridge"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
@@ -73,6 +74,10 @@ func Setup() error {
 	// initialize the docker client
 	if err := Init(); err != nil {
 		return fmt.Errorf("failed to initialize docker for provider: %s", err.Error())
+	}
+
+	if err := bridge.Setup(); err != nil {
+		return fmt.Errorf("failed to setup the network bridge: %s", err.Error())
 	}
 
 	return nil
