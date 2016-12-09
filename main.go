@@ -18,7 +18,7 @@ import (
 	"github.com/nanobox-io/nanobox/processors"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
-	// "github.com/nanobox-io/nanobox/util/memory_logger"
+	"github.com/nanobox-io/nanobox/util/provider"
 )
 
 var bugsnagToken string
@@ -47,9 +47,22 @@ func main() {
 		processors.Configure()
 	}
 
+
 	// build the viper config because viper cannot handle concurrency
 	// so it has to be done at the beginning even if we dont need it
-	config.Viper()
+	providerName := config.Viper().GetString("provider")
+
+	// make sure nanobox has all the necessry parts
+	valid, missingParts := provider.Valid()
+	if !valid {
+		fmt.Printf("Using nanobox with %s requires tools that appear to not be available on your system.\n", providerName)
+		fmt.Println(strings.Join(missingParts, "\n"))
+		if providerName == "native" {
+			providerName = "docker"
+		}
+		fmt.Println("View these requirements at docs.nanobox.io/install/requirements/%s/\n", providerName)
+		os.Exit(1)
+	}
 
 	// setup a file logger, this will be replaced in verbose mode.
 	fileLogger, err := lumber.NewTruncateLogger(filepath.ToSlash(filepath.Join(config.GlobalDir(), "nanobox.log")))

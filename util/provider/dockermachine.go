@@ -32,16 +32,50 @@ func init() {
 }
 
 // Valid ensures docker-machine is installed and available
-func (machine DockerMachine) Valid() error {
+func (machine DockerMachine) Valid() (bool, []string) {
 
-	cmd := exec.Command(dockerMachineCmd, "version")
+	missingParts := []string{}
 
-	//
-	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("Nanobox could not run 'docker-machine' please make sure it is in your path")
+	// we install our own docker-machine so we dont need to check
+	
+	// do you have vbox manage?
+	if err := exec.Command("VBoxManage", "-v").Run(); err != nil {
+		missingParts = append(missingParts, "vboxmanage")
 	}
 
-	return nil
+	// return early if we are running native mounts
+	if config.Viper().GetString("mount-type") == "native" {
+		return len(missingParts) == 0, missingParts
+	}
+
+
+	unixCheck := func() {
+		// check to see if i am listening on the netfs port
+		out, err := exec.Command("netstat", "-ln").CombinedOutput()
+		if err != nil || !bytes.Contains(out, []byte(":2049 ")) {
+			missingParts = append(missingParts, "netfs")
+		}
+		
+	}
+	// net share checking
+	switch runtime.GOOS {
+	case "linux":
+		unixCheck()
+		if err := exec.Command("exportfs").Run(); err != nil {
+			missingParts = append(missingParts, "exportfs")
+		}
+
+	case "darwin":
+		unixCheck()
+		if err := exec.Command("nfsd", "status").Run(); err != nil {
+			missingParts = append(missingParts, "nfsd")
+		}
+
+	case "windows":
+
+	}
+
+	return len(missingParts) == 0, missingParts
 }
 
 func (machine DockerMachine) Status() string {
