@@ -45,6 +45,10 @@ func (native Native) Status() string {
 	return "Running"
 }
 
+func (native Native) BridgeRequired() bool {
+	return runtime.GOOS != "linux"
+}
+
 func (native Native) IsInstalled() bool {
 	cmd := exec.Command("docker", "version")
 

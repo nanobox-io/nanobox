@@ -8,6 +8,7 @@ import (
 
 // Provider ...
 type Provider interface {
+	BridgeRequired() bool
 	Status() string
 	IsReady() bool
 	IsInstalled() bool
@@ -340,6 +341,16 @@ func IsReady() bool {
 	}
 
 	return p.IsReady()
+}
+
+func BridgeRequired() bool {
+
+	p, err := fetchProvider()
+	if err != nil {
+		return false
+	}
+
+	return p.BridgeRequired()
 }
 
 // fetchProvider fetches the registered provider from the configured name

@@ -76,9 +76,12 @@ func Setup() error {
 		return fmt.Errorf("failed to initialize docker for provider: %s", err.Error())
 	}
 
-	if err := bridge.Setup(); err != nil {
-		return fmt.Errorf("failed to setup the network bridge: %s", err.Error())
+	if provider.BridgeRequired() {
+		if err := bridge.Setup(); err != nil {
+			return fmt.Errorf("failed to setup the network bridge: %s", err.Error())
+		}			
 	}
+
 
 	return nil
 }

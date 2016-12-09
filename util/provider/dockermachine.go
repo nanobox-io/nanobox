@@ -100,6 +100,10 @@ func (machine DockerMachine) Install() error {
 	return nil
 }
 
+func (machine DockerMachine) BridgeRequired() bool {
+	return true
+}
+
 // Create creates the docker-machine vm
 func (machine DockerMachine) Create() error {
 

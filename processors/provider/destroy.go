@@ -15,15 +15,17 @@ func Destroy() error {
 	locker.GlobalLock()
 	defer locker.GlobalUnlock()
 
-	// initialize the docker client
-	// ensures we can actually communicate
-	if err := Init(); err != nil {
-		return fmt.Errorf("failed to initialize docker for provider: %s", err.Error())
-	}
+	if provider.BridgeRequired() {
+		// initialize the docker client
+		// ensures we can actually communicate
+		if err := Init(); err != nil {
+			return fmt.Errorf("failed to initialize docker for provider: %s", err.Error())
+		}
 
-	// remove the network bridge
-	if err := bridge.Teardown(); err != nil {
-		return fmt.Errorf("failed to teardown network bridge: %s", err.Error())
+		// remove the network bridge
+		if err := bridge.Teardown(); err != nil {
+			return fmt.Errorf("failed to teardown network bridge: %s", err.Error())
+		}
 	}
 
 	// destroy the provider
