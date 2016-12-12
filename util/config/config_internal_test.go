@@ -1,9 +1,9 @@
 package config
 
 import (
-	"testing"
-	"strings"
 	"github.com/mitchellh/go-homedir"
+	"strings"
+	"testing"
 )
 
 func TestGlobalDir(t *testing.T) {
@@ -35,7 +35,7 @@ func TestBinDir(t *testing.T) {
 
 func TestSSHDir(t *testing.T) {
 	homedir, _ := homedir.Dir()
-	if SSHDir() != homedir + "/.ssh" {
+	if SSHDir() != homedir+"/.ssh" {
 		t.Errorf("incorrect ssh directory")
 	}
 }

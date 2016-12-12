@@ -50,8 +50,8 @@ RESERVE:
 
 // reserIPs reserves app-level ip addresses
 func reserveIPs(appModel *models.App) error {
-	
-	if appModel.LocalIPs["env"] != ""  {
+
+	if appModel.LocalIPs["env"] != "" {
 		return nil
 	}
 
@@ -69,9 +69,8 @@ func reserveIPs(appModel *models.App) error {
 
 		// now assign the IPs onto the app model
 		appModel.LocalIPs["env"] = envIP.String()
-		
-	}
 
+	}
 
 	if appModel.Name == "sim" {
 		if appModel.LocalIPs["logvac"] == "" {
@@ -83,7 +82,7 @@ func reserveIPs(appModel *models.App) error {
 				return fmt.Errorf("failed to reserve a logvac IP: %s", err.Error())
 			}
 			appModel.LocalIPs["logvac"] = logvacIP.String()
-			
+
 		}
 
 		if appModel.LocalIPs["mist"] == "" {
@@ -96,7 +95,7 @@ func reserveIPs(appModel *models.App) error {
 			}
 
 			appModel.LocalIPs["mist"] = mistIP.String()
-			
+
 		}
 
 	}

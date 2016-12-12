@@ -17,11 +17,11 @@ type (
 		AppID string `json:"app_id"`
 		EnvID string `json:"env_id"`
 		// name is used for boltdb storage
-		Name       string        `json:"name"`
-		Label      string        `json:"label"`
-		Image      string        `json:"image"`
-		Type       string        `json:"type"`
-		IP         string        `json:"ip"`
+		Name  string `json:"name"`
+		Label string `json:"label"`
+		Image string `json:"image"`
+		Type  string `json:"type"`
+		IP    string `json:"ip"`
 		// ExternalIP string        `json:"external_ip"`
 		InternalIP string        `json:"internal_ip"`
 		Plan       ComponentPlan `json:"plan"`

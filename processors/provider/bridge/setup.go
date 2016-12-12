@@ -2,23 +2,20 @@ package bridge
 
 import (
 	"fmt"
-	"time"
 	"os"
 	"runtime"
+	"time"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
 
-	"github.com/nanobox-io/nanobox/util/fileutil"
 	container_generator "github.com/nanobox-io/nanobox/generators/containers"
-	"github.com/nanobox-io/nanobox/util/locker"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
+	"github.com/nanobox-io/nanobox/util/fileutil"
 	"github.com/nanobox-io/nanobox/util/hookit"
-
-
+	"github.com/nanobox-io/nanobox/util/locker"
 )
-
 
 func Setup() error {
 	// create a component
@@ -41,10 +38,8 @@ func Setup() error {
 		return err
 	}
 
-	return nil	
+	return nil
 }
-
-
 
 // sets up the dev container and network stack
 func setupContainer() error {
@@ -155,16 +150,16 @@ func downloadBridgeClient() error {
 			return fmt.Errorf("failed to set permissions: ", err.Error())
 		}
 	}
-	
+
 	return nil
 }
 
 func configureBridge() error {
-	
+
 	return nil
 }
 
 func startBridge() error {
-	
+
 	return nil
 }

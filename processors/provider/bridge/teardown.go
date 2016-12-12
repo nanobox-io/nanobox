@@ -2,15 +2,13 @@ package bridge
 
 import (
 	"fmt"
-	
+
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
 
 	container_generator "github.com/nanobox-io/nanobox/generators/containers"
 	"github.com/nanobox-io/nanobox/util/locker"
-
 )
-
 
 func Teardown() error {
 	// remove bridge client
@@ -27,18 +25,17 @@ func Teardown() error {
 	if err := removeComponent(); err != nil {
 		return err
 	}
-	
-	return nil	
-}
 
-func removeBridge() error {
-	
 	return nil
 }
 
+func removeBridge() error {
+
+	return nil
+}
 
 func removeConfig() error {
-	
+
 	return nil
 }
 

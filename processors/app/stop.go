@@ -89,4 +89,3 @@ func stopDevContainer(appModel *models.App) error {
 	}
 	return nil
 }
-

@@ -23,7 +23,6 @@ func BridgeName() string {
 	return "nanobox_bridge"
 }
 
-
 // reserveIP reserves a local IP for the build container
 func reserveIP() string {
 	ip, _ := dhcp.ReserveLocal()

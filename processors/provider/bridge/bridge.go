@@ -1,8 +1,8 @@
 package bridge
 
 import (
-	"runtime"
 	"path/filepath"
+	"runtime"
 
 	"github.com/nanobox-io/nanobox/util/config"
 )
