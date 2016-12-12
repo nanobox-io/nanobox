@@ -35,10 +35,10 @@ func Build(envModel *models.Env) error {
 	display.StartTask("Starting docker container")
 
 	// start the container
-	config := container_generator.BuildConfig(buildImage)
-	container, err := docker.CreateContainer(config)
+	contConfig := container_generator.BuildConfig(buildImage)
+	container, err := docker.CreateContainer(contConfig)
 	if err != nil {
-		lumber.Error("code:Build:docker.CreateContainer(%+v): %s", config, err.Error())
+		lumber.Error("code:Build:docker.CreateContainer(%+v): %s", contConfig, err.Error())
 		return fmt.Errorf("failed to start docker container: %s", err.Error())
 	}
 
@@ -67,7 +67,7 @@ func Build(envModel *models.Env) error {
 	}
 
 	envModel.LastBuild = time.Now()
-
+	envModel.LastBuildProvider = config.Viper().GetString("provider")
 	envModel.Save()
 
 	// ensure we stop the container when we're done

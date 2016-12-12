@@ -23,6 +23,7 @@ type Env struct {
 	LastBuild     time.Time
 	LastCompile   time.Time
 	BuildTriggers map[string]string
+	LastBuildProvider string
 }
 
 // Remote ...

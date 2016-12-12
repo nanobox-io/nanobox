@@ -43,6 +43,10 @@ func buildFn(ccmd *cobra.Command, args []string) {
 func buildComplete() bool {
 	// check the boxfile to be sure it hasnt changed
 	env, _ := models.FindEnvByID(config.EnvID())
+	// if the build provider changes we need to build again
+	if config.Viper().GetString("provider") != env.LastBuildProvider{
+		return false
+	}
 	box := boxfile.NewFromPath(config.Boxfile())
 
 	// we need to rebuild if this isnt true without going to check triggers

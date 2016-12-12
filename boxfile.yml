@@ -6,3 +6,6 @@ run.config:
   dev_packages:
     - py27-awscli
     - coreutils  
+  extra_steps:
+    - "go get github.com/mitchellh/gox"
+    - "go get github.com/kardianos/govendor"
