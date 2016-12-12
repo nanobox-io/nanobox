@@ -36,5 +36,10 @@ func Mount(env *models.Env) error {
 		return fmt.Errorf("failed to mount the code share on the provider: %s", err.Error())
 	}
 
+	// setup mount directories
+	provider.Run([]string{"mkdir", "-p", fmt.Sprintf("%s%s/build", provider.HostMntDir(), env.ID)})
+	provider.Run([]string{"mkdir", "-p", fmt.Sprintf("%s%s/deploy", provider.HostMntDir(), env.ID)})
+	provider.Run([]string{"mkdir", "-p", fmt.Sprintf("%s%s/cache", provider.HostMntDir(), env.ID)})
+
 	return nil
 }
