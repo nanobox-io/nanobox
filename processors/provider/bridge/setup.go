@@ -5,6 +5,7 @@ import (
 	"os"
 	"runtime"
 	"time"
+	"encoding/json"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
@@ -16,6 +17,11 @@ import (
 	"github.com/nanobox-io/nanobox/util/hookit"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
+
+// ca.crt
+// client.key
+// client.crt
+var keys map[string]string
 
 func Setup() error {
 	// create a component
@@ -75,7 +81,7 @@ func setupContainer() error {
 
 	display.StartTask("Configuring")
 	// run the configure hook
-	if _, err := hookit.DebugExec(container.ID, "configure", "{}", "info"); err != nil {
+	if _, err := hookit.DebugExec(container.ID, "configure", "{\"platform\":\"local\",\"config\":{}}", "info"); err != nil {
 		return fmt.Errorf("failed to run configure hook: %s", err.Error())
 	}
 
@@ -84,6 +90,16 @@ func setupContainer() error {
 		return fmt.Errorf("failed to run start hook: %s", err.Error())
 	}
 
+	// run the start hook
+	output, err := hookit.DebugExec(container.ID, "keys", "{}", "info")
+	if err != nil {
+		return fmt.Errorf("failed to run start hook: %s, %s", output, err.Error())
+	}
+	
+	fmt.Println("keys output", output)
+	if err := json.Unmarshal([]byte(output), &keys); err != nil {
+		return fmt.Errorf("failed to decode the keys: %s %s", output, err.Error())
+	}
 	display.StopTask()
 
 	return nil
@@ -128,6 +144,8 @@ func downloadImage(image string) error {
 }
 
 func downloadBridgeClient() error {
+	// TODO: remove once we have a client we can download
+	return nil
 	// short-circuit if we're already installed
 	if fileutil.Exists(bridgeClient) {
 		return nil
