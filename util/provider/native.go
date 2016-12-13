@@ -5,7 +5,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"strings"
 
 	"github.com/jcelliott/lumber"
@@ -24,21 +23,15 @@ func init() {
 }
 
 // Valid ensures docker-machine is installed and available
-func (native Native) Valid() error {
-
-	//
-	if runtime.GOOS != "linux" {
-		return fmt.Errorf("Native only works on linux (currently)")
-	}
-
-	cmd := exec.Command("docker", "version")
+func (native Native) Valid() (bool, []string) {
+	cmd := exec.Command("docker", "ps")
 
 	//
 	if err := cmd.Run(); err != nil {
-		return fmt.Errorf("I could not run 'docker' please make sure it is in your path")
+		return false, []string{"docker"}
 	}
 
-	return nil
+	return true, nil
 }
 
 func (native Native) Status() string {

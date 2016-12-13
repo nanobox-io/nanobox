@@ -2,7 +2,6 @@ package share_test
 
 import (
 	"os"
-	"os/exec"
 	"path/filepath"
 	"testing"
 
@@ -22,7 +21,6 @@ func TestMain(m *testing.M) {
 
 	provider.Save()
 
-	exec.Command("touch", "/tmp/exports").Run()
 	share.EXPORTSFILE = "/tmp/exports"
 	exitCode := m.Run()
 	os.Remove("/tmp/exports")

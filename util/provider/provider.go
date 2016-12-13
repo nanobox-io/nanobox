@@ -16,7 +16,7 @@ type Provider interface {
 	HostMntDir() string
 	HostIP() (string, error)
 	ReservedIPs() []string
-	Valid() error
+	Valid() (bool, []string)
 	Install() error
 	Create() error
 	Reboot() error
@@ -54,11 +54,11 @@ func Display(verb bool) {
 }
 
 // Valid ...
-func Valid() error {
+func Valid() (bool, []string) {
 
 	p, err := fetchProvider()
 	if err != nil {
-		return err
+		return false, []string{"invalid provider"}
 	}
 
 	return p.Valid()
