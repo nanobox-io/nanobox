@@ -52,7 +52,7 @@ func (machine DockerMachine) Valid() (bool, []string) {
 	unixCheck := func() {
 		// check to see if i am listening on the netfs port
 		out, err := exec.Command("netstat", "-ln").CombinedOutput()
-		if err != nil || !bytes.Contains(out, []byte(":2049 ")) {
+		if err != nil || !bytes.Contains(out, []byte("2049")) {
 			missingParts = append(missingParts, "netfs")
 		}
 		
