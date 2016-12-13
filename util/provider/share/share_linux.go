@@ -111,6 +111,11 @@ func entry(path string) (string, error) {
 
 // addEntry will add the entry into the /etc/exports file
 func addEntry(entry string) error {
+	// check to see if it exists
+	if _, err := os.Stat(EXPORTSFILE); err != nil {
+		// if not write our entry and return
+		return ioutil.WriteFile(EXPORTSFILE, []byte(entry), 0644)
+	}
 
 	// open exports file
 	f, err := os.OpenFile(EXPORTSFILE, os.O_RDWR|os.O_APPEND, 0644)
