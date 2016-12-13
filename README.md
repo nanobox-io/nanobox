@@ -9,7 +9,7 @@ Once code is built and tested locally, Nanobox provisions and deploys an identic
 
 ## How It Works
 
-Nanobox uses [Virtual Box](http://virtualbox.org) and [Docker](https://www.docker.com/) to create virtual development environments on your local machine. App configuration is handled in the [boxfile.yml](https://docs.nanobnox.io/app-config/boxfile/), a small yaml config file used to provision and configure your apps' environments both locally and in production.
+Nanobox uses [Virtual Box](http://virtualbox.org) and [Docker](https://www.docker.com/) to create virtual development environments on your local machine. App configuration is handled in the [boxfile.yml](https://docs.nanobox.io/app-config/boxfile/), a small yaml config file used to provision and configure your apps' environments both locally and in production.
 
 ## Why Nanobox?
 
