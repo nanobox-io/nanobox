@@ -39,7 +39,7 @@ func (machine DockerMachine) Valid() (bool, []string) {
 	// we install our own docker-machine so we dont need to check
 	
 	// do you have vbox manage?
-	if err := exec.Command("VBoxManage", "-v").Run(); err != nil {
+	if err := exec.Command(vboxManageCmd, "-v").Run(); err != nil {
 		missingParts = append(missingParts, "vboxmanage")
 	}
 
