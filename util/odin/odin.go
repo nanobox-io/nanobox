@@ -192,15 +192,15 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 	}
 
 	if res.StatusCode == 401 {
-		return fmt.Errorf("Unauthorized")
+		return fmt.Errorf("Unauthorized (%s)", b)
 	}
 
 	if res.StatusCode == 404 {
-		return fmt.Errorf("Not Found")
+		return fmt.Errorf("Not Found (%s", b)
 	}
 
 	if res.StatusCode == 500 {
-		return fmt.Errorf("Internal Server Error")
+		return fmt.Errorf("Internal Server Error (%s)", b)
 	}
 
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
