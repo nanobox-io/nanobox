@@ -96,7 +96,6 @@ func setupContainer() error {
 		return fmt.Errorf("failed to run start hook: %s, %s", output, err.Error())
 	}
 	
-	fmt.Println("keys output", output)
 	if err := json.Unmarshal([]byte(output), &keys); err != nil {
 		return fmt.Errorf("failed to decode the keys: %s %s", output, err.Error())
 	}

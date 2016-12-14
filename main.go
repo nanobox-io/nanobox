@@ -5,6 +5,7 @@ import (
 	"crypto/md5"
 	"fmt"
 	"os"
+	"bufio"
 	"path/filepath"
 	"runtime"
 	"runtime/debug"
@@ -19,6 +20,8 @@ import (
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/provider"
+	"github.com/nanobox-io/nanobox/util/display"
+
 )
 
 var bugsnagToken string
@@ -40,13 +43,15 @@ func main() {
 		os.Exit(1)
 	}
 
+	// temp 
+	firstVpn()
+
 	fixRunArgs()
 
 	// do the commands configure check here because we need it to happen before setupBugsnag creates the config
 	if !config.ConfigExists() {
 		processors.Configure()
 	}
-
 
 	// build the viper config because viper cannot handle concurrency
 	// so it has to be done at the beginning even if we dont need it
@@ -155,4 +160,20 @@ LOOP:
 	if found {
 		os.Args = append(os.Args[:lastLocation+1], strings.Join(os.Args[lastLocation+1:], " "))
 	}
+}
+
+// a temporary check to help people migrate over to the new vpn way
+func firstVpn()  {
+	// check to see if this is the first time we are running the new vpn way
+	env, _ := models.FindEnvByID(config.EnvID())
+
+	if config.Viper().GetString("provider") == "docker-machine" && (env.ID != "" && env.LastBuildProvider == "") {
+		fmt.Println("manditory migration message")
+		fmt.Println("press enter to continue")
+		reader := bufio.NewReader(os.Stdin)
+		reader.ReadString('\n')
+		display.CommandErr(processors.Implode())
+
+	}
+
 }
