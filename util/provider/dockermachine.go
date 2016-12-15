@@ -159,9 +159,6 @@ func (machine DockerMachine) Create() error {
 
 	// load in the disk size
 	disk := conf.GetInt("disk")
-	if disk < 15000 {
-		disk = 15000
-	}
 
 	cmd := []string{
 		dockerMachineCmd,
@@ -174,10 +171,14 @@ func (machine DockerMachine) Create() error {
 		fmt.Sprintf("%d", cpus),
 		"--virtualbox-memory",
 		fmt.Sprintf("%d", ram*1024),
-		"--virtualbox-disk-size",
-		fmt.Sprintf("%d", disk),
-		"nanobox",
 	}
+
+	// append the disk if they set it big enough
+	if disk > 15360 {
+		cmd = append(cmd, "--virtualbox-disk-size",fmt.Sprintf("%d", disk))
+	}
+
+	cmd = append(cmd, "nanobox")
 
 	process := exec.Command(cmd[0], cmd[1:]...)
 
