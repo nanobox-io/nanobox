@@ -2,6 +2,7 @@ package processors
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/display"
@@ -12,12 +13,19 @@ import (
 func Login(username, password, endpoint string) error {
 
 	// request Username/Password if missing
+	if username == "" && os.Getenv("NANOBOX_USERNAME") != "" {
+		username = os.Getenv("NANOBOX_USERNAME")
+	}
 	if username == "" {
 		user, err := display.ReadUsername()
 		if err != nil {
 			return fmt.Errorf("unable to retrieve username: %s", err)
 		}
 		username = user
+	}
+
+	if password == "" && os.Getenv("NANOBOX_PASSWORD") != "" {
+		password = os.Getenv("NANOBOX_PASSWORD")
 	}
 
 	if password == "" {
@@ -27,6 +35,10 @@ func Login(username, password, endpoint string) error {
 			return fmt.Errorf("failed to read password: %s", err.Error())
 		}
 		password = pass
+	}
+
+	if endpoint == "" && os.Getenv("NANOBOX_ENDPOINT") != "" {
+		endpoint = os.Getenv("NANOBOX_ENDPOINT")
 	}
 
 	if endpoint == "" {
