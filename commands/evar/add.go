@@ -49,14 +49,14 @@ func parseEvars(args []string) map[string]string {
 		// define a function that will allow us to
 		// split on ',' or ' '
 		f := func(c rune) bool {
-			return c == ',' || c == ' '
+			return c == ','
 		}
 
 		for _, pair := range strings.FieldsFunc(arg, f) {
 			// define a field split that llows us to split on
 			// ':' or '='
 			parts := strings.FieldsFunc(pair, func(c rune) bool {
-				return c == ':' || c == '='
+				return c == '='
 			})
 			if len(parts) == 2 {
 
