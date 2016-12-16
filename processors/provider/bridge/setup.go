@@ -133,6 +133,7 @@ func downloadImage(image string) error {
 		_, err := docker.ImagePull(image, dockerPercent)
 		return err
 	}
+
 	if err := util.Retry(imagePull, 5, time.Second); err != nil {
 		display.ErrorTask()
 		lumber.Error("dev:Setup:downloadImage.ImagePull(%s, nil): %s", image, err.Error())
@@ -143,8 +144,6 @@ func downloadImage(image string) error {
 }
 
 func downloadBridgeClient() error {
-	// TODO: remove once we have a client we can download
-	return nil
 	// short-circuit if we're already installed
 	if fileutil.Exists(bridgeClient) {
 		return nil
@@ -172,11 +171,11 @@ func downloadBridgeClient() error {
 }
 
 func configureBridge() error {
-
+	fmt.Printf("keys: %+v\n\n", keys)
 	return nil
 }
 
 func startBridge() error {
-
 	return nil
 }
+
