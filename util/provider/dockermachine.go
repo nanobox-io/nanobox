@@ -39,7 +39,7 @@ func (machine DockerMachine) Valid() (bool, []string) {
 	// we install our own docker-machine so we dont need to check
 	
 	// do you have vbox manage?
-	if err := exec.Command("VBoxManage", "-v").Run(); err != nil {
+	if err := exec.Command(vboxManageCmd, "-v").Run(); err != nil {
 		missingParts = append(missingParts, "vboxmanage")
 	}
 
@@ -52,7 +52,7 @@ func (machine DockerMachine) Valid() (bool, []string) {
 	unixCheck := func() {
 		// check to see if i am listening on the netfs port
 		out, err := exec.Command("netstat", "-ln").CombinedOutput()
-		if err != nil || !bytes.Contains(out, []byte(":2049 ")) {
+		if err != nil || !bytes.Contains(out, []byte("2049")) {
 			missingParts = append(missingParts, "netfs")
 		}
 		
@@ -161,6 +161,9 @@ func (machine DockerMachine) Create() error {
 		ram = 1
 	}
 
+	// load in the disk size
+	disk := conf.GetInt("disk")
+
 	cmd := []string{
 		dockerMachineCmd,
 		"create",
@@ -172,8 +175,14 @@ func (machine DockerMachine) Create() error {
 		fmt.Sprintf("%d", cpus),
 		"--virtualbox-memory",
 		fmt.Sprintf("%d", ram*1024),
-		"nanobox",
 	}
+
+	// append the disk if they set it big enough
+	if disk > 15360 {
+		cmd = append(cmd, "--virtualbox-disk-size",fmt.Sprintf("%d", disk))
+	}
+
+	cmd = append(cmd, "nanobox")
 
 	process := exec.Command(cmd[0], cmd[1:]...)
 

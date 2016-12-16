@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"os"
 	"net/http"
 	"net/url"
 
@@ -160,6 +161,16 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 
 	auth, _ := models.LoadAuthByEndpoint(endpoint)
 
+	// if they have not logged in but the user name and password are both set
+	// use attempt to authenticate
+	if auth.Key == "" && 
+		os.Getenv("NANOBOX_PASSWORD") != "" && 
+		os.Getenv("NANOBOX_USERNAME") != "" && 
+		path != fmt.Sprintf("users/%s/auth_token", os.Getenv("NANOBOX_USERNAME")){
+
+		auth.Key, _ = Auth(os.Getenv("NANOBOX_USERNAME"), os.Getenv("NANOBOX_PASSWORD"))
+	}
+
 	if params == nil {
 		params = url.Values{}
 	}
@@ -192,15 +203,15 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 	}
 
 	if res.StatusCode == 401 {
-		return fmt.Errorf("Unauthorized")
+		return fmt.Errorf("Unauthorized (%s)", b)
 	}
 
 	if res.StatusCode == 404 {
-		return fmt.Errorf("Not Found")
+		return fmt.Errorf("Not Found (%s", b)
 	}
 
 	if res.StatusCode == 500 {
-		return fmt.Errorf("Internal Server Error")
+		return fmt.Errorf("Internal Server Error (%s)", b)
 	}
 
 	if res.StatusCode < 200 || res.StatusCode >= 300 {

@@ -65,7 +65,7 @@ func main() {
 		if providerName == "native" {
 			providerName = "docker"
 		}
-		fmt.Println("View these requirements at docs.nanobox.io/install/requirements/%s/\n", providerName)
+		fmt.Printf("View these requirements at docs.nanobox.io/install/requirements/%s/\n", providerName)
 		os.Exit(1)
 	}
 

@@ -39,7 +39,7 @@ func Add(envModel *models.Env, appName, alias string) error {
 	// fetch the odin app
 	app, err := odin.App(appName)
 	if err != nil {
-		fmt.Printf("! Sorry, but you don't have access to %s\n", appName)
+		fmt.Printf("! Sorry, but you don't have access to %s\n%s\n", appName, err)
 		return nil
 	}
 

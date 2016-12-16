@@ -74,7 +74,9 @@ func List(filter string) []DomainName {
 
 // Add ...
 func Add(entry string) error {
-	if entry == "" {
+	// break early if there is no entry
+	// or we have already added this entry
+	if entry == "" || Exists(entry) {
 		return nil
 	}
 
