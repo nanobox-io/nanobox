@@ -34,8 +34,8 @@ func startCheck() bool {
 	provider.Init()
 	components, _ := app.Components()
 	for _, component := range components {
-		info, _ := docker.ContainerInspect(component.ID)
-		if !info.State.Running {
+		info, err := docker.ContainerInspect(component.ID)
+		if err != nil || !info.State.Running {
 			return false
 		}
 	}

@@ -106,3 +106,14 @@ func BinDir() string {
 
 	return binDir
 }
+
+func EtcDir() string {
+
+	etcDir := filepath.ToSlash(filepath.Join(GlobalDir(), "etc"))
+
+	if err := os.MkdirAll(etcDir, 0755); err != nil {
+		lumber.Fatal("[config/config] os.Mkdir() failed", err.Error())
+	}
+
+	return etcDir
+}

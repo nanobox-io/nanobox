@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"io/ioutil"
 	"time"
+	"path/filepath"
 	"encoding/json"
 
 	"github.com/jcelliott/lumber"
@@ -15,6 +17,7 @@ import (
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/fileutil"
 	"github.com/nanobox-io/nanobox/util/hookit"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
 
@@ -24,6 +27,10 @@ import (
 var keys map[string]string
 
 func Setup() error {
+
+	display.OpenContext("Building bridge")
+	defer display.CloseContext()
+
 	// create a component
 	if err := setupContainer(); err != nil {
 		return err
@@ -59,9 +66,6 @@ func setupContainer() error {
 	if isBridgeExists() {
 		return nil
 	}
-
-	display.OpenContext("Building bridge")
-	defer display.CloseContext()
 
 	// generate a container config
 	config := container_generator.BridgeConfig()
@@ -171,11 +175,43 @@ func downloadBridgeClient() error {
 }
 
 func configureBridge() error {
-	fmt.Printf("keys: %+v\n\n", keys)
+	// fmt.Printf("keys: %+v\n\n", keys)
+	display.StartTask("configuring")
+	defer display.StopTask()
+
+	// make the openvpn folder
+	vpnDir := filepath.ToSlash(filepath.Join(config.EtcDir(), "openvpn"))
+
+	if err := os.MkdirAll(vpnDir, 0755); err != nil {
+		lumber.Fatal("[bridge] os.Mkdir() failed", err.Error())
+	}
+
+	// create config file
+	if err := ioutil.WriteFile(configFile(), []byte(bridgeConfig()), 0o644); err != nil {
+		return err
+	}
+
+	// create ca.crt
+	if err := ioutil.WriteFile(caCrt(), []byte(keys["ca.crt"]), 0o644); err != nil {
+		return err
+	}
+
+	// create client.key
+	if err := ioutil.WriteFile(clientKey(), []byte(keys["client.key"]), 0o644); err != nil {
+		return err
+	}
+	// create client.crt
+	if err := ioutil.WriteFile(clientCrt(), []byte(keys["client.crt"]), 0o644); err != nil {
+		return err
+	}
+
 	return nil
 }
 
 func startBridge() error {
+	display.StartTask("starting")
+	defer display.StopTask()
+
 	return nil
 }
 
