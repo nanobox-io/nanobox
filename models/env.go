@@ -71,6 +71,7 @@ func (e *Env) Generate() error {
 	e.Directory = config.LocalDir()
 	e.Name = config.LocalDirName()
 	e.Remotes = map[string]Remote{}
+	e.LastBuildProvider = config.Viper().GetString("provider")
 
 	return e.Save()
 }
