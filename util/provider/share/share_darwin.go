@@ -126,6 +126,7 @@ func reloadServer() error {
 		lumber.Debug("enable nfs: %s", b)
 		return fmt.Errorf("enable nfs: %s %s", b, err.Error())
 	}
+	exec.Command("nfsd", "start")
 
 	// check the exports to make sure a reload will be successful; TODO: provide a
 	// clear message for a direction to fix
