@@ -128,7 +128,7 @@ func (native Native) Start() error {
 	if !native.hasNetwork() {
 		fmt.Print(stylish.Bullet("Setting up custom docker network..."))
 
-		cmd := exec.Command("docker", "network", "create", "--driver=bridge", "--subnet=192.168.0.0/24", "--opt=\"com.docker.network.driver.mtu=1450\"", "--opt=\"com.docker.network.bridge.name=redd0\"", "--gateway=192.168.0.1", "nanobox")
+		cmd := exec.Command("docker", "network", "create", "--driver=bridge", "--subnet=172.18.0.0/16", "--opt=\"com.docker.network.driver.mtu=1450\"", "--opt=\"com.docker.network.bridge.name=redd0\"", "--gateway=172.18.0.1", "nanobox")
 
 		cmd.Stdout = display.NewStreamer("  ")
 		cmd.Stderr = display.NewStreamer("  ")

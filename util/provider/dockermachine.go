@@ -308,7 +308,7 @@ func (machine DockerMachine) Start() error {
 
 	// create custom nanobox docker network
 	if !machine.hasNetwork() {
-
+		// networkSpace := config.Viper().GetString("docker-machine-network-space")
 		cmd := []string{
 			dockerMachineCmd,
 			"ssh",
@@ -317,10 +317,10 @@ func (machine DockerMachine) Start() error {
 			"network",
 			"create",
 			"--driver=bridge",
-			"--subnet=192.168.0.0/24",
+			"--subnet=172.19.0.0/16",
 			"--opt='com.docker.network.driver.mtu=1450'",
 			"--opt='com.docker.network.bridge.name=redd0'",
-			"--gateway=192.168.0.1",
+			"--gateway=172.19.0.1",
 			"nanobox",
 		}
 

@@ -21,9 +21,6 @@ import (
 	"github.com/nanobox-io/nanobox/util/locker"
 )
 
-// ca.crt
-// client.key
-// client.crt
 var keys map[string]string
 
 func Setup() error {
@@ -47,7 +44,7 @@ func Setup() error {
 	}
 
 	// start bridge client
-	if err := startBridge(); err != nil {
+	if err := Start(); err != nil {
 		return err
 	}
 
@@ -57,15 +54,15 @@ func Setup() error {
 // sets up the dev container and network stack
 func setupContainer() error {
 
+	// we don't need to setup if bridge is already running
+	if isBridgeExists() {
+		return nil
+	}
+
 	// establish a local lock to ensure we're the only ones bringing up the
 	// dev container. Also, we need to ensure the lock is released even in we error
 	locker.LocalLock()
 	defer locker.LocalUnlock()
-
-	// we don't need to setup if dev is already running
-	if isBridgeExists() {
-		return nil
-	}
 
 	// generate a container config
 	config := container_generator.BridgeConfig()
@@ -174,6 +171,9 @@ func downloadBridgeClient() error {
 	return nil
 }
 
+// ca.crt
+// client.key
+// client.crt
 func configureBridge() error {
 	// fmt.Printf("keys: %+v\n\n", keys)
 	display.StartTask("configuring")
@@ -187,31 +187,28 @@ func configureBridge() error {
 	}
 
 	// create config file
-	if err := ioutil.WriteFile(configFile(), []byte(bridgeConfig()), 0o644); err != nil {
+	if err := ioutil.WriteFile(configFile(), []byte(bridgeConfig()), 0644); err != nil {
 		return err
 	}
 
+	// make sure to not overwrite the keys if we didnt create the container on this run
+	if keys["ca.crt"] == "" {
+		return nil
+	}
+
 	// create ca.crt
-	if err := ioutil.WriteFile(caCrt(), []byte(keys["ca.crt"]), 0o644); err != nil {
+	if err := ioutil.WriteFile(caCrt(), []byte(keys["ca.crt"]), 0644); err != nil {
 		return err
 	}
 
 	// create client.key
-	if err := ioutil.WriteFile(clientKey(), []byte(keys["client.key"]), 0o644); err != nil {
+	if err := ioutil.WriteFile(clientKey(), []byte(keys["client.key"]), 0644); err != nil {
 		return err
 	}
 	// create client.crt
-	if err := ioutil.WriteFile(clientCrt(), []byte(keys["client.crt"]), 0o644); err != nil {
+	if err := ioutil.WriteFile(clientCrt(), []byte(keys["client.crt"]), 0644); err != nil {
 		return err
 	}
 
 	return nil
 }
-
-func startBridge() error {
-	display.StartTask("starting")
-	defer display.StopTask()
-
-	return nil
-}
-
