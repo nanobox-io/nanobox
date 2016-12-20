@@ -47,8 +47,12 @@ func ReserveGlobal() (net.IP, error) {
 		return nil, err
 	}
 
+	// dump the first ip becuase it is the gateway
+	ip := ipSpace.GlobalIP
+	inc(ip)
+
 	//
-	for ip := ipSpace.GlobalIP; ipSpace.GlobalNet.Contains(ip); inc(ip) {
+	for ; ipSpace.GlobalNet.Contains(ip); inc(ip) {
 		if !contains(reservedIPs, ip) {
 			setReserved(append(reservedIPs, ip))
 			if err != nil {
@@ -94,11 +98,17 @@ func ReserveLocal() (net.IP, error) {
 		return nil, err
 	}
 
+
 	// switch based on what provider we are using
 	switch config.Viper().GetString("provider") {
 	case "docker-machine":
+
+		// dump the first ip becuase it is the gateway
+		ip := ipSpace.LocalIP
+		inc(ip)
+
 		// get dockers local ipspace
-		for ip := ipSpace.LocalIP; ipSpace.LocalNet.Contains(ip); inc(ip) {
+		for ; ipSpace.LocalNet.Contains(ip); inc(ip) {
 			if !contains(reservedIPs, ip) {
 				setReserved(append(reservedIPs, ip))
 				if err != nil {
@@ -109,8 +119,13 @@ func ReserveLocal() (net.IP, error) {
 		}
 
 	case "native":
+
+		// dump the first ip becuase it is the gateway
+		ip := ipSpace.LocalIP
+		inc(ip)
+
 		// get the native ipspace
-		for ip := ipSpace.NativeIP; ipSpace.NativeNet.Contains(ip); inc(ip) {
+		for ; ipSpace.NativeNet.Contains(ip); inc(ip) {
 			if !contains(reservedIPs, ip) {
 				setReserved(append(reservedIPs, ip))
 				if err != nil {
