@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"net"
 	"os/exec"
 	"path/filepath"
 	"regexp"
@@ -308,6 +309,12 @@ func (machine DockerMachine) Start() error {
 
 	// create custom nanobox docker network
 	if !machine.hasNetwork() {
+
+		ip, ipNet, err := net.ParseCIDR(config.Viper().GetString("docker-machine-network-space"))
+		if err != nil {
+			return err
+		}
+
 		// networkSpace := config.Viper().GetString("docker-machine-network-space")
 		cmd := []string{
 			dockerMachineCmd,
@@ -317,10 +324,10 @@ func (machine DockerMachine) Start() error {
 			"network",
 			"create",
 			"--driver=bridge",
-			"--subnet=172.19.0.0/16",
+			fmt.Sprintf("--subnet=%s", ipNet.String()),
 			"--opt='com.docker.network.driver.mtu=1450'",
 			"--opt='com.docker.network.bridge.name=redd0'",
-			"--gateway=172.19.0.1",
+			fmt.Sprintf("--gateway=%s", ip.String()),
 			"nanobox",
 		}
 
