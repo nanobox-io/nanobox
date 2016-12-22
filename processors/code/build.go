@@ -67,7 +67,6 @@ func Build(envModel *models.Env) error {
 	}
 
 	envModel.LastBuild = time.Now()
-	envModel.LastBuildProvider = config.Viper().GetString("provider")
 	envModel.Save()
 
 	// ensure we stop the container when we're done

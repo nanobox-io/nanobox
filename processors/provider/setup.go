@@ -56,6 +56,7 @@ func Setup() error {
 
 	// fetch the provider model
 	providerModel, _ := models.LoadProvider()
+	providerModel.Name = provider.Name()
 
 	display.StartTask("Joining virtual network")
 

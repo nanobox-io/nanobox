@@ -20,7 +20,7 @@ import (
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/provider"
-	"github.com/nanobox-io/nanobox/util/display"
+	// "github.com/nanobox-io/nanobox/util/display"
 
 )
 
@@ -35,7 +35,6 @@ func (bugLog) Printf(fmt string, v ...interface{}) {
 
 // main
 func main() {
-
 	// verify that we support the prompt they are using
 	if badTerminal() {
 		fmt.Println("This console is currently not supported by nanobox")
@@ -43,15 +42,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	// temp 
-	firstVpn()
-
-	fixRunArgs()
-
 	// do the commands configure check here because we need it to happen before setupBugsnag creates the config
 	if !config.ConfigExists() {
 		processors.Configure()
 	}
+
+	migrationCheck()
+
+	fixRunArgs()
 
 	// build the viper config because viper cannot handle concurrency
 	// so it has to be done at the beginning even if we dont need it
@@ -120,6 +118,7 @@ func setupBugsnag() {
 		Logger:      bugLog{},
 		Synchronous: true,
 		AppVersion:  version,
+		PanicHandler: func() {}, // the built in panic handler reexicutes our code
 	})
 
 	bugsnag.OnBeforeNotify(func(event *bugsnag.Event, config *bugsnag.Configuration) error {
@@ -127,6 +126,7 @@ func setupBugsnag() {
 		event.GroupingHash = fmt.Sprintf("%x", md5.Sum([]byte(event.Message)))
 		return nil
 	})
+
 }
 
 func badTerminal() bool {
@@ -162,18 +162,45 @@ LOOP:
 	}
 }
 
-// a temporary check to help people migrate over to the new vpn way
-func firstVpn()  {
-	// check to see if this is the first time we are running the new vpn way
-	env, _ := models.FindEnvByID(config.EnvID())
+// check to see if we need to wipe the old
+func migrationCheck()  {
+	providerName := config.Viper().GetString("provider")
+	providerModel, err := models.LoadProvider()
 
-	if config.Viper().GetString("provider") == "docker-machine" && (env.ID != "" && env.LastBuildProvider == "") {
-		fmt.Println("manditory migration message")
-		fmt.Println("press enter to continue")
-		reader := bufio.NewReader(os.Stdin)
-		reader.ReadString('\n')
-		display.CommandErr(processors.Implode())
+	// if the provider hasnt changed or its a new provider
+	// no migration required
+	fmt.Println(util.IsPrivileged())
+	fmt.Println(err)
+	fmt.Println(providerModel.Name)
+	fmt.Println(providerName)
+	if util.IsPrivileged() || err != nil || providerModel.Name == providerName {
+		return
+	} 
 
+	// remember the new provider
+	newProviderName := providerName
+
+	// when migrating from the old system
+	// the provider.Name may be blank
+	if providerModel.Name == "" {
+		providerModel.Name = newProviderName
 	}
 
+	// adjust cached config to be the old provider
+	config.Viper().Set("provider", providerModel.Name)
+
+	// alert the user of our actions
+	fmt.Println("manditory migration message")
+	fmt.Println("press enter to continue")
+	reader := bufio.NewReader(os.Stdin)
+	reader.ReadString('\n')
+
+	// implode the old system
+	processors.Implode()
+
+	// on implode success 
+	// adjust the provider to the new one and save the provider model
+	config.Viper().Set("provider", newProviderName)
+	providerModel.Name = newProviderName
+	providerModel.Save()
 }

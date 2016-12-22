@@ -29,7 +29,8 @@ func (native Native) Valid() (bool, []string) {
 	cmd := exec.Command("docker", "ps")
 
 	//
-	if err := cmd.Run(); err != nil {
+	if out, err := cmd.CombinedOutput(); err != nil {
+		fmt.Println(string(out))
 		return false, []string{"docker"}
 	}
 
@@ -94,6 +95,9 @@ func (native Native) Implode() error {
 		}
 	}
 
+	if len(containers) == 0 {
+		return nil
+	}
 	cmdParts := append([]string{"rm", "-f"}, containers...)
 	cmd = exec.Command("docker", cmdParts...)
 	cmd.Stdout = display.NewStreamer("  ")

@@ -23,7 +23,6 @@ type Env struct {
 	LastBuild         time.Time
 	LastCompile       time.Time
 	BuildTriggers     map[string]string
-	LastBuildProvider string
 }
 
 // Remote ...
@@ -71,8 +70,7 @@ func (e *Env) Generate() error {
 	e.Directory = config.LocalDir()
 	e.Name = config.LocalDirName()
 	e.Remotes = map[string]Remote{}
-	e.LastBuildProvider = config.Viper().GetString("provider")
-
+	
 	return e.Save()
 }
 

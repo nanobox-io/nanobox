@@ -40,7 +40,9 @@ func Teardown() error {
 
 func removeConfig() error {
 	if runtime.GOOS != "windows" {
-		return os.Remove(serviceConfigFile())
+		// dont catch the error because we dont care if the file exists before
+		os.Remove(serviceConfigFile())
+		return nil
 	}
 
 	return nil
@@ -52,6 +54,7 @@ func removeComponent() error {
 	if err != nil {
 		// if we cant get the container it may have been removed by someone else
 		// just return here
+		// if we cant talk to docker its ok too
 		return nil
 	}
 

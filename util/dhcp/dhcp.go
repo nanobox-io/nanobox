@@ -121,7 +121,7 @@ func ReserveLocal() (net.IP, error) {
 	case "native":
 
 		// dump the first ip becuase it is the gateway
-		ip := ipSpace.LocalIP
+		ip := ipSpace.NativeIP
 		inc(ip)
 
 		// get the native ipspace

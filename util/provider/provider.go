@@ -355,14 +355,23 @@ func BridgeRequired() bool {
 
 // fetchProvider fetches the registered provider from the configured name
 func fetchProvider() (Provider, error) {
-	prov := config.Viper().GetString("provider")
-	if prov == "docker_machine" {
-		prov = "docker-machine"
-	}
-	p, ok := providers[prov]
+	p, ok := providers[Name()]
 	if !ok {
 		return nil, errors.New("invalid provider")
 	}
 
 	return p, nil
+}
+
+func Name() string {
+	prov := config.Viper().GetString("provider")
+	if prov == "docker_machine" {
+		prov = "docker-machine"
+	}
+	// set the provider to the default if it is a bad input
+	if prov != "docker-machine" && prov != "native" {
+		prov = "docker-machine"
+	}
+
+	return prov
 }
