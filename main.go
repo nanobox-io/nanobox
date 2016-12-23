@@ -169,10 +169,6 @@ func migrationCheck()  {
 
 	// if the provider hasnt changed or its a new provider
 	// no migration required
-	fmt.Println(util.IsPrivileged())
-	fmt.Println(err)
-	fmt.Println(providerModel.Name)
-	fmt.Println(providerName)
 	if util.IsPrivileged() || err != nil || providerModel.Name == providerName {
 		return
 	} 
