@@ -30,8 +30,10 @@ func DevConfig(appModel *models.App) docker.ContainerConfig {
 		IP:      appModel.LocalIPs["env"],
 		Binds: []string{
 			fmt.Sprintf("%s%s/code:/app", provider.HostShareDir(), appModel.EnvID),
-			fmt.Sprintf("%s%s/build:/data", provider.HostMntDir(), appModel.EnvID),
-			fmt.Sprintf("%s%s/cache:/mnt/cache", provider.HostMntDir(), appModel.EnvID),
+			// fmt.Sprintf("%s%s/build:/data", provider.HostMntDir(), appModel.EnvID),
+			// fmt.Sprintf("%s%s/cache:/mnt/cache", provider.HostMntDir(), appModel.EnvID),			
+			fmt.Sprintf("nanobox_%s_build:/data", appModel.EnvID),
+			fmt.Sprintf("nanobox_%s_cache:/mnt/cache", appModel.EnvID),			
 		},
 		RestartPolicy: "no",
 	}
@@ -46,14 +48,14 @@ func DevConfig(appModel *models.App) docker.ContainerConfig {
 		config.Env = []string{"TERM=" + termEvar}
 	}
 
-	// add cache_dirs into the container binds
-	libDirs := boxfile.Node("run.config").StringSliceValue("cache_dirs")
+	// // add cache_dirs into the container binds
+	// libDirs := boxfile.Node("run.config").StringSliceValue("cache_dirs")
 
-	for _, libDir := range libDirs {
-		// TODO: the cache source should come from the provider
-		path := fmt.Sprintf("%s/%s/cache/cache_dirs/%s:/app/%s", provider.HostMntDir(), appModel.EnvID, libDir, libDir)
-		config.Binds = append(config.Binds, path)
-	}
+	// for _, libDir := range libDirs {
+	// 	// TODO: the cache source should come from the provider
+	// 	path := fmt.Sprintf("%s/%s/cache/cache_dirs/%s:/app/%s", provider.HostMntDir(), appModel.EnvID, libDir, libDir)
+	// 	config.Binds = append(config.Binds, path)
+	// }
 
 	return config
 }

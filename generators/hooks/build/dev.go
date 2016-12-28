@@ -9,6 +9,7 @@ import (
 func DevPayload(appModel *models.App) string {
 	rtn := map[string]interface{}{}
 	rtn["env"] = appModel.Evars
+	rtn["boxfile"] = appModel.DeployedBoxfile
 	bytes, _ := json.Marshal(rtn)
 	return string(bytes)
 }

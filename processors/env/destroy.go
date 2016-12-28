@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/jcelliott/lumber"
+	"github.com/nanobox-io/golang-docker-client"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/app"
@@ -47,6 +48,12 @@ func Destroy(env *models.Env) error {
 	if err := util_provider.RemoveEnvDir(env.ID); err != nil {
 		return fmt.Errorf("failed to remove the environment from host: %s", err)
 	}
+
+	// remove volumes
+	docker.VolumeRemove(fmt.Sprintf("nanobox_%s_app", env.ID))
+	docker.VolumeRemove(fmt.Sprintf("nanobox_%s_cache", env.ID))
+	docker.VolumeRemove(fmt.Sprintf("nanobox_%s_mount", env.ID))
+	docker.VolumeRemove(fmt.Sprintf("nanobox_%s_deploy", env.ID))
 
 	// remove the environment
 	if err := env.Delete(); err != nil {

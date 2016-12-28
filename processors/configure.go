@@ -41,7 +41,7 @@ time by running: 'nanobox configure'
 	setupConf.Provider = stringAsker(`
 How would you like to run nanobox?
   a) Inside a lightweight VM
-  b) Via Docker Native (coming)
+  b) Via Docker Native
 
 (recommended a)
 Answer: `, map[string]string{"a": "docker-machine", "b": "native"})

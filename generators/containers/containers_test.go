@@ -28,6 +28,7 @@ func TestCompileConfig(t *testing.T) {
 		t.Errorf("bad results")
 	}
 }
+
 func TestComponentConfig(t *testing.T) {
 	componentModel := &models.Component{
 		Image:      "imagename",

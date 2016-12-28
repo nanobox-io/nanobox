@@ -19,9 +19,12 @@ func CompileConfig(image string) docker.ContainerConfig {
 		Binds: []string{
 			fmt.Sprintf("%s%s/code:/share/code", provider.HostShareDir(), env),
 			fmt.Sprintf("%s%s/engine:/share/engine", provider.HostShareDir(), env),
-			fmt.Sprintf("%s%s/build:/data", provider.HostMntDir(), env),
-			fmt.Sprintf("%s%s/app:/mnt/app", provider.HostMntDir(), env),
-			fmt.Sprintf("%s%s/cache:/mnt/cache", provider.HostMntDir(), env),
+			// fmt.Sprintf("%s%s/build:/data", provider.HostMntDir(), env),
+			// fmt.Sprintf("%s%s/app:/mnt/app", provider.HostMntDir(), env),
+			// fmt.Sprintf("%s%s/cache:/mnt/cache", provider.HostMntDir(), env),
+			fmt.Sprintf("nanobox_%s_build:/data", env),
+			fmt.Sprintf("nanobox_%s_app:/mnt/app", env),
+			fmt.Sprintf("nanobox_%s_cache:/mnt/cache", env),
 		},
 		RestartPolicy: "no",
 	}
