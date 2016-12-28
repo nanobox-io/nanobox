@@ -8,6 +8,7 @@ import (
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util/provider/bridge"
 )
 
 func Start() error {
@@ -15,12 +16,12 @@ func Start() error {
 	if util.IsPrivileged() {
 
 		// create service
-		if err := createService(); err != nil {
+		if err := bridge.CreateService(); err != nil {
 			return err
 		}
 
 		// start service
-		return startService()
+		return bridge.StartService()
 
 	} else {
 

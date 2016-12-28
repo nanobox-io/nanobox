@@ -6,7 +6,7 @@ import (
 	// "strings"
 )
 
-func stopService() error {
+func StopService() error {
 	switch launchSystem() {
 	case "systemd":
 		// systemctl stop nanobox-openvpn.service

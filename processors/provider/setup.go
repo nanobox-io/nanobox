@@ -24,16 +24,20 @@ func Setup() error {
 	defer display.CloseContext()
 
 	if provider.IsReady() {
-
+		
+		// if we are already ready we may still need to bridge
 		display.StartTask("Skipping (already running)")
 		display.StopTask()
 
-		// initialize the docker client
 		if err := Init(); err != nil {
 			return fmt.Errorf("failed to initialize docker for provider: %s", err.Error())
 		}
 
-		return nil
+		if provider.BridgeRequired() {
+			if err := bridge.Setup(); err != nil {
+				return fmt.Errorf("failed to setup the network bridge: %s", err.Error())
+			}
+		}
 	}
 
 	// install the provider (VM)
@@ -72,7 +76,6 @@ func Setup() error {
 
 	display.StopTask()
 
-	// initialize the docker client
 	if err := Init(); err != nil {
 		return fmt.Errorf("failed to initialize docker for provider: %s", err.Error())
 	}

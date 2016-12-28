@@ -12,6 +12,7 @@ import (
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util/provider/bridge"
 )
 
 func Teardown() error {
@@ -41,7 +42,7 @@ func Teardown() error {
 func removeConfig() error {
 	if runtime.GOOS != "windows" {
 		// dont catch the error because we dont care if the file exists before
-		os.Remove(serviceConfigFile())
+		os.Remove(bridge.ServiceConfigFile())
 		return nil
 	}
 

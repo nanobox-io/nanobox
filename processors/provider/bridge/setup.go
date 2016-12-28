@@ -16,6 +16,7 @@ import (
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/fileutil"
+	"github.com/nanobox-io/nanobox/util/provider/bridge"
 	"github.com/nanobox-io/nanobox/util/hookit"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/locker"
@@ -27,6 +28,11 @@ func Setup() error {
 
 	display.OpenContext("Building bridge")
 	defer display.CloseContext()
+
+	// if the container exists and openvpn is running
+	if isBridgeExists() {
+		return nil
+	}
 
 	// create a component
 	if err := setupContainer(); err != nil {
@@ -146,7 +152,7 @@ func downloadImage(image string) error {
 
 func downloadBridgeClient() error {
 	// short-circuit if we're already installed
-	if fileutil.Exists(bridgeClient) {
+	if fileutil.Exists(bridge.BridgeClient) {
 		return nil
 	}
 
@@ -154,7 +160,7 @@ func downloadBridgeClient() error {
 	defer display.StopTask()
 
 	// download the executable
-	if err := fileutil.Download(bridgeURL, bridgeClient); err != nil {
+	if err := fileutil.Download(bridge.BridgeURL, bridge.BridgeClient); err != nil {
 		display.ErrorTask()
 		return fmt.Errorf("failed to download docker-machine: %s", err.Error())
 	}
@@ -162,7 +168,7 @@ func downloadBridgeClient() error {
 	// make it executable (unless it's windows)
 	if runtime.GOOS != "windows" {
 		// make new CLI executable
-		if err := os.Chmod(bridgeClient, 0755); err != nil {
+		if err := os.Chmod(bridge.BridgeClient, 0755); err != nil {
 			display.ErrorTask()
 			return fmt.Errorf("failed to set permissions: ", err.Error())
 		}
@@ -187,7 +193,7 @@ func configureBridge() error {
 	}
 
 	// create config file
-	if err := ioutil.WriteFile(configFile(), []byte(bridgeConfig()), 0644); err != nil {
+	if err := ioutil.WriteFile(bridge.ConfigFile(), []byte(bridge.BridgeConfig()), 0644); err != nil {
 		return err
 	}
 
@@ -197,16 +203,16 @@ func configureBridge() error {
 	}
 
 	// create ca.crt
-	if err := ioutil.WriteFile(caCrt(), []byte(keys["ca.crt"]), 0644); err != nil {
+	if err := ioutil.WriteFile(bridge.CaCrt(), []byte(keys["ca.crt"]), 0644); err != nil {
 		return err
 	}
 
 	// create client.key
-	if err := ioutil.WriteFile(clientKey(), []byte(keys["client.key"]), 0644); err != nil {
+	if err := ioutil.WriteFile(bridge.ClientKey(), []byte(keys["client.key"]), 0644); err != nil {
 		return err
 	}
 	// create client.crt
-	if err := ioutil.WriteFile(clientCrt(), []byte(keys["client.crt"]), 0644); err != nil {
+	if err := ioutil.WriteFile(bridge.ClientCrt(), []byte(keys["client.crt"]), 0644); err != nil {
 		return err
 	}
 

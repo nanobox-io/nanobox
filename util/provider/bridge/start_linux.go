@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 )
 
-func serviceConfigFile() string {
+func ServiceConfigFile() string {
 	switch launchSystem() {
 	case "systemd":
 		return "/etc/systemd/system/nanobox-openvpn.service"
@@ -29,26 +29,26 @@ After=network.target
 Type=simple
 EnvironmentFile=-/etc/sysconfig/network
 ExecStart=%s --config %s
-`, bridgeClient, configFile())
+`, BridgeClient, ConfigFile())
 
 	case "upstart":
 
 		return fmt.Sprintf(`
 script
 %s --config %s
-end script`, bridgeClient, configFile())
+end script`, BridgeClient, ConfigFile())
 
 	}
 
 	return ""
 }
 
-func createService() error {
+func CreateService() error {
 	// setup config file	
-	return ioutil.WriteFile(serviceConfigFile(), []byte(serviceConfig()), 0644)
+	return ioutil.WriteFile(ServiceConfigFile(), []byte(serviceConfig()), 0644)
 }
 
-func startService() error {
+func StartService() error {
 	switch launchSystem() {
 	case "systemd":
 		// systemctl start nanobox-openvpn.service

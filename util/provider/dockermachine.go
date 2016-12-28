@@ -147,6 +147,8 @@ func (machine DockerMachine) Create() error {
 		return nil
 	}
 
+	display.ProviderSetup()
+	
 	// load the configuration for docker-machine
 	conf := config.Viper()
 

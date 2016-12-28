@@ -3,6 +3,6 @@ package bridge
 import (
 )
 
-func stopService() error {
+func StopService() error {
 	return nil	
 }

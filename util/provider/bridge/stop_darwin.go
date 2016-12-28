@@ -5,7 +5,7 @@ import (
 	"os/exec"
 )
 
-func stopService() error {
+func StopService() error {
 	exec.Command("launchctl", "stop", "io.nanobox.openvpn").CombinedOutput()
 
 	// out, err := exec.Command("launchctl", "stop", "io.nanobox.openvpn").CombinedOutput() 

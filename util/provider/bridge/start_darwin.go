@@ -7,7 +7,7 @@ import (
 	"io/ioutil"
 )
 
-func serviceConfigFile() string {
+func ServiceConfigFile() string {
 	return "/Library/LaunchDaemons/io.nanobox.openvpn.plist"
 }
 
@@ -27,13 +27,13 @@ func serviceConfig() string {
         </array>
 </dict>
 </plist>
-`, bridgeClient, configFile())
+`, BridgeClient, ConfigFile())
 }
 
-func createService() error {
+func CreateService() error {
 
 	// setup config file
-	if err := ioutil.WriteFile(serviceConfigFile(), []byte(serviceConfig()), 0644); err != nil {
+	if err := ioutil.WriteFile(ServiceConfigFile(), []byte(serviceConfig()), 0644); err != nil {
 		return err
 	}
 
@@ -44,7 +44,7 @@ func createService() error {
 	return nil
 }
 
-func startService() error {
+func StartService() error {
 	out, err := exec.Command("launchctl", "start", "io.nanobox.openvpn").CombinedOutput() 
 	if err != nil {
 		fmt.Errorf("out: %s, err: %s", out, err)

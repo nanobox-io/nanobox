@@ -1,5 +1,5 @@
 run.config:
-  image: nanobox/build
+  image: nanobox/build:beta
   engine: golang
   engine.config:
     package: github.com/nanobox-io/nanobox

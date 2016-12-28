@@ -9,22 +9,22 @@ import (
 	"github.com/nanobox-io/nanobox/util/config"
 )
 
-var bridgeClient = filepath.ToSlash(filepath.Join(config.BinDir(), "openvpn"))
-var bridgeURL string
+var BridgeClient = filepath.ToSlash(filepath.Join(config.BinDir(), "openvpn"))
+var BridgeURL string
 
 func init() {
 	switch runtime.GOOS {
 	case "windows":
-		bridgeClient = bridgeClient + ".exe"
-		bridgeURL = "https://s3.amazonaws.com/tools.nanobox.io/openvpn/windows/openvpn.exe"
+		BridgeClient = BridgeClient + ".exe"
+		BridgeURL = "https://s3.amazonaws.com/tools.nanobox.io/openvpn/windows/openvpn.exe"
 	case "darwin":
-		bridgeURL = "https://s3.amazonaws.com/tools.nanobox.io/openvpn/darwin/openvpn"
+		BridgeURL = "https://s3.amazonaws.com/tools.nanobox.io/openvpn/darwin/openvpn"
 	case "linux":
-		bridgeURL = "https://s3.amazonaws.com/tools.nanobox.io/openvpn/linux/openvpn"
+		BridgeURL = "https://s3.amazonaws.com/tools.nanobox.io/openvpn/linux/openvpn"
 	}
 }
 
-func bridgeConfig() string {
+func BridgeConfig() string {
 	node := ""
 	if runtime.GOOS == "windows" {
 		node = "dev-node MyTap"
@@ -48,21 +48,21 @@ key %s
 cipher none
 auth none
 verb 3
-`, node, ip, caCrt(), clientCrt(), clientKey())
+`, node, ip, CaCrt(), ClientCrt(), ClientKey())
 }
 
-func configFile() string {
+func ConfigFile() string {
 	return filepath.ToSlash(filepath.Join(config.EtcDir(), "openvpn", "openvpn.conf"))
 }
 
-func caCrt() string {
+func CaCrt() string {
 	return filepath.ToSlash(filepath.Join(config.EtcDir(), "openvpn", "ca.crt"))
 }
 
-func clientKey() string {
+func ClientKey() string {
 	return filepath.ToSlash(filepath.Join(config.EtcDir(), "openvpn", "client.key"))
 }
 
-func clientCrt() string {
+func ClientCrt() string {
 	return filepath.ToSlash(filepath.Join(config.EtcDir(), "openvpn", "client.crt"))
 }
