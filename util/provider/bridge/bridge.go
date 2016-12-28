@@ -41,9 +41,9 @@ nobind
 persist-key
 persist-tun
 
-ca %s
-cert %s
-key %s
+ca "%s"
+cert "%s"
+key "%s"
 
 cipher none
 auth none
