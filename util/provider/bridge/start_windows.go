@@ -11,8 +11,8 @@ func ServiceConfigFile() string {
 }
 
 // create a service
-func createService() error {
-	_, err := exec.Command("sc", "create", "nanobox-vpn", "binpath=", fmt.Sprintf("\"%s\" --config \"%s\"", bridgeClient, configFile())).CombinedOutput()
+func CreateService() error {
+	_, err := exec.Command("sc", "create", "nanobox-vpn", "binpath=", fmt.Sprintf("\"%s\" --config \"%s\"", BridgeClient, ConfigFile())).CombinedOutput()
 	return err
 }
 
