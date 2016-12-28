@@ -11,13 +11,8 @@ func ServiceConfigFile() string {
 }
 
 // create a service
-<<<<<<< Updated upstream:util/provider/bridge/start_windows.go
-func CreateService() error {
-	_, err := exec.Command("sc", "nanobox-vpn", "create", fmt.Sprintf("binpath=%s --config %s", BridgeClient, ConfigFile())).CombinedOutput()
-=======
 func createService() error {
 	_, err := exec.Command("sc", "create", "nanobox-vpn", "binpath=", fmt.Sprintf("\"%s\" --config \"%s\"", bridgeClient, configFile())).CombinedOutput()
->>>>>>> Stashed changes:processors/provider/bridge/start_windows.go
 	return err
 }
 
