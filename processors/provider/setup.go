@@ -38,6 +38,7 @@ func Setup() error {
 				return fmt.Errorf("failed to setup the network bridge: %s", err.Error())
 			}
 		}
+		return nil
 	}
 
 	// create the provider (VM)
