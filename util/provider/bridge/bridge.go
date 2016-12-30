@@ -3,36 +3,36 @@ package bridge
 import (
 	"fmt"
 	"path/filepath"
-	"runtime"
+	// "runtime"
 
 	"github.com/nanobox-io/nanobox/util/provider"
 	"github.com/nanobox-io/nanobox/util/config"
 )
 
-var BridgeClient = filepath.ToSlash(filepath.Join(config.BinDir(), "openvpn"))
-var BridgeURL string
+var BridgeClient = "nanobox-vpn"
+// var BridgeURL string
 
-func init() {
-	switch runtime.GOOS {
-	case "windows":
-		BridgeClient = BridgeClient + ".exe"
-		BridgeURL = "https://s3.amazonaws.com/tools.nanobox.io/openvpn/windows/openvpn.exe"
-	case "darwin":
-		BridgeURL = "https://s3.amazonaws.com/tools.nanobox.io/openvpn/darwin/openvpn"
-	case "linux":
-		BridgeURL = "https://s3.amazonaws.com/tools.nanobox.io/openvpn/linux/openvpn"
-	}
-}
+// func init() {
+// 	switch runtime.GOOS {
+// 	case "windows":
+// 		// BridgeClient = BridgeClient + ".exe"
+// 		BridgeURL = "https://s3.amazonaws.com/tools.nanobox.io/openvpn/windows/openvpn.exe"
+// 	case "darwin":
+// 		BridgeURL = "https://s3.amazonaws.com/tools.nanobox.io/openvpn/darwin/openvpn"
+// 	case "linux":
+// 		BridgeURL = "https://s3.amazonaws.com/tools.nanobox.io/openvpn/linux/openvpn"
+// 	}
+// }
 
 func BridgeConfig() string {
-	node := ""
-	if runtime.GOOS == "windows" {
-		node = "dev-node MyTap"
-	}
+	// node := ""
+	// if runtime.GOOS == "windows" {
+	// 	node = "dev-node MyTap"
+	// }
 
 	ip, _ := provider.HostIP()
 	return fmt.Sprintf(`client
-%s
+
 dev tap
 proto udp
 remote %s 1194
@@ -48,7 +48,7 @@ key "%s"
 cipher none
 auth none
 verb 3
-`, node, ip, CaCrt(), ClientCrt(), ClientKey())
+`, ip, CaCrt(), ClientCrt(), ClientKey())
 }
 
 func ConfigFile() string {

@@ -11,6 +11,11 @@ import (
 
 // Mount sets up the env mounts
 func Mount(env *models.Env) error {
+
+	if !provider.RequiresMount() {
+		return nil
+	}
+	
 	display.StartTask("Mounting codebase")
 	defer display.StopTask()
 

@@ -3,7 +3,7 @@ package bridge
 import (
 	"fmt"
 	"os"
-	"runtime"
+	// "runtime"
 	"io/ioutil"
 	"time"
 	"path/filepath"
@@ -15,7 +15,7 @@ import (
 	container_generator "github.com/nanobox-io/nanobox/generators/containers"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/util/fileutil"
+	// "github.com/nanobox-io/nanobox/util/fileutil"
 	"github.com/nanobox-io/nanobox/util/provider/bridge"
 	"github.com/nanobox-io/nanobox/util/hookit"
 	"github.com/nanobox-io/nanobox/util/config"
@@ -39,10 +39,10 @@ func Setup() error {
 		return err
 	}
 
-	// download bridge client
-	if err := downloadBridgeClient(); err != nil {
-		return err
-	}
+	// // download bridge client
+	// if err := downloadBridgeClient(); err != nil {
+	// 	return err
+	// }
 
 	// configure bridge client
 	if err := configureBridge(); err != nil {
@@ -150,32 +150,32 @@ func downloadImage(image string) error {
 	return nil
 }
 
-func downloadBridgeClient() error {
-	// short-circuit if we're already installed
-	if fileutil.Exists(bridge.BridgeClient) {
-		return nil
-	}
+// func downloadBridgeClient() error {
+// 	// short-circuit if we're already installed
+// 	if fileutil.Exists(bridge.BridgeClient) {
+// 		return nil
+// 	}
 
-	display.StartTask("Downloading bridge client")
-	defer display.StopTask()
+// 	display.StartTask("Downloading bridge client")
+// 	defer display.StopTask()
 
-	// download the executable
-	if err := fileutil.Download(bridge.BridgeURL, bridge.BridgeClient); err != nil {
-		display.ErrorTask()
-		return fmt.Errorf("failed to download docker-machine: %s", err.Error())
-	}
+// 	// // download the executable
+// 	// if err := fileutil.Download(bridge.BridgeURL, bridge.BridgeClient); err != nil {
+// 	// 	display.ErrorTask()
+// 	// 	return fmt.Errorf("failed to download docker-machine: %s", err.Error())
+// 	// }
 
-	// make it executable (unless it's windows)
-	if runtime.GOOS != "windows" {
-		// make new CLI executable
-		if err := os.Chmod(bridge.BridgeClient, 0755); err != nil {
-			display.ErrorTask()
-			return fmt.Errorf("failed to set permissions: ", err.Error())
-		}
-	}
+// 	// make it executable (unless it's windows)
+// 	if runtime.GOOS != "windows" {
+// 		// make new CLI executable
+// 		if err := os.Chmod(bridge.BridgeClient, 0755); err != nil {
+// 			display.ErrorTask()
+// 			return fmt.Errorf("failed to set permissions: ", err.Error())
+// 		}
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 // ca.crt
 // client.key

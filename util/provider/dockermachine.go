@@ -7,7 +7,7 @@ import (
 	"os"
 	"net"
 	"os/exec"
-	"path/filepath"
+	// "path/filepath"
 	"regexp"
 	"runtime"
 	"strings"
@@ -15,13 +15,13 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/util/fileutil"
+	// "github.com/nanobox-io/nanobox/util/fileutil"
 	"github.com/nanobox-io/nanobox/util/vbox"
 )
 
 var (
 	vboxManageCmd    = vbox.DetectVBoxManageCmd()
-	dockerMachineCmd = filepath.ToSlash(filepath.Join(config.BinDir(), "docker-machine"))
+	dockerMachineCmd = "nanobox-machine"
 )
 
 // DockerMachine ...
@@ -83,56 +83,6 @@ func (machine DockerMachine) Status() string {
 	cmd := exec.Command(dockerMachineCmd, "status", "nanobox")
 	output, _ := cmd.CombinedOutput()
 	return strings.TrimSpace(string(output))
-}
-
-// Returns true if dockermachine and docker are already installed
-func (machine DockerMachine) IsInstalled() bool {
-
-	cmd := dockerMachineCmd
-
-	if runtime.GOOS == "windows" {
-		cmd = fmt.Sprintf("%s.exe", cmd)
-	}
-
-	return fileutil.Exists(cmd)
-}
-
-// Installs docker-machine and docker binaries
-func (machine DockerMachine) Install() error {
-
-	// short-circuit if we're already installed
-	if machine.IsInstalled() {
-		return nil
-	}
-
-	display.StartTask("Downloading docker-machine")
-	defer display.StopTask()
-
-	// download the binary
-	url := dockerMachineURL()
-	path := dockerMachineCmd
-
-	// if windows, add an .exe
-	if runtime.GOOS == "windows" {
-		path = fmt.Sprintf("%s.exe", path)
-	}
-
-	// download the executable
-	if err := fileutil.Download(url, path); err != nil {
-		display.ErrorTask()
-		return fmt.Errorf("failed to download docker-machine: %s", err.Error())
-	}
-
-	// make it executable (unless it's windows)
-	if runtime.GOOS != "windows" {
-		// make new CLI executable
-		if err := os.Chmod(path, 0755); err != nil {
-			display.ErrorTask()
-			return fmt.Errorf("failed to set permissions: ", err.Error())
-		}
-	}
-
-	return nil
 }
 
 func (machine DockerMachine) BridgeRequired() bool {
@@ -804,11 +754,6 @@ func (machine DockerMachine) hasNetwork() bool {
 
 // IsReady ...
 func (machine DockerMachine) IsReady() bool {
-
-	// return false right away if docker-machine isn't installed
-	if !machine.IsInstalled() {
-		return false
-	}
 
 	// docker-machine status nanobox
 	cmd := exec.Command(dockerMachineCmd, "status", "nanobox")

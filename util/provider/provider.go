@@ -11,13 +11,11 @@ type Provider interface {
 	BridgeRequired() bool
 	Status() string
 	IsReady() bool
-	IsInstalled() bool
 	HostShareDir() string
 	HostMntDir() string
 	HostIP() (string, error)
 	ReservedIPs() []string
 	Valid() (bool, []string)
-	Install() error
 	Create() error
 	Reboot() error
 	Stop() error
@@ -31,6 +29,7 @@ type Provider interface {
 	SetDefaultIP(ip string) error
 	// AddNat(host, container string) error
 	// RemoveNat(host, container string) error
+	RequiresMount() bool
 	HasMount(mount string) bool
 	AddMount(local, host string) error
 	RemoveMount(local, host string) error
@@ -80,27 +79,6 @@ func Status() string {
 	}
 
 	return p.Status()
-}
-
-func IsInstalled() bool {
-
-	p, err := fetchProvider()
-	if err != nil {
-		return false
-	}
-
-	return p.IsInstalled()
-}
-
-// Install ...
-func Install() error {
-
-	p, err := fetchProvider()
-	if err != nil {
-		return err
-	}
-
-	return p.Install()
 }
 
 // Create ...
@@ -277,6 +255,17 @@ func SetDefaultIP(ip string) error {
 
 // 	return p.RemoveNat(host, container)
 // }
+
+// RequiresMount ...
+func RequiresMount() bool {
+
+	p, err := fetchProvider()
+	if err != nil {
+		return false
+	}
+
+	return p.RequiresMount()
+}
 
 // HasMount ...
 func HasMount(path string) bool {

@@ -2,8 +2,6 @@ package bridge
 
 import (
 	"fmt"
-	"os"
-	"runtime"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
@@ -23,10 +21,10 @@ func Teardown() error {
 			return err
 		}
 
-		// remove bridge config
-		if err := removeConfig(); err != nil {
+		if err := bridge.Remove(); err != nil {
 			return err
 		}
+
 
 	} else {
 		// remove component
@@ -34,16 +32,6 @@ func Teardown() error {
 			return err
 		}
 		return reExecTeardown()
-	}
-
-	return nil
-}
-
-func removeConfig() error {
-	if runtime.GOOS != "windows" {
-		// dont catch the error because we dont care if the file exists before
-		os.Remove(bridge.ServiceConfigFile())
-		return nil
 	}
 
 	return nil

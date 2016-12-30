@@ -45,19 +45,6 @@ func (native Native) BridgeRequired() bool {
 	return runtime.GOOS != "linux"
 }
 
-func (native Native) IsInstalled() bool {
-	cmd := exec.Command("docker", "version")
-
-	//
-	err := cmd.Run()
-
-	return err == nil
-}
-
-func (native Native) Install() error {
-	return nil
-}
-
 // Create does nothing for native
 func (native Native) Create() error {
 	// TODO: maybe some setup stuff???
@@ -213,6 +200,10 @@ func (native Native) AddNat(ip, containerIP string) error {
 func (native Native) RemoveNat(ip, containerIP string) error {
 	// TODO: ???
 	return nil
+}
+
+func (native Native) RequiresMount() bool {
+	return false
 }
 
 // HasMount will return true if the mount already exists

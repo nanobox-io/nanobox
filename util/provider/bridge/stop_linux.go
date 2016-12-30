@@ -2,6 +2,7 @@ package bridge
 
 import (
 	// "fmt"
+	"os"
 	"os/exec"
 	// "strings"
 )
@@ -27,4 +28,9 @@ func StopService() error {
 	}
 
 	return nil	
+}
+
+func Remove() error {
+	os.Remove(ServiceConfigFile())
+	return nil
 }

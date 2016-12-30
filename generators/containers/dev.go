@@ -23,13 +23,19 @@ func DevConfig(appModel *models.App) docker.ContainerConfig {
 		image = "nanobox/build"
 	}
 
+	code := fmt.Sprintf("%s%s/code:/app", provider.HostShareDir(), appModel.EnvID)
+
+	if !provider.RequiresMount() {
+		code = fmt.Sprintf("%s:/app", config.LocalDir())
+	}
+
 	config := docker.ContainerConfig{
 		Name:    fmt.Sprintf("nanobox_%s", appModel.ID),
 		Image:   image, // this will need to be configurable some time
 		Network: "virt",
 		IP:      appModel.LocalIPs["env"],
 		Binds: []string{
-			fmt.Sprintf("%s%s/code:/app", provider.HostShareDir(), appModel.EnvID),
+			code,
 			// fmt.Sprintf("%s%s/build:/data", provider.HostMntDir(), appModel.EnvID),
 			// fmt.Sprintf("%s%s/cache:/mnt/cache", provider.HostMntDir(), appModel.EnvID),			
 			fmt.Sprintf("nanobox_%s_build:/data", appModel.EnvID),
