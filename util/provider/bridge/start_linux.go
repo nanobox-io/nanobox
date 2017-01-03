@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
 	"io/ioutil"
+
+	"github.com/nanobox-io/nanobox/util/config"
 )
 
 func ServiceConfigFile() string {
@@ -29,7 +32,7 @@ After=network.target
 Type=simple
 EnvironmentFile=-/etc/sysconfig/network
 ExecStart=%s --config %s
-`, BridgeClient, ConfigFile())
+`, filepath.Join(config.BinDir(),BridgeClient), ConfigFile())
 
 	case "upstart":
 

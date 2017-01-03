@@ -2,6 +2,9 @@ package config
 
 import (
 	"os"
+	"fmt"
+	"os/exec"
+	"runtime"
 	"path/filepath"
 	"strings"
 
@@ -9,6 +12,7 @@ import (
 	"github.com/mitchellh/go-homedir"
 
 	"github.com/nanobox-io/nanobox-boxfile"
+
 )
 
 // GlobalDir ...
@@ -97,14 +101,16 @@ func EngineDir() string {
 // BinDir creates a directory where nanobox specific binaries can be downloaded
 // docker, dockermachine, etc
 func BinDir() string {
-
-	binDir := filepath.ToSlash(filepath.Join(GlobalDir(), "bin"))
-
-	if err := os.MkdirAll(binDir, 0755); err != nil {
-		lumber.Fatal("[config/config] os.Mkdir() failed", err.Error())
+	path, err := exec.LookPath(os.Args[0])
+	fmt.Println("path", path)
+	if err != nil {
+		if runtime.GOOS == "windows" {
+			return "C:\\Program Files\\Nanobox"
+		
+		}
+		return filepath.Dir(os.Args[0])
 	}
-
-	return binDir
+	return filepath.Dir(path)
 }
 
 func EtcDir() string {
