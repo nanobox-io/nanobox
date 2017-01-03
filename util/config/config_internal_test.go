@@ -26,13 +26,6 @@ func TestLocalDirName(t *testing.T) {
 	}
 }
 
-func TestBinDir(t *testing.T) {
-	dir := BinDir()
-	if !strings.HasSuffix(dir, ".nanobox/bin") {
-		t.Errorf("bin dir failure")
-	}
-}
-
 func TestSSHDir(t *testing.T) {
 	homedir, _ := homedir.Dir()
 	if SSHDir() != homedir+"/.ssh" {
