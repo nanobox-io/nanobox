@@ -18,7 +18,7 @@ func BuildConfig(image string) docker.ContainerConfig {
 	if !provider.RequiresMount() {
 		code = fmt.Sprintf("%s:/app", config.LocalDir())
 		if config.EngineDir() != "" {
-			engine = fmt.Sprintf("%s:/share/engine", config.EngineDir())		
+			engine = fmt.Sprintf("%s:/share/engine", config.EngineDir())
 		}
 	}
 
@@ -31,7 +31,7 @@ func BuildConfig(image string) docker.ContainerConfig {
 			engine,
 			// fmt.Sprintf("%s%s/build:/mnt/build", provider.HostMntDir(), env),
 			// fmt.Sprintf("%s%s/deploy:/mnt/deploy", provider.HostMntDir(), env),
-			// fmt.Sprintf("%s%s/cache:/mnt/cache", provider.HostMntDir(), env),			
+			// fmt.Sprintf("%s%s/cache:/mnt/cache", provider.HostMntDir(), env),
 			fmt.Sprintf("nanobox_%s_build:/mnt/build", env),
 			fmt.Sprintf("nanobox_%s_deploy:/mnt/deploy", env),
 			fmt.Sprintf("nanobox_%s_cache:/mnt/cache", env),

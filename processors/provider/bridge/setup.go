@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 	// "runtime"
-	"io/ioutil"
-	"time"
-	"path/filepath"
 	"encoding/json"
+	"io/ioutil"
+	"path/filepath"
+	"time"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
@@ -16,10 +16,10 @@ import (
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
 	// "github.com/nanobox-io/nanobox/util/fileutil"
-	"github.com/nanobox-io/nanobox/util/provider/bridge"
-	"github.com/nanobox-io/nanobox/util/hookit"
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util/hookit"
 	"github.com/nanobox-io/nanobox/util/locker"
+	"github.com/nanobox-io/nanobox/util/provider/bridge"
 )
 
 var keys map[string]string
@@ -102,7 +102,7 @@ func setupContainer() error {
 	if err != nil {
 		return fmt.Errorf("failed to run start hook: %s, %s", output, err.Error())
 	}
-	
+
 	if err := json.Unmarshal([]byte(output), &keys); err != nil {
 		return fmt.Errorf("failed to decode the keys: %s %s", output, err.Error())
 	}

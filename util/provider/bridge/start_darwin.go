@@ -2,9 +2,11 @@ package bridge
 
 import (
 	"fmt"
-
-	"os/exec"
 	"io/ioutil"
+	"os/exec"
+	"path/filepath"
+
+	"github.com/nanobox-io/nanobox/util/config"
 )
 
 func ServiceConfigFile() string {
@@ -27,7 +29,7 @@ func serviceConfig() string {
         </array>
 </dict>
 </plist>
-`, BridgeClient, ConfigFile())
+`, filepath.Join(config.BinDir(), BridgeClient), ConfigFile())
 }
 
 func CreateService() error {
@@ -37,7 +39,7 @@ func CreateService() error {
 		return err
 	}
 
-	out, err := exec.Command("launchctl","load", "-w", "/Library/LaunchDaemons/io.nanobox.openvpn.plist").CombinedOutput() 
+	out, err := exec.Command("launchctl", "load", "/Library/LaunchDaemons/io.nanobox.openvpn.plist").CombinedOutput()
 	if err != nil {
 		fmt.Errorf("out: %s, err: %s", out, err)
 	}
@@ -45,7 +47,7 @@ func CreateService() error {
 }
 
 func StartService() error {
-	out, err := exec.Command("launchctl", "start", "io.nanobox.openvpn").CombinedOutput() 
+	out, err := exec.Command("launchctl", "start", "io.nanobox.openvpn").CombinedOutput()
 	if err != nil {
 		fmt.Errorf("out: %s, err: %s", out, err)
 	}

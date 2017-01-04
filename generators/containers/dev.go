@@ -37,9 +37,9 @@ func DevConfig(appModel *models.App) docker.ContainerConfig {
 		Binds: []string{
 			code,
 			// fmt.Sprintf("%s%s/build:/data", provider.HostMntDir(), appModel.EnvID),
-			// fmt.Sprintf("%s%s/cache:/mnt/cache", provider.HostMntDir(), appModel.EnvID),			
+			// fmt.Sprintf("%s%s/cache:/mnt/cache", provider.HostMntDir(), appModel.EnvID),
 			fmt.Sprintf("nanobox_%s_build:/data", appModel.EnvID),
-			fmt.Sprintf("nanobox_%s_cache:/mnt/cache", appModel.EnvID),			
+			fmt.Sprintf("nanobox_%s_cache:/mnt/cache", appModel.EnvID),
 		},
 		RestartPolicy: "no",
 	}

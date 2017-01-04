@@ -42,7 +42,7 @@ func CompileConfig(image string) docker.ContainerConfig {
 	if config.EngineDir() != "" {
 		conf.Binds = append(conf.Binds, engine)
 	}
-	
+
 	return conf
 }
 

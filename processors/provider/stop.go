@@ -5,10 +5,10 @@ import (
 
 	"github.com/jcelliott/lumber"
 
+	"github.com/nanobox-io/nanobox/processors/provider/bridge"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/locker"
 	"github.com/nanobox-io/nanobox/util/provider"
-	"github.com/nanobox-io/nanobox/processors/provider/bridge"
 )
 
 // Stop stops the provider (stops the VM)

@@ -2,23 +2,22 @@ package bridge
 
 import (
 	"fmt"
-	"os/exec"
 	"io/ioutil"
+	"os/exec"
 	"path/filepath"
 
-	"github.com/nanobox-io/nanobox/util/update"
+	"github.com/nanobox-io/nanobox/util/config"
 )
 
-
 func ServiceConfigFile() string {
-	return filepath.Join(publicFolder(),"bridge.ini")
+	return filepath.Join(config.BinDir(), "bridge.ini")
 }
 
 func serviceConfig() string {
 	return fmt.Sprintf(`[nanobox-vpn]
 startup="%s\nanobox-vpn.exe" --config "%s"
 shutdown_method=winmessage
-`, publicFolder(), ConfigFile())
+`, config.BinDir(), ConfigFile())
 }
 
 func CreateService() error {
@@ -28,20 +27,11 @@ func CreateService() error {
 		return err
 	}
 
-	_, err := exec.Command("sc", "create", "nanobox-vpn", "binpath=", fmt.Sprintf(`%s\srvstart.exe nanobox-vpn  -c "%s"`, publicFolder(), ServiceConfigFile())).CombinedOutput()
+	_, err := exec.Command("sc", "create", "nanobox-vpn", "binpath=", fmt.Sprintf(`%s\srvstart.exe nanobox-vpn  -c "%s"`, config.BinDir(), ServiceConfigFile())).CombinedOutput()
 	return err
 }
 
 func StartService() error {
 	_, err := exec.Command("sc", "start", "nanobox-vpn").CombinedOutput()
 	return err
-}
-
-func publicFolder() string {
-	path, err := exec.LookPath(update.Name)
-	fmt.Println("path", path)
-	if err != nil {
-		return "C:\\Program Files\\Nanobox"
-	}
-	return filepath.Dir(path)
 }

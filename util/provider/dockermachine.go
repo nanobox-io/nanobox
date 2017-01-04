@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"os"
 	"net"
+	"os"
 	"os/exec"
 	// "path/filepath"
 	"regexp"
@@ -38,7 +38,7 @@ func (machine DockerMachine) Valid() (bool, []string) {
 	missingParts := []string{}
 
 	// we install our own docker-machine so we dont need to check
-	
+
 	// do you have vbox manage?
 	if err := exec.Command(vboxManageCmd, "-v").Run(); err != nil {
 		missingParts = append(missingParts, "vboxmanage")
@@ -49,14 +49,13 @@ func (machine DockerMachine) Valid() (bool, []string) {
 		return len(missingParts) == 0, missingParts
 	}
 
-
 	unixCheck := func() {
 		// check to see if i am listening on the netfs port
 		out, err := exec.Command("netstat", "-ln").CombinedOutput()
 		if err != nil || !bytes.Contains(out, []byte("2049")) {
 			missingParts = append(missingParts, "netfs")
 		}
-		
+
 	}
 	// net share checking
 	switch runtime.GOOS {
@@ -98,7 +97,7 @@ func (machine DockerMachine) Create() error {
 	}
 
 	display.ProviderSetup()
-	
+
 	// load the configuration for docker-machine
 	conf := config.Viper()
 
@@ -132,7 +131,7 @@ func (machine DockerMachine) Create() error {
 
 	// append the disk if they set it big enough
 	if disk > 15360 {
-		cmd = append(cmd, "--virtualbox-disk-size",fmt.Sprintf("%d", disk))
+		cmd = append(cmd, "--virtualbox-disk-size", fmt.Sprintf("%d", disk))
 	}
 
 	cmd = append(cmd, "nanobox")

@@ -24,7 +24,7 @@ func Setup() error {
 	defer display.CloseContext()
 
 	if provider.IsReady() {
-		
+
 		// if we are already ready we may still need to bridge
 		display.StartTask("Skipping (already running)")
 		display.StopTask()

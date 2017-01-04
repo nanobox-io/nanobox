@@ -46,7 +46,6 @@ How would you like to run nanobox?
 (recommended a)
 Answer: `, map[string]string{"a": "docker-machine", "b": "native"})
 
-
 	// if provider == docker-machine ask more questions
 	if setupConf.Provider == "native" {
 		config.ConfigFile(setupConf)

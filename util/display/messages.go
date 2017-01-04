@@ -134,7 +134,7 @@ func FirstBuild() {
 }
 
 func ProviderSetup() {
-  os.Stderr.WriteString(fmt.Sprintf(`
+	os.Stderr.WriteString(fmt.Sprintf(`
 --------------------------------------------------------------------------------
 + HEADS UP:
 + Nanobox will run a single VM transparently within VirtualBox.

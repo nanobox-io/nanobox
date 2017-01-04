@@ -2,12 +2,12 @@ package provider
 
 import (
 	"fmt"
-	"os"
 	"net"
+	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 	"runtime"
+	"strings"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox-golang-stylish"

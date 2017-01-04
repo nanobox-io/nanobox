@@ -5,11 +5,12 @@ import (
 	"path/filepath"
 	// "runtime"
 
-	"github.com/nanobox-io/nanobox/util/provider"
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util/provider"
 )
 
 var BridgeClient = "nanobox-vpn"
+
 // var BridgeURL string
 
 // func init() {

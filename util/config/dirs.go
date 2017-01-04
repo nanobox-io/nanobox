@@ -1,18 +1,17 @@
 package config
 
 import (
-	"os"
 	"fmt"
+	"os"
 	"os/exec"
-	"runtime"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/jcelliott/lumber"
 	"github.com/mitchellh/go-homedir"
 
 	"github.com/nanobox-io/nanobox-boxfile"
-
 )
 
 // GlobalDir ...
@@ -106,7 +105,7 @@ func BinDir() string {
 	if err != nil {
 		if runtime.GOOS == "windows" {
 			return "C:\\Program Files\\Nanobox"
-		
+
 		}
 		return filepath.Dir(os.Args[0])
 	}

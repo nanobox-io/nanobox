@@ -4,14 +4,12 @@ import (
 	dockType "github.com/docker/engine-api/types"
 	"github.com/docker/engine-api/types/filters"
 	"golang.org/x/net/context"
-
-
 )
 
 // create a new volume
 func VolumeCreate(name string) (dockType.Volume, error) {
 	vol := dockType.VolumeCreateRequest{
-		Name:       name,
+		Name: name,
 	}
 
 	return client.VolumeCreate(context.Background(), vol)
@@ -34,7 +32,7 @@ func VolumeExists(name string) bool {
 		if volume.Name == name {
 			return true
 		}
-		
+
 	}
 	return false
 }

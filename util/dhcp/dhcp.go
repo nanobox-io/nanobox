@@ -23,8 +23,8 @@ type IPSpace struct {
 	GlobalNet net.IPNet
 	LocalIP   net.IP
 	LocalNet  net.IPNet
-	NativeIP   net.IP
-	NativeNet  net.IPNet
+	NativeIP  net.IP
+	NativeNet net.IPNet
 }
 
 // ReserveGlobal ...
@@ -97,7 +97,6 @@ func ReserveLocal() (net.IP, error) {
 	if err != nil {
 		return nil, err
 	}
-
 
 	// switch based on what provider we are using
 	switch config.Viper().GetString("provider") {

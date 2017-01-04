@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
-	"os"
 	"net/http"
 	"net/url"
+	"os"
 
 	"github.com/jcelliott/lumber"
 
@@ -163,10 +163,10 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 
 	// if they have not logged in but the user name and password are both set
 	// use attempt to authenticate
-	if auth.Key == "" && 
-		os.Getenv("NANOBOX_PASSWORD") != "" && 
-		os.Getenv("NANOBOX_USERNAME") != "" && 
-		path != fmt.Sprintf("users/%s/auth_token", os.Getenv("NANOBOX_USERNAME")){
+	if auth.Key == "" &&
+		os.Getenv("NANOBOX_PASSWORD") != "" &&
+		os.Getenv("NANOBOX_USERNAME") != "" &&
+		path != fmt.Sprintf("users/%s/auth_token", os.Getenv("NANOBOX_USERNAME")) {
 
 		auth.Key, _ = Auth(os.Getenv("NANOBOX_USERNAME"), os.Getenv("NANOBOX_PASSWORD"))
 	}

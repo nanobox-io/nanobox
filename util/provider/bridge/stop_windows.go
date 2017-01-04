@@ -11,7 +11,6 @@ func StopService() error {
 	return err
 }
 
-
 func Remove() error {
 	_, err := exec.Command("sc", "delete", "nanobox-vpn").CombinedOutput()
 	if err != nil {

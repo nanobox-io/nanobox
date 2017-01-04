@@ -6,8 +6,8 @@ import (
 
 	"github.com/jcelliott/lumber"
 
-	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/commands/registry"
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/env"
 	"github.com/nanobox-io/nanobox/processors/provider"
 	"github.com/nanobox-io/nanobox/util/config"
@@ -42,7 +42,7 @@ func Implode() error {
 
 	// purge the installation
 	if registry.GetBool("full-implode") {
-		purgeConfiguration()	
+		purgeConfiguration()
 	}
 
 	return nil

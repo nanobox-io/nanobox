@@ -8,8 +8,8 @@ import (
 
 	container_generator "github.com/nanobox-io/nanobox/generators/containers"
 	"github.com/nanobox-io/nanobox/util"
-	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/provider/bridge"
 )
 
@@ -24,7 +24,6 @@ func Teardown() error {
 		if err := bridge.Remove(); err != nil {
 			return err
 		}
-
 
 	} else {
 		// remove component
@@ -55,7 +54,6 @@ func removeComponent() error {
 
 	return nil
 }
-
 
 // reExecTeardown re-execs the current process with a privileged user
 func reExecTeardown() error {

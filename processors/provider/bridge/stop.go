@@ -2,7 +2,7 @@ package bridge
 
 import (
 	"fmt"
-	
+
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/util"

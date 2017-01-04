@@ -2,10 +2,10 @@
 package main
 
 import (
+	"bufio"
 	"crypto/md5"
 	"fmt"
 	"os"
-	"bufio"
 	"path/filepath"
 	"runtime"
 	"runtime/debug"
@@ -21,7 +21,6 @@ import (
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/provider"
 	// "github.com/nanobox-io/nanobox/util/display"
-
 )
 
 var bugsnagToken string
@@ -114,10 +113,10 @@ func setupBugsnag() {
 	}
 
 	bugsnag.Configure(bugsnag.Configuration{
-		APIKey:      bugsnagToken,
-		Logger:      bugLog{},
-		Synchronous: true,
-		AppVersion:  version,
+		APIKey:       bugsnagToken,
+		Logger:       bugLog{},
+		Synchronous:  true,
+		AppVersion:   version,
 		PanicHandler: func() {}, // the built in panic handler reexicutes our code
 	})
 
@@ -163,7 +162,7 @@ LOOP:
 }
 
 // check to see if we need to wipe the old
-func migrationCheck()  {
+func migrationCheck() {
 	providerName := config.Viper().GetString("provider")
 	providerModel, err := models.LoadProvider()
 
@@ -171,7 +170,7 @@ func migrationCheck()  {
 	// no migration required
 	if util.IsPrivileged() || err != nil || providerModel.Name == providerName {
 		return
-	} 
+	}
 
 	// remember the new provider
 	newProviderName := providerName
@@ -194,7 +193,7 @@ func migrationCheck()  {
 	// implode the old system
 	processors.Implode()
 
-	// on implode success 
+	// on implode success
 	// adjust the provider to the new one and save the provider model
 	config.Viper().Set("provider", newProviderName)
 	providerModel.Name = newProviderName
