@@ -39,11 +39,6 @@ func Setup() error {
 		return err
 	}
 
-	// // download bridge client
-	// if err := downloadBridgeClient(); err != nil {
-	// 	return err
-	// }
-
 	// configure bridge client
 	if err := configureBridge(); err != nil {
 		return err
