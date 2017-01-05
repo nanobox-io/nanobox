@@ -30,7 +30,7 @@ func Setup() error {
 	defer display.CloseContext()
 
 	// if the container exists and openvpn is running
-	if isBridgeExists() {
+	if bridge.Connected() {
 		return nil
 	}
 
@@ -149,33 +149,6 @@ func downloadImage(image string) error {
 
 	return nil
 }
-
-// func downloadBridgeClient() error {
-// 	// short-circuit if we're already installed
-// 	if fileutil.Exists(bridge.BridgeClient) {
-// 		return nil
-// 	}
-
-// 	display.StartTask("Downloading bridge client")
-// 	defer display.StopTask()
-
-// 	// // download the executable
-// 	// if err := fileutil.Download(bridge.BridgeURL, bridge.BridgeClient); err != nil {
-// 	// 	display.ErrorTask()
-// 	// 	return fmt.Errorf("failed to download docker-machine: %s", err.Error())
-// 	// }
-
-// 	// make it executable (unless it's windows)
-// 	if runtime.GOOS != "windows" {
-// 		// make new CLI executable
-// 		if err := os.Chmod(bridge.BridgeClient, 0755); err != nil {
-// 			display.ErrorTask()
-// 			return fmt.Errorf("failed to set permissions: ", err.Error())
-// 		}
-// 	}
-
-// 	return nil
-// }
 
 // ca.crt
 // client.key

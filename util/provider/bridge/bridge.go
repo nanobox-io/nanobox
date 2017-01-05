@@ -4,26 +4,14 @@ import (
 	"fmt"
 	"path/filepath"
 	// "runtime"
+	"net"
 
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/provider"
 )
 
 var BridgeClient = "nanobox-vpn"
-
-// var BridgeURL string
-
-// func init() {
-// 	switch runtime.GOOS {
-// 	case "windows":
-// 		// BridgeClient = BridgeClient + ".exe"
-// 		BridgeURL = "https://s3.amazonaws.com/tools.nanobox.io/openvpn/windows/openvpn.exe"
-// 	case "darwin":
-// 		BridgeURL = "https://s3.amazonaws.com/tools.nanobox.io/openvpn/darwin/openvpn"
-// 	case "linux":
-// 		BridgeURL = "https://s3.amazonaws.com/tools.nanobox.io/openvpn/linux/openvpn"
-// 	}
-// }
 
 func BridgeConfig() string {
 	// node := ""
@@ -66,4 +54,36 @@ func ClientKey() string {
 
 func ClientCrt() string {
 	return filepath.ToSlash(filepath.Join(config.EtcDir(), "openvpn", "client.crt"))
+}
+
+// check to see if the bridge is connected
+func Connected() bool {
+	network, err := dhcp.LocalNet()
+	if err != nil {
+		return false
+	}
+	interfaces, err := net.Interfaces()
+	if err != nil {
+		return false
+	}
+
+	// look throught the interfaces on the system
+	for _, i := range interfaces {
+		addrs, err := i.Addrs()
+		if err != nil {
+			continue
+		}
+		// find a
+		for _, addr := range addrs {
+			ip, _, err := net.ParseCIDR(addr.String())
+			if err != nil {
+				continue
+			}
+			if network.Contains(ip) {
+				return true
+			}
+		}
+	}
+
+	return false
 }

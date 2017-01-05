@@ -53,3 +53,7 @@ func StartService() error {
 	}
 	return nil
 }
+
+func Installed() bool {
+	return true
+}

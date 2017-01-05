@@ -78,6 +78,21 @@ func Flush() {
 	ips.Delete()
 }
 
+func LocalNet() (*net.IPNet, error) {
+	ipSpace, err := getIPSpace()
+	if err != nil {
+		return nil, err
+	}
+	// switch based on what provider we are using
+	switch config.Viper().GetString("provider") {
+	case "docker-machine":
+		return &ipSpace.LocalNet, nil
+	case "native":
+		return &ipSpace.NativeNet, nil
+	}
+	return nil, errors.New("no network found")
+}
+
 // ReserveLocal ...
 func ReserveLocal() (net.IP, error) {
 

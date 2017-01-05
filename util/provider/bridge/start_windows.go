@@ -35,3 +35,7 @@ func StartService() error {
 	_, err := exec.Command("sc", "start", "nanobox-vpn").CombinedOutput()
 	return err
 }
+
+func Installed() bool {
+	return true	
+}
