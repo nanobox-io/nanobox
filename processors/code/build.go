@@ -133,7 +133,7 @@ func populateBuildTriggers(envModel *models.Env) {
 	if envModel.BuildTriggers == nil {
 		envModel.BuildTriggers = map[string]string{}
 	}
-	box := boxfile.New([]byte(envModel.UserBoxfile))
+	box := boxfile.New([]byte(envModel.BuiltBoxfile))
 	for _, trigger := range box.Node("run.config").StringSliceValue("build_triggers") {
 		envModel.BuildTriggers[trigger] = util.FileMD5(trigger)
 	}
