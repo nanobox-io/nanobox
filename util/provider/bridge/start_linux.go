@@ -84,8 +84,3 @@ func launchSystem() string {
 
 	return ""
 }
-
-func Installed() bool {
-	return true	
-}
-
