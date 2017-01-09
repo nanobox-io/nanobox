@@ -20,9 +20,6 @@ func Setup() error {
 	locker.GlobalLock()
 	defer locker.GlobalUnlock()
 
-	display.OpenContext("Starting Nanobox")
-	defer display.CloseContext()
-
 	if provider.IsReady() {
 
 		// if we are already ready we may still need to bridge
@@ -40,6 +37,9 @@ func Setup() error {
 		}
 		return nil
 	}
+
+	display.OpenContext("Starting Nanobox")
+	defer display.CloseContext()
 
 	// create the provider (VM)
 	if err := util.Retry(provider.Create, 2, 10*time.Second); err != nil {

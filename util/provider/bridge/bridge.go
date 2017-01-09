@@ -79,6 +79,7 @@ func Connected() bool {
 			if err != nil {
 				continue
 			}
+			fmt.Println("ip", ip)
 			if network.Contains(ip) {
 				return true
 			}

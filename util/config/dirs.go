@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -101,7 +100,6 @@ func EngineDir() string {
 // docker, dockermachine, etc
 func BinDir() string {
 	path, err := exec.LookPath(os.Args[0])
-	fmt.Println("path", path)
 	if err != nil {
 		if runtime.GOOS == "windows" {
 			return "C:\\Program Files\\Nanobox"

@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util/fileutil"
 )
 
 func ServiceConfigFile() string {
@@ -21,11 +22,21 @@ shutdown_method=winmessage
 }
 
 func CreateService() error {
+	
+	// make sure we actually have to do this part
+	if fileutil.Exists(ServiceConfigFile()) {
+		return nil
+	}
 
 	// setup config file
 	if err := ioutil.WriteFile(ServiceConfigFile(), []byte(serviceConfig()), 0644); err != nil {
 		return err
 	}
+
+	// the service may have been created this should clean out any old version
+	// we arent catching errors just incase they dont exist
+	StopService()	
+	Remove()
 
 	_, err := exec.Command("sc", "create", "nanobox-vpn", "binpath=", fmt.Sprintf(`%s\srvstart.exe nanobox-vpn  -c "%s"`, config.BinDir(), ServiceConfigFile())).CombinedOutput()
 	return err
