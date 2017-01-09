@@ -67,7 +67,7 @@ func main() {
 	}
 
 	// setup a file logger, this will be replaced in verbose mode.
-	fileLogger, err := lumber.NewTruncateLogger(filepath.ToSlash(filepath.Join(config.GlobalDir(), "nanobox.log")))
+	fileLogger, err := lumber.NewAppendLogger(filepath.ToSlash(filepath.Join(config.GlobalDir(), "nanobox.log")))
 	if err != nil {
 		fmt.Println("logging error:", err)
 	}

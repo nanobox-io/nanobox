@@ -5,9 +5,11 @@ import (
 	"io/ioutil"
 	"os/exec"
 	"path/filepath"
+	"strings"
+
+	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/fileutil"
 )
 
 func ServiceConfigFile() string {
@@ -24,7 +26,7 @@ shutdown_method=winmessage
 func CreateService() error {
 	
 	// make sure we actually have to do this part
-	if fileutil.Exists(ServiceConfigFile()) {
+	if out, _ := exec.Command("sc", "query", "nanobox-vpn").CombinedOutput(); !strings.Contains(string(out), "service does not exist") {
 		return nil
 	}
 
@@ -37,12 +39,21 @@ func CreateService() error {
 	// we arent catching errors just incase they dont exist
 	StopService()	
 	Remove()
+	out, err := exec.Command("sc", "create", "nanobox-vpn", "binpath=", fmt.Sprintf(`%s\srvstart.exe nanobox-vpn  -c "%s"`, config.BinDir(), ServiceConfigFile())).CombinedOutput()
+	lumber.Info("sc", "create", "nanobox-vpn", "binpath=", fmt.Sprintf(`%s\srvstart.exe nanobox-vpn  -c "%s"`, config.BinDir(), ServiceConfigFile()))
+	lumber.Info("\n\nout: %s\n\n", out)
+	if err != nil {
+		return fmt.Errorf("%s: %s", out, err)
+	}
+	fmt.Printf("\n\nout: %s\n\n", out)
 
-	_, err := exec.Command("sc", "create", "nanobox-vpn", "binpath=", fmt.Sprintf(`%s\srvstart.exe nanobox-vpn  -c "%s"`, config.BinDir(), ServiceConfigFile())).CombinedOutput()
 	return err
 }
 
 func StartService() error {
-	_, err := exec.Command("sc", "start", "nanobox-vpn").CombinedOutput()
+	out, err := exec.Command("sc", "start", "nanobox-vpn").CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("%s: %s", out, err)
+	}
 	return err
 }
