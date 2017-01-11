@@ -14,6 +14,10 @@ import (
 	"github.com/nanobox-io/nanobox/util/config"
 )
 
+func (machine DockerMachine) RequiresMount() bool {
+	return true
+}
+
 // HasMount checks to see if the mount exists in the vm
 func (machine DockerMachine) HasMount(mount string) bool {
 

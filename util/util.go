@@ -7,9 +7,9 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"os"
-	"time"
 	"path/filepath"
-	
+	"time"
+
 	"github.com/nanobox-io/nanobox/util/config"
 )
 

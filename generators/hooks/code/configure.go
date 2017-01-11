@@ -45,7 +45,7 @@ func ConfigurePayload(appModel *models.App, componentModel *models.Component) st
 	logvac, _ := models.FindComponentBySlug(componentModel.AppID, "logvac")
 
 	pload := configure{
-		LogvacHost: logvac.InternalIP,
+		LogvacHost: logvac.IPAddr(),
 		Config:     boxfile.Node(componentModel.Name).Value("config"),
 		Component: component{
 			Name: componentModel.Name,
@@ -87,7 +87,7 @@ func mounts(appModel *models.App, componentModel *models.Component) []mount {
 			// skip because of problems
 			continue
 		}
-		m = append(m, mount{component.InternalIP, component.Plan.MountProtocol, boxNetworkDirs.StringSliceValue(node)})
+		m = append(m, mount{component.IPAddr(), component.Plan.MountProtocol, boxNetworkDirs.StringSliceValue(node)})
 
 	}
 

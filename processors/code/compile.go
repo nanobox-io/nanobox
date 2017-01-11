@@ -11,6 +11,7 @@ import (
 	hook_generator "github.com/nanobox-io/nanobox/generators/hooks/build"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/hookit"
 )
@@ -54,6 +55,8 @@ func Compile(envModel *models.Env) error {
 
 	// update the compiled flag
 	envModel.LastCompile = time.Now()
+	envModel.BuiltID = util.RandomString(30)
+
 	return envModel.Save()
 }
 

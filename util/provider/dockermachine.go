@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"net"
 	"os"
 	"os/exec"
-	"path/filepath"
+	// "path/filepath"
 	"regexp"
 	"runtime"
 	"strings"
@@ -14,13 +15,13 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/util/fileutil"
+	// "github.com/nanobox-io/nanobox/util/fileutil"
 	"github.com/nanobox-io/nanobox/util/vbox"
 )
 
 var (
 	vboxManageCmd    = vbox.DetectVBoxManageCmd()
-	dockerMachineCmd = filepath.ToSlash(filepath.Join(config.BinDir(), "docker-machine"))
+	dockerMachineCmd = "nanobox-machine"
 )
 
 // DockerMachine ...
@@ -37,7 +38,7 @@ func (machine DockerMachine) Valid() (bool, []string) {
 	missingParts := []string{}
 
 	// we install our own docker-machine so we dont need to check
-	
+
 	// do you have vbox manage?
 	if err := exec.Command(vboxManageCmd, "-v").Run(); err != nil {
 		missingParts = append(missingParts, "vboxmanage")
@@ -48,14 +49,13 @@ func (machine DockerMachine) Valid() (bool, []string) {
 		return len(missingParts) == 0, missingParts
 	}
 
-
 	unixCheck := func() {
 		// check to see if i am listening on the netfs port
 		out, err := exec.Command("netstat", "-ln").CombinedOutput()
 		if err != nil || !bytes.Contains(out, []byte("2049")) {
 			missingParts = append(missingParts, "netfs")
 		}
-		
+
 	}
 	// net share checking
 	switch runtime.GOOS {
@@ -84,54 +84,8 @@ func (machine DockerMachine) Status() string {
 	return strings.TrimSpace(string(output))
 }
 
-// Returns true if dockermachine and docker are already installed
-func (machine DockerMachine) IsInstalled() bool {
-
-	cmd := dockerMachineCmd
-
-	if runtime.GOOS == "windows" {
-		cmd = fmt.Sprintf("%s.exe", cmd)
-	}
-
-	return fileutil.Exists(cmd)
-}
-
-// Installs docker-machine and docker binaries
-func (machine DockerMachine) Install() error {
-
-	// short-circuit if we're already installed
-	if machine.IsInstalled() {
-		return nil
-	}
-
-	display.StartTask("Downloading docker-machine")
-	defer display.StopTask()
-
-	// download the binary
-	url := dockerMachineURL()
-	path := dockerMachineCmd
-
-	// if windows, add an .exe
-	if runtime.GOOS == "windows" {
-		path = fmt.Sprintf("%s.exe", path)
-	}
-
-	// download the executable
-	if err := fileutil.Download(url, path); err != nil {
-		display.ErrorTask()
-		return fmt.Errorf("failed to download docker-machine: %s", err.Error())
-	}
-
-	// make it executable (unless it's windows)
-	if runtime.GOOS != "windows" {
-		// make new CLI executable
-		if err := os.Chmod(path, 0755); err != nil {
-			display.ErrorTask()
-			return fmt.Errorf("failed to set permissions: ", err.Error())
-		}
-	}
-
-	return nil
+func (machine DockerMachine) BridgeRequired() bool {
+	return true
 }
 
 // Create creates the docker-machine vm
@@ -141,6 +95,8 @@ func (machine DockerMachine) Create() error {
 	if machine.isCreated() {
 		return nil
 	}
+
+	display.ProviderSetup()
 
 	// load the configuration for docker-machine
 	conf := config.Viper()
@@ -175,7 +131,7 @@ func (machine DockerMachine) Create() error {
 
 	// append the disk if they set it big enough
 	if disk > 15360 {
-		cmd = append(cmd, "--virtualbox-disk-size",fmt.Sprintf("%d", disk))
+		cmd = append(cmd, "--virtualbox-disk-size", fmt.Sprintf("%d", disk))
 	}
 
 	cmd = append(cmd, "nanobox")
@@ -305,6 +261,12 @@ func (machine DockerMachine) Start() error {
 	// create custom nanobox docker network
 	if !machine.hasNetwork() {
 
+		ip, ipNet, err := net.ParseCIDR(config.Viper().GetString("docker-machine-network-space"))
+		if err != nil {
+			return err
+		}
+
+		// networkSpace := config.Viper().GetString("docker-machine-network-space")
 		cmd := []string{
 			dockerMachineCmd,
 			"ssh",
@@ -313,10 +275,10 @@ func (machine DockerMachine) Start() error {
 			"network",
 			"create",
 			"--driver=bridge",
-			"--subnet=192.168.0.0/24",
+			fmt.Sprintf("--subnet=%s", ipNet.String()),
 			"--opt='com.docker.network.driver.mtu=1450'",
 			"--opt='com.docker.network.bridge.name=redd0'",
-			"--gateway=192.168.0.1",
+			fmt.Sprintf("--gateway=%s", ip.String()),
 			"nanobox",
 		}
 
@@ -423,29 +385,6 @@ func (machine DockerMachine) DockerEnv() error {
 	os.Setenv("DOCKER_MACHINE_NAME", "nanobox")
 	os.Setenv("DOCKER_HOST", fmt.Sprintf("tcp://%s:2376", inspect.Driver.IPAddress))
 	os.Setenv("DOCKER_CERT_PATH", inspect.HostOptions.AuthOptions.StorePath)
-
-	return nil
-}
-
-// Touch adds an IP into the docker-machine vm for host access
-func (machine DockerMachine) Touch(file string) error {
-	cmd := []string{
-		dockerMachineCmd,
-		"ssh",
-		"nanobox",
-		"sudo",
-		"touch",
-		file,
-	}
-
-	process := exec.Command(cmd[0], cmd[1:]...)
-
-	b, err := process.CombinedOutput()
-	if err != nil {
-		return fmt.Errorf("%s: %s", b, err)
-	}
-
-	// todo: check output for failures
 
 	return nil
 }
@@ -814,11 +753,6 @@ func (machine DockerMachine) hasNetwork() bool {
 
 // IsReady ...
 func (machine DockerMachine) IsReady() bool {
-
-	// return false right away if docker-machine isn't installed
-	if !machine.IsInstalled() {
-		return false
-	}
 
 	// docker-machine status nanobox
 	cmd := exec.Command(dockerMachineCmd, "status", "nanobox")

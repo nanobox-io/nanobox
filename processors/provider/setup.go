@@ -7,6 +7,7 @@ import (
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processors/provider/bridge"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
@@ -19,27 +20,26 @@ func Setup() error {
 	locker.GlobalLock()
 	defer locker.GlobalUnlock()
 
-	display.OpenContext("Starting Nanobox")
-	defer display.CloseContext()
-
 	if provider.IsReady() {
 
+		// if we are already ready we may still need to bridge
 		display.StartTask("Skipping (already running)")
 		display.StopTask()
 
-		// initialize the docker client
 		if err := Init(); err != nil {
 			return fmt.Errorf("failed to initialize docker for provider: %s", err.Error())
 		}
 
+		if provider.BridgeRequired() {
+			if err := bridge.Setup(); err != nil {
+				return fmt.Errorf("failed to setup the network bridge: %s", err.Error())
+			}
+		}
 		return nil
 	}
 
-	// install the provider (VM)
-	if err := util.Retry(provider.Install, 2, 10*time.Second); err != nil {
-		lumber.Error("provider:Setup:provider.Install(): %s", err.Error())
-		return fmt.Errorf("failed to install the provider: %s", err.Error())
-	}
+	display.OpenContext("Starting Nanobox")
+	defer display.CloseContext()
 
 	// create the provider (VM)
 	if err := util.Retry(provider.Create, 2, 10*time.Second); err != nil {
@@ -55,6 +55,7 @@ func Setup() error {
 
 	// fetch the provider model
 	providerModel, _ := models.LoadProvider()
+	providerModel.Name = provider.Name()
 
 	display.StartTask("Joining virtual network")
 
@@ -70,9 +71,14 @@ func Setup() error {
 
 	display.StopTask()
 
-	// initialize the docker client
 	if err := Init(); err != nil {
 		return fmt.Errorf("failed to initialize docker for provider: %s", err.Error())
+	}
+
+	if provider.BridgeRequired() {
+		if err := bridge.Setup(); err != nil {
+			return fmt.Errorf("failed to setup the network bridge: %s", err.Error())
+		}
 	}
 
 	return nil

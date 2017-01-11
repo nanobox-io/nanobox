@@ -220,8 +220,9 @@ func (s *Summarizer) handleLog(data string) {
 			msg = line
 		}
 
-		if s.windowWidth > 0 && len(line) > s.windowWidth {
-			msg = msg[:s.windowWidth-(len(s.Label)+len(s.Prefix)+10)] + "..."
+		availableLen := s.windowWidth - (len(s.Label) + len(s.Prefix) + 5)
+		if s.windowWidth > 0 && len(line) > availableLen {
+			msg = msg[:availableLen] + "..."
 		}
 	}
 

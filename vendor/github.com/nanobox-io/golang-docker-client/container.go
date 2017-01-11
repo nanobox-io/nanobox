@@ -9,6 +9,7 @@ import (
 	dockContainer "github.com/docker/engine-api/types/container"
 	dockNetwork "github.com/docker/engine-api/types/network"
 	"github.com/docker/engine-api/types/strslice"
+	"github.com/docker/go-connections/nat"
 )
 
 type ContainerConfig struct {
@@ -30,6 +31,7 @@ type ContainerConfig struct {
 	CPUShares       int64             `json:"cpu_shares"`
 	RestartPolicy   string            `json:"restart_policy"`
 	RestartAttempts int               `json:"restart_attempts"`
+	Ports           []string          `json:"ports"`
 }
 
 // create a container from the user specification
@@ -37,6 +39,8 @@ func CreateContainer(conf ContainerConfig) (dockType.ContainerJSON, error) {
 	// if len(conf.Cmd) == 0 {
 	// 	conf.Cmd = []string{"/bin/sleep", "3650d"}
 	// }
+
+	ports, portBindings, _ := nat.ParsePortSpecs(conf.Ports)
 
 	// create a configurable restart policy with a default 'unless stopped' behavior
 	restartPolicy := dockContainer.RestartPolicy{Name: "unless-stopped"}
@@ -56,6 +60,7 @@ func CreateContainer(conf ContainerConfig) (dockType.ContainerJSON, error) {
 		Labels:          conf.Labels,
 		NetworkDisabled: false,
 		Image:           conf.Image,
+		ExposedPorts:    ports,
 	}
 
 	hostConfig := &dockContainer.HostConfig{
@@ -70,6 +75,7 @@ func CreateContainer(conf ContainerConfig) (dockType.ContainerJSON, error) {
 			MemorySwap: conf.MemorySwap,
 			CPUShares:  conf.CPUShares,
 		},
+		PortBindings: portBindings,
 	}
 
 	netConfig := &dockNetwork.NetworkingConfig{}

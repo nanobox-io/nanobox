@@ -38,7 +38,7 @@ func BuildRoutes(appModel *models.App) []portal.Route {
 
 		routes = append(routes, portal.Route{
 			Path:    "/",
-			Targets: []string{fmt.Sprintf("http://%s:%s", component.InternalIP, "8080")},
+			Targets: []string{fmt.Sprintf("http://%s:%s", component.IPAddr(), "8080")},
 		})
 	}
 
@@ -85,7 +85,7 @@ func buildComponentRoutes(boxfile boxfile.Boxfile, component *models.Component) 
 			Path:      path,
 		}
 
-		portalRoute.Targets = append(portalRoute.Targets, fmt.Sprintf("http://%s:%s", component.InternalIP, "8080"))
+		portalRoute.Targets = append(portalRoute.Targets, fmt.Sprintf("http://%s:%s", component.IPAddr(), "8080"))
 		portalRoutes = append(portalRoutes, portalRoute)
 	}
 

@@ -23,7 +23,7 @@ func MistListen(appModel *models.App) error {
 	// connect to the mist server
 	var client *clients.TCP
 	clientConnect := func() (err error) {
-		client, err = clients.New(mist.ExternalIP+":1445", "123")
+		client, err = clients.New(mist.IPAddr()+":1445", "123")
 		return err
 	}
 	if err := util.Retry(clientConnect, 3, time.Second); err != nil {

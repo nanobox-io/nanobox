@@ -10,7 +10,6 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/util/provider"
 )
 
 // Destroy destroys a code component from the app
@@ -62,29 +61,8 @@ func detachNetwork(componentModel *models.Component) error {
 	defer display.StopTask()
 
 	//
-	if err := provider.RemoveNat(componentModel.ExternalIP, componentModel.InternalIP); err != nil {
-		lumber.Error("code:Destroy:provider.RemoveNat(%s, %s): %s", componentModel.ExternalIP, componentModel.InternalIP, err.Error())
-		display.ErrorTask()
-		return fmt.Errorf("unable to remove network bridge: %s", err.Error())
-	}
-
-	//
-	if err := provider.RemoveIP(componentModel.ExternalIP); err != nil {
-		lumber.Error("code:Destroy:provider.RemoveIP(%s): %s", componentModel.ExternalIP, err.Error())
-		display.ErrorTask()
-		return fmt.Errorf("unable to release ip: %s", err.Error())
-	}
-
-	//
-	if err := dhcp.ReturnIP(net.ParseIP(componentModel.ExternalIP)); err != nil {
-		lumber.Error("code:Destroy:dhcp.ReturnIP(%s): %s", componentModel.ExternalIP, err.Error())
-		display.ErrorTask()
-		return fmt.Errorf("unable to release ip: %s", err.Error())
-	}
-
-	//
-	if err := dhcp.ReturnIP(net.ParseIP(componentModel.InternalIP)); err != nil {
-		lumber.Error("code:Destroy:dhcp.ReturnIP(%s): %s", componentModel.InternalIP, err.Error())
+	if err := dhcp.ReturnIP(net.ParseIP(componentModel.IPAddr())); err != nil {
+		lumber.Error("code:Destroy:dhcp.ReturnIP(%s): %s", componentModel.IPAddr(), err.Error())
 		display.ErrorTask()
 		return fmt.Errorf(": %s", err.Error())
 	}

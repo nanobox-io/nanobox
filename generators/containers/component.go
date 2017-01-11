@@ -14,7 +14,7 @@ func ComponentConfig(componentModel *models.Component) docker.ContainerConfig {
 		Name:          ComponentName(componentModel),
 		Image:         componentModel.Image,
 		Network:       "virt",
-		IP:            componentModel.InternalIP,
+		IP:            componentModel.IPAddr(),
 		RestartPolicy: "no",
 	}
 

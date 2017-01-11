@@ -42,6 +42,6 @@ func DebugExec(container, hook, payload, displayLevel string) (string, error) {
 		}
 	}
 
-	// try running the exec one more time. 
+	// try running the exec one more time.
 	return Exec(container, hook, payload, displayLevel)
 }

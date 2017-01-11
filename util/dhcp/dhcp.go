@@ -23,6 +23,8 @@ type IPSpace struct {
 	GlobalNet net.IPNet
 	LocalIP   net.IP
 	LocalNet  net.IPNet
+	NativeIP  net.IP
+	NativeNet net.IPNet
 }
 
 // ReserveGlobal ...
@@ -45,8 +47,12 @@ func ReserveGlobal() (net.IP, error) {
 		return nil, err
 	}
 
+	// dump the first ip becuase it is the gateway
+	ip := ipSpace.GlobalIP
+	inc(ip)
+
 	//
-	for ip := ipSpace.GlobalIP; ipSpace.GlobalNet.Contains(ip); inc(ip) {
+	for ; ipSpace.GlobalNet.Contains(ip); inc(ip) {
 		if !contains(reservedIPs, ip) {
 			setReserved(append(reservedIPs, ip))
 			if err != nil {
@@ -72,6 +78,21 @@ func Flush() {
 	ips.Delete()
 }
 
+func LocalNet() (*net.IPNet, error) {
+	ipSpace, err := getIPSpace()
+	if err != nil {
+		return nil, err
+	}
+	// switch based on what provider we are using
+	switch config.Viper().GetString("provider") {
+	case "docker-machine":
+		return &ipSpace.LocalNet, nil
+	case "native":
+		return &ipSpace.NativeNet, nil
+	}
+	return nil, errors.New("no network found")
+}
+
 // ReserveLocal ...
 func ReserveLocal() (net.IP, error) {
 
@@ -92,15 +113,42 @@ func ReserveLocal() (net.IP, error) {
 		return nil, err
 	}
 
-	//
-	for ip := ipSpace.LocalIP; ipSpace.LocalNet.Contains(ip); inc(ip) {
-		if !contains(reservedIPs, ip) {
-			setReserved(append(reservedIPs, ip))
-			if err != nil {
-				return nil, err
+	// switch based on what provider we are using
+	switch config.Viper().GetString("provider") {
+	case "docker-machine":
+
+		// dump the first ip becuase it is the gateway
+		ip := ipSpace.LocalIP
+		inc(ip)
+
+		// get dockers local ipspace
+		for ; ipSpace.LocalNet.Contains(ip); inc(ip) {
+			if !contains(reservedIPs, ip) {
+				setReserved(append(reservedIPs, ip))
+				if err != nil {
+					return nil, err
+				}
+				return ip, nil
 			}
-			return ip, nil
 		}
+
+	case "native":
+
+		// dump the first ip becuase it is the gateway
+		ip := ipSpace.NativeIP
+		inc(ip)
+
+		// get the native ipspace
+		for ; ipSpace.NativeNet.Contains(ip); inc(ip) {
+			if !contains(reservedIPs, ip) {
+				setReserved(append(reservedIPs, ip))
+				if err != nil {
+					return nil, err
+				}
+				return ip, nil
+			}
+		}
+
 	}
 
 	return nil, errIPNotFound
@@ -142,13 +190,20 @@ func getIPSpace() (IPSpace, error) {
 	ipSpace.GlobalNet = *ipNet
 
 	//
-	ip, ipNet, err = net.ParseCIDR(config.Viper().GetString("internal-network-space"))
+	ip, ipNet, err = net.ParseCIDR(config.Viper().GetString("docker-machine-network-space"))
 	if err != nil {
 		return ipSpace, err
 	}
 	ipSpace.LocalIP = ip
 	ipSpace.LocalNet = *ipNet
 
+	//
+	ip, ipNet, err = net.ParseCIDR(config.Viper().GetString("native-network-space"))
+	if err != nil {
+		return ipSpace, err
+	}
+	ipSpace.NativeIP = ip
+	ipSpace.NativeNet = *ipNet
 	return ipSpace, nil
 }
 

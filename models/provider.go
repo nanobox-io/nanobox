@@ -6,6 +6,7 @@ import (
 
 // Provider ...
 type Provider struct {
+	Name    string // name of the provider
 	HostIP  string // the ip the host knows about
 	MountIP string // the ip we reserved for mounting
 }

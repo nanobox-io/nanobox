@@ -23,4 +23,5 @@ A namespaced collection of hidded subcommands used primarily as share provisioni
 func init() {
 	// hidden subcommands
 	EnvCmd.AddCommand(env.ShareCmd)
+	EnvCmd.AddCommand(env.BridgeCmd)
 }

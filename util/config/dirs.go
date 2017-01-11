@@ -2,7 +2,9 @@ package config
 
 import (
 	"os"
+	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/jcelliott/lumber"
@@ -97,12 +99,24 @@ func EngineDir() string {
 // BinDir creates a directory where nanobox specific binaries can be downloaded
 // docker, dockermachine, etc
 func BinDir() string {
+	path, err := exec.LookPath(os.Args[0])
+	if err != nil {
+		if runtime.GOOS == "windows" {
+			return "C:\\Program Files\\Nanobox"
 
-	binDir := filepath.ToSlash(filepath.Join(GlobalDir(), "bin"))
+		}
+		return filepath.Dir(os.Args[0])
+	}
+	return filepath.Dir(path)
+}
 
-	if err := os.MkdirAll(binDir, 0755); err != nil {
+func EtcDir() string {
+
+	etcDir := filepath.ToSlash(filepath.Join(GlobalDir(), "etc"))
+
+	if err := os.MkdirAll(etcDir, 0755); err != nil {
 		lumber.Fatal("[config/config] os.Mkdir() failed", err.Error())
 	}
 
-	return binDir
+	return etcDir
 }

@@ -9,9 +9,9 @@ set -e
 printf "\nBuilding nanobox...\n"
 
 # build nanobox
-gox -ldflags "-X main.bugsnagToken=$BUGSNAG_TOKEN -X github.com/nanobox-io/nanobox/util/mixpanel.token=$MIXPANEL_TOKEN" -osarch "darwin/amd64 linux/amd64 windows/amd64" -output="./.build/v1/{{.OS}}/{{.Arch}}/nanobox"
+gox -ldflags "-X main.bugsnagToken=$BUGSNAG_TOKEN -X github.com/nanobox-io/nanobox/util/mixpanel.token=$MIXPANEL_TOKEN" -osarch "darwin/amd64 linux/amd64 windows/amd64" -output="./.build/v2/{{.OS}}/{{.Arch}}/nanobox"
 
 printf "\nBuilding nanobox updater...\n"
 
 # change into updater directory and build nanobox updater
-cd ./updater && gox -osarch "darwin/amd64 linux/amd64 windows/amd64" -output="../.build/v1/{{.OS}}/{{.Arch}}/nanobox-update"
+cd ./updater && gox -osarch "darwin/amd64 linux/amd64 windows/amd64" -output="../.build/v2/{{.OS}}/{{.Arch}}/nanobox-update"

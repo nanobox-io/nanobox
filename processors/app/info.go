@@ -29,7 +29,7 @@ func Info(env *models.Env, app *models.App) error {
 	fmt.Printf("%s\n", line)
 
 	fmt.Printf("\nMount Path: %s\n", env.Directory)
-	fmt.Printf("Env IP: %s\n", app.GlobalIPs["env"])
+	fmt.Printf("Env IP: %s\n", app.LocalIPs["env"])
 
 	components, _ := app.Components()
 
@@ -43,7 +43,7 @@ func Info(env *models.Env, app *models.App) error {
 		}
 
 		// print the IP
-		fmt.Printf("  IP      : %s\n", component.ExternalIP)
+		fmt.Printf("  IP      : %s\n", component.IPAddr())
 
 		// print users
 		if len(component.Plan.Users) > 0 {

@@ -5,6 +5,7 @@ import (
 
 	"github.com/jcelliott/lumber"
 
+	"github.com/nanobox-io/nanobox/processors/provider/bridge"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/locker"
 	"github.com/nanobox-io/nanobox/util/provider"
@@ -17,6 +18,11 @@ func Stop() error {
 
 	display.OpenContext("Stopping Nanobox")
 	defer display.CloseContext()
+
+	// stop the vpn
+	if err := bridge.Stop(); err != nil {
+		return fmt.Errorf("failed to stop vpn: %s", err)
+	}
 
 	// stop the provider (VM)
 	if err := provider.Stop(); err != nil {

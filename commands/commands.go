@@ -34,11 +34,10 @@ var (
 
 	// NanoboxCmd ...
 	NanoboxCmd = &cobra.Command{
-		Use:   "nanobox",
+		Use:   "",
 		Short: "",
 		Long:  ``,
 		PersistentPreRun: func(ccmd *cobra.Command, args []string) {
-
 			// report the command usage to mixpanel
 			mixpanel.Report(strings.Replace(ccmd.CommandPath(), "nanobox ", "", 1))
 

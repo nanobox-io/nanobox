@@ -2,8 +2,8 @@ package util_test
 
 import (
 	"fmt"
-	"time"
 	"testing"
+	"time"
 
 	"github.com/nanobox-io/nanobox/util"
 )
@@ -27,6 +27,5 @@ func TestRetry(t *testing.T) {
 	if err != nil {
 		t.Errorf("func succeeded but i recieved an error")
 	}
-
 
 }

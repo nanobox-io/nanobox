@@ -55,7 +55,7 @@ func buildComponentServices(boxfile boxfile.Boxfile, component *models.Component
 				Scheduler: "rr",
 				Servers: []portal.Server{
 					{
-						Host:      component.InternalIP,
+						Host:      component.IPAddr(),
 						Port:      toInt,
 						Forwarder: "m",
 						Weight:    1,

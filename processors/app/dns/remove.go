@@ -17,7 +17,7 @@ func Remove(a *models.App, name string) error {
 	// fetch the IP
 	// env in dev is used in the dev container
 	// env in sim is used for portal
-	envIP := a.GlobalIPs["env"]
+	envIP := a.LocalIPs["env"]
 
 	// generate the dns entry
 	entry := dns.Entry(envIP, name, a.ID)

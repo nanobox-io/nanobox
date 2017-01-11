@@ -8,15 +8,14 @@ import (
 
 // Provider ...
 type Provider interface {
+	BridgeRequired() bool
 	Status() string
 	IsReady() bool
-	IsInstalled() bool
 	HostShareDir() string
 	HostMntDir() string
 	HostIP() (string, error)
 	ReservedIPs() []string
 	Valid() (bool, []string)
-	Install() error
 	Create() error
 	Reboot() error
 	Stop() error
@@ -24,15 +23,13 @@ type Provider interface {
 	Destroy() error
 	Start() error
 	DockerEnv() error
-	Touch(file string) error
+	// we might be able to remove ip stuff as well
 	AddIP(ip string) error
 	RemoveIP(ip string) error
 	SetDefaultIP(ip string) error
-	AddNat(host, container string) error
-	RemoveNat(host, container string) error
-	// HasShare(local, host string) bool
-	// AddShare(local, host string) error
-	// RemoveShare(local, host string) error
+	// AddNat(host, container string) error
+	// RemoveNat(host, container string) error
+	RequiresMount() bool
 	HasMount(mount string) bool
 	AddMount(local, host string) error
 	RemoveMount(local, host string) error
@@ -82,27 +79,6 @@ func Status() string {
 	}
 
 	return p.Status()
-}
-
-func IsInstalled() bool {
-
-	p, err := fetchProvider()
-	if err != nil {
-		return false
-	}
-
-	return p.IsInstalled()
-}
-
-// Install ...
-func Install() error {
-
-	p, err := fetchProvider()
-	if err != nil {
-		return err
-	}
-
-	return p.Install()
 }
 
 // Create ...
@@ -226,17 +202,6 @@ func DockerEnv() error {
 	return p.DockerEnv()
 }
 
-// Touch ..
-func Touch(file string) error {
-
-	p, err := fetchProvider()
-	if err != nil {
-		return err
-	}
-
-	return p.Touch(file)
-}
-
 // AddIP ..
 func AddIP(ip string) error {
 
@@ -269,26 +234,37 @@ func SetDefaultIP(ip string) error {
 	return p.SetDefaultIP(ip)
 }
 
-// AddNat ..
-func AddNat(host, container string) error {
+// // AddNat ..
+// func AddNat(host, container string) error {
+
+// 	p, err := fetchProvider()
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	return p.AddNat(host, container)
+// }
+
+// // RemoveNat ..
+// func RemoveNat(host, container string) error {
+
+// 	p, err := fetchProvider()
+// 	if err != nil {
+// 		return err
+// 	}
+
+// 	return p.RemoveNat(host, container)
+// }
+
+// RequiresMount ...
+func RequiresMount() bool {
 
 	p, err := fetchProvider()
 	if err != nil {
-		return err
+		return false
 	}
 
-	return p.AddNat(host, container)
-}
-
-// RemoveNat ..
-func RemoveNat(host, container string) error {
-
-	p, err := fetchProvider()
-	if err != nil {
-		return err
-	}
-
-	return p.RemoveNat(host, container)
+	return p.RequiresMount()
 }
 
 // HasMount ...
@@ -356,16 +332,35 @@ func IsReady() bool {
 	return p.IsReady()
 }
 
+func BridgeRequired() bool {
+
+	p, err := fetchProvider()
+	if err != nil {
+		return false
+	}
+
+	return p.BridgeRequired()
+}
+
 // fetchProvider fetches the registered provider from the configured name
 func fetchProvider() (Provider, error) {
-	prov := config.Viper().GetString("provider")
-	if prov == "docker_machine" {
-		prov = "docker-machine"
-	}
-	p, ok := providers[prov]
+	p, ok := providers[Name()]
 	if !ok {
 		return nil, errors.New("invalid provider")
 	}
 
 	return p, nil
+}
+
+func Name() string {
+	prov := config.Viper().GetString("provider")
+	if prov == "docker_machine" {
+		prov = "docker-machine"
+	}
+	// set the provider to the default if it is a bad input
+	if prov != "docker-machine" && prov != "native" {
+		prov = "docker-machine"
+	}
+
+	return prov
 }

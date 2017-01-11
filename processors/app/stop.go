@@ -13,7 +13,6 @@ import (
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/locker"
-	"github.com/nanobox-io/nanobox/util/provider"
 )
 
 // Stop will stop all services associated with an app
@@ -81,11 +80,6 @@ func stopDevContainer(appModel *models.App) error {
 	// extract the container IP
 	ip := docker.GetIP(container)
 
-	// detach dev container from the network
-	if err := detachNetwork(appModel, ip); err != nil {
-		return fmt.Errorf("failed to detach dev container from network: %s", err.Error())
-	}
-
 	// return the container IP back to the IP pool
 	if err := dhcp.ReturnIP(net.ParseIP(ip)); err != nil {
 		lumber.Error("dev:console:teardown:dhcp.ReturnIP(%s): %s", ip, err)
@@ -93,26 +87,5 @@ func stopDevContainer(appModel *models.App) error {
 		lumber.Error("An error occurred durring dev console teadown:%s", err.Error())
 		return fmt.Errorf("failed to return unused IP back to pool: %s", err.Error())
 	}
-	return nil
-}
-
-// detachNetwork detaches the container from the host network
-func detachNetwork(appModel *models.App, containerIP string) error {
-
-	// fetch the envIP
-	envIP := appModel.GlobalIPs["env"]
-
-	// remove nat
-	if err := provider.RemoveNat(envIP, containerIP); err != nil {
-		lumber.Error("dev:detachNetwork:provider.RemoveNat(%s, %s):%s", envIP, containerIP, err.Error())
-		return fmt.Errorf("failed to remove NAT from container: %s", err.Error())
-	}
-
-	// remove the IP from the provider
-	if err := provider.RemoveIP(envIP); err != nil {
-		lumber.Error("dev:detachNetwork:provider.RemoveIP(%s):%s", envIP, err.Error())
-		return fmt.Errorf("failed to remove the IP from the provider: %s", err.Error())
-	}
-
 	return nil
 }

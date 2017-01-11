@@ -43,9 +43,11 @@ func parseConfig() error {
 
 	// set sensible defaults
 
-	// network space
+	// network spaces
+	config.SetDefault("native-network-space", "172.18.0.1/16")
+
 	config.SetDefault("external-network-space", "192.168.99.50/24")
-	config.SetDefault("internal-network-space", "192.168.0.50/16")
+	config.SetDefault("docker-machine-network-space", "172.19.0.1/16")
 
 	// configurable options (via ~.nanobox/config.yml); these defaults are set here
 	// incase for some reason an incomplete or invalid config.yml is parsed, nanobox

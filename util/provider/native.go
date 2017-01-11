@@ -2,9 +2,11 @@ package provider
 
 import (
 	"fmt"
+	"net"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/jcelliott/lumber"
@@ -27,7 +29,8 @@ func (native Native) Valid() (bool, []string) {
 	cmd := exec.Command("docker", "ps")
 
 	//
-	if err := cmd.Run(); err != nil {
+	if out, err := cmd.CombinedOutput(); err != nil {
+		fmt.Println(string(out))
 		return false, []string{"docker"}
 	}
 
@@ -38,12 +41,8 @@ func (native Native) Status() string {
 	return "Running"
 }
 
-func (native Native) IsInstalled() bool {
-	return true
-}
-
-func (native Native) Install() error {
-	return nil
+func (native Native) BridgeRequired() bool {
+	return runtime.GOOS != "linux"
 }
 
 // Create does nothing for native
@@ -67,6 +66,7 @@ func (native Native) Stop() error {
 // implode loops through the docker containers we created
 // and removes each one
 func (native Native) Implode() error {
+	// remove any crufty containers
 	cmd := exec.Command("docker", "ps", "-a")
 	bytes, err := cmd.CombinedOutput()
 	if err != nil {
@@ -83,6 +83,9 @@ func (native Native) Implode() error {
 		}
 	}
 
+	if len(containers) == 0 {
+		return nil
+	}
 	cmdParts := append([]string{"rm", "-f"}, containers...)
 	cmd = exec.Command("docker", cmdParts...)
 	cmd.Stdout = display.NewStreamer("  ")
@@ -118,7 +121,12 @@ func (native Native) Start() error {
 	if !native.hasNetwork() {
 		fmt.Print(stylish.Bullet("Setting up custom docker network..."))
 
-		cmd := exec.Command("docker", "network", "create", "--driver=bridge", "--subnet=192.168.0.0/24", "--opt=\"com.docker.network.driver.mtu=1450\"", "--opt=\"com.docker.network.bridge.name=redd0\"", "--gateway=192.168.0.1", "nanobox")
+		ip, ipNet, err := net.ParseCIDR(config.Viper().GetString("native-network-space"))
+		if err != nil {
+			return err
+		}
+
+		cmd := exec.Command("docker", "network", "create", "--driver=bridge", fmt.Sprintf("--subnet=%s", ipNet.String()), "--opt=\"com.docker.network.driver.mtu=1450\"", "--opt=\"com.docker.network.bridge.name=redd0\"", fmt.Sprintf("--gateway=%s", ip.String()), "nanobox")
 
 		cmd.Stdout = display.NewStreamer("  ")
 		cmd.Stderr = display.NewStreamer("  ")
@@ -132,7 +140,7 @@ func (native Native) Start() error {
 }
 
 func (native Native) IsReady() bool {
-	return true
+	return native.hasNetwork()
 }
 
 // HostShareDir ...
@@ -166,12 +174,6 @@ func (native Native) DockerEnv() error {
 	return nil
 }
 
-// Touch touches a file on the host
-func (native Native) Touch(file string) error {
-	// TODO: ???
-	return nil
-}
-
 // AddIP adds an IP into the host for host access
 func (native Native) AddIP(ip string) error {
 	// TODO: ???
@@ -185,7 +187,7 @@ func (native Native) RemoveIP(ip string) error {
 }
 
 func (native Native) SetDefaultIP(ip string) error {
-	// nothing is necessary ehre
+	// nothing is necessary here
 	return nil
 }
 
@@ -201,19 +203,8 @@ func (native Native) RemoveNat(ip, containerIP string) error {
 	return nil
 }
 
-// HasShare is not applicable for the native adapter, so will return false
-func (native Native) HasShare(_, _ string) bool {
+func (native Native) RequiresMount() bool {
 	return false
-}
-
-// AddShare is not applicable for the native adapter, so will return nil
-func (native Native) AddShare(_, _ string) error {
-	return nil
-}
-
-// RemoveShare is not applicable for the native adapter, so will return nil
-func (native Native) RemoveShare(_, _ string) error {
-	return nil
 }
 
 // HasMount will return true if the mount already exists
@@ -272,8 +263,11 @@ func (native Native) Run(command []string) ([]byte, error) {
 
 //
 func (native Native) RemoveEnvDir(id string) error {
-	// TODO: figure this out??
-	return nil
+	if id == "" {
+		return nil
+	}
+
+	return os.RemoveAll(native.HostMntDir() + id)
 }
 
 // hasNetwork ...

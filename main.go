@@ -2,6 +2,7 @@
 package main
 
 import (
+	"bufio"
 	"crypto/md5"
 	"fmt"
 	"os"
@@ -19,6 +20,7 @@ import (
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/provider"
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 var bugsnagToken string
@@ -32,7 +34,6 @@ func (bugLog) Printf(fmt string, v ...interface{}) {
 
 // main
 func main() {
-
 	// verify that we support the prompt they are using
 	if badTerminal() {
 		fmt.Println("This console is currently not supported by nanobox")
@@ -40,13 +41,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	fixRunArgs()
-
 	// do the commands configure check here because we need it to happen before setupBugsnag creates the config
 	if !config.ConfigExists() {
 		processors.Configure()
 	}
 
+	migrationCheck()
+
+	fixRunArgs()
 
 	// build the viper config because viper cannot handle concurrency
 	// so it has to be done at the beginning even if we dont need it
@@ -65,7 +67,7 @@ func main() {
 	}
 
 	// setup a file logger, this will be replaced in verbose mode.
-	fileLogger, err := lumber.NewTruncateLogger(filepath.ToSlash(filepath.Join(config.GlobalDir(), "nanobox.log")))
+	fileLogger, err := lumber.NewAppendLogger(filepath.ToSlash(filepath.Join(config.GlobalDir(), "nanobox.log")))
 	if err != nil {
 		fmt.Println("logging error:", err)
 	}
@@ -111,10 +113,11 @@ func setupBugsnag() {
 	}
 
 	bugsnag.Configure(bugsnag.Configuration{
-		APIKey:      bugsnagToken,
-		Logger:      bugLog{},
-		Synchronous: true,
-		AppVersion:  version,
+		APIKey:       bugsnagToken,
+		Logger:       bugLog{},
+		Synchronous:  true,
+		AppVersion:   version,
+		PanicHandler: func() {}, // the built in panic handler reexicutes our code
 	})
 
 	bugsnag.OnBeforeNotify(func(event *bugsnag.Event, config *bugsnag.Configuration) error {
@@ -122,6 +125,7 @@ func setupBugsnag() {
 		event.GroupingHash = fmt.Sprintf("%x", md5.Sum([]byte(event.Message)))
 		return nil
 	})
+
 }
 
 func badTerminal() bool {
@@ -155,4 +159,45 @@ LOOP:
 	if found {
 		os.Args = append(os.Args[:lastLocation+1], strings.Join(os.Args[lastLocation+1:], " "))
 	}
+}
+
+// check to see if we need to wipe the old
+func migrationCheck() {
+	providerName := config.Viper().GetString("provider")
+	providerModel, err := models.LoadProvider()
+
+	// if the provider hasnt changed or its a new provider
+	// no migration required
+	if util.IsPrivileged() || err != nil || providerModel.Name == providerName {
+		return
+	}
+
+	// remember the new provider
+	newProviderName := providerName
+
+	// when migrating from the old system
+	// the provider.Name may be blank
+	if providerModel.Name == "" {
+		display.MigrateOldRequired()
+		providerModel.Name = newProviderName
+	} else {
+		display.MigrateProviderRequired()
+	}
+
+	// adjust cached config to be the old provider
+	config.Viper().Set("provider", providerModel.Name)
+
+	// alert the user of our actions
+	fmt.Println("press enter to continue")
+	reader := bufio.NewReader(os.Stdin)
+	reader.ReadString('\n')
+
+	// implode the old system
+	processors.Implode()
+
+	// on implode success
+	// adjust the provider to the new one and save the provider model
+	config.Viper().Set("provider", newProviderName)
+	providerModel.Name = newProviderName
+	providerModel.Save()
 }

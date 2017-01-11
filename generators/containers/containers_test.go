@@ -1,12 +1,12 @@
 package containers_test
 
 import (
-	"testing"
 	"net"
+	"testing"
 
 	"github.com/nanobox-io/nanobox/generators/containers"
-	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util/dhcp"
 )
 
 func TestBuildConfig(t *testing.T) {
@@ -28,12 +28,13 @@ func TestCompileConfig(t *testing.T) {
 		t.Errorf("bad results")
 	}
 }
+
 func TestComponentConfig(t *testing.T) {
 	componentModel := &models.Component{
-		Image: "imagename",
+		Image:      "imagename",
 		InternalIP: "1.2.3.4",
-		AppID: "2",
-		Name: "name",
+		AppID:      "2",
+		Name:       "name",
 	}
 
 	result := containers.ComponentConfig(componentModel)
@@ -56,7 +57,7 @@ func TestPublishConfig(t *testing.T) {
 }
 
 func TestDevConfig(t *testing.T) {
-	appModel := &models.App{EnvID: "1", ID:"2"}
+	appModel := &models.App{EnvID: "1", ID: "2"}
 	result := containers.DevConfig(appModel)
 	if result.Network != "virt" ||
 		result.Image != "nanobox/build" ||

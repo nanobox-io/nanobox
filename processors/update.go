@@ -10,7 +10,6 @@ import (
 	process_provider "github.com/nanobox-io/nanobox/processors/provider"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/util/provider"
 	//	"github.com/nanobox-io/nanobox/util/update"
 )
 
@@ -29,8 +28,7 @@ func Update() error {
 		return fmt.Errorf("failed to pull images: %s", err)
 	}
 
-	// pull the latest docker-machine image
-	return provider.Install()
+	return nil
 }
 
 func pullImages() error {

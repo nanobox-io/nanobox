@@ -11,6 +11,11 @@ import (
 
 // Mount sets up the env mounts
 func Mount(env *models.Env) error {
+
+	if !provider.RequiresMount() {
+		return nil
+	}
+
 	display.StartTask("Mounting codebase")
 	defer display.StopTask()
 
@@ -35,6 +40,11 @@ func Mount(env *models.Env) error {
 		display.ErrorTask()
 		return fmt.Errorf("failed to mount the code share on the provider: %s", err.Error())
 	}
+
+	// // setup mount directories
+	// provider.Run([]string{"mkdir", "-p", fmt.Sprintf("%s%s/build", provider.HostMntDir(), env.ID)})
+	// provider.Run([]string{"mkdir", "-p", fmt.Sprintf("%s%s/deploy", provider.HostMntDir(), env.ID)})
+	// provider.Run([]string{"mkdir", "-p", fmt.Sprintf("%s%s/cache", provider.HostMntDir(), env.ID)})
 
 	return nil
 }

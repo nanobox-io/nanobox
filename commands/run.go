@@ -40,9 +40,7 @@ func runFn(ccmd *cobra.Command, args []string) {
 	envModel, _ := models.FindEnvByID(config.EnvID())
 	appModel, _ := models.FindAppBySlug(config.EnvID(), "dev")
 
-	consoleConfig := console.ConsoleConfig{
-		DevIP: appModel.GlobalIPs["env"],
-	}
+	consoleConfig := console.ConsoleConfig{}
 
 	if len(args) > 0 {
 		consoleConfig.Command = strings.Join(args, " ")

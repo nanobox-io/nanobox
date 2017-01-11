@@ -9,7 +9,14 @@ import (
 	"github.com/nanobox-io/nanobox/util/config"
 )
 
+var configured bool
+
 func Configure() error {
+	// make sure to only run configure one time
+	if configured {
+		return nil
+	}
+	configured = true
 
 	<-time.After(time.Second)
 
@@ -31,11 +38,10 @@ time by running: 'nanobox configure'
 `)
 
 	// ask about provider
-	// currently ignoring the input here
-	stringAsker(`
+	setupConf.Provider = stringAsker(`
 How would you like to run nanobox?
   a) Inside a lightweight VM
-  b) Via Docker Native (coming)
+  b) Via Docker Native
 
 (recommended a)
 Answer: `, map[string]string{"a": "docker-machine", "b": "native"})
