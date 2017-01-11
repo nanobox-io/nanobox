@@ -16,6 +16,7 @@ import (
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/console"
 	"github.com/nanobox-io/nanobox/util/display"
+	"github.com/nanobox-io/nanobox/util/provider"
 	"github.com/nanobox-io/nanobox/util/hookit"
 	"github.com/nanobox-io/nanobox/util/locker"
 	"github.com/nanobox-io/nanobox/util/watch"
@@ -166,7 +167,7 @@ func downloadImage(image string) error {
 
 func watchFiles(envModel *models.Env, appModel *models.App) {
 	boxfile := boxfile.New([]byte(appModel.DeployedBoxfile))
-	if boxfile.Node("run.config").BoolValue("fs_watch") {
+	if boxfile.Node("run.config").BoolValue("fs_watch") && provider.RequiresMount() {
 		lumber.Info("watcher starting")
 		go watch.Watch(container_generator.DevName(), envModel.Directory)
 	}
