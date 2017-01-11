@@ -185,7 +185,7 @@ func migrationCheck() {
 	config.Viper().Set("provider", providerModel.Name)
 
 	// alert the user of our actions
-	fmt.Println("manditory migration message")
+	fmt.Println(`Great news! Nanobox can now optionally run directly on top of Docker. This change constitutes a major architectural refactor as well as data re-structure. To use this version we need to purge your current apps. Fortunately, nanobox will re-build them for you the next time you use "nanobox run".`)
 	fmt.Println("press enter to continue")
 	reader := bufio.NewReader(os.Stdin)
 	reader.ReadString('\n')
