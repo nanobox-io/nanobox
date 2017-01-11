@@ -66,6 +66,7 @@ func (native Native) Stop() error {
 // implode loops through the docker containers we created
 // and removes each one
 func (native Native) Implode() error {
+	// remove any crufty containers
 	cmd := exec.Command("docker", "ps", "-a")
 	bytes, err := cmd.CombinedOutput()
 	if err != nil {
