@@ -20,7 +20,7 @@ import (
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/provider"
-	// "github.com/nanobox-io/nanobox/util/display"
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 var bugsnagToken string
@@ -178,14 +178,16 @@ func migrationCheck() {
 	// when migrating from the old system
 	// the provider.Name may be blank
 	if providerModel.Name == "" {
+		display.MigrateOldRequired()
 		providerModel.Name = newProviderName
+	} else {
+		display.MigrateProviderRequired()
 	}
 
 	// adjust cached config to be the old provider
 	config.Viper().Set("provider", providerModel.Name)
 
 	// alert the user of our actions
-	fmt.Println(`Great news! Nanobox can now optionally run directly on top of Docker. This change constitutes a major architectural refactor as well as data re-structure. To use this version we need to purge your current apps. Fortunately, nanobox will re-build them for you the next time you use "nanobox run".`)
 	fmt.Println("press enter to continue")
 	reader := bufio.NewReader(os.Stdin)
 	reader.ReadString('\n')

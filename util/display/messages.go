@@ -143,3 +143,17 @@ func ProviderSetup() {
 
 `))
 }
+
+func MigrateOldRequired() {
+  os.Stderr.WriteString(fmt.Sprintf(`
+Great news! Nanobox can now optionally run directly on top of Docker. This change constitutes a major architectural refactor as well as data re-structure. To use this version we need to purge your current apps. Fortunately, nanobox will re-build them for you the next time you use "nanobox run".
+`))
+  
+}
+
+func MigrateProviderRequired() {
+  os.Stderr.WriteString(fmt.Sprintf(`
+    To migrate between providers we need to implode.. LACE UP ITS GOIGN TO GET BUMPY!
+`))
+}
+
