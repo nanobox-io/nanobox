@@ -67,9 +67,9 @@ func (machine DockerMachine) Valid() (bool, []string) {
 
 	case "darwin":
 		// unixCheck()
-		if err := exec.Command("nfsd", "status").Run(); err != nil {
-			missingParts = append(missingParts, "nfsd")
-		}
+		// if err := exec.Command("nfsd", "status").Run(); err != nil {
+		// 	missingParts = append(missingParts, "nfsd")
+		// }
 
 	case "windows":
 
