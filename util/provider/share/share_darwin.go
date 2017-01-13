@@ -6,12 +6,14 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"time"
 	"os/exec"
 	"strings"
 
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
 )
 
 // EXPORTSFILE ...
@@ -120,17 +122,14 @@ func reloadServer() error {
 		return nil
 	}
 
-	// make sure nfsd is running
-	cmd := exec.Command("nfsd", "enable")
-	if b, err := cmd.CombinedOutput(); err != nil {
-		lumber.Debug("enable nfs: %s", b)
-		return fmt.Errorf("enable nfs: %s %s", b, err.Error())
+	if err := util.Retry(startNFSD, 5, time.Second) ; err != nil {
+		lumber.Error("nfsd enable: %s", err)
+		return err
 	}
-	exec.Command("nfsd", "start")
 
 	// check the exports to make sure a reload will be successful; TODO: provide a
 	// clear message for a direction to fix
-	cmd = exec.Command("nfsd", "checkexports")
+	cmd := exec.Command("nfsd", "checkexports")
 	if b, err := cmd.CombinedOutput(); err != nil {
 		lumber.Debug("checkexports: %s", b)
 		return fmt.Errorf("checkexports: %s %s", b, err.Error())
@@ -143,6 +142,26 @@ func reloadServer() error {
 		return fmt.Errorf("update: %s %s", b, err.Error())
 	}
 
+	return nil
+}
+
+func startNFSD() error {
+	// make sure nfsd is running
+	cmd := exec.Command("nfsd", "enable")
+	if b, err := cmd.CombinedOutput(); err != nil {
+		lumber.Debug("enable nfs: %s", b)
+		return fmt.Errorf("enable nfs: %s %s", b, err.Error())
+	}
+
+	// request it to start but if everythign is working starting could cause an error
+	// we dont want to check
+	exec.Command("nfsd", "start").CombinedOutput()
+	
+	// check to see if nfsd is running
+	b, _ := exec.Command("netstat", "-l").CombinedOutput()
+	if !strings.Contains(string(b), ".nfsd") {
+		return fmt.Errorf("nfsd ports not in use")
+	}
 	return nil
 }
 
