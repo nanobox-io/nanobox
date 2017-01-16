@@ -5,7 +5,7 @@ run.config:
     package: github.com/nanobox-io/nanobox
   dev_packages:
     - py27-awscli
-    - coreutils  
+    - coreutils
   extra_steps:
-    - "go get github.com/mitchellh/gox"
     - "go get github.com/kardianos/govendor"
+    - "go get github.com/mitchellh/gox"
