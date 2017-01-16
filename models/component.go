@@ -27,13 +27,6 @@ type (
 		Plan       ComponentPlan `json:"plan"`
 		State      string        `json:"state"`
 	}
-
-	// ComponentUser ...
-	ComponentUser struct {
-		Username string                 `json:"username"`
-		Password string                 `json:"password"`
-		Meta     map[string]interface{} `json:"meta"`
-	}
 )
 
 // IsNew returns true if the Component hasn't been created yet
@@ -81,6 +74,7 @@ func (c *Component) GeneratePlan(data string) error {
 	if data == "" {
 		return nil
 	}
+	
 	// decode the json directly into the component plan
 	if err := json.Unmarshal([]byte(data), &c.Plan); err != nil {
 		return fmt.Errorf("failed to decode the plan data:%s", err.Error())
