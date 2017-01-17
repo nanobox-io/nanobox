@@ -1,6 +1,8 @@
 package commands
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/commands/steps"
@@ -29,6 +31,16 @@ func init() {
 
 // configureFn ...
 func configureFn(ccmd *cobra.Command, args []string) {
+	// if they want to configure a key/value
+	// show the config
+	if len(args) == 1 {
+		config, _ := models.LoadConfig()
+		fmt.Printf("%+v\n", config)
+
+	}
+	if len(args) == 2 {
+		display.CommandErr(processors.ConfigureSet(args[0], args[1]))
+	}
 	display.CommandErr(processors.Configure())
 }
 
