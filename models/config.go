@@ -7,21 +7,21 @@ import (
 
 // Config ...
 type Config struct {
-	Provider                  string
+	Provider                  string  `json:"provider"`
 
 	// required for docker-machine
-	MountType                 string
-	NetfsMountOpts            string
-	CPUs                      int
-	RAM                       int
-	Disk                      int
+	MountType                 string `json:"mount-type"`
+	NetfsMountOpts            string `json:"netfs-mount-opts"`
+	CPUs                      int `json:"cpus"`
+	RAM                       int `json:"ram"`
+	Disk                      int `json:"disk"`
 
 	// ip address spaces
-	ExternalNetworkSpace      string
-	DockerMachineNetworkSpace string
-	NativeNetworkSpace        string
+	ExternalNetworkSpace      string `json:"external-network-space"`
+	DockerMachineNetworkSpace string `json:"docker-machine-network-space"`
+	NativeNetworkSpace        string `json:"native-network-space"`
 
-	LockPort                  int
+	LockPort                  int `json:"lock-port"`
 }
 
 // Save persists the Config to the database
@@ -60,15 +60,15 @@ func (c *Config) makeValid() {
 		c.Disk = 15360
 	}
 
-	if _, _, err := net.ParseCIDR(c.ExternalNetworkSpace); err != nil {
+	if _, _, err := net.ParseCIDR(c.ExternalNetworkSpace); c.ExternalNetworkSpace == "" || err != nil {
 		c.ExternalNetworkSpace = "192.168.99.50/24"
 	}
 
-	if _, _, err := net.ParseCIDR(c.DockerMachineNetworkSpace); err != nil {
+	if _, _, err := net.ParseCIDR(c.DockerMachineNetworkSpace); c.DockerMachineNetworkSpace == "" || err != nil {
 		c.DockerMachineNetworkSpace = "172.19.0.1/16"
 	}
 
-	if _, _, err := net.ParseCIDR(c.NativeNetworkSpace); err != nil {
+	if _, _, err := net.ParseCIDR(c.NativeNetworkSpace); c.NativeNetworkSpace == "" || err != nil {
 		c.NativeNetworkSpace = "172.18.0.1/16"
 	}
 

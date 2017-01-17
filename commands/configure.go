@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"encoding/json"
 
 	"github.com/spf13/cobra"
 
@@ -35,13 +36,16 @@ func configureFn(ccmd *cobra.Command, args []string) {
 	// show the config
 	if len(args) == 1 {
 		config, _ := models.LoadConfig()
-		fmt.Printf("%+v\n", config)
+		prettyJson, _ := json.MarshalIndent(config, "", "  ")
+		fmt.Printf("%s\n", prettyJson)
+		return
 
 	}
 	if len(args) == 2 {
 		display.CommandErr(processors.ConfigureSet(args[0], args[1]))
+		return
 	}
-	display.CommandErr(processors.Configure())
+	// display.CommandErr(processors.Configure())
 }
 
 func configureComplete() bool {
