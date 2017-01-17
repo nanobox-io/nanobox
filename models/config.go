@@ -95,11 +95,11 @@ func (c *Config) Delete() error {
 
 // LoadConfig loads the Config entry
 func LoadConfig() (*Config, error) {
-	Config := &Config{}
-
-	if err := get("registry", "Config", &Config); err != nil {
-		return Config, fmt.Errorf("failed to load Config: %s", err.Error())
+	c := &Config{}
+	c.makeValid()
+	if err := get("registry", "Config", &c); err != nil {
+		return c, fmt.Errorf("failed to load Config: %s", err.Error())
 	}
 
-	return Config, nil
+	return c, nil
 }
