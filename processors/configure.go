@@ -6,7 +6,7 @@ import (
 	"runtime"
 	"time"
 
-	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/models"
 )
 
 var configured bool
@@ -20,11 +20,11 @@ func Configure() error {
 
 	<-time.After(time.Second)
 
-	setupConf := &config.SetupConf{
-		Provider: "docker-machine",
-		Mount:    "native",
-		CPUs:     1,
-		RAM:      1,
+	config := &models.Config{
+		Provider:  "docker-machine",
+		MountType: "native",
+		CPUs:      1,
+		RAM:       1,
 	}
 
 	fmt.Print(`
@@ -38,7 +38,7 @@ time by running: 'nanobox configure'
 `)
 
 	// ask about provider
-	setupConf.Provider = stringAsker(`
+	config.Provider = stringAsker(`
 How would you like to run nanobox?
   a) Inside a lightweight VM
   b) Via Docker Native
@@ -47,34 +47,34 @@ How would you like to run nanobox?
 Answer: `, map[string]string{"a": "docker-machine", "b": "native"})
 
 	// if provider == docker-machine ask more questions
-	if setupConf.Provider == "native" {
-		config.ConfigFile(setupConf)
+	if config.Provider == "native" {
+		config.Save()
 		return nil
 	}
 
 	// ask about cpus
-	setupConf.CPUs = intAsker(fmt.Sprintf(`
+	config.CPUs = intAsker(fmt.Sprintf(`
 How many CPU cores would you like to make available to the VM (1-%d)?
 
 (recommended > 2)
 Answer: `, runtime.NumCPU()), runtime.NumCPU())
 
 	// ask about ram
-	setupConf.RAM = intAsker(`
+	config.RAM = intAsker(`
 How many GB of RAM would you like to make available to the VM (2-4)?
 
 (recommended > 1)
 Answer: `, 4)
 
 	// ask about mount types
-	setupConf.Mount = stringAsker(`
+	config.MountType = stringAsker(`
 Would you like to enable netfs for faster filesystem access (y/n)?
 (we highly recommend using this option, but this will prompt for password)
 
 (recommended y)
 Answer: `, map[string]string{"y": "netfs", "n": "native"})
 
-	config.ConfigFile(setupConf)
+	config.Save()
 	return nil
 
 }

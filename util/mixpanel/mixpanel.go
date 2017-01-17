@@ -7,21 +7,21 @@ import (
 	mp "github.com/timehop/go-mixpanel"
 
 	"github.com/nanobox-io/nanobox/util"
-	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/models"
 )
 
 var token string
 
 func Report(args string) {
 	go func() {
-
+		config, _ := models.LoadConfig()
 		mx := mp.NewMixpanel(token)
 		id := util.UniqueID()
 
 		err := mx.Track(id, "command", mp.Properties{
 			"os":         runtime.GOOS,
-			"provider":   config.Viper().GetString("provider"),
-			"mount-type": config.Viper().GetString("mount-type"),
+			"provider":   config.Provider,
+			"mount-type": config.MountType,
 			"args":       args,
 			"cpus":       runtime.NumCPU(),
 		})

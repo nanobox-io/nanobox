@@ -12,6 +12,7 @@ import (
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox-golang-stylish"
 
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 )
@@ -121,7 +122,8 @@ func (native Native) Start() error {
 	if !native.hasNetwork() {
 		fmt.Print(stylish.Bullet("Setting up custom docker network..."))
 
-		ip, ipNet, err := net.ParseCIDR(config.Viper().GetString("native-network-space"))
+		config, _ := models.LoadConfig()
+		ip, ipNet, err := net.ParseCIDR(config.NativeNetworkSpace)
 		if err != nil {
 			return err
 		}

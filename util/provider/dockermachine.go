@@ -13,7 +13,6 @@ import (
 	"strings"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 	// "github.com/nanobox-io/nanobox/util/fileutil"
 	"github.com/nanobox-io/nanobox/util/vbox"
@@ -45,7 +44,9 @@ func (machine DockerMachine) Valid() (bool, []string) {
 	}
 
 	// return early if we are running native mounts
-	if config.Viper().GetString("mount-type") == "native" {
+	config, _ := models.LoadConfig()
+
+	if config.MountType == "native" {
 		return len(missingParts) == 0, missingParts
 	}
 
@@ -99,22 +100,22 @@ func (machine DockerMachine) Create() error {
 	display.ProviderSetup()
 
 	// load the configuration for docker-machine
-	conf := config.Viper()
+	conf, _ := models.LoadConfig()
 
 	// load the cpus setting
-	cpus := conf.GetInt("cpus")
+	cpus := conf.CPUs
 	if cpus < 1 {
 		cpus = 1
 	}
 
 	// load the ram setting
-	ram := conf.GetInt("ram")
+	ram := conf.RAM
 	if ram < 1 {
 		ram = 1
 	}
 
 	// load in the disk size
-	disk := conf.GetInt("disk")
+	disk := conf.Disk
 
 	cmd := []string{
 		dockerMachineCmd,
@@ -130,7 +131,7 @@ func (machine DockerMachine) Create() error {
 	}
 
 	// append the disk if they set it big enough
-	if disk > 15360 {
+	if disk >= 15360 {
 		cmd = append(cmd, "--virtualbox-disk-size", fmt.Sprintf("%d", disk))
 	}
 
@@ -260,13 +261,12 @@ func (machine DockerMachine) Start() error {
 
 	// create custom nanobox docker network
 	if !machine.hasNetwork() {
-
-		ip, ipNet, err := net.ParseCIDR(config.Viper().GetString("docker-machine-network-space"))
+		config, _ := models.LoadConfig()
+		ip, ipNet, err := net.ParseCIDR(config.DockerMachineNetworkSpace)
 		if err != nil {
 			return err
 		}
 
-		// networkSpace := config.Viper().GetString("docker-machine-network-space")
 		cmd := []string{
 			dockerMachineCmd,
 			"ssh",

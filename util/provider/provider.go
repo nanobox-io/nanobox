@@ -3,7 +3,7 @@ package provider
 import (
 	"errors"
 
-	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/models"
 )
 
 // Provider ...
@@ -353,7 +353,9 @@ func fetchProvider() (Provider, error) {
 }
 
 func Name() string {
-	prov := config.Viper().GetString("provider")
+	config, _ := models.LoadConfig()
+
+	prov := config.Provider
 	if prov == "docker_machine" {
 		prov = "docker-machine"
 	}

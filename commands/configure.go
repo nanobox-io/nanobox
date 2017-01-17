@@ -5,7 +5,7 @@ import (
 
 	"github.com/nanobox-io/nanobox/commands/steps"
 	"github.com/nanobox-io/nanobox/processors"
-	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
@@ -33,5 +33,6 @@ func configureFn(ccmd *cobra.Command, args []string) {
 }
 
 func configureComplete() bool {
-	return config.ConfigExists()
+	_, err := models.LoadConfig()
+	return err == nil
 }
