@@ -1,14 +1,14 @@
 package commands
 
 import (
-	"fmt"
 	"encoding/json"
+	"fmt"
 
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/commands/steps"
-	"github.com/nanobox-io/nanobox/processors"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processors"
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
@@ -45,7 +45,7 @@ func configureFn(ccmd *cobra.Command, args []string) {
 		display.CommandErr(processors.ConfigureSet(args[0], args[1]))
 		return
 	}
-	// display.CommandErr(processors.Configure())
+	display.CommandErr(processors.Configure())
 }
 
 func configureComplete() bool {

@@ -10,8 +10,8 @@ import (
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/commands/registry"
-	"github.com/nanobox-io/nanobox/processors/env/share"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processors/env/share"
 )
 
 func (machine DockerMachine) RequiresMount() bool {

@@ -19,8 +19,8 @@ import (
 	"github.com/nanobox-io/nanobox/processors"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/provider"
 	"github.com/nanobox-io/nanobox/util/display"
+	"github.com/nanobox-io/nanobox/util/provider"
 )
 
 var bugsnagToken string
@@ -158,6 +158,7 @@ LOOP:
 		}
 
 	}
+
 	if found {
 		os.Args = append(os.Args[:lastLocation+1], strings.Join(os.Args[lastLocation+1:], " "))
 	}

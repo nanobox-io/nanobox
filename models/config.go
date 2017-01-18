@@ -7,21 +7,21 @@ import (
 
 // Config ...
 type Config struct {
-	Provider                  string  `json:"provider"`
+	Provider string `json:"provider"`
 
 	// required for docker-machine
-	MountType                 string `json:"mount-type"`
-	NetfsMountOpts            string `json:"netfs-mount-opts"`
-	CPUs                      int `json:"cpus"`
-	RAM                       int `json:"ram"`
-	Disk                      int `json:"disk"`
+	MountType      string `json:"mount-type"`
+	NetfsMountOpts string `json:"netfs-mount-opts"`
+	CPUs           int    `json:"cpus"`
+	RAM            int    `json:"ram"`
+	Disk           int    `json:"disk"`
 
 	// ip address spaces
 	ExternalNetworkSpace      string `json:"external-network-space"`
 	DockerMachineNetworkSpace string `json:"docker-machine-network-space"`
 	NativeNetworkSpace        string `json:"native-network-space"`
 
-	LockPort                  int `json:"lock-port"`
+	LockPort int `json:"lock-port"`
 }
 
 // Save persists the Config to the database
@@ -47,7 +47,6 @@ func (c *Config) makeValid() {
 		c.MountType = "native"
 	}
 
-	
 	if c.CPUs == 0 {
 		c.CPUs = 1
 	}
@@ -73,9 +72,8 @@ func (c *Config) makeValid() {
 	}
 
 	if c.LockPort == 0 {
-		c.LockPort = 12345 
+		c.LockPort = 12345
 	}
-
 
 }
 

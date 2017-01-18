@@ -24,7 +24,7 @@ shutdown_method=winmessage
 }
 
 func CreateService() error {
-	
+
 	// make sure we actually have to do this part
 	if out, _ := exec.Command("sc", "query", "nanobox-vpn").CombinedOutput(); !strings.Contains(string(out), "service does not exist") {
 		return nil
@@ -37,7 +37,7 @@ func CreateService() error {
 
 	// the service may have been created this should clean out any old version
 	// we arent catching errors just incase they dont exist
-	StopService()	
+	StopService()
 	Remove()
 	out, err := exec.Command("sc", "create", "nanobox-vpn", "binpath=", fmt.Sprintf(`%s\srvstart.exe nanobox-vpn  -c "%s"`, config.BinDir(), ServiceConfigFile())).CombinedOutput()
 	lumber.Info("sc", "create", "nanobox-vpn", "binpath=", fmt.Sprintf(`%s\srvstart.exe nanobox-vpn  -c "%s"`, config.BinDir(), ServiceConfigFile()))

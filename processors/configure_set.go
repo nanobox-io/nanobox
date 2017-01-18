@@ -28,7 +28,7 @@ func ConfigureSet(key, val string) error {
 		config.DockerMachineNetworkSpace = val
 	case "native_network_space", "native-network-space":
 		config.NativeNetworkSpace = val
-	case "lock_port", "lock-port":	
+	case "lock_port", "lock-port":
 		config.LockPort, _ = strconv.Atoi(val)
 
 	}
