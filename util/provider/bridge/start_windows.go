@@ -39,6 +39,7 @@ func CreateService() error {
 	// we arent catching errors just incase they dont exist
 	StopService()
 	Remove()
+	
 	out, err := exec.Command("sc", "create", "nanobox-vpn", "binpath=", fmt.Sprintf(`%s\srvstart.exe nanobox-vpn  -c "%s"`, config.BinDir(), ServiceConfigFile())).CombinedOutput()
 	lumber.Info("sc", "create", "nanobox-vpn", "binpath=", fmt.Sprintf(`%s\srvstart.exe nanobox-vpn  -c "%s"`, config.BinDir(), ServiceConfigFile()))
 	lumber.Info("\n\nout: %s\n\n", out)
