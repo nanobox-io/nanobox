@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/jcelliott/lumber"
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/config"
 )
 
@@ -45,7 +46,8 @@ func LocalTryLock() (bool, error) {
 	}
 
 	//
-	port := config.Viper().GetInt("lock-port")
+	config, _ := models.LoadConfig()
+	port := config.LockPort
 	if port == 0 {
 		port = 12345
 	}

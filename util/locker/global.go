@@ -8,7 +8,7 @@ import (
 
 	"github.com/jcelliott/lumber"
 
-	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/models"
 )
 
 var (
@@ -49,7 +49,8 @@ func GlobalTryLock() (bool, error) {
 	}
 
 	//
-	port := config.Viper().GetInt("lock-port")
+	config, _ := models.LoadConfig()
+	port := config.LockPort
 	if port == 0 {
 		port = 12345
 	}

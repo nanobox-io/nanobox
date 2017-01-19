@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"time"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/jcelliott/lumber"
 
@@ -122,7 +122,7 @@ func reloadServer() error {
 		return nil
 	}
 
-	if err := util.Retry(startNFSD, 5, time.Second) ; err != nil {
+	if err := util.Retry(startNFSD, 5, time.Second); err != nil {
 		lumber.Error("nfsd enable: %s", err)
 		return err
 	}
@@ -156,7 +156,7 @@ func startNFSD() error {
 	// request it to start but if everythign is working starting could cause an error
 	// we dont want to check
 	exec.Command("nfsd", "start").CombinedOutput()
-	
+
 	// check to see if nfsd is running
 	b, _ := exec.Command("netstat", "-l").CombinedOutput()
 	if !strings.Contains(string(b), ".nfsd") {

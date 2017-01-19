@@ -74,7 +74,7 @@ func (c *Component) GeneratePlan(data string) error {
 	if data == "" {
 		return nil
 	}
-	
+
 	// decode the json directly into the component plan
 	if err := json.Unmarshal([]byte(data), &c.Plan); err != nil {
 		return fmt.Errorf("failed to decode the plan data:%s", err.Error())

@@ -19,8 +19,8 @@ import (
 	"github.com/nanobox-io/nanobox/processors"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/provider"
 	"github.com/nanobox-io/nanobox/util/display"
+	"github.com/nanobox-io/nanobox/util/provider"
 )
 
 var bugsnagToken string
@@ -42,7 +42,7 @@ func main() {
 	}
 
 	// do the commands configure check here because we need it to happen before setupBugsnag creates the config
-	if !config.ConfigExists() {
+	if _, err := models.LoadConfig(); err != nil {
 		processors.Configure()
 	}
 
@@ -50,9 +50,11 @@ func main() {
 
 	fixRunArgs()
 
+	configModel, _ := models.LoadConfig()
+
 	// build the viper config because viper cannot handle concurrency
 	// so it has to be done at the beginning even if we dont need it
-	providerName := config.Viper().GetString("provider")
+	providerName := configModel.Provider
 
 	// make sure nanobox has all the necessry parts
 	valid, missingParts := provider.Valid()
@@ -156,6 +158,7 @@ LOOP:
 		}
 
 	}
+
 	if found {
 		os.Args = append(os.Args[:lastLocation+1], strings.Join(os.Args[lastLocation+1:], " "))
 	}
@@ -163,7 +166,8 @@ LOOP:
 
 // check to see if we need to wipe the old
 func migrationCheck() {
-	providerName := config.Viper().GetString("provider")
+	config, _ := models.LoadConfig()
+	providerName := config.Provider
 	providerModel, err := models.LoadProvider()
 
 	// if the provider hasnt changed or its a new provider
@@ -185,7 +189,8 @@ func migrationCheck() {
 	}
 
 	// adjust cached config to be the old provider
-	config.Viper().Set("provider", providerModel.Name)
+	config.Provider = providerModel.Name
+	config.Save()
 
 	// alert the user of our actions
 	fmt.Println("press enter to continue")
@@ -197,7 +202,9 @@ func migrationCheck() {
 
 	// on implode success
 	// adjust the provider to the new one and save the provider model
-	config.Viper().Set("provider", newProviderName)
+	config.Provider = newProviderName
+	config.Save()
+
 	providerModel.Name = newProviderName
 	providerModel.Save()
 }

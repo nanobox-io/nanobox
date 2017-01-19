@@ -145,7 +145,7 @@ func ProviderSetup() {
 }
 
 func MigrateOldRequired() {
-  os.Stderr.WriteString(fmt.Sprintf(`
+	os.Stderr.WriteString(fmt.Sprintf(`
 --------------------------------------------------------------------------------
 + WARNING:
 + Nanobox has been successfully upgraded! This change constitutes a major 
@@ -154,11 +154,11 @@ func MigrateOldRequired() {
 + you the next time you use "nanobox run".
 --------------------------------------------------------------------------------
 `))
-  
+
 }
 
 func MigrateProviderRequired() {
-  os.Stderr.WriteString(fmt.Sprintf(`
+	os.Stderr.WriteString(fmt.Sprintf(`
 --------------------------------------------------------------------------------
 + WARNING:
 + It looks like you want to use a different provider, cool! Just FYI, we have

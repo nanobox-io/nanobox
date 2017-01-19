@@ -54,6 +54,7 @@ func Destroy(env *models.Env) error {
 	docker.VolumeRemove(fmt.Sprintf("nanobox_%s_cache", env.ID))
 	docker.VolumeRemove(fmt.Sprintf("nanobox_%s_mount", env.ID))
 	docker.VolumeRemove(fmt.Sprintf("nanobox_%s_deploy", env.ID))
+	docker.VolumeRemove(fmt.Sprintf("nanobox_%s_build", env.ID))
 
 	// remove the environment
 	if err := env.Delete(); err != nil {

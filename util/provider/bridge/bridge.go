@@ -80,6 +80,9 @@ func Connected() bool {
 				continue
 			}
 			if network.Contains(ip) {
+				if i.Flags & net.FlagUp != net.FlagUp {
+					return false
+				}
 				return true
 			}
 		}

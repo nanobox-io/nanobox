@@ -8,6 +8,7 @@ import (
 
 	"github.com/jcelliott/lumber"
 
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 )
@@ -54,7 +55,8 @@ func (machine DockerMachine) addNetfsMount(local, host string) error {
 	// mount -t cifs -o username=USER,password=PASSWORD //192.168.99.1/APP /PATH
 	source := fmt.Sprintf("//192.168.99.1/nanobox-%s", appID)
 	// mfsymlinks,
-	additionalOptions := config.Viper().GetString("netfs_mount_opts")
+	config, _ := models.LoadConfig()
+	additionalOptions := config.NetfsMountOpts
 	opts := fmt.Sprintf("sec=ntlmssp,user='%s',password='%s',uid=1000,gid=1000", user, pass)
 	if additionalOptions != "" {
 		opts = fmt.Sprintf("%s,%s", additionalOptions, opts)

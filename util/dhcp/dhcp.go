@@ -7,7 +7,6 @@ import (
 	"sync"
 
 	"github.com/nanobox-io/nanobox/models"
-	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/locker"
 	"github.com/nanobox-io/nanobox/util/provider"
 )
@@ -84,7 +83,8 @@ func LocalNet() (*net.IPNet, error) {
 		return nil, err
 	}
 	// switch based on what provider we are using
-	switch config.Viper().GetString("provider") {
+	config, _ := models.LoadConfig()
+	switch config.Provider {
 	case "docker-machine":
 		return &ipSpace.LocalNet, nil
 	case "native":
@@ -114,7 +114,9 @@ func ReserveLocal() (net.IP, error) {
 	}
 
 	// switch based on what provider we are using
-	switch config.Viper().GetString("provider") {
+	config, _ := models.LoadConfig()
+
+	switch config.Provider {
 	case "docker-machine":
 
 		// dump the first ip becuase it is the gateway
@@ -180,9 +182,10 @@ func ReturnIP(ip net.IP) error {
 // getIPSpace do not store the space on the disk.
 func getIPSpace() (IPSpace, error) {
 	ipSpace := IPSpace{}
+	config, _ := models.LoadConfig()
 
 	// there was no data stored for ip space so we need to populate it
-	ip, ipNet, err := net.ParseCIDR(config.Viper().GetString("external-network-space"))
+	ip, ipNet, err := net.ParseCIDR(config.ExternalNetworkSpace)
 	if err != nil {
 		return ipSpace, err
 	}
@@ -190,7 +193,7 @@ func getIPSpace() (IPSpace, error) {
 	ipSpace.GlobalNet = *ipNet
 
 	//
-	ip, ipNet, err = net.ParseCIDR(config.Viper().GetString("docker-machine-network-space"))
+	ip, ipNet, err = net.ParseCIDR(config.DockerMachineNetworkSpace)
 	if err != nil {
 		return ipSpace, err
 	}
@@ -198,7 +201,7 @@ func getIPSpace() (IPSpace, error) {
 	ipSpace.LocalNet = *ipNet
 
 	//
-	ip, ipNet, err = net.ParseCIDR(config.Viper().GetString("native-network-space"))
+	ip, ipNet, err = net.ParseCIDR(config.NativeNetworkSpace)
 	if err != nil {
 		return ipSpace, err
 	}

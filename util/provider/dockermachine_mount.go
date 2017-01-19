@@ -10,8 +10,8 @@ import (
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/commands/registry"
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/env/share"
-	"github.com/nanobox-io/nanobox/util/config"
 )
 
 func (machine DockerMachine) RequiresMount() bool {
@@ -73,7 +73,8 @@ func (machine DockerMachine) AddMount(local, host string) error {
 		}
 	}
 
-	switch config.Viper().GetString("mount-type") {
+	config, _ := models.LoadConfig()
+	switch config.MountType {
 
 	case "netfs":
 
