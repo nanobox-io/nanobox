@@ -51,7 +51,7 @@ Get a key from the configuration
 List the full configuration.
 		`,
 		Run: configureListFn,
-		Aliases: []string{"list"},	
+		Aliases: []string{"list", "ls"},	
 	}
 )
 
