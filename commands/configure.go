@@ -45,12 +45,13 @@ Get a key from the configuration
 	}
 
 	ConfigureListCmd = &cobra.Command{
-		Use:   "list",
+		Use:   "show",
 		Short: "Show the full configuration",
 		Long: `
 List the full configuration.
 		`,
 		Run: configureListFn,
+		Aliases: []string{"list"},	
 	}
 )
 
