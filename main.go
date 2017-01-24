@@ -58,15 +58,17 @@ func main() {
 	providerName := configModel.Provider
 
 	// make sure nanobox has all the necessry parts
-	valid, missingParts := provider.Valid()
-	if !valid {
-		fmt.Printf("Using nanobox with %s requires tools that appear to not be available on your system.\n", providerName)
-		fmt.Println(strings.Join(missingParts, "\n"))
-		if providerName == "native" {
-			providerName = "docker"
-		}
-		fmt.Printf("View these requirements at docs.nanobox.io/install/requirements/%s/\n", providerName)
-		os.Exit(1)
+	if !strings.Contains(command, " config") {
+		valid, missingParts := provider.Valid()
+		if !valid  {
+			fmt.Printf("Using nanobox with %s requires tools that appear to not be available on your system.\n", providerName)
+			fmt.Println(strings.Join(missingParts, "\n"))
+			if providerName == "native" {
+				providerName = "docker"
+			}
+			fmt.Printf("View these requirements at docs.nanobox.io/install/requirements/%s/\n", providerName)
+			os.Exit(1)
+		}		
 	}
 
 	// setup a file logger, this will be replaced in verbose mode.
