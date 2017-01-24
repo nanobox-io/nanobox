@@ -22,7 +22,7 @@ var (
 Walks through a series of question prompts that modify your local
 Nanobox configuration (~/.nanobox/config.yml).
 		`,
-		Run: configureFn,
+		Run:     configureFn,
 		Aliases: []string{"config"},
 	}
 
@@ -50,8 +50,8 @@ Get a key from the configuration
 		Long: `
 List the full configuration.
 		`,
-		Run: configureListFn,
-		Aliases: []string{"list", "ls"},	
+		Run:     configureListFn,
+		Aliases: []string{"list", "ls"},
 	}
 )
 
@@ -74,7 +74,7 @@ func configureSetFn(ccmd *cobra.Command, args []string) {
 	if len(args) != 2 {
 		fmt.Println("setting a key requires <key> <value>")
 		return
-	}	
+	}
 	display.CommandErr(processors.ConfigureSet(args[0], args[1]))
 }
 
@@ -88,7 +88,7 @@ func configureGetFn(ccmd *cobra.Command, args []string) {
 	configMap := map[string]interface{}{}
 	json.Unmarshal(jsonData, &configMap)
 	fmt.Println(configMap[args[0]])
-	return	
+	return
 
 }
 

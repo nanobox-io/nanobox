@@ -42,7 +42,8 @@ func main() {
 	}
 
 	// do the commands configure check here because we need it to happen before setupBugsnag creates the config
-	if _, err := models.LoadConfig(); err != nil {
+	command := strings.Join(os.Args, " ")
+	if _, err := models.LoadConfig(); err != nil && !strings.Contains(command, " config") {
 		processors.Configure()
 	}
 
