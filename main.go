@@ -36,8 +36,7 @@ func (bugLog) Printf(fmt string, v ...interface{}) {
 func main() {
 	// verify that we support the prompt they are using
 	if badTerminal() {
-		fmt.Println("This console is currently not supported by nanobox")
-		fmt.Println("Please refer to the docs for more information")
+		display.BadTerminal()
 		os.Exit(1)
 	}
 
@@ -60,12 +59,7 @@ func main() {
 	// make sure nanobox has all the necessry parts
 	valid, missingParts := provider.Valid()
 	if !valid {
-		fmt.Printf("Using nanobox with %s requires tools that appear to not be available on your system.\n", providerName)
-		fmt.Println(strings.Join(missingParts, "\n"))
-		if providerName == "native" {
-			providerName = "docker"
-		}
-		fmt.Printf("View these requirements at docs.nanobox.io/install/requirements/%s/\n", providerName)
+		display.MissingDependencies(providerName, missingParts)
 		os.Exit(1)
 	}
 
@@ -91,7 +85,8 @@ func main() {
 			stack := debug.Stack()
 
 			bugsnag.Notify(fmt.Errorf("panic"), bugsnag.SeverityError, bugsnag.User{Id: util.UniqueID()}, r, stack)
-
+			// in a panic state we dont want to try loading or using any non standard libraries.
+			// so we will just use the ones we already have
 			lumber.Fatal(fmt.Sprintf("Cause of failure: %v", r))
 			lumber.Fatal(fmt.Sprintf("Error output:\n%v\n", string(stack)))
 			lumber.Close()
