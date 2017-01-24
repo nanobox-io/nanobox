@@ -13,10 +13,10 @@ func Remove(name string) error {
 		if err != nil {
 			fmt.Errorf("out: %s, err: %s", out, err)
 		}
-		
+
 	}
 
 	os.Remove(serviceConfigFile(name))
 	return nil
-	
+
 }

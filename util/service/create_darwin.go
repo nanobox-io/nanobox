@@ -2,9 +2,9 @@ package service
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os/exec"
 	"strings"
-	"io/ioutil"
 )
 
 func Create(name string, command []string) error {

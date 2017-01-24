@@ -2,10 +2,9 @@ package service
 
 import (
 	"fmt"
-	"strings"
 	"io/ioutil"
+	"strings"
 )
-
 
 func Create(name string, command []string) error {
 	// setup config file
@@ -37,4 +36,3 @@ end script`, strings.Join(command, " "))
 
 	return ""
 }
-

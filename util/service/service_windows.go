@@ -16,7 +16,7 @@ func startCmd(name string) []string {
 }
 
 func stopCmd(name string) []string {
-	return []string{"sc", "stop", name}	
+	return []string{"sc", "stop", name}
 }
 
 func removeCmd(name string) []string {

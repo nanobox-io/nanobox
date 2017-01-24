@@ -2,12 +2,11 @@ package service
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os/exec"
 	"strings"
-	"io/ioutil"
 
 	"github.com/nanobox-io/nanobox/util/config"
-
 )
 
 func Create(name string, command []string) error {
@@ -26,7 +25,7 @@ func Create(name string, command []string) error {
 	// we arent catching errors just incase they dont exist
 	Stop(name)
 	Remove(name)
-	
+
 	out, err := exec.Command("sc", "create", name, "binpath=", fmt.Sprintf(`%s\srvstart.exe %s -c "%s"`, config.BinDir(), name, serviceConfigFile(name))).CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("%s: %s", out, err)

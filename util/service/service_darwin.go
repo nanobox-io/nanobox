@@ -11,7 +11,7 @@ func startCmd(name string) []string {
 }
 
 func stopCmd(name string) []string {
-	return []string{"launchctl", "stop", fmt.Sprintf("io.%s", name)}	
+	return []string{"launchctl", "stop", fmt.Sprintf("io.%s", name)}
 }
 
 func removeCmd(name string) []string {

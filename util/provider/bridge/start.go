@@ -1,6 +1,6 @@
 package bridge
 
-import  (
+import (
 	"fmt"
 	"path/filepath"
 	"runtime"
@@ -15,7 +15,7 @@ func CreateService() error {
 	if runtime.GOOS == "windows" {
 		cmd = []string{fmt.Sprintf(`"%s\%s.exe"`, config.BinDir(), BridgeClient), "--config", fmt.Sprintf(`"%s"`, ConfigFile())}
 	}
-	
+
 	return service.Create("nanobox-vpn", cmd)
 }
 
