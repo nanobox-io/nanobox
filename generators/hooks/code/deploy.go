@@ -17,7 +17,7 @@ type (
 		BeforeLiveAll      interface{}    `json:"before_live_all,omitempty"`
 		AfterLive          interface{}    `json:"after_live,omitempty"`
 		AfterLiveAll       interface{}    `json:"after_live_all,omitempty"`
-		DeployHookTimeout  int            `json:"deploy_hook_timeout,omitempty"`
+		DeployHookTimeout  interface{}    `json:"deploy_hook_timeout,omitempty"`
 	}
 )
 
