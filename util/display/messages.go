@@ -167,3 +167,21 @@ func MigrateProviderRequired() {
 --------------------------------------------------------------------------------
 `))
 }
+
+func BadTerminal() {
+  os.Stderr.WriteString(fmt.Sprintf(`
+--------------------------------------------------------------------------------
+This console is currently not supported by nanobox
+Please refer to the docs for more information
+--------------------------------------------------------------------------------
+`))
+}
+
+func MissingDependencies(provider string, missingParts []string) {
+    fmt.Printf("Using nanobox with %s requires tools that appear to not be available on your system.\n", provider)
+    fmt.Println(strings.Join(missingParts, "\n"))
+    if provider == "native" {
+      provider = "docker"
+    }
+    fmt.Printf("View these requirements at docs.nanobox.io/install/requirements/%s/\n", provider)
+}
