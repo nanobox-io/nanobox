@@ -318,12 +318,9 @@ func (machine DockerMachine) Start() error {
 		return err
 	}
 
-	display.StartTask("Booting VM")
+	display.StopTask()
 
-	if err := process.Run(); err != nil {
-		display.ErrorTask()
-		return err
-	}
+	display.StartTask("Cleaning DHCP")
 
 	// kill dhcp
 	cmd = []string{
@@ -339,11 +336,7 @@ func (machine DockerMachine) Start() error {
 
 	process.Stdout = display.NewStreamer("info")
 	process.Stderr = display.NewStreamer("info")
-
-	if err := process.Run(); err != nil {
-		display.ErrorTask()
-		return err
-	}
+	process.Run()
 
 	display.StopTask()
 
