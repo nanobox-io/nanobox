@@ -57,10 +57,12 @@ func main() {
 	providerName := configModel.Provider
 
 	// make sure nanobox has all the necessry parts
-	valid, missingParts := provider.Valid()
-	if !valid {
-		display.MissingDependencies(providerName, missingParts)
-		os.Exit(1)
+	if !strings.Contains(command, " config") {
+		valid, missingParts := provider.Valid()
+		if !valid {
+			display.MissingDependencies(providerName, missingParts)
+			os.Exit(1)
+		}		
 	}
 
 	// setup a file logger, this will be replaced in verbose mode.
