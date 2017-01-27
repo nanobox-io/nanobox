@@ -34,7 +34,7 @@ func PrivilegeExec(command string) error {
 		return nil
 	}
 
-	cmd := exec.Command("/bin/sh", "-c", fmt.Sprintf("sudo %v --internal", command))
+	cmd := exec.Command("/bin/sh", "-c", fmt.Sprintf("sudo -E %v --internal", command))
 
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
