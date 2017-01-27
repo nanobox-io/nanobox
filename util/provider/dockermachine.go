@@ -318,6 +318,33 @@ func (machine DockerMachine) Start() error {
 		return err
 	}
 
+	display.StartTask("Booting VM")
+
+	if err := process.Run(); err != nil {
+		display.ErrorTask()
+		return err
+	}
+
+	// kill dhcp
+	cmd = []string{
+		dockerMachineCmd,
+		"ssh",
+		"nanobox",
+		"sudo",
+		"pkill",
+		"udhcpc",
+	}
+
+	process = exec.Command(cmd[0], cmd[1:]...)
+
+	process.Stdout = display.NewStreamer("info")
+	process.Stderr = display.NewStreamer("info")
+
+	if err := process.Run(); err != nil {
+		display.ErrorTask()
+		return err
+	}
+
 	display.StopTask()
 
 	if machine.changedIP() {
