@@ -8,7 +8,7 @@ import (
 )
 
 func serviceConfigFile(name string) string {
-	return filepath.Join(config.BinDir(), fmt.Sprintf("%s.ini", name))
+	return filepath.Join(config.BinDir(), fmt.Sprintf("%s-config.ini", name))
 }
 
 func startCmd(name string) []string {
