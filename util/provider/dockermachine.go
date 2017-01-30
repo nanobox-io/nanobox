@@ -320,6 +320,26 @@ func (machine DockerMachine) Start() error {
 
 	display.StopTask()
 
+	display.StartTask("Cleaning DHCP")
+
+	// kill dhcp
+	cmd = []string{
+		dockerMachineCmd,
+		"ssh",
+		"nanobox",
+		"sudo",
+		"pkill",
+		"udhcpc",
+	}
+
+	process = exec.Command(cmd[0], cmd[1:]...)
+
+	process.Stdout = display.NewStreamer("info")
+	process.Stderr = display.NewStreamer("info")
+	process.Run()
+
+	display.StopTask()
+
 	if machine.changedIP() {
 		return machine.regenerateCert()
 	}
