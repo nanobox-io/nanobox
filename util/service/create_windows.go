@@ -16,15 +16,15 @@ func Create(name string, command []string) error {
 		return nil
 	}
 
-	// setup config file
-	if err := ioutil.WriteFile(serviceConfigFile(name), []byte(serviceConfig(name, command)), 0644); err != nil {
-		return err
-	}
-
 	// the service may have been created this should clean out any old version
 	// we arent catching errors just incase they dont exist
 	Stop(name)
 	Remove(name)
+
+	// setup config file
+	if err := ioutil.WriteFile(serviceConfigFile(name), []byte(serviceConfig(name, command)), 0644); err != nil {
+		return err
+	}
 
 	out, err := exec.Command("sc", "create", name, "binpath=", fmt.Sprintf(`%s\srvstart.exe %s -c "%s"`, config.BinDir(), name, serviceConfigFile(name))).CombinedOutput()
 	if err != nil {
