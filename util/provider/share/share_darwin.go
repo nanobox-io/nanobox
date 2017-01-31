@@ -26,7 +26,7 @@ func Exists(path string) bool {
 		return false
 	}
 	// check to see if the path is in the file
-	return bytes.Contains(b, []byte(path+" "))
+	return bytes.Contains(b, []byte(path+" ")) || bytes.Contains(b, []byte(path+"\" "))
 }
 
 func Add(path string) error {
