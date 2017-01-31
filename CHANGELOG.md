@@ -1,3 +1,10 @@
+## v2.0.0 (January 31, 2017)
+
+FEATURES:
+  - Make nanobox work using docker-machine instead of vagrant
+  - Rework networking to use a vpn
+  - Add Native support to use native docker on the system
+
 ## v0.18.4 (March 9, 2016)
 
 FEATURES:
