@@ -36,26 +36,25 @@ func (machine DockerMachine) HasMount(mount string) bool {
 		return false
 
 	}
-	return strings.Contains(string(output), mount) // && !machine.staleMount(mount)
+	return strings.Contains(string(output), mount) && !machine.staleMount(mount)
 }
 
 func (machine DockerMachine) staleMount(mount string) bool {
 
-	// ensure stat is installed
-	cmd := []string{"sh", "-c", setupCoreUtilsScript()}
-	if b, err := Run(cmd); err != nil {
-		lumber.Error("stat install output: %s", b)
-		return true
-	}
+	// removed the ensure statment because its slow and already installed
+	// // ensure stat is installed
+	// cmd := []string{"sh", "-c", setupCoreUtilsScript()}
+	// if b, err := Run(cmd); err != nil {
+	// 	lumber.Error("stat install output: %s", b)
+	// 	return true
+	// }
 
-	cmd = []string{"stat", mount}
-
-	output, err := Run(cmd)
+	output, err := Run([]string{"stat", mount})
 	if err != nil {
 		return true
 	}
 
-	return strings.Contains(string(output), "stale")
+	return strings.Contains(string(output), "Stale") || strings.Contains(string(output), "stale")
 }
 
 // AddMount adds a virtualbox mount into the docker-machine vm
