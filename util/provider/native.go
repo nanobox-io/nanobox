@@ -30,8 +30,7 @@ func (native Native) Valid() (bool, []string) {
 	cmd := exec.Command("docker", "ps")
 
 	//
-	if out, err := cmd.CombinedOutput(); err != nil {
-		fmt.Println(string(out))
+	if _, err := cmd.CombinedOutput(); err != nil {
 		return false, []string{"docker"}
 	}
 
