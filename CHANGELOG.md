@@ -1,33 +1,33 @@
-## v2.0.0 (January 31, 2017)
+## 2.0.0 (January 31, 2017)
 
 FEATURES:
   - Make nanobox work using docker-machine instead of vagrant
   - Rework networking to use a vpn
   - Add Native support to use native docker on the system
 
-## v0.18.4 (March 9, 2016)
+## 0.18.4 (March 9, 2016)
 
 FEATURES:
   - Updated to use the new Mist (1.0.0)
 
-## v0.18.3 (February 22, 2016)
+## 0.18.3 (February 22, 2016)
 
 IMPROVEMENTS:
   - Better error messaging when nanobox is unable to communicate with nanobox-server
 
 
-## v0.18.2 (February 8, 2016)
+## 0.18.2 (February 8, 2016)
 
 BUG FIXES:
   - Nanobox create/destroy will now call the correct command when attempting to
   execute sudoed commands; this was caused after the move to dev subcommands.
 
-## v0.18.1 (February 4, 2016)
+## 0.18.1 (February 4, 2016)
 
 FEATURES:
   - Nanobox will no longer create, publish, or fetch engines or services.
 
-## v0.18.0 (February 4, 2016)
+## 0.18.0 (February 4, 2016)
 
 BREAKING CHANGES:
   - All relevant "dev" commands are now sub-commands of "dev" in preparation
@@ -51,25 +51,25 @@ BUG FIXES:
   - Fixed an issue causing deploys to happen on every dev, rather than only after
   a recent reload.
 
-## v0.17.4 ()
+## 0.17.4 ()
 
   - Removed anything related to logtap since it isn't used in this way anymore
   (nanobox gets all its historical logs from a /logs route to the server)
 
-## v0.17.3 (December 24, 2015)
+## 0.17.3 (December 24, 2015)
 
 BUG FIXES:
   - Fixed a regression caused by the previous version in which some clients were
   being prematurely closed causing panics when they were later attempted to close
   because it was presumed they were left open.
 
-## v0.17.2 (December 22, 2015)
+## 0.17.2 (December 22, 2015)
 
 FEATURES:
   - Adds the ability to forward local proxy variables to the vm, for docker and
   nanobox server use (97fbfcc).
 
-## v0.17.1 (December 21, 2015)
+## 0.17.1 (December 21, 2015)
 
 IMPROVEMENTS:
 
@@ -86,7 +86,7 @@ IMPROVEMENTS:
   that can be displayed to the client via mist (61399a2).
   - More idiomatic way of checking flag in dev command (59b8735).
 
-## v0.17.0 (December 21, 2015)
+## 0.17.0 (December 21, 2015)
 
 FEATURES:
 
@@ -98,7 +98,7 @@ FEATURES:
   and use the script when updating. If a break should occur the script can be
   run manually to update nanobox for fixes (30881d9).
 
-## v0.16.17 (December 17, 2015)
+## 0.16.17 (December 17, 2015)
 
 IMPROVEMENTS:
 
@@ -118,7 +118,7 @@ BUG FIXES:
   - Prompting for admin before delete runs to avoid password prompt showing up in
   the middle of vagrant output (f076651).
 
-## v0.16.16 (December 15, 2015)
+## 0.16.16 (December 15, 2015)
 
 FEATURES:
 
@@ -127,7 +127,7 @@ FEATURES:
   - Added `dev-config` flag to `nanobox dev` allowing on-the-fly setting of the
   guest vm environment(c4bf44a).
 
-## v0.16.15 (December 9, 2015)
+## 0.16.15 (December 9, 2015)
 
 FEATURES:
 
