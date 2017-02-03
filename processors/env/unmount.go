@@ -12,10 +12,6 @@ import (
 
 // Unmount unmounts the env shares
 func Unmount(env *models.Env) error {
-	// break early if we're not mounted
-	if !mounted(env) {
-		return nil
-	}
 
 	// break early if there is still an environemnt using the mounts
 	if mountsInUse(env) {
