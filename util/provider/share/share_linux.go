@@ -106,7 +106,7 @@ func entry(path string) (string, error) {
 		return "", fmt.Errorf("there is no mount ip on the provider")
 	}
 
-	return fmt.Sprintf("%s %s(rw,crossmnt,sync,no_subtree_check,all_squash,anonuid=%d,anongid=%d)", path, provider.MountIP, uid(), gid()), nil
+	return fmt.Sprintf("\"%s\" %s(rw,crossmnt,sync,no_subtree_check,all_squash,anonuid=%d,anongid=%d)", path, provider.MountIP, uid(), gid()), nil
 }
 
 // addEntry will add the entry into the /etc/exports file

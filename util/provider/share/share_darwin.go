@@ -26,7 +26,7 @@ func Exists(path string) bool {
 		return false
 	}
 	// check to see if the path is in the file
-	return bytes.Contains(b, []byte(path+" "))
+	return bytes.Contains(b, []byte(path+" ")) || bytes.Contains(b, []byte(path+"\" "))
 }
 
 func Add(path string) error {
@@ -53,7 +53,7 @@ func Add(path string) error {
 		// get existing line
 		if strings.Contains(line, lineCheck) {
 			// add our path to the line
-			lines[i] = fmt.Sprintf("%s %s", path, line)
+			lines[i] = fmt.Sprintf("\"%s\" %s", path, line)
 			lines[i] = cleanLine(lines[i], lineCheck)
 			found = true
 			break
@@ -71,6 +71,8 @@ func Add(path string) error {
 }
 
 func Remove(path string) error {
+
+	quotedPath := fmt.Sprintf("\"%s\"", path)
 	// get the provider because i need the mount ip
 	provider, err := models.LoadProvider()
 	if err != nil {
@@ -97,8 +99,9 @@ func Remove(path string) error {
 			continue
 		}
 
-		// add our path to the line
+		// recreate the line without our path or quoted path
 		line = strings.Replace(line, fmt.Sprintf("%s ", path), "", 1)
+		line = strings.Replace(line, fmt.Sprintf("%s ", quotedPath), "", 1)
 		if line != lineCheck {
 			// if there is still any paths left in our line
 			line = cleanLine(line, lineCheck)
@@ -169,6 +172,8 @@ func cleanLine(line, lineCheck string) string {
 	paths := strings.Split(strings.Replace(line, lineCheck, "", 1), " ")
 	goodPaths := []string{}
 	for _, path := range paths {
+		// remove the quotes from the path
+		path = strings.Replace(path, "\"", "", -1)
 		fileInfo, err := os.Stat(path)
 		if err != nil || !fileInfo.IsDir() {
 			// continue on if the file doest exist or if it is not a directory
@@ -176,5 +181,5 @@ func cleanLine(line, lineCheck string) string {
 		}
 		goodPaths = append(goodPaths, path)
 	}
-	return fmt.Sprintf("%s %s", strings.Join(goodPaths, " "), lineCheck)
+	return fmt.Sprintf("\"%s\" %s", strings.Join(goodPaths, "\" \""), lineCheck)
 }

@@ -110,13 +110,11 @@ func (machine DockerMachine) AddMount(local, host string) error {
 
 // RemoveMount removes a mount from the docker-machine vm
 func (machine DockerMachine) RemoveMount(local, host string) error {
-	if !machine.HasMount(host) {
-		return nil
-	}
-
-	// all mounts are removed as if they are native
-	if err := machine.removeNativeMount(local, host); err != nil {
-		return err
+	if machine.HasMount(host) {
+		// all mounts are removed as if they are native
+		if err := machine.removeNativeMount(local, host); err != nil {
+			return err
+		}
 	}
 
 	// if we are supposed to keep the shares return here
