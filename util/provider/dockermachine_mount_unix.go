@@ -26,7 +26,7 @@ func (machine DockerMachine) addNetfsMount(local, host string) error {
 	}
 
 	// TODO: this IP shouldn't be hardcoded, needs to be figured out!
-	source := fmt.Sprintf("192.168.99.1:%s", local)
+	source := fmt.Sprintf("\"192.168.99.1:%s\"", local)
 	cmd = []string{"sudo", "/bin/mount", "-t", "nfs", source, host}
 	if b, err := Run(cmd); err != nil {
 		lumber.Debug("output: %s", b)
