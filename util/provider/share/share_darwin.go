@@ -161,8 +161,8 @@ func startNFSD() error {
 	exec.Command("nfsd", "start").CombinedOutput()
 
 	// check to see if nfsd is running
-	b, _ := exec.Command("netstat", "-l").CombinedOutput()
-	if !strings.Contains(string(b), ".nfsd") {
+	b, _ := exec.Command("netstat", "-ln").CombinedOutput()
+	if !strings.Contains(string(b), ".111") {
 		return fmt.Errorf("nfsd ports not in use")
 	}
 	return nil
