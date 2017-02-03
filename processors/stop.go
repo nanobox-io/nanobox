@@ -10,10 +10,15 @@ import (
 	"github.com/nanobox-io/nanobox/processors/env"
 	"github.com/nanobox-io/nanobox/processors/provider"
 	"github.com/nanobox-io/nanobox/util/display"
+	util_provider "github.com/nanobox-io/nanobox/util/provider"
 )
 
 // Stop stops the running apps, unmounts all envs, and stops the provider
 func Stop() error {
+	// if the util provider isnt ready it doesnt need to stop
+	if !util_provider.IsReady() {
+		return nil
+	}
 
 	// init docker client
 	if err := provider.Init(); err != nil {
