@@ -38,7 +38,8 @@ time by running: 'nanobox configure'
 `)
 
 	defer func() {
-			fmt.Println(`      **
+			fmt.Println(`
+      **
    *********
 ***************   [√] Nanobox successfully Configured!
 :: ********* ::   ------------------------------------------------------------
