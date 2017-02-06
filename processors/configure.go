@@ -93,16 +93,6 @@ Answer: `, map[string]string{"y": "netfs", "n": "native"})
 
 	config.Save()
 
-	fmt.Println(`      **
-   *********
-***************   [√] Nanobox successfully Configured!
-:: ********* ::   ------------------------------------------------------------
-" ::: *** ::: "   Change these settings at any time via : 'nanobox configure'
-  ""  :::  ""     
-    "" " ""
-       "
-`)
-
 	return nil
 }
 
