@@ -37,13 +37,28 @@ time by running: 'nanobox configure'
 (Learn more at : https://docs.nanobox.io/local-config/nanobox-config-yml/)
 `)
 
+	defer func() {
+			fmt.Println(`      **
+   *********
+***************   [√] Nanobox successfully Configured!
+:: ********* ::   ------------------------------------------------------------
+" ::: *** ::: "   Change these settings at any time via : 'nanobox configure'
+  ""  :::  ""     
+    "" " ""
+       "
+`)		
+	}()
+
+
 	// ask about provider
 	config.Provider = stringAsker(`
 How would you like to run nanobox?
   a) Inside a lightweight VM
   b) Via Docker Native
 
-(recommended a)
+  Note : Mac users, we strongly recommend choosing (a) until Docker Native
+         resolves an issue causing slow speeds : http://bit.ly/2jYFfWQ
+
 Answer: `, map[string]string{"a": "docker-machine", "b": "native"})
 
 	// if provider == docker-machine ask more questions
@@ -55,28 +70,40 @@ Answer: `, map[string]string{"a": "docker-machine", "b": "native"})
 	// ask about cpus
 	config.CPUs = intAsker(fmt.Sprintf(`
 How many CPU cores would you like to make available to the VM (1-%d)?
+-------------------------------------------------------------------
+  Note : we recommend 2 or more
 
-(recommended > 2)
 Answer: `, runtime.NumCPU()), runtime.NumCPU())
 
 	// ask about ram
 	config.RAM = intAsker(`
 How many GB of RAM would you like to make available to the VM (2-4)?
+-------------------------------------------------------------------
+  Note : we recommended 2 or more
 
-(recommended > 1)
-Answer: `, 4)
+Answer: `, 8)
 
 	// ask about mount types
 	config.MountType = stringAsker(`
 Would you like to enable netfs for faster filesystem access (y/n)?
-(we highly recommend using this option, but this will prompt for password)
+-------------------------------------------------------------------
+  Note : We HIGHLY recommend (y). Using this option may prompt for password
 
-(recommended y)
 Answer: `, map[string]string{"y": "netfs", "n": "native"})
 
 	config.Save()
-	return nil
 
+	fmt.Println(`      **
+   *********
+***************   [√] Nanobox successfully Configured!
+:: ********* ::   ------------------------------------------------------------
+" ::: *** ::: "   Change these settings at any time via : 'nanobox configure'
+  ""  :::  ""     
+    "" " ""
+       "
+`)
+
+	return nil
 }
 
 func stringAsker(text string, answers map[string]string) string {
