@@ -33,7 +33,7 @@ func Remove(path string) error {
 	return nil
 }
 
-// reExecPrivilegedAdd re-execs the current process with a privileged user
+// reExecPrivilegedRemove re-execs the current process with a privileged user
 func reExecPrivilegedRemove(path string) error {
 	display.PauseTask()
 	defer display.ResumeTask()

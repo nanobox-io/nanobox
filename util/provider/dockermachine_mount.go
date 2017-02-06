@@ -51,6 +51,9 @@ func (machine DockerMachine) staleMount(mount string) bool {
 
 	output, err := Run([]string{"stat", mount})
 	if err != nil {
+		if strings.Contains(string(output), "No such file or directory") {
+			return false
+		}
 		return true
 	}
 
@@ -67,7 +70,7 @@ func (machine DockerMachine) AddMount(local, host string) error {
 	}
 
 	if machine.staleMount(host) {
-		if err := machine.RemoveMount(local, host); err != nil {
+		if err := machine.removeNativeMount(local, host); err != nil {
 			return fmt.Errorf("failed to clean up stale mount: %s", err)
 		}
 	}
