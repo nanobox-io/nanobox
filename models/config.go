@@ -55,8 +55,8 @@ func (c *Config) makeValid() {
 		c.RAM = 1
 	}
 
-	if c.Disk < 15360 {
-		c.Disk = 15360
+	if c.Disk < 20480 {
+		c.Disk = 20480
 	}
 
 	if _, _, err := net.ParseCIDR(c.ExternalNetworkSpace); c.ExternalNetworkSpace == "" || err != nil {
