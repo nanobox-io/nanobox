@@ -4,12 +4,15 @@ package provider
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/jcelliott/lumber"
 )
 
 // Mount mounts a share on a guest machine
 func (machine DockerMachine) addNetfsMount(local, host string) error {
+	// make local the actual path instead of the link
+	local, _ = filepath.EvalSymlinks(local)
 
 	// ensure nfs-client is running
 	cmd := []string{"sudo", "/usr/local/etc/init.d/nfs-client", "start"}
