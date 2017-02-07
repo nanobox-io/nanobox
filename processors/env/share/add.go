@@ -21,6 +21,7 @@ func Add(path string) error {
 
 	// if we're not running as the privileged user, we need to re-exec with privilege
 	if !util.IsPrivileged() {
+
 		return reExecPrivilegedAdd(path)
 	}
 
