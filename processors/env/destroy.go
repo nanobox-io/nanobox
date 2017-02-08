@@ -47,7 +47,8 @@ func Destroy(env *models.Env) error {
 
 	// TODO: remove folder from host /mnt/sda1/env_id
 	if err := util_provider.RemoveEnvDir(env.ID); err != nil {
-		return util.ErrorAppend(err, "failed to remove the environment from host")
+		// it is ok if the cleanup fails its not worth erroring here
+		// return util.ErrorAppend(err, "failed to remove the environment from host")
 	}
 
 	// remove volumes

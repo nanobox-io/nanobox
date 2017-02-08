@@ -7,9 +7,6 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/bugsnag/bugsnag-go"
-	"github.com/jcelliott/lumber"
-
 	"github.com/nanobox-io/nanobox/util"
 )
 
@@ -25,13 +22,6 @@ func CommandErr(err error) {
 
 	if err == nil {
 		return
-	}
-
-	lumber.Error("Command: %+s", err.Error())
-
-	bugsnagErr := bugsnag.Notify(err, bugsnag.User{Id: util.UniqueID()}, bugsnag.SeverityInfo)
-	if bugsnagErr != nil {
-		lumber.Error("Bugsnag error: %s", bugsnagErr)
 	}
 
 	cause, context := parseCommandErr(err)
