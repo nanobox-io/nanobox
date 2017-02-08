@@ -1,11 +1,10 @@
 package component
 
 import (
-	"fmt"
-
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
@@ -16,7 +15,7 @@ func StopAll(appModel *models.App) error {
 	componentModels, err := appModel.Components()
 	if err != nil {
 		lumber.Error("component:StopAll:models.App{ID:%s}.Components() %s", appModel.ID, err.Error())
-		return fmt.Errorf("unable to retrieve components: %s", err.Error())
+		return util.ErrorAppend(err, "unable to retrieve components")
 	}
 
 	if len(componentModels) == 0 {
@@ -29,7 +28,7 @@ func StopAll(appModel *models.App) error {
 	// stop each component
 	for _, componentModel := range componentModels {
 		if err := Stop(componentModel); err != nil {
-			return fmt.Errorf("unable to stop component(%s): %s", componentModel.Name, err.Error())
+			return util.ErrorAppend(err, "unable to stop component(%s)", componentModel.Name)
 		}
 	}
 

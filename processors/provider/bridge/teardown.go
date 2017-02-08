@@ -49,7 +49,7 @@ func removeComponent() error {
 	// remove the container
 	if err := docker.ContainerRemove(container.ID); err != nil {
 		lumber.Error("provider:bridge:teardown:docker.ContainerRemove(%s): %s", container.ID, err)
-		return fmt.Errorf("failed to remove bridge container: %s", err.Error())
+		return util.ErrorAppend(err, "failed to remove bridge container")
 	}
 
 	return nil

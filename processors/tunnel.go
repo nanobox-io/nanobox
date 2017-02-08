@@ -6,6 +6,7 @@ import (
 	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/helpers"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/nanoagent"
 	"github.com/nanobox-io/nanobox/util/odin"
@@ -44,7 +45,7 @@ func Tunnel(envModel *models.Env, tunnelConfig TunnelConfig) error {
 	key, location, port, err := odin.EstablishTunnel(appID, tunnelConfig.Container)
 	if err != nil {
 		// todo: can we know if the request was rejected for authorization and print that?
-		return fmt.Errorf("failed to initiate a remote tunnel session: %s", err.Error())
+		return util.ErrorAppend(err, "failed to initiate a remote tunnel session")
 	}
 
 	// set a default port if the user didn't specify
@@ -54,7 +55,7 @@ func Tunnel(envModel *models.Env, tunnelConfig TunnelConfig) error {
 
 	// connect up to the session
 	if err := nanoagent.Tunnel(key, location, tunnelConfig.Port); err != nil {
-		return fmt.Errorf("failed to connect to remote tunnel session: %s", err.Error())
+		return util.ErrorAppend(err, "failed to connect to remote tunnel session")
 	}
 
 	return nil

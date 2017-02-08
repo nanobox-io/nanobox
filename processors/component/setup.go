@@ -1,7 +1,6 @@
 package component
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/jcelliott/lumber"
@@ -22,7 +21,7 @@ func Setup(appModel *models.App, componentModel *models.Component) error {
 	// generate the missing component data
 	if err := componentModel.Generate(appModel, "data"); err != nil {
 		lumber.Error("component:Setup:models.Component:Generate(%s, data): %s", appModel.ID, componentModel.Name, err.Error())
-		return fmt.Errorf("failed to generate component data: %s", err.Error())
+		return util.ErrorAppend(err, "failed to generate component data")
 	}
 
 	// short-circuit if this component is already setup
@@ -39,7 +38,7 @@ func Setup(appModel *models.App, componentModel *models.Component) error {
 		image, err := componentImage(componentModel)
 		if err != nil {
 			lumber.Error("component:Setup:boxfile.ComponentImage(%+v): %s", componentModel, err.Error())
-			return fmt.Errorf("unable to retrieve component image: %s", err.Error())
+			return util.ErrorAppend(err, "unable to retrieve component image")
 		}
 		componentModel.Image = image
 	}
@@ -63,13 +62,13 @@ func Setup(appModel *models.App, componentModel *models.Component) error {
 			// remove the component because it doesnt need to be cleaned up at this point
 			componentModel.Delete()
 			display.ErrorTask()
-			return fmt.Errorf("failed to pull docker image (%s): %s", componentModel.Image, err.Error())
+			return util.ErrorAppend(err, "failed to pull docker image (%s): %s", componentModel.Image, err.Error())
 		}
 		display.StopTask()
 	}
 	// reserve IPs
 	if err := reserveIP(appModel, componentModel); err != nil {
-		return fmt.Errorf("failed to reserve IPs for component: %s", err.Error())
+		return util.ErrorAppend(err, "failed to reserve IPs for component")
 	}
 
 	// start the container
@@ -79,15 +78,15 @@ func Setup(appModel *models.App, componentModel *models.Component) error {
 	if err != nil {
 		lumber.Error("component:Setup:docker.CreateContainer(%+v): %s", config, err.Error())
 		display.ErrorTask()
-		return fmt.Errorf("failed to start docker container: %s", err.Error())
+		return util.ErrorAppend(err, "failed to start docker container")
 	}
 	display.StopTask()
 
 	// persist the container ID
 	componentModel.ID = container.ID
 	if err := componentModel.Save(); err != nil {
-		lumber.Error("component:Setup:models.Component.Save(): %s", err.Error())
-		return fmt.Errorf("failed to persist container ID: %s", err.Error())
+		lumber.Error("component:Setup:models.Component.Save()")
+		return util.ErrorAppend(err, "failed to persist container ID")
 	}
 
 	// plan the component
@@ -103,7 +102,7 @@ func Setup(appModel *models.App, componentModel *models.Component) error {
 	componentModel.State = "active"
 	if err := componentModel.Save(); err != nil {
 		lumber.Error("component:Setup:models.Component.Save()", err.Error())
-		return fmt.Errorf("failed to set component state: %s", err.Error())
+		return util.ErrorAppend(err, "failed to set component state")
 	}
 
 	return nil
@@ -128,8 +127,8 @@ func reserveIP(appModel *models.App, componentModel *models.Component) error {
 			localIP, err := dhcp.ReserveLocal()
 			if err != nil {
 				display.StopTask()
-				lumber.Error("component.reserveIPs:dhcp.ReserveLocal(): %s", err.Error())
-				return fmt.Errorf("failed to reserve local IP address: %s", err.Error())
+				lumber.Error("component.reserveIPs:dhcp.ReserveLocal()")
+				return util.ErrorAppend(err, "failed to reserve local IP address")
 			}
 
 			componentModel.IP = localIP.String()
@@ -138,8 +137,8 @@ func reserveIP(appModel *models.App, componentModel *models.Component) error {
 
 	if err := componentModel.Save(); err != nil {
 		display.StopTask()
-		lumber.Error("component.reserveIPs:models.Component.Save(): %s", err.Error())
-		return fmt.Errorf("failed to persist component IPs: %s", err.Error())
+		lumber.Error("component.reserveIPs:models.Component.Save()")
+		return util.ErrorAppend(err, "failed to persist component IPs")
 	}
 
 	return nil
@@ -152,19 +151,19 @@ func planComponent(appModel *models.App, componentModel *models.Component) error
 
 	planOutput, err := hookit.DebugExec(componentModel.ID, "plan", hook_generator.PlanPayload(componentModel), "info")
 	if err != nil {
-		return fmt.Errorf("failed to run plan hook: %s", err.Error())
+		return util.ErrorAppend(err, "failed to run plan hook")
 	}
 
 	// generate the component plan
 	if err := componentModel.GeneratePlan(planOutput); err != nil {
 		lumber.Error("component:Setup:models.Component.GeneratePlan(%s): %s", planOutput, err.Error())
-		return fmt.Errorf("failed to generate the component plan: %s", err.Error())
+		return util.ErrorAppend(err, "failed to generate the component plan")
 	}
 
 	// generate environment variables
 	if err := componentModel.GenerateEvars(appModel); err != nil {
 		lumber.Error("component:Setup:models.Component.GenerateEvars(%+v): %s", appModel, err.Error())
-		return fmt.Errorf("failed to generate the component evars: %s", err.Error())
+		return util.ErrorAppend(err, "failed to generate the component evars")
 	}
 
 	return nil
@@ -178,17 +177,17 @@ func configureComponent(appModel *models.App, componentModel *models.Component) 
 	// run the update hook
 	if _, err := hookit.DebugExec(componentModel.ID, "update", hook_generator.UpdatePayload(componentModel), "debug"); err != nil {
 		display.ErrorTask()
-		return fmt.Errorf("failed to run update hook: %s", err.Error())
+		return util.ErrorAppend(err, "failed to run update hook")
 	}
 
 	// run the configure hook
 	if _, err := hookit.DebugExec(componentModel.ID, "configure", hook_generator.ConfigurePayload(appModel, componentModel), "info"); err != nil {
-		return fmt.Errorf("failed to run configure hook: %s", err.Error())
+		return util.ErrorAppend(err, "failed to run configure hook")
 	}
 
 	// run the start hook
 	if _, err := hookit.DebugExec(componentModel.ID, "start", hook_generator.UpdatePayload(componentModel), "info"); err != nil {
-		return fmt.Errorf("failed to run start hook: %s", err.Error())
+		return util.ErrorAppend(err, "failed to run start hook")
 	}
 
 	return nil

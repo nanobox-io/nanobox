@@ -1,11 +1,10 @@
 package processors
 
 import (
-	"fmt"
-
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/code"
 	"github.com/nanobox-io/nanobox/processors/env"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
 
@@ -18,12 +17,12 @@ func Compile(envModel *models.Env) error {
 
 	// init docker client and env mounts
 	if err := env.Setup(envModel); err != nil {
-		return fmt.Errorf("failed to init docker client: %s", err.Error())
+		return util.ErrorAppend(err, "failed to init docker client")
 	}
 
 	// build code
 	if err := code.Compile(envModel); err != nil {
-		return fmt.Errorf("failed to build the code: %s", err.Error())
+		return util.ErrorAppend(err, "failed to build the code")
 	}
 
 	return nil

@@ -1,12 +1,11 @@
 package component
 
 import (
-	"fmt"
-
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
@@ -23,7 +22,7 @@ func Start(componentModel *models.Component) error {
 
 	// make sure the component is active
 	if componentModel.State != "active" {
-		return fmt.Errorf("tried to start an inactive component")
+		return util.Errorf("tried to start an inactive component")
 	}
 
 	// start the container
@@ -41,7 +40,7 @@ func startContainer(id string) error {
 
 	if err := docker.ContainerStart(id); err != nil {
 		lumber.Error("component:Start:docker.ContainerStart(%s): %s", id, err.Error())
-		return fmt.Errorf("failed to start docker container: %s", err.Error())
+		return util.ErrorAppend(err, "failed to start docker container")
 	}
 
 	return nil

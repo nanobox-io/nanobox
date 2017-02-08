@@ -1,12 +1,11 @@
 package component
 
 import (
-	"fmt"
-
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
@@ -16,7 +15,7 @@ func Clean(appModel *models.App) error {
 	components, err := appModel.Components()
 	if err != nil {
 		lumber.Error("component:Clean:models.App{ID:%s}.Components(): %s", appModel.ID, err.Error())
-		return fmt.Errorf("failed to fetch app component collection: %s", err.Error())
+		return util.ErrorAppend(err, "failed to fetch app component collection")
 	}
 
 	if !areComponentsDirty(components) {
@@ -29,7 +28,7 @@ func Clean(appModel *models.App) error {
 	// iterate through the components and clean them
 	for _, componentModel := range components {
 		if err := cleanComponent(appModel, componentModel); err != nil {
-			return fmt.Errorf("failed to clean component: %s", err.Error())
+			return util.ErrorAppend(err, "failed to clean component")
 		}
 	}
 
@@ -45,7 +44,7 @@ func cleanComponent(appModel *models.App, componentModel *models.Component) erro
 	}
 
 	if err := Destroy(appModel, componentModel); err != nil {
-		return fmt.Errorf("failed to remove component: %s", err.Error())
+		return util.ErrorAppend(err, "failed to remove component")
 	}
 
 	return nil

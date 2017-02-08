@@ -189,8 +189,9 @@ func ErrorTask() error {
 		summarizer.Error()
 		summarizer = nil
 
-		// print the task log
-		Out.Write(taskLog.Bytes())
+		// // print the task log
+		// this is handled in a different part
+		// Out.Write(taskLog.Bytes())
 	}
 
 	// mark task as stopped

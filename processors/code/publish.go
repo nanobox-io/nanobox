@@ -1,8 +1,6 @@
 package code
 
 import (
-	"fmt"
-
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
 
@@ -10,6 +8,7 @@ import (
 	"github.com/nanobox-io/nanobox/generators/hooks/build"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/provider"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/hookit"
 )
@@ -22,13 +21,13 @@ func Publish(envModel *models.Env, WarehouseConfig WarehouseConfig) error {
 	// initialize the docker client
 	// init docker client
 	if err := provider.Init(); err != nil {
-		return fmt.Errorf("failed to init docker client: %s", err.Error())
+		return util.ErrorAppend(err, "failed to init docker client")
 	}
 
 	// pull the latest build image
 	buildImage, err := pullBuildImage()
 	if err != nil {
-		return fmt.Errorf("failed to pull the build image: %s", err.Error())
+		return util.ErrorAppend(err, "failed to pull the build image")
 	}
 
 	display.StartTask("Starting docker container")
@@ -42,7 +41,7 @@ func Publish(envModel *models.Env, WarehouseConfig WarehouseConfig) error {
 	if err != nil {
 		lumber.Error("code:Build:docker.CreateContainer(%+v): %s", config, err.Error())
 		display.ErrorTask()
-		return fmt.Errorf("failed to start docker container: %s", err.Error())
+		return util.ErrorAppend(err, "failed to start docker container")
 	}
 	// ensure we stop the container when we're done
 	defer docker.ContainerRemove(container.ID)
@@ -58,8 +57,8 @@ func Publish(envModel *models.Env, WarehouseConfig WarehouseConfig) error {
 	// TODO: display output from hooks
 	payload := build.UserPayload()
 	if err != nil {
-		lumber.Error("code:Publish:build.UserPayload(): %s", err.Error())
-		return fmt.Errorf("unable to retrieve user payload: %s", err.Error())
+		lumber.Error("code:Publish:build.UserPayload()")
+		return util.ErrorAppend(err, "unable to retrieve user payload")
 	}
 	if _, err := hookit.DebugExec(container.ID, "user", payload, "info"); err != nil {
 		return err
@@ -74,12 +73,12 @@ func Publish(envModel *models.Env, WarehouseConfig WarehouseConfig) error {
 
 	payload = build.PublishPayload(envModel, buildWarehouseConfig)
 	if err != nil {
-		lumber.Error("code:Publish:build.UserPayload(): %s", err.Error())
+		lumber.Error("code:Publish:build.UserPayload()")
 		display.ErrorTask()
-		return fmt.Errorf("unable to retrieve user payload: %s", err.Error())
+		return util.ErrorAppend(err, "unable to retrieve user payload")
 	}
 	if _, err := hookit.DebugExec(container.ID, "publish", payload, "info"); err != nil {
-		return fmt.Errorf("failed to run publish hook: %s", err.Error())
+		return util.ErrorAppend(err, "failed to run publish hook")
 	}
 
 	display.StopTask()

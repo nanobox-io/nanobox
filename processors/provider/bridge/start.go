@@ -17,12 +17,12 @@ func Start() error {
 
 		// create service
 		if err := bridge.CreateService(); err != nil {
-			return fmt.Errorf("failed to create service: %s", err)
+			return util.ErrorAppend(err, "failed to create service")
 		}
 
 		// start service
 		if err := bridge.StartService(); err != nil {
-			return fmt.Errorf("failed to start service: %s", err)
+			return util.ErrorAppend(err, "failed to start service")
 		}
 
 	} else {

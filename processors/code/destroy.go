@@ -1,13 +1,13 @@
 package code
 
 import (
-	"fmt"
 	"net"
 
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
 )
@@ -24,14 +24,14 @@ func Destroy(componentModel *models.Component) error {
 
 	// detach from the host network
 	if err := detachNetwork(componentModel); err != nil {
-		return fmt.Errorf("failed to detach container from the host network: %s", err.Error())
+		return util.ErrorAppend(err, "failed to detach container from the host network")
 	}
 
 	// remove the componentModel from the database
 	if err := componentModel.Delete(); err != nil {
-		lumber.Error("code:Destroy:Component.Delete(): %s", err.Error())
+		lumber.Error("code:Destroy:Component.Delete()")
 		display.ErrorTask()
-		return fmt.Errorf("unable to delete database model: %s", err.Error())
+		return util.ErrorAppend(err, "unable to delete database model")
 	}
 
 	return nil
@@ -49,7 +49,7 @@ func destroyContainer(id string) error {
 	if err := docker.ContainerRemove(id); err != nil {
 		lumber.Error("component:Destroy:docker.ContainerRemove(%s): %s", id, err.Error())
 		display.ErrorTask()
-		return fmt.Errorf("failed to remove docker container: %s", err.Error())
+		return util.ErrorAppend(err, "failed to remove docker container")
 	}
 
 	return nil
@@ -64,7 +64,7 @@ func detachNetwork(componentModel *models.Component) error {
 	if err := dhcp.ReturnIP(net.ParseIP(componentModel.IPAddr())); err != nil {
 		lumber.Error("code:Destroy:dhcp.ReturnIP(%s): %s", componentModel.IPAddr(), err.Error())
 		display.ErrorTask()
-		return fmt.Errorf(": %s", err.Error())
+		return util.ErrorAppend(err, "")
 	}
 
 	return nil

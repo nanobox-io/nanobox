@@ -4,12 +4,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jcelliott/lumber"
-
 	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/env"
 	"github.com/nanobox-io/nanobox/processors/provider"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 	util_provider "github.com/nanobox-io/nanobox/util/provider"
@@ -32,12 +31,12 @@ func Implode() error {
 
 	// destroy the provider
 	if err := provider.Destroy(); err != nil {
-		return fmt.Errorf("failed to destroy the provider: %s", err)
+		return util.ErrorAppend(err, "failed to destroy the provider")
 	}
 
 	// destroy the provider (VM), remove images, remove containers
 	if err := util_provider.Implode(); err != nil {
-		return fmt.Errorf("failed to implode the provider: %s", err)
+		return util.ErrorAppend(err, "failed to implode the provider")
 	}
 
 	// purge the installation
@@ -56,8 +55,7 @@ func purgeConfiguration() error {
 
 	// implode the global dir
 	if err := os.RemoveAll(config.GlobalDir()); err != nil {
-		lumber.Error("Destroy:Run:config.ImplodeGlobalDir(): %s", err.Error())
-		return fmt.Errorf("failed to purge the data directory: %s", err.Error())
+		return util.ErrorAppend(err, "failed to purge the data directory")
 	}
 
 	return nil

@@ -11,6 +11,7 @@ import (
 	"github.com/nanobox-io/nanobox/processors/app/dns"
 	"github.com/nanobox-io/nanobox/processors/component"
 	"github.com/nanobox-io/nanobox/processors/provider"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/locker"
@@ -20,7 +21,7 @@ import (
 func Destroy(appModel *models.App) error {
 	// init docker client
 	if err := provider.Init(); err != nil {
-		return fmt.Errorf("failed to init docker client: %s", err.Error())
+		return util.ErrorAppend(err, "failed to init docker client")
 	}
 
 	locker.LocalLock()
@@ -34,12 +35,12 @@ func Destroy(appModel *models.App) error {
 	// load the env for the display context
 	envModel, err := appModel.Env()
 	if err != nil {
-		lumber.Error("app:Start:models.App.Env(): %s", err.Error())
-		return fmt.Errorf("failed to load app env: %s", err.Error())
+		lumber.Error("app:Start:models.App.Env()")
+		return util.ErrorAppend(err, "failed to load app env")
 	}
 
 	if err := dns.RemoveAll(appModel); err != nil {
-		return fmt.Errorf("failed to remove dns aliases")
+		return util.ErrorAppend(err, "failed to remove dns aliases")
 	}
 
 	display.OpenContext("%s (%s)", envModel.Name, appModel.DisplayName())
@@ -50,18 +51,18 @@ func Destroy(appModel *models.App) error {
 
 	// destroy the associated components
 	if err := destroyComponents(appModel); err != nil {
-		return fmt.Errorf("failed to destroy components: %s", err.Error())
+		return util.ErrorAppend(err, "failed to destroy components")
 	}
 
 	// release IPs
 	if err := releaseIPs(appModel); err != nil {
-		return fmt.Errorf("failed to release IPs: %s", err.Error())
+		return util.ErrorAppend(err, "failed to release IPs")
 	}
 
 	// destroy the app model
 	if err := appModel.Delete(); err != nil {
 		lumber.Error("app:Destroy:models.App{ID:%s}.Destroy(): %s", appModel.ID, err.Error())
-		return fmt.Errorf("failed to delete app model: %s", err.Error())
+		return util.ErrorAppend(err, "failed to delete app model")
 	}
 
 	return nil
@@ -75,7 +76,7 @@ func destroyComponents(appModel *models.App) error {
 	componentModels, err := appModel.Components()
 	if err != nil {
 		lumber.Error("app:destroyComponents:models.App{ID:%s}.Components() %s", appModel.ID, err.Error())
-		return fmt.Errorf("unable to retrieve components: %s", err.Error())
+		return util.ErrorAppend(err, "unable to retrieve components")
 	}
 
 	if len(componentModels) == 0 {
@@ -86,7 +87,7 @@ func destroyComponents(appModel *models.App) error {
 
 	for _, componentModel := range componentModels {
 		if err := component.Destroy(appModel, componentModel); err != nil {
-			return fmt.Errorf("failed to destroy app component: %s", err.Error())
+			return util.ErrorAppend(err, "failed to destroy app component")
 		}
 	}
 
@@ -104,7 +105,7 @@ func releaseIPs(appModel *models.App) error {
 		if err := dhcp.ReturnIP(net.ParseIP(ip)); err != nil {
 			display.ErrorTask()
 			lumber.Error("app:Destroy:releaseIPs:dhcp.ReturnIP(%s): %s", ip, err.Error())
-			return fmt.Errorf("failed to release IP: %s", err.Error())
+			return util.ErrorAppend(err, "failed to release IP")
 		}
 	}
 

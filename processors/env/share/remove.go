@@ -27,7 +27,7 @@ func Remove(path string) error {
 	// rm the share entry
 	if err := share.Remove(path); err != nil {
 		lumber.Error("share:Add:share.Remove(%s): %s", path, err.Error())
-		return fmt.Errorf("failed to remove share share: %s", err.Error())
+		return util.ErrorAppend(err, "failed to remove share share: %s")
 	}
 
 	return nil

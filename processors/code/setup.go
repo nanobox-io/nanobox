@@ -1,7 +1,6 @@
 package code
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/jcelliott/lumber"
@@ -21,7 +20,7 @@ func Setup(appModel *models.App, componentModel *models.Component, warehouseConf
 	// generate the missing component data
 	if err := componentModel.Generate(appModel, "code"); err != nil {
 		lumber.Error("component:Setup:models.Component:Generate(%s, code): %s", appModel.ID, componentModel.Name, err.Error())
-		return fmt.Errorf("failed to generate component data: %s", err.Error())
+		return util.ErrorAppend(err, "failed to generate component data")
 	}
 
 	// short-circuit if this component is already setup
@@ -48,7 +47,7 @@ func Setup(appModel *models.App, componentModel *models.Component, warehouseConf
 		if err := util.Retry(imagePull, 5, time.Second); err != nil {
 			lumber.Error("component:Setup:docker.ImagePull(%s, nil): %s", componentModel.Image, err.Error())
 			display.ErrorTask()
-			return fmt.Errorf("failed to pull docker image (%s): %s", componentModel.Image, err.Error())
+			return util.ErrorAppend(err, "failed to pull docker image (%s)", componentModel.Image)
 		}
 		display.StopTask()
 
@@ -57,7 +56,7 @@ func Setup(appModel *models.App, componentModel *models.Component, warehouseConf
 	display.StartTask("Starting docker container")
 	if err := reserveIps(componentModel); err != nil {
 		display.ErrorTask()
-		lumber.Error("code:Setup:setup.getLocalIP(): %s", err.Error())
+		lumber.Error("code:Setup:setup.getLocalIP()")
 		return err
 	}
 
@@ -65,16 +64,16 @@ func Setup(appModel *models.App, componentModel *models.Component, warehouseConf
 	config := container_generator.ComponentConfig(componentModel)
 	container, err := docker.CreateContainer(config)
 	if err != nil {
-		lumber.Error("code:Setup:createContainer:docker.CreateContainer(%+v): %s", config, err.Error())
+		lumber.Error("code:Setup:createContainer:docker.CreateContainer(%+v)", config)
 		display.ErrorTask()
-		return err
+		return util.ErrorAppend(err, "unable to create container")
 	}
 	display.StopTask()
 
 	// save the component
 	componentModel.ID = container.ID
 	if err := componentModel.Save(); err != nil {
-		lumber.Error("code:Setup:Component.Save(): %s", err.Error())
+		lumber.Error("code:Setup:Component.Save()")
 		return err
 	}
 
@@ -98,7 +97,7 @@ func Setup(appModel *models.App, componentModel *models.Component, warehouseConf
 	display.StartTask("Starting services")
 	if _, err := hookit.DebugExec(componentModel.ID, "configure", payload, "info"); err != nil {
 		display.ErrorTask()
-		return fmt.Errorf("failed to configure code: %s", err.Error())
+		return util.ErrorAppend(err, "failed to configure code")
 	}
 
 	// run start command
@@ -111,8 +110,8 @@ func Setup(appModel *models.App, componentModel *models.Component, warehouseConf
 	//
 	componentModel.State = ACTIVE
 	if err := componentModel.Save(); err != nil {
-		lumber.Error("code:Configure:Component.Save(): %s", err.Error())
-		return fmt.Errorf("unable to save component model: %s", err.Error())
+		lumber.Error("code:Configure:Component.Save()")
+		return util.ErrorAppend(err, "unable to save component model")
 	}
 
 	return nil
@@ -123,7 +122,7 @@ func reserveIps(componentModel *models.Component) error {
 	if componentModel.IPAddr() == "" {
 		localIP, err := dhcp.ReserveLocal()
 		if err != nil {
-			lumber.Error("code:Setup:dhcp.ReserveLocal(): %s", err.Error())
+			lumber.Error("code:Setup:dhcp.ReserveLocal()")
 			return err
 		}
 		componentModel.IP = localIP.String()

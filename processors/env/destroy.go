@@ -9,6 +9,7 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/app"
 	"github.com/nanobox-io/nanobox/processors/provider"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/locker"
 	util_provider "github.com/nanobox-io/nanobox/util/provider"
 )
@@ -20,14 +21,14 @@ func Destroy(env *models.Env) error {
 
 	// init docker client
 	if err := provider.Init(); err != nil {
-		return fmt.Errorf("failed to init docker client: %s", err)
+		return util.ErrorAppend(err, "failed to init docker client")
 	}
 
 	// find apps
 	apps, err := env.Apps()
 	if err != nil {
 		lumber.Error("env:Destroy:models.Env{ID:%s}.Apps(): %s", env.ID, err)
-		return fmt.Errorf("failed to load app collection: %s", err)
+		return util.ErrorAppend(err, "failed to load app collection")
 	}
 
 	// destroy apps
@@ -35,18 +36,18 @@ func Destroy(env *models.Env) error {
 
 		err := app.Destroy(a)
 		if err != nil {
-			return fmt.Errorf("failed to remove app: %s", err)
+			return util.ErrorAppend(err, "failed to remove app")
 		}
 	}
 
 	// unmount the environment
 	if err := Unmount(env); err != nil {
-		return fmt.Errorf("failed to unmount env: %s", err)
+		return util.ErrorAppend(err, "failed to unmount env")
 	}
 
 	// TODO: remove folder from host /mnt/sda1/env_id
 	if err := util_provider.RemoveEnvDir(env.ID); err != nil {
-		return fmt.Errorf("failed to remove the environment from host: %s", err)
+		return util.ErrorAppend(err, "failed to remove the environment from host")
 	}
 
 	// remove volumes
@@ -58,7 +59,7 @@ func Destroy(env *models.Env) error {
 
 	// remove the environment
 	if err := env.Delete(); err != nil {
-		return fmt.Errorf("failed to remove env: %s", err)
+		return util.ErrorAppend(err, "failed to remove env")
 	}
 
 	return nil

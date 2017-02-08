@@ -62,7 +62,7 @@ func main() {
 		if !valid {
 			display.MissingDependencies(providerName, missingParts)
 			os.Exit(1)
-		}		
+		}
 	}
 
 	// setup a file logger, this will be replaced in verbose mode.

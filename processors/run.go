@@ -1,7 +1,6 @@
 package processors
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/jcelliott/lumber"
@@ -27,12 +26,12 @@ func Run(envModel *models.Env, appModel *models.App, consoleConfig console.Conso
 
 	// ensure the environment is setup
 	if err := env.Setup(envModel); err != nil {
-		return fmt.Errorf("failed to setup environment: %s", err.Error())
+		return util.ErrorAppend(err, "failed to setup environment")
 	}
 
 	// setup the dev container
 	if err := setup(appModel); err != nil {
-		return fmt.Errorf("failed to setup dev container: %s", err.Error())
+		return util.ErrorAppend(err, "failed to setup dev container")
 	}
 
 	// start a watcher to watch for changes and inform the vm
@@ -47,11 +46,11 @@ func Run(envModel *models.Env, appModel *models.App, consoleConfig console.Conso
 	consoleConfig.Cwd = cwd(appModel)
 
 	if err := env.Console(component, consoleConfig); err != nil {
-		return fmt.Errorf("failed to console into dev container: %s", err)
+		return util.ErrorAppend(err, "failed to console into dev container")
 	}
 
 	if err := teardown(appModel); err != nil {
-		return fmt.Errorf("unable to teardown dev: %s", err)
+		return util.ErrorAppend(err, "unable to teardown dev")
 	}
 
 	return nil
@@ -90,7 +89,7 @@ func setup(appModel *models.App) error {
 	container, err := docker.CreateContainer(config)
 	if err != nil {
 		display.ErrorTask()
-		return fmt.Errorf("failed to create docker container: %s", err.Error())
+		return util.ErrorAppend(err, "failed to create docker container")
 	}
 	display.StopTask()
 
@@ -100,11 +99,11 @@ func setup(appModel *models.App) error {
 	display.StartTask("Configuring")
 	userPayload := build_generator.UserPayload()
 	if _, err := hookit.DebugExec(container.ID, "user", userPayload, "debug"); err != nil {
-		return fmt.Errorf("failed to run the user hook: %s", err.Error())
+		return util.ErrorAppend(err, "failed to run the user hook")
 	}
 
 	if _, err := hookit.DebugExec(container.ID, "dev", build_generator.DevPayload(appModel), "info"); err != nil {
-		return fmt.Errorf("failed to run the dev hook: %s", err.Error())
+		return util.ErrorAppend(err, "failed to run the dev hook")
 	}
 	display.StopTask()
 
@@ -130,7 +129,7 @@ func teardown(appModel *models.App) error {
 	// remove the container
 	if err := docker.ContainerRemove(container.ID); err != nil {
 		lumber.Error("dev:console:teardown:docker.ContainerRemove(%s): %s", container.ID, err)
-		return fmt.Errorf("failed to remove dev container: %s", err.Error())
+		return util.ErrorAppend(err, "failed to remove dev container")
 	}
 
 	return nil
@@ -159,7 +158,7 @@ func downloadImage(image string) error {
 	if err := util.Retry(imagePull, 5, time.Second); err != nil {
 		display.ErrorTask()
 		lumber.Error("dev:Setup:downloadImage.ImagePull(%s, nil): %s", image, err.Error())
-		return fmt.Errorf("failed to pull docker image (%s): %s", image, err.Error())
+		return util.ErrorAppend(err, "failed to pull docker image (%s)", image)
 	}
 
 	return nil

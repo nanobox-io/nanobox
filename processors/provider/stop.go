@@ -1,11 +1,10 @@
 package provider
 
 import (
-	"fmt"
-
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/processors/provider/bridge"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/locker"
 	"github.com/nanobox-io/nanobox/util/provider"
@@ -21,13 +20,13 @@ func Stop() error {
 
 	// stop the vpn
 	if err := bridge.Stop(); err != nil {
-		return fmt.Errorf("failed to stop vpn: %s", err)
+		return util.ErrorAppend(err, "failed to stop vpn")
 	}
 
 	// stop the provider (VM)
 	if err := provider.Stop(); err != nil {
 		lumber.Error("provider:Stop:provider.Stop(): %s", err.Error())
-		return fmt.Errorf("failed to stop the provider: %s", err.Error())
+		return util.ErrorAppend(err, "failed to stop the provider")
 	}
 
 	return nil

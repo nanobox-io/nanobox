@@ -1,12 +1,11 @@
 package code
 
 import (
-	"fmt"
-
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox-boxfile"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
@@ -22,11 +21,11 @@ func Sync(appModel *models.App, warehouseConfig WarehouseConfig) error {
 	defer locker.LocalUnlock()
 
 	if err := purgeComponents(appModel); err != nil {
-		return fmt.Errorf("failed to purge code components: %s", err.Error())
+		return util.ErrorAppend(err, "failed to purge code components")
 	}
 
 	if err := provisionComponents(appModel, warehouseConfig); err != nil {
-		return fmt.Errorf("failed to provision components: %s", err.Error())
+		return util.ErrorAppend(err, "failed to provision components")
 	}
 
 	return nil
@@ -52,7 +51,7 @@ func purgeComponents(appModel *models.App) error {
 
 			// run a code destroy
 			if err := Destroy(componentModel); err != nil {
-				return fmt.Errorf("failed to destroy code component: %s", err.Error())
+				return util.ErrorAppend(err, "failed to destroy code component")
 			}
 		}
 	}
@@ -76,7 +75,7 @@ func provisionComponents(appModel *models.App, warehouseConfig WarehouseConfig) 
 		// run the code setup process with the new config
 		err := Setup(appModel, componentModel, warehouseConfig)
 		if err != nil {
-			return fmt.Errorf("failed to setup code (%s): %s\n", componentModel.Name, err.Error())
+			return util.ErrorAppend(err, "failed to setup code (%s): %s\n", componentModel.Name, err.Error())
 		}
 
 	}

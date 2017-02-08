@@ -1,7 +1,6 @@
 package platform
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/jcelliott/lumber"
@@ -25,14 +24,14 @@ func UpdatePortal(appModel *models.App) error {
 	// use the retry method here because there is a chance the portal server isnt responding yet
 	if err := util.Retry(updateRoute, 2, time.Second); err != nil {
 		lumber.Error("platform:UpdatePortal:UpdateRoutes(%+v): %s", routes, err.Error())
-		return fmt.Errorf("failed to send routing updates to the router: %s", err.Error())
+		return util.ErrorAppend(err, "failed to send routing updates to the router")
 	}
 
 	// update services
 	services := generator.BuildServices(appModel)
 	if err := client.UpdateServices(services); err != nil {
 		lumber.Error("platform:UpdatePortal:UpdateServices(%+v): %s", services, err.Error())
-		return fmt.Errorf("failed to update port forwarding: %s", err.Error())
+		return util.ErrorAppend(err, "failed to update port forwarding")
 	}
 
 	return nil
