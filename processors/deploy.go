@@ -33,8 +33,7 @@ func Deploy(envModel *models.Env, deployConfig DeployConfig) error {
 
 	// validate access to the app
 	if err := helpers.ValidateOdinApp(appID); err != nil {
-		// the validation already printed the error
-		return nil
+		return util.ErrorAppend(err, "unable to validate app")
 	}
 
 	warehouseConfig, err := getWarehouseConfig(envModel, appID)
