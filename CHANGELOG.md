@@ -1,3 +1,16 @@
+## 2.0.1 (February 9, 2017)
+
+BUG FIXES:
+  - Remove duplicate display of error messages [#360](https://github.com/nanobox-io/nanobox/issues/360)
+  - Allow hook timeouts to work properly
+
+FEATURES:
+  - Make our busgnag reporting much better [#353](https://github.com/nanobox-io/nanobox/issues/353)
+  - Update the config command to be cleaner [#349](https://github.com/nanobox-io/nanobox/issues/349)
+  - Adjust the error handling so stack tracers are cleaner
+  - Allow for odin messages to be encapsulated inside the correct context when erroring
+  - Add an error message when a evar is not added [#338](https://github.com/nanobox-io/nanobox/issues/338)
+
 ## 2.0.0 (January 31, 2017)
 
 FEATURES:
