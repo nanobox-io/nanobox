@@ -62,7 +62,7 @@ func parseEvars(args []string) map[string]string {
 
 				evars[strings.ToUpper(parts[0])] = parts[1]
 			} else {
-				fmt.Printf("invalid field option (%s)\n", pair)
+				fmt.Printf("invalid evar (%s)\n", pair)
 			}
 		}
 	}
