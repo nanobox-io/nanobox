@@ -17,7 +17,10 @@ func Exec(container, hook, payload, displayLevel string) (string, error) {
 		// if its a 126 the hook didnt exist
 		return "", nil
 	}
-	return out, err
+	if err != nil {
+		return out, util.ErrorAppend(err, "failed to exe in container")
+	}
+	return out, nil
 }
 
 func DebugExec(container, hook, payload, displayLevel string) (string, error) {

@@ -1,10 +1,9 @@
 package platform
 
 import (
-	"fmt"
-
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/component"
+	"github.com/nanobox-io/nanobox/util"
 )
 
 // provisionComponent will provision an individual component
@@ -21,7 +20,7 @@ func provisionComponent(appModel *models.App, platformComponent PlatformComponen
 
 		// start the component
 		if err := component.Start(componentModel); err != nil {
-			return fmt.Errorf("failed to start component: %s", err.Error())
+			return util.ErrorAppend(err, "failed to start component")
 		}
 
 		return nil
@@ -29,7 +28,7 @@ func provisionComponent(appModel *models.App, platformComponent PlatformComponen
 
 	// setup
 	if err := component.Setup(appModel, componentModel); err != nil {
-		return fmt.Errorf("failed to setup platform component (%s): %s", componentModel.Label, err.Error())
+		return util.ErrorAppend(err, "failed to setup platform component (%s)", componentModel.Label)
 	}
 
 	return nil

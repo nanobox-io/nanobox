@@ -2,7 +2,6 @@
 package code
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/jcelliott/lumber"
@@ -49,7 +48,7 @@ func pullBuildImage() (string, error) {
 	if err := util.Retry(imagePull, 5, time.Second); err != nil {
 		lumber.Error("code:pullBuildImage:docker.ImagePull(%s, nil): %s", buildImage, err.Error())
 		display.ErrorTask()
-		return "", fmt.Errorf("failed to pull docker image (%s): %s", buildImage, err.Error())
+		return "", util.ErrorAppend(err, "failed to pull docker image (%s)", buildImage)
 	}
 
 	return buildImage, nil

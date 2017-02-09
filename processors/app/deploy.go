@@ -1,8 +1,6 @@
 package app
 
 import (
-	"fmt"
-
 	"github.com/nanobox-io/nanobox-boxfile"
 
 	generator "github.com/nanobox-io/nanobox/generators/hooks/code"
@@ -11,6 +9,7 @@ import (
 	"github.com/nanobox-io/nanobox/processors/component"
 	"github.com/nanobox-io/nanobox/processors/platform"
 	"github.com/nanobox-io/nanobox/processors/provider"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/hookit"
 )
@@ -20,12 +19,12 @@ func Deploy(envModel *models.Env, appModel *models.App) error {
 
 	// init docker client
 	if err := provider.Init(); err != nil {
-		return fmt.Errorf("failed to init docker client: %s", err.Error())
+		return util.ErrorAppend(err, "failed to init docker client")
 	}
 
 	// syncronize the services as per the new boxfile
 	if err := component.Sync(envModel, appModel); err != nil {
-		return fmt.Errorf("failed to sync components: %s", err.Error())
+		return util.ErrorAppend(err, "failed to sync components")
 	}
 
 	// if the app is a dev app then we should leave here
@@ -35,7 +34,7 @@ func Deploy(envModel *models.Env, appModel *models.App) error {
 
 	// setup the platform services
 	if err := platform.Setup(appModel); err != nil {
-		return fmt.Errorf("failed to setup platform services: %s", err.Error())
+		return util.ErrorAppend(err, "failed to setup platform services")
 	}
 
 	// create the warehouse config for child processes
@@ -49,16 +48,16 @@ func Deploy(envModel *models.Env, appModel *models.App) error {
 
 	// publish the code
 	if err := code.Publish(envModel, warehouseConfig); err != nil {
-		return fmt.Errorf("unable to publish code: %s", err.Error())
+		return util.ErrorAppend(err, "unable to publish code")
 	}
 
 	// start code
 	if err := code.Sync(appModel, warehouseConfig); err != nil {
-		return fmt.Errorf("failed to add code components: %s", err.Error())
+		return util.ErrorAppend(err, "failed to add code components")
 	}
 
 	if err := finalizeDeploy(appModel); err != nil {
-		return fmt.Errorf("failed to finalize deploy: %s", err.Error())
+		return util.ErrorAppend(err, "failed to finalize deploy")
 	}
 
 	// give the user some helpful information
@@ -75,7 +74,7 @@ func finalizeDeploy(appModel *models.App) error {
 	display.StartTask("Running before_live hooks")
 	if err := runDeployHook(appModel, "before_live"); err != nil {
 		display.ErrorTask()
-		return fmt.Errorf("failed to run before deploy hooks: %s", err.Error())
+		return util.ErrorAppend(err, "failed to run before deploy hooks")
 	}
 	display.StopTask()
 
@@ -83,14 +82,14 @@ func finalizeDeploy(appModel *models.App) error {
 	display.StartTask("Updating router")
 	if err := platform.UpdatePortal(appModel); err != nil {
 		display.ErrorTask()
-		return fmt.Errorf("failed to update router: %s", err.Error())
+		return util.ErrorAppend(err, "failed to update router")
 	}
 	display.StopTask()
 
 	display.StartTask("Running after_live hooks")
 	if err := runDeployHook(appModel, "after_live"); err != nil {
 		display.ErrorTask()
-		return fmt.Errorf("failed to run after deloy hooks: %s", err.Error())
+		return util.ErrorAppend(err, "failed to run after deloy hooks")
 	}
 	display.StopTask()
 

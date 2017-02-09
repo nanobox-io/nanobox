@@ -1,7 +1,6 @@
 package bridge
 
 import (
-	"fmt"
 	"os"
 	// "runtime"
 	"encoding/json"
@@ -77,29 +76,29 @@ func setupContainer() error {
 	container, err := docker.CreateContainer(config)
 	if err != nil {
 		display.ErrorTask()
-		return fmt.Errorf("failed to create docker container: %s", err.Error())
+		return util.ErrorAppend(err, "failed to create docker container")
 	}
 	display.StopTask()
 
 	display.StartTask("Configuring")
 	// run the configure hook
 	if _, err := hookit.DebugExec(container.ID, "configure", "{\"platform\":\"local\",\"config\":{}}", "info"); err != nil {
-		return fmt.Errorf("failed to run configure hook: %s", err.Error())
+		return util.ErrorAppend(err, "failed to run configure hook")
 	}
 
 	// run the start hook
 	if _, err := hookit.DebugExec(container.ID, "start", "{}", "info"); err != nil {
-		return fmt.Errorf("failed to run start hook: %s", err.Error())
+		return util.ErrorAppend(err, "failed to run start hook")
 	}
 
 	// run the start hook
 	output, err := hookit.DebugExec(container.ID, "keys", "{}", "info")
 	if err != nil {
-		return fmt.Errorf("failed to run start hook: %s, %s", output, err.Error())
+		return util.ErrorAppend(err, "failed to run start hook")
 	}
 
 	if err := json.Unmarshal([]byte(output), &keys); err != nil {
-		return fmt.Errorf("failed to decode the keys: %s %s", output, err.Error())
+		return util.ErrorAppend(err, "failed to decode the keys")
 	}
 	display.StopTask()
 
@@ -139,7 +138,7 @@ func downloadImage(image string) error {
 	if err := util.Retry(imagePull, 5, time.Second); err != nil {
 		display.ErrorTask()
 		lumber.Error("dev:Setup:downloadImage.ImagePull(%s, nil): %s", image, err.Error())
-		return fmt.Errorf("failed to pull docker image (%s): %s", image, err.Error())
+		return util.ErrorAppend(err, "failed to pull docker image (%s)", image)
 	}
 
 	return nil
@@ -149,7 +148,6 @@ func downloadImage(image string) error {
 // client.key
 // client.crt
 func configureBridge() error {
-	// fmt.Printf("keys: %+v\n\n", keys)
 	display.StartTask("configuring")
 	defer display.StopTask()
 

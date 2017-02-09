@@ -1,7 +1,6 @@
 package code
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/jcelliott/lumber"
@@ -24,7 +23,7 @@ func Compile(envModel *models.Env) error {
 	// pull the latest build image
 	buildImage, err := pullBuildImage()
 	if err != nil {
-		return fmt.Errorf("failed to pull the compile image: %s", err.Error())
+		return util.ErrorAppend(err, "failed to pull the compile image")
 	}
 
 	// if a compile container was leftover from a previous compile, let's remove it
@@ -37,7 +36,7 @@ func Compile(envModel *models.Env) error {
 	container, err := docker.CreateContainer(config)
 	if err != nil {
 		lumber.Error("code:Compile:docker.CreateContainer(%+v): %s", config, err.Error())
-		return fmt.Errorf("failed to start docker container: %s", err.Error())
+		return util.ErrorAppend(err, "failed to start docker container")
 	}
 
 	display.StopTask()

@@ -7,9 +7,6 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/bugsnag/bugsnag-go"
-	"github.com/jcelliott/lumber"
-
 	"github.com/nanobox-io/nanobox/util"
 )
 
@@ -27,14 +24,7 @@ func CommandErr(err error) {
 		return
 	}
 
-	lumber.Error("Command: %+s", err.Error())
-
-	bugsnagErr := bugsnag.Notify(err, bugsnag.User{Id: util.UniqueID()}, bugsnag.SeverityInfo)
-	if bugsnagErr != nil {
-		lumber.Error("Bugsnag error: %s", bugsnagErr)
-	}
-
-	cause, context := parseCommandErr(err.Error())
+	cause, context := parseCommandErr(err)
 
 	fmt.Println()
 	fmt.Printf("Error   : %s\n", cause)
@@ -53,7 +43,14 @@ func CommandErr(err error) {
 	os.Exit(1)
 }
 
-func parseCommandErr(trace string) (cause, context string) {
+func parseCommandErr(err error) (cause, context string) {
+	// if it is one of our utility errors we can
+	// extract the cause and the stack seperately
+	if er, ok := err.(util.Err); ok {
+		return er.Message, strings.Join(er.Stack, " -> ")
+	}
+
+	trace := err.Error()
 	// remove any extra : at the end of the trace
 	trace = CmdErrRegex.ReplaceAllString(trace, "")
 

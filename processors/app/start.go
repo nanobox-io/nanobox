@@ -1,12 +1,11 @@
 package app
 
 import (
-	"fmt"
-
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/component"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
@@ -20,7 +19,7 @@ func Start(envModel *models.Env, appModel *models.App, name string) error {
 	// if the app been initialized run the setup
 	if appModel.State != "active" {
 		if err := Setup(envModel, appModel, name); err != nil {
-			return fmt.Errorf("failed to setup the app: %s", err)
+			return util.ErrorAppend(err, "failed to setup the app")
 		}
 	} else {
 		// restoring app
@@ -37,19 +36,19 @@ func Start(envModel *models.Env, appModel *models.App, name string) error {
 
 	// clean crufty components
 	if err := component.Clean(appModel); err != nil {
-		return fmt.Errorf("failed to clean crufty components: %s", err.Error())
+		return util.ErrorAppend(err, "failed to clean crufty components")
 	}
 
 	// start all the app components
 	if err := component.StartAll(appModel); err != nil {
-		return fmt.Errorf("failed to start app components: %s", err.Error())
+		return util.ErrorAppend(err, "failed to start app components")
 	}
 
 	// set the status to up
 	appModel.Status = "up"
 	if err := appModel.Save(); err != nil {
-		lumber.Error("app:Start:models.App.Save(): %s", err.Error())
-		return fmt.Errorf("failed to persist app status: %s", err.Error())
+		lumber.Error("app:Start:models.App.Save()")
+		return util.ErrorAppend(err, "failed to persist app status")
 	}
 
 	return nil

@@ -1,9 +1,8 @@
 package platform
 
 import (
-	"fmt"
-
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
@@ -14,7 +13,7 @@ func Setup(appModel *models.App) error {
 
 	for _, component := range setupComponents {
 		if err := provisionComponent(appModel, component); err != nil {
-			return fmt.Errorf("failed to provision platform component: %s", err.Error())
+			return util.ErrorAppend(err, "failed to provision platform component")
 		}
 	}
 

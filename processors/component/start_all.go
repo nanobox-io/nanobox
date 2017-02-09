@@ -1,11 +1,10 @@
 package component
 
 import (
-	"fmt"
-
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
@@ -16,7 +15,7 @@ func StartAll(a *models.App) error {
 	components, err := models.AllComponentsByApp(a.ID)
 	if err != nil {
 		lumber.Error("component:StartAll:models.AllComponentsByApp(%s): %s", a.ID, err.Error())
-		return fmt.Errorf("unable to retrieve app components: %s", err)
+		return util.ErrorAppend(err, "unable to retrieve app components")
 	}
 
 	if len(components) == 0 {
@@ -29,7 +28,7 @@ func StartAll(a *models.App) error {
 	// start each component
 	for _, component := range components {
 		if err := Start(component); err != nil {
-			return fmt.Errorf("unable to start component(%s): %s", component.Name, err.Error())
+			return util.ErrorAppend(err, "unable to start component(%s)", component.Name)
 		}
 	}
 

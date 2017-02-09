@@ -28,7 +28,7 @@ func RemoveAll(a *models.App) error {
 
 	if err := dns.Remove(a.ID); err != nil {
 		lumber.Error("dns:RemoveAll:dns.Remove(%s): %s", a.ID, err.Error())
-		return fmt.Errorf("failed to remove all dns entries: %s", err.Error())
+		return util.ErrorAppend(err, "failed to remove all dns entries")
 	}
 
 	return nil

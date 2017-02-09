@@ -1,12 +1,11 @@
 package component
 
 import (
-	"fmt"
-
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox-boxfile"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
@@ -17,19 +16,19 @@ func Sync(envModel *models.Env, appModel *models.App) error {
 
 	// purge delta components
 	if err := purgeDeltaComponents(envModel, appModel); err != nil {
-		return fmt.Errorf("failed to purge delta components: %s", err.Error())
+		return util.ErrorAppend(err, "failed to purge delta components")
 	}
 
 	// provision components
 	if err := provisionComponents(envModel, appModel); err != nil {
-		return fmt.Errorf("failed to provision components: %s", err.Error())
+		return util.ErrorAppend(err, "failed to provision components")
 	}
 
 	// update deployed boxfile
 	appModel.DeployedBoxfile = envModel.BuiltBoxfile
 	if err := appModel.Save(); err != nil {
-		lumber.Error("component:Sync:models.App.Save(): %s", err.Error())
-		return fmt.Errorf("failed to update deployed boxfile on app: %s", err.Error())
+		lumber.Error("component:Sync:models.App.Save()")
+		return util.ErrorAppend(err, "failed to update deployed boxfile on app")
 	}
 
 	return nil
@@ -51,7 +50,7 @@ func purgeDeltaComponents(envModel *models.Env, appModel *models.App) error {
 	components, err := models.AllComponentsByApp(appModel.ID)
 	if err != nil {
 		lumber.Error("component:purgeDeltaComponents:models.AllComponentsByApp(%s): %s", appModel.ID, err.Error())
-		return fmt.Errorf("failed to load app components: %s", err.Error())
+		return util.ErrorAppend(err, "failed to load app components")
 	}
 
 	for _, component := range components {
@@ -74,7 +73,7 @@ func purgeDeltaComponents(envModel *models.Env, appModel *models.App) error {
 
 		// destroy the component
 		if err := Destroy(appModel, component); err != nil {
-			return fmt.Errorf("failed to destroy component: %s", err.Error())
+			return util.ErrorAppend(err, "failed to destroy component")
 		}
 	}
 
@@ -115,7 +114,7 @@ func provisionComponents(envModel *models.Env, appModel *models.App) error {
 
 		// setup
 		if err := Setup(appModel, componentModel); err != nil {
-			return fmt.Errorf("failed to setup component (%s): %s", name, err.Error())
+			return util.ErrorAppend(err, "failed to setup component (%s): %s", name, err.Error())
 		}
 
 	}

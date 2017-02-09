@@ -1,6 +1,7 @@
 package evar
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -61,6 +62,8 @@ func parseEvars(args []string) map[string]string {
 			if len(parts) == 2 {
 
 				evars[strings.ToUpper(parts[0])] = parts[1]
+			} else {
+				fmt.Printf("invalid evar (%s)\n", pair)
 			}
 		}
 	}

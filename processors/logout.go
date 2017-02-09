@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
@@ -25,7 +26,7 @@ func Logout(endpoint string) error {
 
 	// remove token from database
 	if err := auth.Delete(); err != nil {
-		return fmt.Errorf("failed to delete user authentication: %s", err.Error())
+		return util.ErrorAppend(err, "failed to delete user authentication")
 	}
 
 	fmt.Printf("%s You've logged out\n", display.TaskComplete)

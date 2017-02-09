@@ -18,7 +18,7 @@ var AppSetup func(envModel *models.Env, appModel *models.App, name string) error
 func Add(envModel *models.Env, appModel *models.App, name string) error {
 
 	if err := AppSetup(envModel, appModel, appModel.Name); err != nil {
-		return fmt.Errorf("failed to setup app: %s", err)
+		return util.ErrorAppend(err, "failed to setup app")
 	}
 
 	// fetch the IP
@@ -42,7 +42,7 @@ func Add(envModel *models.Env, appModel *models.App, name string) error {
 	// add the entry
 	if err := dns.Add(entry); err != nil {
 		lumber.Error("dns:Add:dns.Add(%s): %s", entry, err.Error())
-		return fmt.Errorf("unable to add dns entry: %s", err.Error())
+		return util.ErrorAppend(err, "unable to add dns entry")
 	}
 
 	fmt.Printf("\n%s %s added\n\n", display.TaskComplete, name)

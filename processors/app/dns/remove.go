@@ -35,7 +35,7 @@ func Remove(a *models.App, name string) error {
 	// remove the entry
 	if err := dns.Remove(entry); err != nil {
 		lumber.Error("dns:Remove:dns.Remove(%s): %s", entry, err.Error())
-		return fmt.Errorf("unable to add dns entry: %s", err.Error())
+		return util.ErrorAppend(err, "unable to add dns entry: %s")
 	}
 
 	fmt.Printf("\n%s %s removed\n\n", display.TaskComplete, name)

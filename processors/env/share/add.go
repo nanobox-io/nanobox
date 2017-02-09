@@ -28,7 +28,7 @@ func Add(path string) error {
 	// add the share entry
 	if err := share.Add(path); err != nil {
 		lumber.Error("share:Add:share.Add(%s): %s", path, err.Error())
-		return fmt.Errorf("failed to add share: %s", err.Error())
+		return util.ErrorAppend(err, "failed to add share")
 	}
 
 	return nil

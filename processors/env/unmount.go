@@ -1,10 +1,10 @@
 package env
 
 import (
-	"fmt"
 	"path/filepath"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/provider"
@@ -29,7 +29,7 @@ func Unmount(env *models.Env) error {
 		// unmount the env on the provider
 		if err := provider.RemoveMount(src, dst); err != nil {
 			display.ErrorTask()
-			return fmt.Errorf("failed to remove engine mount: %s", err.Error())
+			return util.ErrorAppend(err, "failed to remove engine mount")
 		}
 
 	}
@@ -41,7 +41,7 @@ func Unmount(env *models.Env) error {
 	// unmount the env on the provider
 	if err := provider.RemoveMount(src, dst); err != nil {
 		display.ErrorTask()
-		return fmt.Errorf("failed to remove code mount: %s", err.Error())
+		return util.ErrorAppend(err, "failed to remove code mount")
 	}
 
 	return nil

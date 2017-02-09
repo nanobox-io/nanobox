@@ -1,12 +1,11 @@
 package component
 
 import (
-	"fmt"
-
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
@@ -36,7 +35,7 @@ func stopContainer(id string) error {
 	if err := docker.ContainerStop(id); err != nil {
 		display.ErrorTask()
 		lumber.Error("component:Stop:docker.ContainerStop(%s): %s", id, err.Error())
-		return fmt.Errorf("failed to stop docker container: %s", err.Error())
+		return util.ErrorAppend(err, "failed to stop docker container")
 	}
 
 	return nil

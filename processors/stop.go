@@ -1,14 +1,13 @@
 package processors
 
 import (
-	"fmt"
-
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/app"
 	"github.com/nanobox-io/nanobox/processors/env"
 	"github.com/nanobox-io/nanobox/processors/provider"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
 	util_provider "github.com/nanobox-io/nanobox/util/provider"
 )
@@ -22,23 +21,23 @@ func Stop() error {
 
 	// init docker client
 	if err := provider.Init(); err != nil {
-		return fmt.Errorf("failed to init docker client: %s", err.Error())
+		return util.ErrorAppend(err, "failed to init docker client")
 	}
 
 	// stop all running apps
 	if err := stopAllApps(); err != nil {
-		return fmt.Errorf("failed to stop running apps: %s", err.Error())
+		return util.ErrorAppend(err, "failed to stop running apps")
 	}
 
 	// env unmounting shouldnt be a problem any more
 	// // unmount envs
 	// if err := unmountEnvs(); err != nil {
-	// 	return fmt.Errorf("failed to unmount envs: %s", err.Error())
+	// 	return util.ErrorAppend(err, "failed to unmount envs")
 	// }
 
 	// stop the provider
 	if err := provider.Stop(); err != nil {
-		return fmt.Errorf("failed to stop the provider: %s", err.Error())
+		return util.ErrorAppend(err, "failed to stop the provider")
 	}
 
 	return nil
@@ -50,8 +49,8 @@ func stopAllApps() error {
 	// load all the apps that think they're currently up
 	apps, err := models.AllAppsByStatus("up")
 	if err != nil {
-		lumber.Error("stopAllApps:models.AllAppsByStatus(up): %s", err.Error())
-		return fmt.Errorf("failed to load running apps: %s", err.Error())
+		lumber.Error("stopAllApps:models.AllAppsByStatus(up)")
+		return util.ErrorAppend(err, "failed to load running apps")
 	}
 
 	if len(apps) == 0 {
@@ -64,7 +63,7 @@ func stopAllApps() error {
 	// run the app stop on all running apps
 	for _, a := range apps {
 		if err := app.Stop(a); err != nil {
-			return fmt.Errorf("failed to stop running app: %s", err.Error())
+			return util.ErrorAppend(err, "failed to stop running app")
 		}
 	}
 
@@ -78,8 +77,7 @@ func unmountEnvs() error {
 	envs, err := models.AllEnvs()
 	if err != nil {
 		display.ErrorTask()
-		lumber.Error("unmountEnvs:models.AllEnvs(): %s", err.Error())
-		return fmt.Errorf("failed to load all envs: %s", err.Error())
+		return util.ErrorAppend(err, "failed to load all envs")
 	}
 
 	if len(envs) == 0 {
@@ -92,7 +90,7 @@ func unmountEnvs() error {
 	for _, e := range envs {
 		if err := env.Unmount(e); err != nil {
 			display.ErrorTask()
-			return fmt.Errorf("failed to unmount env: %s", err.Error())
+			return util.ErrorAppend(err, "failed to unmount env")
 		}
 	}
 

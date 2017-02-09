@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/provider"
@@ -27,7 +28,7 @@ func Mount(env *models.Env) error {
 		// first export the env on the workstation
 		if err := provider.AddMount(src, dst); err != nil {
 			display.ErrorTask()
-			return fmt.Errorf("failed to mount the engine share on the provider: %s", src, err.Error())
+			return util.ErrorAppend(err, "failed to mount the engine share on the provider")
 		}
 	}
 
@@ -38,7 +39,7 @@ func Mount(env *models.Env) error {
 	// first export the env on the workstation
 	if err := provider.AddMount(src, dst); err != nil {
 		display.ErrorTask()
-		return fmt.Errorf("failed to mount the code share on the provider: %s", err.Error())
+		return util.ErrorAppend(err, "failed to mount the code share on the provider")
 	}
 
 	// // setup mount directories

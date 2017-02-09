@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/odin"
 )
@@ -19,7 +20,7 @@ func Login(username, password, endpoint string) error {
 	if username == "" {
 		user, err := display.ReadUsername()
 		if err != nil {
-			return fmt.Errorf("unable to retrieve username: %s", err)
+			return util.ErrorAppend(err, "unable to retrieve username")
 		}
 		username = user
 	}
@@ -32,7 +33,7 @@ func Login(username, password, endpoint string) error {
 		// ReadPassword prints Password: already
 		pass, err := display.ReadPassword()
 		if err != nil {
-			return fmt.Errorf("failed to read password: %s", err.Error())
+			return util.ErrorAppend(err, "failed to read password")
 		}
 		password = pass
 	}
@@ -61,10 +62,10 @@ func Login(username, password, endpoint string) error {
 		Key:      token,
 	}
 	if auth.Save() != nil {
-		return fmt.Errorf("unable to save user authentication")
+		return util.Errorf("unable to save user authentication")
 	}
 
-	fmt.Printf("%s You've successfully logged in\n", display.TaskComplete)
+	display.LoginComplete()
 
 	return nil
 }

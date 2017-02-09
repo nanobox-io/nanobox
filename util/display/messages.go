@@ -169,7 +169,7 @@ func MigrateProviderRequired() {
 }
 
 func BadTerminal() {
-  os.Stderr.WriteString(fmt.Sprintf(`
+	os.Stderr.WriteString(fmt.Sprintf(`
 --------------------------------------------------------------------------------
 This console is currently not supported by nanobox
 Please refer to the docs for more information
@@ -178,10 +178,24 @@ Please refer to the docs for more information
 }
 
 func MissingDependencies(provider string, missingParts []string) {
-    fmt.Printf("Using nanobox with %s requires tools that appear to not be available on your system.\n", provider)
-    fmt.Println(strings.Join(missingParts, "\n"))
-    if provider == "native" {
-      provider = "docker"
-    }
-    fmt.Printf("View these requirements at docs.nanobox.io/install/requirements/%s/\n", provider)
+	fmt.Printf("Using nanobox with %s requires tools that appear to not be available on your system.\n", provider)
+	fmt.Println(strings.Join(missingParts, "\n"))
+	if provider == "native" {
+		provider = "docker"
+	}
+	fmt.Printf("View these requirements at docs.nanobox.io/install/requirements/%s/\n", provider)
+}
+
+func DeployComplete() {
+	os.Stderr.WriteString(fmt.Sprintf(`
+%s Success, this deploy is on the way!
+  Check your dashboard for progress.
+
+`, TaskComplete))
+}
+
+func LoginComplete() {
+	os.Stderr.WriteString(fmt.Sprintf(`
+%s You've successfully logged in
+`, TaskComplete))
 }

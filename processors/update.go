@@ -1,7 +1,6 @@
 package processors
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/jcelliott/lumber"
@@ -10,14 +9,13 @@ import (
 	process_provider "github.com/nanobox-io/nanobox/processors/provider"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
-	//	"github.com/nanobox-io/nanobox/util/update"
 )
 
 func Update() error {
 
 	// init docker client
 	if err := process_provider.Init(); err != nil {
-		return fmt.Errorf("failed to init docker client: %s", err.Error())
+		return util.ErrorAppend(err, "failed to init docker client")
 	}
 
 	// // check to see if nanobox needs to update
@@ -25,7 +23,7 @@ func Update() error {
 
 	// update all the nanobox images
 	if err := pullImages(); err != nil {
-		return fmt.Errorf("failed to pull images: %s", err)
+		return util.ErrorAppend(err, "failed to pull images")
 	}
 
 	return nil
@@ -61,7 +59,7 @@ func pullImages() error {
 		if err := util.Retry(imagePullFunc, 5, time.Second); err != nil {
 			lumber.Error("code:pullBuildImage:docker.ImagePull(%s, nil): %s", image.Slug, err.Error())
 			display.ErrorTask()
-			return fmt.Errorf("failed to pull docker image (%s): %s", image.Slug, err.Error())
+			return util.ErrorAppend(err, "failed to pull docker image (%s)", image.Slug)
 		}
 
 		display.StopTask()

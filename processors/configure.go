@@ -38,7 +38,7 @@ time by running: 'nanobox configure'
 `)
 
 	defer func() {
-			fmt.Println(`
+		fmt.Println(`
       **
    *********
 ***************   [√] Nanobox successfully Configured!
@@ -47,9 +47,8 @@ time by running: 'nanobox configure'
   ""  :::  ""     
     "" " ""
        "
-`)		
+`)
 	}()
-
 
 	// ask about provider
 	config.Provider = stringAsker(`

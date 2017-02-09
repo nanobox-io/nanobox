@@ -5,6 +5,7 @@ import (
 
 	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/odin"
@@ -14,7 +15,7 @@ func Add(envModel *models.Env, appName, alias string) error {
 
 	// ensure the env model has been generated
 	if err := envModel.Generate(); err != nil {
-		return fmt.Errorf("unable to generate the environment")
+		return util.ErrorAppend(err, "unable to generate the environment")
 	}
 
 	// set the alias to be the default its missing
@@ -55,7 +56,7 @@ func Add(envModel *models.Env, appName, alias string) error {
 	}
 
 	if err := envModel.Save(); err != nil {
-		return fmt.Errorf("failed to save remote: %s", err)
+		return util.ErrorAppend(err, "failed to save remote")
 	}
 
 	fmt.Printf("\n%s Codebase linked to %s\n", display.TaskComplete, appName)

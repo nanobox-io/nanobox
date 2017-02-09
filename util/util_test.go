@@ -29,3 +29,15 @@ func TestRetry(t *testing.T) {
 	}
 
 }
+
+func TestError(t *testing.T) {
+	err := util.ErrorfQuiet("hi %s", "world")
+	if err.Error() != "hi world" {
+		t.Errorf("did not format correctly")
+	}
+
+	err = util.ErrorAppend(err, "james")
+	if err.Error() != "james: hi world" {
+		t.Errorf("append failed")
+	}
+}

@@ -1,13 +1,13 @@
 package component
 
 import (
-	"fmt"
 	"net"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
 )
@@ -26,19 +26,19 @@ func Destroy(appModel *models.App, componentModel *models.Component) error {
 
 	// detach from the host network
 	if err := detachNetwork(appModel, componentModel); err != nil {
-		return fmt.Errorf("failed to detach container from the host network: %s", err.Error())
+		return util.ErrorAppend(err, "failed to detach container from the host network")
 	}
 
 	// purge evars
 	if err := componentModel.PurgeEvars(appModel); err != nil {
 		lumber.Error("component:Destroy:models.Component.PurgeEvars(%+v): %s", appModel, err.Error())
-		return fmt.Errorf("failed to purge component evars from app: %s", err.Error())
+		return util.ErrorAppend(err, "failed to purge component evars from app")
 	}
 
 	// destroy the data model
 	if err := componentModel.Delete(); err != nil {
-		lumber.Error("component:Destroy:models.Component.Delete(): %s", err.Error())
-		return fmt.Errorf("failed to destroy component model: %s", err.Error())
+		lumber.Error("component:Destroy:models.Component.Delete()")
+		return util.ErrorAppend(err, "failed to destroy component model")
 	}
 
 	return nil
@@ -57,7 +57,7 @@ func destroyContainer(id string) error {
 	if err := docker.ContainerRemove(id); err != nil {
 		lumber.Error("component:Destroy:docker.ContainerRemove(%s): %s", id, err.Error())
 		display.ErrorTask()
-		// return fmt.Errorf("failed to remove docker container: %s", err.Error())
+		// return util.ErrorAppend(err, "failed to remove docker container")
 	}
 
 	return nil
@@ -79,7 +79,7 @@ func detachNetwork(appModel *models.App, componentModel *models.Component) error
 		if err := dhcp.ReturnIP(ip); err != nil {
 			lumber.Error("component:detachNetwork:dhcp.ReturnIP(%s): %s", ip, err.Error())
 			display.ErrorTask()
-			return fmt.Errorf("failed to release IP back to pool: %s", err.Error())
+			return util.ErrorAppend(err, "failed to release IP back to pool")
 		}
 	}
 

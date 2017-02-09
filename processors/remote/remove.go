@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
@@ -14,7 +15,7 @@ func Remove(envModel *models.Env, alias string) error {
 
 	// persist the model
 	if err := envModel.Save(); err != nil {
-		return fmt.Errorf("failed to remove remote: %s", err.Error())
+		return util.ErrorAppend(err, "failed to remove remote")
 	}
 
 	fmt.Printf("\n%s %s remote removed\n\n", display.TaskComplete, alias)

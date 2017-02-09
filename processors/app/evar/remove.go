@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
@@ -16,7 +17,7 @@ func Remove(appModel *models.App, keys []string) error {
 
 	// persist the app model
 	if err := appModel.Save(); err != nil {
-		return fmt.Errorf("failed to delete evars: %s", err.Error())
+		return util.ErrorAppend(err, "failed to delete evars")
 	}
 
 	// print the deleted keys
