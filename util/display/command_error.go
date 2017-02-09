@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/commands/registry"
 )
 
 var (
@@ -19,8 +20,16 @@ var (
 // We hit a minor bump, which can be quickly resolved following the instructions above.
 // If not, come talk and we'll walk you through the resolution.
 func CommandErr(err error) {
+	// get the exit code we are going to use
+	// if none has been set GetInt returns 0
+	exitCode := registry.GetInt("exit_code")
 
 	if err == nil {
+		// if an exit code is provided we need to quit here 
+		// and use that exit code
+		if exitCode != 0 {
+			os.Exit(exitCode)		
+		}
 		return
 	}
 
@@ -39,8 +48,10 @@ func CommandErr(err error) {
 		var input string
 		fmt.Scanln(&input)
 	}
-
-	os.Exit(1)
+	if exitCode == 0 {
+		os.Exit(1)	
+	}
+	os.Exit(exitCode)
 }
 
 func parseCommandErr(err error) (cause, context string) {
