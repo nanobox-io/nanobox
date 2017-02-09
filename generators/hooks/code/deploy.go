@@ -38,7 +38,7 @@ func DeployPayload(appModel *models.App, componentModel *models.Component) strin
 		BeforeLiveAll:     boxfile.Node("deploy.config").Node("before_live_all").Value(componentModel.Name),
 		AfterLive:         boxfile.Node("deploy.config").Node("after_live").Value(componentModel.Name),
 		AfterLiveAll:      boxfile.Node("deploy.config").Node("after_live_all").Value(componentModel.Name),
-		DeployHookTimeout: boxfile.Node("deploy.config").Node("deploy_hook_timeout"),
+		DeployHookTimeout: boxfile.Node("deploy.config").Value("deploy_hook_timeout"),
 	}
 
 	// turn it into json
