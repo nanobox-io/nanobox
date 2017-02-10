@@ -208,7 +208,7 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 	}
 
 	if res.StatusCode == 404 {
-		return util.ErrorfQuiet("Not Found (%s", b)
+    return util.ErrorfQuiet("Not Found (%s)", b)
 	}
 
 	if res.StatusCode == 500 {

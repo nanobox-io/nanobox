@@ -35,8 +35,7 @@ func Console(envModel *models.Env, consoleConfig ConsoleConfig) error {
 
 	// validate access to the app
 	if err := helpers.ValidateOdinApp(appID); err != nil {
-		// the validation already printed the error
-		return err
+		return util.ErrorAppend(err, "unable to validate app")
 	}
 
 	// initiate a console session with odin
