@@ -37,8 +37,7 @@ func Tunnel(envModel *models.Env, tunnelConfig TunnelConfig) error {
 
 	// validate access to the app
 	if err := helpers.ValidateOdinApp(appID); err != nil {
-		// the validation already printed the error
-		return nil
+		return util.ErrorAppend(err, "unable to validate app")
 	}
 
 	// initiate a tunnel session with odin
