@@ -7,8 +7,8 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/commands/registry"
+	"github.com/nanobox-io/nanobox/util"
 )
 
 var (
@@ -25,10 +25,10 @@ func CommandErr(err error) {
 	exitCode := registry.GetInt("exit_code")
 
 	if err == nil {
-		// if an exit code is provided we need to quit here 
+		// if an exit code is provided we need to quit here
 		// and use that exit code
 		if exitCode != 0 {
-			os.Exit(exitCode)		
+			os.Exit(exitCode)
 		}
 		return
 	}
@@ -49,7 +49,7 @@ func CommandErr(err error) {
 		fmt.Scanln(&input)
 	}
 	if exitCode == 0 {
-		os.Exit(1)	
+		os.Exit(1)
 	}
 	os.Exit(exitCode)
 }

@@ -18,7 +18,7 @@ func Exec(container, hook, payload, displayLevel string) (string, error) {
 		return "", nil
 	}
 	if err != nil {
-		return out, util.ErrorAppend(err, "failed to exe in container")
+		return out, util.ErrorfQuiet("failed to execute hook (%s) on %s: %s", hook, container, err)
 	}
 	return out, nil
 }

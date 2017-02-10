@@ -69,8 +69,7 @@ func Errorf(fmt string, args ...interface{}) error {
 	return eh
 }
 
-// create an error but do not report the error to the nanobox log
-// or to bugsnag
+// create an error but do not report to bugsnag
 func ErrorQuiet(err error) error {
 	if err == nil {
 		return err
