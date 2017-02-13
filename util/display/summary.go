@@ -208,22 +208,31 @@ func (s *Summarizer) handleLog(data string) {
 	}
 
 	// iterate through the lines, we'll keep the last line that has data
-	lines := strings.FieldsFunc(data, f)
-	for _, line := range lines {
+	lines := strings.FieldsFunc(msg+data, f)
+	for i, line := range lines {
+		// detect if this is the last line and its unfinished.
+		if len(lines) == i+1 && (!strings.HasSuffix(line, "\n") || !strings.HasSuffix(line, "\r")) {
+			continue
+		}
+
 		// first we need to remove escape sequences
 		line = EscSeqRegex.ReplaceAllString(line, "")
 
 		// then we need to remove any leading whitespace
 		line = LogStripRegex.ReplaceAllString(line, "")
 
-		if len(line) > 0 {
-			msg = line
+		if len(line) == 0 {
+			continue
 		}
 
 		availableLen := s.windowWidth - (len(s.Label) + len(s.Prefix) + 5)
-		if s.windowWidth > 0 && len(line) > availableLen {
+		if s.windowWidth > 0 && len(msg) > availableLen {
 			msg = msg[:availableLen] + "..."
 		}
+
+		s.detail = msg
+		s.reset()
+		s.print()
 	}
 
 	// if there is any data and it doesnt end with a newline
@@ -232,11 +241,6 @@ func (s *Summarizer) handleLog(data string) {
 		s.leftover = lines[len(lines)-1]
 	}
 
-	if len(msg) > 0 {
-		s.detail = msg
-		s.reset()
-		s.print()
-	}
 }
 
 // tick updates the spinner index and refreshes the summary
@@ -308,6 +312,7 @@ func (s *Summarizer) reset() {
 
 // print prints the current summary
 func (s *Summarizer) print() {
+
 
 	header := fmt.Sprintf("%s%s %s :\n", s.Prefix, TaskSpinner[s.spinIdx], s.Label)
 	detail := fmt.Sprintf("%s  %s\n", s.Prefix, s.detail)
