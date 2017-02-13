@@ -11,6 +11,7 @@ import (
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
 
+	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/models"
 )
 
@@ -86,6 +87,12 @@ func Run(id string, consoleConfig ConsoleConfig) error {
 
 	go io.Copy(resp.Conn, os.Stdin)
 	io.Copy(os.Stdout, resp.Reader)
+
+	// after the console closes lets get the exit code
+	exInspect, _ := docker.ExecInspect(exec.ID)
+	if exInspect.ExitCode != 0 {
+		registry.Set("exit_code", exInspect.ExitCode)
+	}
 
 	return nil
 }

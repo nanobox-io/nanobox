@@ -14,6 +14,7 @@ import (
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
 )
 
 const (
@@ -203,19 +204,19 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 	}
 
 	if res.StatusCode == 401 {
-		return fmt.Errorf("Unauthorized (%s)", b)
+		return util.ErrorfQuiet("Unauthorized (%s)", b)
 	}
 
 	if res.StatusCode == 404 {
-		return fmt.Errorf("Not Found (%s)", b)
+    return util.ErrorfQuiet("Not Found (%s)", b)
 	}
 
 	if res.StatusCode == 500 {
-		return fmt.Errorf("Internal Server Error (%s)", b)
+		return util.ErrorfQuiet("Internal Server Error (%s)", b)
 	}
 
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
-		return fmt.Errorf("bad exit response(%d %s %s %s (%s) %s)", res.StatusCode, req.Method, req.URL, req.Proto, res.Header.Get("Content-Length"), b)
+		return util.ErrorfQuiet("bad exit response(%d %s %s %s (%s) %s)", res.StatusCode, req.Method, req.URL, req.Proto, res.Header.Get("Content-Length"), b)
 	}
 
 	if responseBody != nil {

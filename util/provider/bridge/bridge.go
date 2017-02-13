@@ -73,16 +73,22 @@ func Connected() bool {
 		if err != nil {
 			continue
 		}
-		// find a
+
+		// find all the addresses assigned to the interface
 		for _, addr := range addrs {
 			ip, _, err := net.ParseCIDR(addr.String())
 			if err != nil {
 				continue
 			}
+
+			// check to see if the ip address is in our network
 			if network.Contains(ip) {
+
+				// now check to see if that interface is up
 				if i.Flags&net.FlagUp != net.FlagUp {
 					return false
 				}
+
 				return true
 			}
 		}
