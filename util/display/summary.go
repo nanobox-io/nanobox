@@ -211,7 +211,7 @@ func (s *Summarizer) handleLog(data string) {
 	lines := strings.FieldsFunc(msg+data, f)
 	for i, line := range lines {
 		// detect if this is the last line and its unfinished.
-		if len(lines) == i+1 && (!strings.HasSuffix(line, "\n") || !strings.HasSuffix(line, "\r")) {
+		if len(lines) == i+1 && (!strings.HasSuffix(data, "\n") || !strings.HasSuffix(data, "\r")) {
 			continue
 		}
 
