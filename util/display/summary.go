@@ -226,11 +226,11 @@ func (s *Summarizer) handleLog(data string) {
 		}
 
 		availableLen := s.windowWidth - (len(s.Label) + len(s.Prefix) + 5)
-		if s.windowWidth > 0 && len(msg) > availableLen {
-			msg = msg[:availableLen] + "..."
+		if s.windowWidth > 0 && len(line) > availableLen {
+			line = line[:availableLen] + "..."
 		}
 
-		s.detail = msg
+		s.detail = line
 		s.reset()
 		s.print()
 	}
