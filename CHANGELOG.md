@@ -1,3 +1,14 @@
+## 2.0.2 (February 14, 2017)
+
+BUG FIXES: 
+  - Allow vt100 terminal codes to work properly [#370](https://github.com/nanobox-io/nanobox/pull/370)
+  - Fix Truncation of the summary to also work with headers [#369](https://github.com/nanobox-io/nanobox/pull/369)
+  - Fix a bug where leftover [#365](https://github.com/nanobox-io/nanobox/issues/365)
+  - Hook failures no longer show duplicates [#360s](https://github.com/nanobox-io/nanobox/issues/360s)
+
+FEATURES:
+  - In consoles use the exit code instead of our own[#361](https://github.com/nanobox-io/nanobox/issues/361)
+
 ## 2.0.1 (February 9, 2017)
 
 BUG FIXES:
