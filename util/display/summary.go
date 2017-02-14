@@ -225,11 +225,6 @@ func (s *Summarizer) handleLog(data string) {
 			continue
 		}
 
-		availableLen := s.windowWidth - (len(s.Label) + len(s.Prefix) + 5)
-		if s.windowWidth > 0 && len(line) > availableLen {
-			line = line[:availableLen] + "..."
-		}
-
 		s.detail = line
 		s.reset()
 		s.print()
@@ -315,7 +310,19 @@ func (s *Summarizer) print() {
 
 
 	header := fmt.Sprintf("%s%s %s :\n", s.Prefix, TaskSpinner[s.spinIdx], s.Label)
+
+	// truncate the header 
+	availableLen := s.windowWidth - 5
+	if s.windowWidth > 0 && len(header) > availableLen {
+		header = header[:availableLen] + "...\n"
+	}
+
 	detail := fmt.Sprintf("%s  %s\n", s.Prefix, s.detail)
+
+	// truncate the details
+	if s.windowWidth > 0 && len(detail) > availableLen {
+		detail = detail[:availableLen] + "..."
+	}
 
 	// todo: add progress estimator
 
