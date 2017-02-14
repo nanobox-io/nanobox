@@ -8,8 +8,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/nanobox-io/nanobox/util"
 	"github.com/lyondhill/vtclean"
+	"github.com/nanobox-io/nanobox/util"
 )
 
 // ...
@@ -207,7 +207,6 @@ func (s *Summarizer) handleLog(data string) {
 	f := func(c rune) bool {
 		return c == '\n' || c == '\r'
 	}
-	printLogFile("data " + data)
 
 	// iterate through the lines, we'll keep the last line that has data
 	lines := strings.FieldsFunc(msg+data, f)
@@ -309,10 +308,9 @@ func (s *Summarizer) reset() {
 // print prints the current summary
 func (s *Summarizer) print() {
 
-
 	header := fmt.Sprintf("%s%s %s :\n", s.Prefix, TaskSpinner[s.spinIdx], s.Label)
 
-	// truncate the header 
+	// truncate the header
 	availableLen := s.windowWidth - 5
 	if s.windowWidth > 0 && len(header) > availableLen {
 		header = header[:availableLen] + "...\n"
