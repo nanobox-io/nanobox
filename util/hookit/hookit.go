@@ -13,10 +13,11 @@ import (
 // Exec executes a hook inside of a container
 func Exec(container, hook, payload, displayLevel string) (string, error) {
 	out, err := util.DockerExec(container, "root", "/opt/nanobox/hooks/"+hook, []string{payload}, display.NewStreamer(displayLevel))
-	if err != nil && (strings.Contains(string(out), "No such file or directory") && strings.Contains(err.Error(), "bad exit code(126)")) {
+	if err != nil && (strings.Contains(string(out), "such file or directory") && strings.Contains(err.Error(), "bad exit code(126)")) {
 		// if its a 126 the hook didnt exist
 		return "", nil
 	}
+
 	if err != nil {
 		return out, util.ErrorfQuiet("failed to execute hook (%s) on %s: %s", hook, container, err)
 	}
