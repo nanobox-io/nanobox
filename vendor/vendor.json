@@ -315,6 +315,12 @@
 			"revisionTime": "2015-09-05T22:45:08Z"
 		},
 		{
+			"checksumSHA1": "YFg6EOS/oNzEPAc5wXjbWmgr2tQ=",
+			"path": "github.com/lyondhill/vtclean",
+			"revision": "ea70112eba8c76618853d04b02eaf84da56067b4",
+			"revisionTime": "2017-02-14T19:52:31Z"
+		},
+		{
 			"checksumSHA1": "KCgFx/QQG9vUtshnL9aUxeWGFyY=",
 			"path": "github.com/magiconair/properties",
 			"revision": "c81f9d71af8f8cba1466501d30326b99a4e56c19",

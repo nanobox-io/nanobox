@@ -8,12 +8,13 @@ import (
 	"strings"
 	"time"
 
+	"github.com/lyondhill/vtclean"
 	"github.com/nanobox-io/nanobox/util"
 )
 
 // ...
 var (
-	EscSeqRegex   = regexp.MustCompile("\\x1b[[][?0123456789]*;?[?0123456789]*[ABCDEFGHJKRSTfminsulhp]")
+	EscSeqRegex   = regexp.MustCompile("\\x1b[[][?0123456789]*;?[?0123456789]*[ABEFHJRSTfminsulhp]")
 	LogStripRegex = regexp.MustCompile("^[ \t-]*")
 	termWidth     = 0
 )
@@ -209,14 +210,13 @@ func (s *Summarizer) handleLog(data string) {
 
 	// iterate through the lines, we'll keep the last line that has data
 	lines := strings.FieldsFunc(msg+data, f)
-	for i, line := range lines {
-		// detect if this is the last line and its unfinished.
-		if len(lines) == i+1 && (!strings.HasSuffix(data, "\n") || !strings.HasSuffix(data, "\r")) {
-			continue
-		}
+	for _, line := range lines {
 
 		// first we need to remove escape sequences
 		line = EscSeqRegex.ReplaceAllString(line, "")
+
+		// then use vtclean to organize the output
+		line = vtclean.Clean(line, true)
 
 		// then we need to remove any leading whitespace
 		line = LogStripRegex.ReplaceAllString(line, "")
@@ -231,7 +231,7 @@ func (s *Summarizer) handleLog(data string) {
 	}
 
 	// if there is any data and it doesnt end with a newline
-	if len(lines) > 0 && (!strings.HasSuffix(data, "\n") || !strings.HasSuffix(data, "\r")) {
+	if len(lines) > 0 && !(strings.HasSuffix(data, "\n") || strings.HasSuffix(data, "\r")) {
 		// place it in the leftovers
 		s.leftover = lines[len(lines)-1]
 	}
@@ -308,10 +308,9 @@ func (s *Summarizer) reset() {
 // print prints the current summary
 func (s *Summarizer) print() {
 
-
 	header := fmt.Sprintf("%s%s %s :\n", s.Prefix, TaskSpinner[s.spinIdx], s.Label)
 
-	// truncate the header 
+	// truncate the header
 	availableLen := s.windowWidth - 5
 	if s.windowWidth > 0 && len(header) > availableLen {
 		header = header[:availableLen] + "...\n"
@@ -321,7 +320,7 @@ func (s *Summarizer) print() {
 
 	// truncate the details
 	if s.windowWidth > 0 && len(detail) > availableLen {
-		detail = detail[:availableLen] + "..."
+		detail = detail[:availableLen] + "...\n"
 	}
 
 	// todo: add progress estimator
