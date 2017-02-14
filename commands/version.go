@@ -22,7 +22,7 @@ var (
 
 // versionFn ...
 func versionFn(ccmd *cobra.Command, args []string) {
-	v := "2.0.1"
+	v := "2.0.2"
 	update, _ := models.LoadUpdate()
 	md5Parts := strings.Fields(update.CurrentVersion)
 	md5 := ""
