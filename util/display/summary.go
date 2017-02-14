@@ -322,7 +322,7 @@ func (s *Summarizer) print() {
 
 	// truncate the details
 	if s.windowWidth > 0 && len(detail) > availableLen {
-		detail = detail[:availableLen] + "..."
+		detail = detail[:availableLen] + "...\n"
 	}
 
 	// todo: add progress estimator
