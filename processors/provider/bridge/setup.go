@@ -80,7 +80,7 @@ func setupContainer() error {
 	}
 	display.StopTask()
 
-	display.StartTask("Configuring")
+	display.StartTask("Setting up container")
 	// run the configure hook
 	if _, err := hookit.DebugExec(container.ID, "configure", "{\"platform\":\"local\",\"config\":{}}", "info"); err != nil {
 		return util.ErrorAppend(err, "failed to run configure hook")

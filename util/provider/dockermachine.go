@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
 	// "github.com/nanobox-io/nanobox/util/fileutil"
 	"github.com/nanobox-io/nanobox/util/vbox"
@@ -97,6 +98,9 @@ func (machine DockerMachine) Create() error {
 		return nil
 	}
 
+	// make sure dockermachine is clean
+	exec.Command(dockerMachineCmd, "rm", "-f", "nanobox").Run()
+	
 	display.ProviderSetup()
 
 	// load the configuration for docker-machine
@@ -139,14 +143,14 @@ func (machine DockerMachine) Create() error {
 
 	process := exec.Command(cmd[0], cmd[1:]...)
 
-	process.Stdout = display.NewStreamer("info")
-	process.Stderr = display.NewStreamer("info")
+	// process.Stdout = display.NewStreamer("info")
+	// process.Stderr = display.NewStreamer("info")
 
 	display.StartTask("Launching VM")
 
-	if err := process.Run(); err != nil {
+	if out, err := process.CombinedOutput(); err != nil {
 		display.ErrorTask()
-		return err
+		return util.Errorf("%s: %s", err, out)
 	}
 
 	display.StopTask()
@@ -737,7 +741,8 @@ func (machine DockerMachine) isCreated() bool {
 		return false
 	}
 
-	if bytes.Contains(output, []byte("Host does not exist: \"nanobox\"")) {
+	if bytes.Contains(output, []byte("Host does not exist: \"nanobox\"")) ||
+	   bytes.Contains(output, []byte("error"))  {
 		return false
 	}
 

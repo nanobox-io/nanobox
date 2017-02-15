@@ -55,7 +55,7 @@ func purgeConfiguration() error {
 
 	// implode the global dir
 	if err := os.RemoveAll(config.GlobalDir()); err != nil {
-		return util.ErrorAppend(err, "failed to purge the data directory")
+		return util.ErrorAppend(util.ErrorQuiet(err), "failed to purge the data directory")
 	}
 
 	return nil
