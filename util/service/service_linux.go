@@ -18,12 +18,17 @@ func serviceConfigFile(name string) string {
 
 func launchSystem() string {
 	_, err := os.Stat("/sbin/systemctl")
-	if err != nil {
+	if err == nil {
+		return "systemd"
+	}
+
+	_, err = os.Stat("/usr/bin/systemctl")
+	if err == nil {
 		return "systemd"
 	}
 
 	_, err = os.Stat("/sbin/initctl")
-	if err != nil {
+	if err == nil {
 		return "upstart"
 	}
 

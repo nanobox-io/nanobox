@@ -3,7 +3,7 @@ package main
 
 import (
 	"bufio"
-	"crypto/md5"
+	// "crypto/md5"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -105,24 +105,24 @@ func main() {
 }
 
 func setupBugsnag() {
-	update, _ := models.LoadUpdate()
-	md5Parts := strings.Fields(update.CurrentVersion)
-	version := ""
-	if len(md5Parts) > 1 {
-		version = md5Parts[len(md5Parts)-1]
-	}
+	// update, _ := models.LoadUpdate()
+	// md5Parts := strings.Fields(update.CurrentVersion)
+	// version := ""
+	// if len(md5Parts) > 1 {
+	// 	version = md5Parts[len(md5Parts)-1]
+	// }
 
 	bugsnag.Configure(bugsnag.Configuration{
 		APIKey:       bugsnagToken,
 		Logger:       bugLog{},
 		Synchronous:  true,
-		AppVersion:   version,
+		AppVersion:   "2.0.2",
 		PanicHandler: func() {}, // the built in panic handler reexicutes our code
 	})
 
 	bugsnag.OnBeforeNotify(func(event *bugsnag.Event, config *bugsnag.Configuration) error {
 		// set the grouping hash to a md5 of the message. which should seperate the grouping in the dashboard
-		event.GroupingHash = fmt.Sprintf("%x", md5.Sum([]byte(event.Message)))
+		event.GroupingHash = fmt.Sprintf("%v", event.Stacktrace)
 		return nil
 	})
 
