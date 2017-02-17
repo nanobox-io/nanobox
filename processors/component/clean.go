@@ -1,6 +1,8 @@
 package component
 
 import (
+	"strings"
+
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
 
@@ -70,5 +72,12 @@ func isComponentDirty(componentModel *models.Component) bool {
 
 	// check to see if the container exists
 	_, err := docker.GetContainer(componentModel.ID)
-	return err != nil
+	if err != nil {
+		if strings.Contains(err.Error(), "host is down") {
+			return false
+		}
+		return true
+	}
+
+	return false
 }
