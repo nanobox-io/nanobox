@@ -143,14 +143,14 @@ func (machine DockerMachine) Create() error {
 
 	process := exec.Command(cmd[0], cmd[1:]...)
 
-	// process.Stdout = display.NewStreamer("info")
-	// process.Stderr = display.NewStreamer("info")
+	process.Stdout = display.NewStreamer("info")
+	process.Stderr = display.NewStreamer("info")
 
 	display.StartTask("Launching VM")
 
-	if out, err := process.CombinedOutput(); err != nil {
+	if err := process.Run(); err != nil {
 		display.ErrorTask()
-		return util.Errorf("%s: %s", err, out)
+		return util.Error(err)
 	}
 
 	display.StopTask()
