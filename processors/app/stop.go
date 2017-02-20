@@ -78,15 +78,15 @@ func stopDevContainer(appModel *models.App) error {
 		return util.ErrorAppend(err, "failed to remove dev container")
 	}
 
-	// extract the container IP
-	ip := docker.GetIP(container)
+	// // extract the container IP
+	// ip := docker.GetIP(container)
 
-	// return the container IP back to the IP pool
-	if err := dhcp.ReturnIP(net.ParseIP(ip)); err != nil {
-		lumber.Error("dev:console:teardown:dhcp.ReturnIP(%s): %s", ip, err)
+	// // return the container IP back to the IP pool
+	// if err := dhcp.ReturnIP(net.ParseIP(ip)); err != nil {
+	// 	lumber.Error("dev:console:teardown:dhcp.ReturnIP(%s): %s", ip, err)
 
-		lumber.Error("An error occurred durring dev console teadown:%s", err.Error())
-		return util.ErrorAppend(err, "failed to return unused IP back to pool")
-	}
+	// 	lumber.Error("An error occurred durring dev console teadown:%s", err.Error())
+	// 	return util.ErrorAppend(err, "failed to return unused IP back to pool")
+	// }
 	return nil
 }
