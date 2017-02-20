@@ -2,7 +2,7 @@ package app
 
 import (
 	"fmt"
-	"net"
+	// "net"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
@@ -11,7 +11,7 @@ import (
 	"github.com/nanobox-io/nanobox/processors/component"
 	process_provider "github.com/nanobox-io/nanobox/processors/provider"
 	"github.com/nanobox-io/nanobox/util"
-	"github.com/nanobox-io/nanobox/util/dhcp"
+	// "github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
