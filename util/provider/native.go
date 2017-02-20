@@ -135,7 +135,7 @@ func (native Native) Start() error {
 
 		if err := cmd.Run(); err != nil {
 			display.ErrorTask()
-			display.NetworkCreateError()
+			display.NetworkCreateError("native-network-space", config.NativeNetworkSpace)
 			return err
 		}
 		display.StopTask()

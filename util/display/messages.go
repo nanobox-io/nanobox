@@ -200,15 +200,15 @@ func LoginComplete() {
 `, TaskComplete))
 }
 
-func NetworkCreateError() {
-	os.Stderr.WriteString(`
+func NetworkCreateError(name, network string) {
+	os.Stderr.WriteString(fmt.Sprintf(`
 Nanobox is trying to create a native docker network, and it
 looks like we have a conflict. An existing docker network is
-already using the DEFAULT_NETWORK address space.
+already using the %s address space.
 
 You will need to either remove the conflicting network, or set
 an alternative address space with the following:
 
-nanobox COMMAND TO SET NEW ADDRESS SPACE
-`)
+nanobox config set %s <unused ip/cidr>
+`, network, name))
 }
