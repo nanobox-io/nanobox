@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"github.com/jcelliott/lumber"
-	"github.com/nanobox-io/nanobox-golang-stylish"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/config"
@@ -99,7 +98,7 @@ func (native Native) Destroy() error {
 	// TODO: remove nanobox images
 
 	if native.hasNetwork() {
-		fmt.Print(stylish.Bullet("Removing custom docker network..."))
+		display.StartTask("Removing custom docker network...")
 
 		cmd := exec.Command("docker", "network", "rm", "nanobox")
 
@@ -107,8 +106,10 @@ func (native Native) Destroy() error {
 		cmd.Stderr = display.NewStreamer("  ")
 
 		if err := cmd.Run(); err != nil {
+			display.ErrorTask()
 			return err
 		}
+		display.StopTask()
 	}
 
 	return nil
@@ -119,7 +120,7 @@ func (native Native) Start() error {
 
 	// TODO: some networking maybe???
 	if !native.hasNetwork() {
-		fmt.Print(stylish.Bullet("Setting up custom docker network..."))
+		display.StartTask("Setting up custom docker network...")
 
 		config, _ := models.LoadConfig()
 		ip, ipNet, err := net.ParseCIDR(config.NativeNetworkSpace)
@@ -133,8 +134,11 @@ func (native Native) Start() error {
 		cmd.Stderr = display.NewStreamer("  ")
 
 		if err := cmd.Run(); err != nil {
+			display.ErrorTask()
+			display.NetworkCreateError()
 			return err
 		}
+		display.StopTask()
 	}
 
 	return nil
