@@ -2,7 +2,7 @@ package app
 
 import (
 	"fmt"
-	"net"
+	// "net"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
@@ -11,7 +11,7 @@ import (
 	"github.com/nanobox-io/nanobox/processors/component"
 	process_provider "github.com/nanobox-io/nanobox/processors/provider"
 	"github.com/nanobox-io/nanobox/util"
-	"github.com/nanobox-io/nanobox/util/dhcp"
+	// "github.com/nanobox-io/nanobox/util/dhcp"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/locker"
 )
@@ -78,15 +78,15 @@ func stopDevContainer(appModel *models.App) error {
 		return util.ErrorAppend(err, "failed to remove dev container")
 	}
 
-	// extract the container IP
-	ip := docker.GetIP(container)
+	// // extract the container IP
+	// ip := docker.GetIP(container)
 
-	// return the container IP back to the IP pool
-	if err := dhcp.ReturnIP(net.ParseIP(ip)); err != nil {
-		lumber.Error("dev:console:teardown:dhcp.ReturnIP(%s): %s", ip, err)
+	// // return the container IP back to the IP pool
+	// if err := dhcp.ReturnIP(net.ParseIP(ip)); err != nil {
+	// 	lumber.Error("dev:console:teardown:dhcp.ReturnIP(%s): %s", ip, err)
 
-		lumber.Error("An error occurred durring dev console teadown:%s", err.Error())
-		return util.ErrorAppend(err, "failed to return unused IP back to pool")
-	}
+	// 	lumber.Error("An error occurred durring dev console teadown:%s", err.Error())
+	// 	return util.ErrorAppend(err, "failed to return unused IP back to pool")
+	// }
 	return nil
 }
