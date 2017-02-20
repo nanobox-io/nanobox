@@ -181,5 +181,31 @@ func cleanLine(line, lineCheck string) string {
 		}
 		goodPaths = append(goodPaths, path)
 	}
+	goodPaths = removeDuplicates(goodPaths)
 	return fmt.Sprintf("\"%s\" %s", strings.Join(goodPaths, "\" \""), lineCheck)
+}
+
+// takes a set of paths and removes duplicates as well as cleaning up any child paths
+func removeDuplicates(paths []string) []string {
+	rtn := []string{}
+	// look through the paths
+	for i, path := range paths {
+
+		for j, originalPath := range paths {
+
+			// if im looking at the same path then ignore it
+			if i == j {
+				continue
+			}
+
+			// if i find an element that is shorter but the same directory structure
+			// ignore the child directory
+			if strings.HasPrefix(path, originalPath) {
+				continue
+			}
+
+			rtn = append(rtn, path)
+		}
+	}
+	return rtn
 }
