@@ -6,7 +6,9 @@ import (
 
 	"github.com/nanobox-io/nanobox/commands/steps"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/helpers"
 	"github.com/nanobox-io/nanobox/processors/env"
+	"github.com/nanobox-io/nanobox/processors/app"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 )
@@ -33,5 +35,17 @@ func destroyFunc(ccmd *cobra.Command, args []string) {
 		fmt.Println("This project doesn't exist on nanobox.")
 		return
 	}
-	display.CommandErr(env.Destroy(envModel))
+
+	if len(args) == 0 {
+		display.CommandErr(env.Destroy(envModel))	
+	}
+
+	_, _, name := helpers.Endpoint(envModel, args, 2)
+	appModel, err := models.FindAppBySlug(envModel.ID, name)
+	if err != nil {
+		fmt.Println("Could not find the application")
+	}
+
+	display.CommandErr(app.Destroy(appModel))
+
 }
