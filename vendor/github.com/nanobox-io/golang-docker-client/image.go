@@ -100,7 +100,7 @@ func ImageInspect(imageID string) (Image, error) {
 	return img, err
 }
 
-func ImageRemove(imageID string) error {
-	_, err := client.ImageRemove(context.Background(), imageID, dockType.ImageRemoveOptions{Force: true, PruneChildren: true})
+func ImageRemove(imageID string, force bool) error {
+	_, err := client.ImageRemove(context.Background(), imageID, dockType.ImageRemoveOptions{Force: force, PruneChildren: true})
 	return err
 }

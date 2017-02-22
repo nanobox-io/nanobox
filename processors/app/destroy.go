@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"net"
+	"strings"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
@@ -65,6 +66,7 @@ func Destroy(appModel *models.App) error {
 		return util.ErrorAppend(err, "failed to delete app model")
 	}
 
+	cleanImages()
 	return nil
 }
 
@@ -110,4 +112,20 @@ func releaseIPs(appModel *models.App) error {
 	}
 
 	return nil
+}
+
+func cleanImages() {
+	images, err := docker.ImageList()
+	if err != nil {
+		return
+	}
+	for _, image := range images {
+		for _, tag := range image.RepoTags {
+			// if there is a tag that is not our build and it is one of ours.. try removing it (without force)
+			if tag != "" && !strings.HasPrefix(tag, "nanobox/build")  && strings.HasPrefix(tag, "nanobox/") {
+				tag = strings.Replace(tag, ":latest", "", 1)
+				docker.ImageRemove(tag, false)
+			}
+		}
+	}
 }
