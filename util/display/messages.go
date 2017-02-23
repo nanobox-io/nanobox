@@ -213,6 +213,17 @@ nanobox config set %s <unused ip/cidr>
 `, network, name))
 }
 
+
+func VMCommunicationError() {
+	os.Stderr.WriteString(fmt.Sprintf(`
+--------------------------------------------------------------------------------
+Nanobox has started a VM that needs access to your machine for mounting.
+This VM is unable to communicate with the host machine currently. Please
+verify that you don't have a firewall blocking this connection, and try again!
+--------------------------------------------------------------------------------
+`))	
+}
+
 func NoGonanaUser() {
 	os.Stderr.WriteString(fmt.Sprintf(`
 We could not connect as the gonano user but we were able to 

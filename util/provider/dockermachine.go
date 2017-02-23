@@ -344,6 +344,24 @@ func (machine DockerMachine) Start() error {
 
 	display.StopTask()
 
+	// check to see if the vm can talk to the host
+	cmd = []string{
+		dockerMachineCmd,
+		"ssh",
+		"nanobox",
+		"ping",
+		"-c",
+		"1",
+		"192.168.99.1",
+	}
+
+	process = exec.Command(cmd[0], cmd[1:]...)
+	if err := process.Run(); err != nil {
+		display.ErrorTask()
+		display.VMCommunicationError()
+		return util.ErrorfQuiet("VM cannot communicate with host")
+	}
+
 	if machine.changedIP() {
 		return machine.regenerateCert()
 	}
