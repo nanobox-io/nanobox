@@ -351,7 +351,7 @@ func (machine DockerMachine) Start() error {
 		"nanobox",
 		"ping",
 		"-c",
-		"1"
+		"1",
 		"192.168.99.1",
 	}
 
