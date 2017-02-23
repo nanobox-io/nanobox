@@ -1,3 +1,19 @@
+## 2.0.3 (February 23, 2017)
+
+BUG FIXES: 
+  - If during the setup the VM errors we now clean up [#373](https://github.com/nanobox-io/nanobox/pull/373)
+  - Detect the correct location for systemd on linux [#374](https://github.com/nanobox-io/nanobox/pull/374)
+  - Fix an issue where docker being down would remove components [#376](https://github.com/nanobox-io/nanobox/pull/376)
+  - Remove Duplicate paths in /etc/exports on osx [#379](https://github.com/nanobox-io/nanobox/pull/379)
+  - Stop releasing ips during nanobox stop [#380](https://github.com/nanobox-io/nanobox/pull/380)
+
+FEATURES:
+  - Add messaging to help make it clear when networks fail [#378](https://github.com/nanobox-io/nanobox/pull/378)
+  - Allow users to set the user they want to console in as [#385](https://github.com/nanobox-io/nanobox/pull/385)
+  - Confirm docker connections during the init process [#386](https://github.com/nanobox-io/nanobox/pull/386)
+  - Confirm VirtualMachine can talk to the host [#387](https://github.com/nanobox-io/nanobox/pull/387)
+
+
 ## 2.0.2 (February 14, 2017)
 
 BUG FIXES: 
