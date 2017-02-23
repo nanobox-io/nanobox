@@ -5,6 +5,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/helpers"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors"
@@ -23,10 +24,18 @@ var (
 		Long:  ``,
 		Run:   consoleFn,
 	}
+	user string
 )
+
+func init() {
+	ConsoleCmd.Flags().StringVarP(&user, "user", "u", "", "user you would like to console in as")
+}
 
 // consoleFn ...
 func consoleFn(ccmd *cobra.Command, args []string) {
+	if user != "" {
+		registry.Set("console_user", user)
+	}
 	envModel, _ := models.FindEnvByID(config.EnvID())
 	args, location, name := helpers.Endpoint(envModel, args, 2)
 
