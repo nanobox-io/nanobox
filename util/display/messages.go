@@ -212,3 +212,10 @@ an alternative address space with the following:
 nanobox config set %s <unused ip/cidr>
 `, network, name))
 }
+
+func NoGonanaUser() {
+	os.Stderr.WriteString(fmt.Sprintf(`
+We could not connect as the gonano user but we were able to 
+fall back to the default user
+`, TaskComplete))
+}
