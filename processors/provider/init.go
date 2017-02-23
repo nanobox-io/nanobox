@@ -1,6 +1,8 @@
 package provider
 
 import (
+	"time"
+
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
 
@@ -21,6 +23,15 @@ func Init() error {
 	if err := docker.Initialize("env"); err != nil {
 		lumber.Error("provider:Init:docker.Initialize()")
 		return util.ErrorAppend(err, "failed to initialize the docker client")
+	}
+
+	checkFunc := func() error {
+		_, err:= docker.ContainerList()
+		return err
+	}
+	// confirm it is up and working
+	if err := util.Retry(checkFunc, 20, time.Second ); err != nil {
+		return util.Errorf("unable to communicate with Docker")
 	}
 
 	return nil
