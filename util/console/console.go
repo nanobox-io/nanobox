@@ -48,10 +48,14 @@ func Run(id string, consoleConfig ConsoleConfig) error {
 	stdInFD, isTerminal := term.GetFdInfo(stdin)
 	stdOutFD, _ := term.GetFdInfo(stdout)
 
+	user := "gonano"
+	if registry.GetString("console_user") != "" {
+		user = registry.GetString("console_user")
+	}
 	// initiate a docker exec
 	execConfig := docker.ExecConfig{
 		ID:     id,
-		User:   "gonano",
+		User:   user,
 		Cmd:    cmd,
 		Stdin:  true,
 		Stdout: true,

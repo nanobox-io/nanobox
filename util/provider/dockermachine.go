@@ -100,7 +100,7 @@ func (machine DockerMachine) Create() error {
 
 	// make sure dockermachine is clean
 	exec.Command(dockerMachineCmd, "rm", "-f", "nanobox").Run()
-	
+
 	display.ProviderSetup()
 
 	// load the configuration for docker-machine
@@ -760,7 +760,7 @@ func (machine DockerMachine) isCreated() bool {
 	}
 
 	if bytes.Contains(output, []byte("Host does not exist: \"nanobox\"")) ||
-	   bytes.Contains(output, []byte("error"))  {
+		bytes.Contains(output, []byte("error")) {
 		return false
 	}
 
