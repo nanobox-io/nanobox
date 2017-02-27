@@ -39,6 +39,7 @@ func destroyFunc(ccmd *cobra.Command, args []string) {
 	if len(args) == 0 {
 		display.CommandErr(env.Destroy(envModel))	
 	}
+	fmt.Println("args", args)
 
 	_, _, name := helpers.Endpoint(envModel, args, 2)
 	appModel, err := models.FindAppBySlug(envModel.ID, name)

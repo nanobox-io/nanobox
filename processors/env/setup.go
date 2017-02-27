@@ -4,10 +4,12 @@ import (
 	"fmt"
 
 	"github.com/jcelliott/lumber"
+	"github.com/nanobox-io/nanobox-boxfile"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/provider"
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 	util_provider "github.com/nanobox-io/nanobox/util/provider"
 )
@@ -15,10 +17,17 @@ import (
 // Setup sets up the provider and the env mounts
 func Setup(envModel *models.Env) error {
 
+	// if there is no boxfile display a message and end
+	if box := boxfile.NewFromPath(config.Boxfile()); !box.Valid {
+		display.MissingBoxfile()
+		return util.ErrorfQuiet("missing or invalid boxfile")
+	}
+
 	// init docker client
 	if err := provider.Init(); err != nil {
 		return util.ErrorAppend(err, "failed to init docker client")
 	}
+
 
 	// ensure the envModel data has been generated
 	if err := envModel.Generate(); err != nil {
