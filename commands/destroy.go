@@ -36,6 +36,7 @@ func destroyFunc(ccmd *cobra.Command, args []string) {
 		return
 	}
 
+
 	if len(args) == 0 {
 		display.CommandErr(env.Destroy(envModel))	
 	}

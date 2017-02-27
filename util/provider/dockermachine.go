@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	// "path/filepath"
+	"io"
 	"regexp"
 	"runtime"
 	"strings"
@@ -143,14 +144,18 @@ func (machine DockerMachine) Create() error {
 
 	process := exec.Command(cmd[0], cmd[1:]...)
 
-	process.Stdout = display.NewStreamer("info")
-	process.Stderr = display.NewStreamer("info")
+	// lets try getting the extra bytes from creating
+	fullBuffer := &bytes.Buffer{}	
+	writer := io.MultiWriter(display.NewStreamer("info"), fullBuffer)
+
+	process.Stdout = writer
+	process.Stderr = writer
 
 	display.StartTask("Launching VM")
 
 	if err := process.Run(); err != nil {
 		display.ErrorTask()
-		return util.Error(err)
+		return util.Errorf("%s: %s", fullBuffer.String(), err)
 	}
 
 	display.StopTask()

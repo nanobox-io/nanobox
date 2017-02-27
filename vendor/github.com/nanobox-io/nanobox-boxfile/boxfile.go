@@ -294,6 +294,12 @@ func (b *Boxfile) FillRaw() {
 
 // parse takes raw data and converts it to a map structure
 func (b *Boxfile) parse() {
+	// if im given no data it is not a valid boxfile
+	if len(b.raw) == 0 {
+		b.Valid = false
+		return
+	}
+
 	err := goyaml.Unmarshal(b.raw, &b.Parsed)
 	if err != nil {
 		b.Valid = false

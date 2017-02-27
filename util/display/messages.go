@@ -230,3 +230,15 @@ We could not connect as the gonano user but we were able to
 fall back to the default user
 `, TaskComplete))
 }
+
+func MissingBoxfile() {
+	os.Stderr.WriteString(fmt.Sprintf(`
+--------------------------------------------------------------------------------
+MISSING BOXFILE.YML
+Nanobox is looking for a boxfile.yml config file. You might want to 
+check out our getting-started guide on configuring your app:
+
+https://guides.nanobox.io/
+--------------------------------------------------------------------------------
+`))	
+}
