@@ -21,6 +21,7 @@ type Config struct {
 	DockerMachineNetworkSpace string `json:"docker-machine-network-space"`
 	NativeNetworkSpace        string `json:"native-network-space"`
 
+	Cache    string `json:cache`
 	LockPort int `json:"lock-port"`
 }
 
@@ -69,6 +70,14 @@ func (c *Config) makeValid() {
 
 	if _, _, err := net.ParseCIDR(c.NativeNetworkSpace); c.NativeNetworkSpace == "" || err != nil {
 		c.NativeNetworkSpace = "172.18.0.1/16"
+	}
+
+	if c.Cache == "" {
+		c.Cache = "single"
+	}
+
+	if c.Cache != "single" && c.Cache != "shared" {
+		c.Cache = "single"
 	}
 
 	if c.LockPort == 0 {

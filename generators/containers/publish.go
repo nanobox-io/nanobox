@@ -5,6 +5,7 @@ import (
 
 	"github.com/nanobox-io/golang-docker-client"
 
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/config"
 	// "github.com/nanobox-io/nanobox/util/provider"
 )
@@ -12,6 +13,13 @@ import (
 // PublishConfig generate the container configuration for the build container
 func PublishConfig(image string) docker.ContainerConfig {
 	env := config.EnvID()
+
+	cache := fmt.Sprintf("nanobox_%s_cache:/mnt/cache", env)
+	configModel, _ := models.LoadConfig()
+	if configModel.Cache == "shared" {
+		cache = "nanobox_cache:/mtn/cache"
+	}
+
 	config := docker.ContainerConfig{
 		Name:    PublishName(),
 		Image:   image,
@@ -21,7 +29,7 @@ func PublishConfig(image string) docker.ContainerConfig {
 			// fmt.Sprintf("%s%s/cache:/mnt/cache", provider.HostMntDir(), env),
 			// fmt.Sprintf("%s%s/deploy:/mnt/deploy", provider.HostMntDir(), env),
 			fmt.Sprintf("nanobox_%s_app:/mnt/app", env),
-			fmt.Sprintf("nanobox_%s_cache:/mnt/cache", env),
+			cache,
 			fmt.Sprintf("nanobox_%s_deploy:/mnt/deploy", env),
 		},
 		RestartPolicy: "no",
