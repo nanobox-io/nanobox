@@ -72,7 +72,7 @@ func Watch(container, path string) error {
 		if runtime.GOOS == "windows" {
 			efile = strings.Replace(efile, "\\", "/", -1)
 		}
-		containerFile := filepath.ToSlash(filepath.Join("/app", strings.Replace(e.file, config.LocalDir(), "", 1)))
+		containerFile := filepath.ToSlash(filepath.Join("/app", strings.Replace(efile, config.LocalDir(), "", 1)))
 		changeList = append(changeList, containerFile)
 	}
 
