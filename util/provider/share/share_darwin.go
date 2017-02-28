@@ -190,7 +190,8 @@ func removeDuplicates(paths []string) []string {
 	rtn := []string{}
 	// look through the paths
 	for i, path := range paths {
-
+		// default to adding the path as a non duplicate
+		add := true
 		for j, originalPath := range paths {
 
 			// if im looking at the same path then ignore it
@@ -199,11 +200,15 @@ func removeDuplicates(paths []string) []string {
 			}
 
 			// if i find an element that is shorter but the same directory structure
-			// ignore the child directory
+			// dont add the longer path
 			if strings.HasPrefix(path, originalPath) {
-				continue
+				add = false
 			}
 
+		}
+
+		// if I didnt detect a shorter path then I need to add this one
+		if add {
 			rtn = append(rtn, path)
 		}
 	}
