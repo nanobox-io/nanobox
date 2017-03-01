@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jcelliott/lumber"
+	// "github.com/jcelliott/lumber"
 
 	"github.com/lyondhill/vtclean"
 	"github.com/nanobox-io/nanobox/util"
@@ -202,7 +202,7 @@ func (s *Summarizer) handleEvent(event *sEventOp) {
 // handleLog sets the detail line and refreshes the summary
 func (s *Summarizer) handleLog(data string) {
 
-	lumber.Debug("%q", data)
+	// lumber.Debug("%q", data)
 	msg := s.leftover
 	s.leftover = ""
 
