@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"os"
 	"os/exec"
 	"bytes"
 )
