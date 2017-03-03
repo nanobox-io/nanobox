@@ -53,7 +53,7 @@ func startCmd(name string) []string {
 func running(name string) bool {
 	switch launchSystem() {
 	case "systemd":
-		out, err := exec.Command("systemctl", "status", name).CombinedOutput()
+		out, err := exec.Command("systemctl", "--no-pager", "status", name).CombinedOutput()
 		if err != nil {
 			return false
 		}
