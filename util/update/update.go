@@ -41,4 +41,5 @@ func populateUpdate(update *models.Update) {
 	update.CurrentVersion = RemoveMd5()
 	update.LastCheckAt = time.Now()
 	update.LastUpdatedAt = time.Now()
+	update.Save()
 }

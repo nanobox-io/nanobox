@@ -19,17 +19,12 @@ func serviceConfigFile(name string) string {
 }
 
 func launchSystem() string {
-	_, err := os.Stat("/sbin/systemctl")
+	_, err := exec.LookPath("systemctl")
 	if err == nil {
 		return "systemd"
 	}
 
-	_, err = os.Stat("/usr/bin/systemctl")
-	if err == nil {
-		return "systemd"
-	}
-
-	_, err = os.Stat("/sbin/initctl")
+	_, err = exec.LookPath("initctl")
 	if err == nil {
 		return "upstart"
 	}
