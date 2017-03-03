@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"path/filepath"
 	"runtime"
+	"time"
 
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/service"
 )
 
@@ -20,5 +22,8 @@ func CreateService() error {
 }
 
 func StartService() error {
-	return service.Start("nanobox-vpn")
+	fn := func() error {
+		return service.Start("nanobox-vpn")
+	}
+	return util.Retry(fn, 2, 10*time.Second)
 }
