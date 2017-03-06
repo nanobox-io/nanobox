@@ -75,7 +75,8 @@ func stopDevContainer(appModel *models.App) error {
 	// remove the container
 	if err := docker.ContainerRemove(container.ID); err != nil {
 		lumber.Error("dev:console:teardown:docker.ContainerRemove(%s): %s", container.ID, err)
-		return util.ErrorAppend(err, "failed to remove dev container")
+		// we cannot trust that the container is there even though we checked for it
+		// return util.ErrorAppend(err, "failed to remove dev container")
 	}
 
 	// // extract the container IP
