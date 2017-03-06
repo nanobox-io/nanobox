@@ -129,7 +129,8 @@ func teardown(appModel *models.App) error {
 	// remove the container
 	if err := docker.ContainerRemove(container.ID); err != nil {
 		lumber.Error("dev:console:teardown:docker.ContainerRemove(%s): %s", container.ID, err)
-		return util.ErrorAppend(err, "failed to remove dev container")
+		// prechecking for the containers existance does not guarantee it exists
+		// return util.ErrorAppend(err, "failed to remove dev container")
 	}
 
 	return nil
