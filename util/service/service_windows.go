@@ -3,6 +3,8 @@ package service
 import (
 	"fmt"
 	"path/filepath"
+	"os/exec"
+	"bytes"
 
 	"github.com/nanobox-io/nanobox/util/config"
 )
@@ -13,6 +15,18 @@ func serviceConfigFile(name string) string {
 
 func startCmd(name string) []string {
 	return []string{"sc", "start", name}
+}
+
+func running(name string) bool {
+	out, err := exec.Command("sc", "query", name).CombinedOutput()
+	if err != nil {
+		return false
+	}
+
+	if !bytes.Contains(out, []byte("RUNNING")) {
+		return false
+	}
+	return true
 }
 
 func stopCmd(name string) []string {

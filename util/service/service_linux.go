@@ -3,6 +3,7 @@ package service
 import (
 	"fmt"
 	"os/exec"
+	"bytes"
 )
 
 func serviceConfigFile(name string) string {
@@ -41,6 +42,33 @@ func startCmd(name string) []string {
 	}
 
 	return nil
+}
+
+func running(name string) bool {
+	switch launchSystem() {
+	case "systemd":
+		out, err := exec.Command("systemctl", "--no-pager", "status", name).CombinedOutput()
+		if err != nil {
+			return false
+		}
+
+		if !bytes.Contains(out, []byte("running")) {
+			return false
+		}
+		return true
+	case "upstart":
+		out, err := exec.Command("initctl", "status", name).CombinedOutput()
+		if err != nil {
+			return false
+		}
+
+		if !bytes.Contains(out, []byte("running")) {
+			return false
+		}
+		return true
+	}
+
+	return false
 }
 
 func stopCmd(name string) []string {

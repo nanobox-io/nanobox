@@ -11,5 +11,9 @@ func Start(name string) error {
 	if err != nil {
 		fmt.Errorf("out: %s, err: %s", out, err)
 	}
+
+	if !running(name) {
+		return fmt.Errorf("service start was successful but the service is not running")
+	}
 	return nil
 }

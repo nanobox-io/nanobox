@@ -242,3 +242,13 @@ https://guides.nanobox.io/
 --------------------------------------------------------------------------------
 `))	
 }
+
+func WorldWritable() {
+	os.Stderr.WriteString(fmt.Sprintf(`
+--------------------------------------------------------------------------------
+Virtualbox was unable to create the virtual machine because a folder in the path
+is globaly accessable and it should be private.
+--------------------------------------------------------------------------------
+`))	
+	
+}
