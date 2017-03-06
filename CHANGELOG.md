@@ -1,3 +1,16 @@
+## 2.0.4 (March 6, 2017)
+
+BUG FIXES:
+  - Add idempotency to linux systemd service start [#399](https://github.com/nanobox-io/nanobox/pull/399)
+  - Fix an issue where the dev container disappeard unexpectedly [#402](https://github.com/nanobox-io/nanobox/pull/402)
+  - Fix an issue that caused us to pull s3 for updates every time [#396](https://github.com/nanobox-io/nanobox/pull/396)
+  - Fix an issue with /etc/exports on osx [#392](https://github.com/nanobox-io/nanobox/pull/392)
+
+FEATURES:
+  - Make linux startup system more flexable [#397](https://github.com/nanobox-io/nanobox/pull/397)
+  - Optimize display of summarized test [#395](https://github.com/nanobox-io/nanobox/pull/395)
+  - Add a check in for boxfile existance [#388](https://github.com/nanobox-io/nanobox/pull/388)
+
 ## 2.0.3 (February 23, 2017)
 
 BUG FIXES: 
