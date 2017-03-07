@@ -260,14 +260,18 @@ func (machine DockerMachine) Start() error {
 
 		process := exec.Command(cmd[0], cmd[1:]...)
 
-		process.Stdout = display.NewStreamer("info")
-		process.Stderr = display.NewStreamer("info")
+		// lets try getting the extra bytes from creating
+		fullBuffer := &bytes.Buffer{}	
+		writer := io.MultiWriter(display.NewStreamer("info"), fullBuffer)
+
+		process.Stdout = writer
+		process.Stderr = writer
 
 		display.StartTask("Booting VM")
 
 		if err := process.Run(); err != nil {
 			display.ErrorTask()
-			return err
+			return util.Errorf("%s: %s", fullBuffer.String(), err)
 		}
 
 		display.StopTask()
@@ -298,14 +302,18 @@ func (machine DockerMachine) Start() error {
 
 		process := exec.Command(cmd[0], cmd[1:]...)
 
-		process.Stdout = display.NewStreamer("info")
-		process.Stderr = display.NewStreamer("info")
+		// lets try getting the extra bytes from creating
+		fullBuffer := &bytes.Buffer{}	
+		writer := io.MultiWriter(display.NewStreamer("info"), fullBuffer)
+
+		process.Stdout = writer
+		process.Stderr = writer
 
 		display.StartTask("Configuring Network")
 
 		if err := process.Run(); err != nil {
 			display.ErrorTask()
-			return err
+			return util.Errorf("%s: %s", fullBuffer.String(), err)
 		}
 
 		display.StopTask()
@@ -322,14 +330,18 @@ func (machine DockerMachine) Start() error {
 
 	process := exec.Command(cmd[0], cmd[1:]...)
 
-	process.Stdout = display.NewStreamer("info")
-	process.Stderr = display.NewStreamer("info")
+	// lets try getting the extra bytes from creating
+	fullBuffer := &bytes.Buffer{}	
+	writer := io.MultiWriter(display.NewStreamer("info"), fullBuffer)
+
+	process.Stdout = writer
+	process.Stderr = writer
 
 	display.StartTask("Loading kernel modules")
 
 	if err := process.Run(); err != nil {
 		display.ErrorTask()
-		return err
+		return util.Errorf("%s: %s", fullBuffer.String(), err)
 	}
 
 	display.StopTask()
