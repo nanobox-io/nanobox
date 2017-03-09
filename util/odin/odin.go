@@ -14,6 +14,7 @@ import (
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/util"
 )
 
@@ -118,8 +119,15 @@ func EstablishTunnel(appID, id string) (string, string, int, error) {
 // EstablishConsole ...
 // protocol ssh/docker
 func EstablishConsole(appID, id string) (string, string, string, error) {
+	// use a default user
+	params := url.Values{}
+		params.Set("user", "gonano")
+	if registry.GetString("console_user") != "" {
+		params.Set("user", registry.GetString("console_user"))
+	}
+
 	r := map[string]string{}
-	err := doRequest("GET", fmt.Sprintf("apps/%s/consoles/%s", appID, id), nil, nil, &r)
+	err := doRequest("GET", fmt.Sprintf("apps/%s/consoles/%s", appID, id), params, nil, &r)
 
 	return r["token"], r["url"], r["protocol"], err
 }
