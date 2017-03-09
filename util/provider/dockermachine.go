@@ -60,6 +60,7 @@ func (machine DockerMachine) Valid() (bool, []string) {
 		}
 
 	}
+	
 	// net share checking
 	switch runtime.GOOS {
 	case "linux":

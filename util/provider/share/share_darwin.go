@@ -160,6 +160,9 @@ func startNFSD() error {
 	// we dont want to check
 	exec.Command("nfsd", "start").CombinedOutput()
 
+	// add a short delay because nfsd takes some time
+	<-time.After(time.Second)
+
 	// check to see if nfsd is running
 	b, _ := exec.Command("netstat", "-ln").CombinedOutput()
 	if !strings.Contains(string(b), ".111 ") {
