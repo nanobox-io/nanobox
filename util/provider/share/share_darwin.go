@@ -1,7 +1,6 @@
 package share
 
 import (
-	"bytes"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -20,13 +19,30 @@ import (
 var EXPORTSFILE = "/etc/exports"
 
 func Exists(path string) bool {
-	// open file
-	b, err := ioutil.ReadFile(EXPORTSFILE)
+	// read exports file
+	existingFile, err := ioutil.ReadFile(EXPORTSFILE)
+	if err != nil {
+		// if i cant read the etc exports it doesnt exist
+		return false
+	}
+
+	// get the provider because i need the mount ip
+	provider, err := models.LoadProvider()
 	if err != nil {
 		return false
 	}
-	// check to see if the path is in the file
-	return bytes.Contains(b, []byte(path+" ")) || bytes.Contains(b, []byte(path+"\" "))
+
+	lineCheck := fmt.Sprintf("%s -alldirs -mapall=%v:%v", provider.MountIP, uid(), gid())
+
+	lines := strings.Split(string(existingFile), "\n")
+
+	for _, line := range lines {
+		// get existing line
+		if strings.Contains(line, lineCheck) {
+			return strings.Contains(line, path+" ") || strings.Contains(line, path+"\" ")
+		}
+	}
+	return false
 }
 
 func Add(path string) error {
