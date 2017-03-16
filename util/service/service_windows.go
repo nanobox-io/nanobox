@@ -34,5 +34,5 @@ func stopCmd(name string) []string {
 }
 
 func removeCmd(name string) []string {
-	return []string{"sc", "remove", name}
+	return []string{"sc", "delete", name}
 }
