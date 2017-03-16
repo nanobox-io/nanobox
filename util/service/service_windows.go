@@ -14,11 +14,11 @@ func serviceConfigFile(name string) string {
 }
 
 func startCmd(name string) []string {
-	return []string{"sc", "start", name}
+	return []string{"sc.exe", "start", name}
 }
 
 func running(name string) bool {
-	out, err := exec.Command("sc", "query", name).CombinedOutput()
+	out, err := exec.Command("sc.exe", "query", name).CombinedOutput()
 	if err != nil {
 		return false
 	}
@@ -30,9 +30,9 @@ func running(name string) bool {
 }
 
 func stopCmd(name string) []string {
-	return []string{"sc", "stop", name}
+	return []string{"sc.exe", "stop", name}
 }
 
 func removeCmd(name string) []string {
-	return []string{"sc", "remove", name}
+	return []string{"sc.exe", "remove", name}
 }
