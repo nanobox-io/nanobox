@@ -12,7 +12,7 @@ import (
 func Create(name string, command []string) error {
 
 	// make sure we actually have to do this part
-	if out, _ := exec.Command("sc", "query", name).CombinedOutput(); !strings.Contains(string(out), "service does not exist") {
+	if out, _ := exec.Command("sc.exe", "query", name).CombinedOutput(); !strings.Contains(string(out), "service does not exist") {
 		return nil
 	}
 
@@ -26,7 +26,7 @@ func Create(name string, command []string) error {
 		return err
 	}
 
-	out, err := exec.Command("sc", "create", name, "binpath=", fmt.Sprintf(`%s\srvstart.exe %s -c "%s"`, config.BinDir(), name, serviceConfigFile(name))).CombinedOutput()
+	out, err := exec.Command("sc.exe", "create", name, "binpath=", fmt.Sprintf(`%s\srvstart.exe %s -c "%s"`, config.BinDir(), name, serviceConfigFile(name))).CombinedOutput()
 	if err != nil {
 		return fmt.Errorf("%s: %s", out, err)
 	}
