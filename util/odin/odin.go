@@ -219,6 +219,21 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 		return util.ErrorfQuiet("Not Found (%s)", b)
 	}
 
+	// if it is a 400 but not 
+	if res.StatusCode >= 400 && res.StatusCode < 500 {
+		rb := map[string]string{}
+		err = json.Unmarshal(b, &rb)
+		if err != nil {
+			return util.ErrorfQuiet("%s", b)
+		}
+
+		errorMessage, ok := rb["error"]
+		if !ok {
+			return util.ErrorfQuiet("%s", b)
+		}
+		return util.ErrorfQuiet("%s", errorMessage)
+	}
+
 	if res.StatusCode == 500 {
 		return util.ErrorfQuiet("Internal Server Error (%s)", b)
 	}

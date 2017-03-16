@@ -2,9 +2,11 @@ package helpers
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/jcelliott/lumber"
 
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/odin"
 )
 
@@ -18,19 +20,19 @@ func ValidateOdinApp(slug string) error {
 
 		lumber.Error("helpers: ValidateOdinApp(%s): %s", slug, err)
 
-		if err.Error() == "Unauthorized" {
+		if strings.Contains(err.Error(), "Unauthorized") {
 			fmt.Printf("\n! Sorry, but you don't have access to %s\n\n", slug)
-			return fmt.Errorf("Unauthorized access to app '%s': %s", slug, err.Error())
+			return util.ErrorAppend(err, "Unauthorized access to app '%s'", slug)
 		}
 
-		if err.Error() == "Not Found" {
+		if strings.Contains(err.Error(), "Not Found") {
 			fmt.Printf("\n! Sorry, the app '%s' doesn't exist\n\n", slug)
-			return fmt.Errorf("Unknown app '%s': %s", slug, err.Error())
+			return util.ErrorAppend(err, "Unknown app '%s'", slug)
 		}
 
 		// All other scenarios
-		fmt.Printf("\n! Oops, nanobox is temporarily unreachable. Try again in in just a bit.\n\n")
-		return fmt.Errorf("Failed to communicate with nanobox: %s", err.Error())
+		fmt.Printf("\n%s\n\n", err.Error())
+		return util.ErrorAppend(err, "Failed to communicate with nanobox")
 	}
 
 	return nil
