@@ -28,7 +28,6 @@ func Setup(envModel *models.Env) error {
 		return util.ErrorAppend(err, "failed to init docker client")
 	}
 
-
 	// ensure the envModel data has been generated
 	if err := envModel.Generate(); err != nil {
 		lumber.Error("env:Setup:models:Env:Generate()")

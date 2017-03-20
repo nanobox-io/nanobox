@@ -1,10 +1,10 @@
 package service
 
 import (
-	"fmt"
-	"path/filepath"
-	"os/exec"
 	"bytes"
+	"fmt"
+	"os/exec"
+	"path/filepath"
 
 	"github.com/nanobox-io/nanobox/util/config"
 )

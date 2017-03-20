@@ -148,7 +148,7 @@ func downloadImage(image string) error {
 // client.key
 // client.crt
 func configureBridge() error {
-	display.StartTask("configuring")
+	display.StartTask("Configuring")
 	defer display.StopTask()
 
 	// make the openvpn folder

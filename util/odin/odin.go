@@ -13,8 +13,8 @@ import (
 
 	"github.com/jcelliott/lumber"
 
-	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/commands/registry"
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
 )
 
@@ -121,7 +121,7 @@ func EstablishTunnel(appID, id string) (string, string, int, error) {
 func EstablishConsole(appID, id string) (string, string, string, error) {
 	// use a default user
 	params := url.Values{}
-		params.Set("user", "gonano")
+	params.Set("user", "gonano")
 	if registry.GetString("console_user") != "" {
 		params.Set("user", registry.GetString("console_user"))
 	}
@@ -219,7 +219,7 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 		return util.ErrorfQuiet("Not Found (%s)", b)
 	}
 
-	// if it is a 400 but not 
+	// if it is a 400 but not
 	if res.StatusCode >= 400 && res.StatusCode < 500 {
 		rb := map[string]string{}
 		err = json.Unmarshal(b, &rb)

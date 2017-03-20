@@ -5,10 +5,10 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/commands/steps"
-	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/helpers"
-	"github.com/nanobox-io/nanobox/processors/env"
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/app"
+	"github.com/nanobox-io/nanobox/processors/env"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 )
@@ -36,9 +36,8 @@ func destroyFunc(ccmd *cobra.Command, args []string) {
 		return
 	}
 
-
 	if len(args) == 0 {
-		display.CommandErr(env.Destroy(envModel))	
+		display.CommandErr(env.Destroy(envModel))
 	}
 
 	_, _, name := helpers.Endpoint(envModel, args, 2)

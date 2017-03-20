@@ -218,14 +218,14 @@ func (s *Summarizer) handleLog(data string) {
 	lines := strings.FieldsFunc(msg+data, f)
 	for i, line := range lines {
 
-		// check to see if we are we are at the last element and determin 
+		// check to see if we are we are at the last element and determin
 		// if we should be displaying it
 		if (len(lines) - 1) == i {
 			// if there is any data and it doesnt end with a newline
 			if !(strings.HasSuffix(data, "\n") || strings.HasSuffix(data, "\r")) {
 				// do not display the last incomplete line
 				continue
-			}			
+			}
 		}
 		// first we need to remove escape sequences
 		line = EscSeqRegex.ReplaceAllString(line, "")
@@ -247,7 +247,7 @@ func (s *Summarizer) handleLog(data string) {
 	// if the new data actuall changed the line we are displaying show it
 	if prevLine != s.detail {
 		s.reset()
-		s.print()		
+		s.print()
 	}
 
 	// if there is any data and it doesnt end with a newline

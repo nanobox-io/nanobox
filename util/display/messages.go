@@ -213,7 +213,6 @@ nanobox config set %s <unused ip/cidr>
 `, network, name))
 }
 
-
 func VMCommunicationError() {
 	os.Stderr.WriteString(fmt.Sprintf(`
 --------------------------------------------------------------------------------
@@ -221,7 +220,7 @@ Nanobox has started a VM that needs access to your machine for mounting.
 This VM is unable to communicate with the host machine currently. Please
 verify that you don't have a firewall blocking this connection, and try again!
 --------------------------------------------------------------------------------
-`))	
+`))
 }
 
 func NoGonanaUser() {
@@ -240,7 +239,7 @@ check out our getting-started guide on configuring your app:
 
 https://guides.nanobox.io/
 --------------------------------------------------------------------------------
-`))	
+`))
 }
 
 func WorldWritable() {
@@ -249,6 +248,6 @@ func WorldWritable() {
 Virtualbox was unable to create the virtual machine because a folder in the path
 is globaly accessable and it should be private.
 --------------------------------------------------------------------------------
-`))	
-	
+`))
+
 }

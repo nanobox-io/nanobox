@@ -60,7 +60,7 @@ func (machine DockerMachine) Valid() (bool, []string) {
 		}
 
 	}
-	
+
 	// net share checking
 	switch runtime.GOOS {
 	case "linux":
@@ -146,7 +146,7 @@ func (machine DockerMachine) Create() error {
 	process := exec.Command(cmd[0], cmd[1:]...)
 
 	// lets try getting the extra bytes from creating
-	fullBuffer := &bytes.Buffer{}	
+	fullBuffer := &bytes.Buffer{}
 	writer := io.MultiWriter(display.NewStreamer("info"), fullBuffer)
 
 	process.Stdout = writer
@@ -155,7 +155,7 @@ func (machine DockerMachine) Create() error {
 	display.StartTask("Launching VM")
 
 	if err := process.Run(); err != nil {
-		// if its complainging about the world writable error issue 
+		// if its complainging about the world writable error issue
 		if strings.Contains(fullBuffer.String(), "VERR_SUPLIB_WORLD_WRITABLE") {
 			display.WorldWritable()
 			return util.ErrorfQuiet("%s: %s", fullBuffer.String(), err)
@@ -262,7 +262,7 @@ func (machine DockerMachine) Start() error {
 		process := exec.Command(cmd[0], cmd[1:]...)
 
 		// lets try getting the extra bytes from creating
-		fullBuffer := &bytes.Buffer{}	
+		fullBuffer := &bytes.Buffer{}
 		writer := io.MultiWriter(display.NewStreamer("info"), fullBuffer)
 
 		process.Stdout = writer
@@ -304,7 +304,7 @@ func (machine DockerMachine) Start() error {
 		process := exec.Command(cmd[0], cmd[1:]...)
 
 		// lets try getting the extra bytes from creating
-		fullBuffer := &bytes.Buffer{}	
+		fullBuffer := &bytes.Buffer{}
 		writer := io.MultiWriter(display.NewStreamer("info"), fullBuffer)
 
 		process.Stdout = writer
@@ -332,7 +332,7 @@ func (machine DockerMachine) Start() error {
 	process := exec.Command(cmd[0], cmd[1:]...)
 
 	// lets try getting the extra bytes from creating
-	fullBuffer := &bytes.Buffer{}	
+	fullBuffer := &bytes.Buffer{}
 	writer := io.MultiWriter(display.NewStreamer("info"), fullBuffer)
 
 	process.Stdout = writer

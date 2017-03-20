@@ -1,9 +1,9 @@
 package service
 
 import (
+	"bytes"
 	"fmt"
 	"os/exec"
-	"bytes"
 )
 
 func serviceConfigFile(name string) string {

@@ -38,7 +38,6 @@ func Setup() error {
 	}
 
 	display.OpenContext("Starting Nanobox")
-	defer display.CloseContext()
 
 	// create the provider (VM)
 	if err := util.Retry(provider.Create, 3, 20*time.Second); err != nil {
@@ -73,6 +72,8 @@ func Setup() error {
 	if err := Init(); err != nil {
 		return util.ErrorAppend(err, "failed to initialize docker for provider")
 	}
+
+	display.CloseContext()
 
 	if provider.BridgeRequired() {
 		if err := bridge.Setup(); err != nil {

@@ -4,7 +4,6 @@ import (
 	"fmt"
 )
 
-
 func serviceConfigFile(name string) string {
 	return fmt.Sprintf("/Library/LaunchDaemons/io.%s.plist", name)
 }
