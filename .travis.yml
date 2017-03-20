@@ -12,7 +12,7 @@ before_install:
   - bash <(curl -fsSL https://get.docker.com/)
   - docker version
   - ifconfig
-  - sudo apt-get -y install awscli
+  - sudo -H pip install awscli
 
 install: 
   - go get github.com/kardianos/govendor
