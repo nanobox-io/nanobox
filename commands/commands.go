@@ -10,6 +10,7 @@ import (
 
 	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/mixpanel"
 	"github.com/nanobox-io/nanobox/util/update"
@@ -70,6 +71,13 @@ var (
 				lumber.Level(lumber.TRACE)
 				display.Summary = false
 				display.Level = "trace"
+			}
+
+			config, _ := models.LoadConfig()
+			if config.CIMode {
+				lumber.Level(lumber.INFO)
+				display.Summary = false
+				display.Level = "info"				
 			}
 
 		},

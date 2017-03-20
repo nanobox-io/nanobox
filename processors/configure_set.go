@@ -30,7 +30,8 @@ func ConfigureSet(key, val string) error {
 		config.NativeNetworkSpace = val
 	case "lock_port", "lock-port":
 		config.LockPort, _ = strconv.Atoi(val)
-
+	case "ci-mode", "ci_mode":
+		config.CIMode = val == "true" || val == "t" || val == "1"
 	}
 
 	return config.Save()
