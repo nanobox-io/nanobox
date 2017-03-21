@@ -9,5 +9,5 @@ func StopService() error {
 }
 
 func Remove() error {
-	return service.Stop("nanobox-vpn")
+	return service.Remove("nanobox-vpn")
 }
