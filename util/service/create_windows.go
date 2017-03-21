@@ -30,7 +30,6 @@ func Create(name string, command []string) error {
 	if err != nil {
 		return fmt.Errorf("%s: %s", out, err)
 	}
-	fmt.Printf("\n\nout: %s\n\n", out)
 
 	return err
 }
