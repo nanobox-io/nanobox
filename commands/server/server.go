@@ -8,6 +8,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/commands/registry"
 )
 
 var ServerCmd = &cobra.Command{
@@ -17,14 +18,25 @@ var ServerCmd = &cobra.Command{
 	Run: serverFnc,
 }
 
+const name = "nanoboxserver"
+
 func serverFnc(ccmd *cobra.Command, args []string) {
 	if !util.IsPrivileged() {
 		log.Fatal("server needs to run as privilaged user")	
 		return
 	}
+
+	// make sure things know im the server
+	registry.Set("server", true)
+
+
+	// fire up the service manager (only required on windows)
+	go svcStart()
+
 	// start the rpc server
 	rpc.Register(commands)
-	listener, e := net.Listen("tcp", ":23456")
+	// only listen for rpc calls on localhost
+	listener, e := net.Listen("tcp", "127.0.0.1:23456")
 	if e != nil {
 		log.Fatal("listen error:", e)
 		return
@@ -39,4 +51,19 @@ func serverFnc(ccmd *cobra.Command, args []string) {
     		go rpc.ServeConn(conn)
     	}
 	}
+}
+
+// run a client request to the rpc server
+func run(funcName string, args interface{}, response interface{}) error {
+	client, err := rpc.Dial("tcp", "127.0.0.1:23456")
+	if err != nil {
+    	return err
+  	}
+
+	err = client.Call(funcName, args, response)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

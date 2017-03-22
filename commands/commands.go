@@ -9,6 +9,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/commands/registry"
+	"github.com/nanobox-io/nanobox/commands/server"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/display"
@@ -126,6 +127,7 @@ func init() {
 	NanoboxCmd.AddCommand(DnsCmd)
 	NanoboxCmd.AddCommand(LogCmd)
 	NanoboxCmd.AddCommand(VersionCmd)
+	NanoboxCmd.AddCommand(server.ServerCmd)
 
 	// hidden subcommands
 	NanoboxCmd.AddCommand(EnvCmd)

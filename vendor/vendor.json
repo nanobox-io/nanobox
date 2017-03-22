@@ -765,6 +765,24 @@
 			"revisionTime": "2016-04-21T02:29:30Z"
 		},
 		{
+			"checksumSHA1": "IRqLaXM/VQRzkbXPuiqOxTb2W0Y=",
+			"path": "golang.org/x/sys/windows/svc",
+			"revision": "99f16d856c9836c42d24e7ab64ea72916925fa97",
+			"revisionTime": "2017-03-08T15:04:45Z"
+		},
+		{
+			"checksumSHA1": "1ouiyoHRaaMDNeq/nap9B0UuQw4=",
+			"path": "golang.org/x/sys/windows/svc/debug",
+			"revision": "99f16d856c9836c42d24e7ab64ea72916925fa97",
+			"revisionTime": "2017-03-08T15:04:45Z"
+		},
+		{
+			"checksumSHA1": "uVlUSSKplihZG7N+QJ6fzDZ4Kh8=",
+			"path": "golang.org/x/sys/windows/svc/eventlog",
+			"revision": "99f16d856c9836c42d24e7ab64ea72916925fa97",
+			"revisionTime": "2017-03-08T15:04:45Z"
+		},
+		{
 			"checksumSHA1": "WCpgePNKiUKt0S0VE/e5kF5OnzU=",
 			"path": "gopkg.in/fsnotify.v1",
 			"revision": "8611c35ab31c1c28aa903d33cf8b6e44a399b09e",

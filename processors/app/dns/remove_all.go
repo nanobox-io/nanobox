@@ -5,9 +5,9 @@ import (
 
 	"github.com/jcelliott/lumber"
 
+	"github.com/nanobox-io/nanobox/commands/server"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
-	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/dns"
 )
@@ -31,6 +31,7 @@ func RemoveAll(a *models.App) error {
 		return util.ErrorAppend(err, "failed to remove all dns entries")
 	}
 
+	display.Info("\n%s removed all\n", display.TaskComplete)
 	return nil
 }
 
@@ -39,16 +40,22 @@ func reExecPrivilegedRemoveAll(a *models.App) error {
 	display.PauseTask()
 	defer display.ResumeTask()
 
-	display.PrintRequiresPrivilege("to modify host dns entries")
+	// display.PrintRequiresPrivilege("to modify host dns entries")
 
 	// call 'dev dns add' with the original path and args
-	cmd := fmt.Sprintf("%s dns rm-all %s", config.NanoboxPath(), a.DisplayName())
+	resp, err := server.RunCommand("dns rm-all", []string{a.DisplayName()})
 
 	// if the sudo'ed subprocess fails, we need to return error to stop the process
-	if err := util.PrivilegeExec(cmd); err != nil {
-		lumber.Error("dns:reExecPrivilegedRemoveAll:util.PrivilegeExec(%s): %s", cmd, err)
+	if err != nil || resp == nil {
+		lumber.Error("dns:reExecPrivilegedAdd:util.PrivilegeExec(dns add): %s", err)
 		return err
 	}
 
+	if resp.ExitCode != 0 {
+		lumber.Error("dns:reExecPrivilegedAdd:util.PrivilegeExec(dns add): %+v, %s", resp, err)
+		return fmt.Errorf("bad exit code from server command(%d)", resp.ExitCode)		
+	}
+
+	fmt.Println(resp.Output)
 	return nil
 }

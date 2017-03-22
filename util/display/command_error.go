@@ -13,13 +13,16 @@ import (
 
 var (
 	CmdErrRegex = regexp.MustCompile(":\\s?$")
+	ServerResponseFunc = func(out string, exitCode int) {
+		
+	}
 )
 
 // CommandErr ...
 //
 // We hit a minor bump, which can be quickly resolved following the instructions above.
 // If not, come talk and we'll walk you through the resolution.
-func CommandErr(err error, resp ...*server.Response) {
+func CommandErr(err error) {
 	// get the exit code we are going to use
 	// if none has been set GetInt returns 0
 	exitCode := registry.GetInt("exit_code")
@@ -28,12 +31,8 @@ func CommandErr(err error, resp ...*server.Response) {
 		// if an exit code is provided we need to quit here
 		// and use that exit code
 		if registry.GetBool("server") {
-			resp := &server.Response{
-				Output: "",
-				ExitCode: 0,
-			}
-			server.AddResponse(resp)
-			retrun
+			ServerResponseFunc("", 0)
+			return
 		}
 		
 		if exitCode != 0 {
@@ -45,11 +44,8 @@ func CommandErr(err error, resp ...*server.Response) {
 	cause, context := parseCommandErr(err)
 
 	if registry.GetBool("server") {
-		resp := &server.Response{
-			Output: fmt.Sprintf("\nError   : %s\nContext : %s\n", cause, context),
-			ExitCode: exitCode,
-		}
-		server.AddResponse(resp)
+		ServerResponseFunc(fmt.Sprintf("\nError   : %s\nContext : %s\n", cause, context), exitCode)
+
 		return
 	}
 	fmt.Println()

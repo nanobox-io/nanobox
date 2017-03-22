@@ -7,6 +7,7 @@ import (
 
 	"github.com/nanobox-io/nanobox/processors/env/share"
 	"github.com/nanobox-io/nanobox/util/display"
+	"github.com/nanobox-io/nanobox/commands/server"
 )
 
 var (
@@ -42,6 +43,8 @@ var (
 func init() {
 	ShareCmd.AddCommand(ShareAddCmd)
 	ShareCmd.AddCommand(ShareRmCmd)
+	server.AddCmd("share add", shareAddFn)
+	server.AddCmd("share rm", shareRmFn)
 }
 
 // shareAddFn will run the share processor for adding a share export
