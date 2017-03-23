@@ -39,6 +39,9 @@ func CompileConfig(image string) docker.ContainerConfig {
 		RestartPolicy: "no",
 	}
 
+	// set http[s]_proxy and no_proxy vars
+	setProxyVars(&config)
+
 	if config.EngineDir() != "" {
 		conf.Binds = append(conf.Binds, engine)
 	}
