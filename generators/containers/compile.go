@@ -40,7 +40,7 @@ func CompileConfig(image string) docker.ContainerConfig {
 	}
 
 	// set http[s]_proxy and no_proxy vars
-	setProxyVars(&config)
+	setProxyVars(&conf)
 
 	if config.EngineDir() != "" {
 		conf.Binds = append(conf.Binds, engine)
