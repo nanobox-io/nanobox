@@ -1,13 +1,20 @@
 package bridge
 
-import (
-	"github.com/nanobox-io/nanobox/util/service"
-)
+func Stop() error {
+	if runningBridge == nil {
+		return nil
+	}
 
-func StopService() error {
-	return service.Stop("nanobox-vpn")
-}
+	if err := runningBridge.Process.Kill(); err != nil {
+		return err
+	}
 
-func Remove() error {
-	return service.Remove("nanobox-vpn")
+	if err := runningBridge.Wait(); err != nil {
+		return err
+	}
+
+	// if we killed it and released the resources 
+	// remove running bridge
+	runningBridge = nil
+	return nil
 }

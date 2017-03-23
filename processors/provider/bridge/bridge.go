@@ -11,8 +11,6 @@ import (
 	"github.com/nanobox-io/nanobox/util/provider"
 )
 
-var BridgeClient = "nanobox-vpn"
-
 func BridgeConfig() string {
 	// node := ""
 	// if runtime.GOOS == "windows" {

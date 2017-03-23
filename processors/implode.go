@@ -8,6 +8,7 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/env"
 	"github.com/nanobox-io/nanobox/processors/provider"
+	"github.com/nanobox-io/nanobox/processors/server"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
@@ -42,6 +43,11 @@ func Implode() error {
 	// purge the installation
 	if registry.GetBool("full-implode") {
 		purgeConfiguration()
+	}
+
+	// teardown the server
+	if err := server.Teardown(); err != nil {
+		return util.ErrorAppend(err, "failed to remove server")
 	}
 
 	return nil

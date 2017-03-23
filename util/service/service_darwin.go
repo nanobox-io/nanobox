@@ -12,7 +12,7 @@ func startCmd(name string) []string {
 	return []string{"launchctl", "start", fmt.Sprintf("io.%s", name)}
 }
 
-func running(name string) bool {
+func Running(name string) bool {
 	// there is currently no query mechanism built into launchctl
 	return true
 }

@@ -1,36 +1,23 @@
 package bridge
 
 import (
-	"fmt"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
 
 	container_generator "github.com/nanobox-io/nanobox/generators/containers"
 	"github.com/nanobox-io/nanobox/util"
-	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/util/provider/bridge"
 )
 
 func Teardown() error {
+	// remove bridge client
+	if err := Stop(); err != nil {
+		return err
+	}
 
-	if util.IsPrivileged() {
-		// remove bridge client
-		if err := Stop(); err != nil {
-			return err
-		}
-
-		if err := bridge.Remove(); err != nil {
-			return err
-		}
-
-	} else {
-		// remove component
-		if err := removeComponent(); err != nil {
-			return err
-		}
-		return reExecTeardown()
+	// remove component
+	if err := removeComponent(); err != nil {
+		return err
 	}
 
 	return nil
@@ -50,23 +37,6 @@ func removeComponent() error {
 	if err := docker.ContainerRemove(container.ID); err != nil {
 		lumber.Error("provider:bridge:teardown:docker.ContainerRemove(%s): %s", container.ID, err)
 		return util.ErrorAppend(err, "failed to remove bridge container")
-	}
-
-	return nil
-}
-
-// reExecTeardown re-execs the current process with a privileged user
-func reExecTeardown() error {
-	display.PauseTask()
-	defer display.ResumeTask()
-
-	display.PrintRequiresPrivilege("remove the vpn")
-
-	cmd := fmt.Sprintf("%s env bridge teardown", config.NanoboxPath())
-
-	if err := util.PrivilegeExec(cmd); err != nil {
-		lumber.Error("bridge:reExecTeardown:util.PrivilegeExec(%s): %s", cmd, err)
-		return err
 	}
 
 	return nil

@@ -2,28 +2,27 @@ package bridge
 
 import (
 	"fmt"
-	"path/filepath"
-	"runtime"
-	"time"
+	"os/exec"
+	"os"
 
-	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
-	"github.com/nanobox-io/nanobox/util/service"
 )
 
-func CreateService() error {
-	cmd := []string{filepath.Join(config.BinDir(), BridgeClient), "--config", ConfigFile()}
+var	runningBridge *exec.Cmd
 
-	if runtime.GOOS == "windows" {
-		cmd = []string{fmt.Sprintf(`"%s\%s.exe"`, config.BinDir(), BridgeClient), "--config", fmt.Sprintf(`"%s"`, ConfigFile())}
+func Start(conf string) error {
+	if runningBridge != nil {
+		return nil
 	}
 
-	return service.Create("nanobox-vpn", cmd)
-}
+	runningBridge = exec.Command(config.VpnPath(), "--config", conf) 
+	runningBridge.Stdout = os.Stdout
+	runningBridge.Stderr = os.Stderr
 
-func StartService() error {
-	fn := func() error {
-		return service.Start("nanobox-vpn")
+	err := runningBridge.Run()
+	if err != nil {
+		runningBridge = nil
+		err = fmt.Errorf("failed to start cmd(%s --config %s): %s",  config.VpnPath(), conf, err)
 	}
-	return util.Retry(fn, 2, 10*time.Second)
+	return err
 }

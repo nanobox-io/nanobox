@@ -783,6 +783,12 @@
 			"revisionTime": "2017-03-08T15:04:45Z"
 		},
 		{
+			"checksumSHA1": "6dvXhF7BOHN87mMJ8SaAuFxai0Q=",
+			"path": "golang.org/x/sys/windows/svc/mgr",
+			"revision": "8fd966b47dbdd4faa03de0d06e3d733baeb9a1a9",
+			"revisionTime": "2016-04-10T19:02:41Z"
+		},
+		{
 			"checksumSHA1": "WCpgePNKiUKt0S0VE/e5kF5OnzU=",
 			"path": "gopkg.in/fsnotify.v1",
 			"revision": "8611c35ab31c1c28aa903d33cf8b6e44a399b09e",

@@ -7,7 +7,7 @@ import (
 	"github.com/nanobox-io/nanobox/processors"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/provider"
-	"github.com/nanobox-io/nanobox/util/provider/bridge"
+	"github.com/nanobox-io/nanobox/processors/provider/bridge"
 )
 
 var (

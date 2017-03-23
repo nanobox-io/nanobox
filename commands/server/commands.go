@@ -21,11 +21,6 @@ type AdminCmds struct {
 	response *Response
 }
 
-type Response struct {
-	Output string
-	ExitCode int
-}
-
 type Request struct {
 	Name string
 	Args []string

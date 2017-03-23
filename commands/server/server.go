@@ -11,6 +11,11 @@ import (
 	"github.com/nanobox-io/nanobox/commands/registry"
 )
 
+type Response struct {
+	Output string
+	ExitCode int
+}
+
 var ServerCmd = &cobra.Command{
 	Use:   "server",
 	Short: "Start a dedicated nanobox server",
@@ -18,14 +23,14 @@ var ServerCmd = &cobra.Command{
 	Run: serverFnc,
 }
 
-const name = "nanoboxserver"
+const name = "nanobox-server"
 
 func serverFnc(ccmd *cobra.Command, args []string) {
+
 	if !util.IsPrivileged() {
 		log.Fatal("server needs to run as privilaged user")	
 		return
 	}
-
 	// make sure things know im the server
 	registry.Set("server", true)
 
@@ -33,8 +38,10 @@ func serverFnc(ccmd *cobra.Command, args []string) {
 	// fire up the service manager (only required on windows)
 	go svcStart()
 
-	// start the rpc server
+	// register controllers
+	rpc.Register(bridge)
 	rpc.Register(commands)
+
 	// only listen for rpc calls on localhost
 	listener, e := net.Listen("tcp", "127.0.0.1:23456")
 	if e != nil {

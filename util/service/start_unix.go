@@ -1,3 +1,5 @@
+// +build !windows
+
 package service
 
 import (
@@ -12,8 +14,8 @@ func Start(name string) error {
 		fmt.Errorf("out: %s, err: %s", out, err)
 	}
 
-	if !running(name) {
-		return fmt.Errorf("service start was successful but the service is not running")
+	if !Running(name) {
+		return fmt.Errorf("%s service start was successful but the service is not running", name)
 	}
 	return nil
 }
