@@ -6,7 +6,6 @@ import (
 
 	"golang.org/x/sys/windows/svc"
 	"golang.org/x/sys/windows/svc/mgr"
-
 )
 
 func Stop(name string) error {

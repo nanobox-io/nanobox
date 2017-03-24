@@ -13,9 +13,8 @@ import (
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
-
 func init() {
-	server.AddCmd("dns add", addFn)	
+	server.AddCmd("dns add", addFn)
 }
 
 // AddCmd ...

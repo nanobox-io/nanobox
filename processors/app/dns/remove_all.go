@@ -53,7 +53,7 @@ func reExecPrivilegedRemoveAll(a *models.App) error {
 
 	if resp.ExitCode != 0 {
 		lumber.Error("dns:reExecPrivilegedAdd:util.PrivilegeExec(dns add): %+v, %s", resp, err)
-		return fmt.Errorf("bad exit code from server command(%d)", resp.ExitCode)		
+		return fmt.Errorf("bad exit code from server command(%d)", resp.ExitCode)
 	}
 
 	fmt.Println(resp.Output)

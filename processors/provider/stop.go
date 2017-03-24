@@ -20,7 +20,7 @@ func Stop() error {
 
 	// stop the vpn
 	if err := bridge.Stop(); err != nil {
-		// do nothing about the error since provider stop happens 
+		// do nothing about the error since provider stop happens
 		// then we shut down the server (killing the bridge)
 		// return util.ErrorAppend(err, "failed to stop vpn")
 	}

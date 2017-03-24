@@ -1,7 +1,6 @@
 package bridge
 
 import (
-
 	"github.com/nanobox-io/nanobox/commands/server"
 )
 

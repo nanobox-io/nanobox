@@ -1,7 +1,6 @@
 package bridge
 
 import (
-
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
 

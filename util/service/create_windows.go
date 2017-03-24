@@ -5,10 +5,9 @@ import (
 	// // "io/ioutil"
 	// "os/exec"
 	// "strings"
-	
+
 	"golang.org/x/sys/windows/svc/eventlog"
 	"golang.org/x/sys/windows/svc/mgr"
-
 )
 
 func Create(name string, command []string) error {

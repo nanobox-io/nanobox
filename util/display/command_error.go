@@ -12,9 +12,9 @@ import (
 )
 
 var (
-	CmdErrRegex = regexp.MustCompile(":\\s?$")
+	CmdErrRegex        = regexp.MustCompile(":\\s?$")
 	ServerResponseFunc = func(out string, exitCode int) {
-		
+
 	}
 )
 
@@ -34,7 +34,7 @@ func CommandErr(err error) {
 			ServerResponseFunc("", 0)
 			return
 		}
-		
+
 		if exitCode != 0 {
 			os.Exit(exitCode)
 		}

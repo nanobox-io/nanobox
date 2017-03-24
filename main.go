@@ -47,13 +47,13 @@ func main() {
 
 	// if it is running the server just run it
 	// skip the tratiotional messaging
-	if len(os.Args) == 2 && os.Args[1] =="server" {
+	if len(os.Args) == 2 && os.Args[1] == "server" {
 		err := commands.NanoboxCmd.Execute()
 		if err != nil {
 			fmt.Println(err)
 			os.Exit(1)
 		}
-		return 
+		return
 	}
 
 	// verify that we support the prompt they are using
@@ -87,7 +87,6 @@ func main() {
 			os.Exit(1)
 		}
 	}
-
 
 	// global panic handler; this is done to avoid showing any panic output if
 	// something happens to fail. The output is logged and "pretty" message is

@@ -8,7 +8,7 @@ import (
 // Config ...
 type Config struct {
 	Provider string `json:"provider"`
-	CIMode   bool `json:"ci-mode"`
+	CIMode   bool   `json:"ci-mode"`
 
 	// required for docker-machine
 	MountType      string `json:"mount-type"`

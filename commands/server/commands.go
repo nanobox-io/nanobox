@@ -1,8 +1,8 @@
 package server
 
 import (
-	"fmt"
 	"bytes"
+	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
@@ -17,7 +17,7 @@ func init() {
 type CmdFunc func(ccmd *cobra.Command, args []string)
 
 type AdminCmds struct {
-	cmds map[string]CmdFunc
+	cmds     map[string]CmdFunc
 	response *Response
 }
 
@@ -27,7 +27,7 @@ type Request struct {
 }
 
 var commands = &AdminCmds{
-	cmds: map[string]CmdFunc{},
+	cmds:     map[string]CmdFunc{},
 	response: nil,
 }
 

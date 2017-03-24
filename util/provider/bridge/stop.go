@@ -13,7 +13,7 @@ func Stop() error {
 		return err
 	}
 
-	// if we killed it and released the resources 
+	// if we killed it and released the resources
 	// remove running bridge
 	runningBridge = nil
 	return nil

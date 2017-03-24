@@ -5,10 +5,10 @@ import (
 
 	"github.com/jcelliott/lumber"
 
+	"github.com/nanobox-io/nanobox/commands/server"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/commands/server"
 	"github.com/nanobox-io/nanobox/util/dns"
 )
 
@@ -61,7 +61,7 @@ func reExecPrivilegedRemove(a *models.App, name string) error {
 
 	if resp.ExitCode != 0 {
 		lumber.Error("dns:reExecPrivilegedAdd:util.PrivilegeExec(dns add): %+v, %s", resp, err)
-		return fmt.Errorf("bad exit code from server command(%d)", resp.ExitCode)		
+		return fmt.Errorf("bad exit code from server command(%d)", resp.ExitCode)
 	}
 
 	fmt.Println(resp.Output)

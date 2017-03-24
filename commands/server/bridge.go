@@ -4,18 +4,16 @@ import (
 	util_bridge "github.com/nanobox-io/nanobox/util/provider/bridge"
 )
 
+type Bridge struct{}
 
-type Bridge struct {}
-
-var bridge = &Bridge{
-}
+var bridge = &Bridge{}
 
 func (br *Bridge) Start(config string, resp *Response) error {
 	resp = &Response{
-		Output: "",
+		Output:   "",
 		ExitCode: 0,
 	}
-	
+
 	err := util_bridge.Start(config)
 	if err != nil {
 		resp.ExitCode = 1
@@ -25,10 +23,10 @@ func (br *Bridge) Start(config string, resp *Response) error {
 
 func (br *Bridge) Stop(config string, resp *Response) error {
 	resp = &Response{
-		Output: "",
+		Output:   "",
 		ExitCode: 0,
 	}
-	
+
 	err := util_bridge.Stop()
 	if err != nil {
 		resp.ExitCode = 1
@@ -39,7 +37,7 @@ func (br *Bridge) Stop(config string, resp *Response) error {
 func StartBridge(config string) error {
 	resp := &Response{}
 
-	return run("Bridge.Start", config, resp)	
+	return run("Bridge.Start", config, resp)
 }
 
 func StopBridge() error {

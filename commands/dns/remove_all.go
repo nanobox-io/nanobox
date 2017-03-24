@@ -16,6 +16,7 @@ import (
 func init() {
 	server.AddCmd("dns rm-all", removeAllFn)
 }
+
 // RemoveAllCmd ...
 var RemoveAllCmd = &cobra.Command{
 	Use:    "rm-all",

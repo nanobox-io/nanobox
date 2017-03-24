@@ -8,12 +8,11 @@ import (
 	"golang.org/x/sys/windows/svc"
 	"golang.org/x/sys/windows/svc/debug"
 	"golang.org/x/sys/windows/svc/eventlog"
-	
 )
 
 var elog debug.Log
 
-type nanoboxServer struct {}
+type nanoboxServer struct{}
 
 func (ns *nanoboxServer) Execute(args []string, r <-chan svc.ChangeRequest, changes chan<- svc.Status) (ssec bool, errno uint32) {
 	elog.Info(1, fmt.Sprintf("execute called"))
@@ -58,7 +57,7 @@ func svcStart() {
 		return
 	}
 	elog.Info(1, fmt.Sprintf("%s service stopped", name))
-	
+
 	// on windows when i get here the service has been stopped so we exit
 	os.Exit(0)
 }

@@ -2,9 +2,9 @@ package server
 
 import (
 	// "time"
-	
-	"github.com/nanobox-io/nanobox/util"	
-	"github.com/nanobox-io/nanobox/util/service"	
+
+	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/service"
 )
 
 func Start() error {
@@ -21,4 +21,4 @@ func Start() error {
 	// }
 
 	return service.Start("nanobox-server")
-}	
+}
