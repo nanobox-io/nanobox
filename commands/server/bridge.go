@@ -11,11 +11,29 @@ var bridge = &Bridge{
 }
 
 func (br *Bridge) Start(config string, resp *Response) error {
-	return util_bridge.Start(config)
+	resp = &Response{
+		Output: "",
+		ExitCode: 0,
+	}
+	
+	err := util_bridge.Start(config)
+	if err != nil {
+		resp.ExitCode = 1
+	}
+	return err
 }
 
 func (br *Bridge) Stop(config string, resp *Response) error {
-	return util_bridge.Stop()
+	resp = &Response{
+		Output: "",
+		ExitCode: 0,
+	}
+	
+	err := util_bridge.Stop()
+	if err != nil {
+		resp.ExitCode = 1
+	}
+	return err
 }
 
 func StartBridge(config string) error {

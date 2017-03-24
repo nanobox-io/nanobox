@@ -19,7 +19,7 @@ func Start(conf string) error {
 	runningBridge.Stdout = os.Stdout
 	runningBridge.Stderr = os.Stderr
 
-	err := runningBridge.Run()
+	err := runningBridge.Start()
 	if err != nil {
 		runningBridge = nil
 		err = fmt.Errorf("failed to start cmd(%s --config %s): %s",  config.VpnPath(), conf, err)
