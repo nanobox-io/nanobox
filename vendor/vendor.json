@@ -21,10 +21,10 @@
 			"revisionTime": "2016-01-02T14:47:48Z"
 		},
 		{
-			"checksumSHA1": "RF/PNVBK2xurtGDZlut5whaoItE=",
+			"checksumSHA1": "L9njXCkN30+qHaLayiiA2Q9jDlY=",
 			"path": "github.com/Microsoft/go-winio",
-			"revision": "3b8b3c98b207f95fe0cd6c7c311a9ac497ba7c0f",
-			"revisionTime": "2016-04-18T22:16:11Z"
+			"revision": "fff283ad5116362ca252298cfc9b95828956d85d",
+			"revisionTime": "2017-02-01T00:43:30Z"
 		},
 		{
 			"checksumSHA1": "okEyrP/wQJTUiNl3in0GqJdc9jI=",
@@ -97,6 +97,12 @@
 			"path": "github.com/docker/docker/pkg/term/windows",
 			"revision": "09b929083d34836a78ce8ee79b22aea082712072",
 			"revisionTime": "2016-08-19T20:09:57Z"
+		},
+		{
+			"checksumSHA1": "dxJfrizyMV1LAZMqkqaasz+T0kU=",
+			"path": "github.com/docker/engine-api",
+			"revision": "4290f40c056686fcaa5c9caf02eac1dde9315adf",
+			"revisionTime": "2016-09-08T23:21:04Z"
 		},
 		{
 			"checksumSHA1": "PDXSPZlb43hdy26n6hZi2UJxi5I=",
