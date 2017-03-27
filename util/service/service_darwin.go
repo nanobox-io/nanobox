@@ -2,6 +2,8 @@ package service
 
 import (
 	"fmt"
+	"os/exec"
+	"bytes"
 )
 
 func serviceConfigFile(name string) string {
@@ -13,7 +15,14 @@ func startCmd(name string) []string {
 }
 
 func Running(name string) bool {
-	// there is currently no query mechanism built into launchctl
+	out, err := exec.Command("launchctl", "list", name).CombinedOutput()
+	if err != nil {
+		return false
+	}
+
+	if !bytes.Contains(out, []byte("PID")) {
+		return false
+	}
 	return true
 }
 
