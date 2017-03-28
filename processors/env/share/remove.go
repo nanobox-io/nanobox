@@ -19,15 +19,15 @@ func Remove(path string) error {
 		return nil
 	}
 
-	// if we're not running as the privileged user, we need to re-exec with privilege
-	if !util.IsPrivileged() {
-		return reExecPrivilegedRemove(path)
-	}
+	// // if we're not running as the privileged user, we need to re-exec with privilege
+	// if !util.IsPrivileged() {
+	// 	return reExecPrivilegedRemove(path)
+	// }
 
 	// rm the share entry
 	if err := share.Remove(path); err != nil {
 		lumber.Error("share:Add:share.Remove(%s): %s", path, err.Error())
-		return util.ErrorAppend(err, "failed to remove share share: %s")
+		return util.ErrorAppend(err, "failed to remove share share")
 	}
 
 	return nil

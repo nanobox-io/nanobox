@@ -208,7 +208,11 @@ func (sh *ShareRPC) Remove(req Request, resp *Response) error {
 		return err
 	}
 
-	return reloadServer()
+	err = reloadServer()
+	if err == nil {
+		resp.Success = true	
+	}
+	return err
 }
 
 // reloadServer will reload the nfs server with the new export configuration

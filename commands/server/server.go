@@ -38,7 +38,7 @@ func serverFnc(ccmd *cobra.Command, args []string) {
 	go svcStart()
 
 	// add any registered rpc classes
-	for controller := range registeredRPCs {
+	for _, controller := range registeredRPCs {
 		rpc.Register(controller)
 	}
 
@@ -62,6 +62,7 @@ func serverFnc(ccmd *cobra.Command, args []string) {
 
 // run a client request to the rpc server
 func ClientRun(funcName string, args interface{}, response interface{}) error {
+	// log.Printf("clientcall: %s %#v %#v\n", funcName, args, response)
 	client, err := rpc.Dial("tcp", "127.0.0.1:23456")
 	if err != nil {
 		return err

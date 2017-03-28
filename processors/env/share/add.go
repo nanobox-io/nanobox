@@ -19,11 +19,11 @@ func Add(path string) error {
 		return nil
 	}
 
-	// if we're not running as the privileged user, we need to re-exec with privilege
-	if !util.IsPrivileged() {
+	// // if we're not running as the privileged user, we need to re-exec with privilege
+	// if !util.IsPrivileged() {
 
-		return reExecPrivilegedAdd(path)
-	}
+	// 	return reExecPrivilegedAdd(path)
+	// }
 
 	// add the share entry
 	if err := share.Add(path); err != nil {

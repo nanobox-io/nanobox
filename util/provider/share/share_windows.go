@@ -111,6 +111,7 @@ func (sh *ShareRPC) Add(req Request, resp *Response) error {
 // Remove removes a cifs share
 func Remove(path string) error {
 	req := Request{
+		Path: path,
 		AppID: config.EnvID(),
 	}
 	resp := &Response{}
@@ -163,7 +164,7 @@ func (sh *ShareRPC) Remove(req Request, resp *Response) error {
 
 	// if we are here, it might have failed. Lets just check one more time
 	// to see if the share is already gone. If so, let's return success (nil)
-	if !Exists(path) {
+	if !Exists(req.Path) {
 		resp.Success = true
 		return nil
 	}
