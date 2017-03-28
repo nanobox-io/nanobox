@@ -2,8 +2,8 @@ package service
 
 import (
 	"fmt"
-	"os/exec"
-	"bytes"
+	"net"
+	"time"
 )
 
 func serviceConfigFile(name string) string {
@@ -15,14 +15,12 @@ func startCmd(name string) []string {
 }
 
 func Running(name string) bool {
-	out, err := exec.Command("launchctl", "list", name).CombinedOutput()
+	<-time.After(500*time.Millisecond)
+	conn, err := net.DialTimeout("tcp", "127.0.0.1:23456", 100*time.Millisecond)
 	if err != nil {
 		return false
 	}
-
-	if !bytes.Contains(out, []byte("PID")) {
-		return false
-	}
+	conn.Close()
 	return true
 }
 

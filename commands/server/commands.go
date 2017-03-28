@@ -7,6 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
@@ -22,6 +23,7 @@ type AdminCmds struct {
 }
 
 type Request struct {
+	DB string
 	Name string
 	Args []string
 }
@@ -32,6 +34,9 @@ var commands = &AdminCmds{
 }
 
 func (comm *AdminCmds) Run(req Request, resp *Response) error {
+	// use the reqests database
+	models.DB = req.DB
+
 	// make display use the buffer
 	buff := &bytes.Buffer{}
 	display.Out = buff
@@ -64,6 +69,8 @@ func AddResponse(out string, exitCode int) {
 
 func RunCommand(cmd string, args []string) (*Response, error) {
 	req := Request{
+
+		DB: models.DB,
 		Name: cmd,
 		Args: args,
 	}

@@ -9,6 +9,10 @@ import (
 )
 
 func Teardown() error {
+	if !Connected() {
+		return nil
+	}
+
 	// remove bridge client
 	if err := Stop(); err != nil {
 		return err

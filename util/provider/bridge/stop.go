@@ -10,7 +10,9 @@ func Stop() error {
 	}
 
 	if err := runningBridge.Wait(); err != nil {
-		return err
+		// it gets a signal but it shows up as an error
+		// we dont want that
+		return nil
 	}
 
 	// if we killed it and released the resources
