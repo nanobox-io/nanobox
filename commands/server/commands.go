@@ -13,6 +13,7 @@ import (
 
 func init() {
 	display.ServerResponseFunc = AddResponse
+	Register(commands)
 }
 
 type CmdFunc func(ccmd *cobra.Command, args []string)
@@ -77,5 +78,5 @@ func RunCommand(cmd string, args []string) (*Response, error) {
 
 	resp := &Response{}
 
-	return resp, run("AdminCmds.Run", req, resp)
+	return resp, ClientRun("AdminCmds.Run", req, resp)
 }

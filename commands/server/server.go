@@ -37,9 +37,10 @@ func serverFnc(ccmd *cobra.Command, args []string) {
 	// fire up the service manager (only required on windows)
 	go svcStart()
 
-	// register controllers
-	rpc.Register(bridge)
-	rpc.Register(commands)
+	// add any registered rpc classes
+	for controller := range registeredRPCs {
+		rpc.Register(controller)
+	}
 
 	// only listen for rpc calls on localhost
 	listener, e := net.Listen("tcp", "127.0.0.1:23456")
@@ -60,7 +61,7 @@ func serverFnc(ccmd *cobra.Command, args []string) {
 }
 
 // run a client request to the rpc server
-func run(funcName string, args interface{}, response interface{}) error {
+func ClientRun(funcName string, args interface{}, response interface{}) error {
 	client, err := rpc.Dial("tcp", "127.0.0.1:23456")
 	if err != nil {
 		return err

@@ -6,7 +6,9 @@ import (
 
 type Bridge struct{}
 
-var bridge = &Bridge{}
+func init() {
+	Register(&Bridge{})
+}
 
 func (br *Bridge) Start(config string, resp *Response) error {
 	resp = &Response{
@@ -37,11 +39,11 @@ func (br *Bridge) Stop(config string, resp *Response) error {
 func StartBridge(config string) error {
 	resp := &Response{}
 
-	return run("Bridge.Start", config, resp)
+	return ClientRun("Bridge.Start", config, resp)
 }
 
 func StopBridge() error {
 	resp := &Response{}
 
-	return run("Bridge.Stop", "", resp)
+	return ClientRun("Bridge.Stop", "", resp)
 }
