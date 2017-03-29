@@ -13,9 +13,7 @@ import (
 
 var (
 	CmdErrRegex        = regexp.MustCompile(":\\s?$")
-	ServerResponseFunc = func(out string, exitCode int) {
 
-	}
 )
 
 // CommandErr ...
@@ -30,11 +28,6 @@ func CommandErr(err error) {
 	if err == nil {
 		// if an exit code is provided we need to quit here
 		// and use that exit code
-		if registry.GetBool("server") {
-			ServerResponseFunc("", 0)
-			return
-		}
-
 		if exitCode != 0 {
 			os.Exit(exitCode)
 		}
@@ -43,11 +36,6 @@ func CommandErr(err error) {
 
 	cause, context := parseCommandErr(err)
 
-	if registry.GetBool("server") {
-		ServerResponseFunc(fmt.Sprintf("\nError   : %s\nContext : %s\n", cause, context), exitCode)
-
-		return
-	}
 	fmt.Println()
 	fmt.Printf("Error   : %s\n", cause)
 	fmt.Printf("Context : %s\n", context)

@@ -5,17 +5,12 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/nanobox-io/nanobox/commands/server"
 	"github.com/nanobox-io/nanobox/helpers"
 	"github.com/nanobox-io/nanobox/models"
 	app_dns "github.com/nanobox-io/nanobox/processors/app/dns"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 )
-
-func init() {
-	server.AddCmd("dns rm", removeFn)
-}
 
 // RemoveCmd ...
 var RemoveCmd = &cobra.Command{

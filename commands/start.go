@@ -32,5 +32,9 @@ func startFn(ccmd *cobra.Command, args []string) {
 }
 
 func startCheck() bool {
-	return provider.IsReady() && service.Running("nanobox-server") && bridge.Connected()
+	bridgeReady := true
+	if provider.BridgeRequired() {
+		bridgeReady = bridge.Connected()	
+	}
+	return provider.IsReady() && service.Running("nanobox-server") && bridgeReady
 }

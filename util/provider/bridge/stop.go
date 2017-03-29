@@ -1,6 +1,16 @@
 package bridge
 
+import (
+	"github.com/nanobox-io/nanobox/commands/server"
+)
+
 func Stop() error {
+	resp := &Response{}
+
+	return server.ClientRun("Bridge.Stop", "", resp)
+}
+
+func (br *Bridge) Stop(config string, resp *Response) error {
 	if runningBridge == nil {
 		return nil
 	}

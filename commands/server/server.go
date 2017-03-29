@@ -11,11 +11,6 @@ import (
 	"github.com/nanobox-io/nanobox/util"
 )
 
-type Response struct {
-	Output   string
-	ExitCode int
-}
-
 var ServerCmd = &cobra.Command{
 	Use:   "server",
 	Short: "Start a dedicated nanobox server",

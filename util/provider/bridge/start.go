@@ -5,12 +5,18 @@ import (
 	"os"
 	"os/exec"
 
+	"github.com/nanobox-io/nanobox/commands/server"
 	"github.com/nanobox-io/nanobox/util/config"
 )
 
-var runningBridge *exec.Cmd
-
 func Start(conf string) error {
+	resp := &Response{}
+
+	return server.ClientRun("Bridge.Start", conf, resp)
+}
+
+func (br *Bridge) Start(conf string, resp *Response) error {
+
 	if runningBridge != nil {
 		return nil
 	}
