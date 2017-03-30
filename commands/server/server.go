@@ -62,6 +62,8 @@ func serverFnc(ccmd *cobra.Command, args []string) {
 }
 
 // TEMP: this only ever needs to be run once.
+// but it wont hurt to run it once everytime nanobox server starts
+// this can be removed once everyone is >= 2.1.0
 func updateUpdater() {
 	// update.Server = true
 	update.Name = strings.Replace(update.Name, "nanobox", "nanobox-update", 1)
