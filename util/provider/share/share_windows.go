@@ -2,21 +2,21 @@ package share
 
 import (
 	"bytes"
+	"flag"
 	"fmt"
 	"os"
 	"os/exec"
-	"flag"
 
 	"github.com/jcelliott/lumber"
 
-	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/commands/server"
+	"github.com/nanobox-io/nanobox/util/config"
 )
 
 type Request struct {
-	Path string
+	Path  string
 	AppID string
-	User string
+	User  string
 }
 
 // Exists checks to see if the share already exists
@@ -46,9 +46,9 @@ func Exists(path string) bool {
 func Add(path string) error {
 
 	req := Request{
-		Path: path,
+		Path:  path,
 		AppID: config.EnvID(),
-		User: os.Getenv("USERNAME"),
+		User:  os.Getenv("USERNAME"),
 	}
 	resp := &Response{}
 
@@ -111,7 +111,7 @@ func (sh *ShareRPC) Add(req Request, resp *Response) error {
 // Remove removes a cifs share
 func Remove(path string) error {
 	req := Request{
-		Path: path,
+		Path:  path,
 		AppID: config.EnvID(),
 	}
 	resp := &Response{}

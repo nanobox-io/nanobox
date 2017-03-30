@@ -2,17 +2,17 @@ package update
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
-	"io/ioutil"
 
 	"github.com/nanobox-io/nanobox/models"
 	// "github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
-var	Server bool
+var Server bool
 
 func Run(path string) error {
 	if path == "" {

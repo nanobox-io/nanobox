@@ -11,8 +11,8 @@ import (
 
 	"github.com/jcelliott/lumber"
 
-	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/commands/server"
+	"github.com/nanobox-io/nanobox/models"
 )
 
 // EXPORTSFILE ...
@@ -59,7 +59,6 @@ func Add(path string) error {
 	if err != nil {
 		return err
 	}
-
 
 	req := Request{Entry: entry}
 	resp := &Response{}

@@ -12,8 +12,7 @@ import (
 )
 
 var (
-	CmdErrRegex        = regexp.MustCompile(":\\s?$")
-
+	CmdErrRegex = regexp.MustCompile(":\\s?$")
 )
 
 // CommandErr ...

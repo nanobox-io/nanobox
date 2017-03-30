@@ -11,15 +11,15 @@ import (
 
 	"github.com/jcelliott/lumber"
 
+	"github.com/nanobox-io/nanobox/commands/server"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
-	"github.com/nanobox-io/nanobox/commands/server"
 )
 
 type Request struct {
-	Path string
-	UID int
-	GID int
+	Path    string
+	UID     int
+	GID     int
 	MountIP string
 }
 
@@ -63,9 +63,9 @@ func Add(path string) error {
 
 	// create a rpc request
 	req := Request{
-		Path: path,
-		UID: uid(),
-		GID: gid(),
+		Path:    path,
+		UID:     uid(),
+		GID:     gid(),
 		MountIP: provider.MountIP,
 	}
 
@@ -124,12 +124,11 @@ func (sh *ShareRPC) Add(req Request, resp *Response) error {
 	}
 
 	if err := reloadServer(); err != nil {
-	 	return err
-	} 
+		return err
+	}
 	resp.Success = true
-	return nil	
+	return nil
 }
-
 
 func Remove(path string) error {
 
@@ -141,9 +140,9 @@ func Remove(path string) error {
 
 	// create a rpc request
 	req := Request{
-		Path: path,
-		UID: uid(),
-		GID: gid(),
+		Path:    path,
+		UID:     uid(),
+		GID:     gid(),
 		MountIP: provider.MountIP,
 	}
 
@@ -210,7 +209,7 @@ func (sh *ShareRPC) Remove(req Request, resp *Response) error {
 
 	err = reloadServer()
 	if err == nil {
-		resp.Success = true	
+		resp.Success = true
 	}
 	return err
 }

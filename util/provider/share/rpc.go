@@ -4,8 +4,7 @@ import (
 	"github.com/nanobox-io/nanobox/commands/server"
 )
 
-
-type ShareRPC struct {}
+type ShareRPC struct{}
 
 type Response struct {
 	Message string

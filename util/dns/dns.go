@@ -16,7 +16,7 @@ type DomainName struct {
 	Domain string
 }
 
-type DomainRPC struct {}
+type DomainRPC struct{}
 
 type Request struct {
 	Entry string
@@ -31,7 +31,6 @@ var (
 	hostsFile = detectHostsFile()
 	newline   = detectNewlineChar()
 )
-
 
 func init() {
 	server.Register(&DomainRPC{})

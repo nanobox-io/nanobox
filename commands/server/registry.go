@@ -1,7 +1,5 @@
 package server
 
-
-
 var registeredRPCs = []interface{}{}
 
 func Register(i interface{}) {

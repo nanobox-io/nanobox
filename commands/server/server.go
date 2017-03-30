@@ -4,9 +4,9 @@ import (
 	"log"
 	"net"
 	"net/rpc"
-	"strings"
-	"os/exec"
 	"os"
+	"os/exec"
+	"strings"
 
 	"github.com/spf13/cobra"
 

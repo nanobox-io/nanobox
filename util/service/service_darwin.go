@@ -15,7 +15,7 @@ func startCmd(name string) []string {
 }
 
 func Running(name string) bool {
-	<-time.After(500*time.Millisecond)
+	<-time.After(500 * time.Millisecond)
 	conn, err := net.DialTimeout("tcp", "127.0.0.1:23456", 100*time.Millisecond)
 	if err != nil {
 		return false

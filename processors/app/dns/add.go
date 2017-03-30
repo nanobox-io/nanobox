@@ -6,10 +6,10 @@ import (
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processors/server"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/dns"
-	"github.com/nanobox-io/nanobox/processors/server"
 )
 
 var AppSetup func(envModel *models.Env, appModel *models.App, name string) error

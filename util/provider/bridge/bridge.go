@@ -1,8 +1,8 @@
 package bridge
 
 import (
-	"os/exec"
 	"github.com/nanobox-io/nanobox/commands/server"
+	"os/exec"
 )
 
 type Bridge struct{}

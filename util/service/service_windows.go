@@ -1,9 +1,8 @@
 package service
 
 import (
-	"os/exec"
 	"bytes"
-	
+	"os/exec"
 	// "golang.org/x/sys/windows/svc"
 	// "golang.org/x/sys/windows/svc/mgr"
 )

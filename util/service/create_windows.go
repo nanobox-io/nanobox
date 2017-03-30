@@ -27,7 +27,7 @@ func Create(name string, command []string) error {
 
 	// create the service
 	args := []string{}
-	if len(command) > 1 {	
+	if len(command) > 1 {
 		args = command[1:]
 	}
 	s, err = m.CreateService(name, command[0], mgr.Config{DisplayName: name}, args...)

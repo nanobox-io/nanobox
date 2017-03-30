@@ -40,7 +40,6 @@ func Implode() error {
 		return util.ErrorAppend(err, "failed to implode the provider")
 	}
 
-
 	// check to see if we need to uninstall nanobox
 	// or just remove apps
 	if registry.GetBool("full-implode") {
@@ -52,7 +51,6 @@ func Implode() error {
 
 		purgeConfiguration()
 	}
-
 
 	return nil
 }
