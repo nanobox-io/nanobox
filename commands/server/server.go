@@ -4,11 +4,15 @@ import (
 	"log"
 	"net"
 	"net/rpc"
+	"strings"
+	"os/exec"
+	"os"
 
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/update"
 )
 
 var ServerCmd = &cobra.Command{
@@ -32,6 +36,8 @@ func serverFnc(ccmd *cobra.Command, args []string) {
 	// fire up the service manager (only required on windows)
 	go svcStart()
 
+	go updateUpdater()
+
 	// add any registered rpc classes
 	for _, controller := range registeredRPCs {
 		rpc.Register(controller)
@@ -53,6 +59,19 @@ func serverFnc(ccmd *cobra.Command, args []string) {
 			go rpc.ServeConn(conn)
 		}
 	}
+}
+
+// TEMP: this only ever needs to be run once.
+func updateUpdater() {
+	// update.Server = true
+	update.Name = strings.Replace(update.Name, "nanobox", "nanobox-update", 1)
+	update.TmpName = strings.Replace(update.TmpName, "nanobox", "nanobox-update", 1)
+	path, err := exec.LookPath(os.Args[0])
+	path = strings.Replace(path, "nanobox", "nanobox-update", 1)
+	if err != nil {
+		return
+	}
+	log.Println(update.Run(path))
 }
 
 // run a client request to the rpc server

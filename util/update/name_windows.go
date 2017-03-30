@@ -1,4 +1,4 @@
 package update
 
-const Name = "nanobox.exe"
-const tmpName = "nanobox-tmp.exe"
+var Name = "nanobox.exe"
+var TmpName = "nanobox-tmp.exe"

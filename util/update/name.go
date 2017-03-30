@@ -2,5 +2,5 @@
 
 package update
 
-const Name = "nanobox"
-const tmpName = "nanobox.tmp"
+var Name = "nanobox"
+var TmpName = "nanobox.tmp"

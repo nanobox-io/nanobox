@@ -21,6 +21,12 @@ func Setup() error {
 		return reExecPrivilageStart()
 	}
 
+	// TEMP: we need to remove the old nanobox-vpn just incase it is left over
+	// we will not catch errors here because if it doesnt exist or it breaks it
+	// should not stop us from creating the new nanobox-server
+	service.Stop("nanobox-vpn")
+	service.Remove("nanobox-vpn")
+
 	// create the service this call is idempotent so we shouldnt need to check
 	if err := service.Create("nanobox-server", []string{config.NanoboxPath(), "server"}); err != nil {
 		return err

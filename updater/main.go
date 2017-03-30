@@ -9,6 +9,7 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/service"
 	"github.com/nanobox-io/nanobox/util/update"
 )
 
@@ -54,6 +55,9 @@ func main() {
 		// we're done
 		return
 	}
+
+	// stop the nanobox service so we can replace the nanobox binary
+	service.Stop("nanobox-server")
 
 	// run the update
 	err = update.Run(path)
