@@ -18,7 +18,10 @@ func Start(conf string) error {
 func (br *Bridge) Start(conf string, resp *Response) error {
 
 	if runningBridge != nil {
-		return nil
+		// if asked to start but we are already running
+		// lets teardown the old and recreate with the new conf
+		br.Stop(conf, resp)
+		// return nil
 	}
 
 	runningBridge = exec.Command(config.VpnPath(), "--config", conf)
