@@ -10,10 +10,11 @@ import (
 // Add adds a share share to the workstation
 func Add(path string) error {
 
-	// short-circuit if the entry already exist
-	if share.Exists(path) {
-		return nil
-	}
+	// since we dont 
+	// // short-circuit if the entry already exist
+	// if share.Exists(path) {
+	// 	return nil
+	// }
 
 	// add the share entry
 	if err := share.Add(path); err != nil {

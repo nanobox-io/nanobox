@@ -44,6 +44,11 @@ func Exists(path string) bool {
 
 // Add exports a cifs share
 func Add(path string) error {
+	
+	// on windows we dont want to try adding more then once
+	if Exists(path) {
+		return nil
+	}
 
 	req := Request{
 		Path:  path,
