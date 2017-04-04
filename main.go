@@ -17,6 +17,7 @@ import (
 	"github.com/nanobox-io/nanobox/commands"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors"
+	proc_provider "github.com/nanobox-io/nanobox/processors/provider"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
@@ -212,9 +213,22 @@ func migrationCheck() {
 
 	// on implode success
 	// adjust the provider to the new one and save the provider model
+
 	config.Provider = newProviderName
 	config.Save()
 
 	providerModel.Name = newProviderName
 	providerModel.Save()
+
+	// unset all the docer variables and re init the docker client
+	os.Unsetenv("DOCKER_TLS_VERIFY")
+	os.Unsetenv("DOCKER_MACHINE_NAME")
+	os.Unsetenv("DOCKER_HOST")
+	os.Unsetenv("DOCKER_CERT_PATH")
+
+	
+	if err := proc_provider.Init(); err != nil {
+		os.Exit(0)
+	}
+
 }
