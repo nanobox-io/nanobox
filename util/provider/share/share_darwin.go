@@ -91,6 +91,7 @@ func Add(path string) error {
 
 // the rpc function run from the server
 func (sh *ShareRPC) Add(req Request, resp *Response) error {
+	fmt.Printf("req: %#v\n", req)
 
 	// read exports file
 	existingFile, err := ioutil.ReadFile(EXPORTSFILE)
@@ -108,14 +109,19 @@ func (sh *ShareRPC) Add(req Request, resp *Response) error {
 		// get existing line
 		if strings.Contains(line, lineCheck) {
 			// add our path to the line
-			lines[i] = fmt.Sprintf("\"%s\" %s", req.Path, line)
+			// check to see if this path has already been added
+			if !(strings.Contains(line, req.Path+" ") || strings.Contains(line, req.Path+"\" ")) {
+				lines[i] = fmt.Sprintf("\"%s\" %s", req.Path, line)
+			}
+			
+
 			lines[i] = cleanLine(lines[i], lineCheck)
 			found = true
 			break
 		}
 	}
 	if !found {
-		lines = append(lines, fmt.Sprintf("%s %s", req.Path, lineCheck))
+		lines = append(lines, fmt.Sprintf("\"%s\" %s", req.Path, lineCheck))
 	}
 
 	// save
