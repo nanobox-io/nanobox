@@ -1,3 +1,12 @@
+## 2.1.0 (April 7, 2017)
+
+FEATURES:
+  - Make a major change to the way nanobox runs. When running nanobox now creates a nanobox server
+    This change fixes the quality of life of most users because it should only ask for passwords once
+  - VPN now runs under the server
+  - All administrative commands (dns add, sharing etc.) now run through the server
+
+
 ## 2.0.4 (March 6, 2017)
 
 BUG FIXES:

@@ -2,6 +2,7 @@ package processors
 
 import (
 	"time"
+	"runtime"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
@@ -167,10 +168,18 @@ func downloadImage(image string) error {
 
 func watchFiles(envModel *models.Env, appModel *models.App) {
 	boxfile := boxfile.New([]byte(appModel.DeployedBoxfile))
-	if boxfile.Node("run.config").BoolValue("fs_watch") && provider.RequiresMount() {
+	if boxfile.Node("run.config").BoolValue("fs_watch") && (provider.RequiresMount() || specialException()) {
 		lumber.Info("watcher starting")
 		go watch.Watch(container_generator.DevName(), envModel.Directory)
 	}
+}
+
+// TEMP: this is added because osxfs on native doesnt propigate file changes
+// this will be removed when osxfs gets better or we switch native on osx to 
+// use nfs
+func specialException() bool {
+	config, _ := models.LoadConfig()
+	return runtime.GOOS == "darwin" && config.Provider == "native"
 }
 
 // cwd sets the cwd from the boxfile or provides a sensible default
