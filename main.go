@@ -226,7 +226,6 @@ func migrationCheck() {
 	os.Unsetenv("DOCKER_HOST")
 	os.Unsetenv("DOCKER_CERT_PATH")
 
-	
 	if err := proc_provider.Init(); err != nil {
 		os.Exit(0)
 	}

@@ -1,8 +1,8 @@
 package processors
 
 import (
-	"time"
 	"runtime"
+	"time"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
@@ -175,7 +175,7 @@ func watchFiles(envModel *models.Env, appModel *models.App) {
 }
 
 // TEMP: this is added because osxfs on native doesnt propigate file changes
-// this will be removed when osxfs gets better or we switch native on osx to 
+// this will be removed when osxfs gets better or we switch native on osx to
 // use nfs
 func specialException() bool {
 	config, _ := models.LoadConfig()

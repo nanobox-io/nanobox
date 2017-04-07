@@ -113,7 +113,6 @@ func (sh *ShareRPC) Add(req Request, resp *Response) error {
 			if !(strings.Contains(line, req.Path+" ") || strings.Contains(line, req.Path+"\" ")) {
 				lines[i] = fmt.Sprintf("\"%s\" %s", req.Path, line)
 			}
-			
 
 			lines[i] = cleanLine(lines[i], lineCheck)
 			found = true
