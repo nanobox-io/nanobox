@@ -1,7 +1,7 @@
 package server
 
 import (
-	// "time"
+	"time"
 
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/service"
@@ -16,9 +16,10 @@ func Start() error {
 		return reExecPrivilageStart()
 	}
 
-	// fn := func() error {
-	// 	return service.Start("nanobox-server")
-	// }
+	fn := func() error {
+		return service.Start("nanobox-server")
+	}
 
-	return service.Start("nanobox-server")
+
+	return util.Retry(fn, 3, time.Second)
 }
