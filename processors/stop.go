@@ -7,6 +7,7 @@ import (
 	"github.com/nanobox-io/nanobox/processors/app"
 	"github.com/nanobox-io/nanobox/processors/env"
 	"github.com/nanobox-io/nanobox/processors/provider"
+	"github.com/nanobox-io/nanobox/processors/server"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
 	util_provider "github.com/nanobox-io/nanobox/util/provider"
@@ -38,6 +39,11 @@ func Stop() error {
 	// stop the provider
 	if err := provider.Stop(); err != nil {
 		return util.ErrorAppend(err, "failed to stop the provider")
+	}
+
+	// stop the server
+	if err := server.Stop(); err != nil {
+		return util.ErrorAppend(err, "failed to stop server")
 	}
 
 	return nil

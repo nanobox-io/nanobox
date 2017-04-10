@@ -2,22 +2,12 @@ package service
 
 import (
 	"bytes"
-	"fmt"
 	"os/exec"
-	"path/filepath"
-
-	"github.com/nanobox-io/nanobox/util/config"
+	// "golang.org/x/sys/windows/svc"
+	// "golang.org/x/sys/windows/svc/mgr"
 )
 
-func serviceConfigFile(name string) string {
-	return filepath.Join(config.BinDir(), fmt.Sprintf("%s-config.ini", name))
-}
-
-func startCmd(name string) []string {
-	return []string{"sc.exe", "start", name}
-}
-
-func running(name string) bool {
+func Running(name string) bool {
 	out, err := exec.Command("sc.exe", "query", name).CombinedOutput()
 	if err != nil {
 		return false
@@ -27,12 +17,24 @@ func running(name string) bool {
 		return false
 	}
 	return true
-}
+	// m, err := mgr.Connect()
+	// if err != nil {
+	// 	return false
+	// }
+	// defer m.Disconnect()
 
-func stopCmd(name string) []string {
-	return []string{"sc.exe", "stop", name}
-}
+	// // check to see if we need to create at all
+	// s, err := m.OpenService(name)
+	// if err != nil {
+	// 	// jobs done
+	// 	return false
+	// }
+	// defer s.Close()
 
-func removeCmd(name string) []string {
-	return []string{"sc.exe", "delete", name}
+	// status, err := s.Query()
+	// if err != nil {
+	// 	return false
+	// }
+
+	// return status.State == svc.Running
 }

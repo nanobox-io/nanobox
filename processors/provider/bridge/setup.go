@@ -18,7 +18,6 @@ import (
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/hookit"
 	"github.com/nanobox-io/nanobox/util/locker"
-	"github.com/nanobox-io/nanobox/util/provider/bridge"
 )
 
 var keys map[string]string
@@ -29,7 +28,7 @@ func Setup() error {
 	defer display.CloseContext()
 
 	// if the container exists and openvpn is running
-	if bridge.Connected() {
+	if Connected() {
 		return nil
 	}
 
@@ -159,7 +158,7 @@ func configureBridge() error {
 	}
 
 	// create config file
-	if err := ioutil.WriteFile(bridge.ConfigFile(), []byte(bridge.BridgeConfig()), 0644); err != nil {
+	if err := ioutil.WriteFile(ConfigFile(), []byte(BridgeConfig()), 0644); err != nil {
 		return err
 	}
 
@@ -169,16 +168,16 @@ func configureBridge() error {
 	}
 
 	// create ca.crt
-	if err := ioutil.WriteFile(bridge.CaCrt(), []byte(keys["ca.crt"]), 0644); err != nil {
+	if err := ioutil.WriteFile(CaCrt(), []byte(keys["ca.crt"]), 0644); err != nil {
 		return err
 	}
 
 	// create client.key
-	if err := ioutil.WriteFile(bridge.ClientKey(), []byte(keys["client.key"]), 0644); err != nil {
+	if err := ioutil.WriteFile(ClientKey(), []byte(keys["client.key"]), 0644); err != nil {
 		return err
 	}
 	// create client.crt
-	if err := ioutil.WriteFile(bridge.ClientCrt(), []byte(keys["client.crt"]), 0644); err != nil {
+	if err := ioutil.WriteFile(ClientCrt(), []byte(keys["client.crt"]), 0644); err != nil {
 		return err
 	}
 

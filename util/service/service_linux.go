@@ -44,7 +44,7 @@ func startCmd(name string) []string {
 	return nil
 }
 
-func running(name string) bool {
+func Running(name string) bool {
 	switch launchSystem() {
 	case "systemd":
 		out, err := exec.Command("systemctl", "--no-pager", "status", name).CombinedOutput()

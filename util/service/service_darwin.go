@@ -2,6 +2,8 @@ package service
 
 import (
 	"fmt"
+	"net"
+	"time"
 )
 
 func serviceConfigFile(name string) string {
@@ -12,8 +14,13 @@ func startCmd(name string) []string {
 	return []string{"launchctl", "start", fmt.Sprintf("io.%s", name)}
 }
 
-func running(name string) bool {
-	// there is currently no query mechanism built into launchctl
+func Running(name string) bool {
+	<-time.After(500 * time.Millisecond)
+	conn, err := net.DialTimeout("tcp", "127.0.0.1:23456", 100*time.Millisecond)
+	if err != nil {
+		return false
+	}
+	conn.Close()
 	return true
 }
 

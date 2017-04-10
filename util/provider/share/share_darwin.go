@@ -11,9 +11,17 @@ import (
 
 	"github.com/jcelliott/lumber"
 
+	"github.com/nanobox-io/nanobox/commands/server"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
 )
+
+type Request struct {
+	Path    string
+	UID     int
+	GID     int
+	MountIP string
+}
 
 // EXPORTSFILE ...
 var EXPORTSFILE = "/etc/exports"
@@ -53,6 +61,38 @@ func Add(path string) error {
 		return err
 	}
 
+	// create a rpc request
+	req := Request{
+		Path:    path,
+		UID:     uid(),
+		GID:     gid(),
+		MountIP: provider.MountIP,
+	}
+
+	resp := &Response{}
+
+	// in testing we will call the rpc function directly
+	if flag.Lookup("test.v") != nil {
+		shareRPC := &ShareRPC{}
+		err := shareRPC.Add(req, resp)
+		if err != nil || !resp.Success {
+			err = fmt.Errorf("failed to add share %v %v", err, resp.Message)
+		}
+		return err
+	}
+
+	// have the server run the share command
+	err = server.ClientRun("ShareRPC.Add", req, resp)
+	if err != nil || !resp.Success {
+		err = fmt.Errorf("failed to add share %v %v", err, resp.Message)
+	}
+	return err
+}
+
+// the rpc function run from the server
+func (sh *ShareRPC) Add(req Request, resp *Response) error {
+	fmt.Printf("req: %#v\n", req)
+
 	// read exports file
 	existingFile, err := ioutil.ReadFile(EXPORTSFILE)
 	if err != nil {
@@ -60,7 +100,7 @@ func Add(path string) error {
 		existingFile = []byte("")
 	}
 
-	lineCheck := fmt.Sprintf("%s -alldirs -mapall=%v:%v", provider.MountIP, uid(), gid())
+	lineCheck := fmt.Sprintf("%s -alldirs -mapall=%v:%v", req.MountIP, req.UID, req.GID)
 
 	lines := strings.Split(string(existingFile), "\n")
 
@@ -69,31 +109,73 @@ func Add(path string) error {
 		// get existing line
 		if strings.Contains(line, lineCheck) {
 			// add our path to the line
-			lines[i] = fmt.Sprintf("\"%s\" %s", path, line)
+			// check to see if this path has already been added
+			if !(strings.Contains(line, req.Path+" ") || strings.Contains(line, req.Path+"\" ")) {
+				lines[i] = fmt.Sprintf("\"%s\" %s", req.Path, line)
+			}
+
 			lines[i] = cleanLine(lines[i], lineCheck)
 			found = true
 			break
 		}
 	}
 	if !found {
-		lines = append(lines, fmt.Sprintf("%s %s", path, lineCheck))
+		lines = append(lines, fmt.Sprintf("\"%s\" %s", req.Path, lineCheck))
 	}
 
 	// save
 	if err := ioutil.WriteFile(EXPORTSFILE, []byte(strings.Join(lines, "\n")), 0644); err != nil {
 		return err
 	}
-	return reloadServer()
+
+	if err := reloadServer(); err != nil {
+		return err
+	}
+	resp.Success = true
+	return nil
 }
 
 func Remove(path string) error {
 
-	quotedPath := fmt.Sprintf("\"%s\"", path)
 	// get the provider because i need the mount ip
 	provider, err := models.LoadProvider()
 	if err != nil {
 		return err
 	}
+
+	// create a rpc request
+	req := Request{
+		Path:    path,
+		UID:     uid(),
+		GID:     gid(),
+		MountIP: provider.MountIP,
+	}
+
+	resp := &Response{}
+
+	// in testing we will call the rpc function directly
+	if flag.Lookup("test.v") != nil {
+		shareRPC := &ShareRPC{}
+		err := shareRPC.Remove(req, resp)
+		if err != nil || !resp.Success {
+			err = fmt.Errorf("failed to add share %v %v", err, resp.Message)
+		}
+		return err
+	}
+
+	// have the server run the share command
+	err = server.ClientRun("ShareRPC.Remove", req, resp)
+	if err != nil || !resp.Success {
+		err = fmt.Errorf("failed to add share %v %v", err, resp.Message)
+	}
+	return err
+
+}
+
+// the rpc function run from the server
+func (sh *ShareRPC) Remove(req Request, resp *Response) error {
+
+	quotedPath := fmt.Sprintf("\"%s\"", req.Path)
 
 	// read exports file
 	existingFile, err := ioutil.ReadFile(EXPORTSFILE)
@@ -103,7 +185,7 @@ func Remove(path string) error {
 		return nil
 	}
 
-	lineCheck := fmt.Sprintf("%s -alldirs -mapall=%v:%v", provider.MountIP, uid(), gid())
+	lineCheck := fmt.Sprintf("%s -alldirs -mapall=%v:%v", req.MountIP, req.UID, req.GID)
 
 	existingLines := strings.Split(string(existingFile), "\n")
 	newLines := []string{}
@@ -116,7 +198,7 @@ func Remove(path string) error {
 		}
 
 		// recreate the line without our path or quoted path
-		line = strings.Replace(line, fmt.Sprintf("%s ", path), "", 1)
+		line = strings.Replace(line, fmt.Sprintf("%s ", req.Path), "", 1)
 		line = strings.Replace(line, fmt.Sprintf("%s ", quotedPath), "", 1)
 		if line != lineCheck {
 			// if there is still any paths left in our line
@@ -130,7 +212,11 @@ func Remove(path string) error {
 		return err
 	}
 
-	return reloadServer()
+	err = reloadServer()
+	if err == nil {
+		resp.Success = true
+	}
+	return err
 }
 
 // reloadServer will reload the nfs server with the new export configuration

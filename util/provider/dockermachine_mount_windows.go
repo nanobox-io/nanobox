@@ -52,7 +52,7 @@ func (machine DockerMachine) addNetfsMount(local, host string) error {
 	}
 
 	// mount!
-	// mount -t cifs -o username=USER,password=PASSWORD //192.168.99.1/APP /PATH
+	// mount -t cifs -o sec=ntlmssp,username=USER,password=PASSWORD,uid=1000,gid=1000 //192.168.99.1/<path to app> /<vm location>
 	source := fmt.Sprintf("//192.168.99.1/nanobox-%s", appID)
 	// mfsymlinks,
 	config, _ := models.LoadConfig()

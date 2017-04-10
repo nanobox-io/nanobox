@@ -11,11 +11,16 @@ import (
 
 	"github.com/jcelliott/lumber"
 
+	"github.com/nanobox-io/nanobox/commands/server"
 	"github.com/nanobox-io/nanobox/models"
 )
 
 // EXPORTSFILE ...
 var EXPORTSFILE = "/etc/exports"
+
+type Request struct {
+	Entry string
+}
 
 // Exists checks to see if the mount already exists
 func Exists(path string) bool {
@@ -55,8 +60,32 @@ func Add(path string) error {
 		return err
 	}
 
+	req := Request{Entry: entry}
+	resp := &Response{}
+
+	// in testing we will call the rpc function directly
+	if flag.Lookup("test.v") != nil {
+		shareRPC := &ShareRPC{}
+		err := shareRPC.Add(req, resp)
+		if err != nil || !resp.Success {
+			err = fmt.Errorf("failed to add share %v %v", err, resp.Message)
+		}
+		return err
+	}
+
+	// have the server run the share command
+	err = server.ClientRun("ShareRPC.Add", req, resp)
+	if err != nil || !resp.Success {
+		err = fmt.Errorf("failed to add share %v %v", err, resp.Message)
+	}
+	return err
+}
+
+// the rpc function run from the server
+func (sh *ShareRPC) Add(req Request, resp *Response) error {
+
 	// add entry into the /etc/exports file
-	if err := addEntry(entry); err != nil {
+	if err := addEntry(req.Entry); err != nil {
 		return err
 	}
 
@@ -69,6 +98,7 @@ func Add(path string) error {
 		return err
 	}
 
+	resp.Success = true
 	return nil
 }
 
@@ -81,7 +111,30 @@ func Remove(path string) error {
 		return err
 	}
 
-	if err := removeEntry(entry); err != nil {
+	req := Request{Entry: entry}
+	resp := &Response{}
+
+	// in testing we will call the rpc function directly
+	if flag.Lookup("test.v") != nil {
+		shareRPC := &ShareRPC{}
+		err := shareRPC.Remove(req, resp)
+		if err != nil || !resp.Success {
+			err = fmt.Errorf("failed to add share %v %v", err, resp.Message)
+		}
+		return err
+	}
+
+	// have the server run the share command
+	err = server.ClientRun("ShareRPC.Remove", req, resp)
+	if err != nil || !resp.Success {
+		err = fmt.Errorf("failed to add share %v %v", err, resp.Message)
+	}
+	return err
+}
+
+// the rpc function run from the server
+func (sh *ShareRPC) Remove(req Request, resp *Response) error {
+	if err := removeEntry(req.Entry); err != nil {
 		return err
 	}
 
@@ -90,6 +143,7 @@ func Remove(path string) error {
 		return err
 	}
 
+	resp.Success = true
 	return nil
 }
 

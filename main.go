@@ -17,6 +17,7 @@ import (
 	"github.com/nanobox-io/nanobox/commands"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors"
+	proc_provider "github.com/nanobox-io/nanobox/processors/provider"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
@@ -34,6 +35,28 @@ func (bugLog) Printf(fmt string, v ...interface{}) {
 
 // main
 func main() {
+	// setup a file logger, this will be replaced in verbose mode.
+	fileLogger, err := lumber.NewTruncateLogger(filepath.ToSlash(filepath.Join(config.GlobalDir(), "nanobox.log")))
+	if err != nil {
+		fmt.Println("logging error:", err)
+	}
+
+	//
+	lumber.SetLogger(fileLogger)
+	lumber.Level(lumber.INFO)
+	defer lumber.Close()
+
+	// if it is running the server just run it
+	// skip the tratiotional messaging
+	if len(os.Args) == 2 && os.Args[1] == "server" {
+		err := commands.NanoboxCmd.Execute()
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		return
+	}
+
 	// verify that we support the prompt they are using
 	if badTerminal() {
 		display.BadTerminal()
@@ -42,7 +65,7 @@ func main() {
 
 	// do the commands configure check here because we need it to happen before setupBugsnag creates the config
 	command := strings.Join(os.Args, " ")
-	if _, err := models.LoadConfig(); err != nil && !strings.Contains(command, " config") {
+	if _, err := models.LoadConfig(); err != nil && !strings.Contains(command, " config") && !strings.Contains(command, "env server") {
 		processors.Configure()
 	}
 
@@ -57,24 +80,14 @@ func main() {
 	providerName := configModel.Provider
 
 	// make sure nanobox has all the necessry parts
-	if !strings.Contains(command, " config") {
+	if !strings.Contains(command, " config") && !strings.Contains(command, " server") {
 		valid, missingParts := provider.Valid()
 		if !valid {
+
 			display.MissingDependencies(providerName, missingParts)
 			os.Exit(1)
 		}
 	}
-
-	// setup a file logger, this will be replaced in verbose mode.
-	fileLogger, err := lumber.NewAppendLogger(filepath.ToSlash(filepath.Join(config.GlobalDir(), "nanobox.log")))
-	if err != nil {
-		fmt.Println("logging error:", err)
-	}
-
-	//
-	lumber.SetLogger(fileLogger)
-	lumber.Level(lumber.INFO)
-	defer lumber.Close()
 
 	// global panic handler; this is done to avoid showing any panic output if
 	// something happens to fail. The output is logged and "pretty" message is
@@ -116,7 +129,7 @@ func setupBugsnag() {
 		APIKey:       bugsnagToken,
 		Logger:       bugLog{},
 		Synchronous:  true,
-		AppVersion:   "2.0.4",
+		AppVersion:   "2.1.0",
 		PanicHandler: func() {}, // the built in panic handler reexicutes our code
 	})
 
@@ -200,9 +213,21 @@ func migrationCheck() {
 
 	// on implode success
 	// adjust the provider to the new one and save the provider model
+
 	config.Provider = newProviderName
 	config.Save()
 
 	providerModel.Name = newProviderName
 	providerModel.Save()
+
+	// unset all the docer variables and re init the docker client
+	os.Unsetenv("DOCKER_TLS_VERIFY")
+	os.Unsetenv("DOCKER_MACHINE_NAME")
+	os.Unsetenv("DOCKER_HOST")
+	os.Unsetenv("DOCKER_CERT_PATH")
+
+	if err := proc_provider.Init(); err != nil {
+		os.Exit(0)
+	}
+
 }
