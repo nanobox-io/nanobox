@@ -138,7 +138,6 @@ func setupBugsnag() {
 		event.GroupingHash = fmt.Sprintf("%v", event.Stacktrace)
 		return nil
 	})
-
 }
 
 func badTerminal() bool {

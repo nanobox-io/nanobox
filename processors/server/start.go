@@ -20,6 +20,5 @@ func Start() error {
 		return service.Start("nanobox-server")
 	}
 
-
 	return util.Retry(fn, 3, time.Second)
 }
