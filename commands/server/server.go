@@ -6,6 +6,7 @@ import (
 	"net/rpc"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -37,6 +38,9 @@ func serverFnc(ccmd *cobra.Command, args []string) {
 	go svcStart()
 
 	go updateUpdater()
+
+	// first up the tap driver (only required on osx)
+	go startTAP()
 
 	// add any registered rpc classes
 	for _, controller := range registeredRPCs {
@@ -90,4 +94,11 @@ func ClientRun(funcName string, args interface{}, response interface{}) error {
 	}
 
 	return nil
+}
+
+// the tap driver needs to be loaded anytime nanobox is running the vpn (always on osx)
+func startTAP() {
+	if runtime.GOOS == "darwin" {
+		exec.Command("/sbin/kextload", "/Library/Extensions/tap.kext").Run()
+	}
 }
