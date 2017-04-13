@@ -3,6 +3,7 @@ package models
 import (
 	"fmt"
 	"net"
+	"runtime"
 )
 
 // Config ...
@@ -58,6 +59,10 @@ func (c *Config) makeValid() {
 
 	if c.Disk < 102400 {
 		c.Disk = 102400
+	}
+
+	if c.NetfsMountOpts == "" && runtime.GOOS == "windows" {
+		c.NetfsMountOpts = "mfsymlinks"
 	}
 
 	if _, _, err := net.ParseCIDR(c.ExternalNetworkSpace); c.ExternalNetworkSpace == "" || err != nil {
