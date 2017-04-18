@@ -13,8 +13,13 @@ import (
 var token string
 
 func Report(args string) {
+
 	go func() {
 		config, _ := models.LoadConfig()
+		// do not include ci in the mixpanel results
+		if config.CIMode {
+			return
+		}
 		mx := mp.NewMixpanel(token)
 		id := util.UniqueID()
 
