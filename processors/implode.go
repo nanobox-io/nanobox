@@ -46,7 +46,8 @@ func Implode() error {
 
 		// teardown the server
 		if err := server.Teardown(); err != nil {
-			return util.ErrorAppend(err, "failed to remove server")
+			// if we cant tear down the server dont worry about it
+			// return util.ErrorAppend(err, "failed to remove server")
 		}
 
 		purgeConfiguration()
