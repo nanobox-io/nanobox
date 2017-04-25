@@ -53,7 +53,10 @@ func Exists(path string) bool {
 
 // Add will export an nfs share
 func Add(path string) error {
-
+	if Exists(path) {
+		return nil
+	}
+	
 	// generate the entry
 	entry, err := entry(path)
 	if err != nil {
