@@ -34,7 +34,7 @@ Please answer the following questions so we can customize your
 nanobox configuration. Feel free to update your config at any
 time by running: 'nanobox configure'
 
-(Learn more at : https://docs.nanobox.io/local-config/nanobox-config-yml/)
+(Learn more at : https://docs.nanobox.io/local-config/configure-nanobox/)
 `)
 
 	defer func() {
@@ -44,7 +44,7 @@ time by running: 'nanobox configure'
 ***************   [√] Nanobox successfully Configured!
 :: ********* ::   ------------------------------------------------------------
 " ::: *** ::: "   Change these settings at any time via : 'nanobox configure'
-  ""  :::  ""     
+  ""  :::  ""
     "" " ""
        "
 `)
