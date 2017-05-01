@@ -3,6 +3,7 @@ package evar
 import (
 	"fmt"
 	"strings"
+	"io/ioutil"
 
 	"github.com/spf13/cobra"
 
@@ -24,11 +25,6 @@ var AddCmd = &cobra.Command{
 	Run: addFn,
 }
 
-var literal bool
-
-func init() {
-	AddCmd.Flags().BoolVarP(&literal, "literal", "", false, "take the added evar at face value (no interpolation) only one key per command")
-}
 // addFn ...
 func addFn(ccmd *cobra.Command, args []string) {
 
@@ -51,22 +47,6 @@ func addFn(ccmd *cobra.Command, args []string) {
 func parseEvars(args []string) map[string]string {
 	evars := map[string]string{}
 
-	if literal {
-		for _, arg := range args {
-			parts := strings.Split(arg, "=")
-			if len(parts) < 2 {
-				fmt.Printf("invalid evar (%s)\n", arg)
-				return evars
-			}
-			key := parts[0]
-			val := strings.Replace(arg, fmt.Sprintf("%s=", key), "", 1)
-			evars[key] = val
-			return evars
-		}
-		
-	}
-
-
 	for _, arg := range args {
 		// define a function that will allow us to
 		// split on ',' or ' '
@@ -75,13 +55,17 @@ func parseEvars(args []string) map[string]string {
 		}
 
 		for _, pair := range strings.FieldsFunc(arg, f) {
-			// define a field split that allows us to split on
+			// define a field split that llows us to split on
 			// ':' or '='
 			parts := strings.FieldsFunc(pair, func(c rune) bool {
 				return c == '='
 			})
 			if len(parts) == 2 {
-
+				// check to see if the value is a file
+				content, err := ioutil.ReadFile(parts[1])
+				if err == nil {
+					parts[1] = string(content)
+				}
 				evars[strings.ToUpper(parts[0])] = parts[1]
 			} else {
 				fmt.Printf("invalid evar (%s)\n", pair)
