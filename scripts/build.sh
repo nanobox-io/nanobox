@@ -9,7 +9,7 @@ set -e
 printf "\nBuilding nanobox...\n"
 
 # build nanobox
-gox -ldflags "-X main.bugsnagToken=$BUGSNAG_TOKEN -X github.com/nanobox-io/nanobox/util/mixpanel.token=$MIXPANEL_TOKEN" -osarch "darwin/amd64 linux/amd64 windows/amd64" -output="./.build/v2/{{.OS}}/{{.Arch}}/nanobox"
+gox -ldflags "-X main.bugsnagToken=$BUGSNAG_TOKEN -X github.com/nanobox-io/nanobox/util/odin.apiKey=$API_KEY" -osarch "darwin/amd64 linux/amd64 windows/amd64" -output="./.build/v2/{{.OS}}/{{.Arch}}/nanobox"
 
 printf "\nBuilding nanobox updater...\n"
 

@@ -28,6 +28,7 @@ const (
 var (
 	// set the default endpoint to nanobox
 	endpoint = "nanobox"
+	apiKey string
 )
 
 type (
@@ -154,6 +155,29 @@ func GetPreviousBuild(appID string) (string, error) {
 	return "", nil
 }
 
+func SubmitEvent(action, message, app string, meta map[string]interface{}) error {
+	params := url.Values{}
+	params.Set("api_key", apiKey)
+
+	request := struct {
+		Action string `json:"action"`
+		App   string `json:"eventable_id,omitempty"`
+		Meta  map[string]interface{} `json:"meta"`
+		Message string `json:"message"`
+	}{
+		Action: action,
+		App: app,
+		Meta: meta,
+		Message: message,
+	}
+
+	err := doRequest("POST", "events", params, map[string]interface{}{"event": request}, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 // doRequest ...
 func doRequest(method, path string, params url.Values, requestBody, responseBody interface{}) error {
 
@@ -183,7 +207,9 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 	if params == nil {
 		params = url.Values{}
 	}
-	params.Set("auth_token", auth.Key)
+	if auth.Key != "" {
+		params.Set("auth_token", auth.Key)
+	}
 
 	// fetch the correct url from the endpoint
 	url := odinURL()
