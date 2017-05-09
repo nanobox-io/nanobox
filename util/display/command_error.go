@@ -8,7 +8,11 @@ import (
 	"strings"
 
 	"github.com/nanobox-io/nanobox/commands/registry"
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/util/odin"
+
 )
 
 var (
@@ -35,10 +39,34 @@ func CommandErr(err error) {
 
 	cause, context := parseCommandErr(err)
 
-	fmt.Println()
-	fmt.Printf("Error   : %s\n", cause)
-	fmt.Printf("Context : %s\n", context)
-	fmt.Println()
+	output := fmt.Sprintf(`
+Error   : %s
+Context : %s
+`, cause, context)
+
+	app := ""
+	env, err := models.FindEnvByID(config.EnvID())
+	if err == nil {
+		remote, ok := env.Remotes["default"]
+		if ok {
+			app = remote.ID
+		}
+	}
+
+	// submit error to nanobox
+	odin.SubmitEvent(
+		"desktop#error",
+		"an error occurred running nanobox desktop", 
+		app,
+		map[string]interface{}{
+			"error": cause,
+			"context": context,
+			"boxfile": env.UserBoxfile,
+		},
+	)
+
+	// display error to user
+	fmt.Println(output)
 
 	if runtime.GOOS == "windows" {
 		// The update process was spawned in a separate window, which will

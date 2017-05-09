@@ -23,7 +23,8 @@ type Config struct {
 	DockerMachineNetworkSpace string `json:"docker-machine-network-space"`
 	NativeNetworkSpace        string `json:"native-network-space"`
 
-	LockPort int `json:"lock-port"`
+	Anonymous bool `json:"anonymous"`
+	LockPort  int `json:"lock-port"`
 }
 
 // Save persists the Config to the database

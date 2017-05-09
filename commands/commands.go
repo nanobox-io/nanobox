@@ -11,9 +11,9 @@ import (
 	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/commands/server"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processors"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
-	"github.com/nanobox-io/nanobox/util/mixpanel"
 	"github.com/nanobox-io/nanobox/util/update"
 )
 
@@ -41,8 +41,9 @@ var (
 		Long:  ``,
 		PersistentPreRun: func(ccmd *cobra.Command, args []string) {
 
-			// report the command usage to mixpanel
-			mixpanel.Report(strings.Replace(ccmd.CommandPath(), "nanobox ", "", 1))
+			// report the command to nanobox
+			processors.SubmitLog(strings.Replace(ccmd.CommandPath(), "nanobox ", "", 1))
+			// mixpanel.Report(strings.Replace(ccmd.CommandPath(), "nanobox ", "", 1))
 
 			// alert the user if an update is needed
 			update.Check()
