@@ -20,7 +20,10 @@ func SubmitLog(args string) error {
 
 	auth, _ := models.LoadAuth()
 	conf, _ := models.LoadConfig()
-	if conf.CIMode {
+	
+	// if we are in ci mode or we are setting a configuration
+	// leave here
+	if strings.Contains(args, "config") || conf.CIMode {
 		return nil
 	}
 
@@ -35,7 +38,7 @@ func SubmitLog(args string) error {
 	app := ""
 
 	env, err := models.FindEnvByID(config.EnvID())
-	if strings.Contains(args, "deploy") || strings.Contains(args, "tunnel") || strings.Contains(args, "console") {
+	if (strings.Contains(args, "deploy") || strings.Contains(args, "tunnel") || strings.Contains(args, "console")) {
 		if err == nil {
 			remote, ok := env.Remotes["default"]
 			if ok {
