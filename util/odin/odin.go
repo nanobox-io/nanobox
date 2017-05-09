@@ -28,7 +28,7 @@ const (
 var (
 	// set the default endpoint to nanobox
 	endpoint = "nanobox"
-	apiKey string
+	apiKey   string
 )
 
 type (
@@ -160,14 +160,14 @@ func SubmitEvent(action, message, app string, meta map[string]interface{}) error
 	params.Set("api_key", apiKey)
 
 	request := struct {
-		Action string `json:"action"`
-		App   string `json:"eventable_id,omitempty"`
-		Meta  map[string]interface{} `json:"meta"`
-		Message string `json:"message"`
+		Action  string                 `json:"action"`
+		App     string                 `json:"eventable_id,omitempty"`
+		Meta    map[string]interface{} `json:"meta"`
+		Message string                 `json:"message"`
 	}{
-		Action: action,
-		App: app,
-		Meta: meta,
+		Action:  action,
+		App:     app,
+		Meta:    meta,
 		Message: message,
 	}
 
@@ -178,6 +178,7 @@ func SubmitEvent(action, message, app string, meta map[string]interface{}) error
 
 	return nil
 }
+
 // doRequest ...
 func doRequest(method, path string, params url.Values, requestBody, responseBody interface{}) error {
 

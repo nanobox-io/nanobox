@@ -9,7 +9,6 @@ import (
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/service"
-
 )
 
 func Setup() error {

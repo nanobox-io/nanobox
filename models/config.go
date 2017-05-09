@@ -24,7 +24,7 @@ type Config struct {
 	NativeNetworkSpace        string `json:"native-network-space"`
 
 	Anonymous bool `json:"anonymous"`
-	LockPort  int `json:"lock-port"`
+	LockPort  int  `json:"lock-port"`
 }
 
 // Save persists the Config to the database

@@ -12,7 +12,6 @@ import (
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/odin"
-
 )
 
 var (
@@ -56,10 +55,10 @@ Context : %s
 	// submit error to nanobox
 	odin.SubmitEvent(
 		"desktop#error",
-		"an error occurred running nanobox desktop", 
+		"an error occurred running nanobox desktop",
 		app,
 		map[string]interface{}{
-			"error": cause,
+			"error":   cause,
 			"context": context,
 			"boxfile": env.UserBoxfile,
 		},

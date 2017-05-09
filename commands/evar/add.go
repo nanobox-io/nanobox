@@ -2,8 +2,8 @@ package evar
 
 import (
 	"fmt"
-	"strings"
 	"io/ioutil"
+	"strings"
 
 	"github.com/spf13/cobra"
 

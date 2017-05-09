@@ -56,7 +56,7 @@ func Add(path string) error {
 	if Exists(path) {
 		return nil
 	}
-	
+
 	// generate the entry
 	entry, err := entry(path)
 	if err != nil {
