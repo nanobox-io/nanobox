@@ -7,6 +7,7 @@ import (
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
+	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/odin"
 )
@@ -24,6 +25,7 @@ func SubmitLog(args string) error {
 	}
 	
 	if auth.Key == "" && !conf.Anonymous {
+		display.LoginRequired()
 		err :=  Login("", "", "")
 		if err != nil {
 			return err
