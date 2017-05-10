@@ -23,7 +23,7 @@ func SubmitLog(args string) error {
 	
 	// if we are in ci mode or we are setting a configuration
 	// leave here
-	if strings.Contains(args, "config") || conf.CIMode {
+	if strings.Contains(args, "login") || strings.Contains(args, "config") || conf.CIMode {
 		return nil
 	}
 
