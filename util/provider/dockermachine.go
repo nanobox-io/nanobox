@@ -384,10 +384,10 @@ func (machine DockerMachine) Start() error {
 		dockerMachineCmd,
 		"ssh",
 		"nanobox",
-		"ping",
-		"-c",
-		"1",
-		"192.168.99.1",
+		"curl",
+		"--connect-timeout",
+		"5",
+		"192.168.99.1:65000",
 	}
 
 	process = exec.Command(cmd[0], cmd[1:]...)

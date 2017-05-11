@@ -3,6 +3,7 @@ package server
 import (
 	"log"
 	"net"
+	"net/http"
 	"net/rpc"
 	"os"
 	"os/exec"
@@ -36,6 +37,8 @@ func serverFnc(ccmd *cobra.Command, args []string) {
 
 	// fire up the service manager (only required on windows)
 	go svcStart()
+
+	go startEcho()
 
 	go updateUpdater()
 
@@ -101,4 +104,17 @@ func startTAP() {
 	if runtime.GOOS == "darwin" {
 		exec.Command("/sbin/kextload", "/Library/Extensions/tap.kext").Run()
 	}
+}
+
+
+type handle struct {
+
+}
+
+func (handle) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	w.Write([]byte("pong\n"))
+}
+
+func startEcho() {
+	http.ListenAndServe(":65000", handle{})
 }
