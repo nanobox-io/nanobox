@@ -35,7 +35,7 @@ func DebugExec(container, hook, payload, displayLevel string) (string, error) {
 	display.ErrorTask()
 	err = fmt.Errorf("failed to execute %s hook: %s", hook, err.Error())
 	if registry.GetBool("debug") {
-		fmt.Printf("An error has occurred: \"%s\"\n", err)
+		fmt.Printf("An error has occurred: \"%s\"\n", res)
 		fmt.Println("Entering Debug Mode")
 		fmt.Printf("  container: %s\n", container)
 		fmt.Printf("  hook:      %s\n", hook)
