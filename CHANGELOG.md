@@ -1,3 +1,15 @@
+## 2.1.0 (May 15, 2017)
+
+FEATURES:
+  - Submit failures and logs to the production nanobox server to help coordinate with tickets [#436](https://github.com/nanobox-io/nanobox/pull/436)
+  - Allow a file with evar values [#435](https://github.com/nanobox-io/nanobox/pull/435)
+  - Adjust the way we do nfs config on windows [#430](https://github.com/nanobox-io/nanobox/pull/430)
+  - Make tap a part of the server start on OSX [#428](https://github.com/nanobox-io/nanobox/pull/428)
+
+BUG FIXES:
+  - Fix a duplicate etc/exports issue on linux [#433](https://github.com/nanobox-io/nanobox/pull/433)
+  - Remove a server shutdown issue when there is no server [#431](https://github.com/nanobox-io/nanobox/pull/431)
+
 ## 2.1.0 (April 7, 2017)
 
 FEATURES:
