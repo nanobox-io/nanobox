@@ -1,6 +1,8 @@
 package sim
 
 import (
+	"fmt"
+
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/spf13/cobra"
 
@@ -10,6 +12,7 @@ import (
 	"github.com/nanobox-io/nanobox/processors/env"
 	"github.com/nanobox-io/nanobox/processors/provider"
 	"github.com/nanobox-io/nanobox/util/config"
+	util_provider "github.com/nanobox-io/nanobox/util/provider"
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
@@ -31,6 +34,13 @@ func startCheck() bool {
 	if app.Status != "up" {
 		return false
 	}
+
+	// make sure im mounted and ready to go
+	envModel, _ := models.FindEnvByID(config.EnvID())
+	if !util_provider.HasMount(fmt.Sprintf("%s%s/code", util_provider.HostShareDir(), envModel.ID)) {
+		return false
+	}
+
 	provider.Init()
 	components, _ := app.Components()
 	for _, component := range components {
