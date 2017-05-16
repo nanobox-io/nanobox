@@ -71,11 +71,11 @@ func (c *Config) makeValid() {
 	}
 
 	if _, _, err := net.ParseCIDR(c.DockerMachineNetworkSpace); c.DockerMachineNetworkSpace == "" || err != nil {
-		c.DockerMachineNetworkSpace = "172.19.0.1/16"
+		c.DockerMachineNetworkSpace = "172.21.0.1/16"
 	}
 
 	if _, _, err := net.ParseCIDR(c.NativeNetworkSpace); c.NativeNetworkSpace == "" || err != nil {
-		c.NativeNetworkSpace = "172.18.0.1/16"
+		c.NativeNetworkSpace = "172.20.0.1/16"
 	}
 
 	if c.LockPort == 0 {
