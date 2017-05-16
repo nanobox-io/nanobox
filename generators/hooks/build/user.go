@@ -1,6 +1,7 @@
 package build
 
 import (
+	"runtime"
 	"encoding/json"
 	"io/ioutil"
 	"os"
@@ -9,15 +10,27 @@ import (
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/util/config"
+	"github.com/nanobox-io/nanobox/models"
 )
 
 // UserPayload returns a string for the user hook payload
 func UserPayload() string {
 
+	configModel, _ := models.LoadConfig()
+	payload := map[string]interface{}{
+		"provider": configModel.Provider,
+		"os": runtime.GOOS,
+	}
+
 	// read all of the ssh files on the system
 	sshFiles, err := ioutil.ReadDir(config.SSHDir())
 	if err != nil {
-		return "{}"
+		b, err := json.Marshal(payload)
+		if err != nil {
+			return "{}"
+		}
+
+		return string(b)
 	}
 
 	// create a list of files that will be installed on the system
@@ -42,9 +55,7 @@ func UserPayload() string {
 		keyFiles[file.Name()] = string(content)
 	}
 
-	payload := map[string]interface{}{
-		"ssh_files": keyFiles,
-	}
+	payload["ssh_files"]= keyFiles
 
 	// marshal the payload into json
 	b, err := json.Marshal(payload)
