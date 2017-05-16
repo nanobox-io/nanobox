@@ -57,7 +57,7 @@ func (machine DockerMachine) addNetfsMount(local, host string) error {
 	// mfsymlinks,
 	config, _ := models.LoadConfig()
 	additionalOptions := config.NetfsMountOpts
-	opts := fmt.Sprintf("sec=ntlmssp,user='%s',password='%s',uid=1000,gid=1000", user, pass)
+	opts := fmt.Sprintf("nodev,sec=ntlmssp,user='%s',password='%s',uid=1000,gid=1000", user, pass)
 	if additionalOptions != "" {
 		opts = fmt.Sprintf("%s,%s", additionalOptions, opts)
 	}
