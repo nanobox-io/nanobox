@@ -51,6 +51,10 @@ func DevConfig(appModel *models.App) docker.ContainerConfig {
 
 	termEvar := os.Getenv("TERM")
 	if termEvar != "" {
+		// use cygwin instead of msys
+		if termEvar == "msys" {
+			termEvar = "cygwin"
+		}
 		config.Env = []string{"TERM=" + termEvar}
 	}
 
