@@ -59,6 +59,7 @@ func DebugExec(container, hook, payload, displayLevel string) (string, error) {
 			return res, fmt.Errorf("failed to establish a debug session: %s", err.Error())
 		}
 	}
+	combined = false
 
 	// try running the exec one more time.
 	return Exec(container, hook, payload, displayLevel)
