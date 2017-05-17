@@ -1,5 +1,4 @@
 run.config:
-  image: nanobox/build
   engine: golang
   engine.config:
     # runtime set to the older version until
