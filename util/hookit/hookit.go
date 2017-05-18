@@ -38,10 +38,12 @@ func DebugExec(container, hook, payload, displayLevel string) (string, error) {
 	res, err := Exec(container, hook, payload, displayLevel)
 
 	// leave early if no error
+	if err != nil {
+		display.ErrorTask()	
+	}
 	if err == nil || !registry.GetBool("debug") {
 		return res, err
 	}
-	display.ErrorTask()
 
 	combined = true
 	res, err = Exec(container, hook, payload, displayLevel)
