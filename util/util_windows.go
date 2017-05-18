@@ -51,7 +51,7 @@ func PrivilegeExec(command string) error {
 	// and the argument list as a space-delimited string in a single argument.
 
 	// ensure the command is prepared to be used in powershell escalation
-	command = preparePrivilegeCmd(command)
+	// command = preparePrivilegeCmd(command)
 
 	// add the --internal flag if the command is nanobox
 	if strings.HasPrefix(command, "nanobox ") {

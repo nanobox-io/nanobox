@@ -27,7 +27,7 @@ func reExecPrivilageStop() error {
 
 	display.PrintRequiresPrivilege("to stop the server")
 
-	cmd := fmt.Sprintf("%s env server stop", config.NanoboxPath())
+	cmd := fmt.Sprintf("\"%s\" env server stop", config.NanoboxPath())
 
 	if err := util.PrivilegeExec(cmd); err != nil {
 		lumber.Error("server:reExecPrivilageStop:util.PrivilegeExec(%s): %s", cmd, err)

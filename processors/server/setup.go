@@ -44,8 +44,7 @@ func reExecPrivilageStart() error {
 
 	display.PrintRequiresPrivilege("to start the server")
 
-	cmd := fmt.Sprintf("%s env server start", config.NanoboxPath())
-
+	cmd := fmt.Sprintf("\"%s\" env server start", config.NanoboxPath())
 	if err := util.PrivilegeExec(cmd); err != nil {
 		lumber.Error("server:reExecPrivilageStart:util.PrivilegeExec(%s): %s", cmd, err)
 		return err

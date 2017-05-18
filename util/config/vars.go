@@ -41,15 +41,15 @@ func NanoboxPath() string {
 
 	programName := os.Args[0]
 
-	// if args[0] was a path to nanobox already
-	if fileutil.Exists(programName) {
-		return programName
-	}
-
 	// lookup the full path to nanobox
 	path, err := exec.LookPath(programName)
 	if err == nil {
 		return path
+	}
+
+	// if args[0] was a path to nanobox already
+	if fileutil.Exists(programName) {
+		return programName
 	}
 
 	// unable to find the full path, just return what was called

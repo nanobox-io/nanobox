@@ -32,7 +32,7 @@ func reExecPrivilageRemove() error {
 
 	display.PrintRequiresPrivilege("to remove the server")
 
-	cmd := fmt.Sprintf("%s env server teardown", config.NanoboxPath())
+	cmd := fmt.Sprintf("\"%s\" env server teardown", config.NanoboxPath())
 
 	if err := util.PrivilegeExec(cmd); err != nil {
 		lumber.Error("server:reExecPrivilageRemove:util.PrivilegeExec(%s): %s", cmd, err)
