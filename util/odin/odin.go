@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 
 	"github.com/jcelliott/lumber"
 
@@ -65,8 +66,18 @@ func Auth(username, password string) (string, error) {
 // App ...
 func App(slug string) (models.App, error) {
 	app := models.App{}
+	var params url.Values
+	if strings.Contains(slug, "/") {
+		appNameParts := strings.Split(slug, "/")
+		if len(appNameParts) == 2 {
+			params = url.Values{}
+			params.Set("ci", appNameParts[0])
+			slug = appNameParts[1]			
+		}
 
-	return app, doRequest("GET", "apps/"+slug, nil, nil, &app)
+	}
+
+	return app, doRequest("GET", "apps/"+slug, params, nil, &app)
 }
 
 // Deploy ...
@@ -81,12 +92,36 @@ func Deploy(appID, id, boxfile, message string) error {
 		},
 	}
 
-	return doRequest("POST", fmt.Sprintf("apps/%s/deploys", appID), nil, body, nil)
+	var params url.Values
+
+	if strings.Contains(appID, "/") {
+		appNameParts := strings.Split(appID, "/")
+		if len(appNameParts) == 2 {
+			params = url.Values{}
+			params.Set("ci", appNameParts[0])
+			appID = appNameParts[1]			
+		}
+
+	}
+
+	return doRequest("POST", fmt.Sprintf("apps/%s/deploys", appID), params, body, nil)
 }
 
 func ListEvars(appID string) ([]evar, error) {
 	evars := []evar{}
-	return evars, doRequest("GET", fmt.Sprintf("apps/%s/evars", appID), nil, nil, &evars)
+
+	var params url.Values
+	if strings.Contains(appID, "/") {
+		appNameParts := strings.Split(appID, "/")
+		if len(appNameParts) == 2 {
+			params = url.Values{}
+			params.Set("ci", appNameParts[0])
+			appID = appNameParts[1]			
+		}
+
+	}
+
+	return evars, doRequest("GET", fmt.Sprintf("apps/%s/evars", appID), params, nil, &evars)
 }
 
 func AddEvar(appID, key, val string) error {
@@ -97,11 +132,35 @@ func AddEvar(appID, key, val string) error {
 		},
 	}
 
-	return doRequest("POST", fmt.Sprintf("apps/%s/evars", appID), nil, body, nil)
+	var params url.Values
+
+	if strings.Contains(appID, "/") {
+		appNameParts := strings.Split(appID, "/")
+		if len(appNameParts) == 2 {
+			params = url.Values{}
+			params.Set("ci", appNameParts[0])
+			appID = appNameParts[1]			
+		}
+
+	}
+
+	return doRequest("POST", fmt.Sprintf("apps/%s/evars", appID), params, body, nil)
 }
 
-func RemoveEvar(appId, id string) error {
-	return doRequest("DELETE", fmt.Sprintf("apps/%s/evars/%s", appId, id), nil, nil, nil)
+func RemoveEvar(appID, id string) error {
+	var params url.Values
+
+	if strings.Contains(appID, "/") {
+		appNameParts := strings.Split(appID, "/")
+		if len(appNameParts) == 2 {
+			params = url.Values{}
+			params.Set("ci", appNameParts[0])
+			appID = appNameParts[1]			
+		}
+
+	}
+
+	return doRequest("DELETE", fmt.Sprintf("apps/%s/evars/%s", appID, id), params, nil, nil)
 }
 
 // EstablishTunnel ...
@@ -112,7 +171,18 @@ func EstablishTunnel(appID, id string) (string, string, int, error) {
 		Port  int    `json:"port"`
 	}{}
 
-	err := doRequest("GET", fmt.Sprintf("apps/%s/tunnels/%s", appID, id), nil, nil, &r)
+	var params url.Values
+
+	if strings.Contains(appID, "/") {
+		appNameParts := strings.Split(appID, "/")
+		if len(appNameParts) == 2 {
+			params = url.Values{}
+			params.Set("ci", appNameParts[0])
+			appID = appNameParts[1]			
+		}
+
+	}
+	err := doRequest("GET", fmt.Sprintf("apps/%s/tunnels/%s", appID, id), params, nil, &r)
 
 	return r.Token, r.Url, r.Port, err
 }
@@ -127,6 +197,15 @@ func EstablishConsole(appID, id string) (string, string, string, error) {
 		params.Set("user", registry.GetString("console_user"))
 	}
 
+	if strings.Contains(appID, "/") {
+		appNameParts := strings.Split(appID, "/")
+		if len(appNameParts) == 2 {
+			params.Set("ci", appNameParts[0])
+			appID = appNameParts[1]			
+		}
+
+	}
+
 	r := map[string]string{}
 	err := doRequest("GET", fmt.Sprintf("apps/%s/consoles/%s", appID, id), params, nil, &r)
 
@@ -136,14 +215,38 @@ func EstablishConsole(appID, id string) (string, string, string, error) {
 // GetWarehouse ...
 func GetWarehouse(appID string) (string, string, error) {
 	r := map[string]string{}
-	err := doRequest("GET", fmt.Sprintf("apps/%s/services/warehouse", appID), nil, nil, &r)
+
+	var params url.Values
+	if strings.Contains(appID, "/") {
+		appNameParts := strings.Split(appID, "/")
+		if len(appNameParts) == 2 {
+			params = url.Values{}
+			params.Set("ci", appNameParts[0])
+			appID = appNameParts[1]			
+		}
+
+	}
+
+	err := doRequest("GET", fmt.Sprintf("apps/%s/services/warehouse", appID), params, nil, &r)
 
 	return r["token"], r["url"], err
 }
 
 func GetPreviousBuild(appID string) (string, error) {
 	r := []map[string]string{}
-	err := doRequest("GET", fmt.Sprintf("apps/%s/deploys", appID), nil, nil, &r)
+
+	var params url.Values
+	if strings.Contains(appID, "/") {
+		appNameParts := strings.Split(appID, "/")
+		if len(appNameParts) == 2 {
+			params = url.Values{}
+			params.Set("ci", appNameParts[0])
+			appID = appNameParts[1]			
+		}
+
+	}
+
+	err := doRequest("GET", fmt.Sprintf("apps/%s/deploys", appID), params, nil, &r)
 	if err != nil {
 		return "", err
 	}
