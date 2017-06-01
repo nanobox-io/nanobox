@@ -1,4 +1,16 @@
-## 2.1.0 (May 15, 2017)
+## 2.1.2 (June 1, 2017)
+
+FEATURES:
+  - Add team support for nanobox production commands [#453](https://github.com/nanobox-io/nanobox/pull/453)
+  - Now much smarter about how it creates networks on native [#447](https://github.com/nanobox-io/nanobox/pull/447)
+
+BUG FIXES:
+  - Fix an idempotency problem on service creation [#454](https://github.com/nanobox-io/nanobox/pull/454)
+  - Fix a permission denied problem on osx [#452](https://github.com/nanobox-io/nanobox/pull/452)
+  - Add mount checking [#443](https://github.com/nanobox-io/nanobox/pull/443)
+  - Make the ping system better at knowing when the server is up [#439](https://github.com/nanobox-io/nanobox/pull/439)
+
+## 2.1.1 (May 15, 2017)
 
 FEATURES:
   - Submit failures and logs to the production nanobox server to help coordinate with tickets [#436](https://github.com/nanobox-io/nanobox/pull/436)
