@@ -254,6 +254,7 @@ is globaly accessable and it should be private.
 
 func LoginRequired() {
 	os.Stderr.WriteString(fmt.Sprintf(`
-It appears you are running nanobox for the first time. Please log in:
+It appears you are running Nanobox for the first time.
+Login to your Nanobox account:
 `))
 }

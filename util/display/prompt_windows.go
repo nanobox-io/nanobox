@@ -21,7 +21,7 @@ func ReadPassword() (string, error) {
 	// Restore echo after the function exits
 	defer terminal.Restore(int(os.Stdin.Fd()), oldState)
 
-	fmt.Printf("Password: ")
+	fmt.Printf("Nanobox Password: ")
 
 	// Read the password from stdin
 	t := terminal.NewTerminal(os.Stdin, "")
