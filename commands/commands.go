@@ -4,6 +4,7 @@ package commands
 import (
 	"path/filepath"
 	"strings"
+	"os"
 
 	"github.com/jcelliott/lumber"
 	"github.com/spf13/cobra"
@@ -12,6 +13,7 @@ import (
 	"github.com/nanobox-io/nanobox/commands/server"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/update"
@@ -55,6 +57,13 @@ var (
 				fileLogger, _ := lumber.NewAppendLogger(filepath.ToSlash(filepath.Join(config.GlobalDir(), "nanobox.log")))
 				lumber.SetLogger(fileLogger)
 
+			} else {
+				if !strings.Contains(ccmd.CommandPath(), "server")  && util.IsPrivileged() {
+					// if it is not an internal command (starting the server requires privilages)
+					// we wont run nanobox as privilage
+					display.UnexpectedPrivilage()
+					os.Exit(1)
+				} 
 			}
 
 			if endpoint != "" {
