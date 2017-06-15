@@ -25,7 +25,7 @@ func BuildConfig(image string) docker.ContainerConfig {
 	conf := docker.ContainerConfig{
 		Name:    BuildName(),
 		Image:   image,
-		Network: "host",
+		Network: "virt",
 		Binds: []string{
 			code,
 			engine,

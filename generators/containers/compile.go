@@ -25,7 +25,7 @@ func CompileConfig(image string) docker.ContainerConfig {
 	conf := docker.ContainerConfig{
 		Name:    CompileName(),
 		Image:   image,
-		Network: "host",
+		Network: "virt",
 		Binds: []string{
 			code,
 			engine,
