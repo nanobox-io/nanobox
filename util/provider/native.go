@@ -127,18 +127,18 @@ func (native Native) Start() error {
 			return err
 		}
 
-		// if we are using the default network configuration 
+		// if we are using the default network configuration
 		// then we are free to try getting one that works without confirming with the user any changes
 		if config.NativeNetworkSpace == "172.20.0.1/16" {
 			// create the values we will need outside the loop
 			var oct int
-			var newNetSpace string			
+			var newNetSpace string
 
 			for i := 0; i < 10; i++ {
 				// get the value of the 2nd octet and use I to increment it
 				// to allow different networks to be used
 				fmt.Sscanf(config.NativeNetworkSpace, "172.%d.0.1/16", &oct)
-				newNetSpace = fmt.Sprintf("172.%d.0.1/16", oct + i)
+				newNetSpace = fmt.Sprintf("172.%d.0.1/16", oct+i)
 
 				ip, ipNet, err := net.ParseCIDR(newNetSpace)
 				if err != nil {
@@ -161,15 +161,15 @@ func (native Native) Start() error {
 			if err != nil {
 				display.ErrorTask()
 				display.NetworkCreateError("native-network-space", config.NativeNetworkSpace)
-				return err	
+				return err
 			}
 
 			// with no errors we will return here
 			if newNetSpace != config.NativeNetworkSpace {
 				config.NativeNetworkSpace = newNetSpace
-				config.Save()				
+				config.Save()
 			}
-			
+
 			display.StopTask()
 			return nil
 
@@ -179,7 +179,6 @@ func (native Native) Start() error {
 		if err != nil {
 			return err
 		}
-
 
 		cmd := exec.Command("docker", "network", "create", "--driver=bridge", fmt.Sprintf("--subnet=%s", ipNet.String()), "--opt=\"com.docker.network.driver.mtu=1450\"", "--opt=\"com.docker.network.bridge.name=redd0\"", fmt.Sprintf("--gateway=%s", ip.String()), "nanobox")
 

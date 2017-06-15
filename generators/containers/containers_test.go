@@ -11,7 +11,7 @@ import (
 
 func TestBuildConfig(t *testing.T) {
 	result := containers.BuildConfig("imagename")
-	if result.Network != "host" ||
+	if result.Network != "virt" ||
 		result.Image != "imagename" ||
 		result.Name != containers.BuildName() {
 		// TODO: add checks for the binds
@@ -21,7 +21,7 @@ func TestBuildConfig(t *testing.T) {
 
 func TestCompileConfig(t *testing.T) {
 	result := containers.CompileConfig("imagename")
-	if result.Network != "host" ||
+	if result.Network != "virt" ||
 		result.Image != "imagename" ||
 		result.Name != containers.CompileName() {
 		// TODO: add checks for the binds
@@ -48,7 +48,7 @@ func TestComponentConfig(t *testing.T) {
 
 func TestPublishConfig(t *testing.T) {
 	result := containers.PublishConfig("imagename")
-	if result.Network != "host" ||
+	if result.Network != "virt" ||
 		result.Image != "imagename" ||
 		result.Name != containers.PublishName() {
 		// TODO: add checks for the binds

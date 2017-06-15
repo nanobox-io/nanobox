@@ -11,8 +11,8 @@ import (
 	"github.com/nanobox-io/nanobox/processors/env"
 	"github.com/nanobox-io/nanobox/processors/provider"
 	"github.com/nanobox-io/nanobox/util/config"
-	util_provider "github.com/nanobox-io/nanobox/util/provider"
 	"github.com/nanobox-io/nanobox/util/display"
+	util_provider "github.com/nanobox-io/nanobox/util/provider"
 )
 
 func init() {

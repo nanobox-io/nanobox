@@ -46,8 +46,8 @@ func Setup(envModel *models.Env) error {
 	mountFunc := func() error {
 		return Mount(envModel)
 	}
-	 
-	if err := util.Retry(mountFunc, 5, (time.Second*10)); err != nil {
+
+	if err := util.Retry(mountFunc, 5, (time.Second * 10)); err != nil {
 		display.ErrorTask()
 		return util.ErrorAppend(err, "failed to setup env mounts")
 	}
