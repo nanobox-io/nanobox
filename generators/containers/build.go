@@ -5,6 +5,7 @@ import (
 
 	"github.com/nanobox-io/golang-docker-client"
 
+	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/provider"
 )
@@ -39,6 +40,14 @@ func BuildConfig(image string) docker.ContainerConfig {
 		RestartPolicy: "no",
 	}
 
+	// Some CI's have an old kernel and require us to use the virtual network
+	// this is only in effect for CI's because it automatically reserves an ip on our nanobox
+	// virtual network and we could have IP conflicts
+	configModel, _ := models.LoadConfig()
+	if configModel.CIMode {
+		conf.Network = "virt"
+	}
+	
 	// set http[s]_proxy and no_proxy vars
 	setProxyVars(&conf)
 

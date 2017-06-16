@@ -106,9 +106,7 @@ func startTAP() {
 	}
 }
 
-
 type handle struct {
-
 }
 
 func (handle) ServeHTTP(w http.ResponseWriter, req *http.Request) {

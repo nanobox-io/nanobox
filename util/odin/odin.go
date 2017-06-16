@@ -72,7 +72,7 @@ func App(slug string) (models.App, error) {
 		if len(appNameParts) == 2 {
 			params = url.Values{}
 			params.Set("ci", appNameParts[0])
-			slug = appNameParts[1]			
+			slug = appNameParts[1]
 		}
 
 	}
@@ -99,7 +99,7 @@ func Deploy(appID, id, boxfile, message string) error {
 		if len(appNameParts) == 2 {
 			params = url.Values{}
 			params.Set("ci", appNameParts[0])
-			appID = appNameParts[1]			
+			appID = appNameParts[1]
 		}
 
 	}
@@ -116,7 +116,7 @@ func ListEvars(appID string) ([]evar, error) {
 		if len(appNameParts) == 2 {
 			params = url.Values{}
 			params.Set("ci", appNameParts[0])
-			appID = appNameParts[1]			
+			appID = appNameParts[1]
 		}
 
 	}
@@ -139,7 +139,7 @@ func AddEvar(appID, key, val string) error {
 		if len(appNameParts) == 2 {
 			params = url.Values{}
 			params.Set("ci", appNameParts[0])
-			appID = appNameParts[1]			
+			appID = appNameParts[1]
 		}
 
 	}
@@ -155,7 +155,7 @@ func RemoveEvar(appID, id string) error {
 		if len(appNameParts) == 2 {
 			params = url.Values{}
 			params.Set("ci", appNameParts[0])
-			appID = appNameParts[1]			
+			appID = appNameParts[1]
 		}
 
 	}
@@ -178,7 +178,7 @@ func EstablishTunnel(appID, id string) (string, string, int, error) {
 		if len(appNameParts) == 2 {
 			params = url.Values{}
 			params.Set("ci", appNameParts[0])
-			appID = appNameParts[1]			
+			appID = appNameParts[1]
 		}
 
 	}
@@ -201,7 +201,7 @@ func EstablishConsole(appID, id string) (string, string, string, error) {
 		appNameParts := strings.Split(appID, "/")
 		if len(appNameParts) == 2 {
 			params.Set("ci", appNameParts[0])
-			appID = appNameParts[1]			
+			appID = appNameParts[1]
 		}
 
 	}
@@ -222,7 +222,7 @@ func GetWarehouse(appID string) (string, string, error) {
 		if len(appNameParts) == 2 {
 			params = url.Values{}
 			params.Set("ci", appNameParts[0])
-			appID = appNameParts[1]			
+			appID = appNameParts[1]
 		}
 
 	}
@@ -241,7 +241,7 @@ func GetPreviousBuild(appID string) (string, error) {
 		if len(appNameParts) == 2 {
 			params = url.Values{}
 			params.Set("ci", appNameParts[0])
-			appID = appNameParts[1]			
+			appID = appNameParts[1]
 		}
 
 	}

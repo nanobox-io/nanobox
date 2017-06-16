@@ -2,8 +2,8 @@ package hookit
 
 import (
 	"fmt"
-	"strings"
 	"io"
+	"strings"
 
 	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/util"
@@ -39,7 +39,7 @@ func DebugExec(container, hook, payload, displayLevel string) (string, error) {
 
 	// leave early if no error
 	if err != nil {
-		display.ErrorTask()	
+		display.ErrorTask()
 	}
 	if err == nil || !registry.GetBool("debug") {
 		return res, err
