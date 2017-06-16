@@ -266,3 +266,4 @@ func BadPortType(protocol string) {
 + The boxfile.yml does not support port protocol '%s'. Using 'tcp' as default.
 --------------------------------------------------------------------------------
 `, protocol))
+}
