@@ -7,6 +7,7 @@ import (
 	"github.com/nanobox-io/golang-portal-client"
 
 	"github.com/nanobox-io/nanobox-boxfile"
+	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/models"
 )
 
