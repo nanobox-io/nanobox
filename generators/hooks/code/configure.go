@@ -20,6 +20,7 @@ type (
 		Env          map[string]string `json:"env"`
 		LogWatches   interface{}       `json:"log_watches"`
 		Start        interface{}       `json:"start"`
+		CronJobs     interface{}       `json:"cron_jobs"`
 	}
 
 	// component ...
@@ -59,6 +60,7 @@ func ConfigurePayload(appModel *models.App, componentModel *models.Component) st
 		Env:          appModel.Evars,
 		LogWatches:   boxfile.Node(componentModel.Name).Value("log_watch"),
 		Start:        boxfile.Node(componentModel.Name).Value("start"),
+		CronJobs:     boxfile.Node(componentModel.Name).Value("cron"),
 	}
 
 	bytes, err := json.Marshal(pload)
