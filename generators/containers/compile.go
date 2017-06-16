@@ -42,7 +42,7 @@ func CompileConfig(image string) docker.ContainerConfig {
 
 	// Some CI's have an old kernel and require us to use the virtual network
 	// this is only in effect for CI's because it automatically reserves an ip on our nanobox
-	// virtual network and we could have IP conflicts in 
+	// virtual network and we could have IP conflicts 
 	configModel, _ := models.LoadConfig()
 	if configModel.CIMode {
 		conf.Network = "virt"
