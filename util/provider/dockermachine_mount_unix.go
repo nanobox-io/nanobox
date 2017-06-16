@@ -34,6 +34,7 @@ func (machine DockerMachine) addNetfsMount(local, host string) error {
 	config, _ := models.LoadConfig()
 	// additionalOptions := config.NetfsMountOpts
 
+	// cmd = []string{"sudo", "/bin/mount", "-t", "nfs", "-o", "nolock"}
 	cmd = []string{"sudo", "/bin/mount", "-t", "nfs"}
 	if config.NetfsMountOpts != "" {
 		cmd = append(cmd, "-o", config.NetfsMountOpts)
@@ -49,5 +50,4 @@ func (machine DockerMachine) addNetfsMount(local, host string) error {
 	}
 
 	return nil
-
 }

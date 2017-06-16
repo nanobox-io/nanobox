@@ -269,3 +269,12 @@ func UnexpectedPrivilage() {
 
 `))
 }
+  
+func BadPortType(protocol string) {
+	os.Stderr.WriteString(fmt.Sprintf(`
+--------------------------------------------------------------------------------
++ WARNING:
++ The boxfile.yml does not support port protocol '%s'. Using 'tcp' as default.
+--------------------------------------------------------------------------------
+`, protocol))
+}

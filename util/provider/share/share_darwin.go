@@ -306,7 +306,7 @@ func removeDuplicates(paths []string) []string {
 
 			// if i find an element that is shorter but the same directory structure
 			// dont add the longer path
-			if strings.HasPrefix(path, originalPath) {
+			if strings.HasPrefix(path, originalPath+"/") {
 				add = false
 			}
 
