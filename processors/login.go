@@ -17,6 +17,7 @@ func Login(username, password, endpoint string) error {
 	if username == "" && os.Getenv("NANOBOX_USERNAME") != "" {
 		username = os.Getenv("NANOBOX_USERNAME")
 	}
+
 	if username == "" {
 		user, err := display.ReadUsername()
 		if err != nil {
