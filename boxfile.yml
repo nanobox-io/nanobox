@@ -1,9 +1,6 @@
 run.config:
   engine: golang
   engine.config:
-    # runtime set to the older version until
-    # this issue is fixed https://github.com/Microsoft/go-winio/issues/41
-    runtime: go-1.7
     package: github.com/nanobox-io/nanobox
   dev_packages:
     - py27-awscli
