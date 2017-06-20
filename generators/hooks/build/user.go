@@ -22,19 +22,41 @@ func UserPayload() string {
 		"os":       runtime.GOOS,
 	}
 
-	// read all of the ssh files on the system
-	sshFiles, err := ioutil.ReadDir(config.SSHDir())
-	if err != nil {
-		b, err := json.Marshal(payload)
-		if err != nil {
-			return "{}"
-		}
+	payload["ssh_files"] = sshKeys()
 
-		return string(b)
+	// marshal the payload into json
+	b, err := json.Marshal(payload)
+	if err != nil {
+		return "{}"
 	}
 
-	// create a list of files that will be installed on the system
+	return string(b)
+}
+
+// collect the ssh keys from the specified location and return them as a map
+func sshKeys() map[string]string {
 	keyFiles := map[string]string{}
+	sshFolder := config.SSHDir()
+	configModel, _ := models.LoadConfig()
+	if configModel.SshKey != "default" {
+		fi, err := os.Stat(configModel.SshKey)
+		// if i were able to read the file then we will be altering the ssh key collection
+		if err == nil {
+			// if it isnt a directory the keys will be a single key pair
+			if !fi.IsDir() {
+				return singleKey(configModel.SshKey)
+			}
+			// if it is a directory continue as normal but using this directory instead
+			sshFolder = configModel.SshKey
+		}
+	}
+
+	// read all of the ssh files on the system
+	sshFiles, err := ioutil.ReadDir(sshFolder)
+	if err != nil {
+		return keyFiles
+	}
+
 	for _, file := range sshFiles {
 
 		if !isValidKeyFile(file) {
@@ -42,7 +64,7 @@ func UserPayload() string {
 		}
 
 		// read the contents of the keyfile
-		keyFile := filepath.Join(config.SSHDir(), file.Name())
+		keyFile := filepath.Join(sshFolder, file.Name())
 		content, err := ioutil.ReadFile(keyFile)
 		if err != nil {
 			lumber.Error("hooks:ioutil.ReadFile(%s): %s", keyFile, err.Error())
@@ -55,15 +77,19 @@ func UserPayload() string {
 		keyFiles[file.Name()] = string(content)
 	}
 
-	payload["ssh_files"] = keyFiles
+	return keyFiles
+}
 
-	// marshal the payload into json
-	b, err := json.Marshal(payload)
+// if there is just one key specified in the config
+// set that as the single key value
+func singleKey(key string) map[string]string {
+	keyFiles := map[string]string{}
+	content, err := ioutil.ReadFile(key)
 	if err != nil {
-		return "{}"
+		return keyFiles
 	}
-
-	return string(b)
+	keyFiles[filepath.Base(key)] = string(content)
+	return keyFiles
 }
 
 // isValidKeyFile returns true if a file is a valid key file
