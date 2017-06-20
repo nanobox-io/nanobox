@@ -47,7 +47,7 @@ func BuildConfig(image string) docker.ContainerConfig {
 	if configModel.CIMode {
 		conf.Network = "virt"
 	}
-	
+
 	// set http[s]_proxy and no_proxy vars
 	setProxyVars(&conf)
 

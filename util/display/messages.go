@@ -269,7 +269,7 @@ func UnexpectedPrivilage() {
 
 `))
 }
-  
+
 func BadPortType(protocol string) {
 	os.Stderr.WriteString(fmt.Sprintf(`
 --------------------------------------------------------------------------------

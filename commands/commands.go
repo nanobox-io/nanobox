@@ -2,9 +2,9 @@
 package commands
 
 import (
+	"os"
 	"path/filepath"
 	"strings"
-	"os"
 
 	"github.com/jcelliott/lumber"
 	"github.com/spf13/cobra"
@@ -65,14 +65,14 @@ var (
 				// 2 server is running
 				// 3 configuring
 				if util.IsPrivileged() &&
-					!configModel.CIMode && 
+					!configModel.CIMode &&
 					!strings.Contains(ccmd.CommandPath(), " config") &&
 					!strings.Contains(ccmd.CommandPath(), "server") {
 					// if it is not an internal command (starting the server requires privilages)
 					// we wont run nanobox as privilage
 					display.UnexpectedPrivilage()
 					os.Exit(1)
-				} 
+				}
 			}
 
 			if endpoint != "" {
