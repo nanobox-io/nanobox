@@ -50,6 +50,8 @@ var (
 			// alert the user if an update is needed
 			update.Check()
 
+			configModel, _ := models.LoadConfig()
+
 			// TODO: look into global messaging
 			if internalCommand {
 				registry.Set("internal", internalCommand)
@@ -58,7 +60,14 @@ var (
 				lumber.SetLogger(fileLogger)
 
 			} else {
-				if !strings.Contains(ccmd.CommandPath(), "server")  && util.IsPrivileged() {
+				// We should only allow admin in 3 carse
+				// 1 cimode
+				// 2 server is running
+				// 3 configuring
+				if util.IsPrivileged() &&
+					!configModel.CIMode && 
+					!strings.Contains(ccmd.CommandPath(), " config") &&
+					!strings.Contains(ccmd.CommandPath(), "server") {
 					// if it is not an internal command (starting the server requires privilages)
 					// we wont run nanobox as privilage
 					display.UnexpectedPrivilage()
@@ -85,8 +94,7 @@ var (
 				display.Level = "trace"
 			}
 
-			config, _ := models.LoadConfig()
-			if config.CIMode {
+			if configModel.CIMode {
 				lumber.Level(lumber.INFO)
 				display.Summary = false
 				display.Level = "info"
