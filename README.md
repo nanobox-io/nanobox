@@ -17,38 +17,8 @@ Nanobox allows you to stop configuring environments and just code. It guarantees
 
 ### Installation
 
-Nanobox can be installed in two different ways:
+By using the [Nanobox installer](https://nanobox.io/download). *(Recommended)* .The installer includes all required dependencies (Virtual Box & Docker).
 
-1. By using the [Nanobox installer](https://nanobox.io/download). *(Recommended)* .The installer includes all required dependencies (Virtual Box & Docker).
-2. Manually installing the nanobox binaries.
-
-
-#### Manually Installing Nanobox Binaries:
-Nanobox requires two binaries:
-
-- `nanobox` - The Nanobox CLI
-- `nanobox-update` - The Nanobox update manager
-
-*Nanobox needs Virtual Box and Docker in order to run. If you don't already have these installed, you'll need to install them.*
-
-##### OSX and Linux:
-
-1. Download the nanobox binaries.
-  ```
-  $ wget https://s3.amazonaws.com/tools.nanobox.io/nanobox/v1/linux/amd64/nanobox
-$ wget https://s3.amazonaws.com/tools.nanobox.io/nanobox/v1/linux/amd64/nanobox-update
-  ```
-
-2. Place the binaries in your $PATH (ex. ~/usr/bin) and run `chmod 755 nanobox`.
-3. Run `which nanobox` to ensure it's accessible from your $PATH.
-4. Type `nanobox` to view a list of available commands.
-
-
-##### Windows
-
-1. Place the nanobox.exe and nanobox-update.exe files in your $PATH (ex. C:\Program Files\Nanobox\).
-2. From a command line prompt, run `where nanobox` to ensure it's accessable from your $PATH.
-3. Type `nanobox` to view a list of available commands.
 
 ### Usage
 ```
