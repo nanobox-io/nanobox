@@ -42,7 +42,6 @@ var (
 		Short: "",
 		Long:  ``,
 		PersistentPreRun: func(ccmd *cobra.Command, args []string) {
-
 			// report the command to nanobox
 			processors.SubmitLog(strings.Replace(ccmd.CommandPath(), "nanobox ", "", 1))
 			// mixpanel.Report(strings.Replace(ccmd.CommandPath(), "nanobox ", "", 1))
@@ -64,9 +63,10 @@ var (
 				// 1 cimode
 				// 2 server is running
 				// 3 configuring
+				fullCmd := strings.Join(os.Args, " ")
 				if util.IsPrivileged() &&
 					!configModel.CIMode &&
-					!strings.Contains(ccmd.CommandPath(), " config") &&
+					!strings.Contains(fullCmd, "set ci") &&
 					!strings.Contains(ccmd.CommandPath(), "server") {
 					// if it is not an internal command (starting the server requires privilages)
 					// we wont run nanobox as privilage
