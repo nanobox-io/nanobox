@@ -259,6 +259,17 @@ Login to your Nanobox account:
 `))
 }
 
+func UnexpectedPrivilage() {
+	os.Stderr.WriteString(fmt.Sprintf(`
+--------------------------------------------------------------------------------
++ ERROR:
++ Nanobox is designed to run as a standard user (non root)
++ Please run all nanobox commands as a non privilage user
+--------------------------------------------------------------------------------
+
+`))
+}
+
 func BadPortType(protocol string) {
 	os.Stderr.WriteString(fmt.Sprintf(`
 --------------------------------------------------------------------------------
