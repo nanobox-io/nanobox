@@ -53,7 +53,7 @@ func Tunnel(envModel *models.Env, tunnelConfig TunnelConfig) error {
 	}
 
 	// connect up to the session
-	if err := nanoagent.Tunnel(key, location, tunnelConfig.Port); err != nil {
+	if err := nanoagent.Tunnel(key, location, tunnelConfig.Port, tunnelConfig.Container); err != nil {
 		return util.ErrorAppend(err, "failed to connect to remote tunnel session")
 	}
 
