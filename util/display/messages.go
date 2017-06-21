@@ -61,6 +61,22 @@ func InfoLocalContainer() {
 `))
 }
 
+func TunnelEstablished(component, port string) {
+	os.Stderr.WriteString(fmt.Sprintf(`
+--------------------------------------------------------------------------------
++ Secure tunnel established to %s
++ Use the following credentials to connect 
+--------------------------------------------------------------------------------
+
+Host: 127.0.0.1
+Port: %s
+User: available in your dashboard (if applicable)
+Pass: available in your dashboard (if applicable)
+
+`, component, port))
+}
+
+
 func InfoDevContainer(ip string) {
 	os.Stderr.WriteString(fmt.Sprintf(`
 --------------------------------------------------------------------------------
@@ -213,7 +229,6 @@ nanobox config set %s <unused ip/cidr>
 `, network, name))
 }
 
-
 func VMCommunicationError() {
 	os.Stderr.WriteString(fmt.Sprintf(`
 --------------------------------------------------------------------------------
@@ -221,7 +236,7 @@ Nanobox has started a VM that needs access to your machine for mounting.
 This VM is unable to communicate with the host machine currently. Please
 verify that you don't have a firewall blocking this connection, and try again!
 --------------------------------------------------------------------------------
-`))	
+`))
 }
 
 func NoGonanaUser() {
@@ -240,5 +255,42 @@ check out our getting-started guide on configuring your app:
 
 https://guides.nanobox.io/
 --------------------------------------------------------------------------------
-`))	
+`))
+}
+
+func WorldWritable() {
+	os.Stderr.WriteString(fmt.Sprintf(`
+--------------------------------------------------------------------------------
+Virtualbox was unable to create the virtual machine because a folder in the path
+is globaly accessable and it should be private.
+--------------------------------------------------------------------------------
+`))
+
+}
+
+func LoginRequired() {
+	os.Stderr.WriteString(fmt.Sprintf(`
+It appears you are running Nanobox for the first time.
+Login to your Nanobox account:
+`))
+}
+
+func UnexpectedPrivilage() {
+	os.Stderr.WriteString(fmt.Sprintf(`
+--------------------------------------------------------------------------------
++ ERROR:
++ Nanobox is designed to run as a standard user (non root)
++ Please run all nanobox commands as a non privilage user
+--------------------------------------------------------------------------------
+
+`))
+}
+
+func BadPortType(protocol string) {
+	os.Stderr.WriteString(fmt.Sprintf(`
+--------------------------------------------------------------------------------
++ WARNING:
++ The boxfile.yml does not support port protocol '%s'. Using 'tcp' as default.
+--------------------------------------------------------------------------------
+`, protocol))
 }

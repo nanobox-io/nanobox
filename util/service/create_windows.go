@@ -1,43 +1,46 @@
 package service
 
 import (
-	"fmt"
-	"io/ioutil"
-	"os/exec"
-	"strings"
+	// "fmt"
+	// // "io/ioutil"
+	// "os/exec"
+	// "strings"
 
-	"github.com/nanobox-io/nanobox/util/config"
+	"golang.org/x/sys/windows/svc/eventlog"
+	"golang.org/x/sys/windows/svc/mgr"
 )
 
 func Create(name string, command []string) error {
+	m, err := mgr.Connect()
+	if err != nil {
+		return err
+	}
+	defer m.Disconnect()
 
-	// make sure we actually have to do this part
-	if out, _ := exec.Command("sc", "query", name).CombinedOutput(); !strings.Contains(string(out), "service does not exist") {
+	// check to see if we need to create at all
+	s, err := m.OpenService(name)
+	if err == nil {
+		s.Close()
+		// jobs done
 		return nil
 	}
 
-	// the service may have been created this should clean out any old version
-	// we arent catching errors just incase they dont exist
-	Stop(name)
-	Remove(name)
-
-	// setup config file
-	if err := ioutil.WriteFile(serviceConfigFile(name), []byte(serviceConfig(name, command)), 0644); err != nil {
+	// create the service
+	args := []string{}
+	if len(command) > 1 {
+		args = command[1:]
+	}
+	s, err = m.CreateService(name, command[0], mgr.Config{DisplayName: name}, args...)
+	if err != nil {
 		return err
 	}
+	defer s.Close()
 
-	out, err := exec.Command("sc", "create", name, "binpath=", fmt.Sprintf(`%s\srvstart.exe %s -c "%s"`, config.BinDir(), name, serviceConfigFile(name))).CombinedOutput()
+	err = eventlog.InstallAsEventCreate(name, eventlog.Error|eventlog.Warning|eventlog.Info)
 	if err != nil {
-		return fmt.Errorf("%s: %s", out, err)
+		// s.Delete()
+		// eventlog.Remove(name)
+		// return fmt.Errorf("SetupEventLogSource() failed: %s", err)
 	}
-	fmt.Printf("\n\nout: %s\n\n", out)
-
-	return err
-}
-
-func serviceConfig(name string, command []string) string {
-	return fmt.Sprintf(`[%s]
-startup=%s
-shutdown_method=winmessage
-`, name, strings.Join(command, " "))
+	return nil
 }

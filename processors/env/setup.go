@@ -2,6 +2,7 @@ package env
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/nanobox-boxfile"
@@ -28,7 +29,6 @@ func Setup(envModel *models.Env) error {
 		return util.ErrorAppend(err, "failed to init docker client")
 	}
 
-
 	// ensure the envModel data has been generated
 	if err := envModel.Generate(); err != nil {
 		lumber.Error("env:Setup:models:Env:Generate()")
@@ -43,7 +43,11 @@ func Setup(envModel *models.Env) error {
 	defer display.CloseContext()
 
 	// setup mounts
-	if err := Mount(envModel); err != nil {
+	mountFunc := func() error {
+		return Mount(envModel)
+	}
+
+	if err := util.Retry(mountFunc, 5, (time.Second * 10)); err != nil {
 		display.ErrorTask()
 		return util.ErrorAppend(err, "failed to setup env mounts")
 	}

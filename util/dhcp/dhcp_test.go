@@ -28,7 +28,7 @@ func TestReservingIps(t *testing.T) {
 	if err != nil {
 		t.Errorf("unable to reserve ip", err)
 	}
-	if ipOne.String() != "192.168.99.51" || ipTwo.String() != "192.168.99.52" || ipThree.String() != "172.19.0.2" {
+	if ipOne.String() != "192.168.99.51" || ipTwo.String() != "192.168.99.52" || ipThree.String() != "172.21.0.2" {
 		t.Errorf("incorrect ip addresses", ipOne, ipTwo, ipThree)
 	}
 }

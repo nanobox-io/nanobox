@@ -60,6 +60,7 @@ func (machine DockerMachine) Valid() (bool, []string) {
 		}
 
 	}
+
 	// net share checking
 	switch runtime.GOOS {
 	case "linux":
@@ -129,6 +130,18 @@ func (machine DockerMachine) Create() error {
 		"virtualbox",
 		"--virtualbox-boot2docker-url",
 		"https://s3.amazonaws.com/tools.nanobox.io/boot2docker/v1/boot2docker.iso",
+		"--engine-env",
+		fmt.Sprintf("HTTP_PROXY=%s", os.Getenv("HTTP_PROXY")),
+		"--engine-env",
+		fmt.Sprintf("HTTPS_PROXY=%s", os.Getenv("HTTPS_PROXY")),
+		"--engine-env",
+		fmt.Sprintf("NO_PROXY=%s", os.Getenv("NO_PROXY")),
+		"--engine-env",
+		fmt.Sprintf("http_proxy=%s", os.Getenv("http_proxy")),
+		"--engine-env",
+		fmt.Sprintf("https_proxy=%s", os.Getenv("https_proxy")),
+		"--engine-env",
+		fmt.Sprintf("no_proxy=%s", os.Getenv("no_proxy")),
 		"--virtualbox-cpu-count",
 		fmt.Sprintf("%d", cpus),
 		"--virtualbox-memory",
@@ -145,7 +158,7 @@ func (machine DockerMachine) Create() error {
 	process := exec.Command(cmd[0], cmd[1:]...)
 
 	// lets try getting the extra bytes from creating
-	fullBuffer := &bytes.Buffer{}	
+	fullBuffer := &bytes.Buffer{}
 	writer := io.MultiWriter(display.NewStreamer("info"), fullBuffer)
 
 	process.Stdout = writer
@@ -154,6 +167,11 @@ func (machine DockerMachine) Create() error {
 	display.StartTask("Launching VM")
 
 	if err := process.Run(); err != nil {
+		// if its complainging about the world writable error issue
+		if strings.Contains(fullBuffer.String(), "VERR_SUPLIB_WORLD_WRITABLE") {
+			display.WorldWritable()
+			return util.ErrorfQuiet("%s: %s", fullBuffer.String(), err)
+		}
 		display.ErrorTask()
 		return util.Errorf("%s: %s", fullBuffer.String(), err)
 	}
@@ -255,14 +273,18 @@ func (machine DockerMachine) Start() error {
 
 		process := exec.Command(cmd[0], cmd[1:]...)
 
-		process.Stdout = display.NewStreamer("info")
-		process.Stderr = display.NewStreamer("info")
+		// lets try getting the extra bytes from creating
+		fullBuffer := &bytes.Buffer{}
+		writer := io.MultiWriter(display.NewStreamer("info"), fullBuffer)
+
+		process.Stdout = writer
+		process.Stderr = writer
 
 		display.StartTask("Booting VM")
 
 		if err := process.Run(); err != nil {
 			display.ErrorTask()
-			return err
+			return util.Errorf("%s: %s", fullBuffer.String(), err)
 		}
 
 		display.StopTask()
@@ -293,14 +315,18 @@ func (machine DockerMachine) Start() error {
 
 		process := exec.Command(cmd[0], cmd[1:]...)
 
-		process.Stdout = display.NewStreamer("info")
-		process.Stderr = display.NewStreamer("info")
+		// lets try getting the extra bytes from creating
+		fullBuffer := &bytes.Buffer{}
+		writer := io.MultiWriter(display.NewStreamer("info"), fullBuffer)
+
+		process.Stdout = writer
+		process.Stderr = writer
 
 		display.StartTask("Configuring Network")
 
 		if err := process.Run(); err != nil {
 			display.ErrorTask()
-			return err
+			return util.Errorf("%s: %s", fullBuffer.String(), err)
 		}
 
 		display.StopTask()
@@ -317,14 +343,18 @@ func (machine DockerMachine) Start() error {
 
 	process := exec.Command(cmd[0], cmd[1:]...)
 
-	process.Stdout = display.NewStreamer("info")
-	process.Stderr = display.NewStreamer("info")
+	// lets try getting the extra bytes from creating
+	fullBuffer := &bytes.Buffer{}
+	writer := io.MultiWriter(display.NewStreamer("info"), fullBuffer)
+
+	process.Stdout = writer
+	process.Stderr = writer
 
 	display.StartTask("Loading kernel modules")
 
 	if err := process.Run(); err != nil {
 		display.ErrorTask()
-		return err
+		return util.Errorf("%s: %s", fullBuffer.String(), err)
 	}
 
 	display.StopTask()
@@ -354,10 +384,10 @@ func (machine DockerMachine) Start() error {
 		dockerMachineCmd,
 		"ssh",
 		"nanobox",
-		"ping",
-		"-c",
-		"1",
-		"192.168.99.1",
+		"curl",
+		"--connect-timeout",
+		"5",
+		"192.168.99.1:65000",
 	}
 
 	process = exec.Command(cmd[0], cmd[1:]...)

@@ -1,13 +1,13 @@
 package dns
 
 import (
-	"fmt"
+	// "fmt"
 
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/processors/server"
 	"github.com/nanobox-io/nanobox/util"
-	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/dns"
 )
@@ -17,13 +17,12 @@ func RemoveAll(a *models.App) error {
 
 	// shortcut if we dont have any entries for this app
 	if len(dns.List(a.ID)) == 0 {
-
 		return nil
 	}
 
-	// ensure we're running as the administrator for this
-	if !util.IsPrivileged() {
-		return reExecPrivilegedRemoveAll(a)
+	// make sure the server is running since it will do the dns work
+	if err := server.Setup(); err != nil {
+		return util.ErrorAppend(err, "failed to setup server")
 	}
 
 	if err := dns.Remove(a.ID); err != nil {
@@ -31,24 +30,6 @@ func RemoveAll(a *models.App) error {
 		return util.ErrorAppend(err, "failed to remove all dns entries")
 	}
 
-	return nil
-}
-
-// reExecPrivilegedRemoveAll re-execs the current process with a privileged user
-func reExecPrivilegedRemoveAll(a *models.App) error {
-	display.PauseTask()
-	defer display.ResumeTask()
-
-	display.PrintRequiresPrivilege("to modify host dns entries")
-
-	// call 'dev dns add' with the original path and args
-	cmd := fmt.Sprintf("%s dns rm-all %s", config.NanoboxPath(), a.DisplayName())
-
-	// if the sudo'ed subprocess fails, we need to return error to stop the process
-	if err := util.PrivilegeExec(cmd); err != nil {
-		lumber.Error("dns:reExecPrivilegedRemoveAll:util.PrivilegeExec(%s): %s", cmd, err)
-		return err
-	}
-
+	display.Info("\n%s removed all\n", display.TaskComplete)
 	return nil
 }

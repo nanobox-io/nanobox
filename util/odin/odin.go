@@ -10,9 +10,11 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 
 	"github.com/jcelliott/lumber"
 
+	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
 )
@@ -27,6 +29,7 @@ const (
 var (
 	// set the default endpoint to nanobox
 	endpoint = "nanobox"
+	apiKey   string
 )
 
 type (
@@ -63,8 +66,18 @@ func Auth(username, password string) (string, error) {
 // App ...
 func App(slug string) (models.App, error) {
 	app := models.App{}
+	var params url.Values
+	if strings.Contains(slug, "/") {
+		appNameParts := strings.Split(slug, "/")
+		if len(appNameParts) == 2 {
+			params = url.Values{}
+			params.Set("ci", appNameParts[0])
+			slug = appNameParts[1]
+		}
 
-	return app, doRequest("GET", "apps/"+slug, nil, nil, &app)
+	}
+
+	return app, doRequest("GET", "apps/"+slug, params, nil, &app)
 }
 
 // Deploy ...
@@ -79,12 +92,36 @@ func Deploy(appID, id, boxfile, message string) error {
 		},
 	}
 
-	return doRequest("POST", fmt.Sprintf("apps/%s/deploys", appID), nil, body, nil)
+	var params url.Values
+
+	if strings.Contains(appID, "/") {
+		appNameParts := strings.Split(appID, "/")
+		if len(appNameParts) == 2 {
+			params = url.Values{}
+			params.Set("ci", appNameParts[0])
+			appID = appNameParts[1]
+		}
+
+	}
+
+	return doRequest("POST", fmt.Sprintf("apps/%s/deploys", appID), params, body, nil)
 }
 
 func ListEvars(appID string) ([]evar, error) {
 	evars := []evar{}
-	return evars, doRequest("GET", fmt.Sprintf("apps/%s/evars", appID), nil, nil, &evars)
+
+	var params url.Values
+	if strings.Contains(appID, "/") {
+		appNameParts := strings.Split(appID, "/")
+		if len(appNameParts) == 2 {
+			params = url.Values{}
+			params.Set("ci", appNameParts[0])
+			appID = appNameParts[1]
+		}
+
+	}
+
+	return evars, doRequest("GET", fmt.Sprintf("apps/%s/evars", appID), params, nil, &evars)
 }
 
 func AddEvar(appID, key, val string) error {
@@ -95,11 +132,35 @@ func AddEvar(appID, key, val string) error {
 		},
 	}
 
-	return doRequest("POST", fmt.Sprintf("apps/%s/evars", appID), nil, body, nil)
+	var params url.Values
+
+	if strings.Contains(appID, "/") {
+		appNameParts := strings.Split(appID, "/")
+		if len(appNameParts) == 2 {
+			params = url.Values{}
+			params.Set("ci", appNameParts[0])
+			appID = appNameParts[1]
+		}
+
+	}
+
+	return doRequest("POST", fmt.Sprintf("apps/%s/evars", appID), params, body, nil)
 }
 
-func RemoveEvar(appId, id string) error {
-	return doRequest("DELETE", fmt.Sprintf("apps/%s/evars/%s", appId, id), nil, nil, nil)
+func RemoveEvar(appID, id string) error {
+	var params url.Values
+
+	if strings.Contains(appID, "/") {
+		appNameParts := strings.Split(appID, "/")
+		if len(appNameParts) == 2 {
+			params = url.Values{}
+			params.Set("ci", appNameParts[0])
+			appID = appNameParts[1]
+		}
+
+	}
+
+	return doRequest("DELETE", fmt.Sprintf("apps/%s/evars/%s", appID, id), params, nil, nil)
 }
 
 // EstablishTunnel ...
@@ -110,7 +171,18 @@ func EstablishTunnel(appID, id string) (string, string, int, error) {
 		Port  int    `json:"port"`
 	}{}
 
-	err := doRequest("GET", fmt.Sprintf("apps/%s/tunnels/%s", appID, id), nil, nil, &r)
+	var params url.Values
+
+	if strings.Contains(appID, "/") {
+		appNameParts := strings.Split(appID, "/")
+		if len(appNameParts) == 2 {
+			params = url.Values{}
+			params.Set("ci", appNameParts[0])
+			appID = appNameParts[1]
+		}
+
+	}
+	err := doRequest("GET", fmt.Sprintf("apps/%s/tunnels/%s", appID, id), params, nil, &r)
 
 	return r.Token, r.Url, r.Port, err
 }
@@ -118,8 +190,24 @@ func EstablishTunnel(appID, id string) (string, string, int, error) {
 // EstablishConsole ...
 // protocol ssh/docker
 func EstablishConsole(appID, id string) (string, string, string, error) {
+	// use a default user
+	params := url.Values{}
+	params.Set("user", "gonano")
+	if registry.GetString("console_user") != "" {
+		params.Set("user", registry.GetString("console_user"))
+	}
+
+	if strings.Contains(appID, "/") {
+		appNameParts := strings.Split(appID, "/")
+		if len(appNameParts) == 2 {
+			params.Set("ci", appNameParts[0])
+			appID = appNameParts[1]
+		}
+
+	}
+
 	r := map[string]string{}
-	err := doRequest("GET", fmt.Sprintf("apps/%s/consoles/%s", appID, id), nil, nil, &r)
+	err := doRequest("GET", fmt.Sprintf("apps/%s/consoles/%s", appID, id), params, nil, &r)
 
 	return r["token"], r["url"], r["protocol"], err
 }
@@ -127,14 +215,38 @@ func EstablishConsole(appID, id string) (string, string, string, error) {
 // GetWarehouse ...
 func GetWarehouse(appID string) (string, string, error) {
 	r := map[string]string{}
-	err := doRequest("GET", fmt.Sprintf("apps/%s/services/warehouse", appID), nil, nil, &r)
+
+	var params url.Values
+	if strings.Contains(appID, "/") {
+		appNameParts := strings.Split(appID, "/")
+		if len(appNameParts) == 2 {
+			params = url.Values{}
+			params.Set("ci", appNameParts[0])
+			appID = appNameParts[1]
+		}
+
+	}
+
+	err := doRequest("GET", fmt.Sprintf("apps/%s/services/warehouse", appID), params, nil, &r)
 
 	return r["token"], r["url"], err
 }
 
 func GetPreviousBuild(appID string) (string, error) {
 	r := []map[string]string{}
-	err := doRequest("GET", fmt.Sprintf("apps/%s/deploys", appID), nil, nil, &r)
+
+	var params url.Values
+	if strings.Contains(appID, "/") {
+		appNameParts := strings.Split(appID, "/")
+		if len(appNameParts) == 2 {
+			params = url.Values{}
+			params.Set("ci", appNameParts[0])
+			appID = appNameParts[1]
+		}
+
+	}
+
+	err := doRequest("GET", fmt.Sprintf("apps/%s/deploys", appID), params, nil, &r)
 	if err != nil {
 		return "", err
 	}
@@ -144,6 +256,30 @@ func GetPreviousBuild(appID string) (string, error) {
 	}
 
 	return "", nil
+}
+
+func SubmitEvent(action, message, app string, meta map[string]interface{}) error {
+	params := url.Values{}
+	params.Set("api_key", apiKey)
+
+	request := struct {
+		Action  string                 `json:"action"`
+		App     string                 `json:"eventable_id,omitempty"`
+		Meta    map[string]interface{} `json:"meta"`
+		Message string                 `json:"message"`
+	}{
+		Action:  action,
+		App:     app,
+		Meta:    meta,
+		Message: message,
+	}
+
+	err := doRequest("POST", "events", params, map[string]interface{}{"event": request}, nil)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 // doRequest ...
@@ -175,7 +311,9 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 	if params == nil {
 		params = url.Values{}
 	}
-	params.Set("auth_token", auth.Key)
+	if auth.Key != "" {
+		params.Set("auth_token", auth.Key)
+	}
 
 	// fetch the correct url from the endpoint
 	url := odinURL()
@@ -209,6 +347,21 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 
 	if res.StatusCode == 404 {
 		return util.ErrorfQuiet("Not Found (%s)", b)
+	}
+
+	// if it is a 400 but not
+	if res.StatusCode >= 400 && res.StatusCode < 500 {
+		rb := map[string]string{}
+		err = json.Unmarshal(b, &rb)
+		if err != nil {
+			return util.ErrorfQuiet("%s", b)
+		}
+
+		errorMessage, ok := rb["error"]
+		if !ok {
+			return util.ErrorfQuiet("%s", b)
+		}
+		return util.ErrorfQuiet("%s", errorMessage)
 	}
 
 	if res.StatusCode == 500 {

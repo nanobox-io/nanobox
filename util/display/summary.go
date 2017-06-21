@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	// "github.com/jcelliott/lumber"
+
 	"github.com/lyondhill/vtclean"
 	"github.com/nanobox-io/nanobox/util"
 )
@@ -200,6 +202,7 @@ func (s *Summarizer) handleEvent(event *sEventOp) {
 // handleLog sets the detail line and refreshes the summary
 func (s *Summarizer) handleLog(data string) {
 
+	// lumber.Debug("%q", data)
 	msg := s.leftover
 	s.leftover = ""
 
@@ -208,10 +211,22 @@ func (s *Summarizer) handleLog(data string) {
 		return c == '\n' || c == '\r'
 	}
 
+	// get the line we were seeing before the new data
+	prevLine := s.detail
+
 	// iterate through the lines, we'll keep the last line that has data
 	lines := strings.FieldsFunc(msg+data, f)
-	for _, line := range lines {
+	for i, line := range lines {
 
+		// check to see if we are we are at the last element and determin
+		// if we should be displaying it
+		if (len(lines) - 1) == i {
+			// if there is any data and it doesnt end with a newline
+			if !(strings.HasSuffix(data, "\n") || strings.HasSuffix(data, "\r")) {
+				// do not display the last incomplete line
+				continue
+			}
+		}
 		// first we need to remove escape sequences
 		line = EscSeqRegex.ReplaceAllString(line, "")
 
@@ -221,11 +236,16 @@ func (s *Summarizer) handleLog(data string) {
 		// then we need to remove any leading whitespace
 		line = LogStripRegex.ReplaceAllString(line, "")
 
+		// if empty or no change we wont reprint
 		if len(line) == 0 {
 			continue
 		}
 
 		s.detail = line
+	}
+
+	// if the new data actuall changed the line we are displaying show it
+	if prevLine != s.detail {
 		s.reset()
 		s.print()
 	}

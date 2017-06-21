@@ -1,6 +1,7 @@
 package dev
 
 import (
+	"fmt"
 	"github.com/nanobox-io/golang-docker-client"
 	"github.com/spf13/cobra"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/nanobox-io/nanobox/processors/provider"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
+	util_provider "github.com/nanobox-io/nanobox/util/provider"
 )
 
 func init() {
@@ -27,10 +29,20 @@ func devStart(ccmd *cobra.Command, args []string) {
 }
 
 func startCheck() bool {
+	// check to see if the app is up
+
 	app, _ := models.FindAppBySlug(config.EnvID(), "dev")
 	if app.Status != "up" {
 		return false
 	}
+
+	// make sure im mounted and ready to go
+	envModel, _ := models.FindEnvByID(config.EnvID())
+	if !util_provider.HasMount(fmt.Sprintf("%s%s/code", util_provider.HostShareDir(), envModel.ID)) {
+		return false
+	}
+
+	// connect to docker and find out if the components exist and are running
 	provider.Init()
 	components, _ := app.Components()
 	for _, component := range components {
@@ -39,5 +51,7 @@ func startCheck() bool {
 			return false
 		}
 	}
+
+	// if we found nothing wrong we are already started :)
 	return true
 }

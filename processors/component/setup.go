@@ -74,6 +74,12 @@ func Setup(appModel *models.App, componentModel *models.Component) error {
 	// start the container
 	display.StartTask("Starting docker container")
 	config := container_generator.ComponentConfig(componentModel)
+
+	// remove any container that may have been created with this name befor
+	// this can happen if the process is killed after the
+	// container was created but before our db model was saved
+	docker.ContainerRemove(config.Name)
+
 	container, err := docker.CreateContainer(config)
 	if err != nil {
 		lumber.Error("component:Setup:docker.CreateContainer(%+v): %s", config, err.Error())

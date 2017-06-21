@@ -18,6 +18,9 @@ func ComponentConfig(componentModel *models.Component) docker.ContainerConfig {
 		RestartPolicy: "no",
 	}
 
+	// set http[s]_proxy and no_proxy vars
+	setProxyVars(&config)
+
 	return config
 }
 

@@ -2,6 +2,7 @@ package evar
 
 import (
 	"fmt"
+	"io/ioutil"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -60,7 +61,11 @@ func parseEvars(args []string) map[string]string {
 				return c == '='
 			})
 			if len(parts) == 2 {
-
+				// check to see if the value is a file
+				content, err := ioutil.ReadFile(parts[1])
+				if err == nil {
+					parts[1] = string(content)
+				}
 				evars[strings.ToUpper(parts[0])] = parts[1]
 			} else {
 				fmt.Printf("invalid evar (%s)\n", pair)

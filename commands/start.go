@@ -5,9 +5,10 @@ import (
 
 	"github.com/nanobox-io/nanobox/commands/steps"
 	"github.com/nanobox-io/nanobox/processors"
+	"github.com/nanobox-io/nanobox/processors/provider/bridge"
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/provider"
-	"github.com/nanobox-io/nanobox/util/provider/bridge"
+	"github.com/nanobox-io/nanobox/util/service"
 )
 
 var (
@@ -31,5 +32,9 @@ func startFn(ccmd *cobra.Command, args []string) {
 }
 
 func startCheck() bool {
-	return provider.IsReady() && bridge.Connected()
+	bridgeReady := true
+	if provider.BridgeRequired() {
+		bridgeReady = bridge.Connected()
+	}
+	return provider.IsReady() && service.Running("nanobox-server") && bridgeReady
 }

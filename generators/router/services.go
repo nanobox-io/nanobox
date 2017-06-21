@@ -8,6 +8,7 @@ import (
 
 	"github.com/nanobox-io/nanobox-boxfile"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 // Update the ports that portal knows about.
@@ -111,7 +112,10 @@ func ports(box boxfile.Boxfile) map[string]map[string]string {
 				switch portParts[0] {
 				case "udp":
 					rtn[portParts[0]][portParts[1]] = portParts[2]
+				case "tcp":
+					rtn["tcp"][portParts[1]] = portParts[2]
 				default:
+					display.BadPortType(portParts[0])
 					rtn["tcp"][portParts[1]] = portParts[2]
 				}
 

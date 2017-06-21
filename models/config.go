@@ -3,11 +3,13 @@ package models
 import (
 	"fmt"
 	"net"
+	"runtime"
 )
 
 // Config ...
 type Config struct {
 	Provider string `json:"provider"`
+	CIMode   bool   `json:"ci-mode"`
 
 	// required for docker-machine
 	MountType      string `json:"mount-type"`
@@ -22,7 +24,10 @@ type Config struct {
 	NativeNetworkSpace        string `json:"native-network-space"`
 
 	Cache    string `json:cache`
-	LockPort int `json:"lock-port"`
+	SshKey string `json:"ssh-key"`
+
+	Anonymous bool `json:"anonymous"`
+	LockPort  int  `json:"lock-port"`
 }
 
 // Save persists the Config to the database
@@ -56,8 +61,12 @@ func (c *Config) makeValid() {
 		c.RAM = 1
 	}
 
-	if c.Disk < 20480 {
-		c.Disk = 20480
+	if c.Disk < 102400 {
+		c.Disk = 102400
+	}
+
+	if c.NetfsMountOpts == "" && runtime.GOOS == "windows" {
+		c.NetfsMountOpts = "mfsymlinks"
 	}
 
 	if _, _, err := net.ParseCIDR(c.ExternalNetworkSpace); c.ExternalNetworkSpace == "" || err != nil {
@@ -65,11 +74,15 @@ func (c *Config) makeValid() {
 	}
 
 	if _, _, err := net.ParseCIDR(c.DockerMachineNetworkSpace); c.DockerMachineNetworkSpace == "" || err != nil {
-		c.DockerMachineNetworkSpace = "172.19.0.1/16"
+		c.DockerMachineNetworkSpace = "172.21.0.1/16"
 	}
 
 	if _, _, err := net.ParseCIDR(c.NativeNetworkSpace); c.NativeNetworkSpace == "" || err != nil {
-		c.NativeNetworkSpace = "172.18.0.1/16"
+		c.NativeNetworkSpace = "172.20.0.1/16"
+	}
+
+	if c.SshKey == "" {
+		c.SshKey = "default"
 	}
 
 	if c.Cache == "" {

@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+
+	"github.com/nanobox-io/nanobox/commands/server"
 )
 
 type DomainName struct {
@@ -14,10 +16,25 @@ type DomainName struct {
 	Domain string
 }
 
+type DomainRPC struct{}
+
+type Request struct {
+	Entry string
+}
+
+type Response struct {
+	Message string
+	Success bool
+}
+
 var (
 	hostsFile = detectHostsFile()
 	newline   = detectNewlineChar()
 )
+
+func init() {
+	server.Register(&DomainRPC{})
+}
 
 // Entry generate the DNS entry to be added
 func Entry(ip, name, env string) string {
@@ -80,6 +97,20 @@ func Add(entry string) error {
 		return nil
 	}
 
+	req := Request{entry}
+	resp := &Response{}
+
+	err := server.ClientRun("DomainRPC.Add", req, resp)
+	if !resp.Success {
+		err = fmt.Errorf("failed to add domain: %v %v", err, resp.Message)
+	}
+
+	return err
+}
+
+// the rpc function run from the server
+func (drpc *DomainRPC) Add(req Request, resp *Response) error {
+
 	// open hosts file
 	f, err := os.OpenFile(hostsFile, os.O_RDWR|os.O_APPEND, 0644)
 	if err != nil {
@@ -88,10 +119,11 @@ func Add(entry string) error {
 	defer f.Close()
 
 	// write the DNS entry to the file
-	if _, err := f.WriteString(fmt.Sprintf("%s%s", entry, newline)); err != nil {
+	if _, err := f.WriteString(fmt.Sprintf("%s%s", req.Entry, newline)); err != nil {
 		return err
 	}
 
+	resp.Success = true
 	return nil
 }
 
@@ -100,6 +132,18 @@ func Remove(entry string) error {
 	if entry == "" {
 		return nil
 	}
+	req := Request{entry}
+	resp := &Response{}
+
+	err := server.ClientRun("DomainRPC.Remove", req, resp)
+	if !resp.Success {
+		err = fmt.Errorf("failed to remove domain: %v %v", err, resp.Message)
+	}
+	return nil
+}
+
+// the rpc function run from the server
+func (drpc *DomainRPC) Remove(req Request, resp *Response) error {
 
 	// "contents" will end up storing the entire contents of the file excluding the
 	// entry that is trying to be removed
@@ -121,7 +165,7 @@ func Remove(entry string) error {
 		// if its exactly the entry then remove it.
 		// if it contains the same environment
 		// also remove it
-		if strings.Contains(scanner.Text(), entry) {
+		if strings.Contains(scanner.Text(), req.Entry) {
 			continue
 		}
 
@@ -140,7 +184,9 @@ func Remove(entry string) error {
 		return err
 	}
 
+	resp.Success = true
 	return nil
+
 }
 
 // RemoveAll removes all dns entries added by nanobox

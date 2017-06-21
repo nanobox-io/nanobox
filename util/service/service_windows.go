@@ -1,24 +1,40 @@
 package service
 
 import (
-	"fmt"
-	"path/filepath"
-
-	"github.com/nanobox-io/nanobox/util/config"
+	"bytes"
+	"os/exec"
+	// "golang.org/x/sys/windows/svc"
+	// "golang.org/x/sys/windows/svc/mgr"
 )
 
-func serviceConfigFile(name string) string {
-	return filepath.Join(config.BinDir(), fmt.Sprintf("%s-config.ini", name))
-}
+func Running(name string) bool {
+	out, err := exec.Command("sc.exe", "query", name).CombinedOutput()
+	if err != nil {
+		return false
+	}
 
-func startCmd(name string) []string {
-	return []string{"sc", "start", name}
-}
+	if !bytes.Contains(out, []byte("RUNNING")) {
+		return false
+	}
+	return true
+	// m, err := mgr.Connect()
+	// if err != nil {
+	// 	return false
+	// }
+	// defer m.Disconnect()
 
-func stopCmd(name string) []string {
-	return []string{"sc", "stop", name}
-}
+	// // check to see if we need to create at all
+	// s, err := m.OpenService(name)
+	// if err != nil {
+	// 	// jobs done
+	// 	return false
+	// }
+	// defer s.Close()
 
-func removeCmd(name string) []string {
-	return []string{"sc", "remove", name}
+	// status, err := s.Query()
+	// if err != nil {
+	// 	return false
+	// }
+
+	// return status.State == svc.Running
 }

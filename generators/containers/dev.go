@@ -56,9 +56,13 @@ func DevConfig(appModel *models.App) docker.ContainerConfig {
 	}
 
 	termEvar := os.Getenv("TERM")
-	if termEvar != "" {
+	// msys doesnt work on linux so we will leave cygwin
+	if termEvar != "" && termEvar != "msys" {
 		config.Env = []string{"TERM=" + termEvar}
 	}
+
+	// set http[s]_proxy and no_proxy vars
+	setProxyVars(&config)
 
 	// // add cache_dirs into the container binds
 	// libDirs := boxfile.Node("run.config").StringSliceValue("cache_dirs")

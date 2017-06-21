@@ -122,7 +122,7 @@ func cleanImages() {
 	for _, image := range images {
 		for _, tag := range image.RepoTags {
 			// if there is a tag that is not our build and it is one of ours.. try removing it (without force)
-			if tag != "" && !strings.HasPrefix(tag, "nanobox/build")  && strings.HasPrefix(tag, "nanobox/") {
+			if tag != "" && !strings.HasPrefix(tag, "nanobox/build") && strings.HasPrefix(tag, "nanobox/") {
 				tag = strings.Replace(tag, ":latest", "", 1)
 				docker.ImageRemove(tag, false)
 			}

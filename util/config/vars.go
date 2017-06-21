@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"runtime"
 
 	"github.com/nanobox-io/nanobox-boxfile"
 
@@ -39,17 +41,36 @@ func NanoboxPath() string {
 
 	programName := os.Args[0]
 
-	// if args[0] was a path to nanobox already
-	if fileutil.Exists(programName) {
-		return programName
-	}
-
 	// lookup the full path to nanobox
 	path, err := exec.LookPath(programName)
 	if err == nil {
 		return path
 	}
 
+	// if args[0] was a path to nanobox already
+	if fileutil.Exists(programName) {
+		return programName
+	}
+
 	// unable to find the full path, just return what was called
 	return programName
+}
+
+// the path where the vpn is located
+func VpnPath() string {
+	bridgeClient := "nanobox-vpn"
+
+	// lookup the full path to nanobox
+	path, err := exec.LookPath(bridgeClient)
+	if err == nil {
+		return path
+	}
+
+	cmd := filepath.Join(BinDir(), bridgeClient)
+
+	if runtime.GOOS == "windows" {
+		cmd = fmt.Sprintf(`%s\%s.exe`, BinDir(), bridgeClient)
+	}
+
+	return cmd
 }

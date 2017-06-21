@@ -38,16 +38,15 @@ func Setup() error {
 	}
 
 	display.OpenContext("Starting Nanobox")
-	defer display.CloseContext()
 
 	// create the provider (VM)
-	if err := util.Retry(provider.Create, 2, 10*time.Second); err != nil {
+	if err := util.Retry(provider.Create, 3, 20*time.Second); err != nil {
 		lumber.Error("provider:Setup:provider.Create()")
 		return util.ErrorAppend(err, "failed to create the provider")
 	}
 
 	// start the provider (VM)
-	if err := util.Retry(provider.Start, 2, 10*time.Second); err != nil {
+	if err := util.Retry(provider.Start, 3, 20*time.Second); err != nil {
 		lumber.Error("provider:Setup:provider.Start()")
 		return util.ErrorAppend(err, "failed to start the provider")
 	}
@@ -73,6 +72,8 @@ func Setup() error {
 	if err := Init(); err != nil {
 		return util.ErrorAppend(err, "failed to initialize docker for provider")
 	}
+
+	display.CloseContext()
 
 	if provider.BridgeRequired() {
 		if err := bridge.Setup(); err != nil {

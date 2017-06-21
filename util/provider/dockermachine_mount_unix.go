@@ -7,6 +7,8 @@ import (
 	"path/filepath"
 
 	"github.com/jcelliott/lumber"
+
+	"github.com/nanobox-io/nanobox/models"
 )
 
 // Mount mounts a share on a guest machine
@@ -28,14 +30,24 @@ func (machine DockerMachine) addNetfsMount(local, host string) error {
 		return fmt.Errorf("mkdir:%s", err.Error())
 	}
 
-	// TODO: this IP shouldn't be hardcoded, needs to be figured out!
+	// get the netfsmount options
+	config, _ := models.LoadConfig()
+	// additionalOptions := config.NetfsMountOpts
+
+	// cmd = []string{"sudo", "/bin/mount", "-t", "nfs", "-o", "nolock"}
+	cmd = []string{"sudo", "/bin/mount", "-t", "nfs"}
+	if config.NetfsMountOpts != "" {
+		cmd = append(cmd, "-o", config.NetfsMountOpts)
+	}
+
+	// the ip is hardcoded because the ip in docker is always set
+	// no need to detect
 	source := fmt.Sprintf("\"192.168.99.1:%s\"", local)
-	cmd = []string{"sudo", "/bin/mount", "-t", "nfs", source, host}
+	cmd = append(cmd, source, host)
 	if b, err := Run(cmd); err != nil {
 		lumber.Debug("output: %s", b)
 		return fmt.Errorf("mount: output: %s err:%s", b, err.Error())
 	}
 
 	return nil
-
 }

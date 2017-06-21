@@ -28,9 +28,14 @@ func ConfigureSet(key, val string) error {
 		config.DockerMachineNetworkSpace = val
 	case "native_network_space", "native-network-space":
 		config.NativeNetworkSpace = val
+	case "ssh_key", "ssh-key":
+		config.SshKey = val
 	case "lock_port", "lock-port":
 		config.LockPort, _ = strconv.Atoi(val)
-
+	case "ci-mode", "ci_mode":
+		config.CIMode = val == "true" || val == "t" || val == "1"
+	case "anonymous":
+		config.Anonymous = val == "true" || val == "t" || val == "1"
 	}
 
 	return config.Save()

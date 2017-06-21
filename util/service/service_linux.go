@@ -1,8 +1,9 @@
 package service
 
 import (
+	"bytes"
 	"fmt"
-	"os"
+	"os/exec"
 )
 
 func serviceConfigFile(name string) string {
@@ -17,17 +18,12 @@ func serviceConfigFile(name string) string {
 }
 
 func launchSystem() string {
-	_, err := os.Stat("/sbin/systemctl")
+	_, err := exec.LookPath("systemctl")
 	if err == nil {
 		return "systemd"
 	}
 
-	_, err = os.Stat("/usr/bin/systemctl")
-	if err == nil {
-		return "systemd"
-	}
-
-	_, err = os.Stat("/sbin/initctl")
+	_, err = exec.LookPath("initctl")
 	if err == nil {
 		return "upstart"
 	}
@@ -46,6 +42,33 @@ func startCmd(name string) []string {
 	}
 
 	return nil
+}
+
+func Running(name string) bool {
+	switch launchSystem() {
+	case "systemd":
+		out, err := exec.Command("systemctl", "--no-pager", "status", name).CombinedOutput()
+		if err != nil {
+			return false
+		}
+
+		if !bytes.Contains(out, []byte("running")) {
+			return false
+		}
+		return true
+	case "upstart":
+		out, err := exec.Command("initctl", "status", name).CombinedOutput()
+		if err != nil {
+			return false
+		}
+
+		if !bytes.Contains(out, []byte("running")) {
+			return false
+		}
+		return true
+	}
+
+	return false
 }
 
 func stopCmd(name string) []string {

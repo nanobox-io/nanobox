@@ -1,3 +1,49 @@
+## 2.1.2 (June 1, 2017)
+
+FEATURES:
+  - Add team support for nanobox production commands [#453](https://github.com/nanobox-io/nanobox/pull/453)
+  - Now much smarter about how it creates networks on native [#447](https://github.com/nanobox-io/nanobox/pull/447)
+
+BUG FIXES:
+  - Fix an idempotency problem on service creation [#454](https://github.com/nanobox-io/nanobox/pull/454)
+  - Fix a permission denied problem on osx [#452](https://github.com/nanobox-io/nanobox/pull/452)
+  - Add mount checking [#443](https://github.com/nanobox-io/nanobox/pull/443)
+  - Make the ping system better at knowing when the server is up [#439](https://github.com/nanobox-io/nanobox/pull/439)
+
+## 2.1.1 (May 15, 2017)
+
+FEATURES:
+  - Submit failures and logs to the production nanobox server to help coordinate with tickets [#436](https://github.com/nanobox-io/nanobox/pull/436)
+  - Allow a file with evar values [#435](https://github.com/nanobox-io/nanobox/pull/435)
+  - Adjust the way we do nfs config on windows [#430](https://github.com/nanobox-io/nanobox/pull/430)
+  - Make tap a part of the server start on OSX [#428](https://github.com/nanobox-io/nanobox/pull/428)
+
+BUG FIXES:
+  - Fix a duplicate etc/exports issue on linux [#433](https://github.com/nanobox-io/nanobox/pull/433)
+  - Remove a server shutdown issue when there is no server [#431](https://github.com/nanobox-io/nanobox/pull/431)
+
+## 2.1.0 (April 7, 2017)
+
+FEATURES:
+  - Make a major change to the way nanobox runs. When running nanobox now creates a nanobox server
+    This change fixes the quality of life of most users because it should only ask for passwords once
+  - VPN now runs under the server
+  - All administrative commands (dns add, sharing etc.) now run through the server
+
+
+## 2.0.4 (March 6, 2017)
+
+BUG FIXES:
+  - Add idempotency to linux systemd service start [#399](https://github.com/nanobox-io/nanobox/pull/399)
+  - Fix an issue where the dev container disappeard unexpectedly [#402](https://github.com/nanobox-io/nanobox/pull/402)
+  - Fix an issue that caused us to pull s3 for updates every time [#396](https://github.com/nanobox-io/nanobox/pull/396)
+  - Fix an issue with /etc/exports on osx [#392](https://github.com/nanobox-io/nanobox/pull/392)
+
+FEATURES:
+  - Make linux startup system more flexable [#397](https://github.com/nanobox-io/nanobox/pull/397)
+  - Optimize display of summarized test [#395](https://github.com/nanobox-io/nanobox/pull/395)
+  - Add a check in for boxfile existance [#388](https://github.com/nanobox-io/nanobox/pull/388)
+
 ## 2.0.3 (February 23, 2017)
 
 BUG FIXES: 

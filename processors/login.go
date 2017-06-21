@@ -17,6 +17,7 @@ func Login(username, password, endpoint string) error {
 	if username == "" && os.Getenv("NANOBOX_USERNAME") != "" {
 		username = os.Getenv("NANOBOX_USERNAME")
 	}
+
 	if username == "" {
 		user, err := display.ReadUsername()
 		if err != nil {
@@ -52,7 +53,9 @@ func Login(username, password, endpoint string) error {
 	// verify that the user exists
 	token, err := odin.Auth(username, password)
 	if err != nil {
-		fmt.Println("! Incorrect username or password")
+		fmt.Println(`! The username/password was incorrect, but we're continuing on.
+  To reattempt authentication, run 'nanobox login'.
+`)
 		return nil
 	}
 
