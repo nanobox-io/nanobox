@@ -61,6 +61,22 @@ func InfoLocalContainer() {
 `))
 }
 
+func TunnelEstablished(component, port string) {
+	os.Stderr.WriteString(fmt.Sprintf(`
+--------------------------------------------------------------------------------
++ Secure tunnel established
++ Use the following credentials to connect to %s
+--------------------------------------------------------------------------------
+
+Host: 127.0.0.1
+Port: %s
+User: available in your dashboard (if applicable)
+Pass: available in your dashboard (if applicable)
+
+`, component, port))
+}
+
+
 func InfoDevContainer(ip string) {
 	os.Stderr.WriteString(fmt.Sprintf(`
 --------------------------------------------------------------------------------

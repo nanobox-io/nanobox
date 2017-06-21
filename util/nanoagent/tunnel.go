@@ -6,6 +6,8 @@ import (
 	"net"
 	"net/http"
 	"syscall"
+
+	"github.com/nanobox-io/nanobox/util/display"
 )
 
 func Tunnel(key, location, port string) error {
@@ -33,6 +35,7 @@ func Tunnel(key, location, port string) error {
 		return fmt.Errorf("failed to setup tcp listener: %s", err.Error())
 	}
 
+	display.TunnelEstablished(key, port)
 	fmt.Println("listening on port", port)
 
 	// handle connections
