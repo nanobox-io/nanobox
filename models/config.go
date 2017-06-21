@@ -23,6 +23,8 @@ type Config struct {
 	DockerMachineNetworkSpace string `json:"docker-machine-network-space"`
 	NativeNetworkSpace        string `json:"native-network-space"`
 
+	SshKey string `json:"ssh-key"`
+
 	Anonymous bool `json:"anonymous"`
 	LockPort  int  `json:"lock-port"`
 }
@@ -76,6 +78,10 @@ func (c *Config) makeValid() {
 
 	if _, _, err := net.ParseCIDR(c.NativeNetworkSpace); c.NativeNetworkSpace == "" || err != nil {
 		c.NativeNetworkSpace = "172.20.0.1/16"
+	}
+
+	if c.SshKey == "" {
+		c.SshKey = "default"
 	}
 
 	if c.LockPort == 0 {
