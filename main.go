@@ -129,7 +129,7 @@ func setupBugsnag() {
 		APIKey:       bugsnagToken,
 		Logger:       bugLog{},
 		Synchronous:  true,
-		AppVersion:   "2.1.1",
+		AppVersion:   "2.1.2",
 		PanicHandler: func() {}, // the built in panic handler reexicutes our code
 	})
 
