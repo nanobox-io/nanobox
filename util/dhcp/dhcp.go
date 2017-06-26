@@ -53,7 +53,7 @@ func ReserveGlobal() (net.IP, error) {
 	//
 	for ; ipSpace.GlobalNet.Contains(ip); inc(ip) {
 		if !contains(reservedIPs, ip) {
-			setReserved(append(reservedIPs, ip))
+			err := setReserved(append(reservedIPs, ip))
 			if err != nil {
 				return nil, err
 			}
@@ -126,7 +126,7 @@ func ReserveLocal() (net.IP, error) {
 		// get dockers local ipspace
 		for ; ipSpace.LocalNet.Contains(ip); inc(ip) {
 			if !contains(reservedIPs, ip) {
-				setReserved(append(reservedIPs, ip))
+				err := setReserved(append(reservedIPs, ip))
 				if err != nil {
 					return nil, err
 				}
@@ -143,7 +143,7 @@ func ReserveLocal() (net.IP, error) {
 		// get the native ipspace
 		for ; ipSpace.NativeNet.Contains(ip); inc(ip) {
 			if !contains(reservedIPs, ip) {
-				setReserved(append(reservedIPs, ip))
+				err := setReserved(append(reservedIPs, ip))
 				if err != nil {
 					return nil, err
 				}
