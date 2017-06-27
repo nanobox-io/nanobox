@@ -23,32 +23,41 @@ By using the [Nanobox installer](https://nanobox.io/download). *(Recommended)* .
 ### Usage
 ```
 Usage:
-  nanobox [flags]
-  nanobox [command]
+   [flags]
+   [command]
 
 Available Commands:
-  status      Displays the status of your Nanobox VM & running platforms.
-  deploy      Deploys your generated build package to a production app.
-  console     Opens an interactive console inside a production component.
-  link        Manages links between local & production apps.
-  login       Authenticates your nanobox client with your nanobox.io account.
-  logout      Removes your nanobox.io api token from your local nanobox client.
-  build       Generates a deployable build package.
-  clean       Clean out any environemnts that no longer exist
-  dev         Manages your 'development' environment.
-  sim         Manages your 'simulated' environment.
-  tunnel      Creates a secure tunnel between your local machine & a production component.
-  destroy     Destroys the Nanobox virtual machine.
-  start       Starts the Nanobox virtual machine.
-  stop        Stop the Nanobox virtual machine.
+  configure     Configure Nanobox.
+  run           Start your local development environment.
+  build-runtime Build your app's runtime.
+  compile-app   Compile your application.
+  deploy        Deploy your application to a live remote or a dry-run environment.
+  console       Open an interactive console inside a component.
+  remote        Manage application remotes.
+  status        Display the status of your Nanobox VM & apps.
+  login         Authenticate your nanobox client with your nanobox.io account.
+  logout        Remove your nanobox.io api token from your local nanobox client.
+  clean         Clean out any apps that no longer exist.
+  info          Show information about the specified environment.
+  tunnel        Create a secure tunnel between your local machine & a live component.
+  implode       Remove all Nanobox-created containers, files, & data.
+  destroy       Destroy the current project and remove it from Nanobox.
+  start         Start the Nanobox virtual machine.
+  stop          Stop the Nanobox virtual machine.
+  update-images Updates docker images.
+  evar          Manage environment variables.
+  dns           Manage dns aliases for local applications.
+  log           View and streams application logs.
+  version       Show the current Nanobox version.
+  server        Start a dedicated nanobox server
 
 Flags:
-      --debug         Increases display output and sets level to debug
-  -h, --help          help for nanobox
-  -v, --verbose       Increases display output and sets level to debug
-  -V, --veryverbose   Increases display output and sets level to trace
+      --debug     In the event of a failure, drop into debug context
+  -h, --help      help for
+  -t, --trace     Increases display output and sets level to trace
+  -v, --verbose   Increases display output and sets level to debug
 
-Use "nanobox [command] --help" for more information about a command.
+Use " [command] --help" for more information about a command.
 ```
 
 ### Documentation
