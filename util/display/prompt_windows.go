@@ -9,7 +9,7 @@ import (
 )
 
 // ReadPassword reads a password from the terminal and masks the input
-func ReadPassword() (string, error) {
+func ReadPassword(label string) (string, error) {
 
 	// Fetch the current state of the terminal so it can be restored later
 	oldState, err := terminal.GetState(int(os.Stdin.Fd()))
@@ -21,7 +21,7 @@ func ReadPassword() (string, error) {
 	// Restore echo after the function exits
 	defer terminal.Restore(int(os.Stdin.Fd()), oldState)
 
-	fmt.Printf("Nanobox Password: ")
+	fmt.Printf("%s Password: ", label)
 
 	// Read the password from stdin
 	t := terminal.NewTerminal(os.Stdin, "")

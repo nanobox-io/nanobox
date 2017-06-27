@@ -32,7 +32,7 @@ func Login(username, password, endpoint string) error {
 
 	if password == "" {
 		// ReadPassword prints Password: already
-		pass, err := display.ReadPassword()
+		pass, err := display.ReadPassword("Nanobox")
 		if err != nil {
 			return util.ErrorAppend(err, "failed to read password")
 		}
