@@ -14,6 +14,12 @@ func Sync(envModel *models.Env, appModel *models.App) error {
 	display.OpenContext("Syncing data components")
 	defer display.CloseContext()
 
+	// clean any crufty that may have been left by a failed
+	// sync
+	if err := Clean(appModel); err != nil {
+		return util.ErrorAppend(err, "failed to clean dirty components")
+	}
+
 	// purge delta components
 	if err := purgeDeltaComponents(envModel, appModel); err != nil {
 		return util.ErrorAppend(err, "failed to purge delta components")
