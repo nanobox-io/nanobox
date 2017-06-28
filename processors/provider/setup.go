@@ -62,11 +62,6 @@ func Setup() error {
 		return util.ErrorAppend(err, "failed to setup the provider network")
 	}
 
-	// attach the network to the host stack
-	if err := setDefaultIP(providerModel); err != nil {
-		return util.ErrorAppend(err, "failed to setup the provider network")
-	}
-
 	display.StopTask()
 
 	if err := Init(); err != nil {

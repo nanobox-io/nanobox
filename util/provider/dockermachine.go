@@ -529,6 +529,13 @@ func (machine DockerMachine) RemoveIP(ip string) error {
 }
 
 func (dockermachine DockerMachine) SetDefaultIP(ip string) error {
+	// check to see if the route is already set as the default
+	checkProcess := exec.Command(dockerMachineCmd, "ssh", "nanobox", "ip", "route")
+	checkOut, _ := checkProcess.CombinedOutput()
+	if strings.Contains(string(checkOut), ip) {
+		// if the output has this ip already we can return without changing anything
+		return nil
+	}
 
 	cmd := []string{
 		dockerMachineCmd,
