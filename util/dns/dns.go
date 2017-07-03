@@ -119,7 +119,9 @@ func (drpc *DomainRPC) Add(req Request, resp *Response) error {
 	defer f.Close()
 
 	// write the DNS entry to the file
-	if _, err := f.WriteString(fmt.Sprintf("%s%s", req.Entry, newline)); err != nil {
+	// we place a newline before and after because
+	// the extra new lines wont hurt and it ensures success
+	if _, err := f.WriteString(fmt.Sprintf("%s%s%s", newline, req.Entry, newline)); err != nil {
 		return err
 	}
 
