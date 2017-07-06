@@ -85,7 +85,13 @@ func batchPublish(container string) {
 		<-time.After(time.Second)
 		if len(changeList) > 0 {
 			lumber.Info("watcher: pushing: %+v", changeList)
-			util.DockerExec(container, "root", "touch", append([]string{"-c"}, changeList...), nil)
+			// util.DockerExec(container, "root", "touch", append([]string{"-c"}, changeList...), nil)
+			touches := []string{}
+			for _, change := range changeList {
+				touches = append(touches, fmt.Sprintf("touch -c -r %s %s", change, change))
+			}
+
+			util.DockerExec(container, "root", "bash", append([]string{"-c"}, strings.Join(touches, "; ")), nil)
 			changeList = []string{}
 		}
 	}
