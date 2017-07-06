@@ -91,7 +91,7 @@ func batchPublish(container string) {
 				touches = append(touches, fmt.Sprintf("touch -c -r %s %s", change, change))
 			}
 
-			util.DockerExec(container, "root", "bash", append([]string{"-c"}, strings.Join(touches, " && ")), nil)
+			util.DockerExec(container, "root", "bash", append([]string{"-c"}, strings.Join(touches, "; ")), nil)
 			changeList = []string{}
 		}
 	}
