@@ -19,6 +19,9 @@ import (
 var ignoreFile = []string{".git", ".hg", ".svn", ".bzr"}
 var changeList = []string{}
 
+var ctimeAvailable bool
+
+
 // the watch package watches a folder and all its sub folders
 // in doing so it may run into open file errors or things of that nature
 // if it does, it will automatically fall back to a slower but still
@@ -39,6 +42,7 @@ type Watcher interface {
 // watch a directory and report changes to nanobox
 func Watch(container, path string) error {
 	populateIgnore(path)
+	ctimeCheck(container)
 
 	lumber.Debug("watch: ignored dirs: %+v", ignoreFile)
 	// try watching with the fast one
@@ -85,16 +89,33 @@ func batchPublish(container string) {
 		<-time.After(time.Second)
 		if len(changeList) > 0 {
 			lumber.Info("watcher: pushing: %+v", changeList)
-			// util.DockerExec(container, "root", "touch", append([]string{"-c"}, changeList...), nil)
-			touches := []string{}
-			for _, change := range changeList {
-				touches = append(touches, fmt.Sprintf("touch -c -r %s %s", change, change))
+			if ctimeAvailable {
+				ctime(container, changeList)
+			} else {
+				touch(container, changeList)
 			}
 
-			util.DockerExec(container, "root", "bash", append([]string{"-c"}, strings.Join(touches, "; ")), nil)
 			changeList = []string{}
 		}
 	}
+}
+
+// check to see if ctime is installed on there docker image
+func ctimeCheck(container string) {
+	out, err := util.DockerExec(container, "root", "which", []string{"ctime"}, nil)
+	if err == nil && strings.Contains(out, "ctime") {
+		ctimeAvailable = true
+	}
+}
+
+// the touch command used when ctime isnt available
+func touch(container string, changeList []string) {
+	util.DockerExec(container, "root", "touch", append([]string{"-c"}, changeList...), nil)
+}
+
+// the ctime command we will use
+func ctime(container string, changeList []string) {
+	util.DockerExec(container, "root", "ctime", changeList, nil)	
 }
 
 // populate the ignore file from the nanoignore
