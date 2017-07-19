@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"syscall"
 
 	"github.com/jcelliott/lumber"
 	"github.com/mitchellh/go-homedir"
@@ -30,11 +31,20 @@ func GlobalDir() string {
 
 // LocalDir ...
 func LocalDir() string {
+	var cwd string
+	var err error
 
-	//
-	cwd, err := os.Getwd()
-	if err != nil {
-		return ""
+	// use syscall if possible (os uses $PWD, causing irregularities on darwin)
+	if syscall.ImplementsGetwd {
+		cwd, err = syscall.Getwd()
+		if err != nil {
+			return ""
+		}
+	} else {
+		cwd, err = os.Getwd()
+		if err != nil {
+			return ""
+		}
 	}
 
 	boxfilePresent := func(path string) bool {
