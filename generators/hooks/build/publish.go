@@ -14,11 +14,14 @@ type WarehouseConfig struct {
 }
 
 func PublishPayload(envModel *models.Env, warehouseConfig WarehouseConfig) string {
+	config, _ := models.LoadConfig()
+
 	pload := map[string]interface{}{
 		"build":           warehouseConfig.BuildID,
 		"warehouse":       warehouseConfig.WarehouseURL,
 		"warehouse_token": warehouseConfig.WarehouseToken,
 		"boxfile":         envModel.BuiltBoxfile,
+		"sync_verbose":    !(config.CIMode && !config.CISyncVerbose),
 	}
 
 	if warehouseConfig.PreviousBuild != "" {

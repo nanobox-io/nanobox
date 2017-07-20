@@ -10,6 +10,7 @@ import (
 type Config struct {
 	Provider string `json:"provider"`
 	CIMode   bool   `json:"ci-mode"`
+	CISyncVerbose bool `json:"ci-sync-verbose"`
 
 	// required for docker-machine
 	MountType      string `json:"mount-type"`
