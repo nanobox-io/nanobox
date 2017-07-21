@@ -2,12 +2,21 @@ package bridge
 
 import (
 	"fmt"
-	"os"
 	"os/exec"
+
+	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/commands/server"
 	"github.com/nanobox-io/nanobox/util/config"
 )
+type stream struct {
+
+}
+
+func (s stream) Write(p []byte) (n int, err error) {
+	lumber.Info("bridge: %s", p)
+	return len(p), nil
+}
 
 func Start(conf string) error {
 	resp := &Response{}
@@ -25,8 +34,8 @@ func (br *Bridge) Start(conf string, resp *Response) error {
 	}
 
 	runningBridge = exec.Command(config.VpnPath(), "--config", conf)
-	runningBridge.Stdout = os.Stdout
-	runningBridge.Stderr = os.Stderr
+	runningBridge.Stdout = stream{}
+	runningBridge.Stderr = stream{}
 
 	err := runningBridge.Start()
 	if err != nil {
