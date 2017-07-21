@@ -21,7 +21,6 @@ var changeList = []string{}
 
 var ctimeAvailable bool
 
-
 // the watch package watches a folder and all its sub folders
 // in doing so it may run into open file errors or things of that nature
 // if it does, it will automatically fall back to a slower but still
@@ -117,7 +116,7 @@ func touch(container string, changeList []string) {
 
 // the ctime command we will use
 func ctime(container string, changeList []string) {
-	util.DockerExec(container, "root", "ctime", changeList, nil)	
+	util.DockerExec(container, "root", "ctime", changeList, nil)
 }
 
 // populate the ignore file from the nanoignore

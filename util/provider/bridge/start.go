@@ -9,8 +9,8 @@ import (
 	"github.com/nanobox-io/nanobox/commands/server"
 	"github.com/nanobox-io/nanobox/util/config"
 )
-type stream struct {
 
+type stream struct {
 }
 
 func (s stream) Write(p []byte) (n int, err error) {

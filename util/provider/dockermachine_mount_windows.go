@@ -57,18 +57,18 @@ func (machine DockerMachine) addNetfsMount(local, host string) error {
 	// mfsymlinks,
 	config, _ := models.LoadConfig()
 	additionalOptions := config.NetfsMountOpts
-	
-	// since the mount command inserts the user into the command string with 
+
+	// since the mount command inserts the user into the command string with
 	// single quotes, we need to escape any single quotes from the real
 	// username. As the command will be running in bash, the actual escape
 	// sequence is a bit tricky. Each ' will be replaced with '"'"'.
 	escapedUser := strings.Replace(user, "'", "'\"'\"'", -1)
-	
+
 	opts := fmt.Sprintf("nodev,sec=ntlmssp,user='%s',password='%s',uid=1000,gid=1000", escapedUser, pass)
 	if additionalOptions != "" {
 		opts = fmt.Sprintf("%s,%s", additionalOptions, opts)
 	}
-	
+
 	cmd = []string{
 		"sudo",
 		"/bin/mount",
@@ -79,7 +79,7 @@ func (machine DockerMachine) addNetfsMount(local, host string) error {
 		source,
 		host,
 	}
-	
+
 	lumber.Debug("cifs mount cmd: %v", cmd)
 	if b, err := Run(cmd); err != nil {
 		lumber.Debug("mount output: %s", b)
