@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/util"
@@ -34,6 +35,17 @@ func serverFnc(ccmd *cobra.Command, args []string) {
 	}
 	// make sure things know im the server
 	registry.Set("server", true)
+
+	// set the logger on linux and osx to go to /var/log
+	if runtime.GOOS != "windows" {
+		fileLogger, err := lumber.NewTruncateLogger("/var/log/nanobox.log")
+		if err != nil {
+			log.Printf("logging error:%s\n", err)
+		}
+
+		//
+		lumber.SetLogger(fileLogger)
+	}
 
 	// fire up the service manager (only required on windows)
 	go svcStart()

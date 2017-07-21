@@ -53,10 +53,12 @@ func Watch(container, path string) error {
 		lumber.Info("Error occured in fast notify watcher: %s", err.Error())
 
 		// print the warning
-		fmt.Printf("\n-------------------------------------------------------\n\n")
-		fmt.Printf("Uh oh, the live filesystem watcher has panic'ed.\n")
-		fmt.Printf("We'll go ahead and rollover to a slower polling solution.\n")
-		fmt.Printf("\n-------------------------------------------------------\n\n")
+		// we added /r because this message often appears in a raw terminal which requires
+		// carrage returns
+		fmt.Printf("\n\r-------------------------------------------------------\n\r\n\r")
+		fmt.Printf("Uh oh, the live filesystem watcher has panic'ed.\n\r")
+		fmt.Printf("We'll go ahead and rollover to a slower polling solution.\n\r")
+		fmt.Printf("\n\r-------------------------------------------------------\n\r\n\r")
 
 		watcher.close()
 		watcher = newCrawlWatcher(path)
