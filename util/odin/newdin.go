@@ -1,33 +1,33 @@
 package odin
 
 import (
-	"bytes"
-	"encoding/json"
-	"errors"
 	"fmt"
-	"io/ioutil"
-	"net/http"
 	"net/url"
 	"strings"
+
+	"github.com/loganmac/nanobox/models"
 )
 
 // Client holds the state and is responsible for making requests to Odin
 type Client struct {
-	HTTP            http.Client // the configured HTTP client
-	URL             string      // which URL to send to
-	BonesaltURL     string      // Bonesalt target URL
-	DevURL          string      // Dev target URL
-	SimURL          string      // Sim target URL
-	NanoboxURL      string      // Nanobox (default) URL
-	NanoboxUsername string      // username to connect to odin
-	NanoboxPassword string      // password to connect to odin
+	HTTP            httpClient // the configured HTTP client
+	URL             string     // which URL to send to
+	BonesaltURL     string     // Bonesalt target URL
+	DevURL          string     // Dev target URL
+	SimURL          string     // Sim target URL
+	NanoboxURL      string     // Nanobox (default) URL
+	NanoboxUsername string     // username to connect to odin
+	NanoboxPassword string     // password to connect to odin
 	// inject an AuthRepo to retrieve stored auth tokens for various endpoints,
 	// instead of reaching out to some global database
 	AuthRepo AuthRepo
-	// inject a logger so that we know what's going on, and have a logger that we
-	// can configure one time, for things like setting the loglevel so you don't
-	// have to inspect a debug flag in our application logic
-	Logger logger
+}
+
+// httpClient is an interface that let's us mock out the
+// more granular details of connecting to Odin and just
+// return specific responses
+type httpClient interface {
+	do(method, url string, payload interface{}) (*odinResponse, error)
 }
 
 // AuthRepo is any key-value store, really, used here
@@ -55,9 +55,9 @@ type odinResponse struct {
 	Protocol  string `json:"protocol"`
 }
 
-// SetEndpoint takes in a string and sets the client's current request URL to the
+// SetTarget takes in a string and sets the client's current request URL to the
 // one that corresponds with that slug, defaulting to the Nanobox URL
-func (c *Client) SetEndpoint(s string) {
+func (c *Client) SetTarget(s string) {
 	endpoint := strings.ToUpper(s)
 	switch endpoint {
 	case "BONESALT":
@@ -74,13 +74,24 @@ func (c *Client) SetEndpoint(s string) {
 // Auth makes a request to the endpoint with the client's username and password,
 // caches the returned authentication token, and returns it
 func (c *Client) Auth() (string, error) {
+	// Try checking cached token
+	var authToken string
+	if err := c.AuthRepo.Get("auths", c.URL, &authToken); err != nil {
+		return "", err
+	}
+	// return it if we have a cached one
+	if authToken != "" {
+		return authToken, nil
+	}
+	// Otherwise, we must not have a cached token, so let's get one
+
 	// URLEncode the password
 	var params url.Values
 	params.Set("password", c.NanoboxPassword)
-	// Construct the endpoint
-	endpoint := fmt.Sprintf("%s/users/%s/auth_token", c.URL, c.NanoboxUsername)
+	// Construct the URL
+	reqURL := fmt.Sprintf("%s/users/%s/auth_token?%s", c.URL, c.NanoboxUsername, params.Encode())
 	// make request
-	res, err := c.do("GET", endpoint, params, nil)
+	res, err := c.HTTP.do("GET", reqURL, nil)
 	if err != nil {
 		return "", nil
 	}
@@ -91,73 +102,44 @@ func (c *Client) Auth() (string, error) {
 	return res.AuthToken, nil
 }
 
-// do wraps Client.HTTP.do with things like logging, json parsing, authentication, and error handling
-func (c *Client) do(method, endpoint string, params url.Values, payload interface{}) (*odinResponse, error) {
-	// get auth key for endpoint before we do anything else
-	var authToken string
-	c.AuthRepo.Get("auths", c.URL, &authToken)
-	if authToken == "" {
-		// try authenticating if there isn't one
-		token, err := c.Auth()
-		if err != nil {
-			return nil, err
-		}
-		// set it with new token
-		authToken = token
+// App takes in a slug like "appID" or "teamID/appID",
+// and returns the app details from Odin
+func (c *Client) App(slug string) (models.App, error) {
+	app := models.App{}
+	// construct parameters
+	var params url.Values
+	// split up teamID if it exists and add it to the params
+	appendTeamContext(&slug, &params)
+	// grab the auth token
+	authToken, err := c.Auth()
+	if err != nil {
+		return app, err
 	}
 	params.Set("auth_token", authToken)
-
-	// marshal the payload to json, if there is one
-	var reqBody *bytes.Buffer
-	if payload != nil {
-		jsonBody, err := json.Marshal(payload)
-		if err != nil {
-			return nil, err
-		}
-		reqBody = bytes.NewBuffer(jsonBody)
-	}
-	// construct the request to be sent to Odin
-	url := fmt.Sprintf("%s%s?%s", c.URL, endpoint, params.Encode())
-	req, err := http.NewRequest(method, url, reqBody)
+	// construct the URL
+	reqURL := fmt.Sprintf("%s/apps/%s?%s", c.URL, slug, params.Encode())
+	// make request
+	res, err := c.HTTP.do("GET", reqURL, nil)
 	if err != nil {
-		return nil, err
+		return app, nil
 	}
-	req.Header.Set("Content-Type", "application/json")
+	_ = res // until we find out
+	// TODO: find out the specific return of the app request to odin
+	// so that we can marshal the response here and set it.
+	return app, nil
+}
 
-	// if we are debugging, log request
-	c.Logger.Debug("Odin Request", "method", req.Method, "url", req.URL, "proto", req.Proto)
-
-	// call upon the might of the Alfadir
-	res, err := c.HTTP.Do(req)
-	if err != nil {
-		return nil, err
+// appendTeamContext is a helper to check the input for
+// teamID/appID pattern, split it up, and append the teamID to the
+// parameters as "ci"
+func appendTeamContext(input *string, params *url.Values) {
+	// check for the "teamname/appname" pattern
+	if strings.Contains(*input, "/") {
+		// split into [teamID, appID]
+		teamAppIDs := strings.Split(*input, "/")
+		// set the team name in the params under "ci"
+		// for "Context ID"
+		params.Set("ci", teamAppIDs[0])
+		input = &teamAppIDs[1]
 	}
-	defer res.Body.Close()
-
-	// read body into buffer
-	resBody, err := ioutil.ReadAll(res.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	// if we are debugging, log response
-	c.Logger.Debug("Odin Response", "body", resBody, "statusCode", res.StatusCode, "method", req.Method,
-		"url", req.URL, "proto", req.Proto, "content-length", res.Header.Get("Content-Length"))
-
-	// handle error responses
-	if res.StatusCode < 200 || res.StatusCode > 299 {
-		c.Logger.Error("bad response from Odin", "body", resBody, "statusCode", res.StatusCode, "method", req.Method,
-			"url", req.URL, "proto", req.Proto, "content-length", res.Header.Get("Content-Length"))
-		return nil, errors.New("received a bad response from odin")
-	}
-
-	// decode the response json
-	var odinResp odinResponse
-	if err := json.Unmarshal(resBody, &odinResp); err != nil {
-		// sometimes it's difficult for mere mortals to comprehend the Alfadir's
-		// mighty tambre, so we just log that out
-		c.Logger.Error("error parsing response from Odin", "error", err)
-		return nil, fmt.Errorf("could not parse response: %v", err)
-	}
-	return &odinResp, nil
 }
