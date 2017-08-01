@@ -7,8 +7,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/nanobox-io/nanobox/models"
-	// "github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
@@ -27,7 +25,7 @@ func Run(path string) error {
 	}
 
 	// download the file and display the progress bar
-	resp, err := http.Get(RemotePath())
+	resp, err := http.Get(remotePath())
 	if err != nil {
 		return err
 	}
@@ -49,8 +47,7 @@ func Run(path string) error {
 	}
 
 	// update the model
-	update, _ := models.LoadUpdate()
-	populateUpdate(update)
+	update := newUpdate()
 
 	return update.Save()
 }

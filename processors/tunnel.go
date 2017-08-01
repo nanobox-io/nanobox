@@ -17,7 +17,7 @@ func Tunnel(envModel *models.Env, tunnelConfig TunnelConfig) error {
 	appID := tunnelConfig.App
 
 	// fetch the remote
-	remote, ok := envModel.Remotes[tunnelConfig.App]
+	remote, ok := envModel.Remotes[appID]
 	if ok {
 		// set the odin endpoint
 		odin.SetEndpoint(remote.Endpoint)

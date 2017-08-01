@@ -38,13 +38,30 @@ var (
 
 	// NanoboxCmd ...
 	NanoboxCmd = &cobra.Command{
-		Use:   "",
+		Use:   "nanobox",
 		Short: "",
 		Long:  ``,
 		PersistentPreRun: func(ccmd *cobra.Command, args []string) {
 			// report the command to nanobox
 			processors.SubmitLog(strings.Replace(ccmd.CommandPath(), "nanobox ", "", 1))
 			// mixpanel.Report(strings.Replace(ccmd.CommandPath(), "nanobox ", "", 1))
+
+			registry.Set("debug", debugMode)
+
+			// setup the display output
+			if displayDebugMode {
+				os.Stdout.Write([]byte("DebugMode\n"))
+				lumber.Level(lumber.DEBUG)
+				display.Summary = false
+				display.Level = "debug"
+			}
+
+			if displayTraceMode {
+				os.Stdout.Write([]byte("TraceMode\n"))
+				lumber.Level(lumber.TRACE)
+				display.Summary = false
+				display.Level = "trace"
+			}
 
 			// alert the user if an update is needed
 			update.Check()
@@ -59,7 +76,7 @@ var (
 				lumber.SetLogger(fileLogger)
 
 			} else {
-				// We should only allow admin in 3 carse
+				// We should only allow admin in 3 cases
 				// 1 cimode
 				// 2 server is running
 				// 3 configuring
@@ -79,27 +96,11 @@ var (
 				registry.Set("endpoint", endpoint)
 			}
 
-			registry.Set("debug", debugMode)
-
-			// setup the display output
-			if displayDebugMode {
-				lumber.Level(lumber.DEBUG)
-				display.Summary = false
-				display.Level = "debug"
-			}
-
-			if displayTraceMode {
-				lumber.Level(lumber.TRACE)
-				display.Summary = false
-				display.Level = "trace"
-			}
-
 			if configModel.CIMode {
 				lumber.Level(lumber.INFO)
 				display.Summary = false
 				display.Level = "info"
 			}
-
 		},
 
 		//

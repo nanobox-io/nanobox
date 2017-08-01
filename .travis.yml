@@ -5,7 +5,7 @@ language: go
 dist: trusty
 
 go:
-  - 1.7.3
+  - 1.8.x
 
 before_install:
   - sudo apt-get -y purge docker-engine

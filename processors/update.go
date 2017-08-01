@@ -1,3 +1,5 @@
+// This update processor updates the images on nanobox local
+
 package processors
 
 import (

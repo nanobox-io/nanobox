@@ -7,7 +7,6 @@ import (
 	"os/exec"
 	"runtime"
 
-	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/service"
 	"github.com/nanobox-io/nanobox/util/update"
@@ -18,6 +17,7 @@ func main() {
 
 	path := ""
 	var err error
+	// this will write a new binary at location provided `nanobox-update newbinary`
 	if len(os.Args) > 1 {
 		path = os.Args[1]
 	} else {
@@ -44,8 +44,9 @@ func main() {
 
 		}
 
-		// make sure the .nanobox folder is created by our user
-		models.LoadUpdate()
+		// todo: make sure removing this doesn't break things
+		// // make sure the .nanobox folder is created by our user
+		// models.LoadUpdate()
 
 		cmd := fmt.Sprintf("%s \"%s\"", os.Args[0], path)
 		if err := util.PrivilegeExec(cmd); err != nil {
