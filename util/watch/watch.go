@@ -90,23 +90,23 @@ func batchPublish(container string) {
 		<-time.After(time.Second)
 		if len(changeList) > 0 {
 			lumber.Info("watcher: pushing: %+v", changeList)
-			
+
 			// As it turns out, the ctime behavior isn't fool-proof. After running
 			// ctime as the default for a couple of weeks, reports have
 			// confirmed that a majority of frameworks will not actually detect
 			// a change if file attributes haven't been modified. We will need
-			// to re-address this, either as a configurable option, or as a 
+			// to re-address this, either as a configurable option, or as a
 			// custom patched kernel with a custom syscall that we can tie into.
-			// 
+			//
 			// Until either of the aforementioned options are available, the
 			// responsible decision here is to rollback to the previous point.
-			// 
+			//
 			// if ctimeAvailable {
 			// 	ctime(container, changeList)
 			// } else {
 			// 	touch(container, changeList)
 			// }
-			
+
 			touch(container, changeList)
 
 			changeList = []string{}

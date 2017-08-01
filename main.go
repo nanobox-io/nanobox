@@ -3,7 +3,6 @@ package main
 
 import (
 	"bufio"
-	// "crypto/md5"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -118,18 +117,11 @@ func main() {
 }
 
 func setupBugsnag() {
-	// update, _ := models.LoadUpdate()
-	// md5Parts := strings.Fields(update.CurrentVersion)
-	// version := ""
-	// if len(md5Parts) > 1 {
-	// 	version = md5Parts[len(md5Parts)-1]
-	// }
-
 	bugsnag.Configure(bugsnag.Configuration{
 		APIKey:       bugsnagToken,
 		Logger:       bugLog{},
 		Synchronous:  true,
-		AppVersion:   "2.1.2",
+		AppVersion:   models.VersionString(),
 		PanicHandler: func() {}, // the built in panic handler reexicutes our code
 	})
 

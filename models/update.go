@@ -7,9 +7,8 @@ import (
 
 // Update ...
 type Update struct {
-	CurrentVersion string
-	LastCheckAt    time.Time
-	LastUpdatedAt  time.Time
+	LastCheckAt   time.Time
+	LastUpdatedAt time.Time
 }
 
 // LoadUpdate loads the update entry

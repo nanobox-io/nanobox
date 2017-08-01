@@ -9,8 +9,7 @@ import (
 )
 
 var (
-
-	// UpdateCmd ...
+	// UpdateCmd updates the images
 	UpdateCmd = &cobra.Command{
 		Use:   "update-images",
 		Short: "Updates docker images.",
