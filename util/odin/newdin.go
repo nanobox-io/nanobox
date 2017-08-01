@@ -77,22 +77,38 @@ func (c *Client) Auth() (string, error) {
 	// URLEncode the password
 	var params url.Values
 	params.Set("password", c.NanoboxPassword)
-	// Construct the URL
-	URL := fmt.Sprintf("%s/users/%s/auth_token", c.URL, c.NanoboxUsername)
+	// Construct the endpoint
+	endpoint := fmt.Sprintf("%s/users/%s/auth_token", c.URL, c.NanoboxUsername)
 	// make request
-	res, err := c.do("GET", URL, params, nil)
+	res, err := c.do("GET", endpoint, params, nil)
 	if err != nil {
 		return "", nil
 	}
 	// cache authToken
-	c.AuthRepo.Put("auths", c.URL, res.AuthToken)
+	if err := c.AuthRepo.Put("auths", c.URL, res.AuthToken); err != nil {
+		return "", err
+	}
 	return res.AuthToken, nil
 }
 
 // do wraps Client.HTTP.do with things like logging, json parsing, authentication, and error handling
-func (c *Client) do(method, url string, params url.Values, payload interface{}) (*odinResponse, error) {
-	var reqBody *bytes.Buffer
+func (c *Client) do(method, endpoint string, params url.Values, payload interface{}) (*odinResponse, error) {
+	// get auth key for endpoint before we do anything else
+	var authToken string
+	c.AuthRepo.Get("auths", c.URL, &authToken)
+	if authToken == "" {
+		// try authenticating if there isn't one
+		token, err := c.Auth()
+		if err != nil {
+			return nil, err
+		}
+		// set it with new token
+		authToken = token
+	}
+	params.Set("auth_token", authToken)
+
 	// marshal the payload to json, if there is one
+	var reqBody *bytes.Buffer
 	if payload != nil {
 		jsonBody, err := json.Marshal(payload)
 		if err != nil {
@@ -101,21 +117,13 @@ func (c *Client) do(method, url string, params url.Values, payload interface{}) 
 		reqBody = bytes.NewBuffer(jsonBody)
 	}
 	// construct the request to be sent to Odin
+	url := fmt.Sprintf("%s%s?%s", c.URL, endpoint, params.Encode())
 	req, err := http.NewRequest(method, url, reqBody)
 	if err != nil {
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
-	// get auth key for endpoint
-	var authToken string
-	c.AuthRepo.Get("auths", c.URL, &authToken)
-	if authToken == "" {
-		// try authenticating if there isn't one
-		authToken, err = c.Auth()
-		if err != nil {
-			return nil, err
-		}
-	}
+
 	// if we are debugging, log request
 	c.Logger.Debug("Odin Request", "method", req.Method, "url", req.URL, "proto", req.Proto)
 
