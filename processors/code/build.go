@@ -97,8 +97,12 @@ func prepareBuildEnvironment(containerID string) error {
 	}
 
 	// run the configure hook
-	if _, err := hookit.DebugExec(containerID, "configure", hook_generator.ConfigurePayload(), "info"); err != nil {
-		return util.ErrorAppend(err, "failed to run the configure hook")
+	if out, err := hookit.DebugExec(containerID, "configure", hook_generator.ConfigurePayload(), "info"); err != nil {
+		if err2, ok := err.(util.Err); ok {
+			err2.Output = out
+			return util.ErrorAppend(err2, "failed to run the configure hook")
+		}
+		return util.ErrorAppend(err, "failed to run configure hook")
 	}
 
 	// run the fetch hook
@@ -111,8 +115,12 @@ func prepareBuildEnvironment(containerID string) error {
 	}
 
 	// run the setup hook
-	if _, err := hookit.DebugExec(containerID, "setup", hook_generator.SetupPayload(), "info"); err != nil {
-		return util.ErrorAppend(err, "failed to run the setup hook")
+	if out, err := hookit.DebugExec(containerID, "setup", hook_generator.SetupPayload(), "info"); err != nil {
+		if err2, ok := err.(util.Err); ok {
+			err2.Output = out
+			return util.ErrorAppend(err2, "failed to run the setup hook")
+		}
+		return util.ErrorAppend(err, "failed to run setup hook")
 	}
 
 	return nil
@@ -126,7 +134,11 @@ func gatherRequirements(envModel *models.Env, containerID string) error {
 	// run the boxfile hook
 	boxOutput, err := hookit.DebugExec(containerID, "boxfile", hook_generator.BoxfilePayload(), "info")
 	if err != nil {
-		return err
+		if err2, ok := err.(util.Err); ok {
+			err2.Output = boxOutput
+			return util.ErrorAppend(err2, "failed to run the boxfile hook")
+		}
+		return util.ErrorAppend(err, "failed to run boxfile hook")
 	}
 
 	box := boxfile.NewFromPath(config.Boxfile())
@@ -156,9 +168,13 @@ func setupBuildMounts(containerID string) error {
 	display.StartTask("Mounting cache_dirs")
 	defer display.StopTask()
 
-	// run the build hook
-	if _, err := hookit.DebugExec(containerID, "mount", hook_generator.MountPayload(), "info"); err != nil {
-		return err
+	// run the mount hook
+	if out, err := hookit.DebugExec(containerID, "mount", hook_generator.MountPayload(), "info"); err != nil {
+		if err2, ok := err.(util.Err); ok {
+			err2.Output = out
+			return util.ErrorAppend(err2, "failed to run the mount hook")
+		}
+		return util.ErrorAppend(err, "failed to run mount hook")
 	}
 
 	return nil
@@ -170,8 +186,12 @@ func installRuntimes(containerID string) error {
 	defer display.StopTask()
 
 	// run the build hook
-	if _, err := hookit.DebugExec(containerID, "build", hook_generator.BuildPayload(), "info"); err != nil {
-		return err
+	if out, err := hookit.DebugExec(containerID, "build", hook_generator.BuildPayload(), "info"); err != nil {
+		if err2, ok := err.(util.Err); ok {
+			err2.Output = out
+			return util.ErrorAppend(err2, "failed to run the build hook")
+		}
+		return util.ErrorAppend(err, "failed to run build hook")
 	}
 
 	return nil
@@ -183,18 +203,30 @@ func packageBuild(containerID string) error {
 	defer display.StopTask()
 
 	// run the pack-build hook
-	if _, err := hookit.DebugExec(containerID, "pack-build", hook_generator.PackBuildPayload(), "info"); err != nil {
-		return err
+	if out, err := hookit.DebugExec(containerID, "pack-build", hook_generator.PackBuildPayload(), "info"); err != nil {
+		if err2, ok := err.(util.Err); ok {
+			err2.Output = out
+			return util.ErrorAppend(err2, "failed to run the pack-build hook")
+		}
+		return util.ErrorAppend(err, "failed to run pack-build hook")
 	}
 
 	// run the clean hook
-	if _, err := hookit.DebugExec(containerID, "clean", hook_generator.CleanPayload(), "info"); err != nil {
-		return err
+	if out, err := hookit.DebugExec(containerID, "clean", hook_generator.CleanPayload(), "info"); err != nil {
+		if err2, ok := err.(util.Err); ok {
+			err2.Output = out
+			return util.ErrorAppend(err2, "failed to run the clean hook")
+		}
+		return util.ErrorAppend(err, "failed to run clean hook")
 	}
 
 	// run the pack-deploy hook
-	if _, err := hookit.DebugExec(containerID, "pack-deploy", hook_generator.PackDeployPayload(), "info"); err != nil {
-		return err
+	if out, err := hookit.DebugExec(containerID, "pack-deploy", hook_generator.PackDeployPayload(), "info"); err != nil {
+		if err2, ok := err.(util.Err); ok {
+			err2.Output = out
+			return util.ErrorAppend(err2, "failed to run the pack-deploy hook")
+		}
+		return util.ErrorAppend(err, "failed to run pack-deploy hook")
 	}
 
 	return nil

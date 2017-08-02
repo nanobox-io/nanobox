@@ -80,18 +80,30 @@ func prepareCompileEnvironment(containerID string) error {
 	}
 
 	// run the configure hook
-	if _, err := hookit.DebugExec(containerID, "configure", hook_generator.ConfigurePayload(), "info"); err != nil {
-		return err
+	if out, err := hookit.DebugExec(containerID, "configure", hook_generator.ConfigurePayload(), "info"); err != nil {
+		if err2, ok := err.(util.Err); ok {
+			err2.Output = out
+			return util.ErrorAppend(err2, "failed to run the configure hook")
+		}
+		return util.ErrorAppend(err, "failed to run configure hook")
 	}
 
 	// run the boxfile hook
-	if _, err := hookit.DebugExec(containerID, "boxfile", hook_generator.BoxfilePayload(), "info"); err != nil {
-		return err
+	if out, err := hookit.DebugExec(containerID, "boxfile", hook_generator.BoxfilePayload(), "info"); err != nil {
+		if err2, ok := err.(util.Err); ok {
+			err2.Output = out
+			return util.ErrorAppend(err2, "failed to run the boxfile hook")
+		}
+		return util.ErrorAppend(err, "failed to run boxfile hook")
 	}
 
 	// run the mount hook
-	if _, err := hookit.DebugExec(containerID, "mount", hook_generator.MountPayload(), "info"); err != nil {
-		return err
+	if out, err := hookit.DebugExec(containerID, "mount", hook_generator.MountPayload(), "info"); err != nil {
+		if err2, ok := err.(util.Err); ok {
+			err2.Output = out
+			return util.ErrorAppend(err2, "failed to run the mount hook")
+		}
+		return util.ErrorAppend(err, "failed to run mount hook")
 	}
 
 	return nil
@@ -104,13 +116,21 @@ func compileCode(containerID string) error {
 	defer display.StopTask()
 
 	// run the compile hook
-	if _, err := hookit.DebugExec(containerID, "compile", hook_generator.CompilePayload(), "info"); err != nil {
-		return err
+	if out, err := hookit.DebugExec(containerID, "compile", hook_generator.CompilePayload(), "info"); err != nil {
+		if err2, ok := err.(util.Err); ok {
+			err2.Output = out
+			return util.ErrorAppend(err2, "failed to run the compile hook")
+		}
+		return util.ErrorAppend(err, "failed to run compile hook")
 	}
 
 	// run the pack-app hook
-	if _, err := hookit.DebugExec(containerID, "pack-app", hook_generator.PackAppPayload(), "info"); err != nil {
-		return err
+	if out, err := hookit.DebugExec(containerID, "pack-app", hook_generator.PackAppPayload(), "info"); err != nil {
+		if err2, ok := err.(util.Err); ok {
+			err2.Output = out
+			return util.ErrorAppend(err2, "failed to run the pack-app hook")
+		}
+		return util.ErrorAppend(err, "failed to run pack-app hook")
 	}
 
 	return nil

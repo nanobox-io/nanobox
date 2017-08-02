@@ -89,7 +89,11 @@ func Publish(envModel *models.Env, WarehouseConfig WarehouseConfig) error {
 		display.ErrorTask()
 		return util.ErrorAppend(err, "unable to retrieve user payload")
 	}
-	if _, err := hookit.DebugExec(container.ID, "publish", payload, "info"); err != nil {
+	if out, err := hookit.DebugExec(container.ID, "publish", payload, "info"); err != nil {
+		if err2, ok := err.(util.Err); ok {
+			err2.Output = out
+			return util.ErrorAppend(err2, "failed to run the publish hook")
+		}
 		return util.ErrorAppend(err, "failed to run publish hook")
 	}
 

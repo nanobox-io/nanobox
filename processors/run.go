@@ -113,8 +113,12 @@ func setup(appModel *models.App) error {
 		return util.ErrorAppend(err, "failed to run the user hook")
 	}
 
-	if _, err := hookit.DebugExec(container.ID, "dev", build_generator.DevPayload(appModel), "info"); err != nil {
-		return util.ErrorAppend(err, "failed to run the dev hook")
+	if out, err := hookit.DebugExec(container.ID, "dev", build_generator.DevPayload(appModel), "info"); err != nil {
+		if err2, ok := err.(util.Err); ok {
+			err2.Output = out
+			return util.ErrorAppend(err2, "failed to run the dev hook")
+		}
+		return util.ErrorAppend(err, "failed to run dev hook")
 	}
 	display.StopTask()
 
