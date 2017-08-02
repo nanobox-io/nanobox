@@ -1,4 +1,4 @@
-// Package commands ...
+// Package commands defines the commands that nanobox can run
 package commands
 
 import (

@@ -43,6 +43,20 @@ Error   : %s
 Context : %s
 `, parsedErr.cause, parsedErr.context)
 
+	if parsedErr.suggest != "" {
+		output = fmt.Sprintf(`
+%s
+Suggest : %s
+`, output, parsedErr.suggest)
+	}
+
+	if parsedErr.output != "" {
+		output = fmt.Sprintf(`
+%s
+Output : %s
+`, output, parsedErr.output)
+	}
+
 	app := ""
 	env, err := models.FindEnvByID(config.EnvID())
 	if err == nil {
@@ -65,8 +79,10 @@ Context : %s
 			"error":           parsedErr.cause,
 			"mount-type":      conf.MountType,
 			"nanobox-version": models.VersionString(),
+			"output":          parsedErr.output,
 			"os":              runtime.GOOS,
 			"provider":        conf.Provider,
+			"suggest":         parsedErr.suggest,
 			"team":            parsedErr.team,
 		},
 	)
@@ -94,6 +110,8 @@ Context : %s
 type errBits struct {
 	cause   string
 	context string
+	output  string
+	suggest string
 	team    string
 }
 
@@ -114,7 +132,12 @@ func parseCommandErr(err error) errBits {
 	if er, ok := err.(util.Err); ok {
 		bits := errBits{}
 		bits.team, bits.cause = parseTeam(er.Message)
+		if er.Code != "" {
+			bits.team = er.Code
+		}
 		bits.context = strings.Join(er.Stack, " -> ")
+		bits.suggest = er.Suggest
+		bits.output = strings.TrimSpace(er.Output)
 		return bits
 	}
 

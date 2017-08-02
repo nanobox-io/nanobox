@@ -1,6 +1,7 @@
 package code
 
 import (
+	"strings"
 	"time"
 
 	"github.com/jcelliott/lumber"
@@ -82,23 +83,36 @@ func prepareBuildEnvironment(containerID string) error {
 	defer display.StopTask()
 
 	// run the user hook
-	if _, err := hookit.DebugExec(containerID, "user", hook_generator.UserPayload(), "info"); err != nil {
-		return err
+	if out, err := hookit.DebugExec(containerID, "user", hook_generator.UserPayload(), "info"); err != nil {
+		// handle 'exec failed: argument list too long' error
+		if strings.Contains(out, "argument list too long") {
+			if err2, ok := err.(util.Err); ok {
+				err2.Suggest = "You may have too many ssh keys, please specify the one you need with `nanobox config set ssh-key ~/.ssh/id_rsa`"
+				err2.Output = out
+				err2.Code = "1001"
+				return util.ErrorAppend(err2, "failed to run the user hook")
+			}
+		}
+		return util.ErrorAppend(err, "failed to run the user hook")
 	}
 
 	// run the configure hook
 	if _, err := hookit.DebugExec(containerID, "configure", hook_generator.ConfigurePayload(), "info"); err != nil {
-		return err
+		return util.ErrorAppend(err, "failed to run the configure hook")
 	}
 
 	// run the fetch hook
-	if _, err := hookit.DebugExec(containerID, "fetch", hook_generator.FetchPayload(), "info"); err != nil {
-		return err
+	if out, err := hookit.DebugExec(containerID, "fetch", hook_generator.FetchPayload(), "info"); err != nil {
+		if err2, ok := err.(util.Err); ok {
+			err2.Output = out
+			return util.ErrorAppend(err2, "failed to run the fetch hook")
+		}
+		return util.ErrorAppend(err, "failed to run the fetch hook")
 	}
 
 	// run the setup hook
 	if _, err := hookit.DebugExec(containerID, "setup", hook_generator.SetupPayload(), "info"); err != nil {
-		return err
+		return util.ErrorAppend(err, "failed to run the setup hook")
 	}
 
 	return nil

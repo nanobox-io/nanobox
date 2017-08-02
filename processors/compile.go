@@ -22,7 +22,7 @@ func Compile(envModel *models.Env) error {
 
 	// build code
 	if err := code.Compile(envModel); err != nil {
-		return util.ErrorAppend(err, "failed to build the code")
+		return util.ErrorAppend(err, "failed to compile the code")
 	}
 
 	return nil
