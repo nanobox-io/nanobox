@@ -170,7 +170,7 @@ func (machine DockerMachine) Create() error {
 		// if its complainging about the world writable error issue
 		if strings.Contains(fullBuffer.String(), "VERR_SUPLIB_WORLD_WRITABLE") {
 			display.WorldWritable()
-			return util.ErrorfQuiet("%s: %s", fullBuffer.String(), err)
+			return util.ErrorfQuiet("[USER] %s: %s", fullBuffer.String(), err)
 		}
 		display.ErrorTask()
 		return util.Errorf("%s: %s", fullBuffer.String(), err)
@@ -394,7 +394,7 @@ func (machine DockerMachine) Start() error {
 	if err := process.Run(); err != nil {
 		display.ErrorTask()
 		display.VMCommunicationError()
-		return util.ErrorfQuiet("VM cannot communicate with host")
+		return util.ErrorfQuiet("[NANOBOX] VM cannot communicate with host")
 	}
 
 	if machine.changedIP() {

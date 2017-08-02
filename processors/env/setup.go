@@ -23,7 +23,7 @@ func Setup(envModel *models.Env) error {
 	if box := boxfile.NewFromPath(config.Boxfile()); !box.Valid {
 		display.MissingBoxfile()
 		// todo: add suggestion here
-		return util.ErrorfQuiet("missing or invalid boxfile")
+		return util.ErrorfQuiet("[USER] missing or invalid boxfile")
 	}
 
 	// init docker client

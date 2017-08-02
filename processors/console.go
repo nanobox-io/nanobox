@@ -42,7 +42,15 @@ func Console(envModel *models.Env, consoleConfig ConsoleConfig) error {
 	key, location, protocol, err := odin.EstablishConsole(appID, consoleConfig.Host)
 	if err != nil {
 		// todo: can we know if the request was rejected for authorization and print that?
-		return util.ErrorAppend(err, "failed to initiate a remote console session")
+		// We may not want that^ as it introduces the potential for app enumeration
+		err = util.ErrorAppend(err, "failed to initiate a remote console session")
+		if err != nil {
+			if err2, ok := err.(util.Err); ok {
+				err2.Suggest = "It appears there is no component/host by that name, check the component/host name and try again"
+				return err2
+			}
+		}
+		return err
 	}
 
 	switch protocol {
