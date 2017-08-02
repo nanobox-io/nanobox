@@ -40,21 +40,16 @@ func CommandErr(err error) {
 
 	output := fmt.Sprintf(`
 Error   : %s
-Context : %s
-`, parsedErr.cause, parsedErr.context)
+Context : %s`, parsedErr.cause, parsedErr.context)
 
 	if parsedErr.suggest != "" {
-		output = fmt.Sprintf(`
-%s
-Suggest : %s
-`, output, parsedErr.suggest)
+		output = fmt.Sprintf(`%s
+Suggest : %s`, output, parsedErr.suggest)
 	}
 
 	if parsedErr.output != "" {
-		output = fmt.Sprintf(`
-%s
-Output : %s
-`, output, parsedErr.output)
+		output = fmt.Sprintf(`%s
+Output : %s`, output, parsedErr.output)
 	}
 
 	app := ""
@@ -117,10 +112,13 @@ type errBits struct {
 
 // parseTeam parses out an error code (in this iteration, team name), we'll have added to the beginning of the "cause"
 func parseTeam(err string) (team, cause string) {
-	re := regexp.MustCompile(`\[([A-Z]+)\] `) // matches to split after "[TEAM] "
+	re := regexp.MustCompile(`\[([A-Z0-9]+)\] `) // matches to split after "[TEAM] "
 	match := re.FindStringSubmatch(err)
 	remaining := re.Split(err, 2)
-	return match[len(match)-1], remaining[len(remaining)-1]
+	if len(match) > 0 && len(remaining) > 0 {
+		return match[len(match)-1], remaining[len(remaining)-1]
+	}
+	return "", err
 }
 
 // parseCommandErr retrieves the cause, context, and team responsible for the error

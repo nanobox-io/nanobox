@@ -86,6 +86,7 @@ func prepareBuildEnvironment(containerID string) error {
 	if out, err := hookit.DebugExec(containerID, "user", hook_generator.UserPayload(), "info"); err != nil {
 		// handle 'exec failed: argument list too long' error
 		if strings.Contains(out, "argument list too long") {
+			display.TooManyKeys()
 			if err2, ok := err.(util.Err); ok {
 				err2.Suggest = "You may have too many ssh keys, please specify the one you need with `nanobox config set ssh-key ~/.ssh/id_rsa`"
 				err2.Output = out

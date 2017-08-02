@@ -257,6 +257,19 @@ https://guides.nanobox.io/
 `))
 }
 
+func TooManyKeys() {
+	os.Stderr.WriteString(fmt.Sprintf(`
+--------------------------------------------------------------------------------
+POSSIBLY TOO MANY KEYS
+Nanobox imports your ssh key directory for fetching dependencies but it appears
+you may have more than we can handle. You might want to check out our docs on
+specifying a key to use:
+
+https://docs.nanobox.io/local-config/configure-nanobox/
+--------------------------------------------------------------------------------
+`))
+}
+
 func WorldWritable() {
 	os.Stderr.WriteString(fmt.Sprintf(`
 --------------------------------------------------------------------------------
