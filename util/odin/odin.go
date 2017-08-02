@@ -342,11 +342,25 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 	}
 
 	if res.StatusCode == 401 {
-		return util.ErrorfQuiet("Unauthorized (%s)", b)
+		err = util.ErrorfQuiet("[USER] Unauthorized (%s)", b)
+		if err != nil {
+			if err2, ok := err.(util.Err); ok {
+				err2.Suggest = "It appears you are not logged in, run `nanobox login` and try again"
+				return err2
+			}
+		}
+		return err
 	}
 
 	if res.StatusCode == 404 {
-		return util.ErrorfQuiet("Not Found (%s)", b)
+		err = util.ErrorfQuiet("[USER] Not Found (%s)", b)
+		if err != nil {
+			if err2, ok := err.(util.Err); ok {
+				err2.Suggest = "It appears that app wasn't found, check the team/app name and try again"
+				return err2
+			}
+		}
+		return err
 	}
 
 	// if it is a 400 but not
@@ -354,22 +368,22 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 		rb := map[string]string{}
 		err = json.Unmarshal(b, &rb)
 		if err != nil {
-			return util.ErrorfQuiet("%s", b)
+			return util.ErrorfQuiet("[NANOBOX] %s", b)
 		}
 
 		errorMessage, ok := rb["error"]
 		if !ok {
-			return util.ErrorfQuiet("%s", b)
+			return util.ErrorfQuiet("[ODIN] %s", b)
 		}
-		return util.ErrorfQuiet("%s", errorMessage)
+		return util.ErrorfQuiet("[ODIN] %s", errorMessage)
 	}
 
 	if res.StatusCode == 500 {
-		return util.ErrorfQuiet("Internal Server Error (%s)", b)
+		return util.ErrorfQuiet("[ODIN] Internal Server Error (%s)", b)
 	}
 
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
-		return util.ErrorfQuiet("bad exit response(%d %s %s %s (%s) %s)", res.StatusCode, req.Method, req.URL, req.Proto, res.Header.Get("Content-Length"), b)
+		return util.ErrorfQuiet("[ODIN] bad exit response(%d %s %s %s (%s) %s)", res.StatusCode, req.Method, req.URL, req.Proto, res.Header.Get("Content-Length"), b)
 	}
 
 	if responseBody != nil {

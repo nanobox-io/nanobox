@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/nanobox-io/golang-portal-client"
-
 	"github.com/nanobox-io/nanobox-boxfile"
+
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/display"
 )

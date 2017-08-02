@@ -12,8 +12,11 @@ import (
 
 type (
 	Err struct {
-		Message string
-		Stack   []string
+		Code    string   // Code defining who is responsible for the error: 1xxx - user, 2xxx - hooks, 3xxx - images, 4xxx - platform, 5xxx - odin, 6xxx - cli
+		Message string   // Error message
+		Output  string   // Output from a command run
+		Stack   []string // Origins of error
+		Suggest string   // Suggested resolution
 	}
 )
 
@@ -110,9 +113,11 @@ func ErrorAppend(err error, fmtStr string, args ...interface{}) error {
 
 	// if it is one of our errors
 	if er, ok := err.(Err); ok {
+		// fmt.Println("OUR ERRORTYPE")
 		er.Stack = append([]string{msg}, er.Stack...)
 		return er
 	}
+	fmt.Println("NOT OUR ERRORTYPE")
 
 	// make sure when we get any new error that isnt ours
 	// we log and report it

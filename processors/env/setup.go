@@ -18,10 +18,12 @@ import (
 // Setup sets up the provider and the env mounts
 func Setup(envModel *models.Env) error {
 
+	// todo: check for boxfile in separate step from valid yaml syntax and valid nodes
 	// if there is no boxfile display a message and end
 	if box := boxfile.NewFromPath(config.Boxfile()); !box.Valid {
 		display.MissingBoxfile()
-		return util.ErrorfQuiet("missing or invalid boxfile")
+		// todo: add suggestion here
+		return util.ErrorfQuiet("[USER] missing or invalid boxfile")
 	}
 
 	// init docker client

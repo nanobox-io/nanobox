@@ -1,15 +1,15 @@
 package code
 
 import (
+	"strings"
 	"time"
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
-
 	"github.com/nanobox-io/nanobox-boxfile"
+
 	container_generator "github.com/nanobox-io/nanobox/generators/containers"
 	hook_generator "github.com/nanobox-io/nanobox/generators/hooks/build"
-
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
@@ -82,23 +82,45 @@ func prepareBuildEnvironment(containerID string) error {
 	defer display.StopTask()
 
 	// run the user hook
-	if _, err := hookit.DebugExec(containerID, "user", hook_generator.UserPayload(), "info"); err != nil {
-		return err
+	if out, err := hookit.DebugExec(containerID, "user", hook_generator.UserPayload(), "info"); err != nil {
+		// handle 'exec failed: argument list too long' error
+		if strings.Contains(out, "argument list too long") {
+			display.TooManyKeys()
+			if err2, ok := err.(util.Err); ok {
+				err2.Suggest = "You may have too many ssh keys, please specify the one you need with `nanobox config set ssh-key ~/.ssh/id_rsa`"
+				err2.Output = out
+				err2.Code = "1001"
+				return util.ErrorAppend(err2, "failed to run the (build)user hook")
+			}
+		}
+		return util.ErrorAppend(err, "failed to run the (build)user hook")
 	}
 
 	// run the configure hook
-	if _, err := hookit.DebugExec(containerID, "configure", hook_generator.ConfigurePayload(), "info"); err != nil {
-		return err
+	if out, err := hookit.DebugExec(containerID, "configure", hook_generator.ConfigurePayload(), "info"); err != nil {
+		if err2, ok := err.(util.Err); ok {
+			err2.Output = out
+			return util.ErrorAppend(err2, "failed to run the (build)configure hook")
+		}
+		return util.ErrorAppend(err, "failed to run the (build)configure hook")
 	}
 
 	// run the fetch hook
-	if _, err := hookit.DebugExec(containerID, "fetch", hook_generator.FetchPayload(), "info"); err != nil {
-		return err
+	if out, err := hookit.DebugExec(containerID, "fetch", hook_generator.FetchPayload(), "info"); err != nil {
+		if err2, ok := err.(util.Err); ok {
+			err2.Output = out
+			return util.ErrorAppend(err2, "failed to run the (build)fetch hook")
+		}
+		return util.ErrorAppend(err, "failed to run the (build)the fetch hook")
 	}
 
 	// run the setup hook
-	if _, err := hookit.DebugExec(containerID, "setup", hook_generator.SetupPayload(), "info"); err != nil {
-		return err
+	if out, err := hookit.DebugExec(containerID, "setup", hook_generator.SetupPayload(), "info"); err != nil {
+		if err2, ok := err.(util.Err); ok {
+			err2.Output = out
+			return util.ErrorAppend(err2, "failed to run the (build)setup hook")
+		}
+		return util.ErrorAppend(err, "failed to run the (build)setup hook")
 	}
 
 	return nil
@@ -112,7 +134,11 @@ func gatherRequirements(envModel *models.Env, containerID string) error {
 	// run the boxfile hook
 	boxOutput, err := hookit.DebugExec(containerID, "boxfile", hook_generator.BoxfilePayload(), "info")
 	if err != nil {
-		return err
+		if err2, ok := err.(util.Err); ok {
+			err2.Output = boxOutput
+			return util.ErrorAppend(err2, "failed to run the (build)boxfile hook")
+		}
+		return util.ErrorAppend(err, "failed to run the (build)boxfile hook")
 	}
 
 	box := boxfile.NewFromPath(config.Boxfile())
@@ -142,9 +168,13 @@ func setupBuildMounts(containerID string) error {
 	display.StartTask("Mounting cache_dirs")
 	defer display.StopTask()
 
-	// run the build hook
-	if _, err := hookit.DebugExec(containerID, "mount", hook_generator.MountPayload(), "info"); err != nil {
-		return err
+	// run the mount hook
+	if out, err := hookit.DebugExec(containerID, "mount", hook_generator.MountPayload(), "info"); err != nil {
+		if err2, ok := err.(util.Err); ok {
+			err2.Output = out
+			return util.ErrorAppend(err2, "failed to run the (build)mount hook")
+		}
+		return util.ErrorAppend(err, "failed to run the (build)mount hook")
 	}
 
 	return nil
@@ -156,8 +186,12 @@ func installRuntimes(containerID string) error {
 	defer display.StopTask()
 
 	// run the build hook
-	if _, err := hookit.DebugExec(containerID, "build", hook_generator.BuildPayload(), "info"); err != nil {
-		return err
+	if out, err := hookit.DebugExec(containerID, "build", hook_generator.BuildPayload(), "info"); err != nil {
+		if err2, ok := err.(util.Err); ok {
+			err2.Output = out
+			return util.ErrorAppend(err2, "failed to run the (build)build hook")
+		}
+		return util.ErrorAppend(err, "failed to run the (build)build hook")
 	}
 
 	return nil
@@ -169,18 +203,30 @@ func packageBuild(containerID string) error {
 	defer display.StopTask()
 
 	// run the pack-build hook
-	if _, err := hookit.DebugExec(containerID, "pack-build", hook_generator.PackBuildPayload(), "info"); err != nil {
-		return err
+	if out, err := hookit.DebugExec(containerID, "pack-build", hook_generator.PackBuildPayload(), "info"); err != nil {
+		if err2, ok := err.(util.Err); ok {
+			err2.Output = out
+			return util.ErrorAppend(err2, "failed to run the (build)pack-build hook")
+		}
+		return util.ErrorAppend(err, "failed to run the (build)pack-build hook")
 	}
 
 	// run the clean hook
-	if _, err := hookit.DebugExec(containerID, "clean", hook_generator.CleanPayload(), "info"); err != nil {
-		return err
+	if out, err := hookit.DebugExec(containerID, "clean", hook_generator.CleanPayload(), "info"); err != nil {
+		if err2, ok := err.(util.Err); ok {
+			err2.Output = out
+			return util.ErrorAppend(err2, "failed to run the (build)clean hook")
+		}
+		return util.ErrorAppend(err, "failed to run the (build)clean hook")
 	}
 
 	// run the pack-deploy hook
-	if _, err := hookit.DebugExec(containerID, "pack-deploy", hook_generator.PackDeployPayload(), "info"); err != nil {
-		return err
+	if out, err := hookit.DebugExec(containerID, "pack-deploy", hook_generator.PackDeployPayload(), "info"); err != nil {
+		if err2, ok := err.(util.Err); ok {
+			err2.Output = out
+			return util.ErrorAppend(err2, "failed to run the (build)pack-deploy hook")
+		}
+		return util.ErrorAppend(err, "failed to run the (build)pack-deploy hook")
 	}
 
 	return nil

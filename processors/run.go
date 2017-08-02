@@ -2,6 +2,7 @@ package processors
 
 import (
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/jcelliott/lumber"
@@ -99,12 +100,25 @@ func setup(appModel *models.App) error {
 
 	display.StartTask("Configuring")
 	userPayload := build_generator.UserPayload()
-	if _, err := hookit.DebugExec(container.ID, "user", userPayload, "debug"); err != nil {
-		return util.ErrorAppend(err, "failed to run the user hook")
+	if out, err := hookit.DebugExec(container.ID, "user", userPayload, "debug"); err != nil {
+		// handle 'exec failed: argument list too long' error
+		if strings.Contains(out, "argument list too long") {
+			if err2, ok := err.(util.Err); ok {
+				err2.Suggest = "You may have too many ssh keys, please specify the one you need with `nanobox config set ssh-key ~/.ssh/id_rsa`"
+				err2.Output = out
+				err2.Code = "1001"
+				return util.ErrorAppend(err2, "failed to run the (run)user hook")
+			}
+		}
+		return util.ErrorAppend(err, "failed to run the (run)user hook")
 	}
 
-	if _, err := hookit.DebugExec(container.ID, "dev", build_generator.DevPayload(appModel), "info"); err != nil {
-		return util.ErrorAppend(err, "failed to run the dev hook")
+	if out, err := hookit.DebugExec(container.ID, "dev", build_generator.DevPayload(appModel), "info"); err != nil {
+		if err2, ok := err.(util.Err); ok {
+			err2.Output = out
+			return util.ErrorAppend(err2, "failed to run the (run)dev hook")
+		}
+		return util.ErrorAppend(err, "failed to run the (run)dev hook")
 	}
 	display.StopTask()
 

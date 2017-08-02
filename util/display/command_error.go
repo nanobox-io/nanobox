@@ -7,6 +7,8 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/nanobox-io/nanobox-boxfile"
+
 	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
@@ -36,31 +38,59 @@ func CommandErr(err error) {
 		return
 	}
 
-	cause, context := parseCommandErr(err)
+	parsedErr := parseCommandErr(err)
 
 	output := fmt.Sprintf(`
 Error   : %s
-Context : %s
-`, cause, context)
+Context : %s`, parsedErr.cause, parsedErr.context)
 
-	app := ""
+	if parsedErr.suggest != "" {
+		output = fmt.Sprintf(`%s
+Suggest : %s`, output, parsedErr.suggest)
+	}
+
+	if parsedErr.output != "" {
+		output = fmt.Sprintf(`%s
+Output : %s`, output, parsedErr.output)
+	}
+
+	var appID, appName string
 	env, err := models.FindEnvByID(config.EnvID())
 	if err == nil {
 		remote, ok := env.Remotes["default"]
 		if ok {
-			app = remote.ID
+			appID = remote.ID
+			appName = remote.Name
 		}
 	}
+
+	// todo: ensure this matters (seen a failed build hook have a boxfile)
+	// get the raw boxfile if a processed one doesn't exist
+	boxfileString := env.UserBoxfile
+	if boxfileString == "" {
+		boxfileString = boxfile.NewFromPath(config.Boxfile()).String()
+	}
+
+	conf, _ := models.LoadConfig()
 
 	// submit error to nanobox
 	odin.SubmitEvent(
 		"desktop#error",
 		"an error occurred running nanobox desktop",
-		app,
+		appID,
 		map[string]interface{}{
-			"error":   cause,
-			"context": context,
-			"boxfile": env.UserBoxfile,
+			"app-id":          appID,
+			"app-name":        appName,
+			"boxfile":         boxfileString,
+			"context":         parsedErr.context,
+			"error":           parsedErr.cause,
+			"mount-type":      conf.MountType,
+			"nanobox-version": models.VersionString(),
+			"output":          parsedErr.output,
+			"os":              runtime.GOOS,
+			"provider":        conf.Provider,
+			"suggest":         parsedErr.suggest,
+			"team":            parsedErr.team,
 		},
 	)
 
@@ -76,16 +106,49 @@ Context : %s
 		fmt.Scanln(&input)
 	}
 	if exitCode == 0 {
+		// todo: handle
 		os.Exit(1)
 	}
+	// todo: handle
 	os.Exit(exitCode)
 }
 
-func parseCommandErr(err error) (cause, context string) {
+// errBits holds the error bits we'll use for context during error reports
+type errBits struct {
+	cause   string
+	context string
+	output  string
+	suggest string
+	team    string
+}
+
+// parseTeam parses out an error code (in this iteration, team name), we'll have added to the beginning of the "cause"
+func parseTeam(err string) (team, cause string) {
+	re := regexp.MustCompile(`\[([A-Z0-9]+)\] `) // matches to split after "[TEAM] "
+	match := re.FindStringSubmatch(err)
+	remaining := re.Split(err, 2)
+	if len(match) > 0 && len(remaining) > 0 {
+		return match[len(match)-1], remaining[len(remaining)-1]
+	}
+	return "", err
+}
+
+// parseCommandErr retrieves the cause, context, and team responsible for the error
+func parseCommandErr(err error) errBits {
+	var team, cause, context string
+
 	// if it is one of our utility errors we can
 	// extract the cause and the stack seperately
 	if er, ok := err.(util.Err); ok {
-		return er.Message, strings.Join(er.Stack, " -> ")
+		bits := errBits{}
+		bits.team, bits.cause = parseTeam(er.Message)
+		if er.Code != "" {
+			bits.team = er.Code
+		}
+		bits.context = strings.Join(er.Stack, " -> ")
+		bits.suggest = er.Suggest
+		bits.output = strings.TrimSpace(er.Output)
+		return bits
 	}
 
 	trace := err.Error()
@@ -98,11 +161,17 @@ func parseCommandErr(err error) (cause, context string) {
 	// extract the last item off of the list
 	cause = stack[len(stack)-1]
 
+	team, cause = parseTeam(cause)
+
 	// now remove the last item from the list
 	stack = stack[:len(stack)-1]
 
 	// join the stack to create a context
 	context = strings.Join(stack, " -> ")
 
-	return
+	return errBits{
+		cause:   cause,
+		context: context,
+		team:    team,
+	}
 }
