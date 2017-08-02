@@ -107,18 +107,18 @@ func setup(appModel *models.App) error {
 				err2.Suggest = "You may have too many ssh keys, please specify the one you need with `nanobox config set ssh-key ~/.ssh/id_rsa`"
 				err2.Output = out
 				err2.Code = "1001"
-				return util.ErrorAppend(err2, "failed to run the user hook")
+				return util.ErrorAppend(err2, "failed to run the (run)user hook")
 			}
 		}
-		return util.ErrorAppend(err, "failed to run the user hook")
+		return util.ErrorAppend(err, "failed to run the (run)user hook")
 	}
 
 	if out, err := hookit.DebugExec(container.ID, "dev", build_generator.DevPayload(appModel), "info"); err != nil {
 		if err2, ok := err.(util.Err); ok {
 			err2.Output = out
-			return util.ErrorAppend(err2, "failed to run the dev hook")
+			return util.ErrorAppend(err2, "failed to run the (run)dev hook")
 		}
-		return util.ErrorAppend(err, "failed to run dev hook")
+		return util.ErrorAppend(err, "failed to run the (run)dev hook")
 	}
 	display.StopTask()
 

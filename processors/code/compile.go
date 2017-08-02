@@ -73,37 +73,37 @@ func prepareCompileEnvironment(containerID string) error {
 				err2.Suggest = "You may have too many ssh keys, please specify the one you need with `nanobox config set ssh-key ~/.ssh/id_rsa`"
 				err2.Output = out
 				err2.Code = "1001"
-				return util.ErrorAppend(err2, "failed to run the user hook")
+				return util.ErrorAppend(err2, "failed to run the (compile)user hook")
 			}
 		}
-		return util.ErrorAppend(err, "failed to run the user hook")
+		return util.ErrorAppend(err, "failed to run the (compile)user hook")
 	}
 
 	// run the configure hook
 	if out, err := hookit.DebugExec(containerID, "configure", hook_generator.ConfigurePayload(), "info"); err != nil {
 		if err2, ok := err.(util.Err); ok {
 			err2.Output = out
-			return util.ErrorAppend(err2, "failed to run the configure hook")
+			return util.ErrorAppend(err2, "failed to run the (compile)configure hook")
 		}
-		return util.ErrorAppend(err, "failed to run configure hook")
+		return util.ErrorAppend(err, "failed to run the (compile)configure hook")
 	}
 
 	// run the boxfile hook
 	if out, err := hookit.DebugExec(containerID, "boxfile", hook_generator.BoxfilePayload(), "info"); err != nil {
 		if err2, ok := err.(util.Err); ok {
 			err2.Output = out
-			return util.ErrorAppend(err2, "failed to run the boxfile hook")
+			return util.ErrorAppend(err2, "failed to run the (compile)boxfile hook")
 		}
-		return util.ErrorAppend(err, "failed to run boxfile hook")
+		return util.ErrorAppend(err, "failed to run the (compile)boxfile hook")
 	}
 
 	// run the mount hook
 	if out, err := hookit.DebugExec(containerID, "mount", hook_generator.MountPayload(), "info"); err != nil {
 		if err2, ok := err.(util.Err); ok {
 			err2.Output = out
-			return util.ErrorAppend(err2, "failed to run the mount hook")
+			return util.ErrorAppend(err2, "failed to run the (compile)mount hook")
 		}
-		return util.ErrorAppend(err, "failed to run mount hook")
+		return util.ErrorAppend(err, "failed to run the (compile)mount hook")
 	}
 
 	return nil
@@ -119,18 +119,18 @@ func compileCode(containerID string) error {
 	if out, err := hookit.DebugExec(containerID, "compile", hook_generator.CompilePayload(), "info"); err != nil {
 		if err2, ok := err.(util.Err); ok {
 			err2.Output = out
-			return util.ErrorAppend(err2, "failed to run the compile hook")
+			return util.ErrorAppend(err2, "failed to run the (compile)compile hook")
 		}
-		return util.ErrorAppend(err, "failed to run compile hook")
+		return util.ErrorAppend(err, "failed to run the (compile)compile hook")
 	}
 
 	// run the pack-app hook
 	if out, err := hookit.DebugExec(containerID, "pack-app", hook_generator.PackAppPayload(), "info"); err != nil {
 		if err2, ok := err.(util.Err); ok {
 			err2.Output = out
-			return util.ErrorAppend(err2, "failed to run the pack-app hook")
+			return util.ErrorAppend(err2, "failed to run the (compile)pack-app hook")
 		}
-		return util.ErrorAppend(err, "failed to run pack-app hook")
+		return util.ErrorAppend(err, "failed to run the (compile)pack-app hook")
 	}
 
 	return nil

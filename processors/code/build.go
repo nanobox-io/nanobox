@@ -6,11 +6,10 @@ import (
 
 	"github.com/jcelliott/lumber"
 	"github.com/nanobox-io/golang-docker-client"
-
 	"github.com/nanobox-io/nanobox-boxfile"
+
 	container_generator "github.com/nanobox-io/nanobox/generators/containers"
 	hook_generator "github.com/nanobox-io/nanobox/generators/hooks/build"
-
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
@@ -91,37 +90,37 @@ func prepareBuildEnvironment(containerID string) error {
 				err2.Suggest = "You may have too many ssh keys, please specify the one you need with `nanobox config set ssh-key ~/.ssh/id_rsa`"
 				err2.Output = out
 				err2.Code = "1001"
-				return util.ErrorAppend(err2, "failed to run the user hook")
+				return util.ErrorAppend(err2, "failed to run the (build)user hook")
 			}
 		}
-		return util.ErrorAppend(err, "failed to run the user hook")
+		return util.ErrorAppend(err, "failed to run the (build)user hook")
 	}
 
 	// run the configure hook
 	if out, err := hookit.DebugExec(containerID, "configure", hook_generator.ConfigurePayload(), "info"); err != nil {
 		if err2, ok := err.(util.Err); ok {
 			err2.Output = out
-			return util.ErrorAppend(err2, "failed to run the configure hook")
+			return util.ErrorAppend(err2, "failed to run the (build)configure hook")
 		}
-		return util.ErrorAppend(err, "failed to run configure hook")
+		return util.ErrorAppend(err, "failed to run the (build)configure hook")
 	}
 
 	// run the fetch hook
 	if out, err := hookit.DebugExec(containerID, "fetch", hook_generator.FetchPayload(), "info"); err != nil {
 		if err2, ok := err.(util.Err); ok {
 			err2.Output = out
-			return util.ErrorAppend(err2, "failed to run the fetch hook")
+			return util.ErrorAppend(err2, "failed to run the (build)fetch hook")
 		}
-		return util.ErrorAppend(err, "failed to run the fetch hook")
+		return util.ErrorAppend(err, "failed to run the (build)the fetch hook")
 	}
 
 	// run the setup hook
 	if out, err := hookit.DebugExec(containerID, "setup", hook_generator.SetupPayload(), "info"); err != nil {
 		if err2, ok := err.(util.Err); ok {
 			err2.Output = out
-			return util.ErrorAppend(err2, "failed to run the setup hook")
+			return util.ErrorAppend(err2, "failed to run the (build)setup hook")
 		}
-		return util.ErrorAppend(err, "failed to run setup hook")
+		return util.ErrorAppend(err, "failed to run the (build)setup hook")
 	}
 
 	return nil
@@ -137,9 +136,9 @@ func gatherRequirements(envModel *models.Env, containerID string) error {
 	if err != nil {
 		if err2, ok := err.(util.Err); ok {
 			err2.Output = boxOutput
-			return util.ErrorAppend(err2, "failed to run the boxfile hook")
+			return util.ErrorAppend(err2, "failed to run the (build)boxfile hook")
 		}
-		return util.ErrorAppend(err, "failed to run boxfile hook")
+		return util.ErrorAppend(err, "failed to run the (build)boxfile hook")
 	}
 
 	box := boxfile.NewFromPath(config.Boxfile())
@@ -173,9 +172,9 @@ func setupBuildMounts(containerID string) error {
 	if out, err := hookit.DebugExec(containerID, "mount", hook_generator.MountPayload(), "info"); err != nil {
 		if err2, ok := err.(util.Err); ok {
 			err2.Output = out
-			return util.ErrorAppend(err2, "failed to run the mount hook")
+			return util.ErrorAppend(err2, "failed to run the (build)mount hook")
 		}
-		return util.ErrorAppend(err, "failed to run mount hook")
+		return util.ErrorAppend(err, "failed to run the (build)mount hook")
 	}
 
 	return nil
@@ -190,9 +189,9 @@ func installRuntimes(containerID string) error {
 	if out, err := hookit.DebugExec(containerID, "build", hook_generator.BuildPayload(), "info"); err != nil {
 		if err2, ok := err.(util.Err); ok {
 			err2.Output = out
-			return util.ErrorAppend(err2, "failed to run the build hook")
+			return util.ErrorAppend(err2, "failed to run the (build)build hook")
 		}
-		return util.ErrorAppend(err, "failed to run build hook")
+		return util.ErrorAppend(err, "failed to run the (build)build hook")
 	}
 
 	return nil
@@ -207,27 +206,27 @@ func packageBuild(containerID string) error {
 	if out, err := hookit.DebugExec(containerID, "pack-build", hook_generator.PackBuildPayload(), "info"); err != nil {
 		if err2, ok := err.(util.Err); ok {
 			err2.Output = out
-			return util.ErrorAppend(err2, "failed to run the pack-build hook")
+			return util.ErrorAppend(err2, "failed to run the (build)pack-build hook")
 		}
-		return util.ErrorAppend(err, "failed to run pack-build hook")
+		return util.ErrorAppend(err, "failed to run the (build)pack-build hook")
 	}
 
 	// run the clean hook
 	if out, err := hookit.DebugExec(containerID, "clean", hook_generator.CleanPayload(), "info"); err != nil {
 		if err2, ok := err.(util.Err); ok {
 			err2.Output = out
-			return util.ErrorAppend(err2, "failed to run the clean hook")
+			return util.ErrorAppend(err2, "failed to run the (build)clean hook")
 		}
-		return util.ErrorAppend(err, "failed to run clean hook")
+		return util.ErrorAppend(err, "failed to run the (build)clean hook")
 	}
 
 	// run the pack-deploy hook
 	if out, err := hookit.DebugExec(containerID, "pack-deploy", hook_generator.PackDeployPayload(), "info"); err != nil {
 		if err2, ok := err.(util.Err); ok {
 			err2.Output = out
-			return util.ErrorAppend(err2, "failed to run the pack-deploy hook")
+			return util.ErrorAppend(err2, "failed to run the (build)pack-deploy hook")
 		}
-		return util.ErrorAppend(err, "failed to run pack-deploy hook")
+		return util.ErrorAppend(err, "failed to run the (build)pack-deploy hook")
 	}
 
 	return nil

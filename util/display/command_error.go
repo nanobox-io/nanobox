@@ -7,6 +7,8 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/nanobox-io/nanobox-boxfile"
+
 	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
@@ -52,13 +54,21 @@ Suggest : %s`, output, parsedErr.suggest)
 Output : %s`, output, parsedErr.output)
 	}
 
-	app := ""
+	var appID, appName string
 	env, err := models.FindEnvByID(config.EnvID())
 	if err == nil {
 		remote, ok := env.Remotes["default"]
 		if ok {
-			app = remote.ID
+			appID = remote.ID
+			appName = remote.Name
 		}
+	}
+
+	// todo: ensure this matters (seen a failed build hook have a boxfile)
+	// get the raw boxfile if a processed one doesn't exist
+	boxfileString := env.UserBoxfile
+	if boxfileString == "" {
+		boxfileString = boxfile.NewFromPath(config.Boxfile()).String()
 	}
 
 	conf, _ := models.LoadConfig()
@@ -67,9 +77,11 @@ Output : %s`, output, parsedErr.output)
 	odin.SubmitEvent(
 		"desktop#error",
 		"an error occurred running nanobox desktop",
-		app,
+		appID,
 		map[string]interface{}{
-			"boxfile":         env.UserBoxfile, // todo: this doesn't seem to populate
+			"app-id":          appID,
+			"app-name":        appName,
+			"boxfile":         boxfileString,
 			"context":         parsedErr.context,
 			"error":           parsedErr.cause,
 			"mount-type":      conf.MountType,

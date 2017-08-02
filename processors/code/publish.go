@@ -70,10 +70,10 @@ func Publish(envModel *models.Env, WarehouseConfig WarehouseConfig) error {
 				err2.Suggest = "You may have too many ssh keys, please specify the one you need with `nanobox config set ssh-key ~/.ssh/id_rsa`"
 				err2.Output = out
 				err2.Code = "1001"
-				return util.ErrorAppend(err2, "failed to run the user hook")
+				return util.ErrorAppend(err2, "failed to run the (publish)user hook")
 			}
 		}
-		return util.ErrorAppend(err, "failed to run the user hook")
+		return util.ErrorAppend(err, "failed to run the (publish)user hook")
 	}
 
 	buildWarehouseConfig := build.WarehouseConfig{
@@ -92,9 +92,9 @@ func Publish(envModel *models.Env, WarehouseConfig WarehouseConfig) error {
 	if out, err := hookit.DebugExec(container.ID, "publish", payload, "info"); err != nil {
 		if err2, ok := err.(util.Err); ok {
 			err2.Output = out
-			return util.ErrorAppend(err2, "failed to run the publish hook")
+			return util.ErrorAppend(err2, "failed to run the (publish)publish hook")
 		}
-		return util.ErrorAppend(err, "failed to run publish hook")
+		return util.ErrorAppend(err, "failed to run the (publish)publish hook")
 	}
 
 	display.StopTask()
