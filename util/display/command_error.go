@@ -36,12 +36,12 @@ func CommandErr(err error) {
 		return
 	}
 
-	cause, context := parseCommandErr(err)
+	parsedErr := parseCommandErr(err)
 
 	output := fmt.Sprintf(`
 Error   : %s
 Context : %s
-`, cause, context)
+`, parsedErr.cause, parsedErr.context)
 
 	app := ""
 	env, err := models.FindEnvByID(config.EnvID())
@@ -52,15 +52,22 @@ Context : %s
 		}
 	}
 
+	conf, _ := models.LoadConfig()
+
 	// submit error to nanobox
 	odin.SubmitEvent(
 		"desktop#error",
 		"an error occurred running nanobox desktop",
 		app,
 		map[string]interface{}{
-			"error":   cause,
-			"context": context,
-			"boxfile": env.UserBoxfile,
+			"boxfile":         env.UserBoxfile, // todo: this doesn't seem to populate
+			"context":         parsedErr.context,
+			"error":           parsedErr.cause,
+			"mount-type":      conf.MountType,
+			"nanobox-version": models.VersionString(),
+			"os":              runtime.GOOS,
+			"provider":        conf.Provider,
+			"team":            parsedErr.team,
 		},
 	)
 
@@ -76,16 +83,39 @@ Context : %s
 		fmt.Scanln(&input)
 	}
 	if exitCode == 0 {
+		// todo: handle
 		os.Exit(1)
 	}
+	// todo: handle
 	os.Exit(exitCode)
 }
 
-func parseCommandErr(err error) (cause, context string) {
+// errBits holds the error bits we'll use for context during error reports
+type errBits struct {
+	cause   string
+	context string
+	team    string
+}
+
+// parseTeam parses out an error code (in this iteration, team name), we'll have added to the beginning of the "cause"
+func parseTeam(err string) (team, cause string) {
+	re := regexp.MustCompile(`\[([A-Z]+)\] `) // matches to split after "[TEAM] "
+	match := re.FindStringSubmatch(err)
+	remaining := re.Split(err, 2)
+	return match[len(match)-1], remaining[len(remaining)-1]
+}
+
+// parseCommandErr retrieves the cause, context, and team responsible for the error
+func parseCommandErr(err error) errBits {
+	var team, cause, context string
+
 	// if it is one of our utility errors we can
 	// extract the cause and the stack seperately
 	if er, ok := err.(util.Err); ok {
-		return er.Message, strings.Join(er.Stack, " -> ")
+		bits := errBits{}
+		bits.team, bits.cause = parseTeam(er.Message)
+		bits.context = strings.Join(er.Stack, " -> ")
+		return bits
 	}
 
 	trace := err.Error()
@@ -98,11 +128,17 @@ func parseCommandErr(err error) (cause, context string) {
 	// extract the last item off of the list
 	cause = stack[len(stack)-1]
 
+	team, cause = parseTeam(cause)
+
 	// now remove the last item from the list
 	stack = stack[:len(stack)-1]
 
 	// join the stack to create a context
 	context = strings.Join(stack, " -> ")
 
-	return
+	return errBits{
+		cause:   cause,
+		context: context,
+		team:    team,
+	}
 }

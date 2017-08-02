@@ -29,7 +29,7 @@ func Exec(container, hook, payload, displayLevel string) (string, error) {
 	}
 
 	if err != nil {
-		return out, util.ErrorfQuiet("failed to execute hook (%s) on %s: %s", hook, container, err)
+		return out, util.ErrorfQuiet("[HOOKS] failed to execute hook (%s) on %s: %s", hook, container, err)
 	}
 	return out, nil
 }

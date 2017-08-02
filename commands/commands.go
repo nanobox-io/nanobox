@@ -50,14 +50,12 @@ var (
 
 			// setup the display output
 			if displayDebugMode {
-				os.Stdout.Write([]byte("DebugMode\n"))
 				lumber.Level(lumber.DEBUG)
 				display.Summary = false
 				display.Level = "debug"
 			}
 
 			if displayTraceMode {
-				os.Stdout.Write([]byte("TraceMode\n"))
 				lumber.Level(lumber.TRACE)
 				display.Summary = false
 				display.Level = "trace"
