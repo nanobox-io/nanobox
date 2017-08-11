@@ -18,7 +18,7 @@ func Build(envModel *models.Env) error {
 
 	// init docker client and env mounts
 	if err := env.Setup(envModel); err != nil {
-		return util.ErrorAppend(err, "failed to init docker client")
+		return util.ErrorAppend(err, "failed to prepare environment")
 	}
 
 	// print a warning if this is the first build

@@ -124,7 +124,11 @@ func ctimeCheck(container string) {
 
 // the touch command used when ctime isnt available
 func touch(container string, changeList []string) {
-	util.DockerExec(container, "root", "touch", append([]string{"-c"}, changeList...), nil)
+	out, err := util.DockerExec(container, "root", "touch", append([]string{"-c"}, changeList...), nil)
+	if err != nil {
+		fmt.Println("TOUCH OUTPUT: %s", out)
+		fmt.Println("TOUCH  ERROR: %s", err.Error())
+	}
 }
 
 // the ctime command we will use

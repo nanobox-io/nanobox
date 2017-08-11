@@ -54,6 +54,8 @@ Suggest : %s`, output, parsedErr.suggest)
 Output : %s`, output, parsedErr.output)
 	}
 
+	output = fmt.Sprintf("%s\n", output)
+
 	var appID, appName string
 	env, err := models.FindEnvByID(config.EnvID())
 	if err == nil {
@@ -68,6 +70,7 @@ Output : %s`, output, parsedErr.output)
 	// get the raw boxfile if a processed one doesn't exist
 	boxfileString := env.UserBoxfile
 	if boxfileString == "" {
+		// config.Boxfile() is essentially `./boxfile.yml`
 		boxfileString = boxfile.NewFromPath(config.Boxfile()).String()
 	}
 

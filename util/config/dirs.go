@@ -1,11 +1,11 @@
 package config
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"syscall"
 
 	"github.com/jcelliott/lumber"
@@ -29,7 +29,7 @@ func GlobalDir() string {
 	return globalDir
 }
 
-// LocalDir ...
+// LocalDir returns the current working directory
 func LocalDir() string {
 	var cwd string
 	var err error
@@ -38,37 +38,55 @@ func LocalDir() string {
 	if syscall.ImplementsGetwd {
 		cwd, err = syscall.Getwd()
 		if err != nil {
+			fmt.Printf("Failed to syscall.getwd - %s\n", err.Error())
+
+			// fallback to os.Getwd
+			cwd, err = os.Getwd()
+			if err != nil {
+				fmt.Printf("Failed to os.getwd - %s\n", err.Error())
+				return ""
+			} else {
+				return cwd
+			}
 			return ""
 		}
 	} else {
 		cwd, err = os.Getwd()
 		if err != nil {
+			fmt.Printf("Failed to os.getwd - %s\n", err.Error())
+			// todo: this func should return an error and setup should fail if this fails
 			return ""
 		}
 	}
 
-	boxfilePresent := func(path string) bool {
-		boxfile := filepath.ToSlash(filepath.Join(path, "boxfile.yml"))
-		fi, err := os.Stat(boxfile)
-		if err != nil {
-			return false
-		}
-		return !fi.IsDir()
-	}
+	return filepath.ToSlash(cwd)
 
-	path := cwd
-	for !boxfilePresent(path) {
-		if path == "" || path == "/" || strings.HasSuffix(path, ":\\") {
-			// return the current working directory if we cant find a path
-			return cwd
-		}
-		// eliminate the most child directory and then check it
-		path = filepath.Dir(path)
-	}
+	// fmt.Println("CURRENT DIR: ", cwd)
 
-	// recursively check for boxfile
+	// // todo: boxfile validation should have happened previously. need to find out why it doesn't
+	// boxfilePresent := func(path string) bool {
+	// 	boxfile := filepath.ToSlash(filepath.Join(path, "boxfile.yml"))
+	// 	fi, err := os.Stat(boxfile)
+	// 	if err != nil {
+	// 		return false
+	// 	}
+	// 	return !fi.IsDir()
+	// }
 
-	return filepath.ToSlash(path)
+	// path := cwd
+	// for !boxfilePresent(path) {
+	// 	if path == "" || path == "/" || strings.HasSuffix(path, ":\\") {
+	// 		// return the current working directory if we cant find a path
+	// 		// todo: this returns the path, which isn't what we want
+	// 		return cwd
+	// 	}
+	// 	// eliminate the most child directory and then check it
+	// 	path = filepath.Dir(path)
+	// }
+
+	// // recursively check for boxfile
+
+	// return filepath.ToSlash(path)
 }
 
 // LocalDirName ...
