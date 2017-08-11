@@ -261,8 +261,8 @@ func InvalidBoxfile() {
 	os.Stderr.WriteString(fmt.Sprintf(`
 --------------------------------------------------------------------------------
 INVALID BOXFILE.YML
-Nanobox requires valid yaml in your boxfile.yml config file. Paste the contents
-of your boxfile into yamllint.com to validate.
+Nanobox requires valid yaml in your boxfile.yml config file. Please paste the
+contents of your boxfile into www.yamllint.com to validate.
 --------------------------------------------------------------------------------
 `))
 }

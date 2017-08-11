@@ -40,6 +40,7 @@ func buildFn(ccmd *cobra.Command, args []string) {
 }
 
 // todo: this doesn't seem to ever run, find out when it does
+// update: this seems to run on deploy
 func buildComplete() bool {
 	// check the boxfile to be sure it hasnt changed
 	env, _ := models.FindEnvByID(config.EnvID())
