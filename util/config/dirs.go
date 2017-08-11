@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"syscall"
 
 	"github.com/jcelliott/lumber"
@@ -59,34 +60,34 @@ func LocalDir() string {
 		}
 	}
 
-	return filepath.ToSlash(cwd)
+	// return filepath.ToSlash(cwd)
 
 	// fmt.Println("CURRENT DIR: ", cwd)
 
-	// // todo: boxfile validation should have happened previously. need to find out why it doesn't
-	// boxfilePresent := func(path string) bool {
-	// 	boxfile := filepath.ToSlash(filepath.Join(path, "boxfile.yml"))
-	// 	fi, err := os.Stat(boxfile)
-	// 	if err != nil {
-	// 		return false
-	// 	}
-	// 	return !fi.IsDir()
-	// }
+	// todo: boxfile validation should have happened previously. need to find out why it doesn't
+	boxfilePresent := func(path string) bool {
+		boxfile := filepath.ToSlash(filepath.Join(path, "boxfile.yml"))
+		fi, err := os.Stat(boxfile)
+		if err != nil {
+			return false
+		}
+		return !fi.IsDir()
+	}
 
-	// path := cwd
-	// for !boxfilePresent(path) {
-	// 	if path == "" || path == "/" || strings.HasSuffix(path, ":\\") {
-	// 		// return the current working directory if we cant find a path
-	// 		// todo: this returns the path, which isn't what we want
-	// 		return cwd
-	// 	}
-	// 	// eliminate the most child directory and then check it
-	// 	path = filepath.Dir(path)
-	// }
+	path := cwd
+	for !boxfilePresent(path) {
+		if path == "" || path == "/" || strings.HasSuffix(path, ":\\") {
+			// return the current working directory if we cant find a path
+			// todo: this returns the path, which isn't what we want
+			return filepath.ToSlash(cwd)
+		}
+		// eliminate the most child directory and then check it
+		path = filepath.Dir(path)
+	}
 
-	// // recursively check for boxfile
+	// recursively check for boxfile
 
-	// return filepath.ToSlash(path)
+	return filepath.ToSlash(path)
 }
 
 // LocalDirName ...

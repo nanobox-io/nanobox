@@ -23,6 +23,7 @@ func Setup(envModel *models.Env) error {
 	// if there is no boxfile, display a message and end
 	box, err := boxfile.NewFromFile(config.Boxfile())
 	if err != nil || box == nil {
+		// todo: recursively check for boxfile
 		display.MissingBoxfile()
 		err = util.ErrorfQuiet("[USER] missing boxfile - %s", err.Error())
 		if err2, ok := err.(util.Err); ok {

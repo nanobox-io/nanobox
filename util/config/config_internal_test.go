@@ -15,16 +15,16 @@ func TestGlobalDir(t *testing.T) {
 
 func TestLocalDir(t *testing.T) {
 	dir := LocalDir()
-	// this used to be 'nanobox', i think because the boxfile was at the root level
-	// since removing that, the localdir returns the current directory
-	if !strings.HasSuffix(dir, "nanobox/util/config") {
+	// this is 'nanobox', because the boxfile is at the root level. localdir returns
+	// a parent boxfile if none is found in the current directory
+	if !strings.HasSuffix(dir, "nanobox") {
 		t.Errorf("local dir mismatch '%s'", dir)
 	}
 }
 
 func TestLocalDirName(t *testing.T) {
 	dir := LocalDirName()
-	if dir != "config" {
+	if dir != "nanobox" {
 		t.Errorf("local dir name mismatch '%s'", dir)
 	}
 }
