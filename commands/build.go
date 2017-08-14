@@ -1,9 +1,8 @@
 package commands
 
 import (
-	"github.com/spf13/cobra"
-
 	"github.com/nanobox-io/nanobox-boxfile"
+	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/commands/steps"
 	"github.com/nanobox-io/nanobox/models"
@@ -40,6 +39,8 @@ func buildFn(ccmd *cobra.Command, args []string) {
 	display.CommandErr(processors.Build(env))
 }
 
+// todo: this doesn't seem to ever run, find out when it does
+// update: this seems to run on deploy
 func buildComplete() bool {
 	// check the boxfile to be sure it hasnt changed
 	env, _ := models.FindEnvByID(config.EnvID())

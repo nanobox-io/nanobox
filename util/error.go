@@ -65,6 +65,25 @@ func ErrorfQuiet(fmtStr string, args ...interface{}) error {
 	return err
 }
 
+// Write an error message simular to Printf but logs the error to
+// the log file
+// todo: this is a silly workaround to preserve the suggestion
+func ErrorfQuietErr(err error, args ...interface{}) error {
+	newErr := Err{
+		Message: fmt.Sprintf(err.Error(), args...),
+		Stack:   []string{},
+	}
+
+	if err2, ok := err.(Err); ok {
+		newErr.Suggest = err2.Suggest
+		newErr.Output = err2.Output
+		newErr.Code = err2.Code
+	}
+
+	newErr.log()
+	return newErr
+}
+
 // creates an error the same fmt does but also reports errors to bugsnag
 func Errorf(fmt string, args ...interface{}) error {
 	eh := ErrorfQuiet(fmt, args...).(Err)

@@ -17,14 +17,34 @@ import (
 
 // Setup sets up the provider and the env mounts
 func Setup(envModel *models.Env) error {
+	lumber.Trace("env:Setup:config:Boxfile() - %s", config.Boxfile())
 
-	// todo: check for boxfile in separate step from valid yaml syntax and valid nodes
-	// if there is no boxfile display a message and end
-	if box := boxfile.NewFromPath(config.Boxfile()); !box.Valid {
+	// check for boxfile in separate step from valid yaml syntax
+	// if there is no boxfile, display a message and end
+	box, err := boxfile.NewFromFile(config.Boxfile())
+	if err != nil || box == nil {
+		// todo: recursively check for boxfile
 		display.MissingBoxfile()
-		// todo: add suggestion here
-		return util.ErrorfQuiet("[USER] missing or invalid boxfile")
+		err = util.ErrorfQuiet("[USER] missing boxfile - %s", err.Error())
+		if err2, ok := err.(util.Err); ok {
+			err2.Suggest = "Ensure you have a boxfile.yml file in your current app directory"
+			return err2
+		}
+		return err
 	}
+
+	// if boxfile is invalid, display a message and end
+	if !box.Valid {
+		display.InvalidBoxfile()
+		err = util.ErrorfQuiet("[USER] invalid yaml found in boxfile")
+		if err2, ok := err.(util.Err); ok {
+			err2.Suggest = "It appears you have an invalid boxfile. Validate it at `yamllint.com`"
+			return err2
+		}
+		return err
+	}
+
+	// todo: validate boxfile nodes
 
 	// init docker client
 	if err := provider.Init(); err != nil {

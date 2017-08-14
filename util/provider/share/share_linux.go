@@ -92,6 +92,8 @@ func (sh *ShareRPC) Add(req Request, resp *Response) error {
 		return err
 	}
 
+	// if the directory added doesn't exist, this will strip it out
+	// todo: validate before writing or log errors so we don't get unexpected behavior
 	if err := cleanExport(); err != nil {
 		return err
 	}
@@ -205,12 +207,15 @@ func cleanExport() error {
 	// remove entry from /etc/exports
 	scanner := bufio.NewScanner(f)
 	for scanner.Scan() {
+		// split on the double quote. will look like ["" "/path/to/app" " 192.168.1.4()"]
 		parts := strings.Split(scanner.Text(), "\"")
 
 		// if it starts with a "
 		if len(parts) > 1 {
+			// if the path doesn't exist or is not a directory, strip it from what we are going to write back
 			fileInfo, err := os.Stat(parts[1])
 			if err != nil || !fileInfo.IsDir() {
+				lumber.Error("[util:provider:share] adding %s failed", parts[1])
 				continue
 			}
 		}

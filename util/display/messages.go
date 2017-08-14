@@ -257,6 +257,16 @@ https://guides.nanobox.io/
 `))
 }
 
+func InvalidBoxfile() {
+	os.Stderr.WriteString(fmt.Sprintf(`
+--------------------------------------------------------------------------------
+INVALID BOXFILE.YML
+Nanobox requires valid yaml in your boxfile.yml config file. Please paste the
+contents of your boxfile into www.yamllint.com to validate.
+--------------------------------------------------------------------------------
+`))
+}
+
 func TooManyKeys() {
 	os.Stderr.WriteString(fmt.Sprintf(`
 --------------------------------------------------------------------------------

@@ -49,7 +49,7 @@ func SubmitLog(args string) error {
 
 	// tell nanobox
 	go odin.SubmitEvent(
-		fmt.Sprintf("desktop%s", strings.Replace(args, " ", "/", -1)),
+		fmt.Sprintf("desktop/%s", args),
 		fmt.Sprintf("desktop command: nanobox %s", args),
 		app,
 		map[string]interface{}{
