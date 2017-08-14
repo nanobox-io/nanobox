@@ -5,8 +5,10 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"strings"
 	"syscall"
 
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
@@ -29,10 +31,17 @@ func Tunnel(key, location, port, name string) error {
 	// setup a tcp listener
 	serv, err := net.Listen("tcp4", fmt.Sprintf(":%s", port))
 	if err != nil {
-		if err == syscall.EADDRINUSE {
-			return fmt.Errorf("it appears your local port (%s) is in use please specify a different port", port)
+		err2 := util.Err{
+			Code:    "TUNNEL",
+			Message: err.Error(),
 		}
-		return fmt.Errorf("failed to setup tcp listener: %s", err.Error())
+		if strings.Contains(err.Error(), "address already in use") || err == syscall.EADDRINUSE {
+			display.PortInUse(port)
+			err2.Code = "USER"
+			err2.Suggest = fmt.Sprintf("It appears your local port (%s) is in use. Please specify a different port.", port)
+		}
+
+		return util.ErrorAppend(err2, "failed to setup tcp listener")
 	}
 
 	display.TunnelEstablished(name, port)
