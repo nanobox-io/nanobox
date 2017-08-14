@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"os/signal"
+	"strings"
 
 	syscall "github.com/docker/docker/pkg/signal"
 	"github.com/docker/docker/pkg/term"
@@ -13,6 +14,7 @@ import (
 
 	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
 )
 
 type ConsoleConfig struct {
@@ -65,8 +67,18 @@ func Run(id string, consoleConfig ConsoleConfig) error {
 
 	exec, resp, err := docker.ExecStart(execConfig)
 	if err != nil {
+		err2 := util.Err{
+			Code:    "CONSOLE",
+			Message: err.Error(),
+		}
+		// note: error string may change with different docker versions
+		if strings.Contains(err.Error(), "page not found") {
+			err2.Suggest = fmt.Sprintf("It appears the node '%s' does not exist locally. Please double check the node name in your boxfile.yml.", id)
+			err2.Code = "USER/DOCKER"
+		}
+
 		lumber.Error("dockerexecerror: %s", err)
-		return err
+		return util.ErrorAppend(err2, "failed to execute console")
 	}
 	defer resp.Conn.Close()
 

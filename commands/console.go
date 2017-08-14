@@ -61,6 +61,12 @@ ex: nanobox console local web.site
 		}
 
 		componentModel, _ := models.FindComponentBySlug(config.EnvID()+"_"+name, args[0])
+		// todo: determine ways this errors and handle it, use util.Err for suggestions
+		// componentModel, err := models.FindComponentBySlug(config.EnvID()+"_"+name, args[0])
+		// if err != nil {
+		// 	display.CommandErr(err)
+		// 	return
+		// }
 
 		display.CommandErr(env.Console(componentModel, console.ConsoleConfig{}))
 

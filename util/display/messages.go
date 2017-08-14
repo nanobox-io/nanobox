@@ -326,3 +326,14 @@ the '-p' flag. (eg. 'nanobox tunnel data.db -p 5444')
 --------------------------------------------------------------------------------
 `, port))
 }
+
+func ConsoleNodeNotFound() {
+	os.Stderr.WriteString(fmt.Sprintf(`
+--------------------------------------------------------------------------------
+NODE NOT FOUND
+It appears the node you are trying to console to does not exist. Please double
+check your boxfile.yml. If your boxfile.yml does contain a node by the name you
+specified, please contact support.
+--------------------------------------------------------------------------------
+`))
+}
