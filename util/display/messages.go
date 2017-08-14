@@ -332,8 +332,8 @@ func ConsoleNodeNotFound() {
 --------------------------------------------------------------------------------
 NODE NOT FOUND
 It appears the node you are trying to console to does not exist. Please double
-check your boxfile. If your boxfile does contain a node by the name you
-specified, please let support know.
+check your boxfile.yml. If your boxfile.yml does contain a node by the name you
+specified, please contact support.
 --------------------------------------------------------------------------------
 `))
 }
