@@ -316,3 +316,13 @@ func BadPortType(protocol string) {
 --------------------------------------------------------------------------------
 `, protocol))
 }
+
+func PortInUse(port string) {
+	os.Stderr.WriteString(fmt.Sprintf(`
+--------------------------------------------------------------------------------
+ADDRESS IN USE
+It appears your local port (%s) is in use. Please specify a different port with
+the '-p' flag. (eg. 'nanobox tunnel data.db -p 5444')
+--------------------------------------------------------------------------------
+`, port))
+}
