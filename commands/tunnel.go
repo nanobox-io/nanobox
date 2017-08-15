@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/spf13/cobra"
 
@@ -41,6 +42,25 @@ func init() {
 
 // tunnelFn ...
 func tunnelFn(ccmd *cobra.Command, args []string) {
+
+	if tunnelCmdFlags.port != "" {
+		port, err := strconv.Atoi(tunnelCmdFlags.port)
+		if err != nil {
+			fmt.Printf(`
+Please specify a number for a port to listen on. You specified '%s'.
+
+`, tunnelCmdFlags.port)
+			return
+		}
+
+		if port < 1024 {
+			fmt.Printf(`
+Please specify a number above 1023 as a port to listen on. You specified '%d'.
+
+`, port)
+			return
+		}
+	}
 
 	env, _ := models.FindEnvByID(config.EnvID())
 	args, location, name := helpers.Endpoint(env, args, 2)

@@ -28,6 +28,10 @@ func Tunnel(key, location, port, name string) error {
 	}
 	defer conn.Close()
 
+	if port == "22" {
+		port = "2022"
+	}
+
 	// setup a tcp listener
 	serv, err := net.Listen("tcp4", fmt.Sprintf(":%s", port))
 	if err != nil {
@@ -38,7 +42,12 @@ func Tunnel(key, location, port, name string) error {
 		if strings.Contains(err.Error(), "address already in use") || err == syscall.EADDRINUSE {
 			display.PortInUse(port)
 			err2.Code = "USER"
-			err2.Suggest = fmt.Sprintf("It appears your local port (%s) is in use. Please specify a different port.", port)
+			err2.Suggest = fmt.Sprintf("It appears your local port (%s) is in use. Please specify a different port with '-p'.", port)
+		}
+		if strings.Contains(err.Error(), "bind: permission denied") || err == syscall.EACCES {
+			display.PortPrivileged(port)
+			err2.Code = "USER"
+			err2.Suggest = fmt.Sprintf("It appears you don't have permission to use port (%s). Please specify a different port with '-p'.", port)
 		}
 
 		return util.ErrorAppend(err2, "failed to setup tcp listener")

@@ -302,7 +302,7 @@ func UnexpectedPrivilage() {
 --------------------------------------------------------------------------------
 + ERROR:
 + Nanobox is designed to run as a standard user (non root)
-+ Please run all nanobox commands as a non privilage user
++ Please run all nanobox commands as a non privileged user
 --------------------------------------------------------------------------------
 
 `))
@@ -322,6 +322,16 @@ func PortInUse(port string) {
 --------------------------------------------------------------------------------
 ADDRESS IN USE
 It appears your local port (%s) is in use. Please specify a different port with
+the '-p' flag. (eg. 'nanobox tunnel data.db -p 5444')
+--------------------------------------------------------------------------------
+`, port))
+}
+
+func PortPrivileged(port string) {
+	os.Stderr.WriteString(fmt.Sprintf(`
+--------------------------------------------------------------------------------
+PRIVILEGED PORT
+Port '%s' is a privileged port. Please specify a port greater than 1023 with
 the '-p' flag. (eg. 'nanobox tunnel data.db -p 5444')
 --------------------------------------------------------------------------------
 `, port))
