@@ -91,7 +91,7 @@ func Add(path string) error {
 
 // the rpc function run from the server
 func (sh *ShareRPC) Add(req Request, resp *Response) error {
-	fmt.Printf("req: %#v\n", req)
+	lumber.Info("req: %#v\n", req)
 
 	// read exports file
 	existingFile, err := ioutil.ReadFile(EXPORTSFILE)
@@ -106,7 +106,7 @@ func (sh *ShareRPC) Add(req Request, resp *Response) error {
 
 	found := false
 	for i, line := range lines {
-		// get existing line
+		// get existing line (mac exports are all on one line)
 		if strings.Contains(line, lineCheck) {
 			// add our path to the line
 			// check to see if this path has already been added
@@ -119,6 +119,8 @@ func (sh *ShareRPC) Add(req Request, resp *Response) error {
 			break
 		}
 	}
+
+	// if this is the first time nanobox adds to the exports (single line)
 	if !found {
 		lines = append(lines, fmt.Sprintf("\"%s\" %s", req.Path, lineCheck))
 	}
@@ -274,16 +276,24 @@ func startNFSD() error {
 }
 
 func cleanLine(line, lineCheck string) string {
-	paths := strings.Split(strings.Replace(line, lineCheck, "", 1), " ")
+	// split on spaces and remove mount options. also cleanup stray quotes
+	paths := strings.Split(strings.Replace(line, lineCheck, "", 1), "\" \"")
+	paths[0] = strings.Replace(paths[0], "\"", "", 1)
+	paths[len(paths)-1] = strings.Replace(paths[len(paths)-1], "\"", "", 1)
+
 	goodPaths := []string{}
 	for _, path := range paths {
-		// remove the quotes from the path
-		path = strings.Replace(path, "\"", "", -1)
 		fileInfo, err := os.Stat(path)
-		if err != nil || !fileInfo.IsDir() {
-			// continue on if the file doest exist or if it is not a directory
+		// continue on if the file doest exist or if it is not a directory
+		if err != nil {
+			lumber.Info("Failed to stat - %s", err.Error())
 			continue
 		}
+		if !fileInfo.IsDir() {
+			lumber.Info("Path is not a directory!")
+			continue
+		}
+
 		goodPaths = append(goodPaths, path)
 	}
 	goodPaths = removeDuplicates(goodPaths)
@@ -304,12 +314,14 @@ func removeDuplicates(paths []string) []string {
 				continue
 			}
 
+			// todo: verify adding children on mac actually breaks (linux is ok)
+			// todo: test parent, child, parent-er, child-er to ensure only the parent-most gets added
 			// if i find an element that is shorter but the same directory structure
 			// dont add the longer path
 			if strings.HasPrefix(path, originalPath+"/") {
+				lumber.Info("Parent directory already exported '%s'", path)
 				add = false
 			}
-
 		}
 
 		// if I didnt detect a shorter path then I need to add this one
