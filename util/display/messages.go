@@ -343,7 +343,7 @@ func ConsoleLocalCode() {
 --------------------------------------------------------------------------------
 CANNOT CONSOLE TO LOCAL CODE NODE
 It appears you are trying to console to a local code node. When consoling to a
-local web/worker node, please use 'nanobox run'.
+local web/worker, please use 'nanobox run'.
 --------------------------------------------------------------------------------
 `))
 }
