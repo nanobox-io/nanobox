@@ -47,7 +47,7 @@ func Tunnel(key, location, port, name string) error {
 		if strings.Contains(err.Error(), "bind: permission denied") || err == syscall.EACCES {
 			display.PortPrivileged(port)
 			err2.Code = "USER"
-			err2.Suggest = fmt.Sprintf("It appears you don't have permission to use port (%s). Please specify a different port with '-p'.", port)
+			err2.Suggest = fmt.Sprintf("It appears you don't have permission to use port '%s'. Please specify a different port with '-p'.", port)
 		}
 
 		return util.ErrorAppend(err2, "failed to setup tcp listener")
