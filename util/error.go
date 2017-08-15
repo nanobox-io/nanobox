@@ -136,7 +136,6 @@ func ErrorAppend(err error, fmtStr string, args ...interface{}) error {
 		er.Stack = append([]string{msg}, er.Stack...)
 		return er
 	}
-	fmt.Println("NOT OUR ERRORTYPE")
 
 	// make sure when we get any new error that isnt ours
 	// we log and report it

@@ -25,7 +25,7 @@ func Mount(env *models.Env) error {
 		src := config.EngineDir()
 		dst := fmt.Sprintf("%s%s/engine", provider.HostShareDir(), env.ID)
 
-		// first export the env on the workstation
+		// first, export the env on the workstation
 		if err := provider.AddMount(src, dst); err != nil {
 			display.ErrorTask()
 			return util.ErrorAppend(err, "failed to mount the engine share on the provider")
