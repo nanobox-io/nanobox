@@ -2,6 +2,7 @@ package commands
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/spf13/cobra"
 
@@ -10,6 +11,7 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors"
 	"github.com/nanobox-io/nanobox/processors/env"
+	"github.com/nanobox-io/nanobox/util"
 	"github.com/nanobox-io/nanobox/util/config"
 	"github.com/nanobox-io/nanobox/util/console"
 	"github.com/nanobox-io/nanobox/util/display"
@@ -46,9 +48,20 @@ func consoleFn(ccmd *cobra.Command, args []string) {
 Wrong number of arguments (expecting 1 got %v). Run the command again with the
 name of the component you wish to console into:
 
-ex: nanobox console local web.site
+ex: nanobox console dry-run web.site
 
 `, len(args))
+		return
+	}
+
+	if name == "dev" && isCode(strings.Join(args, " ")) {
+		display.ConsoleLocalCode()
+		display.CommandErr(util.Err{
+			Message: "Console to local code node not valid",
+			Code:    "USER",
+			Stack:   []string{"failed to console"},
+			Suggest: "It appears you are trying to console to a local code node. Please use `nanobox run` instead.",
+		})
 		return
 	}
 
@@ -81,4 +94,11 @@ ex: nanobox console local web.site
 		display.CommandErr(processors.Console(envModel, consoleConfig))
 
 	}
+}
+
+func isCode(args string) bool {
+	if strings.Contains(args, "web.") || strings.Contains(args, "worker.") {
+		return true
+	}
+	return false
 }
