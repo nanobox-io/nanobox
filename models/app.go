@@ -22,6 +22,10 @@ type App struct {
 	LocalIPs map[string]string
 	// the boxfile from the most recent deploy
 	DeployedBoxfile string
+	// the https key used
+	Key string
+	// the https cert used
+	Cert string
 }
 
 // IsNew returns true if the App hasn't been created yet
@@ -31,7 +35,6 @@ func (a *App) IsNew() bool {
 
 // Save persists the App to the database
 func (a *App) Save() error {
-
 	if err := put(a.EnvID, a.ID, a); err != nil {
 		return fmt.Errorf("failed to save app: %s", err.Error())
 	}
