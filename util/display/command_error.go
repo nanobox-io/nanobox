@@ -51,7 +51,7 @@ Suggest : %s`, output, parsedErr.suggest)
 
 	if parsedErr.output != "" {
 		output = fmt.Sprintf(`%s
-Output : %s`, output, parsedErr.output)
+Output  : %s`, output, parsedErr.output)
 	}
 
 	output = fmt.Sprintf("%s\n", output)

@@ -4,13 +4,16 @@ package display
 type Streamer struct {
 	logLevel string
 	prefixer *Prefixer
+	Message  chan string
 }
 
 // NewStreamer returns a new Streamer
 func NewStreamer(logLevel string) Streamer {
-	return Streamer{
+	streemer := Streamer{
 		logLevel: logLevel,
 	}
+	streemer.Message = make(chan string)
+	return streemer
 }
 
 // NewPrefixedStreamer returns a new Streamer with a Prefixer
@@ -24,6 +27,9 @@ func NewPrefixedStreamer(logLevel string, prefix string) Streamer {
 // Write implements the io.Writer interface to write bytes on a writer
 func (s Streamer) Write(p []byte) (n int, err error) {
 	msg := string(p)
+
+	// todo: likely want to goroutine this in case there isn't a channel receiver
+	s.Message <- msg
 
 	// if we have a prefixer run the message through it
 	if s.prefixer != nil {

@@ -22,10 +22,28 @@ func Exec(container, hook, payload, displayLevel string) (string, error) {
 		stream = display.NewStreamer(displayLevel)
 	}
 
+	// stream.(display.Streamer)
+	var outs string
+	go func(outy *string) {
+		for {
+			select {
+			case msg := <-stream.(display.Streamer).Message:
+				*outy += msg
+				// fmt.Println("RECEIVED", msg)
+			}
+		}
+	}(&outs)
 	out, err := util.DockerExec(container, "root", "/opt/nanobox/hooks/"+hook, []string{payload}, stream)
+
 	if err != nil && (strings.Contains(string(out), "such file or directory") && strings.Contains(err.Error(), "bad exit code(126)")) {
 		// if its a 126 the hook didnt exist
 		return "", nil
+	}
+
+	if out == "" {
+		out = outs
+	} else {
+		out = fmt.Sprintf("%s -- %q", out, outs)
 	}
 
 	if err != nil {
