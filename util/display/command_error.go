@@ -49,10 +49,11 @@ Context : %s`, parsedErr.cause, parsedErr.context)
 Suggest : %s`, output, parsedErr.suggest)
 	}
 
-	if parsedErr.output != "" {
-		output = fmt.Sprintf(`%s
-Output  : %s`, output, parsedErr.output)
-	}
+	// todo: determine if we ever need to show this
+	// 	if parsedErr.output != "" {
+	// 		output = fmt.Sprintf(`%s
+	// Output  : %s`, output, parsedErr.output)
+	// 	}
 
 	output = fmt.Sprintf("%s\n", output)
 

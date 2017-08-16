@@ -2,7 +2,6 @@ package hookit
 
 import (
 	"fmt"
-	"io"
 	"strings"
 
 	"github.com/nanobox-io/nanobox/commands/registry"
@@ -16,20 +15,21 @@ var combined bool
 // Exec executes a hook inside of a container
 func Exec(container, hook, payload, displayLevel string) (string, error) {
 
-	var stream io.Writer
+	// display.Streamer is an io.Writer and can be passed to DockerExec
+	var stream display.Streamer
 
 	if !combined {
 		stream = display.NewStreamer(displayLevel)
 	}
 
-	// stream.(display.Streamer)
+	stream.CaptureOutput(true)
+
 	var outs string
 	go func(outy *string) {
 		for {
 			select {
-			case msg := <-stream.(display.Streamer).Message:
+			case msg := <-stream.Message:
 				*outy += msg
-				// fmt.Println("RECEIVED", msg)
 			}
 		}
 	}(&outs)
@@ -43,10 +43,14 @@ func Exec(container, hook, payload, displayLevel string) (string, error) {
 	if out == "" {
 		out = outs
 	} else {
-		out = fmt.Sprintf("%s -- %q", out, outs)
+		out = fmt.Sprintf("%s -- %s", out, outs)
 	}
 
 	if err != nil {
+		// todo: add errorfquiets for errors the hooks may stream
+		if strings.Contains(outs, "INVALID BOXFILE") {
+			return out, util.ErrorfQuiet("[USER] invalid node in boxfile (see output for more detail)")
+		}
 		return out, util.ErrorfQuiet("[HOOKS] failed to execute hook (%s) on %s: %s", hook, container, err)
 	}
 	return out, nil
