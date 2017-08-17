@@ -16,7 +16,7 @@ var combined bool
 func Exec(container, hook, payload, displayLevel string) (string, error) {
 
 	// display.Streamer is an io.Writer and can be passed to DockerExec
-	var stream display.Streamer
+	var stream *display.Streamer
 
 	if !combined {
 		stream = display.NewStreamer(displayLevel)
@@ -24,22 +24,13 @@ func Exec(container, hook, payload, displayLevel string) (string, error) {
 
 	stream.CaptureOutput(true)
 
-	var outs string
-	go func(outy *string) {
-		for {
-			select {
-			case msg := <-stream.Message:
-				*outy += msg
-			}
-		}
-	}(&outs)
 	out, err := util.DockerExec(container, "root", "/opt/nanobox/hooks/"+hook, []string{payload}, stream)
-
 	if err != nil && (strings.Contains(string(out), "such file or directory") && strings.Contains(err.Error(), "bad exit code(126)")) {
 		// if its a 126 the hook didnt exist
 		return "", nil
 	}
 
+	outs := stream.Output()
 	if out == "" {
 		out = outs
 	} else {
