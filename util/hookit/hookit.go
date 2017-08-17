@@ -31,10 +31,13 @@ func Exec(container, hook, payload, displayLevel string) (string, error) {
 	}
 
 	outs := stream.Output()
-	if out == "" {
-		out = outs
-	} else {
-		out = fmt.Sprintf("%s -- %s", out, outs)
+	// the boxfile hook returns the boxfile, we shouldn't append anything.
+	if hook != "boxfile" {
+		if out == "" {
+			out = outs
+		} else if outs != "" {
+			out = fmt.Sprintf("%s --- %s", out, outs)
+		}
 	}
 
 	if err != nil {

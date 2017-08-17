@@ -21,6 +21,7 @@ Manages environment variables in your different environments.
 //
 func init() {
 	EvarCmd.AddCommand(evar.AddCmd)
+	EvarCmd.AddCommand(evar.LoadCmd)
 	EvarCmd.AddCommand(evar.RemoveCmd)
 	EvarCmd.AddCommand(evar.ListCmd)
 }
