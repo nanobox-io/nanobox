@@ -31,8 +31,8 @@ func Exec(container, hook, payload, displayLevel string) (string, error) {
 	}
 
 	outs := stream.Output()
-	// the boxfile hook returns the boxfile, we shouldn't append anything.
-	if hook != "boxfile" {
+	// these hooks depend on the output, we shouldn't append anything.
+	if hook != "boxfile" && hook != "keys" {
 		if out == "" {
 			out = outs
 		} else if outs != "" {
