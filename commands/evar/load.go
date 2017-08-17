@@ -32,7 +32,7 @@ func loadFn(ccmd *cobra.Command, args []string) {
 	// parse the evars excluding the context
 	env, _ := models.FindEnvByID(config.EnvID())
 	args, location, name := helpers.Endpoint(env, args, 0)
-	vars, err := loadVars(args)
+	vars, err := loadVars(args, fileGetter{})
 	if err != nil {
 		display.CommandErr(util.Err{
 			Message: err.Error(),
@@ -42,7 +42,7 @@ func loadFn(ccmd *cobra.Command, args []string) {
 		return
 	}
 
-	evars := parseEvars(vars)
+	evars := parseSplitEvars(vars)
 
 	switch location {
 	case "local":
@@ -56,17 +56,17 @@ func loadFn(ccmd *cobra.Command, args []string) {
 }
 
 // loadVars loads variables from filenames passed in
-func loadVars(args []string) ([]string, error) {
+func loadVars(args []string, getter contentGetter) ([]string, error) {
 	vars := []string{}
 
 	for _, filename := range args {
-		contents, err := ioutil.ReadFile(filename)
+		contents, err := getter.getContents(filename)
 		if err != nil {
-			return nil, fmt.Errorf("Failed to read file - %s", err.Error())
+			return nil, fmt.Errorf("Failed to get var contents - %s", err.Error())
 		}
 
 		// normalize file `key=val`
-		newthings := strings.Replace(string(contents), "export ", "", -1)
+		newthings := strings.Replace(contents, "export ", "", -1)
 
 		// strip out blank lines
 		newthings = regexp.MustCompilePOSIX(`\n\n+`).ReplaceAllString(newthings, "\n")
@@ -74,8 +74,8 @@ func loadVars(args []string) ([]string, error) {
 		// strip trailing newline
 		newthings = regexp.MustCompilePOSIX(`\n$`).ReplaceAllString(newthings, "")
 
-		// get index of variable start (change regex to allow more than alphabet chars as keys)
-		indexes := regexp.MustCompilePOSIX(`(^[a-zA-Z]*?)=(\"\n|.)`).FindAllStringIndex(newthings, -1)
+		// get index of variable start (change regex to allow more than alphanumeric chars as keys)
+		indexes := regexp.MustCompilePOSIX(`(^[a-zA-Z0-9]*?)=(\"\n|.)`).FindAllStringIndex(newthings, -1)
 
 		start := 0
 		for i := range indexes {
@@ -92,4 +92,45 @@ func loadVars(args []string) ([]string, error) {
 	}
 
 	return vars, nil
+}
+
+// parseSplitEvars parses evars already split into key="val" pairs.
+func parseSplitEvars(vars []string) map[string]string {
+	evars := map[string]string{}
+
+	for _, pair := range vars {
+		parts := strings.SplitN(pair, "=", 2)
+		if len(parts) == 2 {
+			// strip var leading quote
+			if parts[1][0] == '"' && len(parts[1]) > 1 {
+				parts[1] = parts[1][1:]
+			}
+
+			// strip var ending quote
+			if parts[1][len(parts[1])-1] == '"' && len(parts[1]) > 1 {
+				parts[1] = parts[1][:len(parts[1])-1]
+			}
+
+			evars[strings.ToUpper(parts[0])] = parts[1]
+		} else {
+			fmt.Printf("invalid evar (%s)\n", pair)
+		}
+	}
+
+	return evars
+}
+
+// contentGetter is an interface to allow us to test loading/parsing of variables.
+type contentGetter interface {
+	getContents(filename string) (string, error)
+}
+
+type fileGetter struct{}
+
+func (f fileGetter) getContents(filename string) (string, error) {
+	contents, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return "", fmt.Errorf("Failed to read file - %s", err.Error())
+	}
+	return string(contents), nil
 }
