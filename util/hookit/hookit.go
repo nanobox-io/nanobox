@@ -41,7 +41,7 @@ func Exec(container, hook, payload, displayLevel string) (string, error) {
 	}
 
 	// the boxfile hook returns the boxfile, we shouldn't append anything.
-	if hook != "boxfile" {
+	if hook != "boxfile" && hook != "keys" {
 		if out == "" {
 			out = outs
 		} else if outs != "" {
