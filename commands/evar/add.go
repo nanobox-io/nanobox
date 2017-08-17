@@ -57,9 +57,13 @@ func parseEvars(args []string) map[string]string {
 		for _, pair := range strings.FieldsFunc(arg, f) {
 			// define a field split that llows us to split on
 			// ':' or '='
-			parts := strings.FieldsFunc(pair, func(c rune) bool {
-				return c == '='
-			})
+
+			// todo: return after first split (in case there are `=` in the variable)
+			// parts := strings.FieldsFunc(pair, func(c rune) bool {
+			// 	return c == '='
+			// })
+
+			parts := strings.SplitN(pair, "=", 2)
 			if len(parts) == 2 {
 				// check to see if the value is a file
 				content, err := ioutil.ReadFile(parts[1])

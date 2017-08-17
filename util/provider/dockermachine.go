@@ -456,7 +456,7 @@ func (machine DockerMachine) DockerEnv() error {
 	}
 
 	if inspect.Driver.IPAddress == "" {
-		return fmt.Errorf("docker-machine didnt start docker properly")
+		return util.Err{Message: "docker-machine didnt start docker properly", Suggest: "run `nanobox-machine stop nanobox` and try again"}
 	}
 	// set docker environment variables for client connections
 	os.Setenv("DOCKER_MACHINE_NAME", "nanobox")

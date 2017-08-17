@@ -2,15 +2,19 @@ package display
 
 // Streamer ...
 type Streamer struct {
-	logLevel string
-	prefixer *Prefixer
+	logLevel      string
+	prefixer      *Prefixer
+	captureOutput bool
+	Message       chan string
 }
 
 // NewStreamer returns a new Streamer
 func NewStreamer(logLevel string) Streamer {
-	return Streamer{
+	streemer := Streamer{
 		logLevel: logLevel,
 	}
+	streemer.Message = make(chan string)
+	return streemer
 }
 
 // NewPrefixedStreamer returns a new Streamer with a Prefixer
@@ -21,9 +25,19 @@ func NewPrefixedStreamer(logLevel string, prefix string) Streamer {
 	}
 }
 
+// CaptureOutput will write messages to the Message channel. Setting to true requires a channel reader for Message.
+func (s *Streamer) CaptureOutput(output bool) {
+	s.captureOutput = output
+}
+
 // Write implements the io.Writer interface to write bytes on a writer
 func (s Streamer) Write(p []byte) (n int, err error) {
 	msg := string(p)
+
+	// todo: likely want to goroutine this in case there isn't a channel receiver
+	if s.captureOutput {
+		s.Message <- msg
+	}
 
 	// if we have a prefixer run the message through it
 	if s.prefixer != nil {
