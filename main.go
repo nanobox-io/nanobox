@@ -1,4 +1,11 @@
-// Package main ...
+// Nanobox automates the creation of isolated, repeatable environments for local
+// and production applications. When developing locally, Nanobox provisions your
+// app's infrastructure inside of a virtual machine (VM) and mounts your local
+// codebase into the VM. Any changes made to your codebase are reflected inside
+// the virtual environment.
+//
+// Once code is built and tested locally, Nanobox provisions and deploys an
+// identical infrastructure on a production platform.
 package main
 
 import (
@@ -47,7 +54,7 @@ func main() {
 
 	// if it is running the server just run it
 	// skip the tratiotional messaging
-	if len(os.Args) == 2 && os.Args[1] == "server" {
+	if len(os.Args) == 2 && (os.Args[1] == "server" || os.Args[1] == "version" || os.Args[1] == "tunnel" || os.Args[1] == "login" || os.Args[1] == "logout") {
 		err := commands.NanoboxCmd.Execute()
 		if err != nil {
 			fmt.Println(err)
