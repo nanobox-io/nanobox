@@ -1,7 +1,7 @@
 package evar
 
 import (
-	// "fmt"
+	"fmt"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -15,9 +15,9 @@ import (
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
-// RemoveCmd ...
+// RemoveCmd removes an evar.
 var RemoveCmd = &cobra.Command{
-	Use:   "rm",
+	Use:   "rm [local|dry-run] key",
 	Short: "Remove environment variable(s)",
 	Long:  ``,
 	// PreRun: steps.Run("login"),
@@ -29,6 +29,18 @@ func removeFn(ccmd *cobra.Command, args []string) {
 	// parse the evars excluding the context
 	env, _ := models.FindEnvByID(config.EnvID())
 	args, location, name := helpers.Endpoint(env, args, 0)
+
+	if len(args) < 1 {
+		fmt.Printf(`
+--------------------------------------------
+Please provide the key you'd like to remove!
+--------------------------------------------
+
+`)
+		ccmd.HelpFunc()(ccmd, args)
+		return
+	}
+
 	evars := parseKeys(args)
 
 	switch location {
@@ -50,7 +62,7 @@ func parseKeys(args []string) []string {
 	for _, arg := range args {
 		for _, key := range strings.Split(arg, ",") {
 			if key != "" {
-				keys = append(keys, key)
+				keys = append(keys, strings.ToUpper(key))
 			}
 		}
 	}
