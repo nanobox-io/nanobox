@@ -9,8 +9,8 @@ import (
 	"github.com/nanobox-io/nanobox/models"
 )
 
-// Check for updates to nanobox once a week
-const checkFrequency = (168 * time.Hour)
+// Check for updates to nanobox every other day
+const checkFrequency = (48 * time.Hour)
 
 // Check checks to see if there is an update available for the nanobox CLI
 func Check() {
