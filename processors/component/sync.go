@@ -120,6 +120,7 @@ func provisionComponents(envModel *models.Env, appModel *models.App) error {
 
 		// setup
 		if err := Setup(appModel, componentModel); err != nil {
+			// todo: if error `Error: No such image: image/postgresql` set code to USER, else, IMAGE
 			return util.ErrorAppend(err, "failed to setup component (%s): %s", name, err.Error())
 		}
 
