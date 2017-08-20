@@ -75,7 +75,7 @@ func loadVars(args []string, getter contentGetter) ([]string, error) {
 		newthings = regexp.MustCompilePOSIX(`\n$`).ReplaceAllString(newthings, "")
 
 		// get index of variable start (change regex to allow more than alphanumeric chars as keys)
-		indexes := regexp.MustCompilePOSIX(`(^[a-zA-Z0-9]*?)=(\"\n|.)`).FindAllStringIndex(newthings, -1)
+		indexes := regexp.MustCompilePOSIX(`(^[a-zA-Z0-9_]*?)=(\"\n|.)`).FindAllStringIndex(newthings, -1)
 
 		start := 0
 		for i := range indexes {
