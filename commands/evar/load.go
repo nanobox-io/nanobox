@@ -113,7 +113,10 @@ func parseSplitEvars(vars []string) map[string]string {
 
 			evars[strings.ToUpper(parts[0])] = parts[1]
 		} else {
-			fmt.Printf("invalid evar (%s)\n", pair)
+			fmt.Printf(`
+--------------------------------------------
+Please provide a valid evar! ("key=value")
+--------------------------------------------`)
 		}
 	}
 

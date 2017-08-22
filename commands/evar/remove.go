@@ -61,9 +61,7 @@ func parseKeys(args []string) []string {
 
 	for _, arg := range args {
 		for _, key := range strings.Split(arg, ",") {
-			if key != "" {
-				keys = append(keys, strings.ToUpper(key))
-			}
+			keys = append(keys, strings.ToUpper(key))
 		}
 	}
 
