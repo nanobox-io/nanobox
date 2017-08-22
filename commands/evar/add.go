@@ -59,15 +59,33 @@ Please provide a key to add evar!
 --------------------------------------------`)
 				continue
 			}
-			// un-escape string values ("ensures proper escaped values too")
-			part, err := strconv.Unquote(parts[1])
-			if err != nil {
-				fmt.Printf(`
+			part := parts[1]
+			var err error
+			// if we've quoted the variable, and it's not a multiline, un-escape it
+			if (len(parts[1]) > 1 && parts[1][0] == '"') && !strings.Contains(part, "\n") {
+				// un-escape string values ("ensures proper escaped values too")
+				// part, err = strconv.Unquote(strconv.Quote(parts[1]))
+				part, err = strconv.Unquote(parts[1])
+				if err != nil {
+					fmt.Printf(`
 --------------------------------------------
 Please provide a properly escaped value!
 --------------------------------------------`)
-				continue
+					continue
+				}
+			} else { // else, it's likely a multiline and we'll need to just remove quotes
+				// strip var leading quote
+				if parts[1][0] == '"' && len(parts[1]) > 1 {
+					parts[1] = parts[1][1:]
+				}
+
+				// strip var ending quote
+				if parts[1][len(parts[1])-1] == '"' && len(parts[1]) > 1 {
+					parts[1] = parts[1][:len(parts[1])-1]
+				}
+				part = parts[1]
 			}
+
 			evars[strings.ToUpper(parts[0])] = part
 		} else {
 			fmt.Printf(`

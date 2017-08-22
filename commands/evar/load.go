@@ -80,7 +80,7 @@ func loadVars(args []string, getter contentGetter) ([]string, error) {
 		start := 0
 		for i := range indexes {
 			end := indexes[i][0]
-			if end == 0 {
+			if end <= 2 {
 				continue
 			}
 			// end-1 leaves off the newline after the variable declaration
