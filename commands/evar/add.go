@@ -2,7 +2,7 @@ package evar
 
 import (
 	"fmt"
-	"io/ioutil"
+	"strconv"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -44,36 +44,54 @@ func addFn(ccmd *cobra.Command, args []string) {
 	}
 }
 
+// parseEvars parses evars already split into key="val" pairs.
 func parseEvars(args []string) map[string]string {
 	evars := map[string]string{}
 
-	for _, arg := range args {
-		// define a function that will allow us to
-		// split on ',' or ' '
-		f := func(c rune) bool {
-			return c == ','
-		}
-
-		for _, pair := range strings.FieldsFunc(arg, f) {
-			// define a field split that llows us to split on
-			// ':' or '='
-
-			// todo: return after first split (in case there are `=` in the variable)
-			// parts := strings.FieldsFunc(pair, func(c rune) bool {
-			// 	return c == '='
-			// })
-
-			parts := strings.SplitN(pair, "=", 2)
-			if len(parts) == 2 {
-				// check to see if the value is a file
-				content, err := ioutil.ReadFile(parts[1])
-				if err == nil {
-					parts[1] = string(content)
-				}
-				evars[strings.ToUpper(parts[0])] = parts[1]
-			} else {
-				fmt.Printf("invalid evar (%s)\n", pair)
+	for _, pair := range args {
+		// return after first split (in case there are `=` in the variable)
+		parts := strings.SplitN(pair, "=", 2)
+		if len(parts) == 2 {
+			if parts[0] == "" {
+				fmt.Printf(`
+--------------------------------------------
+Please provide a key to add evar!
+--------------------------------------------`)
+				continue
 			}
+			part := parts[1]
+			var err error
+			// if we've quoted the variable, and it's not a multiline, un-escape it
+			if (len(parts[1]) > 1 && parts[1][0] == '"') && !strings.Contains(part, "\n") {
+				// un-escape string values ("ensures proper escaped values too")
+				// part, err = strconv.Unquote(strconv.Quote(parts[1]))
+				part, err = strconv.Unquote(parts[1])
+				if err != nil {
+					fmt.Printf(`
+--------------------------------------------
+Please provide a properly escaped value!
+--------------------------------------------`)
+					continue
+				}
+			} else { // else, it's likely a multiline and we'll need to just remove quotes
+				// strip var leading quote
+				if parts[1][0] == '"' && len(parts[1]) > 1 {
+					parts[1] = parts[1][1:]
+				}
+
+				// strip var ending quote
+				if parts[1][len(parts[1])-1] == '"' && len(parts[1]) > 1 {
+					parts[1] = parts[1][:len(parts[1])-1]
+				}
+				part = parts[1]
+			}
+
+			evars[strings.ToUpper(parts[0])] = part
+		} else {
+			fmt.Printf(`
+--------------------------------------------
+Please provide a valid evar! ("key=value")
+--------------------------------------------`)
 		}
 	}
 
