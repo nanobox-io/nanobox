@@ -42,7 +42,7 @@ func loadFn(ccmd *cobra.Command, args []string) {
 		return
 	}
 
-	evars := parseSplitEvars(vars)
+	evars := parseEvars(vars)
 
 	switch location {
 	case "local":
@@ -92,35 +92,6 @@ func loadVars(args []string, getter contentGetter) ([]string, error) {
 	}
 
 	return vars, nil
-}
-
-// parseSplitEvars parses evars already split into key="val" pairs.
-func parseSplitEvars(vars []string) map[string]string {
-	evars := map[string]string{}
-
-	for _, pair := range vars {
-		parts := strings.SplitN(pair, "=", 2)
-		if len(parts) == 2 {
-			// strip var leading quote
-			if parts[1][0] == '"' && len(parts[1]) > 1 {
-				parts[1] = parts[1][1:]
-			}
-
-			// strip var ending quote
-			if parts[1][len(parts[1])-1] == '"' && len(parts[1]) > 1 {
-				parts[1] = parts[1][:len(parts[1])-1]
-			}
-
-			evars[strings.ToUpper(parts[0])] = parts[1]
-		} else {
-			fmt.Printf(`
---------------------------------------------
-Please provide a valid evar! ("key=value")
---------------------------------------------`)
-		}
-	}
-
-	return evars
 }
 
 // contentGetter is an interface to allow us to test loading/parsing of variables.

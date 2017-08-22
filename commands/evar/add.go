@@ -2,6 +2,7 @@ package evar
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -43,6 +44,7 @@ func addFn(ccmd *cobra.Command, args []string) {
 	}
 }
 
+// parseEvars parses evars already split into key="val" pairs.
 func parseEvars(args []string) map[string]string {
 	evars := map[string]string{}
 
@@ -57,7 +59,16 @@ Please provide a key to add evar!
 --------------------------------------------`)
 				continue
 			}
-			evars[strings.ToUpper(parts[0])] = parts[1]
+			// un-escape string values ("ensures proper escaped values too")
+			part, err := strconv.Unquote(parts[1])
+			if err != nil {
+				fmt.Printf(`
+--------------------------------------------
+Please provide a properly escaped value!
+--------------------------------------------`)
+				continue
+			}
+			evars[strings.ToUpper(parts[0])] = part
 		} else {
 			fmt.Printf(`
 --------------------------------------------
