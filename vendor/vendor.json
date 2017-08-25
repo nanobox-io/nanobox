@@ -753,6 +753,12 @@
 			"revisionTime": "2016-02-16T13:16:06Z"
 		},
 		{
+			"checksumSHA1": "7EZyXN0EmZLgGxZxK01IJua4c8o=",
+			"path": "golang.org/x/net/websocket",
+			"revision": "57efc9c3d9f91fb3277f8da1cff370539c4d3dc5",
+			"revisionTime": "2017-08-18T05:32:00Z"
+		},
+		{
 			"checksumSHA1": "CoRxz7vk573Zu/UcMS4PzpAsv3w=",
 			"path": "golang.org/x/sys/unix",
 			"revision": "b776ec39b3e54652e09028aaaaac9757f4f8211a",
