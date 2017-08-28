@@ -6,12 +6,14 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"os/signal"
 	"strings"
 	"time"
 
 	"github.com/jcelliott/lumber"
+	"github.com/nanopack/logvac/core"
 	"github.com/nanopack/mist/core"
 	"golang.org/x/net/websocket"
 
@@ -24,7 +26,7 @@ import (
 )
 
 // Tail tails production logs for an app.
-func Tail(envModel *models.Env, app string) error {
+func Tail(envModel *models.Env, app string, logFollow bool) error {
 
 	appID := app
 
@@ -54,9 +56,49 @@ func Tail(envModel *models.Env, app string) error {
 	}
 
 	// fmt.Println("mistConfig", mistConfig)
-	err = mistListen(mistConfig.Token, mistConfig.URL)
+	err = mistListen(mistConfig.Token, mistConfig.URL, logFollow)
 	if err != nil {
 		return util.ErrorAppend(err, "failed to subscribe to logs")
+	}
+
+	return nil
+}
+
+// Print prints historic production logs for an app.
+func Print(envModel *models.Env, app string, numLogs int) error {
+
+	appID := app
+
+	// fetch the remote
+	remote, ok := envModel.Remotes[appID]
+	if ok {
+		// set the odin endpoint
+		odin.SetEndpoint(remote.Endpoint)
+		// set the app id
+		appID = remote.ID
+	}
+
+	// todo: don't assume app name, just message and die
+	// set the app id to the directory name if it's default
+	if appID == "default" {
+		appID = config.AppName()
+	}
+
+	// validate access to the app
+	if err := helpers.ValidateOdinApp(appID); err != nil {
+		return util.ErrorAppend(err, "unable to validate app")
+	}
+
+	token, url, err := odin.GetComponent(appID, "logger")
+	if err != nil {
+		lumber.Error("deploy:setMistToken:GetMist(%s): %s", appID, err.Error())
+		err = util.ErrorAppend(err, "failed to fetch logvac information from nanobox")
+		return err
+	}
+
+	err = fetchLogs(token, url, numLogs)
+	if err != nil {
+		return util.ErrorAppend(err, "failed to fetch logs")
 	}
 
 	return nil
@@ -79,9 +121,8 @@ func getMistConfig(envModel *models.Env, appID string) (*MistConfig, error) {
 	return &MistConfig{url, token}, nil
 }
 
-func mistListen(token, url string) error {
-	fmt.Printf("Connecting to %s, with token %s.\n", url, token)
-
+// mistListen will subscribe to mist and print incoming logs.
+func mistListen(token, url string, logFollow bool) error {
 	// connect to the mist server
 	var wsConn *websocket.Conn
 	clientConnect := func() (err error) {
@@ -91,26 +132,27 @@ func mistListen(token, url string) error {
 	if err := util.Retry(clientConnect, 3, time.Second); err != nil {
 		return err
 	}
-	fmt.Println("connected")
 
 	// subscribe to all logs
 	if err := subscribe(wsConn); err != nil {
 		return err
 	}
-	fmt.Println("subscribed")
 
 	// catch kill signals
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt)
 	signal.Notify(sigChan, os.Kill)
 
-	fmt.Printf(`
+	// if `-f` wasn't explicity called, print what we are doing
+	if !logFollow {
+		fmt.Printf(`
 Connected to streaming logs:
 ctrl + c to quit
 ------------------------------------------------
 waiting for output...
 
 `)
+	}
 
 	// loop waiting for messages or signals if we recieve a kill signal quit
 	// messages will be displayed
@@ -189,4 +231,44 @@ func subscribe(ws *websocket.Conn) error {
 
 	_, err = ws.Write(b)
 	return err
+}
+
+// fetchLogs fetches and prints historic logs
+func fetchLogs(token, url string, numLogs int) error {
+	body, err := rest(url, "GET", fmt.Sprintf("/logs?type=app&id=&start=0&limit=%d", numLogs), token, token)
+	if err != nil {
+		return fmt.Errorf("failed to get logs - %s", err.Error())
+	}
+
+	msgs := []logvac.Message{}
+	err = json.Unmarshal(body, &msgs)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal - %s", err.Error())
+	}
+
+	for i := range msgs {
+		display.FormatLogvacMessage(msgs[i])
+	}
+
+	return nil
+}
+
+func rest(ip, method, route, auth, user string) ([]byte, error) {
+	req, _ := http.NewRequest(method, fmt.Sprintf("https://%s:6361%s", ip, route), nil)
+	req.Header.Add("X-AUTH-TOKEN", auth)
+	req.Header.Add("X-USER-TOKEN", user)
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("Unable to %s %s - %s", method, route, err)
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		return nil, fmt.Errorf("Status '200' expected, got '%d'", res.StatusCode)
+	}
+
+	b, _ := ioutil.ReadAll(res.Body)
+
+	return b, nil
 }

@@ -14,13 +14,21 @@ import (
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
-// LogCmd ...
-var LogCmd = &cobra.Command{
-	Use:    "log [dry-run|remote-alias]",
-	Short:  "Streams application logs.",
-	Long:   "'remote-alias' is the alias for your app, given on `nanobox remote add app-name alias`",
-	Run:    logFn,
-}
+var (
+	logFollow bool
+	logNumber int
+	logStart  string // todo: forthcoming
+	logEnd    string // todo: forthcoming
+	logLimit  string // todo: forthcoming
+
+	// LogCmd provides the logging functionality.
+	LogCmd = &cobra.Command{
+		Use:   "log [dry-run|remote-alias]",
+		Short: "Streams application logs.",
+		Long:  "'remote-alias' is the alias for your app, given on `nanobox remote add app-name alias`",
+		Run:   logFn,
+	}
+)
 
 // logFn ...
 func logFn(ccmd *cobra.Command, args []string) {
@@ -46,7 +54,18 @@ logs inside a terminal running 'nanobox run'.
 	case "production":
 		steps.Run("login")(ccmd, args)
 
+		// since we default to live logging, if `-n` is set, we'll print that many
+		// historic logs and return unless `-f` is also set.
+		if logNumber > 0 {
+			display.CommandErr(log.Print(envModel, name, logNumber))
+
+			// if `-f` is also specified, continue, else return here.
+			if !logFollow {
+				return
+			}
+		}
+
 		// set the meta arguments to be used in the processor and run the processor
-		display.CommandErr(log.Tail(envModel, name))
+		display.CommandErr(log.Tail(envModel, name, logFollow))
 	}
 }
