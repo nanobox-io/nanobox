@@ -69,9 +69,13 @@ func ErrorfQuietErr(err error, args ...interface{}) error {
 }
 
 // creates an error the same fmt does
-func Errorf(fmt string, args ...interface{}) error {
-	eh := ErrorfQuiet(fmt, args...).(Err)
-	return eh
+func Errorf(fmtStr string, args ...interface{}) error {
+	err := Err{
+		Message: fmt.Sprintf(fmtStr, args...),
+		Stack:   []string{},
+	}
+
+	return err
 }
 
 // create an error
