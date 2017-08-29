@@ -2,6 +2,7 @@ package provider
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/nanobox-io/nanobox/models"
 )
@@ -15,7 +16,7 @@ type Provider interface {
 	HostMntDir() string
 	HostIP() (string, error)
 	ReservedIPs() []string
-	Valid() (bool, []string)
+	Valid() (error, []string)
 	Create() error
 	Reboot() error
 	Stop() error
@@ -53,11 +54,11 @@ func Display(verb bool) {
 }
 
 // Valid ...
-func Valid() (bool, []string) {
+func Valid() (error, []string) {
 
 	p, err := fetchProvider()
 	if err != nil {
-		return false, []string{"invalid provider"}
+		return fmt.Errorf("invalid provider - %s", err.Error()), []string{"invalid provider"}
 	}
 
 	return p.Valid()

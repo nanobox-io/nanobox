@@ -34,39 +34,55 @@ func init() {
 }
 
 // Valid ensures docker-machine is installed and available
-func (machine DockerMachine) Valid() (bool, []string) {
+func (machine DockerMachine) Valid() (error, []string) {
+	var masterErr error // will hold a collection of any errors hit
 
 	missingParts := []string{}
 
 	// we install our own docker-machine so we dont need to check
 
 	// do you have vbox manage?
-	if err := exec.Command(vboxManageCmd, "-v").Run(); err != nil {
+	out, err := exec.Command(vboxManageCmd, "-v").CombinedOutput()
+	if err != nil {
+		// append rather than return here so that we can check everything before erroring.
+		// otherwise a user could error multiple times, learning about one problem at a time.
 		missingParts = append(missingParts, "vboxmanage")
+		masterErr = fmt.Errorf("missing vboxmanage - %q", err.Error())
+	}
+	// check output for errors/instruction
+	if bytes.Contains(out, []byte("WARNING")) {
+		if masterErr == nil {
+			masterErr = fmt.Errorf("vboxmanage gave warning - \n%s", out)
+		} else {
+			masterErr = fmt.Errorf("%s - vboxmanage gave warning - \n%s", masterErr.Error(), out)
+		}
 	}
 
 	// return early if we are running native mounts
 	config, _ := models.LoadConfig()
 
 	if config.MountType == "native" {
-		return len(missingParts) == 0, missingParts
-	}
-
-	unixCheck := func() {
-		// check to see if i am listening on the netfs port
-		out, err := exec.Command("netstat", "-ln").CombinedOutput()
-		if err != nil || !bytes.Contains(out, []byte("2049")) {
-			missingParts = append(missingParts, "netfs")
+		if len(missingParts) == 0 && masterErr == nil {
+			return nil, missingParts
 		}
-
+		return masterErr, missingParts
 	}
 
 	// net share checking
 	switch runtime.GOOS {
 	case "linux":
-		unixCheck()
+		out, err := exec.Command("netstat", "-tln").CombinedOutput()
+		if err != nil {
+			missingParts = append(missingParts, "netfs")
+			masterErr = fmt.Errorf("%s - failed to check for netfs - %q", masterErr.Error(), err.Error())
+		} else if !bytes.Contains(out, []byte("2049")) {
+			missingParts = append(missingParts, "netfs")
+			masterErr = fmt.Errorf("%s - missing or not running netfs - %q", masterErr.Error(), err.Error())
+		}
+
 		if err := exec.Command("exportfs").Run(); err != nil {
 			missingParts = append(missingParts, "exportfs")
+			masterErr = fmt.Errorf("%s - missing exportfs - %q", masterErr.Error(), err.Error())
 		}
 
 	case "darwin":
@@ -79,7 +95,7 @@ func (machine DockerMachine) Valid() (bool, []string) {
 
 	}
 
-	return len(missingParts) == 0, missingParts
+	return masterErr, missingParts
 }
 
 func (machine DockerMachine) Status() string {

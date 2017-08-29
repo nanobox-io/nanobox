@@ -25,15 +25,12 @@ func init() {
 }
 
 // Valid ensures docker-machine is installed and available
-func (native Native) Valid() (bool, []string) {
-	cmd := exec.Command("docker", "ps")
-
-	//
-	if _, err := cmd.CombinedOutput(); err != nil {
-		return false, []string{"docker"}
+func (native Native) Valid() (error, []string) {
+	if err := exec.Command("docker", "ps").Run(); err != nil {
+		return fmt.Errorf("missing docker - %s", err.Error()), []string{"docker"}
 	}
 
-	return true, nil
+	return nil, nil
 }
 
 func (native Native) Status() string {
