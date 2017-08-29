@@ -221,20 +221,26 @@
 		{
 			"checksumSHA1": "pfZB2heUOImpxC+LS/xFSFDd2J8=",
 			"path": "github.com/docker/machine/libmachine/log",
-			"revision": "85bef344b7be221c79a1e0173acf44715075f0f9",
-			"revisionTime": "2016-09-08T18:02:50Z"
+			"revision": "937160559e02cc430fe176991beb9a6ffbfe3de0",
+			"revisionTime": "2017-07-12T23:53:51Z",
+			"version": "v0.12.2",
+			"versionExact": "v0.12.2"
 		},
 		{
-			"checksumSHA1": "QG310EdbozuJynkrfT3wvVm29FY=",
+			"checksumSHA1": "WZq3NS1/0CN7IyeZqH+AugPzm7k=",
 			"path": "github.com/docker/machine/libmachine/mcnutils",
-			"revision": "85bef344b7be221c79a1e0173acf44715075f0f9",
-			"revisionTime": "2016-09-08T18:02:50Z"
+			"revision": "937160559e02cc430fe176991beb9a6ffbfe3de0",
+			"revisionTime": "2017-07-12T23:53:51Z",
+			"version": "v0.12.2",
+			"versionExact": "v0.12.2"
 		},
 		{
-			"checksumSHA1": "MotUnJVkO3Cg501ZASzbnwb+Um4=",
+			"checksumSHA1": "Fn8hXKmkAUxnXi5RrIexvW9BnI8=",
 			"path": "github.com/docker/machine/version",
-			"revision": "85bef344b7be221c79a1e0173acf44715075f0f9",
-			"revisionTime": "2016-09-08T18:02:50Z"
+			"revision": "937160559e02cc430fe176991beb9a6ffbfe3de0",
+			"revisionTime": "2017-07-12T23:53:51Z",
+			"version": "v0.12.2",
+			"versionExact": "v0.12.2"
 		},
 		{
 			"checksumSHA1": "xgjI2W3RGiQwNlxsOW2V9fJ9kaM=",
