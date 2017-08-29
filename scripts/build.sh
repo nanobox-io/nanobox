@@ -21,7 +21,7 @@ BUILD_DATE=`date -u +%y%m%dT%H%M`
 printf "\nBuilding nanobox...\n"
 
 # build nanobox
-gox -ldflags "-s -X main.bugsnagToken=$BUGSNAG_TOKEN -X github.com/nanobox-io/nanobox/util/odin.apiKey=$API_KEY \
+gox -ldflags "-s -X github.com/nanobox-io/nanobox/util/odin.apiKey=$API_KEY \
 			  -X github.com/nanobox-io/nanobox/models.nanoVersion=$(getCurrTag) \
 			  -X github.com/nanobox-io/nanobox/models.nanoCommit=$(getCurrCommit) \
 			  -X github.com/nanobox-io/nanobox/models.nanoBuild=$BUILD_DATE" \

@@ -6,7 +6,6 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"github.com/bugsnag/bugsnag-go"
 	"github.com/jcelliott/lumber"
 )
 
@@ -26,21 +25,6 @@ func (eh Err) Error() string {
 		return eh.Message
 	}
 	return fmt.Sprintf("%s: %s", strings.Join(eh.Stack, ": "), eh.Message)
-}
-
-// report an issue to bugsnag this has to be done when the error is first created by us
-// so it can have a valid stacktrace
-func (eh Err) report() {
-	// dont report if we are testing
-	if flag.Lookup("test.v") != nil {
-		return
-	}
-
-	bugsnagErr := bugsnag.Notify(eh, bugsnag.User{Id: UniqueID()}, bugsnag.SeverityInfo)
-	if bugsnagErr != nil {
-		lumber.Error("Bugsnag error: %s", bugsnagErr)
-	}
-
 }
 
 // log the error we ran into into our log file
@@ -84,14 +68,13 @@ func ErrorfQuietErr(err error, args ...interface{}) error {
 	return newErr
 }
 
-// creates an error the same fmt does but also reports errors to bugsnag
+// creates an error the same fmt does
 func Errorf(fmt string, args ...interface{}) error {
 	eh := ErrorfQuiet(fmt, args...).(Err)
-	eh.report()
 	return eh
 }
 
-// create an error but do not report to bugsnag
+// create an error
 func ErrorQuiet(err error) error {
 	if err == nil {
 		return err
@@ -116,7 +99,6 @@ func Error(err error) error {
 	}
 
 	eh := ErrorQuiet(err).(Err)
-	eh.report()
 	return eh
 }
 
@@ -138,6 +120,6 @@ func ErrorAppend(err error, fmtStr string, args ...interface{}) error {
 	}
 
 	// make sure when we get any new error that isnt ours
-	// we log and report it
+	// we log it
 	return ErrorAppend(Error(err), fmtStr, args...)
 }
