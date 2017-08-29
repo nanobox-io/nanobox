@@ -17,7 +17,6 @@ import (
 	"runtime/debug"
 	"strings"
 
-	"github.com/bugsnag/bugsnag-go"
 	"github.com/jcelliott/lumber"
 
 	"github.com/nanobox-io/nanobox/commands"
@@ -29,15 +28,6 @@ import (
 	"github.com/nanobox-io/nanobox/util/display"
 	"github.com/nanobox-io/nanobox/util/provider"
 )
-
-var bugsnagToken string
-
-type bugLog struct {
-}
-
-func (bugLog) Printf(fmt string, v ...interface{}) {
-	lumber.Info(fmt, v...)
-}
 
 // main
 func main() {
@@ -69,7 +59,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// do the commands configure check here because we need it to happen before setupBugsnag creates the config
+	// do the commands configure check here
 	command := strings.Join(os.Args, " ")
 	if _, err := models.LoadConfig(); err != nil && !strings.Contains(command, " config") && !strings.Contains(command, "env server") {
 		processors.Configure()
@@ -107,7 +97,6 @@ func main() {
 
 			stack := debug.Stack()
 
-			bugsnag.Notify(fmt.Errorf("panic"), bugsnag.SeverityError, bugsnag.User{Id: util.UniqueID()}, r, stack)
 			// in a panic state we dont want to try loading or using any non standard libraries.
 			// so we will just use the ones we already have
 			lumber.Fatal(fmt.Sprintf("Cause of failure: %v", r))
@@ -118,27 +107,8 @@ func main() {
 		}
 	}()
 
-	// get the bugsnag variables ready
-	setupBugsnag()
-
 	//
 	commands.NanoboxCmd.Execute()
-}
-
-func setupBugsnag() {
-	bugsnag.Configure(bugsnag.Configuration{
-		APIKey:       bugsnagToken,
-		Logger:       bugLog{},
-		Synchronous:  true,
-		AppVersion:   models.VersionString(),
-		PanicHandler: func() {}, // the built in panic handler reexicutes our code
-	})
-
-	bugsnag.OnBeforeNotify(func(event *bugsnag.Event, config *bugsnag.Configuration) error {
-		// set the grouping hash to a md5 of the message. which should seperate the grouping in the dashboard
-		event.GroupingHash = fmt.Sprintf("%v", event.Stacktrace)
-		return nil
-	})
 }
 
 func badTerminal() bool {

@@ -82,6 +82,7 @@ func (cmd *Cmd) Output() (string, error) {
 	cmd.Stdout = &buffer
 	err := cmd.Run()
 	if err != nil {
+		// todo: during `--debug`, duplicate logs get entered
 		// todo: strip out auth tokens/ssh keys from cmd.Args
 		lumber.Error("exec:Cmd:Run: %s, %s, %v", cmd.ID, cmd.Path, cmd.Args)
 		lumber.Error("exec:cmd:Output: %s, err: %s", buffer.String(), err.Error())

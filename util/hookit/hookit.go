@@ -10,13 +10,14 @@ import (
 	"github.com/nanobox-io/nanobox/util/display"
 )
 
+// since `--debug` runs the command twice, combined prevents duplication of the error output.
 var combined bool
 
 // Exec executes a hook inside of a container
 func Exec(container, hook, payload, displayLevel string) (string, error) {
 
 	// display.Streamer is an io.Writer and can be passed to DockerExec
-	var stream *display.Streamer
+	stream := &display.Streamer{}
 
 	if !combined {
 		stream = display.NewStreamer(displayLevel)
@@ -41,11 +42,11 @@ func Exec(container, hook, payload, displayLevel string) (string, error) {
 	}
 
 	if err != nil {
-		// todo: add errorfquiets for errors the hooks may stream
+		// todo: add errorf's for other errors the hooks may stream
 		if strings.Contains(outs, "INVALID BOXFILE") {
-			return out, util.ErrorfQuiet("[USER] invalid node in boxfile (see output for more detail)")
+			return out, util.Errorf("[USER] invalid node in boxfile (see output for more detail)")
 		}
-		return out, util.ErrorfQuiet("[HOOKS] failed to execute hook (%s) on %s: %s", hook, container, err)
+		return out, util.Errorf("[HOOKS] failed to execute hook (%s) on %s: %s", hook, container, err)
 	}
 	return out, nil
 }
@@ -62,14 +63,17 @@ func DebugExec(container, hook, payload, displayLevel string) (string, error) {
 	}
 
 	combined = true
+	// todo: why run again if we are going to let them run it?
 	res, err = Exec(container, hook, payload, displayLevel)
 
-	fmt.Printf("failed to execute %s hook: %s\n", hook, err)
-	fmt.Printf("An error has occurred: \"%s\"\n", res)
+	fmt.Println()
+	fmt.Printf("Failed to execute %s hook: %s\n", hook, err)
 	fmt.Println("Entering Debug Mode")
 	fmt.Printf("  container: %s\n", container)
 	fmt.Printf("  hook:      %s\n", hook)
 	fmt.Printf("  payload:   %s\n", payload)
+	fmt.Println()
+
 	err = console.Run(container, console.ConsoleConfig{})
 	if err != nil {
 		return res, fmt.Errorf("failed to establish a debug session: %s", err.Error())

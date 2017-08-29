@@ -39,30 +39,6 @@
 			"revisionTime": "2015-11-12T15:10:49Z"
 		},
 		{
-			"checksumSHA1": "2NTXHLhDX7UZwuUwyQtOL0d8tYI=",
-			"path": "github.com/bugsnag/bugsnag-go",
-			"revision": "668d01fbd1a849a06fded17148fb86b98dfd232f",
-			"revisionTime": "2015-11-17T01:04:51Z"
-		},
-		{
-			"checksumSHA1": "zxHs+p2FrgwC6X2B+OlkKjSFWzo=",
-			"path": "github.com/bugsnag/bugsnag-go/errors",
-			"revision": "668d01fbd1a849a06fded17148fb86b98dfd232f",
-			"revisionTime": "2015-11-17T01:04:51Z"
-		},
-		{
-			"checksumSHA1": "ERKaUVBHSzWn+qi2ESfDfjLp9lA=",
-			"path": "github.com/bugsnag/osext",
-			"revision": "0dd3f918b21bec95ace9dc86c7e70266cfc5c702",
-			"revisionTime": "2013-06-17T22:48:35Z"
-		},
-		{
-			"checksumSHA1": "oqEXvxda7EhSToHjg/UOcOaKH6c=",
-			"path": "github.com/bugsnag/panicwrap",
-			"revision": "e5f9854865b9778a45169fc249e99e338d4d6f27",
-			"revisionTime": "2014-11-10T18:43:34Z"
-		},
-		{
 			"checksumSHA1": "f1wARLDzsF/JoyN01yoxXEwFIp8=",
 			"path": "github.com/docker/distribution/digest",
 			"revision": "b7088d29c6ee508881153aed3bb46290f521e15d",
@@ -661,6 +637,12 @@
 			"path": "github.com/nanobox-io/nanobox/util/watch",
 			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
 			"revisionTime": "2016-11-17T23:10:25Z"
+		},
+		{
+			"checksumSHA1": "5rOBGrnVJoymxI+FQn5tyHgbgcA=",
+			"path": "github.com/nanopack/logvac/config",
+			"revision": "c84455c64d89c6a86c007edf436cd4301736293a",
+			"revisionTime": "2017-08-23T22:19:47Z"
 		},
 		{
 			"checksumSHA1": "RI5cATdVXt1L8NoI0+8op9butCg=",
