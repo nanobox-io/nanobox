@@ -77,10 +77,12 @@ func main() {
 
 	// make sure nanobox has all the necessry parts
 	if !strings.Contains(command, " config") && !strings.Contains(command, " server") {
-		valid, missingParts := provider.Valid()
-		if !valid {
-
-			display.MissingDependencies(providerName, missingParts)
+		err, missingParts := provider.Valid()
+		if err != nil {
+			fmt.Printf("Failed to validate provider - %s\n", err.Error())
+			if len(missingParts) > 0 {
+				display.MissingDependencies(providerName, missingParts)
+			}
 			os.Exit(1)
 		}
 	}
