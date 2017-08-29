@@ -232,6 +232,27 @@ func GetWarehouse(appID string) (string, string, error) {
 	return r["token"], r["url"], err
 }
 
+// GetComponent gets the token and url for a given component
+func GetComponent(appID, component string) (string, string, error) {
+	r := map[string]string{}
+
+	var params url.Values
+	if strings.Contains(appID, "/") {
+		appNameParts := strings.Split(appID, "/")
+		if len(appNameParts) == 2 {
+			params = url.Values{}
+			params.Set("ci", appNameParts[0])
+			appID = appNameParts[1]
+		}
+
+	}
+
+	err := doRequest("GET", fmt.Sprintf("apps/%s/services/%s", appID, component), params, nil, &r)
+	// r = map["uid":"pusher1" "name":"message bus" "slug":"pusher" "url":"x.x.x.x" "token":"secret" "mode":"simple" "ip":"x.x.x.x" "id":"d371c59b-fbbc-4248-8f3b-7f694a62b5e1"]
+
+	return r["token"], r["url"], err
+}
+
 func GetPreviousBuild(appID string) (string, error) {
 	r := []map[string]string{}
 

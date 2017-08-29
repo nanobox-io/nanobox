@@ -657,6 +657,12 @@
 			"revisionTime": "2016-11-17T23:10:25Z"
 		},
 		{
+			"checksumSHA1": "RI5cATdVXt1L8NoI0+8op9butCg=",
+			"path": "github.com/nanopack/logvac/core",
+			"revision": "c84455c64d89c6a86c007edf436cd4301736293a",
+			"revisionTime": "2017-08-23T22:19:47Z"
+		},
+		{
 			"checksumSHA1": "TTEICNRFfe8Q66Z1WqZt+J9X49g=",
 			"path": "github.com/nanopack/mist/clients",
 			"revision": "5d5621c29dfb71d4b9a7807017fa2b0888b3bf2b",
@@ -751,6 +757,12 @@
 			"path": "golang.org/x/net/proxy",
 			"revision": "b6d7b1396ec874c3b00f6c84cd4301a17c56c8ed",
 			"revisionTime": "2016-02-16T13:16:06Z"
+		},
+		{
+			"checksumSHA1": "7EZyXN0EmZLgGxZxK01IJua4c8o=",
+			"path": "golang.org/x/net/websocket",
+			"revision": "57efc9c3d9f91fb3277f8da1cff370539c4d3dc5",
+			"revisionTime": "2017-08-18T05:32:00Z"
 		},
 		{
 			"checksumSHA1": "CoRxz7vk573Zu/UcMS4PzpAsv3w=",

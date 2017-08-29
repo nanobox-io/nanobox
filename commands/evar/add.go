@@ -18,7 +18,7 @@ import (
 
 // AddCmd ...
 var AddCmd = &cobra.Command{
-	Use:   "add key=val[ key=val,key=val]",
+	Use:   "add key=val [key=val key=val]",
 	Short: "Adds environment variable(s)",
 	Long:  ``,
 	// PreRun: steps.Run("login"),

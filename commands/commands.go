@@ -122,6 +122,14 @@ func init() {
 	NanoboxCmd.PersistentFlags().BoolVarP(&displayDebugMode, "verbose", "v", false, "Increases display output and sets level to debug")
 	NanoboxCmd.PersistentFlags().BoolVarP(&displayTraceMode, "trace", "t", false, "Increases display output and sets level to trace")
 
+	// log specific flags
+	LogCmd.Flags().BoolVarP(&logFollow, "follow", "f", false, "Follow logs (live feed)")
+	LogCmd.Flags().IntVarP(&logNumber, "number", "n", 0, "Number of historic logs to print")
+	// todo:
+	// LogCmd.Flags().StringVarP(&logStart, "start", "", "", "Timestamp of oldest historic log to print")
+	// LogCmd.Flags().StringVarP(&logEnd, "end", "", "", "Timestamp of newest historic log to print")
+	// LogCmd.Flags().StringVarP(&logLimit, "limit", "", "", "Time to limit amount of historic logs to print")
+
 	// subcommands
 	NanoboxCmd.AddCommand(ConfigureCmd)
 	NanoboxCmd.AddCommand(RunCmd)

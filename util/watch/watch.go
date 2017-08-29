@@ -54,10 +54,12 @@ func Watch(container, path string) error {
 		// print the warning
 		// we added /r because this message often appears in a raw terminal which requires
 		// carrage returns
-		fmt.Printf("\n\r-------------------------------------------------------\n\r\n\r")
-		fmt.Printf("Uh oh, the live filesystem watcher has panic'ed.\n\r")
-		fmt.Printf("We'll go ahead and rollover to a slower polling solution.\n\r")
-		fmt.Printf("\n\r-------------------------------------------------------\n\r\n\r")
+		fmt.Printf("\n\r---------------------------------------------------------------------\n\r\n\r")
+		fmt.Printf("An error occured in the fast notify watcher: '%s'\n\r\n\r", err.Error())
+		fmt.Printf("Generally, having too low of a ulimit causes these issues.\n\r")
+		fmt.Printf("Consiser upping your ulimit to resolve (`ulimit -n 2048`).\n\r")
+		fmt.Printf("Until then, we'll go ahead and rollover to a slower polling solution.\n\r")
+		fmt.Printf("\n\r---------------------------------------------------------------------\n\r\n\r")
 
 		watcher.close()
 		watcher = newCrawlWatcher(path)
@@ -126,8 +128,8 @@ func ctimeCheck(container string) {
 func touch(container string, changeList []string) {
 	out, err := util.DockerExec(container, "root", "touch", append([]string{"-c"}, changeList...), nil)
 	if err != nil {
-		fmt.Println("TOUCH OUTPUT: %s", out)
-		fmt.Println("TOUCH  ERROR: %s", err.Error())
+		fmt.Printf("TOUCH OUTPUT: %s\n", out)
+		fmt.Printf("TOUCH  ERROR: %s\n", err.Error())
 	}
 }
 
