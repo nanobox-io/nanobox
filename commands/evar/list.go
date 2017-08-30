@@ -1,7 +1,9 @@
 package evar
 
 import (
-	// "fmt"
+	"strings"
+
+	"github.com/jcelliott/lumber"
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/commands/steps"
@@ -15,11 +17,10 @@ import (
 
 // ListCmd ...
 var ListCmd = &cobra.Command{
-	Use:   "ls",
+	Use:   "ls [local|dry-run|remote-alias]",
 	Short: "list environment variable(s)",
 	Long:  ``,
-	// PreRun: steps.Run("login"),
-	Run: listFn,
+	Run:   listFn,
 }
 
 // listFn ...
@@ -27,6 +28,15 @@ func listFn(ccmd *cobra.Command, args []string) {
 
 	env, _ := models.FindEnvByID(config.EnvID())
 	args, location, name := helpers.Endpoint(env, args, 0)
+
+	// if the first argument is not a keyvalue pair, (at this point the
+	// remote-alias would be stripped from helpers.Endpoint) it is likely
+	// the app name. try setting vars on that app
+	if len(args) > 0 && !strings.Contains(args[0], "=") {
+		lumber.Info("Remote alias not found for '%s', attempting to set vars on app named '%s'\n", args[0], args[0])
+		name = args[0]
+		args = args[1:]
+	}
 
 	switch location {
 	case "local":

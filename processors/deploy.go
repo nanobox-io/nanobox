@@ -18,7 +18,7 @@ func Deploy(envModel *models.Env, deployConfig DeployConfig) error {
 	appID := deployConfig.App
 
 	// fetch the remote
-	remote, ok := envModel.Remotes[deployConfig.App]
+	remote, ok := envModel.Remotes[appID]
 	if ok {
 		// set the odin endpoint
 		odin.SetEndpoint(remote.Endpoint)

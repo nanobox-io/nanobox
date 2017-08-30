@@ -44,8 +44,7 @@ func main() {
 
 	// if it is running the server just run it
 	// skip the tratiotional messaging
-	if len(os.Args) >= 2 && (
-		os.Args[1] == "server" ||
+	if len(os.Args) >= 2 && (os.Args[1] == "server" ||
 		os.Args[1] == "version" ||
 		os.Args[1] == "tunnel" ||
 		os.Args[1] == "console" ||
