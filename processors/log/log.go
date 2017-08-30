@@ -17,6 +17,7 @@ import (
 	"github.com/nanopack/mist/core"
 	"golang.org/x/net/websocket"
 
+	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/helpers"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
@@ -37,6 +38,11 @@ func Tail(envModel *models.Env, app string, logFollow bool) error {
 		odin.SetEndpoint(remote.Endpoint)
 		// set the app id
 		appID = remote.ID
+	}
+
+	// set odins endpoint if the arguement is passed
+	if endpoint := registry.GetString("endpoint"); endpoint != "" {
+		odin.SetEndpoint(endpoint)
 	}
 
 	// todo: don't assume app name, just message and die
@@ -76,6 +82,11 @@ func Print(envModel *models.Env, app string, numLogs int) error {
 		odin.SetEndpoint(remote.Endpoint)
 		// set the app id
 		appID = remote.ID
+	}
+
+	// set odins endpoint if the arguement is passed
+	if endpoint := registry.GetString("endpoint"); endpoint != "" {
+		odin.SetEndpoint(endpoint)
 	}
 
 	// todo: don't assume app name, just message and die
@@ -243,7 +254,10 @@ func fetchLogs(token, url string, numLogs int) error {
 	msgs := []logvac.Message{}
 	err = json.Unmarshal(body, &msgs)
 	if err != nil {
-		return fmt.Errorf("failed to unmarshal - %s", err.Error())
+		return util.Err{
+			Message: fmt.Sprintf("Failed to process historic logs - %s", err.Error()),
+			Suggest: "Please upgrade your logging component and try again.",
+		}
 	}
 
 	for i := range msgs {

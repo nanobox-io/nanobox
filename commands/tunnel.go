@@ -15,8 +15,7 @@ import (
 )
 
 var (
-
-	// TunnelCmd ...
+	// TunnelCmd handles tunneling to components.
 	TunnelCmd = &cobra.Command{
 		Use:   "tunnel",
 		Short: "Create a secure tunnel between your local machine & a live component.",
