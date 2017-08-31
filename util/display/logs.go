@@ -63,7 +63,7 @@ func FormatLogMessage(msg mist.Message, showTimestamp bool) {
 	// return our pretty entry
 	var message string
 	if showTimestamp {
-		message = fmt.Sprintf("[%s]%s %s (%s) :: %s[reset]", logProcesses[entryTag], fmt.Sprintf(entry.Time.Format(layout)), entry.ID, entryTag, entry.Message)
+		message = fmt.Sprintf("[%s]%s (%s) :: %s[reset]", logProcesses[entryTag], entry.ID, entryTag, entry.Message)
 	} else {
 		message = fmt.Sprintf("[%s]%s %s (%s) :: %s[reset]", logProcesses[entryTag], fmt.Sprintf(entry.Time.Format(layout)), entry.ID, entryTag, fmtMsg)
 	}
@@ -105,7 +105,7 @@ func FormatLogvacMessage(msg logvac.Message, showTimestamp bool) {
 	// return our pretty entry
 	var message string
 	if showTimestamp {
-		message = fmt.Sprintf("[%s]%s %s (%s) :: %s[reset]", logProcesses[entryTag], fmt.Sprintf(entry.Time.Format(layout)), entry.ID, entryTag, entry.Message)
+		message = fmt.Sprintf("[%s]%s (%s) :: %s[reset]", logProcesses[entryTag], entry.ID, entryTag, entry.Message)
 	} else {
 		message = fmt.Sprintf("[%s]%s %s (%s) :: %s[reset]", logProcesses[entryTag], fmt.Sprintf(entry.Time.Format(layout)), entry.ID, entryTag, fmtMsg)
 	}
