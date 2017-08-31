@@ -163,28 +163,29 @@ func RemoveEvar(appID, id string) error {
 	return doRequest("DELETE", fmt.Sprintf("apps/%s/evars/%s", appID, id), params, nil, nil)
 }
 
-// EstablishTunnel ...
-func EstablishTunnel(appID, id string) (string, string, int, error) {
-	r := struct {
-		Token string `json:"token"`
-		Url   string `json:"url"`
-		Port  int    `json:"port"`
-	}{}
+// EstablishTunnel requests a tunnel from odin.
+func EstablishTunnel(tunCfg models.TunnelConfig) (models.TunnelInfo, error) {
+	r := models.TunnelInfo{Port: tunCfg.DestPort}
 
-	var params url.Values
-
-	if strings.Contains(appID, "/") {
-		appNameParts := strings.Split(appID, "/")
+	params := url.Values{}
+	if strings.Contains(tunCfg.AppName, "/") {
+		appNameParts := strings.Split(tunCfg.AppName, "/")
 		if len(appNameParts) == 2 {
 			params = url.Values{}
+			// ci is contextID for teams `team/app`
 			params.Set("ci", appNameParts[0])
-			appID = appNameParts[1]
+			tunCfg.AppName = appNameParts[1]
 		}
-
 	}
-	err := doRequest("GET", fmt.Sprintf("apps/%s/tunnels/%s", appID, id), params, nil, &r)
 
-	return r.Token, r.Url, r.Port, err
+	err := doRequest("GET", fmt.Sprintf("apps/%s/tunnels/%s", tunCfg.AppName, tunCfg.Component), params, r, &r)
+	if err != nil {
+		if strings.Contains(err.Error(), "port 0") {
+			err = fmt.Errorf("%s - the component has nothing to tunnel to.", err.Error())
+		}
+	}
+
+	return r, err
 }
 
 // EstablishConsole ...
