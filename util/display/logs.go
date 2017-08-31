@@ -33,7 +33,7 @@ var (
 
 // FormatLogMessage takes a Logvac/Mist and formats it into a pretty message to be
 // output to the terminal
-func FormatLogMessage(msg mist.Message) {
+func FormatLogMessage(msg mist.Message, showTimestamp bool) {
 
 	// set the time output format
 	layout := "Mon Jan 02 15:04:05 2006" // time.RFC822
@@ -61,14 +61,19 @@ func FormatLogMessage(msg mist.Message) {
 	}
 
 	// return our pretty entry
-	message := fmt.Sprintf("[%s]%s %s (%s) :: %s[reset]", logProcesses[entryTag], fmt.Sprintf(entry.Time.Format(layout)), entry.ID, entryTag, fmtMsg)
+	var message string
+	if showTimestamp {
+		message = fmt.Sprintf("[%s]%s %s (%s) :: %s[reset]", logProcesses[entryTag], fmt.Sprintf(entry.Time.Format(layout)), entry.ID, entryTag, entry.Message)
+	} else {
+		message = fmt.Sprintf("[%s]%s %s (%s) :: %s[reset]", logProcesses[entryTag], fmt.Sprintf(entry.Time.Format(layout)), entry.ID, entryTag, fmtMsg)
+	}
 	fmt.Println(colorstring.Color(message))
 	return
 }
 
 // FormatLogvacMessage takes a Logvac/Mist and formats it into a pretty message to be
 // output to the terminal
-func FormatLogvacMessage(msg logvac.Message) {
+func FormatLogvacMessage(msg logvac.Message, showTimestamp bool) {
 
 	// set the time output format
 	layout := "Mon Jan 02 15:04:05 2006" // time.RFC822
@@ -98,7 +103,13 @@ func FormatLogvacMessage(msg logvac.Message) {
 	}
 
 	// return our pretty entry
-	message := fmt.Sprintf("[%s]%s %s (%s) :: %s[reset]", logProcesses[entryTag], fmt.Sprintf(entry.Time.Format(layout)), entry.ID, entryTag, fmtMsg)
+	var message string
+	if showTimestamp {
+		message = fmt.Sprintf("[%s]%s %s (%s) :: %s[reset]", logProcesses[entryTag], fmt.Sprintf(entry.Time.Format(layout)), entry.ID, entryTag, entry.Message)
+	} else {
+		message = fmt.Sprintf("[%s]%s %s (%s) :: %s[reset]", logProcesses[entryTag], fmt.Sprintf(entry.Time.Format(layout)), entry.ID, entryTag, fmtMsg)
+	}
+
 	fmt.Println(colorstring.Color(message))
 	return
 }
