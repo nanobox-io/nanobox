@@ -181,7 +181,19 @@ func EstablishTunnel(tunCfg models.TunnelConfig) (models.TunnelInfo, error) {
 	err := doRequest("GET", fmt.Sprintf("apps/%s/tunnels/%s", tunCfg.AppName, tunCfg.Component), params, r, &r)
 	if err != nil {
 		if strings.Contains(err.Error(), "port 0") {
+			if err2, ok := err.(util.Err); ok {
+				err2.Suggest = "Specify a destination port with `-p source:destination`."
+				err2.Message = fmt.Sprintf("%s - the component has nothing to tunnel to", err.Error())
+				return r, err2
+			}
 			err = fmt.Errorf("%s - the component has nothing to tunnel to.", err.Error())
+		}
+		if strings.Contains(err.Error(), "Not Found") {
+			if err2, ok := err.(util.Err); ok {
+				err2.Message = fmt.Sprintf("%s - component '%s' not found on app '%s'", err.Error(), tunCfg.Component, tunCfg.AppName)
+				return r, err2
+			}
+			err = fmt.Errorf("%s - component '%s' not found on app '%s'", err.Error(), tunCfg.Component, tunCfg.AppName)
 		}
 	}
 
@@ -378,7 +390,7 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 		err = util.ErrorfQuiet("[USER] Not Found (%s)", b)
 		if err != nil {
 			if err2, ok := err.(util.Err); ok {
-				err2.Suggest = "It appears that app wasn't found, check the team/app name and try again"
+				err2.Suggest = "It appears that app or component wasn't found, check the team/app name and try again"
 				return err2
 			}
 		}

@@ -24,7 +24,7 @@ var (
 Creates a secure tunnel between your local machine &
 a live component. The tunnel allows you to manage
 live data using your local client of choice.
-		`,
+`,
 		PreRun: steps.Run("login"),
 		Run:    tunnelFn,
 	}
@@ -41,7 +41,7 @@ live data using your local client of choice.
 
 //
 func init() {
-	TunnelCmd.Flags().StringVarP(&portMap, "port", "p", "", "Local port to start listening on")
+	TunnelCmd.Flags().StringVarP(&portMap, "port", "p", "", "Specify a local[:destination] port to listen on and connect to.")
 }
 
 // tunnelFn validates the ports and establishes the tunnel

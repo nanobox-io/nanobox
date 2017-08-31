@@ -13,6 +13,10 @@ import (
 )
 
 func Tunnel(key, location, port, name string) error {
+	if port == "0" {
+		return fmt.Errorf("port 0 is not a valid port - that component has nothing to tunnel to")
+	}
+
 	// establish a connection and just leave it open.
 	req, err := http.NewRequest("POST", fmt.Sprintf("/tunnel?key=%s", key), nil)
 	if err != nil {

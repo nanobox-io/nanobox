@@ -1,6 +1,8 @@
 package processors
 
 import (
+	"strings"
+
 	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/helpers"
 	"github.com/nanobox-io/nanobox/models"
@@ -46,7 +48,11 @@ func Console(envModel *models.Env, consoleConfig ConsoleConfig) error {
 		err = util.ErrorAppend(err, "failed to initiate a remote console session")
 		if err != nil {
 			if err2, ok := err.(util.Err); ok {
-				err2.Suggest = "It appears there is no component/host by that name, check the component/host name and try again"
+				if strings.Contains(err2.Error(), "Internal Server Error") {
+					err2.Suggest = "It appears there was an issue with the request. If subsequent attempts fail, please report."
+				} else {
+					err2.Suggest = "It appears there is no component/host by that name, check the component/host name and try again"
+				}
 				return err2
 			}
 		}

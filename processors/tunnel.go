@@ -19,7 +19,7 @@ func Tunnel(envModel *models.Env, tunnelConfig models.TunnelConfig) error {
 		// set the odin endpoint
 		odin.SetEndpoint(remote.Endpoint)
 		// set the app id
-		tunnelConfig.AppName = remote.ID
+		tunnelConfig.AppName = remote.Name
 	}
 
 	// set the app id to the directory name if it's default
@@ -40,7 +40,6 @@ func Tunnel(envModel *models.Env, tunnelConfig models.TunnelConfig) error {
 	// initiate a tunnel session with odin
 	tunInfo, err := odin.EstablishTunnel(tunnelConfig)
 	if err != nil {
-		// todo: can we know if the request was rejected for authorization and print that?
 		return util.ErrorAppend(err, "failed to initiate a remote tunnel session")
 	}
 
