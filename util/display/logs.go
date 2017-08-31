@@ -41,7 +41,7 @@ func FormatLogMessage(msg mist.Message) {
 	// unmarshal the message data as an Entry
 	entry := Entry{}
 	if err := json.Unmarshal([]byte(msg.Data), &entry); err != nil {
-		message := fmt.Sprintf("[light_red]%s :: %s\n[reset]%s", time.Now().Format(layout), msg.Data, fmt.Sprintf("Failed to process entry - '%s'. Consider running `nanobox update-images` and re-trying.", err.Error()))
+		message := fmt.Sprintf("[light_red]%s :: %s\n[reset]%s", time.Now().Format(layout), msg.Data, fmt.Sprintf("Failed to process entry - '%s'. Please upgrade your logging component and try again.", err.Error()))
 		fmt.Println(colorstring.Color(message))
 		return
 	}

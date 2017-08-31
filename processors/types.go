@@ -10,9 +10,3 @@ type ConsoleConfig struct {
 	App  string
 	Host string
 }
-
-type TunnelConfig struct {
-	App       string
-	Port      string
-	Container string
-}

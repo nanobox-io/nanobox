@@ -44,7 +44,13 @@ func main() {
 
 	// if it is running the server just run it
 	// skip the tratiotional messaging
-	if len(os.Args) == 2 && (os.Args[1] == "server" || os.Args[1] == "version" || os.Args[1] == "tunnel" || os.Args[1] == "login" || os.Args[1] == "logout") {
+	if len(os.Args) >= 2 && (os.Args[1] == "server" ||
+		os.Args[1] == "version" ||
+		os.Args[1] == "tunnel" ||
+		os.Args[1] == "console" ||
+		os.Args[1] == "log" ||
+		os.Args[1] == "login" ||
+		os.Args[1] == "logout") {
 		err := commands.NanoboxCmd.Execute()
 		if err != nil {
 			fmt.Println(err)

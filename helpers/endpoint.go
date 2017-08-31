@@ -25,5 +25,13 @@ func Endpoint(envModel *models.Env, args []string, maxArgs int) ([]string, strin
 		return args[1:], "production", args[0]
 	}
 
+	// todo: MAYBE check the remote here (`fetch the remote` in other locations in code)
+	// // fetch the remote
+	// remote, ok := envModel.Remotes[args[0]]
+	// if ok {
+	// 	// set the app id
+	//  return args[1:], "production", remote.ID
+	// }
+
 	return args, "production", "default"
 }

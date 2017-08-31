@@ -163,28 +163,41 @@ func RemoveEvar(appID, id string) error {
 	return doRequest("DELETE", fmt.Sprintf("apps/%s/evars/%s", appID, id), params, nil, nil)
 }
 
-// EstablishTunnel ...
-func EstablishTunnel(appID, id string) (string, string, int, error) {
-	r := struct {
-		Token string `json:"token"`
-		Url   string `json:"url"`
-		Port  int    `json:"port"`
-	}{}
+// EstablishTunnel requests a tunnel from odin.
+func EstablishTunnel(tunCfg models.TunnelConfig) (models.TunnelInfo, error) {
+	r := models.TunnelInfo{Port: tunCfg.DestPort}
 
-	var params url.Values
-
-	if strings.Contains(appID, "/") {
-		appNameParts := strings.Split(appID, "/")
+	params := url.Values{}
+	if strings.Contains(tunCfg.AppName, "/") {
+		appNameParts := strings.Split(tunCfg.AppName, "/")
 		if len(appNameParts) == 2 {
 			params = url.Values{}
+			// ci is contextID for teams `team/app`
 			params.Set("ci", appNameParts[0])
-			appID = appNameParts[1]
+			tunCfg.AppName = appNameParts[1]
 		}
-
 	}
-	err := doRequest("GET", fmt.Sprintf("apps/%s/tunnels/%s", appID, id), params, nil, &r)
 
-	return r.Token, r.Url, r.Port, err
+	err := doRequest("GET", fmt.Sprintf("apps/%s/tunnels/%s", tunCfg.AppName, tunCfg.Component), params, r, &r)
+	if err != nil {
+		if strings.Contains(err.Error(), "port 0") {
+			if err2, ok := err.(util.Err); ok {
+				err2.Suggest = "Specify a destination port with `-p source:destination`."
+				err2.Message = fmt.Sprintf("%s - the component has nothing to tunnel to", err.Error())
+				return r, err2
+			}
+			err = fmt.Errorf("%s - the component has nothing to tunnel to.", err.Error())
+		}
+		if strings.Contains(err.Error(), "Not Found") {
+			if err2, ok := err.(util.Err); ok {
+				err2.Message = fmt.Sprintf("%s - component '%s' not found on app '%s'", err.Error(), tunCfg.Component, tunCfg.AppName)
+				return r, err2
+			}
+			err = fmt.Errorf("%s - component '%s' not found on app '%s'", err.Error(), tunCfg.Component, tunCfg.AppName)
+		}
+	}
+
+	return r, err
 }
 
 // EstablishConsole ...
@@ -377,7 +390,7 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 		err = util.ErrorfQuiet("[USER] Not Found (%s)", b)
 		if err != nil {
 			if err2, ok := err.(util.Err); ok {
-				err2.Suggest = "It appears that app wasn't found, check the team/app name and try again"
+				err2.Suggest = "It appears that app or component wasn't found, check the team/app name and try again"
 				return err2
 			}
 		}

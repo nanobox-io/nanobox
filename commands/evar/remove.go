@@ -17,10 +17,14 @@ import (
 
 // RemoveCmd removes an evar.
 var RemoveCmd = &cobra.Command{
-	Use:   "rm [local|dry-run] key",
+	Use:   "rm [local|dry-run|remote-alias] key",
 	Short: "Remove environment variable(s)",
-	Long:  ``,
-	// PreRun: steps.Run("login"),
+	Long: `Remove environment variable(s).
+
+The alias must be used when removing variables from a production app.
+If you would like to remove variables from a different app, please add
+it as a remote as follows: 'nanobox remote add <APPNAME> <ALIAS>'.
+You may then perform the 'rm' again, specifying that alias.`,
 	Run: removeFn,
 }
 
@@ -60,6 +64,8 @@ func parseKeys(args []string) []string {
 	keys := []string{}
 
 	for _, arg := range args {
+		// todo: remove support for comma separated key list (not necessary,
+		// but would be nice to have uniform syntax not supporting it)
 		for _, key := range strings.Split(arg, ",") {
 			keys = append(keys, strings.ToUpper(key))
 		}

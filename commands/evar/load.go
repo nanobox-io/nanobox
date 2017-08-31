@@ -20,10 +20,15 @@ import (
 
 // LoadCmd loads variables from a file.
 var LoadCmd = &cobra.Command{
-	Use:   "load filename",
+	Use:   "load [local|dry-run|remote-alias] filename",
 	Short: "Loads environment variable(s) from a file",
-	Long:  ``,
-	Run:   loadFn,
+	Long: `Loads environment variable(s) from a file.
+
+The alias must be used when loading variables for a production app.
+If you would like to load variables for a different app, please add
+it as a remote as follows: 'nanobox remote add <APPNAME> <ALIAS>'.
+You may then perform the 'load' again, specifying that alias.`,
+	Run: loadFn,
 }
 
 // loadFn parses a specified file and adds the contained variables to nanobox.
