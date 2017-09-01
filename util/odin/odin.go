@@ -45,18 +45,17 @@ func SetEndpoint(stage string) {
 	endpoint = stage
 }
 
-// Auth ...
+// Auth authenticates the user with odin.
 func Auth(username, password string) (string, error) {
 
-	//
-	params := url.Values{}
-	params.Set("password", password)
+	loginInfo := struct {
+		Slug     string `json:"slug"`
+		Password string `json:"password"`
+	}{username, password}
 
-	//
 	resBody := map[string]string{}
 
-	//
-	if err := doRequest("GET", fmt.Sprintf("users/%s/auth_token", username), params, nil, &resBody); err != nil {
+	if err := doRequest("GET", "user_auth_token", nil, loginInfo, &resBody); err != nil {
 		return "", err
 	}
 
@@ -180,13 +179,19 @@ func EstablishTunnel(tunCfg models.TunnelConfig) (models.TunnelInfo, error) {
 
 	err := doRequest("GET", fmt.Sprintf("apps/%s/tunnels/%s", tunCfg.AppName, tunCfg.Component), params, r, &r)
 	if err != nil {
-		if strings.Contains(err.Error(), "port 0") {
+		if strings.Contains(err.Error(), "valid port") {
 			if err2, ok := err.(util.Err); ok {
-				err2.Suggest = "Specify a destination port with `-p source:destination`."
-				err2.Message = fmt.Sprintf("%s - the component has nothing to tunnel to", err.Error())
+				err2.Suggest = "Specify a valid destination port with `-p source:destination`"
+				err2.Message = err.Error()
 				return r, err2
 			}
-			err = fmt.Errorf("%s - the component has nothing to tunnel to", err.Error())
+		}
+		if strings.Contains(err.Error(), "no default") {
+			if err2, ok := err.(util.Err); ok {
+				err2.Suggest = "Specify a destination port with `-p source:destination`"
+				err2.Message = err.Error()
+				return r, err2
+			}
 		}
 		if strings.Contains(err.Error(), "Not Found") {
 			if err2, ok := err.(util.Err); ok {
