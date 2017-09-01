@@ -17,6 +17,7 @@ import (
 var (
 	logFollow bool
 	logNumber int
+	logRaw    bool   // display log timestamps instead of added ones
 	logStart  string // todo: forthcoming
 	logEnd    string // todo: forthcoming
 	logLimit  string // todo: forthcoming
@@ -53,11 +54,16 @@ logs inside a terminal running 'nanobox run'.
 		display.CommandErr(platform.MistListen(app))
 	case "production":
 		steps.Run("login")(ccmd, args)
+		logOpts := models.LogOpts{
+			Number: logNumber,
+			Follow: logFollow,
+			Raw:    logRaw,
+		}
 
 		// since we default to live logging, if `-n` is set, we'll print that many
 		// historic logs and return unless `-f` is also set.
 		if logNumber > 0 {
-			display.CommandErr(log.Print(envModel, name, logNumber))
+			display.CommandErr(log.Print(envModel, name, logOpts))
 
 			// if `-f` is also specified, continue, else return here.
 			if !logFollow {
@@ -66,6 +72,6 @@ logs inside a terminal running 'nanobox run'.
 		}
 
 		// set the meta arguments to be used in the processor and run the processor
-		display.CommandErr(log.Tail(envModel, name, logFollow))
+		display.CommandErr(log.Tail(envModel, name, logOpts))
 	}
 }

@@ -27,8 +27,7 @@ import (
 )
 
 // Tail tails production logs for an app.
-func Tail(envModel *models.Env, app string, logFollow bool) error {
-
+func Tail(envModel *models.Env, app string, logOpts models.LogOpts) error {
 	appID := app
 
 	// fetch the remote
@@ -62,7 +61,7 @@ func Tail(envModel *models.Env, app string, logFollow bool) error {
 	}
 
 	// fmt.Println("mistConfig", mistConfig)
-	err = mistListen(mistConfig.Token, mistConfig.URL, logFollow)
+	err = mistListen(mistConfig.Token, mistConfig.URL, logOpts)
 	if err != nil {
 		return util.ErrorAppend(err, "failed to subscribe to logs")
 	}
@@ -71,8 +70,7 @@ func Tail(envModel *models.Env, app string, logFollow bool) error {
 }
 
 // Print prints historic production logs for an app.
-func Print(envModel *models.Env, app string, numLogs int) error {
-
+func Print(envModel *models.Env, app string, logOpts models.LogOpts) error {
 	appID := app
 
 	// fetch the remote
@@ -107,7 +105,7 @@ func Print(envModel *models.Env, app string, numLogs int) error {
 		return err
 	}
 
-	err = fetchLogs(token, url, numLogs)
+	err = fetchLogs(token, url, logOpts)
 	if err != nil {
 		return util.ErrorAppend(err, "failed to fetch logs")
 	}
@@ -133,7 +131,8 @@ func getMistConfig(envModel *models.Env, appID string) (*MistConfig, error) {
 }
 
 // mistListen will subscribe to mist and print incoming logs.
-func mistListen(token, url string, logFollow bool) error {
+func mistListen(token, url string, logOpts models.LogOpts) error {
+	logFollow := logOpts.Follow
 	// connect to the mist server
 	var wsConn *websocket.Conn
 	clientConnect := func() (err error) {
@@ -171,7 +170,7 @@ waiting for output...
 	for {
 		select {
 		case msg := <-messageChan:
-			display.FormatLogMessage(msg)
+			display.FormatLogMessage(msg, logOpts.Raw)
 		case <-sigChan:
 			return nil
 		}
@@ -245,7 +244,8 @@ func subscribe(ws *websocket.Conn) error {
 }
 
 // fetchLogs fetches and prints historic logs
-func fetchLogs(token, url string, numLogs int) error {
+func fetchLogs(token, url string, logOpts models.LogOpts) error {
+	numLogs := logOpts.Number
 	body, err := rest(url, "GET", fmt.Sprintf("/logs?type=app&id=&start=0&limit=%d", numLogs), token, token)
 	if err != nil {
 		return fmt.Errorf("failed to get logs - %s", err.Error())
@@ -261,7 +261,7 @@ func fetchLogs(token, url string, numLogs int) error {
 	}
 
 	for i := range msgs {
-		display.FormatLogvacMessage(msgs[i])
+		display.FormatLogvacMessage(msgs[i], logOpts.Raw)
 	}
 
 	return nil

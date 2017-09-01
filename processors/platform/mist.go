@@ -53,7 +53,7 @@ waiting for output...
 	for {
 		select {
 		case msg := <-client.Messages():
-			display.FormatLogMessage(msg)
+			display.FormatLogMessage(msg, false)
 		case <-sigChan:
 			return nil
 		}

@@ -123,6 +123,7 @@ func init() {
 	NanoboxCmd.PersistentFlags().BoolVarP(&displayTraceMode, "trace", "t", false, "Increases display output and sets level to trace")
 
 	// log specific flags
+	LogCmd.Flags().BoolVarP(&logRaw, "raw", "r", false, "Print raw log timestamps instead")
 	LogCmd.Flags().BoolVarP(&logFollow, "follow", "f", false, "Follow logs (live feed)")
 	LogCmd.Flags().IntVarP(&logNumber, "number", "n", 0, "Number of historic logs to print")
 	// todo:
