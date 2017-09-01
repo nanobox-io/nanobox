@@ -1,3 +1,33 @@
+## 2.3.0 (Sept 1, 2017)
+
+FEATURES:
+  - Support setting custom tunnel destination port [#561](https://github.com/nanobox-io/nanobox/pull/561)[#564](https://github.com/nanobox-io/nanobox/pull/564)
+  - Support streaming production logs [#549](https://github.com/nanobox-io/nanobox/pull/549)[#562](https://github.com/nanobox-io/nanobox/pull/562)
+  - Allow either username or email address for login [#565](https://github.com/nanobox-io/nanobox/pull/565)
+
+BUG FIXES:
+  - Improve pre-validation for virtualbox on linux [#556](https://github.com/nanobox-io/nanobox/pull/556)
+  - Fix regression in `--debug` [#555](https://github.com/nanobox-io/nanobox/pull/555)
+  - Enhance added evars validation [#547](https://github.com/nanobox-io/nanobox/pull/547)
+  - Support '_' in keys when loading from files [#543](https://github.com/nanobox-io/nanobox/pull/543)
+
+
+## 2.2.0 (Aug 18, 2017)
+
+FEATURES:
+  - Support HTTPS in `dry-run` [#524](https://github.com/nanobox-io/nanobox/pull/524)
+  - Support loading evars from files [#535](https://github.com/nanobox-io/nanobox/pull/535)
+  - Unify removing evars (case insensitivity) [#539](https://github.com/nanobox-io/nanobox/pull/535)
+  - Add universal versioning [#506](https://github.com/nanobox-io/nanobox/pull/506)
+  - Add suggestions for common problems [#515](https://github.com/nanobox-io/nanobox/pull/515)[#517](https://github.com/nanobox-io/nanobox/pull/517)[#521](https://github.com/nanobox-io/nanobox/pull/521)
+
+BUG FIXES:
+  - Check for boxfile and validate in separate steps [#512](https://github.com/nanobox-io/nanobox/pull/512)
+  - Handle consoling to local code node [#519](https://github.com/nanobox-io/nanobox/pull/519)
+  - Allow spaces in directory tree [#523](https://github.com/nanobox-io/nanobox/pull/523)
+  - Skip checks before printing version or tunneling [#538](https://github.com/nanobox-io/nanobox/pull/538)
+
+
 ## 2.1.2 (June 1, 2017)
 
 FEATURES:
