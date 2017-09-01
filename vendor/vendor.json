@@ -339,16 +339,16 @@
 			"revisionTime": "2015-07-17T05:11:58Z"
 		},
 		{
-			"checksumSHA1": "4+vK0+yKNVuODgSskybTqJyv42M=",
+			"checksumSHA1": "mvyZI+F9HYUSJ3qI2mb1dRNedcc=",
 			"path": "github.com/nanobox-io/golang-docker-client",
-			"revision": "a8c1396f836f67d3946de5d2337acb80ed9472fd",
-			"revisionTime": "2016-12-28T15:26:45Z"
+			"revision": "d1683dd8c7dd48bdd358d2583c26295919f7c2ca",
+			"revisionTime": "2017-09-01T18:42:07Z"
 		},
 		{
-			"checksumSHA1": "CElLaU1k46jjoU8KB5jKMONmqYw=",
+			"checksumSHA1": "qlhiU9lPzLZrgRbmoTMjh2AYfLY=",
 			"path": "github.com/nanobox-io/golang-portal-client",
-			"revision": "552531bd5ea2289c042c0c4836affb9313ed84a0",
-			"revisionTime": "2016-06-23T21:40:26Z"
+			"revision": "350613abb8743e43ff433b1ad9a327b171db35ec",
+			"revisionTime": "2017-09-01T18:44:16Z"
 		},
 		{
 			"checksumSHA1": "UwQRRri8/y+7BExMLpmDfvwmRmo=",
@@ -363,10 +363,10 @@
 			"revisionTime": "2017-08-03T21:20:06Z"
 		},
 		{
-			"checksumSHA1": "0QScn868a1DUhIyxwueIbQjNEw0=",
+			"checksumSHA1": "sW6kgyu+s0Vg9q9u0BpPH3DlkC8=",
 			"path": "github.com/nanobox-io/nanobox-golang-stylish",
-			"revision": "0fdfc90fd2a0cb557590511dc0240085caecd4a8",
-			"revisionTime": "2016-06-01T14:52:14Z"
+			"revision": "030019c3e9a974f3142a674bc189dff000ca59b3",
+			"revisionTime": "2016-06-17T20:12:42Z"
 		},
 		{
 			"checksumSHA1": "ozJKUbhYHc8RYgIKKzpSG7cfSmw=",

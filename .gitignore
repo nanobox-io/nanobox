@@ -34,3 +34,4 @@ rsrc.syso
 Icon
 .sync
 nb.setup
+vendor/*/

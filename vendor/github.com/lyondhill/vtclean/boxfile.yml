@@ -1,5 +1,0 @@
-run.config:
-  image: nanobox/build
-  engine: golang
-  engine.config:
-    package: github.com/lyondhill/vtclean
