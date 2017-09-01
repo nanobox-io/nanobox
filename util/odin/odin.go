@@ -186,7 +186,7 @@ func EstablishTunnel(tunCfg models.TunnelConfig) (models.TunnelInfo, error) {
 				err2.Message = fmt.Sprintf("%s - the component has nothing to tunnel to", err.Error())
 				return r, err2
 			}
-			err = fmt.Errorf("%s - the component has nothing to tunnel to.", err.Error())
+			err = fmt.Errorf("%s - the component has nothing to tunnel to", err.Error())
 		}
 		if strings.Contains(err.Error(), "Not Found") {
 			if err2, ok := err.(util.Err); ok {
