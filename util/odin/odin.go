@@ -342,7 +342,7 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 	if auth.Key == "" &&
 		os.Getenv("NANOBOX_PASSWORD") != "" &&
 		os.Getenv("NANOBOX_USERNAME") != "" &&
-		path != fmt.Sprintf("users/%s/auth_token", os.Getenv("NANOBOX_USERNAME")) {
+		path != "user_auth_token" {
 
 		auth.Key, _ = Auth(os.Getenv("NANOBOX_USERNAME"), os.Getenv("NANOBOX_PASSWORD"))
 	}
