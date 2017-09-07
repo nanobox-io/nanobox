@@ -2,9 +2,8 @@ sudo: required
 
 language: go
 
+# ~1 hour is too long to wait for an osx container, plus docker/dependencies
 dist: trusty
-os: osx
-osx_image: xcode8.3
 
 go:
   - 1.8.x
