@@ -17,8 +17,10 @@ before_install:
 install: 
   - go get github.com/kardianos/govendor
   - go get github.com/mitchellh/gox
+  - govendor sync
 
-script: govendor test +local -v
+script:
+  - govendor test +local -v
 
 after_success:
   - export BRANCH=$(if [ "$TRAVIS_PULL_REQUEST" == "false" ]; then echo $TRAVIS_BRANCH; else echo $TRAVIS_PULL_REQUEST_BRANCH; fi)

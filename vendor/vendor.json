@@ -75,12 +75,6 @@
 			"revisionTime": "2016-08-19T20:09:57Z"
 		},
 		{
-			"checksumSHA1": "dxJfrizyMV1LAZMqkqaasz+T0kU=",
-			"path": "github.com/docker/engine-api",
-			"revision": "4290f40c056686fcaa5c9caf02eac1dde9315adf",
-			"revisionTime": "2016-09-08T23:21:04Z"
-		},
-		{
 			"checksumSHA1": "PDXSPZlb43hdy26n6hZi2UJxi5I=",
 			"path": "github.com/docker/engine-api/client",
 			"revision": "4290f40c056686fcaa5c9caf02eac1dde9315adf",
@@ -339,16 +333,16 @@
 			"revisionTime": "2015-07-17T05:11:58Z"
 		},
 		{
-			"checksumSHA1": "4+vK0+yKNVuODgSskybTqJyv42M=",
+			"checksumSHA1": "mvyZI+F9HYUSJ3qI2mb1dRNedcc=",
 			"path": "github.com/nanobox-io/golang-docker-client",
-			"revision": "a8c1396f836f67d3946de5d2337acb80ed9472fd",
-			"revisionTime": "2016-12-28T15:26:45Z"
+			"revision": "d1683dd8c7dd48bdd358d2583c26295919f7c2ca",
+			"revisionTime": "2017-09-01T18:42:07Z"
 		},
 		{
-			"checksumSHA1": "CElLaU1k46jjoU8KB5jKMONmqYw=",
+			"checksumSHA1": "qlhiU9lPzLZrgRbmoTMjh2AYfLY=",
 			"path": "github.com/nanobox-io/golang-portal-client",
-			"revision": "552531bd5ea2289c042c0c4836affb9313ed84a0",
-			"revisionTime": "2016-06-23T21:40:26Z"
+			"revision": "350613abb8743e43ff433b1ad9a327b171db35ec",
+			"revisionTime": "2017-09-01T18:44:16Z"
 		},
 		{
 			"checksumSHA1": "UwQRRri8/y+7BExMLpmDfvwmRmo=",
@@ -363,280 +357,10 @@
 			"revisionTime": "2017-08-03T21:20:06Z"
 		},
 		{
-			"checksumSHA1": "0QScn868a1DUhIyxwueIbQjNEw0=",
+			"checksumSHA1": "sW6kgyu+s0Vg9q9u0BpPH3DlkC8=",
 			"path": "github.com/nanobox-io/nanobox-golang-stylish",
-			"revision": "0fdfc90fd2a0cb557590511dc0240085caecd4a8",
-			"revisionTime": "2016-06-01T14:52:14Z"
-		},
-		{
-			"checksumSHA1": "ozJKUbhYHc8RYgIKKzpSG7cfSmw=",
-			"path": "github.com/nanobox-io/nanobox/commands",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "qqbewycM4vZcrWCucfqGV67AWew=",
-			"path": "github.com/nanobox-io/nanobox/commands/dev",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "XtMUI/4I1RJTA3yTfOKotDnm7no=",
-			"path": "github.com/nanobox-io/nanobox/commands/dns",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "SqrM/3gXrzm32fpsJ4fNYV/4dak=",
-			"path": "github.com/nanobox-io/nanobox/commands/env",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "4B07DPV4E+OgB0QojHEhgPnmD+E=",
-			"path": "github.com/nanobox-io/nanobox/commands/evar",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "gi7xayLstUWYiv3bwK3kNCd7y6U=",
-			"path": "github.com/nanobox-io/nanobox/commands/registry",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "yLolGRV8P19rL0dNTSv/WjhJqKY=",
-			"path": "github.com/nanobox-io/nanobox/commands/sim",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "QyvB3yjXLz4VbvTHlRBPZ9EsJ20=",
-			"path": "github.com/nanobox-io/nanobox/commands/steps",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "VGom9um1tlfzW5vRfV5DX0C+sT4=",
-			"path": "github.com/nanobox-io/nanobox/generators/containers",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "VWFNLMPqWIUGSy2z3dqLqNDxSUM=",
-			"path": "github.com/nanobox-io/nanobox/generators/hooks/build",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "US0XiTfljFUszCqzxZpOvqveKQs=",
-			"path": "github.com/nanobox-io/nanobox/generators/hooks/code",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "hmU9bPaFOO2ljEyzJNfNXrLk/Bw=",
-			"path": "github.com/nanobox-io/nanobox/generators/hooks/component",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "CncqaznEUefsQsHRWLp2HeBxlS4=",
-			"path": "github.com/nanobox-io/nanobox/generators/router",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "rqA+9oiB4sCTXTuC2g5EduiZm/k=",
-			"path": "github.com/nanobox-io/nanobox/helpers",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "Axi3zTJj/1KIOrDzfcbgCwqjmyA=",
-			"path": "github.com/nanobox-io/nanobox/models",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "XAnBd+sQ7mzb7D8x4JAtrJMrwyA=",
-			"path": "github.com/nanobox-io/nanobox/processors",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "SQxYqZc8kWX4SYL9bO0sEApBs5s=",
-			"path": "github.com/nanobox-io/nanobox/processors/app",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "yJwkBhBKTsbeOo8io0cA0aiyhSg=",
-			"path": "github.com/nanobox-io/nanobox/processors/app/dns",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "nms2prBcmdeIOQ07vMqLeFjqCN4=",
-			"path": "github.com/nanobox-io/nanobox/processors/app/evar",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "ZBKebWWtkMua6/se5i1W+G+jMG4=",
-			"path": "github.com/nanobox-io/nanobox/processors/code",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "C81kzVIfvegCzM3jQdZr7B4gdNU=",
-			"path": "github.com/nanobox-io/nanobox/processors/component",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "AxfbZuxVs7mfR2MGR/cHfjJCAYc=",
-			"path": "github.com/nanobox-io/nanobox/processors/env",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "QQ7+4iFJftPpE0Te27AHsP9pvwg=",
-			"path": "github.com/nanobox-io/nanobox/processors/env/share",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "DJTgEFCfDKSOpMEZSGgytgVZmKc=",
-			"path": "github.com/nanobox-io/nanobox/processors/evar",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "bSx1ebLKtr5oek7GpyAZxv08Otc=",
-			"path": "github.com/nanobox-io/nanobox/processors/platform",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "29A/dE0v4/bwaA1NaqJYyIFe8nU=",
-			"path": "github.com/nanobox-io/nanobox/processors/provider",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "KegtDJr7BVxHAaYceDHIaieuxkg=",
-			"path": "github.com/nanobox-io/nanobox/processors/remote",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "FXnLeOJDUR4vVIVU4b+NgHR05DI=",
-			"path": "github.com/nanobox-io/nanobox/updater",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "X23x9fqnClGFDVtAL9Ko30cwnvU=",
-			"path": "github.com/nanobox-io/nanobox/util",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "36DHxz9Wa2MoF/SSQV5OQcZ7ues=",
-			"path": "github.com/nanobox-io/nanobox/util/config",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "2JsQMfdEIK5m8Dh6v9hjAyzqUFU=",
-			"path": "github.com/nanobox-io/nanobox/util/console",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "9nZMigKQz+125tMtPWrOFbOMg64=",
-			"path": "github.com/nanobox-io/nanobox/util/dhcp",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "RcoM9RMkuCOGpyf5bFtntPrR2YU=",
-			"path": "github.com/nanobox-io/nanobox/util/display",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "I7gHSEX/JCpCf8pQ2sj3fV0dpAM=",
-			"path": "github.com/nanobox-io/nanobox/util/dns",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "i5/mj0wg317rkcLda2oyUB/E5sA=",
-			"path": "github.com/nanobox-io/nanobox/util/fileutil",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "eCiSe4Kt4uHQKPW0k0d8YAxFsS0=",
-			"path": "github.com/nanobox-io/nanobox/util/hookit",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "00GAP5+03+mgx9SsGRhzYc3qeJA=",
-			"path": "github.com/nanobox-io/nanobox/util/locker",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "qpeJa6+QvDRuk8sEQOICgCkTCk8=",
-			"path": "github.com/nanobox-io/nanobox/util/mixpanel",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "RrVsBRJnf2f022c8jdcRvJz9tsI=",
-			"path": "github.com/nanobox-io/nanobox/util/nanoagent",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "HCHGbxOqd//d4raTP0ZrvznsNng=",
-			"path": "github.com/nanobox-io/nanobox/util/odin",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "wmz5+EzcS9U/X5C47B2XSJKHNgs=",
-			"path": "github.com/nanobox-io/nanobox/util/provider",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "a+YsSGmw3WSd07BjzM2jP0dT+wc=",
-			"path": "github.com/nanobox-io/nanobox/util/provider/share",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "kPjGt/MokpbAHMALrJB2rQfeIZM=",
-			"path": "github.com/nanobox-io/nanobox/util/update",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "BBxVvcBXgiAyJBRQe0BCrCui/l8=",
-			"path": "github.com/nanobox-io/nanobox/util/vbox",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
-		},
-		{
-			"checksumSHA1": "rrGKeh83DnZfWENXdLI121imxfI=",
-			"path": "github.com/nanobox-io/nanobox/util/watch",
-			"revision": "078dd1c63e13831022d2421ebfb3843d6575868a",
-			"revisionTime": "2016-11-17T23:10:25Z"
+			"revision": "030019c3e9a974f3142a674bc189dff000ca59b3",
+			"revisionTime": "2016-06-17T20:12:42Z"
 		},
 		{
 			"checksumSHA1": "5rOBGrnVJoymxI+FQn5tyHgbgcA=",
@@ -805,12 +529,6 @@
 			"path": "gopkg.in/yaml.v2",
 			"revision": "f7716cbe52baa25d2e9b0d0da546fcf909fc16b4",
 			"revisionTime": "2015-12-01T16:27:45Z"
-		},
-		{
-			"checksumSHA1": "sXSygS3TMaBu6s5VmQWXmHSzRyE=",
-			"path": "launchpad.net/goyaml",
-			"revision": "51",
-			"revisionTime": "2014-03-05T20:04:16Z"
 		}
 	],
 	"rootPath": "github.com/nanobox-io/nanobox"
