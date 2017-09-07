@@ -75,12 +75,6 @@
 			"revisionTime": "2016-08-19T20:09:57Z"
 		},
 		{
-			"checksumSHA1": "dxJfrizyMV1LAZMqkqaasz+T0kU=",
-			"path": "github.com/docker/engine-api",
-			"revision": "4290f40c056686fcaa5c9caf02eac1dde9315adf",
-			"revisionTime": "2016-09-08T23:21:04Z"
-		},
-		{
 			"checksumSHA1": "PDXSPZlb43hdy26n6hZi2UJxi5I=",
 			"path": "github.com/docker/engine-api/client",
 			"revision": "4290f40c056686fcaa5c9caf02eac1dde9315adf",
@@ -805,12 +799,6 @@
 			"path": "gopkg.in/yaml.v2",
 			"revision": "f7716cbe52baa25d2e9b0d0da546fcf909fc16b4",
 			"revisionTime": "2015-12-01T16:27:45Z"
-		},
-		{
-			"checksumSHA1": "sXSygS3TMaBu6s5VmQWXmHSzRyE=",
-			"path": "launchpad.net/goyaml",
-			"revision": "51",
-			"revisionTime": "2014-03-05T20:04:16Z"
 		}
 	],
 	"rootPath": "github.com/nanobox-io/nanobox"
