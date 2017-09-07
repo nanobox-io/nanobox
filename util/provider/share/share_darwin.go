@@ -279,7 +279,10 @@ func cleanLine(line, lineCheck string) string {
 	// split on spaces and remove mount options. also cleanup stray quotes
 	paths := strings.Split(strings.Replace(line, lineCheck, "", 1), "\" \"")
 	paths[0] = strings.Replace(paths[0], "\"", "", 1)
-	paths[len(paths)-1] = strings.Replace(paths[len(paths)-1], "\"", "", 1)
+	// the space in this `"\" "` is important. Prepending a space to lineCheck
+	// after it gets passed in might work too, assuming it doesn't have one
+	// already when getting passed in.
+	paths[len(paths)-1] = strings.Replace(paths[len(paths)-1], "\" ", "", 1)
 
 	goodPaths := []string{}
 	for _, path := range paths {

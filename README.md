@@ -7,13 +7,16 @@
 
 Once code is built and tested locally, Nanobox provisions and deploys an identical infrastructure on a production platform.
 
+
 ## How It Works
 
 Nanobox uses [Virtual Box](http://virtualbox.org) and [Docker](https://www.docker.com/) to create virtual development environments on your local machine. App configuration is handled in the [boxfile.yml](https://docs.nanobox.io/boxfile/), a small yaml config file used to provision and configure your apps' environments both locally and in production.
 
+
 ## Why Nanobox?
 
 Nanobox allows you to stop configuring environments and just code. It guarantees that any project you start will work the same for anyone else collaborating on the project. When it's time to launch the project, you'll know that your production app will work, because it already works locally.
+
 
 ### Installation
 
@@ -21,10 +24,11 @@ By using the [Nanobox installer](https://nanobox.io/download). *(Recommended)* .
 
 
 ### Usage
+
 ```
 Usage:
-   [flags]
-   [command]
+  nanobox [flags]
+  nanobox [command]
 
 Available Commands:
   configure     Configure Nanobox.
@@ -47,18 +51,19 @@ Available Commands:
   update-images Updates docker images.
   evar          Manage environment variables.
   dns           Manage dns aliases for local applications.
-  log           View and streams application logs.
+  log           Streams application logs.
   version       Show the current Nanobox version.
   server        Start a dedicated nanobox server
 
 Flags:
       --debug     In the event of a failure, drop into debug context
-  -h, --help      help for
+  -h, --help      help for nanobox
   -t, --trace     Increases display output and sets level to trace
   -v, --verbose   Increases display output and sets level to debug
 
-Use " [command] --help" for more information about a command.
+Use "nanobox [command] --help" for more information about a command.
 ```
+
 
 ### Documentation
 
@@ -67,10 +72,13 @@ Use " [command] --help" for more information about a command.
 
 
 ## Contributing
+
 Contributing to Nanobox is easy. Just follow these [contribution guidelines](https://docs.nanobox.io/contributing/).
+Nanobox uses [govendor](https://github.com/kardianos/govendor#the-vendor-tool-for-go) to vendor dependencies. Use `govendor sync` to restore dependencies.
+
 
 ### Contact
 
-For help using Nanobox or if you have any questions/suggestions, please reach out to help@nanobox.io or find us on IRC at #nanobox (freenode). You can also [create a new issue on this project](https://github.com/nanobox-io/nanobox/issues/new).
+For help using Nanobox or if you have any questions/suggestions, please reach out to help@nanobox.io or find us on [slack](https://slack.nanoapp.io/). You can also [create a new issue on this project](https://github.com/nanobox-io/nanobox/issues/new).
 
-[![nanobox logo](http://nano-assets.gopagoda.io/open-src/nanobox-open-src.png)](http://nanobox.io/open-source)
+[![nanobox logo](http://nano-assets.gopagoda.io/open-src/nanobox-open-src.png)](https://nanobox.io/open-source/)

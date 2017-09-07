@@ -3,6 +3,8 @@ sudo: required
 language: go
 
 dist: trusty
+os: osx
+osx_image: xcode8.3
 
 go:
   - 1.8.x
