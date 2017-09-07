@@ -70,6 +70,7 @@ func (machine DockerMachine) AddMount(local, host string) error {
 	}
 
 	if machine.staleMount(host) {
+		lumber.Debug("Removing stale mount: %s", host)
 		if err := machine.removeNativeMount(local, host); err != nil {
 			return fmt.Errorf("failed to clean up stale mount: %s", err)
 		}

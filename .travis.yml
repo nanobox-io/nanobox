@@ -2,6 +2,7 @@ sudo: required
 
 language: go
 
+# ~1 hour is too long to wait for an osx container, plus docker/dependencies
 dist: trusty
 
 go:

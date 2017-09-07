@@ -351,7 +351,7 @@
 			"revisionTime": "2016-09-12T15:03:35Z"
 		},
 		{
-			"checksumSHA1": "JMZI3mXrZwsQ+yE6DdC5Q7X+nI8=",
+			"checksumSHA1": "wTAYmbl1nt5HdkjblpnInPKhwp0=",
 			"path": "github.com/nanobox-io/nanobox-boxfile",
 			"revision": "213ff24b93f4b7de0a8067841612278c1995d393",
 			"revisionTime": "2017-08-03T21:20:06Z"
@@ -365,14 +365,14 @@
 		{
 			"checksumSHA1": "5rOBGrnVJoymxI+FQn5tyHgbgcA=",
 			"path": "github.com/nanopack/logvac/config",
-			"revision": "c84455c64d89c6a86c007edf436cd4301736293a",
-			"revisionTime": "2017-08-23T22:19:47Z"
+			"revision": "655f2ff0ed087cf7103f2bfdde0324019fabaf4c",
+			"revisionTime": "2017-09-07T18:11:09Z"
 		},
 		{
 			"checksumSHA1": "RI5cATdVXt1L8NoI0+8op9butCg=",
 			"path": "github.com/nanopack/logvac/core",
-			"revision": "c84455c64d89c6a86c007edf436cd4301736293a",
-			"revisionTime": "2017-08-23T22:19:47Z"
+			"revision": "655f2ff0ed087cf7103f2bfdde0324019fabaf4c",
+			"revisionTime": "2017-09-07T18:11:09Z"
 		},
 		{
 			"checksumSHA1": "TTEICNRFfe8Q66Z1WqZt+J9X49g=",
