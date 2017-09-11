@@ -8,6 +8,7 @@ import (
 	"runtime"
 
 	"github.com/jcelliott/lumber"
+	"golang.org/x/crypto/ssh"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util/config"
@@ -66,10 +67,18 @@ func sshKeys() map[string]string {
 		// read the contents of the keyfile
 		keyFile := filepath.Join(sshFolder, file.Name())
 		content, err := ioutil.ReadFile(keyFile)
+		// todo: display notice to user failed to read a file
 		if err != nil {
 			lumber.Error("hooks:ioutil.ReadFile(%s): %s", keyFile, err.Error())
 			// if this file cant be read continue on and give as many
 			// of the ssh keys as we can
+			continue
+		}
+
+		// ensure key is not password protected and is a valid private key file
+		_, err = ssh.ParsePrivateKey(content)
+		if err != nil {
+			lumber.Error("hooks:ssh.ParsePrivateKey(%s): %s", keyFile, err.Error())
 			continue
 		}
 
@@ -94,7 +103,6 @@ func singleKey(key string) map[string]string {
 
 // isValidKeyFile returns true if a file is a valid key file
 func isValidKeyFile(file os.FileInfo) bool {
-
 	return !file.IsDir() &&
 		file.Name() != "authorized_keys" &&
 		file.Name() != "config" &&
