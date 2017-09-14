@@ -62,7 +62,7 @@ func (f testGetter) getContents(filename string) (string, error) {
 	return testContents, nil
 }
 
-var testContents = `
+var testContents = `# comment
 key1=val
 key2="val"
 key3="this
@@ -78,6 +78,8 @@ key5="yes, even spaces and = are allowed as values"
 export key6=gasp
 export key7="how is this guy doing these awesome things"
 
+# comment
+# more comment
 
 key8="yep, even whitespace is _allowed (gets stripped)"
 export key9="you're \"welcome ;)"

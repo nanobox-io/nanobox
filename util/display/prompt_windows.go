@@ -4,8 +4,9 @@ package display
 
 import (
 	"fmt"
-	"golang.org/x/crypto/ssh/terminal"
 	"os"
+
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 // ReadPassword reads a password from the terminal and masks the input

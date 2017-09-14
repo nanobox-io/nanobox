@@ -73,6 +73,9 @@ func loadVars(args []string, getter contentGetter) ([]string, error) {
 		// normalize file `key=val`
 		newthings := strings.Replace(contents, "export ", "", -1)
 
+		// strip commented (#) lines
+		newthings = regexp.MustCompilePOSIX(`^#.*$\n*`).ReplaceAllString(newthings, "")
+
 		// strip out blank lines
 		newthings = regexp.MustCompilePOSIX(`\n\n+`).ReplaceAllString(newthings, "\n")
 
