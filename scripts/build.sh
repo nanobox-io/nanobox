@@ -34,3 +34,6 @@ printf "\nBuilding nanobox updater...\n"
 
 # change into updater directory and build nanobox updater
 cd ./updater && gox -osarch "darwin/amd64 linux/amd64 windows/amd64" -ldflags="-s" -output="../.build/v2/{{.OS}}/{{.Arch}}/nanobox-update"
+
+printf "\nCompacting binaries...\n"
+upx ./.build/v2/*/*/nanobox*
