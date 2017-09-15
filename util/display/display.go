@@ -137,7 +137,7 @@ func StartTask(format string, args ...interface{}) error {
 	return nil
 }
 
-// PauseTask ...
+// PauseTask pauses the summarizer so you can print to stdout.
 func PauseTask() {
 	// stop the task summarizer
 	if Summary && summarizer != nil {
@@ -151,7 +151,11 @@ func PauseTask() {
 	}
 }
 
-// ResumeTask ...
+// todo: make a quiet pause/resume task. just disable the "summarizer" and don't
+// print junk on resume. maybe just delete the previous line `* Paused Task` so
+// it will be overwritten with the `⣷ Resumed Task` header.
+
+// ResumeTask resumes the summarizer, so output is swallowed unless `-v` is passed.
 func ResumeTask() {
 	// resume task
 	if Summary && summarizer != nil {

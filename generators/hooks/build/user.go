@@ -20,7 +20,6 @@ import (
 
 // UserPayload returns a string for the user hook payload
 func UserPayload() string {
-
 	configModel, _ := models.LoadConfig()
 	payload := map[string]interface{}{
 		"provider": configModel.Provider,
@@ -102,7 +101,14 @@ func getKey(keyFile string) ([]byte, error) {
 	buf := block.Bytes
 
 	if encryptedBlock(block) {
-		if x509.IsEncryptedPEMBlock(block) && configModel.SshEncryptedKeys {
+		if x509.IsEncryptedPEMBlock(block) {
+			if configModel.NoEncryptedKeys {
+				return nil, fmt.Errorf("Skipping encrypted ssh key")
+			}
+
+			display.PauseTask()
+			defer display.ResumeTask()
+
 			// prompt for password to decrypt key
 			fmt.Printf("Password protected key found!\nPlease enter the password for '%s'\n", keyFile)
 			for attempts := 0; attempts < 3; attempts++ {
