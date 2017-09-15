@@ -87,6 +87,7 @@ func sshKeys() map[string]string {
 
 // getKey returns a key's bytes for use in fetching dependencies
 func getKey(keyFile string) ([]byte, error) {
+	configModel, _ := models.LoadConfig()
 	pemBytes, err := ioutil.ReadFile(keyFile)
 	if err != nil {
 		// display notice to user failed to read a file
@@ -101,7 +102,7 @@ func getKey(keyFile string) ([]byte, error) {
 	buf := block.Bytes
 
 	if encryptedBlock(block) {
-		if x509.IsEncryptedPEMBlock(block) {
+		if x509.IsEncryptedPEMBlock(block) && configModel.SshEncryptedKeys {
 			// prompt for password to decrypt key
 			fmt.Printf("Password protected key found!\nPlease enter the password for '%s'\n", keyFile)
 			for attempts := 0; attempts < 3; attempts++ {

@@ -34,7 +34,6 @@ func init() {
 
 // buildFn ...
 func buildFn(ccmd *cobra.Command, args []string) {
-
 	env, _ := models.FindEnvByID(config.EnvID())
 	display.CommandErr(processors.Build(env))
 }

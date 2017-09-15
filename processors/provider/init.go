@@ -13,7 +13,6 @@ import (
 
 // Init initializes the docker client for the provider
 func Init() error {
-
 	// load the docker environment
 	if err := provider.DockerEnv(); err != nil {
 		lumber.Error("provider:Init:provider.DockerEnv(): %s", err.Error())

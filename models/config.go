@@ -24,7 +24,8 @@ type Config struct {
 	DockerMachineNetworkSpace string `json:"docker-machine-network-space"`
 	NativeNetworkSpace        string `json:"native-network-space"`
 
-	SshKey string `json:"ssh-key"`
+	SshKey           string `json:"ssh-key"`
+	SshEncryptedKeys bool   `json:"ssh-encrypted-keys"`
 
 	Anonymous bool `json:"anonymous"`
 	LockPort  int  `json:"lock-port"`

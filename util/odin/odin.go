@@ -189,6 +189,7 @@ func EstablishTunnel(tunCfg models.TunnelConfig) (models.TunnelInfo, error) {
 		if strings.Contains(err.Error(), "no default") {
 			if err2, ok := err.(util.Err); ok {
 				err2.Suggest = "Specify a destination port with `-p source:destination`"
+				err2.Code = "USER"
 				err2.Message = err.Error()
 				return r, err2
 			}

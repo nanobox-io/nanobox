@@ -22,7 +22,7 @@ var (
 
 	// DeployCmd ...
 	DeployCmd = &cobra.Command{
-		Use:   "deploy",
+		Use:   "deploy [dry-run|remote-alias]",
 		Short: "Deploy your application to a live remote or a dry-run environment.",
 		Long:  ``,
 		PreRun: func(ccmd *cobra.Command, args []string) {
