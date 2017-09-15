@@ -29,6 +29,12 @@ func DevConfig(appModel *models.App) docker.ContainerConfig {
 		code = fmt.Sprintf("%s:/app", config.LocalDir())
 	}
 
+	cache := fmt.Sprintf("nanobox_%s_cache:/mnt/cache", appModel.EnvID)
+	configModel, _ := models.LoadConfig()
+	if configModel.Cache == "shared" {
+		cache = "nanobox_cache:/mtn/cache"
+	}
+
 	config := docker.ContainerConfig{
 		Name:    fmt.Sprintf("nanobox_%s", appModel.ID),
 		Image:   image, // this will need to be configurable some time
@@ -39,7 +45,7 @@ func DevConfig(appModel *models.App) docker.ContainerConfig {
 			// fmt.Sprintf("%s%s/build:/data", provider.HostMntDir(), appModel.EnvID),
 			// fmt.Sprintf("%s%s/cache:/mnt/cache", provider.HostMntDir(), appModel.EnvID),
 			fmt.Sprintf("nanobox_%s_build:/data", appModel.EnvID),
-			fmt.Sprintf("nanobox_%s_cache:/mnt/cache", appModel.EnvID),
+			cache,
 		},
 		RestartPolicy: "no",
 	}

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/nanobox-io/golang-docker-client"
+
 	"github.com/nanobox-io/nanobox/commands/registry"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors/env"
@@ -29,6 +31,9 @@ func Implode() error {
 			fmt.Printf("unable to remove mounts: %s", err)
 		}
 	}
+
+	// remove any shared caches if any
+	docker.VolumeRemove("nanobox_cache")
 
 	// destroy the provider
 	if err := provider.Destroy(); err != nil {

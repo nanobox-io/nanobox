@@ -24,6 +24,7 @@ type Config struct {
 	DockerMachineNetworkSpace string `json:"docker-machine-network-space"`
 	NativeNetworkSpace        string `json:"native-network-space"`
 
+	Cache    string `json:cache`
 	SshKey string `json:"ssh-key"`
 
 	Anonymous bool `json:"anonymous"`
@@ -83,6 +84,14 @@ func (c *Config) makeValid() {
 
 	if c.SshKey == "" {
 		c.SshKey = "default"
+	}
+
+	if c.Cache == "" {
+		c.Cache = "single"
+	}
+
+	if c.Cache != "single" && c.Cache != "shared" {
+		c.Cache = "single"
 	}
 
 	if c.LockPort == 0 {

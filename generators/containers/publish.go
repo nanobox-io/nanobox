@@ -13,6 +13,13 @@ import (
 // PublishConfig generate the container configuration for the build container
 func PublishConfig(image string) docker.ContainerConfig {
 	env := config.EnvID()
+
+	cache := fmt.Sprintf("nanobox_%s_cache:/mnt/cache", env)
+	configModel, _ := models.LoadConfig()
+	if configModel.Cache == "shared" {
+		cache = "nanobox_cache:/mtn/cache"
+	}
+
 	config := docker.ContainerConfig{
 		Name:    PublishName(),
 		Image:   image,
@@ -22,7 +29,7 @@ func PublishConfig(image string) docker.ContainerConfig {
 			// fmt.Sprintf("%s%s/cache:/mnt/cache", provider.HostMntDir(), env),
 			// fmt.Sprintf("%s%s/deploy:/mnt/deploy", provider.HostMntDir(), env),
 			fmt.Sprintf("nanobox_%s_app:/mnt/app", env),
-			fmt.Sprintf("nanobox_%s_cache:/mnt/cache", env),
+			cache,
 			fmt.Sprintf("nanobox_%s_deploy:/mnt/deploy", env),
 		},
 		RestartPolicy: "no",
@@ -31,7 +38,6 @@ func PublishConfig(image string) docker.ContainerConfig {
 	// Some CI's have an old kernel and require us to use the virtual network
 	// this is only in effect for CI's because it automatically reserves an ip on our nanobox
 	// virtual network and we could have IP conflicts
-	configModel, _ := models.LoadConfig()
 	if configModel.CIMode {
 		config.Network = "virt"
 	}
