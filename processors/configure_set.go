@@ -30,7 +30,7 @@ func ConfigureSet(key, val string) error {
 		config.NativeNetworkSpace = val
 	case "ssh_key", "ssh-key":
 		config.SshKey = val
-	case "ssh_encrypted_keys", "ssh-encrypted-keys":
+	case "ssh_encrypted_keys", "ssh-encrypted-keys", "use_encrypted_keys", "use-encrypted-keys":
 		config.SshEncryptedKeys = val == "true" || val == "t" || val == "1"
 	case "lock_port", "lock-port":
 		config.LockPort, _ = strconv.Atoi(val)
