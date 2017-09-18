@@ -102,7 +102,7 @@ func getKey(keyFile string) ([]byte, error) {
 
 	if encryptedBlock(block) {
 		if x509.IsEncryptedPEMBlock(block) {
-			if configModel.NoEncryptedKeys {
+			if !configModel.SshEncryptedKeys {
 				return nil, fmt.Errorf("Skipping encrypted ssh key")
 			}
 
