@@ -20,6 +20,10 @@ type (
 		Env          map[string]string `json:"env"`
 		LogWatches   interface{}       `json:"log_watches"`
 		Start        interface{}       `json:"start"`
+		Cwd          interface{}       `json:"cwd"`
+		Stop         interface{}       `json:"stop"`
+		StopTimeout  interface{}       `json:"stop_timeout"`
+		StopForce    interface{}       `json:"stop_force"`
 		CronJobs     interface{}       `json:"cron_jobs"`
 	}
 
@@ -60,6 +64,10 @@ func ConfigurePayload(appModel *models.App, componentModel *models.Component) st
 		Env:          appModel.Evars,
 		LogWatches:   boxfile.Node(componentModel.Name).Value("log_watch"),
 		Start:        boxfile.Node(componentModel.Name).Value("start"),
+		Cwd:          boxfile.Node(componentModel.Name).Value("cwd"),
+		Stop:         boxfile.Node(componentModel.Name).Value("stop"),
+		StopTimeout:  boxfile.Node(componentModel.Name).Value("stop_timeout"),
+		StopForce:    boxfile.Node(componentModel.Name).Value("stop_force"),
 		CronJobs:     boxfile.Node(componentModel.Name).Value("cron"),
 	}
 
