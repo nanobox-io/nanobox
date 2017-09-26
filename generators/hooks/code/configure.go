@@ -5,6 +5,7 @@ import (
 
 	"github.com/nanobox-io/nanobox-boxfile"
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util/dns"
 )
 
 type (
@@ -25,6 +26,7 @@ type (
 		StopTimeout  interface{}       `json:"stop_timeout"`
 		StopForce    interface{}       `json:"stop_force"`
 		CronJobs     interface{}       `json:"cron_jobs"`
+		DnsEntries   interface{}       `json:"dns_entries"`
 	}
 
 	// component ...
@@ -69,6 +71,7 @@ func ConfigurePayload(appModel *models.App, componentModel *models.Component) st
 		StopTimeout:  boxfile.Node(componentModel.Name).Value("stop_timeout"),
 		StopForce:    boxfile.Node(componentModel.Name).Value("stop_force"),
 		CronJobs:     boxfile.Node(componentModel.Name).Value("cron"),
+		DnsEntries:   dns.List(" by nanobox"),
 	}
 
 	bytes, err := json.Marshal(pload)
