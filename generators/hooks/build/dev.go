@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util/dns"
 )
 
 func DevPayload(appModel *models.App) string {
@@ -14,6 +15,7 @@ func DevPayload(appModel *models.App) string {
 	rtn := map[string]interface{}{}
 	rtn["env"] = evars
 	rtn["boxfile"] = appModel.DeployedBoxfile
+	rtn["dns_entries"] = dns.List(" by nanobox")
 	bytes, _ := json.Marshal(rtn)
 	return string(bytes)
 }
