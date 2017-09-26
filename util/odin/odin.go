@@ -423,7 +423,7 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 	}
 
 	if res.StatusCode < 200 || res.StatusCode >= 300 {
-		return util.ErrorfQuiet("[ODIN] bad exit response(%d %s %s %s (%s) %s)", res.StatusCode, req.Method, req.URL, req.Proto, res.Header.Get("Content-Length"), b)
+		return util.ErrorfQuiet("[ODIN] bad exit response(%d %s %s %s (%s) %s)", res.StatusCode, req.Method, strings.Replace(req.URL.String(), auth.Key, "REDACTED", -1), req.Proto, res.Header.Get("Content-Length"), b)
 	}
 
 	if responseBody != nil {

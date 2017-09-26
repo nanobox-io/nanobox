@@ -3,6 +3,7 @@
 package processors
 
 import (
+	"strings"
 	"time"
 
 	"github.com/jcelliott/lumber"
@@ -19,9 +20,6 @@ func Update() error {
 	if err := process_provider.Init(); err != nil {
 		return util.ErrorAppend(err, "failed to init docker client")
 	}
-
-	// // check to see if nanobox needs to update
-	// update.Check()
 
 	// update all the nanobox images
 	if err := pullImages(); err != nil {
@@ -44,12 +42,14 @@ func pullImages() error {
 		if image.Slug == "" {
 			continue
 		}
+		if !strings.Contains(image.Slug, "nanobox/") {
+			continue
+		}
 		display.StartTask("Pulling %s image", image.Slug)
 
 		// generate a docker percent display
 		dockerPercent := &display.DockerPercentDisplay{
 			Output: display.NewStreamer("info"),
-			// Prefix: buildImage,
 		}
 
 		// pull the build image
