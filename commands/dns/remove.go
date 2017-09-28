@@ -14,7 +14,7 @@ import (
 
 // RemoveCmd ...
 var RemoveCmd = &cobra.Command{
-	Use:   "rm",
+	Use:   "rm [local|dry-run]",
 	Short: "Remove dns entries",
 	Long:  ``,
 	// PreRun: steps.Run("login"),

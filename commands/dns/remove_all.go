@@ -14,7 +14,7 @@ import (
 
 // RemoveAllCmd ...
 var RemoveAllCmd = &cobra.Command{
-	Use:    "rm-all",
+	Use:    "rm-all [local|dry-run]",
 	Short:  "remove all dns entries",
 	Long:   ``,
 	Run:    removeAllFn,

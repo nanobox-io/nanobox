@@ -14,7 +14,7 @@ import (
 
 // AddCmd ...
 var AddCmd = &cobra.Command{
-	Use:   "add",
+	Use:   "add [local|dry-run]",
 	Short: "Adds dns entries",
 	Long:  ``,
 	// PreRun: steps.Run("login"),
