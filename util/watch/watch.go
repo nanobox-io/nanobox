@@ -53,11 +53,11 @@ func Watch(container, path string) error {
 
 		// print the warning
 		// we added /r because this message often appears in a raw terminal which requires
-		// carrage returns
+		// carriage returns
 		fmt.Printf("\n\r---------------------------------------------------------------------\n\r\n\r")
 		fmt.Printf("An error occured in the fast notify watcher: '%s'\n\r\n\r", err.Error())
 		fmt.Printf("Generally, having too low of a ulimit causes these issues.\n\r")
-		fmt.Printf("Consiser upping your ulimit to resolve (`ulimit -n 2048`).\n\r")
+		fmt.Printf("Consider upping your ulimit to resolve (`ulimit -n 2048`).\n\r")
 		fmt.Printf("Until then, we'll go ahead and rollover to a slower polling solution.\n\r")
 		fmt.Printf("\n\r---------------------------------------------------------------------\n\r\n\r")
 
