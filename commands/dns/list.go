@@ -2,6 +2,7 @@ package dns
 
 import (
 	"fmt"
+
 	"github.com/spf13/cobra"
 
 	// "github.com/nanobox-io/nanobox/commands/steps"
@@ -14,7 +15,7 @@ import (
 
 // ListCmd ...
 var ListCmd = &cobra.Command{
-	Use:   "ls",
+	Use:   "ls [local|dry-run]",
 	Short: "list dns entries",
 	Long:  ``,
 	// PreRun: steps.Run("login"),
