@@ -25,6 +25,7 @@ func main() {
 		path, err = exec.LookPath(update.Name)
 		if err != nil {
 			fmt.Printf("Cannot find %s: %s\n", update.Name, err)
+			os.Exit(1)
 		}
 	}
 
