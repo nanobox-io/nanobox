@@ -49,7 +49,14 @@ func main() {
 		// // make sure the .nanobox folder is created by our user
 		// models.LoadUpdate()
 
-		cmd := fmt.Sprintf("%s \"%s\"", os.Args[0], path)
+		// determine the full path to the executable in case
+		// it isn't in the path when run with sudo
+		cmdPath, err := os.Executable()
+		if err != nil {
+			fmt.Printf("Cannot find the path for nanobox-update\n")
+			os.Exit(1)
+		}
+		cmd := fmt.Sprintf("%s \"%s\"", cmdPath, path)
 		if err := util.PrivilegeExec(cmd); err != nil {
 			os.Exit(1)
 		}
