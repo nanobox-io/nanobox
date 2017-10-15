@@ -27,7 +27,7 @@ remote, live applications created with Nanobox.
 
 	// RemoteAddCmd ...
 	RemoteAddCmd = &cobra.Command{
-		Use:   "add",
+		Use:   "add <team-name>/<app-name> [remote-alias]",
 		Short: "Add a new remote.",
 		Long: `
 Adds a new remote. A local app can have multiple remotes. Each
@@ -48,7 +48,7 @@ remote needs an alias. If no alias is provided, 'default' is assumed.
 
 	// RemoteRemoveCmd ...
 	RemoteRemoveCmd = &cobra.Command{
-		Use:    "rm",
+		Use:    "rm [remote-alias]",
 		Short:  "Remove a remote.",
 		Long:   ``,
 		PreRun: steps.Run("login"),
