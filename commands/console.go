@@ -21,7 +21,7 @@ var (
 
 	// ConsoleCmd ...
 	ConsoleCmd = &cobra.Command{
-		Use:   "console",
+		Use:   "console [<local | dry-run | {remote-alias}>] <component.id>",
 		Short: "Open an interactive console inside a component.",
 		Long:  ``,
 		Run:   consoleFn,
