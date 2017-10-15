@@ -16,7 +16,7 @@ var (
 
 	// InfoCmd ...
 	InfoCmd = &cobra.Command{
-		Use:   "info",
+		Use:   "info [local | dry-run | remote-alias]",
 		Short: "Show information about the specified environment.",
 		Long: `
 Shows information about the specified environment. You must
