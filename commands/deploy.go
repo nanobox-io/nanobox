@@ -44,7 +44,7 @@ var (
 func init() {
 	DeployCmd.Flags().BoolVarP(&deployCmdFlags.skipCompile, "skip-compile", "", false, "skip compiling the app")
 	DeployCmd.Flags().BoolVarP(&deployCmdFlags.force, "force", "", false, "force the deploy even if you have used this build on a previous deploy")
-	DeployCmd.Flags().StringVarP(&deployCmdFlags.message, "message", "m", "", "message to accompany this command")
+	DeployCmd.Flags().StringVarP(&deployCmdFlags.message, "message", "m", "", "Allows you to append a message to the deploy. These messages appear in your app's deploy history in your dashboard.")
 }
 
 // deployFn ...

@@ -18,7 +18,7 @@ import (
 var (
 	// TunnelCmd handles tunneling to components.
 	TunnelCmd = &cobra.Command{
-		Use:   "tunnel [dry-run|remote-alias] component",
+		Use:   "tunnel [dry-run|remote-alias] <component.id>",
 		Short: "Create a secure tunnel between your local machine & a live component.",
 		Long: `
 Creates a secure tunnel between your local machine &

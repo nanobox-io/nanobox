@@ -27,16 +27,16 @@ Nanobox configuration (~/.nanobox/config.yml).
 	}
 
 	ConfigureSetCmd = &cobra.Command{
-		Use:   "set",
+		Use:   "set <config-key> <config-value>",
 		Short: "Set a configuration key",
 		Long: `
-Set a key in the configuration		
+Set a key in the configuration
 		`,
 		Run: configureSetFn,
 	}
 
 	ConfigureGetCmd = &cobra.Command{
-		Use:   "get",
+		Use:   "get <config-key>",
 		Short: "Get a value form the configuration",
 		Long: `
 Get a key from the configuration
