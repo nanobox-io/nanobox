@@ -16,9 +16,9 @@ var (
 		Use:   "login",
 		Short: "Authenticate your nanobox client with your nanobox.io account.",
 		Long:  `
-		Authenticate with your nanobox account by passing the username and password in or using the following environment variables:
-		NANOBOX_USERNAME
-		NANOBOX_PASSWORD
+Authenticate with your nanobox account by passing the username and password in or using the following environment variables:
+NANOBOX_USERNAME
+NANOBOX_PASSWORD
 		`,
 		Run:   loginFn,
 	}
