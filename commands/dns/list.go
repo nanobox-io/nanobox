@@ -33,6 +33,11 @@ func listFn(ccmd *cobra.Command, args []string) {
 		app, _ := models.FindAppBySlug(config.EnvID(), name)
 		display.CommandErr(app_dns.List(app))
 	case "production":
-		fmt.Println("not yet implemented")
+		fmt.Printf(`
+--------------------------------------------------------
+Production dns aliasing is not yet implemented.
+--------------------------------------------------------
+
+`)
 	}
 }

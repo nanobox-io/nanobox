@@ -38,6 +38,11 @@ func addFn(ccmd *cobra.Command, args []string) {
 		app.Generate(env, name)
 		display.CommandErr(app_dns.Add(env, app, args[0]))
 	case "production":
-		fmt.Println("not yet implemented")
+		fmt.Printf(`
+--------------------------------------------------------
+Production dns aliasing is not yet implemented.
+--------------------------------------------------------
+
+`)
 	}
 }

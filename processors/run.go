@@ -184,6 +184,7 @@ func watchFiles(envModel *models.Env, appModel *models.App) {
 	boxfile := boxfile.New([]byte(appModel.DeployedBoxfile))
 	if boxfile.Node("run.config").BoolValue("fs_watch") && (provider.RequiresMount() || specialException()) {
 		lumber.Info("watcher starting")
+		// todo: server.Watch to call the following, so we can pre-emptively set ulimit to much higher.
 		go watch.Watch(container_generator.DevName(), envModel.Directory)
 	}
 }

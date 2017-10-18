@@ -75,7 +75,7 @@ func setupContainer() error {
 	container, err := docker.CreateContainer(config)
 	if err != nil {
 		display.ErrorTask()
-		return util.ErrorAppend(err, "failed to create docker container")
+		return util.ErrorAppend(err, "failed to create bridge container")
 	}
 	display.StopTask()
 

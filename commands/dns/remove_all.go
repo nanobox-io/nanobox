@@ -32,6 +32,11 @@ func removeAllFn(ccmd *cobra.Command, args []string) {
 		app, _ := models.FindAppBySlug(config.EnvID(), name)
 		display.CommandErr(app_dns.RemoveAll(app))
 	case "production":
-		fmt.Println("not yet implemented")
+		fmt.Printf(`
+--------------------------------------------------------
+Production dns aliasing is not yet implemented.
+--------------------------------------------------------
+
+`)
 	}
 }

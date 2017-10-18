@@ -73,11 +73,19 @@ func (machine DockerMachine) Valid() (error, []string) {
 	case "linux":
 		out, err := exec.Command("netstat", "-tln").CombinedOutput()
 		if err != nil {
-			missingParts = append(missingParts, "netfs")
-			masterErr = fmt.Errorf("%s - failed to check for netfs - %q", masterErr.Error(), err.Error())
+			missingParts = append(missingParts, "nfs-kernel-server")
+			if masterErr == nil {
+				masterErr = fmt.Errorf("failed to check for netfs - %s", err.Error())
+			} else {
+				masterErr = fmt.Errorf("%s - failed to check for netfs - %s", masterErr.Error(), err.Error())
+			}
 		} else if !bytes.Contains(out, []byte("2049")) {
-			missingParts = append(missingParts, "netfs")
-			masterErr = fmt.Errorf("%s - missing or not running netfs - %q", masterErr.Error(), err.Error())
+			missingParts = append(missingParts, "nfs-kernel-server")
+			if masterErr == nil {
+				masterErr = fmt.Errorf("missing or not running netfs")
+			} else {
+				masterErr = fmt.Errorf("%s - missing or not running netfs", masterErr.Error())
+			}
 		}
 
 		if err := exec.Command("exportfs").Run(); err != nil {

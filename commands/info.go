@@ -37,6 +37,11 @@ func infoFn(ccmd *cobra.Command, args []string) {
 		appModel, _ := models.FindAppBySlug(config.EnvID(), name)
 		display.CommandErr(app.Info(env, appModel))
 	case "production":
-		fmt.Println("not yet implemented")
+		fmt.Printf(`
+----------------------------------------------------------
+Showing production app information is not yet implemneted.
+----------------------------------------------------------
+
+`)
 	}
 }
