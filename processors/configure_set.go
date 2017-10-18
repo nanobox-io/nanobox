@@ -1,6 +1,7 @@
 package processors
 
 import (
+	"fmt"
 	"strconv"
 
 	"github.com/nanobox-io/nanobox/models"
@@ -40,7 +41,17 @@ func ConfigureSet(key, val string) error {
 		config.CISyncVerbose = val == "true" || val == "t" || val == "1"
 	case "anonymous":
 		config.Anonymous = val == "true" || val == "t" || val == "1"
+	default:
+		fmt.Printf("'%s' is not a valid key.\n", key)
+		return nil
 	}
 
-	return config.Save()
+	err := config.Save()
+	if err == nil {
+		fmt.Printf("Successfully set '%s'\n", key)
+	} else {
+		fmt.Printf("Failed to set '%s'\n", key)
+	}
+
+	return err
 }

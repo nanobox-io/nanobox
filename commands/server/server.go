@@ -30,7 +30,7 @@ const name = "nanobox-server"
 func serverFnc(ccmd *cobra.Command, args []string) {
 
 	if !util.IsPrivileged() {
-		log.Fatal("server needs to run as privilaged user")
+		log.Fatal("server needs to run as a privileged user")
 		return
 	}
 	// make sure things know im the server
