@@ -2,6 +2,7 @@ package env
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/util"
@@ -12,7 +13,6 @@ import (
 
 // Mount sets up the env mounts
 func Mount(env *models.Env) error {
-
 	if !provider.RequiresMount() {
 		return nil
 	}
@@ -20,10 +20,14 @@ func Mount(env *models.Env) error {
 	display.StartTask("Mounting codebase")
 	defer display.StopTask()
 
+	// BUG(glinton) if the `build` isn't successful and the engine changes in the boxfile,
+	// this mount sticks around and must be cleaned up manually.
+	//
 	// mount the engine if it's a local directory
-	if config.EngineDir() != "" {
-		src := config.EngineDir()
-		dst := fmt.Sprintf("%s%s/engine", provider.HostShareDir(), env.ID)
+	engineDir, _ := config.EngineDir()
+	if engineDir != "" {
+		src := engineDir                                                // local directory
+		dst := filepath.Join(provider.HostShareDir(), env.ID, "engine") // b2d "global zone"
 
 		// first, export the env on the workstation
 		if err := provider.AddMount(src, dst); err != nil {

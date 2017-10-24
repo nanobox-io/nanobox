@@ -22,16 +22,16 @@ func Unmount(env *models.Env) error {
 	defer display.StopTask()
 
 	// unmount the engine if it's a local directory
-	if config.EngineDir() != "" {
-		src := config.EngineDir()
-		dst := filepath.Join(provider.HostShareDir(), env.ID, "engine")
+	engineDir, _ := config.EngineDir()
+	if engineDir != "" {
+		src := engineDir                                                // local directory
+		dst := filepath.Join(provider.HostShareDir(), env.ID, "engine") // b2d "global zone"
 
 		// unmount the env on the provider
 		if err := provider.RemoveMount(src, dst); err != nil {
 			display.ErrorTask()
 			return util.ErrorAppend(err, "failed to remove engine mount")
 		}
-
 	}
 
 	// unmount the app src
@@ -47,6 +47,21 @@ func Unmount(env *models.Env) error {
 	return nil
 }
 
+func UnmountEngine(env *models.Env, engineDir string) error {
+	// unmount the engine if it's a local directory
+	if engineDir != "" {
+		src := engineDir                                                // local directory
+		dst := filepath.Join(provider.HostShareDir(), env.ID, "engine") // b2d "global zone"
+
+		// unmount the env on the provider
+		if err := provider.RemoveMount(src, dst); err != nil {
+			display.ErrorTask()
+			return util.ErrorAppend(err, "failed to cleanup old engine mount")
+		}
+	}
+	return nil
+}
+
 // mountsInUse returns true if any of the env's apps are running
 func mountsInUse(env *models.Env) bool {
 	devApp, _ := models.FindAppBySlug(env.ID, "dev")
@@ -58,7 +73,8 @@ func mountsInUse(env *models.Env) bool {
 func mounted(env *models.Env) bool {
 
 	// if the engine is mounted, check that
-	if config.EngineDir() != "" {
+	engineDir, _ := config.EngineDir()
+	if engineDir != "" {
 		dst := filepath.Join(provider.HostShareDir(), env.ID, "engine")
 
 		if provider.HasMount(dst) {

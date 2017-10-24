@@ -357,3 +357,14 @@ local web/worker, please use 'nanobox run'.
 --------------------------------------------------------------------------------
 `))
 }
+
+func LocalEngineNotFound() {
+	os.Stderr.WriteString(fmt.Sprintf(`
+--------------------------------------------------------------------------------
+LOCAL ENGINE NOT FOUND
+It appears the local engine sepcified does not exist at the location defined.
+Please double check your boxfile.yml and the path to the engine. If the path
+you specified exists, please contact support.
+--------------------------------------------------------------------------------
+`))
+}

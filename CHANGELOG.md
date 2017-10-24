@@ -1,3 +1,23 @@
+## 2.3.1 (unreleased)
+
+FEATURES:
+  - Add dns alias' to run and dry-run containers [#592](https://github.com/nanobox-io/nanobox/pull/592)
+  - Support service configuration enhancements [#586](https://github.com/nanobox-io/nanobox/pull/586)
+  - Support password protected ssh keys [#576](https://github.com/nanobox-io/nanobox/pull/576)[#580](https://github.com/nanobox-io/nanobox/pull/580)[#582](https://github.com/nanobox-io/nanobox/pull/582)
+  - Untrack vendored files [#567](https://github.com/nanobox-io/nanobox/pull/567)
+
+BUG FIXES:
+  - Refactor local engine configuration [#604](https://github.com/nanobox-io/nanobox/pull/604)
+  - Fix panic on linux if nfs isn't running [#601](https://github.com/nanobox-io/nanobox/pull/601)
+  - Handle `nanobox-update` not being in global path [#596](https://github.com/nanobox-io/nanobox/pull/596)
+  - Fix fast notify watcher warning typos [#594](https://github.com/nanobox-io/nanobox/pull/594)
+  - Update `--help` docs for cli [#593](https://github.com/nanobox-io/nanobox/pull/593)[#598](https://github.com/nanobox-io/nanobox/pull/598)
+  - Only pull `nanobox/*` images on `update-images` [#591](https://github.com/nanobox-io/nanobox/pull/591)
+  - Only add valid, un-password protected ssh keys [#572](https://github.com/nanobox-io/nanobox/pull/572)
+  - Fix regression and allow multiple apps on osx [#571](https://github.com/nanobox-io/nanobox/pull/571)
+  - Fix broken route for email login [hotfix](d9469af105be39d402e5e6ad6312f3a9ecf95f6f)
+
+
 ## 2.3.0 (Sept 1, 2017)
 
 FEATURES:

@@ -14,12 +14,16 @@ import (
 func BuildConfig(image string) docker.ContainerConfig {
 	env := config.EnvID()
 	code := fmt.Sprintf("%s%s/code:/app", provider.HostShareDir(), env)
+	// mounting from b2d "global zone" to container will be the same whether local engine specified or not
 	engine := fmt.Sprintf("%s%s/engine:/share/engine", provider.HostShareDir(), env)
 
 	if !provider.RequiresMount() {
 		code = fmt.Sprintf("%s:/app", config.LocalDir())
-		if config.EngineDir() != "" {
-			engine = fmt.Sprintf("%s:/share/engine", config.EngineDir())
+
+		// todo: test this (likely docker-native linux)
+		engineDir, _ := config.EngineDir()
+		if engineDir != "" {
+			engine = fmt.Sprintf("%s:/share/engine", engineDir)
 		}
 	}
 
@@ -50,10 +54,6 @@ func BuildConfig(image string) docker.ContainerConfig {
 
 	// set http[s]_proxy and no_proxy vars
 	setProxyVars(&conf)
-
-	if config.EngineDir() != "" {
-		conf.Binds = append(conf.Binds, engine)
-	}
 
 	return conf
 }
