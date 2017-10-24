@@ -109,7 +109,6 @@ func (sh *ShareRPC) Add(req Request, resp *Response) error {
 
 // Remove will remove an nfs share
 func Remove(path string) error {
-
 	// generate the entry
 	entry, err := entry(path)
 	if err != nil {

@@ -2,6 +2,7 @@ package env
 
 import (
 	"fmt"
+	"path/filepath"
 	"time"
 
 	"github.com/jcelliott/lumber"
@@ -46,6 +47,18 @@ func Setup(envModel *models.Env) error {
 
 	// todo: validate boxfile nodes
 
+	// ensure local engine exists
+	engineDir, err := config.EngineDir()
+	if err != nil {
+		display.LocalEngineNotFound()
+		err = util.ErrorfQuiet("[USER] custom local engine not found - %s", err.Error())
+		if err2, ok := err.(util.Err); ok {
+			err2.Suggest = "Ensure the engine defined in your boxfile.yml exists at the location specified"
+			return err2
+		}
+		return err
+	}
+
 	// init docker client
 	if err := provider.Init(); err != nil {
 		return util.ErrorAppend(err, "failed to init docker client")
@@ -57,8 +70,31 @@ func Setup(envModel *models.Env) error {
 		return util.ErrorAppend(err, "failed to initialize the env data")
 	}
 
+	// if switch from local engine, ensure old local engine gets unmounted
+	oldBox := boxfile.New([]byte(envModel.UserBoxfile))
+	newBox, _ := boxfile.NewFromFile(config.Boxfile()) // can ignore error, we made sure it exists before this point
+	oldEngineName := oldBox.Node("run.config").StringValue("engine")
+	newEngineName := newBox.Node("run.config").StringValue("engine")
+	if (oldEngineName != newEngineName) && newEngineName != "" {
+		oldEnginePath, err := filepath.Abs(oldEngineName)
+		if err != nil {
+			// todo: ignore here so if they delete their engine it won't break until they restore it
+			return fmt.Errorf("Failed to resolve old engine location - %s", err.Error())
+		}
+
+		err = UnmountEngine(envModel, oldEnginePath)
+		if err != nil {
+			return fmt.Errorf("Failed to unmount engine - %s", err.Error())
+		}
+	}
+
 	if util_provider.HasMount(fmt.Sprintf("%s%s/code", util_provider.HostShareDir(), envModel.ID)) {
-		return nil
+		if engineDir == "" {
+			return nil
+		}
+		if util_provider.HasMount(fmt.Sprintf("%s%s/engine", util_provider.HostShareDir(), envModel.ID)) {
+			return nil
+		}
 	}
 
 	display.OpenContext("Preparing environment")

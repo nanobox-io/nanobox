@@ -18,8 +18,9 @@ func CompileConfig(image string) docker.ContainerConfig {
 
 	if !provider.RequiresMount() {
 		code = fmt.Sprintf("%s:/share/code", config.LocalDir())
-		if config.EngineDir() != "" {
-			engine = fmt.Sprintf("%s:/share/engine", config.EngineDir())
+		engineDir, _ := config.EngineDir()
+		if engineDir != "" {
+			engine = fmt.Sprintf("%s:/share/engine", engineDir)
 		}
 	}
 
@@ -50,10 +51,6 @@ func CompileConfig(image string) docker.ContainerConfig {
 
 	// set http[s]_proxy and no_proxy vars
 	setProxyVars(&conf)
-
-	if config.EngineDir() != "" {
-		conf.Binds = append(conf.Binds, engine)
-	}
 
 	return conf
 }

@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"syscall"
@@ -107,22 +108,38 @@ func SSHDir() string {
 	return filepath.ToSlash(filepath.Join(p, ".ssh"))
 }
 
+var engineDir string
+
 // EngineDir gets the directory of the engine if it is a directory and on the
 // local file system
-func EngineDir() string {
+func EngineDir() (string, error) {
+	if engineDir != "" {
+		return engineDir, nil
+	}
 
-	box := boxfile.NewFromPath(Boxfile())
-	engineName := box.Node("env").StringValue("engine")
-
-	//
+	engineName := boxfile.NewFromPath(Boxfile()).Node("run.config").StringValue("engine")
 	if engineName != "" {
+		// if engine specified is not a filepath, set engine path to blank
+		var validLocal = regexp.MustCompile(`^[~|\.|\/|\\]`)
+		if !validLocal.MatchString(engineName) {
+			return "", nil
+		}
+
 		fi, err := os.Stat(engineName)
-		if err == nil && fi.IsDir() {
-			return engineName
+		if err != nil {
+			return "", fmt.Errorf("Failed to find engine - %s", err.Error())
+		}
+		if fi.IsDir() {
+			path, err := filepath.Abs(engineName)
+			if err != nil {
+				return "", fmt.Errorf("Failed to resolve engine location - %s", err.Error())
+			}
+			engineDir = path
+			return path, nil
 		}
 	}
 
-	return ""
+	return "", nil
 }
 
 // BinDir creates a directory where nanobox specific binaries can be downloaded
