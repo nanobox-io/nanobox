@@ -2,6 +2,7 @@ package update
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/jcelliott/lumber"
@@ -17,6 +18,10 @@ func Check() {
 	// load the update model
 	updateInfo, err := models.LoadUpdate()
 	if err != nil {
+		if strings.Contains(err.Error(), "no record found") {
+			checkTomorrow(&models.Update{})
+			return
+		}
 		lumber.Error("update:models.LoadUpdate(): %s", err)
 		return
 	}
