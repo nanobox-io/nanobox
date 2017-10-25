@@ -52,9 +52,11 @@ func Run(path string) error {
 	// update the model
 	update := newUpdate()
 
-	fmt.Printf("Updated to version: %s", getCurrentVersion(path))
+	newVersion := getCurrentVersion(path)
 
-	printGithubReleaseUrl(getCurrentVersion(path))
+	fmt.Printf("Updated to version: %s", newVersion)
+
+	printGithubReleaseUrl(newVersion)
 
 	return update.Save()
 }
