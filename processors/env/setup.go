@@ -3,6 +3,7 @@ package env
 import (
 	"fmt"
 	"path/filepath"
+	"regexp"
 	"time"
 
 	"github.com/jcelliott/lumber"
@@ -75,7 +76,8 @@ func Setup(envModel *models.Env) error {
 	newBox, _ := boxfile.NewFromFile(config.Boxfile()) // can ignore error, we made sure it exists before this point
 	oldEngineName := oldBox.Node("run.config").StringValue("engine")
 	newEngineName := newBox.Node("run.config").StringValue("engine")
-	if (oldEngineName != newEngineName) && newEngineName != "" {
+	var validLocal = regexp.MustCompile(`^[~|\.|\/|\\]`)
+	if (oldEngineName != newEngineName) && newEngineName != "" && validLocal.MatchString(oldEngineName) {
 		oldEnginePath, err := filepath.Abs(oldEngineName)
 		if err != nil {
 			// todo: ignore here so if they delete their engine it won't break until they restore it
