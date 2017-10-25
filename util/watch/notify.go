@@ -1,6 +1,7 @@
 package watch
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -9,35 +10,123 @@ import (
 	"github.com/jcelliott/lumber"
 )
 
-type notify struct {
-	path    string
-	events  chan event
-	watcher *fsnotify.Watcher
+type event struct {
+	file  string
+	error error
+	fsnotify.Event
 }
 
-func newNotifyWatcher(path string) Watcher {
-	return &notify{
-		path:   path,
-		events: make(chan event, 10),
+type Watcher interface {
+	watch() error
+	eventChan() chan event
+	close() error
+}
+
+type notify struct {
+	events chan event // separate event channel so we don't send on all fsnotify.Events
+	*fsnotify.Watcher
+}
+
+func newRecursiveWatcher(path string) (Watcher, error) {
+	folders := subfolders(path)
+	if len(folders) == 0 {
+		return nil, fmt.Errorf("No folders to watch")
 	}
+
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		return nil, err
+	}
+
+	notifyWatcher := &notify{Watcher: watcher, events: make(chan event)}
+
+	for i := range folders {
+		lumber.Info("Adding %s", folders[i])
+		err = notifyWatcher.Add(folders[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return notifyWatcher, nil
+}
+
+func run(watcher *notify) {
+	for {
+		select {
+		case evnt := <-watcher.Events:
+			if shouldIgnoreFile(filepath.Base(evnt.Name)) {
+				continue
+			}
+
+			if evnt.Op&fsnotify.Create == fsnotify.Create {
+				fi, err := os.Stat(evnt.Name)
+				if err != nil {
+					// stat ./4913: no such file or directory
+					lumber.Error("Failed to stat on event - %s", err.Error())
+				} else if fi.IsDir() {
+					lumber.Info("Detected dir creation: %s", evnt.Name) // todo: Debug doesn't work
+					if !shouldIgnoreFile(filepath.Base(evnt.Name)) {
+						err = watcher.Add(evnt.Name)
+						if err != nil {
+							lumber.Error("ERROR - %s", err.Error())
+						}
+					}
+				} else {
+					lumber.Info("Detected     creation: %s", evnt.Name) // todo: Debug doesn't work
+					watcher.events <- event{file: evnt.Name}
+				}
+			}
+
+			if evnt.Op&fsnotify.Write == fsnotify.Write {
+				lumber.Info("Detected modification: %s", evnt.Name) // todo: Debug doesn't work
+				watcher.events <- event{file: evnt.Name}
+			}
+
+		case err := <-watcher.Errors:
+			lumber.Error("Watcher error encountered - %s", err.Error())
+		}
+	}
+}
+
+// subfolders returns a slice of subfolders (recursive), including the folder provided.
+func subfolders(path string) (paths []string) {
+	filepath.Walk(path, func(newPath string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		if info.IsDir() {
+			name := info.Name()
+			// skip folders that begin with a dot
+			if shouldIgnoreFile(name) && name != "." && name != ".." {
+				return filepath.SkipDir
+			}
+			paths = append(paths, newPath)
+		}
+		return nil
+	})
+	return paths
+}
+
+// shouldIgnoreFile determines if a file should be ignored.
+// Ignore files that start with `.` or `_` or end with `~`.
+func shouldIgnoreFile(name string) bool {
+	for i := range ignoreFile {
+		if name == ignoreFile[i] {
+			return true
+		}
+	}
+
+	return strings.HasPrefix(name, ".") ||
+		strings.HasPrefix(name, "_") ||
+		strings.HasSuffix(name, ".swp") ||
+		strings.HasSuffix(name, "~")
 }
 
 // start the watching process and return an error if we cant watch all the files
 func (n *notify) watch() (err error) {
-
-	n.watcher, err = fsnotify.NewWatcher()
-	if err != nil {
-		return err
-	}
-
-	err = filepath.Walk(n.path, n.walkFunc)
-	if err != nil {
-		return err
-	}
-
-	go n.EventHandler()
-
-	return
+	go run(n)
+	return nil
 }
 
 func (n *notify) eventChan() chan event {
@@ -46,62 +135,5 @@ func (n *notify) eventChan() chan event {
 
 // close the watcher
 func (n *notify) close() error {
-	return n.watcher.Close()
-}
-
-// add a file that is being walked to the watch system
-func (n *notify) walkFunc(path string, info os.FileInfo, err error) error {
-	if err != nil {
-		return err
-	}
-
-	for _, ignoreName := range ignoreFile {
-		if strings.HasSuffix(path, ignoreName) {
-			lumber.Info("watcher: skipping %s", path)
-			if info.IsDir() {
-				// if the thing we are ignoring is a directory
-				return filepath.SkipDir
-			}
-			// if its not just skip the file
-			return nil
-		}
-	}
-
-	return n.watcher.Add(path)
-}
-
-func (n *notify) EventHandler() {
-	for {
-		select {
-		case e := <-n.watcher.Events:
-			lumber.Debug("e: %+v", e)
-			switch {
-			case e.Op&fsnotify.Create == fsnotify.Create:
-				// a new file/folder was created.. add it
-				n.watcher.Add(e.Name)
-				// send an event
-				n.events <- event{file: e.Name}
-
-			case e.Op&fsnotify.Write == fsnotify.Write:
-				// a file was written to.. send the event
-				n.events <- event{file: e.Name}
-
-			case e.Op&fsnotify.Remove == fsnotify.Remove:
-				// a file was removed. remove it
-				n.watcher.Remove(e.Name)
-
-			case e.Op&fsnotify.Rename == fsnotify.Rename:
-				// remove from watcher because we no longer need to watch
-				n.watcher.Remove(e.Name)
-
-			case e.Op&fsnotify.Chmod == fsnotify.Chmod:
-				// ignore anything that is just changing modes
-				// mostlikely it was just a touch
-
-			}
-		case err := <-n.watcher.Errors:
-			n.events <- event{file: "", error: err}
-		}
-	}
-
+	return n.Close()
 }
