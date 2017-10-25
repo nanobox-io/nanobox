@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"strings"
 
 	"github.com/nanobox-io/nanobox/util/display"
 )
@@ -52,11 +51,9 @@ func Run(path string) error {
 	// update the model
 	update := newUpdate()
 
-	newVersion := getCurrentVersion(path)
-
-	fmt.Printf("Updated to version: %s", newVersion)
-
-	printGithubReleaseUrl(newVersion)
+	fmt.Printf("\nUpdated to version: %s\n\n", getCurrentVersion(path))
+	fmt.Println("Check out the release notes here:")
+	fmt.Println("https://github.com/nanobox-io/nanobox/blob/master/CHANGELOG.md")
 
 	return update.Save()
 }
@@ -73,8 +70,3 @@ func getCurrentVersion(path string) string {
 	return string(version)
 }
 
-func printGithubReleaseUrl(version string) {
-	semver := strings.Split(strings.Split(version, " ")[2], "-")[0]
-	fmt.Printf("Check out the release notes here: \n")
-	fmt.Printf("https://github.com/nanobox-io/nanobox/releases/tag/%s \n", semver)
-}
