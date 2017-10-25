@@ -69,4 +69,3 @@ func getCurrentVersion(path string) string {
 	}
 	return string(version)
 }
-

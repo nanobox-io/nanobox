@@ -1,7 +1,7 @@
 package server
 
 import (
-	"log"
+	"fmt"
 	"net"
 	"net/http"
 	"net/rpc"
@@ -28,9 +28,8 @@ var ServerCmd = &cobra.Command{
 const name = "nanobox-server"
 
 func serverFnc(ccmd *cobra.Command, args []string) {
-
 	if !util.IsPrivileged() {
-		log.Fatal("server needs to run as a privileged user")
+		fmt.Println("server needs to run as a privileged user")
 		return
 	}
 	// make sure things know im the server
@@ -40,12 +39,13 @@ func serverFnc(ccmd *cobra.Command, args []string) {
 	if runtime.GOOS != "windows" {
 		fileLogger, err := lumber.NewTruncateLogger("/var/log/nanobox.log")
 		if err != nil {
-			log.Printf("logging error:%s\n", err)
+			fmt.Printf("logging error:%s\n", err)
 		}
 
-		//
 		lumber.SetLogger(fileLogger)
 	}
+
+	lumber.Info("Starting nanobox server...")
 
 	// fire up the service manager (only required on windows)
 	go svcStart()
@@ -55,7 +55,11 @@ func serverFnc(ccmd *cobra.Command, args []string) {
 	go updateUpdater()
 
 	// first up the tap driver (only required on osx)
-	go startTAP()
+	err := startTAP()
+	if err != nil {
+		lumber.Fatal(err.Error())
+		os.Exit(1)
+	}
 
 	// add any registered rpc classes
 	for _, controller := range registeredRPCs {
@@ -63,41 +67,50 @@ func serverFnc(ccmd *cobra.Command, args []string) {
 	}
 
 	// only listen for rpc calls on localhost
-	listener, e := net.Listen("tcp", "127.0.0.1:23456")
-	if e != nil {
-		log.Fatal("listen error:", e)
+	listener, err := net.Listen("tcp", "127.0.0.1:23456")
+	if err != nil {
+		lumber.Fatal("Failed to listen - %s", err.Error())
 		return
 	}
+
+	lumber.Info("Nanobox server listening")
 
 	// listen for new connections forever
 	for {
 		if conn, err := listener.Accept(); err != nil {
-			log.Fatal("accept error: " + err.Error())
+			lumber.Fatal("accept error: " + err.Error())
 		} else {
-			log.Printf("new connection established\n")
+			lumber.Info("new connection established\n")
 			go rpc.ServeConn(conn)
 		}
 	}
 }
 
-// TEMP: this only ever needs to be run once.
-// but it wont hurt to run it once everytime nanobox server starts
-// this can be removed once everyone is >= 2.1.0
+// updateUpdater used to be a temporary means to update everyone's updater,
+// but it is quite useful so we will leave it in. Maybe in the future we'll
+// try updating nanobox itself prior to starting.
 func updateUpdater() {
-	// update.Server = true
+	lumber.Info("Updating nanobox-update")
 	update.Name = strings.Replace(update.Name, "nanobox", "nanobox-update", 1)
 	update.TmpName = strings.Replace(update.TmpName, "nanobox", "nanobox-update", 1)
+
+	// this gets the path to nanobox (assumes nanobox-update is at same location)
 	path, err := exec.LookPath(os.Args[0])
 	path = strings.Replace(path, "nanobox", "nanobox-update", 1)
 	if err != nil {
 		return
 	}
-	log.Println(update.Run(path))
+	err = update.Run(path)
+	if err != nil {
+		lumber.Fatal("Failed to update `nanobox-update` - %s", err.Error())
+		return
+	}
+	lumber.Info("Update complete")
 }
 
 // run a client request to the rpc server
 func ClientRun(funcName string, args interface{}, response interface{}) error {
-	// log.Printf("clientcall: %s %#v %#v\n", funcName, args, response)
+	// lumber.Info("clientcall: %s %#v %#v\n", funcName, args, response)
 	client, err := rpc.Dial("tcp", "127.0.0.1:23456")
 	if err != nil {
 		return err
@@ -112,10 +125,15 @@ func ClientRun(funcName string, args interface{}, response interface{}) error {
 }
 
 // the tap driver needs to be loaded anytime nanobox is running the vpn (always on osx)
-func startTAP() {
+func startTAP() error {
 	if runtime.GOOS == "darwin" {
-		exec.Command("/sbin/kextload", "/Library/Extensions/tap.kext").Run()
+		out, err := exec.Command("/sbin/kextload", "/Library/Extensions/tap.kext").CombinedOutput()
+		if err != nil {
+			return fmt.Errorf("Failed to load tap extensions - %s. Output - %s", err.Error(), out)
+		}
+		lumber.Info("Loaded tap extensions")
 	}
+	return nil
 }
 
 type handle struct {

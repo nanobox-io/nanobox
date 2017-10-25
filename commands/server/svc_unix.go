@@ -2,8 +2,6 @@
 
 package server
 
-import ()
-
 func svcStart() {
-
+	return
 }
