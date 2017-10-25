@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"os/exec"
 	"path/filepath"
 
 	"github.com/nanobox-io/nanobox/util/display"
@@ -24,6 +25,7 @@ func Run(path string) error {
 		return err
 	}
 
+	fmt.Printf("Current version: %s", getCurrentVersion(path))
 	// download the file and display the progress bar
 	resp, err := http.Get(remotePath())
 	if err != nil {
@@ -49,5 +51,19 @@ func Run(path string) error {
 	// update the model
 	update := newUpdate()
 
+	fmt.Printf("Updated to version: %s", getCurrentVersion(path))
+
 	return update.Save()
+}
+
+func getCurrentVersion(path string) string {
+	if path == "" {
+		fmt.Errorf("invalid path")
+	}
+	version, err := exec.Command(path, "version").Output()
+	if err != nil {
+		fmt.Errorf("Error while trying to get the nanobox version")
+		return ""
+	}
+	return string(version)
 }
