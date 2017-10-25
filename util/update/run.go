@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/nanobox-io/nanobox/util/display"
 )
@@ -53,6 +54,8 @@ func Run(path string) error {
 
 	fmt.Printf("Updated to version: %s", getCurrentVersion(path))
 
+	printGithubReleaseUrl(getCurrentVersion(path))
+
 	return update.Save()
 }
 
@@ -66,4 +69,10 @@ func getCurrentVersion(path string) string {
 		return ""
 	}
 	return string(version)
+}
+
+func printGithubReleaseUrl(version string) {
+	semver := strings.Split(strings.Split(version, " ")[2], "-")[0]
+	fmt.Printf("Check out the release notes here: \n")
+	fmt.Printf("https://github.com/nanobox-io/nanobox/releases/tag/%s \n", semver)
 }
