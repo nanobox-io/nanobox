@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/nanobox-io/nanobox/util/display"
 )
@@ -15,7 +16,7 @@ var Server bool
 
 func Run(path string) error {
 	if path == "" {
-		fmt.Errorf("invalid path")
+		return fmt.Errorf("invalid path")
 	}
 
 	// create a temporary file
@@ -25,7 +26,10 @@ func Run(path string) error {
 		return err
 	}
 
-	fmt.Printf("Current version: %s", getCurrentVersion(path))
+	if !strings.Contains(path, "nanobox-update") {
+		fmt.Printf("Current version: %s", getCurrentVersion(path))
+	}
+
 	// download the file and display the progress bar
 	resp, err := http.Get(remotePath())
 	if err != nil {
@@ -51,22 +55,24 @@ func Run(path string) error {
 	// update the model
 	update := newUpdate()
 
-	fmt.Printf("\nUpdated to version: %s\n\n", getCurrentVersion(path))
-	fmt.Println("Check out the release notes here:")
-	fmt.Println("https://github.com/nanobox-io/nanobox/blob/master/CHANGELOG.md")
+	if !strings.Contains(path, "nanobox-update") {
+		fmt.Printf("\nUpdated to version: %s\n\n", getCurrentVersion(path))
+		fmt.Println("Check out the release notes here:")
+		fmt.Println("https://github.com/nanobox-io/nanobox/blob/master/CHANGELOG.md")
+	}
 
 	return update.Save()
 }
 
 func getCurrentVersion(path string) string {
 	if path == "" {
-		fmt.Errorf("invalid path")
+		fmt.Println("invalid path")
+		return ""
 	}
 	version, err := exec.Command(path, "version").Output()
 	if err != nil {
-		fmt.Errorf("Error while trying to get the nanobox version")
+		fmt.Println("Error while trying to get the nanobox version")
 		return ""
 	}
 	return string(version)
 }
-

@@ -12,13 +12,20 @@ import (
 	"github.com/nanobox-io/nanobox/util/update"
 )
 
+// nanobox-update's version
+var VERSION = "0.8.0" // todo: maybe we'll ldflag populate this too
+
 // main ...
 func main() {
-
 	path := ""
 	var err error
+
 	// this will write a new binary at location provided `nanobox-update newbinary`
 	if len(os.Args) > 1 {
+		if os.Args[1] == "version" {
+			fmt.Printf("nanobox-update %s\n", VERSION)
+			return
+		}
 		path = os.Args[1]
 	} else {
 		// get the location of the current nanobox

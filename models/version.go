@@ -3,7 +3,7 @@ package models
 import "fmt"
 
 var (
-	// will be set with build flags, defaults for one-off `go-build`
+	// will be set with build flags, defaults for one-off `go build`
 	nanoVersion string = "0.0.0"  // git tag
 	nanoCommit  string = "custom" // commit id of build
 	nanoBuild   string = "now"    // date of build
