@@ -2,6 +2,7 @@
 package commands
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -19,7 +20,6 @@ import (
 	"github.com/nanobox-io/nanobox/util/update"
 )
 
-//
 var (
 	// debug mode
 	debugMode bool
@@ -30,11 +30,9 @@ var (
 	// display level trace
 	displayTraceMode bool
 
-	//
 	internalCommand bool
-
-	//
-	endpoint string
+	showVersion     bool
+	endpoint        string
 
 	// NanoboxCmd ...
 	NanoboxCmd = &cobra.Command{
@@ -101,9 +99,11 @@ var (
 			}
 		},
 
-		//
 		Run: func(ccmd *cobra.Command, args []string) {
-
+			if displayDebugMode || showVersion {
+				fmt.Println(models.VersionString())
+				return
+			}
 			// fall back on default help if no args/flags are passed
 			ccmd.HelpFunc()(ccmd, args)
 		},
@@ -120,6 +120,7 @@ func init() {
 	NanoboxCmd.PersistentFlags().MarkHidden("internal")
 	NanoboxCmd.PersistentFlags().BoolVarP(&debugMode, "debug", "", false, "In the event of a failure, drop into debug context")
 	NanoboxCmd.PersistentFlags().BoolVarP(&displayDebugMode, "verbose", "v", false, "Increases display output and sets level to debug")
+	NanoboxCmd.PersistentFlags().BoolVarP(&showVersion, "version", "", false, "Print version information and exit")
 	NanoboxCmd.PersistentFlags().BoolVarP(&displayTraceMode, "trace", "t", false, "Increases display output and sets level to trace")
 
 	// log specific flags
