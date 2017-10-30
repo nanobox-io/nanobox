@@ -21,8 +21,10 @@ After=network.target
 
 [Service]
 Type=simple
-EnvironmentFile=-/etc/sysconfig/network
 ExecStart=%s
+
+[Install]
+WantedBy=multi-user.target
 `, name, strings.Join(command, " "))
 
 	case "upstart":
