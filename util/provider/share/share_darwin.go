@@ -160,7 +160,7 @@ func Remove(path string) error {
 		shareRPC := &ShareRPC{}
 		err := shareRPC.Remove(req, resp)
 		if err != nil || !resp.Success {
-			err = fmt.Errorf("failed to add share %v %v", err, resp.Message)
+			err = fmt.Errorf("failed to remove share %v %v", err, resp.Message)
 		}
 		return err
 	}
@@ -168,7 +168,7 @@ func Remove(path string) error {
 	// have the server run the share command
 	err = server.ClientRun("ShareRPC.Remove", req, resp)
 	if err != nil || !resp.Success {
-		err = fmt.Errorf("failed to add share %v %v", err, resp.Message)
+		err = fmt.Errorf("failed to remove share %v %v", err, resp.Message)
 	}
 	return err
 

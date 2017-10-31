@@ -27,26 +27,16 @@ var ctimeAvailable bool
 // useful watching mechanism that looks at files and gets a hash of the content
 // then when
 
-type event struct {
-	file  string
-	error error
-}
-
-type Watcher interface {
-	watch() error
-	eventChan() chan event
-	close() error
-}
-
 // watch a directory and report changes to nanobox
 func Watch(container, path string) error {
 	populateIgnore(path)
-	ctimeCheck(container)
+	// ctimeCheck(container) // see comment in batchPublish()
 
-	lumber.Debug("watch: ignored dirs: %+v", ignoreFile)
+	lumber.Info("watch: ignored files: %+v", ignoreFile)
+
 	// try watching with the fast one
-	watcher := newNotifyWatcher(path)
-	err := watcher.watch()
+	watcher, err := newRecursiveWatcher("./")
+	defer watcher.close()
 	if err != nil {
 		// if it fails display a message and try the slow one
 		lumber.Info("Error occured in fast notify watcher: %s", err.Error())
@@ -68,8 +58,9 @@ func Watch(container, path string) error {
 			// neither of the watchers are working
 			return err
 		}
+	} else {
+		go run(watcher.(*notify))
 	}
-	defer watcher.close()
 
 	go batchPublish(container)
 
@@ -86,10 +77,27 @@ func Watch(container, path string) error {
 	return nil
 }
 
+func uniq(list []string) []string {
+	if len(list) == 0 {
+		return []string{}
+	}
+
+	tmp := make(map[string]struct{})
+	newlist := []string{}
+	for i := range list {
+		tmp[list[i]] = struct{}{}
+	}
+	for k, _ := range tmp {
+		newlist = append(newlist, k)
+	}
+	return newlist
+}
+
 // publish in batches so to save clock cycles
 func batchPublish(container string) {
 	for {
 		<-time.After(time.Second)
+		changeList = uniq(changeList)
 		if len(changeList) > 0 {
 			lumber.Info("watcher: pushing: %+v", changeList)
 
@@ -157,5 +165,4 @@ func populateIgnore(path string) {
 	for _, str := range stringFields {
 		ignoreFile = append(ignoreFile, str)
 	}
-
 }

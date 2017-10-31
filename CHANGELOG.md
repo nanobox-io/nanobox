@@ -1,12 +1,15 @@
 ## 2.3.1 (unreleased)
 
 FEATURES:
+  - Allow `-v` and `--version` to print version [#612](https://github.com/nanobox-io/nanobox/pull/612)
+  - Make nanobox-server service able to survive reboots [#612](https://github.com/nanobox-io/nanobox/pull/612)
   - Add dns alias' to run and dry-run containers [#592](https://github.com/nanobox-io/nanobox/pull/592)
   - Support service configuration enhancements [#586](https://github.com/nanobox-io/nanobox/pull/586)
   - Support password protected ssh keys [#576](https://github.com/nanobox-io/nanobox/pull/576)[#580](https://github.com/nanobox-io/nanobox/pull/580)[#582](https://github.com/nanobox-io/nanobox/pull/582)
   - Untrack vendored files [#567](https://github.com/nanobox-io/nanobox/pull/567)
 
 BUG FIXES:
+  - Fix linux fs_watch issues [#612](https://github.com/nanobox-io/nanobox/pull/612)
   - Refactor local engine configuration [#604](https://github.com/nanobox-io/nanobox/pull/604)
   - Fix panic on linux if nfs isn't running [#601](https://github.com/nanobox-io/nanobox/pull/601)
   - Handle `nanobox-update` not being in global path [#596](https://github.com/nanobox-io/nanobox/pull/596)

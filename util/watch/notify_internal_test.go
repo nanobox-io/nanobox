@@ -9,13 +9,13 @@ import (
 
 func TestNotifyFiles(t *testing.T) {
 	os.MkdirAll("/tmp/nanobox/", 0777)
-	notifyWatcher := newNotifyWatcher("/tmp/nanobox/")
-	err := notifyWatcher.watch()
+	notifyWatcher, err := newRecursiveWatcher("/tmp/nanobox/")
+	defer notifyWatcher.close()
 	if err != nil {
 		t.Fatalf("failed to watch: %s", err)
 	}
+	notifyWatcher.watch()
 
-	defer notifyWatcher.close()
 	<-time.After(time.Second)
 	ioutil.WriteFile("/tmp/nanobox/notify.tmp", []byte("hi"), 0777)
 
