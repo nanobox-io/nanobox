@@ -9,9 +9,7 @@ go:
   - 1.9
 
 before_install:
-  - sudo apt-get -y purge docker-engine
   - sudo apt-get -y install upx-ucl
-  - bash <(curl -fsSL https://get.docker.com/)
   - docker version
   - ifconfig
   - sudo -H pip install awscli
