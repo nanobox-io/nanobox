@@ -27,8 +27,9 @@ _testmain.go
 .DS_Store
 TODO
 nanobox
-nanobox-updater
+nanobox-*
 updater/updater
+updater/updater-*
 .build
 rsrc.syso
 Icon

@@ -20,5 +20,4 @@ func Remove(name string) error {
 
 	os.Remove(serviceConfigFile(name))
 	return nil
-
 }

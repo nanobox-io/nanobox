@@ -36,7 +36,6 @@ func Watch(container, path string) error {
 
 	// try watching with the fast one
 	watcher, err := newRecursiveWatcher("./")
-	defer watcher.close()
 	if err != nil {
 		// if it fails display a message and try the slow one
 		lumber.Info("Error occured in fast notify watcher: %s", err.Error())
@@ -51,7 +50,6 @@ func Watch(container, path string) error {
 		fmt.Printf("Until then, we'll go ahead and rollover to a slower polling solution.\n\r")
 		fmt.Printf("\n\r---------------------------------------------------------------------\n\r\n\r")
 
-		watcher.close()
 		watcher = newCrawlWatcher(path)
 		err := watcher.watch()
 		if err != nil {
@@ -61,6 +59,7 @@ func Watch(container, path string) error {
 	} else {
 		go run(watcher.(*notify))
 	}
+	defer watcher.close()
 
 	go batchPublish(container)
 
