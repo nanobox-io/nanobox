@@ -44,6 +44,7 @@ func newRecursiveWatcher(path string) (Watcher, error) {
 		lumber.Info("Adding %s", folders[i])
 		err = notifyWatcher.Add(folders[i])
 		if err != nil {
+			watcher.Close()
 			return nil, err
 		}
 	}
