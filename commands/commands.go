@@ -155,6 +155,7 @@ func init() {
 	NanoboxCmd.AddCommand(DnsCmd)
 	NanoboxCmd.AddCommand(LogCmd)
 	NanoboxCmd.AddCommand(VersionCmd)
+	NanoboxCmd.AddCommand(CacheCmd)
 	NanoboxCmd.AddCommand(server.ServerCmd)
 
 	// hidden subcommands
