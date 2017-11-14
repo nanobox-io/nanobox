@@ -91,6 +91,23 @@ func FindEnvByID(ID string) (*Env, error) {
 	return env, nil
 }
 
+// FindEnvByName finds an app by a name
+func FindEnvByName(name string) (*Env, error) {
+	apps := []*Env{}
+
+	if err := getAll("envs", &apps); err != nil {
+		return nil, fmt.Errorf("failed to get all envs: %s", err.Error())
+	}
+
+	for i := range apps {
+		if apps[i].Name == name {
+			return apps[i], nil
+		}
+	}
+
+	return &Env{}, fmt.Errorf("failed to find env '%s' by name", name)
+}
+
 // AllEnvs loads all of the Envs in the database
 func AllEnvs() ([]*Env, error) {
 	// list of apps to return
