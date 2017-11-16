@@ -15,6 +15,7 @@ func Start(name string) error {
 	}
 
 	if !Running(name) {
+		fmt.Printf("%s\n", out)
 		return fmt.Errorf("%s service start was successful but the service is not running", name)
 	}
 	return nil

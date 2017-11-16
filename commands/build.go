@@ -5,6 +5,7 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/nanobox-io/nanobox/commands/steps"
+	"github.com/nanobox-io/nanobox/generators/hooks/build"
 	"github.com/nanobox-io/nanobox/models"
 	"github.com/nanobox-io/nanobox/processors"
 	"github.com/nanobox-io/nanobox/util"
@@ -13,8 +14,7 @@ import (
 )
 
 var (
-
-	// BuildCmd ...
+	// BuildCmd builds the app's runtime.
 	BuildCmd = &cobra.Command{
 		Use:   "build-runtime",
 		Short: "Build your app's runtime.",
@@ -26,20 +26,26 @@ locally and in live environments.
 		Run:     buildFn,
 		Aliases: []string{"build"},
 	}
+
+	cacheClear bool
 )
 
 func init() {
 	steps.Build("build-runtime", buildComplete, buildFn)
+
+	BuildCmd.Flags().BoolVar(&cacheClear, "clear-cache", false, "Clear package cache for this build.")
 }
 
-// buildFn ...
 func buildFn(ccmd *cobra.Command, args []string) {
+	if cacheClear {
+		build.ClearPkgCache = true
+	}
+
 	env, _ := models.FindEnvByID(config.EnvID())
 	display.CommandErr(processors.Build(env))
 }
 
-// todo: this doesn't seem to ever run, find out when it does
-// update: this seems to run on deploy
+// update: this runs on deploy
 func buildComplete() bool {
 	// check the boxfile to be sure it hasnt changed
 	env, _ := models.FindEnvByID(config.EnvID())
