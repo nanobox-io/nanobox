@@ -7,6 +7,8 @@ GO_LDFLAGS="-s -X github.com/nanobox-io/nanobox/util/odin.apiKey=$(API_KEY) -X g
 
 default: build
 
+local: linux windows darwin
+
 clean:
 	@echo "Cleaning old builds"
 	@rm -rf "./.build"

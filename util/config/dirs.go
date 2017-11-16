@@ -145,6 +145,7 @@ func EngineDir() (string, error) {
 // BinDir creates a directory where nanobox specific binaries can be downloaded
 // docker, dockermachine, etc
 func BinDir() string {
+	// todo: maybe replace with `os.Executable()`
 	path, err := exec.LookPath(os.Args[0])
 	if err != nil {
 		if runtime.GOOS == "windows" {

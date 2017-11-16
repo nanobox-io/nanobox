@@ -39,10 +39,13 @@ func EnvID() string {
 // NanoboxPath ...
 func NanoboxPath() string {
 
-	programName := os.Args[0]
+	programName, err := os.Executable()
+	if err == nil {
+		return programName
+	}
 
 	// lookup the full path to nanobox
-	path, err := exec.LookPath(programName)
+	path, err := exec.LookPath(os.Args[0])
 	if err == nil {
 		return path
 	}
