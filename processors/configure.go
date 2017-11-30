@@ -3,22 +3,52 @@ package processors
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"runtime"
 	"time"
 
 	"github.com/nanobox-io/nanobox/models"
+	"github.com/nanobox-io/nanobox/util"
 )
 
 var configured bool
 
 func Configure() error {
+	var os string
+
 	// make sure to only run configure one time
 	if configured {
 		return nil
 	}
 	configured = true
 
-	<-time.After(time.Second)
+	v, err := util.OsDetect()
+	if err == nil {
+		os = v
+	}
+
+	if os == "high sierra" && !models.HasRead() {
+		// warn about high sierra
+		hasRead := stringAsker(`
+--------------------------------------------------------------------------------
++ WARNING:
++
++ MacOS High Sierra introduces breaking changes to Nanobox!
++
++ Please ensure you have read the following guides before continuing:
++ https://content.nanobox.io/installing-nanobox-on-macos-high-sierra/
+--------------------------------------------------------------------------------
+
+Have you already read the guide? y/n`, map[string]string{"y": "yes", "n": "no"})
+		if hasRead == "no" {
+			exec.Command("open", "https://content.nanobox.io/installing-nanobox-on-macos-high-sierra/").Start()
+			return fmt.Errorf("\nEnding configure, please read the guide and try again.\n")
+		}
+		models.DoneRead()
+	}
+
+	// todo: why do we wait?
+	<-time.After(150 * time.Millisecond)
 
 	config := &models.Config{
 		Provider:  "docker-machine",
@@ -83,13 +113,15 @@ How many GB of RAM would you like to make available to the VM (2-4)?
 
 Answer: `, 8)
 
-	// ask about mount types
-	config.MountType = stringAsker(`
+	if os != "high sierra" {
+		// ask about mount types
+		config.MountType = stringAsker(`
 Would you like to enable netfs for faster filesystem access (y/n)?
 -------------------------------------------------------------------
   Note : We HIGHLY recommend (y). Using this option may prompt for password
 
 Answer: `, map[string]string{"y": "netfs", "n": "native"})
+	}
 
 	config.Save()
 
