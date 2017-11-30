@@ -68,7 +68,11 @@ func main() {
 	// do the commands configure check here
 	command := strings.Join(os.Args, " ")
 	if _, err := models.LoadConfig(); err != nil && !strings.Contains(command, " config") && !strings.Contains(command, "env server") {
-		processors.Configure()
+		err = processors.Configure()
+		if err != nil {
+			fmt.Println(err.Error())
+			os.Exit(1)
+		}
 	}
 
 	migrationCheck()
