@@ -27,7 +27,7 @@ func Configure() error {
 		os = v
 	}
 
-	if os == "high sierra" {
+	if os == "high sierra" && !models.HasRead() {
 		// warn about high sierra
 		hasRead := stringAsker(`
 --------------------------------------------------------------------------------
@@ -44,6 +44,7 @@ Have you already read the guide? y/n`, map[string]string{"y": "yes", "n": "no"})
 			exec.Command("open", "https://content.nanobox.io/installing-nanobox-on-macos-high-sierra/").Start()
 			return fmt.Errorf("\nEnding configure, please read the guide and try again.\n")
 		}
+		models.DoneRead()
 	}
 
 	// todo: why do we wait?

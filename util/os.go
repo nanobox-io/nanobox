@@ -3,8 +3,8 @@ package util
 import (
 	"fmt"
 	"os/exec"
-	"runtime"
 	"regexp"
+	"runtime"
 )
 
 func OsDetect() (string, error) {

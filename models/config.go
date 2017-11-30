@@ -116,3 +116,24 @@ func LoadConfig() (*Config, error) {
 
 	return c, nil
 }
+
+// HasRead returns true if the value is set. Used for prompting high sierra
+// warning on first config.
+func HasRead() bool {
+	r := ""
+
+	if err := get("registry", "HasRead", &r); err != nil {
+		return false
+	}
+
+	return r != ""
+}
+
+// DoneRead stores that the high sierra guide has been read.
+func DoneRead() error {
+	if err := put("registry", "HasRead", "true"); err != nil {
+		return fmt.Errorf("failed to save HasRead: %s", err.Error())
+	}
+
+	return nil
+}

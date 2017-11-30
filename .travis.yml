@@ -9,7 +9,6 @@ go:
   - 1.9
 
 before_install:
-  - sudo apt-get -y install upx-ucl
   - docker version
   - ifconfig
   - sudo -H pip install awscli
