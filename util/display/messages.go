@@ -65,7 +65,7 @@ func TunnelEstablished(component, port string) {
 	os.Stderr.WriteString(fmt.Sprintf(`
 --------------------------------------------------------------------------------
 + Secure tunnel established to %s
-+ Use the following credentials to connect 
++ Use the following credentials to connect
 --------------------------------------------------------------------------------
 
 Host: 127.0.0.1
@@ -163,9 +163,9 @@ func MigrateOldRequired() {
 	os.Stderr.WriteString(fmt.Sprintf(`
 --------------------------------------------------------------------------------
 + WARNING:
-+ Nanobox has been successfully upgraded! This change constitutes a major 
-+ architectural refactor as well as data re-structure. To use this version we 
-+ need to purge your current apps. No worries, nanobox will re-build them for 
++ Nanobox has been successfully upgraded! This change constitutes a major
++ architectural refactor as well as data re-structure. To use this version we
++ need to purge your current apps. No worries, nanobox will re-build them for
 + you the next time you use "nanobox run".
 --------------------------------------------------------------------------------
 `))
@@ -177,7 +177,7 @@ func MigrateProviderRequired() {
 --------------------------------------------------------------------------------
 + WARNING:
 + It looks like you want to use a different provider, cool! Just FYI, we have
-+ to bring down your existing apps as providers are not compatible. No worries, 
++ to bring down your existing apps as providers are not compatible. No worries,
 + nanobox will re-build them for you the next time you use "nanobox run".
 --------------------------------------------------------------------------------
 `))
@@ -198,7 +198,7 @@ func MissingDependencies(provider string, missingParts []string) {
 	if provider == "native" {
 		provider = "docker"
 	}
-	fmt.Printf("View these requirements at docs.nanobox.io/install/requirements/%s/\n", provider)
+	fmt.Printf("View these requirements at docs.nanobox.io/install\n", provider)
 }
 
 func DeployComplete() {
@@ -240,7 +240,7 @@ verify that you don't have a firewall blocking this connection, and try again!
 
 func NoGonanaUser() {
 	os.Stderr.WriteString(fmt.Sprintf(`
-We could not connect as the gonano user but we were able to 
+We could not connect as the gonano user but we were able to
 fall back to the default user
 `, TaskComplete))
 }
@@ -249,7 +249,7 @@ func MissingBoxfile() {
 	os.Stderr.WriteString(fmt.Sprintf(`
 --------------------------------------------------------------------------------
 MISSING BOXFILE.YML
-Nanobox is looking for a boxfile.yml config file. You might want to 
+Nanobox is looking for a boxfile.yml config file. You might want to
 check out our getting-started guide on configuring your app:
 
 https://guides.nanobox.io/
