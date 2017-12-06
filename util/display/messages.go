@@ -195,10 +195,7 @@ Please refer to the docs for more information
 func MissingDependencies(provider string, missingParts []string) {
 	fmt.Printf("Using nanobox with %s requires tools that appear to not be available on your system.\n", provider)
 	fmt.Println(strings.Join(missingParts, "\n"))
-	if provider == "native" {
-		provider = "docker"
-	}
-	fmt.Printf("View these requirements at docs.nanobox.io/install\n", provider)
+	fmt.Println("View these requirements at docs.nanobox.io/install")
 }
 
 func DeployComplete() {
