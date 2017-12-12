@@ -46,7 +46,7 @@ func Add(envModel *models.Env, appModel *models.App, name string) error {
 			tld = "test"
 		}
 
-		display.Warn("\nGoogle has been locking down use of the .dev TLD, and your app may not be accessible with this domain.\nTry using %s.%s instead\n", name[0:len(name)-4], tld)
+		return util.Errorf("Google has been locking down use of the .dev TLD, and your app may not be accessible with this domain.\nTry using %s.%s instead.", name[0:len(name)-4], tld)
 	}
 
 	// add the entry
