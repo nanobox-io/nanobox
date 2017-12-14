@@ -39,6 +39,16 @@ func Add(envModel *models.Env, appModel *models.App, name string) error {
 		return util.ErrorAppend(err, "failed to setup server")
 	}
 
+	// issue a warning about `.dev` being unusable with Chrome
+	if name[len(name)-4:] == ".dev" {
+		tld := appModel.DisplayName()
+		if tld == "dry-run" {
+			tld = "test"
+		}
+
+		return util.Errorf("Google has been locking down use of the .dev TLD, and your app may not be accessible with this domain.\nTry using %s.%s instead.", name[0:len(name)-4], tld)
+	}
+
 	// add the entry
 	if err := dns.Add(entry); err != nil {
 		lumber.Error("dns:Add:dns.Add(%s): %s", entry, err.Error())
