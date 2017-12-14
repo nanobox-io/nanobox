@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
+# disable cgo for true static binaries (will work on alpine linux)
+export CGO_ENABLED=0;
+
 # vfor versioning
 getCurrCommit() {
   echo `git rev-parse --short HEAD | tr -d "[ \r\n\']"`
