@@ -22,8 +22,8 @@ import (
 const (
 	NANOBOX  = "https://api.nanobox.io/v1/"
 	BONESALT = "https://api.bonesalt.com/v1/"
-	DEV      = "http://api.nanobox.dev:8080/v1/"
-	SIM      = "http://api.nanobox.sim/v1/"
+	DEV      = "http://api.nanobox.local:8080/v1/"
+	SIM      = "http://api.nanobox.test/v1/"
 )
 
 var (
