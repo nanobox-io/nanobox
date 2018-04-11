@@ -438,6 +438,9 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 }
 
 func odinURL() string {
+	if o := os.Getenv("ODIN_URL"); o != "" {
+		return o
+	}
 	switch endpoint {
 	case "bonesalt":
 		return BONESALT
