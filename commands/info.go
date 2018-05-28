@@ -39,7 +39,7 @@ func infoFn(ccmd *cobra.Command, args []string) {
 	case "production":
 		fmt.Printf(`
 ----------------------------------------------------------
-Showing production app information is not yet implemneted.
+Showing production app information is not yet implemented.
 ----------------------------------------------------------
 
 `)
