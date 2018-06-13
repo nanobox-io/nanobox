@@ -94,7 +94,7 @@ func loadVars(args []string, getter contentGetter) ([]string, error) {
 
 			if regexp.MustCompilePOSIX(`(^[a-zA-Z0-9_]*?)="(\n|.)`).MatchString(newthings[start:end-1]) {
 				// Now we know that this variable is enclosed in quotes
-				if newthings[end-2:end-1] != "\"" {
+				if newthings[end-2:end-1] != "\"" || newthings[end-3:end-1] == "\\\"" {
 					// Now we know that this block begins a variable but does not complete it,
 					// there may be an equal sign in the middle that was evaluated as the start
 					// of a new variable - continue so that the next variable becomes a part of

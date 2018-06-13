@@ -35,7 +35,7 @@ func TestEvarLoad(t *testing.T) {
 	vars, _ := loadVars([]string{""}, testGetter{})
 	evars := parseEvars(vars)
 
-	if len(evars) != 13 {
+	if len(evars) != 15 {
 		t.Fatalf("Failed to parse all evars - %d - %q", len(evars), evars)
 	}
 
@@ -61,6 +61,14 @@ func TestEvarLoad(t *testing.T) {
 
 	if evars["KEY_13"] != "previous value with equal sign isn't greedy and leaves me alone" {
 		t.Fatalf("Variable(s) after one with equal sign in middle failed to parse - %q should be \"previous value with equal sign isn't greedy and leaves me alone\"", evars["KEY_13"])
+	}
+
+	if evars["KEY_14"] != "this line isn't the end\\\"\nthis=one is" {
+		t.Fatalf("Variable with equal sign and escaped quote failed to parse - %q should be \"this line isn't the end\\\"\nthis=one is\"", evars["KEY_14"])
+	}
+
+	if evars["KEY_15"] != "previous value with escaped quoted isn't greedy and leaves me alone" {
+		t.Fatalf("Variable(s) after one with escaped quote failed to parse - %q should be \"previous value with escaped quoted isn't greedy and leaves me alone\"", evars["KEY_15"])
 	}
 }
 
@@ -102,4 +110,7 @@ an=in
 the
 middle"
 key_13="previous value with equal sign isn't greedy and leaves me alone"
+key_14="this line isn't the end\"
+this=one is"
+key_15="previous value with escaped quoted isn't greedy and leaves me alone"
 `
