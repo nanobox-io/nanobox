@@ -35,7 +35,7 @@ func TestEvarLoad(t *testing.T) {
 	vars, _ := loadVars([]string{""}, testGetter{})
 	evars := parseEvars(vars)
 
-	if len(evars) != 11 {
+	if len(evars) != 13 {
 		t.Fatalf("Failed to parse all evars - %d - %q", len(evars), evars)
 	}
 
@@ -53,6 +53,14 @@ func TestEvarLoad(t *testing.T) {
 
 	if evars["KEY_11"] != "x\ny\nz" {
 		t.Fatalf("Underscored key failed - %q", evars["KEY_11"])
+	}
+
+	if evars["KEY_12"] != "this\none\nhas\nan=in\nthe\nmiddle" {
+		t.Fatalf("Multiline var with equal sign in value failed to parse - %q should be \"this\none\nhas\nan=in\nthe\nmiddle\"", evars["KEY_12"])
+	}
+
+	if evars["KEY_13"] != "previous value with equal sign isn't greedy and leaves me alone" {
+		t.Fatalf("Variable(s) after one with equal sign in middle failed to parse - %q should be \"previous value with equal sign isn't greedy and leaves me alone\"", evars["KEY_13"])
 	}
 }
 
@@ -87,4 +95,11 @@ key10="x"
 key_11="x
 y
 z"
+key_12="this
+one
+has
+an=in
+the
+middle"
+key_13="previous value with equal sign isn't greedy and leaves me alone"
 `
