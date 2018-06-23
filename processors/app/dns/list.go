@@ -10,7 +10,7 @@ import (
 // List lists all dns entries for an app
 func List(a *models.App) error {
 	if a.ID == "" {
-		fmt.Println("No DNS Alaises registered")
+		fmt.Println("No DNS aliases registered")
 		return nil
 	}
 
