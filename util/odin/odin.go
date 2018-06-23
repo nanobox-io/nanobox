@@ -22,8 +22,8 @@ import (
 const (
 	NANOBOX  = "https://api.nanobox.io/v1/"
 	BONESALT = "https://api.bonesalt.com/v1/"
-	DEV      = "http://api.nanobox.dev:8080/v1/"
-	SIM      = "http://api.nanobox.sim/v1/"
+	DEV      = "http://api.nanobox.local:8080/v1/"
+	SIM      = "http://api.nanobox.test/v1/"
 )
 
 var (
@@ -438,6 +438,9 @@ func doRequest(method, path string, params url.Values, requestBody, responseBody
 }
 
 func odinURL() string {
+	if o := os.Getenv("ODIN_URL"); o != "" {
+		return o
+	}
 	switch endpoint {
 	case "bonesalt":
 		return BONESALT
