@@ -26,7 +26,7 @@ func DevConfig(appModel *models.App) docker.ContainerConfig {
 	code := fmt.Sprintf("%s%s/code:/app", provider.HostShareDir(), appModel.EnvID)
 
 	if !provider.RequiresMount() {
-		code = fmt.Sprintf("%s:/app", config.LocalDir())
+		code = fmt.Sprintf("%s:/app:cached", config.LocalDir())
 	}
 
 	config := docker.ContainerConfig{
