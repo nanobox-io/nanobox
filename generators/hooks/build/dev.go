@@ -8,9 +8,13 @@ import (
 )
 
 func DevPayload(appModel *models.App) string {
-	// create an APP_IP evar
 	evars := appModel.Evars
+
+	// create an APP_IP evar
 	evars["APP_IP"] = appModel.LocalIPs["env"]
+
+	// create a NANOBOX evar
+	evars["NANOBOX"] = "nanobox"
 
 	rtn := map[string]interface{}{}
 	rtn["env"] = evars
